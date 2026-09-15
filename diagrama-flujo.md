@@ -135,6 +135,7 @@ flowchart LR
         S3[/"capitulos.json[N]"/]
         S4[/"personajes.json"/]
         S5[/"continuidad.json<br/>append-only · INV-03"/]
+        FIL{{"filtro por relevancia<br/>RF-05.1"}}
         S6[/"resumen_rodante.md<br/>ventana deslizante 2-3 caps"/]
     end
 
@@ -154,11 +155,13 @@ flowchart LR
     S2 --> ESC
     S3 --> ESC
     S4 --> ESC
-    S5 --> ESC
+    S5 --> FIL
+    FIL -->|"hechos del capítulo N<br/>+ mundo + no validados"| ESC
     S6 --> ESC
     ESC -->|"escribe"| MN
 
     MN -->|"un solo capítulo<br/>INV-02"| EXT
+    S4 -->|"registro de sujetos<br/>solo nombres · RF-06.1"| EXT
     EXT --> D[/"delta"/]
     D -->|"personajes"| S4
     D -->|"hechos_nuevos"| S5
@@ -179,6 +182,7 @@ flowchart LR
 
     class ESC,EXT,AQA agente
     class S1,S2,S3,S4,S5,S6,RECURSOS,D estado
+    class FIL agente
     class M1,M2,MN texto
 ```
 

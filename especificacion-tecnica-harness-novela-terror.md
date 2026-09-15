@@ -38,8 +38,8 @@ harness/
 │   └── qa.py                   # RF-07.1, RF-07.2, RF-07.3
 ├── state/
 │   ├── repository.py           # lectura/escritura con validación (EX-01)
-│   ├── continuidad.py          # aplicar deltas, append-only (RF-06.3, INV-03)
-│   ├── personajes.py           # aplicar deltas (RF-06.2)
+│   ├── continuidad.py          # append-only, filtrado por relevancia (RF-06.3, RF-05.1, INV-03)
+│   ├── personajes.py           # aplicar deltas, registro de sujetos (RF-06.2, RF-06.1)
 │   └── resumen_rodante.py      # ventana deslizante (RF-06.4)
 ├── orchestrator/
 │   ├── loop.py                 # loop principal fases 5-7
@@ -108,8 +108,12 @@ class FichaPersonajes(RootModel[dict[str, Personaje]]): ...
 
 # schemas/continuidad.py
 class HechoContinuidad(BaseModel):
-    hecho: str
+    sujeto: str                  # clave de personajes.json, locación de mundo.json, o "mundo"
+    categoria: Literal["personaje", "locacion", "mundo"]
+    sujeto_validado: bool = True # False si `sujeto` no estaba en el registro (RF-06.1)
+    hecho: str                   # la formulación en prosa — es lo que lee el escritor
     cap_origen: int
+    superado_por: int | None = None   # RF-07.6; nulo mientras el hecho siga vigente
 
 class LogContinuidad(RootModel[list[HechoContinuidad]]): ...
 
@@ -124,7 +128,7 @@ class EntradaOutline(BaseModel):
 
 # schemas/deltas.py
 class DeltaExtraccion(BaseModel):
-    personajes: dict[str, Personaje]   # solo los que cambiaron
+    personajes: dict[str, Personaje]   # solo los que cambiaron; claves del registro (RF-06.1)
     hechos_nuevos: list[HechoContinuidad]
     resumen_corto: str                  # 3-5 líneas
 
@@ -311,6 +315,10 @@ Solo `capitulos_por_tanda` admite override. `total_capitulos` y `palabras_por_ca
 | Manual, con LLM real | Corrida de 8-10 capítulos reales antes de comprometerse a una tanda completa, revisando `personajes.json` y `continuidad.json` a mano. | Igual que el checklist de `harness-novela-terror.md` §7. |
 | Equivalencia de tandas (INV-06) | Que partir la generación en tandas no cambie el resultado. | Con `LLMProvider` determinista: correr 6 capítulos de una vez y, en otro directorio, correr 3 + 3. Los artefactos de estado y los `cap_*.md` deben ser idénticos byte a byte. |
 | Reanudación (RF-CFG-04, INV-07) | Que reanudar avance y nunca reescriba. | Correr una tanda de 3, anotar los `mtime` de `cap_1..3.md`, correr otra tanda de 3, verificar que esos `mtime` no cambiaron y que aparecieron `cap_4..6.md`. |
+| **Calidad de atribución de sujeto** (RF-06.1) | Que el filtrado de RF-05.1 se apoye en datos confiables. **Es el criterio que decide si el diseño de §12.3 se sostiene.** | Sobre los 8-10 capítulos de la corrida manual: revisar a mano cada hecho de `continuidad.json` y contar cuántos tienen el `sujeto` correcto. Medir también la proporción de `sujeto_validado = false`. |
+| Cobertura del filtro (RF-05.1) | Que filtrar no omita hechos relevantes. | Para cada capítulo de la corrida manual, comparar los hechos inyectados contra el log completo y revisar si algún hecho excluido era pertinente a lo que el capítulo terminó narrando. |
+
+Criterio de decisión para las dos filas nuevas: si la atribución de sujeto acierta por debajo de ~90%, o si aparece algún hecho pertinente excluido por el filtro, hay que volver a inyectar `continuidad.json` completo y asumir el costo de contexto. El resto del esquema (`sujeto`, `categoria`, `superado_por`) se conserva igual: sigue sirviendo para QA y para RF-07.6 aunque el escritor no filtre.
 
 ## 10. Trazabilidad requisito → componente técnico
 
@@ -319,7 +327,10 @@ Solo `capitulos_por_tanda` admite override. `total_capitulos` y `palabras_por_ca
 | RF-05.1 (ensamblado de contexto) | `agents/escritor.py::ensamblar_contexto`, `llm/roles.py` |
 | RF-05.3 (restricción de acceso del escritor) | Regla de dependencias §2 — `escritor.py` no importa lectura de manuscrito |
 | RF-06.1 (extracción de un solo capítulo) | `agents/extractor.py::extraer` — firma solo acepta `cap_n: str`, no una lista |
-| RF-06.3 (continuidad append-only) | `state/continuidad.py::aplicar_delta` — solo expone `agregar()`, sin `eliminar()` ni `modificar()` |
+| RF-06.3 (continuidad append-only) | `state/continuidad.py::aplicar_delta` — solo expone `agregar()` y `marcar_superado()`, sin `eliminar()` ni `modificar()` |
+| RF-05.1 (filtrado por relevancia) | `state/continuidad.py::filtrar_para_capitulo(entrada_outline)` — devuelve una selección de lectura; no escribe |
+| RF-06.1 (registro de sujetos) | `state/personajes.py::sujetos_conocidos()` + validador Pydantic sobre `HechoContinuidad.sujeto`; un sujeto fuera del registro fija `sujeto_validado = False`, no rechaza el hecho |
+| RF-07.6 (reextracción tras corrección) | `state/continuidad.py::marcar_superado(caps)` — fija `superado_por`, nunca borra (INV-03) |
 | RF-07.4 (pausa ante contradicciones) | `orchestrator/checkpoint.py::pausar_por_qa`, estado `pausado_por_qa` en el manifiesto |
 | RF-CFG-01 (dimensionamiento) | `config.py::HarnessConfig` — §8.1, rangos validados con Pydantic |
 | RF-CFG-02 (tanda parcial) | `orchestrator/loop.py::ejecutar_tanda` — contador `cerrados_en_esta_tanda`, salida `tope_de_tanda` |
@@ -395,16 +406,21 @@ El manifiesto registra el hash del prompt usado por cada rol al iniciar la tanda
 
 **`max_hechos_por_capitulo`.** El presupuesto de `max_tokens_contexto_escritor` se consume mayoritariamente por `continuidad.json`, que es append-only y por tanto el único componente del contexto que crece sin techo. Con 4 hechos por capítulo a ~25 tokens cada uno, el log llega a ~3.900 tokens en el capítulo 40 y el contexto total supera los 5.000 configurados. La válvula de escape de EX-04 (recortar el resumen rodante) libera unos 350 tokens: es más chica que la fuga. El esquema de `DeltaExtraccion` acepta hoy `hechos_nuevos: list[HechoContinuidad]` sin tope, así que nada limita el crecimiento salvo la esperanza de que el extractor sea conciso.
 
-Mitigación en dos partes, ambas baratas:
-1. Tope declarativo en el esquema — `Field(max_length=max_hechos_por_capitulo)`.
-2. Subir `max_tokens_contexto_escritor` a ~12.000, que sigue siendo un orden de magnitud menos que el manuscrito.
+La mitigación adoptada es el **filtrado por relevancia** de RF-05.1: el escritor recibe solo los hechos de las entidades que aparecen en su capítulo, más los de mundo. Con eso el log puede crecer sin techo sin que el contexto se mueva, porque lo que crece es justamente lo que no se inyecta. Ver §12.3.
+
+`max_hechos_por_capitulo` queda como **segunda línea de defensa**, no como mecanismo principal:
+
+1. Acota el tamaño del archivo en disco y el contexto de QA, que sí recibe el log completo.
+2. Protege contra un extractor que se desborde en un capítulo puntual.
+
+Conviene igualmente subir `max_tokens_contexto_escritor` a ~12.000: sigue siendo un orden de magnitud menos que el manuscrito y da margen para que el filtro incluya de más sin abortar, que es su comportamiento deseado ante un fallo de clasificación.
 
 ### 11.7 Decisiones abiertas
 
 | Tema | Estado |
 |---|---|
 | Modelo del agente QA | La spec asigna modelo económico. Pero QA cruza ~34.000 tokens de prosa contra ~150 hechos: es razonamiento sobre contexto largo, justo donde los modelos económicos flojean. Corre 5 veces contra las 40 del escritor, así que moverlo al modelo capaz cuesta poco. **Pendiente de decidir.** |
-| `mundo.json` | La fase 4 lo inicializa (RF-04.2) pero ningún requisito lo lista como entrada del contexto del escritor (RF-05.1). O se agrega a RF-05.1 o se documenta que es solo referencia humana. **Pendiente de decidir.** |
+| `mundo.json` | **Resuelto por §12.3.** Sus locaciones alimentan el registro de sujetos de RF-06.1 y la clave de filtrado de RF-05.1, así que ya no es un artefacto huérfano. Su *contenido* sigue sin inyectarse al escritor, y es correcto: las reglas del universo que deben condicionar la escritura viven como hechos de `categoria = "mundo"` en `continuidad.json` (RF-04.3), que sí se inyectan siempre. `mundo.json` queda como registro de locaciones y referencia humana. |
 | Selección entre borradores | Fuera de alcance por decisión explícita (§2 de la spec funcional). Es la diferencia principal contra Re3, que genera varias continuaciones y rerankea por coherencia. Conviene dejar registrado que es una limitación conocida, no un olvido. |
 
 ## 12. Gestión de contexto — los archivos como memoria
@@ -434,33 +450,42 @@ El manuscrito no es memoria de ningún tipo. Es el producto. Que no se relea es 
 
 | Agente | Memoria larga | Memoria corta | Manuscrito |
 |---|---|---|---|
-| Escritor | style_guide, tres_actos, capitulos[N], personajes, continuidad | resumen_rodante | **Ninguno** (INV-01) |
-| Extractor | ninguna | ninguna | Solo `cap_N.md` (INV-02) |
+| Escritor | style_guide, tres_actos, capitulos[N], personajes, **continuidad filtrada** (RF-05.1) | resumen_rodante | **Ninguno** (INV-01) |
+| Extractor | solo el **registro de sujetos** — nombres, sin hechos | ninguna | Solo `cap_N.md` (INV-02) |
 | QA | continuidad completo, recursos_usados | ninguna | Últimos `cadencia_qa` capítulos (INV-05) |
 
-El extractor no recibe memoria alguna a propósito: si viera el estado acumulado, tendería a repetir hechos ya registrados en vez de extraer solo lo nuevo del capítulo.
+El extractor no recibe memoria narrativa a propósito: si viera el estado acumulado, tendería a repetir hechos ya registrados en vez de extraer solo lo nuevo del capítulo. El registro de sujetos es la única excepción, y es deliberadamente un **vocabulario** — la lista de nombres canónicos de personajes y locaciones, sin sus estados ni sus hechos. Sirve para que el extractor nombre las entidades igual que el resto del sistema, no para que recuerde qué les pasó.
 
-### 12.3 Estructura del log de continuidad
+QA es el único que recibe el log completo: su trabajo es precisamente buscar contradicciones contra todo lo establecido, no escribir la escena siguiente.
 
-`HechoContinuidad` guarda hoy el hecho como texto libre más su capítulo de origen. Eso obliga a que la detección de contradicciones (RF-07.2) sea enteramente juicio del modelo.
+### 12.3 Estructura del log de continuidad — decisión adoptada
 
-La literatura sobre generación de historias largas usa una estructura más rica: DOME almacena su memoria de largo plazo como cuádruplas `<sujeto, acción, objeto, capítulo>`, lo que permite agrupar hechos por reglas mecánicas antes de consultar al modelo — misma pareja sujeto/acción con distinto objeto, tripletas idénticas repetidas, cambios de estado de una misma entidad a lo largo del tiempo.
+`HechoContinuidad` lleva un `sujeto` canónico y una `categoria`, además de la formulación en prosa. El esquema vinculante está en §4.
 
-Aplicado acá, `HechoContinuidad` pasaría a:
+**Qué se evaluó.** La literatura usa estructuras más ricas: DOME almacena su memoria de largo plazo como cuádruplas `<sujeto, acción, objeto, capítulo>` y agrupa hechos por reglas mecánicas antes de consultar al modelo.
 
-```python
-class HechoContinuidad(BaseModel):
-    sujeto: str
-    accion: str
-    objeto: str
-    hecho: str          # la formulación en prosa, para el prompt del escritor
-    cap_origen: int
-    superado_por: int | None = None   # RF-07.6
-```
+Se descartó adoptar `accion` y `objeto`. Esas reglas comparan cadenas, y solo funcionan si las tripletas están canonicalizadas. Canonicalizar el sujeto es tratable porque hay un registro cerrado de personajes y locaciones; canonicalizar la acción no lo es, porque el vocabulario de verbos en prosa es abierto: `<Kovacs, perdió, brazo izquierdo>` en el capítulo 7 y `<el capitán, tiene, ambos brazos>` en el 30 no disparan ninguna regla, porque ni el sujeto ni la acción coinciden como texto. El resultado sería estructura sin poder de detección, más dos campos que el extractor rellena y nadie puede usar.
 
-El beneficio no es cosmético: permite que el harness **preseleccione** los hechos candidatos a contradicción con código, en vez de pedirle al modelo que compare 150 hechos contra 34.000 tokens de prosa de una sola vez. El modelo pasa de buscar a juzgar, que es donde es confiable.
+La decisión es aditiva: si la experiencia muestra que hacen falta, `accion` y `objeto` se agregan después sin romper lo ya escrito. Quitarlos de un log append-only con doscientas entradas sería la migración cara.
 
-Coste: el extractor tiene que producir la tripleta, no solo la frase. Es una tarea estructurada más, acorde a su rol.
+**Para qué sirve `sujeto` realmente.** Menos para detectar contradicciones que para **filtrar**, y eso resuelve dos problemas con un solo campo.
+
+`capitulos.json` ya trae por capítulo los campos `personajes` y `locacion`: la clave de recuperación ya existía en la escaleta. RF-05.1 la usa para inyectar al escritor solo los hechos de las entidades que aparecen en el capítulo N, más todos los de `categoria = "mundo"`.
+
+Eso ataca el crecimiento sin techo de `continuidad.json` dentro del presupuesto de contexto de forma **estructural, no por recorte**: el log puede llegar a cuatrocientos hechos sin que el contexto del escritor se mueva, porque lo que crece es lo que no se inyecta. Es una mejora cualitativa sobre `max_hechos_por_capitulo` (§11.6), que limitaba cuánto se registra; el filtro no limita nada, solo selecciona.
+
+Para QA el mismo índice acota la búsqueda a los hechos de las entidades presentes en la muestra.
+
+**Un defecto que además corrige.** `delta.personajes` es un diccionario con nombres de personaje como claves, y el extractor no recibía ningún estado. Nada le impedía devolver `"el capitán"` donde `personajes.json` tiene `"Kovacs"`, creando una ficha duplicada que ningún criterio de aceptación detectaba. El registro de sujetos de RF-06.1 cierra ese hueco con el mismo mecanismo.
+
+**Riesgo asumido y su mitigación.** El fallo propio de un filtro es la omisión silenciosa: si el capítulo 30 menciona a un personaje que la escaleta no listaba, sus hechos no se cargan y el escritor lo contradice sin que nada avise.
+
+Por eso RF-05.1 fija que el filtro puede incluir de más pero nunca de menos:
+
+- Los hechos de `categoria = "mundo"` entran siempre. Las reglas del universo no dependen de quién esté en escena.
+- Los hechos con `sujeto_validado = false` entran siempre. Un error de clasificación del extractor degrada el ahorro de tokens, nunca la continuidad.
+
+**Qué mediría un cambio de rumbo.** Todo esto depende de que el extractor asigne bien el `sujeto`. Si en la corrida de validación de §9 la tasa de aciertos es baja, el filtro se vuelve peligroso y conviene volver a inyectar el log completo, asumiendo el costo. §9 incorpora esa medición como criterio explícito.
 
 ### 12.4 Métricas computables para el corte de QA
 

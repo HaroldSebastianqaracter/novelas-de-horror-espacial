@@ -165,16 +165,22 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 
 **RF-04.3 — Inicialización de log de continuidad**
 - Descripción: crear `continuidad.json` vacío o con hechos iniciales derivados de la premisa (ej. reglas del mundo que ya son "hechos" desde el capítulo 1).
-- Criterio de aceptación: dado el estado inicial, cuando se crea `continuidad.json`, entonces cada entrada, si existe, tiene los campos `hecho` y `cap_origen`.
+- Criterio de aceptación: dado el estado inicial, cuando se crea `continuidad.json`, entonces cada entrada, si existe, tiene los campos `sujeto`, `categoria`, `hecho` y `cap_origen`.
+- Nota: los hechos derivados de la premisa suelen ser reglas del universo sin protagonista (cómo funciona el soporte vital, qué hay afuera). Esos llevan `categoria = "mundo"`, que es la categoría que RF-05.1 inyecta siempre sin filtrar.
 
 ### Fase 5 — Generación capítulo a capítulo
 
 **RF-05.1 — Ensamblado de contexto por capítulo**
 - Descripción: el sistema debe construir el contexto del agente escritor a partir del estado persistente, sin incluir el manuscrito completo.
-- Entradas: `style_guide.md`, `tres_actos.md`, `capitulos[N]`, `resumen_rodante.md`, `personajes.json`, `continuidad.json`.
+- Entradas: `style_guide.md`, `tres_actos.md`, `capitulos[N]`, `resumen_rodante.md`, `personajes.json`, `continuidad.json`, y los parámetros de voz narrativa (RF-CFG-05).
 - Salidas: prompt ensamblado para el agente escritor.
-- Regla: el prompt nunca debe contener el texto de `cap_1.md` … `cap_(N-1).md`.
-- Criterio de aceptación: dado un capítulo N > 3, cuando se ensambla el contexto, entonces (a) no contiene ninguna subcadena de más de 20 caracteres proveniente de `cap_(N-1).md` o anterior, y (b) su tamaño no excede `max_tokens_contexto_escritor`.
+- Reglas:
+  - El prompt nunca debe contener el texto de `cap_1.md` … `cap_(N-1).md`.
+  - `continuidad.json` no se inyecta completo: se **filtra por relevancia** usando la entrada de outline del capítulo N. Entran los hechos cuyo `sujeto` sea uno de los `capitulos[N].personajes`, o la `capitulos[N].locacion`.
+  - Entran **siempre**, sin filtrar, los hechos de `categoria = "mundo"` y los hechos con `sujeto_validado = false` (RF-06.1). Un fallo de clasificación nunca debe traducirse en omisión: el filtro puede incluir de más, nunca de menos.
+  - Los hechos con `superado_por` distinto de nulo no se inyectan (RF-07.6).
+  - El filtro no borra ni modifica `continuidad.json`: es una selección de lectura. El archivo en disco sigue siendo íntegro y append-only (INV-03).
+- Criterio de aceptación: dado un capítulo N > 3, cuando se ensambla el contexto, entonces (a) no contiene ninguna subcadena de más de 20 caracteres proveniente de `cap_(N-1).md` o anterior, (b) su tamaño no excede `max_tokens_contexto_escritor`, (c) contiene todos los hechos de `categoria = "mundo"` no superados, y (d) no contiene ningún hecho cuyo `sujeto` sea un personaje ausente de `capitulos[N].personajes`, salvo que su sujeto no haya validado.
 
 **RF-05.2 — Generación del borrador**
 - Descripción: el agente escritor produce el texto del capítulo N a partir del contexto ensamblado.
@@ -193,9 +199,13 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 
 **RF-06.1 — Extracción de cambios de estado**
 - Descripción: un agente separado lee únicamente `cap_{N}.md` y produce los deltas de estado.
-- Entradas: `cap_{N}.md` (y solo ese archivo del manuscrito).
+- Entradas: `cap_{N}.md` (y solo ese archivo del manuscrito), más el **registro de sujetos conocidos**: las claves de `personajes.json`, las locaciones de `mundo.json`, y el valor literal `mundo`.
 - Salidas: objeto `delta` con `personajes`, `hechos_nuevos`, `resumen_corto` (3–5 líneas).
-- Criterio de aceptación: dado `cap_{N}.md`, cuando se ejecuta la extracción, entonces el agente extractor no recibe en su contexto ningún otro archivo de `05_manuscrito/`.
+- Reglas:
+  - El registro de sujetos es un **vocabulario, no memoria**: la lista de nombres, sin los hechos ni los estados asociados. El extractor sigue sin ver el log de continuidad, el resumen rodante ni ningún capítulo anterior (INV-02).
+  - Cada hecho de `hechos_nuevos` lleva `sujeto` y `categoria`. El `sujeto` debe pertenecer al registro; si el capítulo establece un hecho sobre una entidad ausente del registro, el extractor lo emite igual y el harness le fija `sujeto_validado = false` en vez de descartarlo. Ese marcado es lo que hace que RF-05.1 lo inyecte siempre.
+  - Las claves de `delta.personajes` también deben pertenecer al registro. Sin esta regla, el extractor puede devolver `"el capitán"` donde `personajes.json` tiene `"Kovacs"` y crear una ficha duplicada que nadie detecta.
+- Criterio de aceptación: dado `cap_{N}.md`, cuando se ejecuta la extracción, entonces (a) el agente extractor no recibe en su contexto ningún otro archivo de `05_manuscrito/`, (b) no recibe `continuidad.json` ni `resumen_rodante.md`, y (c) todo hecho emitido tiene `sujeto` y `categoria`.
 
 **RF-06.2 — Actualización de fichas de personajes**
 - Descripción: aplicar `delta.personajes` sobre `personajes.json`, actualizando solo los campos afectados por el capítulo N.
