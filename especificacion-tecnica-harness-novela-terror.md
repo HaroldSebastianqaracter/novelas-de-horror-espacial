@@ -1,7 +1,7 @@
 # Especificación Técnica — Harness Generador de Novelas de Terror
 
-**Versión:** 1.0
-**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.0 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
+**Versión:** 1.1 — historial de cambios en `git log` sobre este archivo.
+**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.1 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
 **Lector previsto:** el agente de código que implementa el harness. Toda decisión no cubierta aquí y no derivable de la especificación funcional debe tratarse como pregunta abierta, no como espacio para asumir.
 
 ## 1. Decisiones de arquitectura declaradas
@@ -12,7 +12,7 @@ Decisiones tomadas para poder avanzar, con su razón — si alguna deja de aplic
 |---|---|
 | Runtime: **Python 3.11+** | Ecosistema maduro para orquestación de agentes, validación de esquemas y scripts de larga duración. |
 | Acceso a LLM vía **adapter intercambiable**, empezando por OpenRouter | La cuenta de Claude Code no es reutilizable como API para automatización. OpenRouter permite arrancar en capa gratuita y migrar a un proveedor de pago (Anthropic directo u otro modelo en OpenRouter) sin rediseñar el harness. |
-| **Modelos distintos por rol** | El agente escritor depende de calidad de prosa (modelo más capaz); extractor y QA son tareas estructuradas (JSON, comparación de hechos) que toleran un modelo más barato/rápido. |
+| **Modelos distintos por rol** | Escritor y QA usan el modelo capaz; el extractor, el económico. El escritor por calidad de prosa. QA porque cruza ~34.000 tokens de prosa contra el log completo de hechos: es razonamiento sobre contexto largo, justo donde los modelos económicos flojean, y un falso negativo suyo es el peor fallo del sistema — una contradicción no detectada sigue viva y el escritor construye encima. El extractor sí es una tarea mecánica (un capítulo → JSON) cuyo error lo atrapa la validación de esquema. Detalle de costes en §11.7. |
 | **Esquemas formales con Pydantic** | Valida cada artefacto de estado antes de persistirlo; permite rechazar y reintentar cuando el LLM produce JSON inválido (EX-01). |
 | **Checkpointing/reanudación** | Los artefactos ya se persisten en disco por capítulo (ver `harness-novela-terror.md`); el harness debe poder detectar dónde quedó una tanda interrumpida y continuar sin repetir capítulos cerrados. |
 
@@ -20,7 +20,7 @@ Decisiones tomadas para poder avanzar, con su razón — si alguna deja de aplic
 
 ```
 harness/
-├── config.py                 # carga y valida harness.config.json
+├── config.py                 # carga y valida la carpeta config/ (§11.1)
 ├── schemas/
 │   ├── personajes.py          # Personaje, FichaPersonajes
 │   ├── continuidad.py         # HechoContinuidad, LogContinuidad
@@ -68,13 +68,13 @@ Todo agente (`escritor.py`, `extractor.py`, `qa.py`) depende de `LLMProvider`, n
 
 ### 3.2 Selección de modelo por rol (`llm/roles.py`)
 
-Se resuelve desde `harness.config.json` (sección `proveedores`), no está hardcodeado:
+Se resuelve desde `config/proveedores.json` (§11.4), no está hardcodeado:
 
 ```json
 "proveedores": {
-  "escritor":  { "provider": "openrouter", "model": "<MODELO_CAPAZ>" },
-  "extractor": { "provider": "openrouter", "model": "<MODELO_ECONOMICO>" },
-  "qa":        { "provider": "openrouter", "model": "<MODELO_ECONOMICO>" }
+  "escritor":  { "provider": "openrouter", "model": "<MODELO_CAPAZ>",     "temperature": 0.8 },
+  "extractor": { "provider": "openrouter", "model": "<MODELO_ECONOMICO>", "temperature": 0.1 },
+  "qa":        { "provider": "openrouter", "model": "<MODELO_CAPAZ>",     "temperature": 0.2 }
 }
 ```
 
@@ -120,6 +120,7 @@ class LogContinuidad(RootModel[list[HechoContinuidad]]): ...
 # schemas/outline.py
 class EntradaOutline(BaseModel):
     num: int
+    titulo: str = Field(min_length=1)   # RF-03.1 — generado en fase 3, no por el escritor
     objetivo_narrativo: str
     personajes: list[str]
     locacion: str
@@ -155,9 +156,14 @@ No forma parte de la especificación funcional (es puramente de soporte técnico
   "ultimo_capitulo_cerrado": 12,
   "ultimo_qa_ejecutado": 8,
   "total_capitulos_esperado": 40,
-  "estado": "en_progreso"   // en_progreso | pausado_por_qa | completo
+  "estado": "en_progreso",  // en_progreso | pausado_por_qa | completo
+  "reporte_qa_pendiente": null,          // nombre del reporte sin resolver, o null (RF-07.4)
+  "intentos_por_capitulo": { "7": 2 },   // solo capítulos que necesitaron reintento (EX-07/EX-08)
+  "prompts_hash": { "escritor": "…", "extractor": "…", "qa": "…" }   // §11.5
 }
 ```
+
+`reporte_qa_pendiente` es lo que hace detectable una edición manual del manifiesto: `checkpoint.py` se niega a reanudar si `estado == "en_progreso"` pero este campo no es nulo, porque esa combinación solo puede producirla alguien que cambió el estado a mano sin pasar por `resolver` (§8.2). El único código que lo pone en nulo es `resolver`, tras ejecutar RF-07.6.
 
 `orchestrator/checkpoint.py` lee este archivo al iniciar; si `estado == "pausado_por_qa"`, el harness no reanuda automáticamente (implementa RF-07.4) hasta que el usuario marque el reporte correspondiente como resuelto.
 
@@ -238,7 +244,11 @@ class OutlineFaltanteError(Exception): ...     # EX-03
 class ContextoExcedidoError(Exception): ...    # EX-04
 class ConfiguracionInvalidaError(Exception): ...      # EX-05
 class ConfiguracionInconsistenteError(Exception): ... # EX-06
+class LongitudFueraDeRangoAviso(Warning): ...         # EX-07 — aviso, no excepción: la tanda sigue
+class PersonajeNoPrevistoError(Exception): ...        # EX-08 — solo tras el segundo intento fallido
 ```
+
+EX-07 es deliberadamente un `Warning` y no una excepción: el segundo intento fuera de rango se acepta y se anota en `intentos_por_capitulo`, nada se detiene. EX-08 sí es excepción, pero `loop.py` la lanza únicamente cuando el reintento también falla; el primer fallo se resuelve regenerando sin salir del loop.
 
 Ninguna de estas se captura silenciosamente en `orchestrator/loop.py`: todas terminan la ejecución de la tanda y dejan el `manifest.json` en un estado consistente con lo que sí se alcanzó a cerrar.
 
@@ -263,7 +273,7 @@ La configuración vive en una **carpeta**, no en un único archivo. El inventari
   "proveedores": {
     "escritor":  { "provider": "openrouter", "model": "<MODELO_CAPAZ>" },
     "extractor": { "provider": "openrouter", "model": "<MODELO_ECONOMICO>" },
-    "qa":        { "provider": "openrouter", "model": "<MODELO_ECONOMICO>" }
+    "qa":        { "provider": "openrouter", "model": "<MODELO_CAPAZ>" }
   },
   "reintentos": { "max_intentos": 3, "backoff_base_segundos": 2 }
 }
@@ -302,9 +312,19 @@ python -m harness run                    # usa capitulos_por_tanda del archivo
 python -m harness run --capitulos 3      # pisa el valor del archivo (RF-CFG-03)
 python -m harness run --hasta-el-final   # ignora el tope y sigue hasta total_capitulos
 python -m harness status                 # imprime el manifiesto sin generar nada
+python -m harness resolver --reporte qa_cap_16 --capitulos 14,15
+                                         # RF-07.4 + RF-07.6: marca el reporte resuelto
+python -m harness resolver --reporte qa_cap_16 --sin-cambios
+                                         # revisé y no toqué ningún capítulo
+python -m harness ensamblar --salida novela.md
+                                         # concatena los capítulos cerrados con su título
 ```
 
 Solo `capitulos_por_tanda` admite override. `total_capitulos` y `palabras_por_capitulo` no se exponen como argumentos a propósito: pasarlos por línea de comandos invitaría a cambiarlos entre tandas, que es justo lo que EX-06 e INV-04 buscan impedir.
+
+**`resolver`** es la única forma legítima de salir de `pausado_por_qa`. En orden: (1) verifica que el reporte exista y sea el que figura en `reporte_qa_pendiente`; (2) para cada capítulo declarado en `--capitulos`, ejecuta la reextracción de RF-07.6 — marca superados los hechos con ese `cap_origen`, extrae los nuevos, recalcula las fichas afectadas y regenera el resumen rodante si toca; (3) recién entonces pone `reporte_qa_pendiente = null` y `estado = en_progreso`. Si el paso 2 falla en cualquier capítulo, el manifiesto no cambia: se puede volver a invocar. `--sin-cambios` y `--capitulos` son mutuamente excluyentes; omitir ambos es error, porque el harness no puede adivinar qué se corrigió.
+
+**`ensamblar`** concatena `cap_1.md` … `cap_K.md` para los K capítulos cerrados, anteponiendo a cada uno su `titulo` de `capitulos.json` como encabezado. No es exportación ni maquetación (fuera de alcance, spec funcional §2): es la forma de leer lo generado sin abrir 40 archivos. No lee ni modifica ningún artefacto de estado, así que puede correr en cualquier momento, incluso con la tanda pausada.
 
 ## 9. Plan de pruebas
 
@@ -331,6 +351,13 @@ Criterio de decisión para las dos filas nuevas: si la atribución de sujeto aci
 | RF-05.1 (filtrado por relevancia) | `state/continuidad.py::filtrar_para_capitulo(entrada_outline)` — devuelve una selección de lectura; no escribe |
 | RF-06.1 (registro de sujetos) | `state/personajes.py::sujetos_conocidos()` + validador Pydantic sobre `HechoContinuidad.sujeto`; un sujeto fuera del registro fija `sujeto_validado = False`, no rechaza el hecho |
 | RF-07.6 (reextracción tras corrección) | `state/continuidad.py::marcar_superado(caps)` — fija `superado_por`, nunca borra (INV-03) |
+| RF-07.4 (resolución como operación) | `cli.py::resolver` — único código que pone `reporte_qa_pendiente = null`; `checkpoint.py` rechaza reanudar si el campo no es nulo con `estado = en_progreso` (§5, §8.2) |
+| RF-03.1 (títulos en fase 3) | `schemas/outline.py::EntradaOutline.titulo` + validador de unicidad sobre el array completo |
+| RF-05.1 (tensión como objetivo) | `agents/escritor.py::ensamblar_contexto` — inyecta `entrada.tension` junto al vocabulario de ritmo de `style_guide.md` |
+| EX-07 (longitud fuera de rango) | `orchestrator/loop.py` — un reintento con el desvío como feedback, luego `LongitudFueraDeRangoAviso` y `intentos_por_capitulo[n] = 2` |
+| EX-08 (personaje no previsto) | `orchestrator/loop.py` — detecta `sujeto_validado = false` en `delta.personajes`, regenera; al segundo fallo lanza `PersonajeNoPrevistoError` |
+| RF-00.2 (verificación contra referencias) | `tests/test_referencias.py` — lee `00_referencias/`; si la carpeta no existe, `pytest.skip` con motivo explícito, nunca pasa en silencio |
+| Ensamblado (spec funcional §2) | `cli.py::ensamblar` — solo lee `05_manuscrito/` y `capitulos.json`; no toca estado |
 | RF-07.4 (pausa ante contradicciones) | `orchestrator/checkpoint.py::pausar_por_qa`, estado `pausado_por_qa` en el manifiesto |
 | RF-CFG-01 (dimensionamiento) | `config.py::HarnessConfig` — §8.1, rangos validados con Pydantic |
 | RF-CFG-02 (tanda parcial) | `orchestrator/loop.py::ejecutar_tanda` — contador `cerrados_en_esta_tanda`, salida `tope_de_tanda` |
@@ -391,7 +418,7 @@ Regla que justifica la partición: `novela.json` está bajo INV-04 (no cambia co
 |---|---|
 | `escritor.provider` / `.model` / `.temperature` | Modelo capaz. La temperatura del escritor es el único parámetro de muestreo que importa para la prosa |
 | `extractor.provider` / `.model` / `.temperature` | Modelo económico. Temperatura baja: la tarea es estructurada |
-| `qa.provider` / `.model` / `.temperature` | **Ver §11.7**: la asignación de modelo económico a QA está en discusión |
+| `qa.provider` / `.model` / `.temperature` | Modelo **capaz** (decisión en §1 y §11.7). Temperatura baja: juzga, no crea |
 | `reintentos.max_intentos` / `.backoff_base_segundos` | §3.3 |
 
 Las claves de API se leen siempre de variables de entorno, nunca de estos archivos.
@@ -400,7 +427,37 @@ Las claves de API se leen siempre de variables de entorno, nunca de estos archiv
 
 Los prompts de los tres agentes viven en archivos, no embebidos en el código Python. Razón: son lo que más se itera, y si están en el código cada ajuste de redacción es un commit de código con diff ilegible. En archivos, el diff muestra exactamente qué instrucción cambió entre una tanda y la siguiente.
 
-El manifiesto registra el hash del prompt usado por cada rol al iniciar la tanda. Si un capítulo sale mal, se puede saber con qué versión del prompt se generó.
+El manifiesto registra el hash del prompt usado por cada rol al iniciar la tanda (`prompts_hash`, §5). Si un capítulo sale mal, se puede saber con qué versión del prompt se generó.
+
+**Qué fija esta spec y qué no.** El texto de los prompts no se especifica: se itera contra corridas reales y cualquier redacción escrita ahora va a cambiar. Lo que sí se fija es el **checklist de contenido obligatorio** de cada uno, para que un prompt se revise contra una lista y no por gusto. Un prompt que omita cualquier ítem de su lista no está listo, por bien que lea.
+
+`prompts/escritor.md` debe llevar:
+- Voz narrativa: `idioma`, `persona_narrativa`, `tiempo_verbal` (RF-CFG-05)
+- La entrada de outline completa: `titulo`, `objetivo_narrativo`, `personajes`, `locacion`, `informacion_nueva` (RF-03.1)
+- `tension` como objetivo explícito, con referencia al vocabulario de ritmo de `style_guide.md` (RF-05.1)
+- Los hechos filtrados de continuidad, ya seleccionados por el harness — el prompt los recibe, no los elige (RF-05.1)
+- El resumen rodante (RF-06.4)
+- Las fichas de los personajes presentes en el capítulo (RF-04.1)
+- Longitud objetivo y tolerancia: `palabras_por_capitulo` ±20% (RF-05.2)
+- Prohibición explícita de introducir personajes ausentes del outline y de `personajes.json` (RF-05.2, EX-08)
+- Y en el reintento de EX-07, el desvío concreto del intento anterior
+
+`prompts/extractor.md` debe llevar:
+- El texto de `cap_N.md`, y nada más del manuscrito (INV-02)
+- El registro de sujetos: nombres de personajes, locaciones y el literal `mundo` (RF-06.1)
+- El esquema JSON de `DeltaExtraccion` con `sujeto` y `categoria` por hecho (§4)
+- Instrucción de emitir **solo lo que el capítulo establece de nuevo**, no lo que reitera
+- El tope `max_hechos_por_capitulo` y el criterio para elegir cuáles (§11.6)
+- Formato de `resumen_corto`: 3–5 líneas, y que las claves de `personajes` salgan del registro
+
+`prompts/qa.md` debe llevar:
+- El log de continuidad completo, con `superado_por` visible para ignorar los superados (RF-07.2)
+- `recursos_usados.json` tal como quedó del corte anterior (RF-07.5)
+- La muestra de capítulos (RF-07.1)
+- La voz narrativa, para detectar capítulos que la rompan (RF-CFG-05)
+- Instrucción de citar `cap_origen` en cada contradicción (RF-07.2)
+- El umbral de repetición: "3 o más veces" (RF-07.3)
+- El esquema de `ReporteQA` y la obligación de devolver `recursos_usados.json` actualizado (RF-07.5)
 
 ### 11.6 Parámetros ausentes detectados al dimensionar
 
@@ -419,9 +476,10 @@ Conviene igualmente subir `max_tokens_contexto_escritor` a ~12.000: sigue siendo
 
 | Tema | Estado |
 |---|---|
-| Modelo del agente QA | La spec asigna modelo económico. Pero QA cruza ~34.000 tokens de prosa contra ~150 hechos: es razonamiento sobre contexto largo, justo donde los modelos económicos flojean. Corre 5 veces contra las 40 del escritor, así que moverlo al modelo capaz cuesta poco. **Pendiente de decidir.** |
+| Modelo del agente QA | **Resuelto: modelo capaz** (§1, §11.4). Con una corrección al razonamiento que circuló antes: "corre solo 5 veces" era engañoso. QA lee ~37.000 tokens por corte × 5 cortes ≈ **185.000 tokens de entrada**, contra ~200.000 del escritor (40 × 5.000). Moverlo al capaz **duplica aproximadamente el gasto en modelo caro**; no es un redondeo. Se asume igual porque un falso negativo de QA es el peor fallo del sistema: la contradicción sigue viva y el escritor construye encima durante 8 capítulos más. Si el presupuesto aprieta, la optimización es **escalar**: el económico marca candidatos en una primera pasada y el capaz juzga solo los marcados. Se difiere hasta la corrida de validación de §9, cuando se sepa cuántos candidatos marca de verdad. |
 | `mundo.json` | **Resuelto por §12.3.** Sus locaciones alimentan el registro de sujetos de RF-06.1 y la clave de filtrado de RF-05.1, así que ya no es un artefacto huérfano. Su *contenido* sigue sin inyectarse al escritor, y es correcto: las reglas del universo que deben condicionar la escritura viven como hechos de `categoria = "mundo"` en `continuidad.json` (RF-04.3), que sí se inyectan siempre. `mundo.json` queda como registro de locaciones y referencia humana. |
-| Selección entre borradores | Fuera de alcance por decisión explícita (§2 de la spec funcional). Es la diferencia principal contra Re3, que genera varias continuaciones y rerankea por coherencia. Conviene dejar registrado que es una limitación conocida, no un olvido. |
+| Selección entre borradores | **Limitación aceptada.** Fuera de alcance por decisión explícita (§2 de la spec funcional). Es la diferencia principal contra Re3, que genera varias continuaciones y rerankea por coherencia. No se revisa hasta tener una novela completa que leer: sin eso no hay forma de saber si el borrador único es el cuello de botella. |
+| Deduplicación de hechos | **Limitación aceptada.** Si "la escotilla 4 quedó sellada" se extrae en el capítulo 7 y otra vez en el 9, el log tiene dos entradas. Deduplicar automáticamente es riesgoso: dos hechos parecidos pueden diferir en algo que importa, y equivocarse borra memoria. El filtrado de RF-05.1 absorbe el sobrecosto en contexto. A lo sumo QA lo reporta como hallazgo de tipo `repeticion`; nunca lo corrige solo. |
 
 ## 12. Gestión de contexto — los archivos como memoria
 

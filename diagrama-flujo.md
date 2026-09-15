@@ -1,6 +1,6 @@
 # Diagrama de flujo — Harness Generador de Novelas de Terror Espacial
 
-Fuente: `especificacion-funcional-harness-novela-terror.md` v1.0 y `especificacion-tecnica-harness-novela-terror.md` v1.0.
+Fuente: `especificacion-funcional-harness-novela-terror.md` v1.1 y `especificacion-tecnica-harness-novela-terror.md` v1.1.
 
 El **0** es el resumen para explicar el sistema a alguien de cero. Los otros cuatro se reparten el detalle: el **1** es el flujo de control (qué corre y en qué orden), el **2** el flujo de datos (quién lee qué — el invariante central del diseño), el **3** el detalle de una iteración y el **4** la máquina de estados que sostiene la reanudación.
 

@@ -1,6 +1,6 @@
 # Especificación Funcional — Harness Generador de Novelas de Terror
 
-**Versión:** 1.0
+**Versión:** 1.1 — historial de cambios en `git log` sobre este archivo.
 **Documento previo:** `harness-novela-terror.md` (estructura de carpetas y esquemas) — este documento formaliza el comportamiento requerido; no repite decisiones de implementación.
 **Lector previsto:** un agente de código que implementará el harness a partir de este documento. Donde este documento sea ambiguo, el agente debe detenerse y pedir aclaración en vez de asumir.
 
@@ -12,7 +12,7 @@ El sistema genera una novela completa de **terror espacial** (space horror — n
 
 - Traducción del manuscrito a otros idiomas.
 - Generación de ilustraciones, portada o cualquier elemento visual.
-- Maquetación o exportación a formato final (ebook, PDF, DOCX).
+- Maquetación o exportación a formato final (ebook, PDF, DOCX). **Sí está en alcance** concatenar los capítulos cerrados con sus títulos en un único `.md` legible (spec técnica §8.2, `ensamblar`): no es exportación, es poder leer lo que se generó.
 - Selección automática entre múltiples borradores generados para un mismo capítulo (esta versión genera un único borrador por capítulo, no hay muestreo ni rechazo).
 - Edición interactiva capítulo a capítulo por parte de un humano. La única intervención humana prevista es la revisión disparada por hallazgos de QA (fase 7).
 - Subgéneros de terror distintos al terror espacial (el destilado de estilo, fase 0, asume ejemplos de referencia de space horror — no terror gótico, slasher, folk horror, etc., salvo que se cambien los ejemplos de entrada).
@@ -52,18 +52,18 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 
 **RF-CFG-01 — Dimensionamiento de la novela**
 - Descripción: el usuario debe poder fijar el tamaño de la obra antes de iniciar una tanda, sin tocar código.
-- Entradas: `harness.config.json`.
+- Entradas: `config/novela.json` (spec técnica §11.2).
 - Parámetros:
   - `total_capitulos` — cuántos capítulos tiene la novela completa. Entero, rango 30–50 (acotado por RF-03.1, que exige que el outline tenga entre 30 y 50 entradas).
   - `palabras_por_capitulo` — longitud objetivo de cada capítulo. Entero positivo. La tolerancia de ±20% la fija RF-05.2.
 - Reglas:
   - `total_capitulos` determina cuántas entradas genera la fase 3 y es el criterio de fin de la generación.
   - Ambos parámetros son inmutables durante una tanda: cambiarlos con capítulos ya cerrados invalida la escaleta y las longitudes ya generadas (ver INV-04).
-- Criterio de aceptación: dado `harness.config.json` con `total_capitulos = K`, cuando termina la fase 3, entonces `capitulos.json` tiene exactamente K entradas con `num` consecutivo de 1 a K.
+- Criterio de aceptación: dado `config/novela.json` con `total_capitulos = K`, cuando termina la fase 3, entonces `capitulos.json` tiene exactamente K entradas con `num` consecutivo de 1 a K.
 
 **RF-CFG-02 — Tanda parcial: capítulos por ejecución**
 - Descripción: el usuario debe poder escribir la novela en tandas, indicando cuántos capítulos generar en una ejecución sin comprometerse a la novela entera.
-- Entradas: `harness.config.json` y, opcionalmente, un argumento de línea de comandos.
+- Entradas: `config/ejecucion.json` y, opcionalmente, un argumento de línea de comandos.
 - Parámetro: `capitulos_por_tanda` — cuántos capítulos generar en esta ejecución. Entero positivo, o ausente/nulo para "seguir hasta `total_capitulos`".
 - Reglas:
   - El conteo es **de capítulos cerrados en esta ejecución**, no del número de capítulo. Una tanda de 5 que arranca en el capítulo 11 termina tras cerrar el 15.
@@ -116,8 +116,10 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 
 **RF-00.2 — Prohibición de embebido de texto crudo**
 - Descripción: los ejemplos de referencia no deben pasarse completos a ningún prompt posterior a esta fase.
-- Regla: ningún artefacto de estado de fases 1–7 puede contener el texto literal de los ejemplos de entrada.
-- Criterio de aceptación: dado el estado persistente completo tras cualquier fase, cuando se busca una subcadena de más de 30 caracteres de los ejemplos originales, entonces no se encuentra ninguna coincidencia.
+- Reglas:
+  - Ningún artefacto de estado de fases 1–7 puede contener el texto literal de los ejemplos de entrada.
+  - Los ejemplos se conservan en `00_referencias/`, **fuera del estado persistente y fuera del control de versiones**. Fuera del estado, porque no son memoria de la novela y ningún agente posterior a la fase 0 debe poder leerlos. Fuera de git, porque si son obras publicadas no pertenecen a un repositorio. Se conservan igual porque el criterio de aceptación de abajo es inverificable sin ellos.
+- Criterio de aceptación: dado el estado persistente completo tras cualquier fase, cuando se busca una subcadena de más de 30 caracteres de los ejemplos originales, entonces no se encuentra ninguna coincidencia. Si `00_referencias/` no existe en la máquina donde corre la verificación, el resultado se reporta como **no ejecutable**, nunca como aprobado.
 
 ### Fase 1 — Concepto
 
@@ -144,8 +146,9 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 **RF-03.1 — Generación de outline**
 - Descripción: generar entre 30 y 50 entradas de outline a partir de la sinopsis.
 - Entradas: `tres_actos.md`, `premisa.md`.
-- Salidas: `capitulos.json`, array de objetos con los campos: `num`, `objetivo_narrativo`, `personajes`, `locacion`, `informacion_nueva`, `tension` (entero 1–5).
-- Criterio de aceptación: dado `tres_actos.md`, cuando se genera el outline, entonces `capitulos.json` valida contra el esquema (todos los campos presentes, `num` consecutivo desde 1, sin huecos, `tension` entre 1 y 5).
+- Salidas: `capitulos.json`, array de objetos con los campos: `num`, `titulo`, `objetivo_narrativo`, `personajes`, `locacion`, `informacion_nueva`, `tension` (entero 1–5).
+- Regla: los títulos se generan **aquí, no en el escritor**. La fase 3 ve los 40 capítulos a la vez y puede darles un estilo consistente y evitar repeticiones; cada instancia del escritor, en cambio, inventaría el suyo sin saber cómo son los otros 39 — el mismo problema que todo el harness existe para evitar.
+- Criterio de aceptación: dado `tres_actos.md`, cuando se genera el outline, entonces `capitulos.json` valida contra el esquema (todos los campos presentes, `num` consecutivo desde 1, sin huecos, `tension` entre 1 y 5, ningún `titulo` vacío ni repetido).
 
 **RF-03.2 — Coherencia de progresión narrativa**
 - Descripción: el nivel de tensión no debe ser estrictamente decreciente a lo largo del outline (el terror no se puede ir apagando de forma monótona antes del clímax).
@@ -179,13 +182,18 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
   - `continuidad.json` no se inyecta completo: se **filtra por relevancia** usando la entrada de outline del capítulo N. Entran los hechos cuyo `sujeto` sea uno de los `capitulos[N].personajes`, o la `capitulos[N].locacion`.
   - Entran **siempre**, sin filtrar, los hechos de `categoria = "mundo"` y los hechos con `sujeto_validado = false` (RF-06.1). Un fallo de clasificación nunca debe traducirse en omisión: el filtro puede incluir de más, nunca de menos.
   - Los hechos con `superado_por` distinto de nulo no se inyectan (RF-07.6).
+  - `capitulos[N].tension` se inyecta como **objetivo explícito** del capítulo, no solo como dato. El vocabulario para interpretarlo ya está en el contexto: `style_guide.md` describe el ritmo de tensión/alivio del subgénero (RF-00.1). Sin esta regla, RF-03.2 valida una curva de tensión que nadie ejecuta.
   - El filtro no borra ni modifica `continuidad.json`: es una selección de lectura. El archivo en disco sigue siendo íntegro y append-only (INV-03).
 - Criterio de aceptación: dado un capítulo N > 3, cuando se ensambla el contexto, entonces (a) no contiene ninguna subcadena de más de 20 caracteres proveniente de `cap_(N-1).md` o anterior, (b) su tamaño no excede `max_tokens_contexto_escritor`, (c) contiene todos los hechos de `categoria = "mundo"` no superados, y (d) no contiene ningún hecho cuyo `sujeto` sea un personaje ausente de `capitulos[N].personajes`, salvo que su sujeto no haya validado.
 
 **RF-05.2 — Generación del borrador**
 - Descripción: el agente escritor produce el texto del capítulo N a partir del contexto ensamblado.
 - Salidas: borrador en texto plano/markdown, longitud objetivo `palabras_por_capitulo` (± 20%).
-- Criterio de aceptación: dado el contexto de RF-05.1, cuando el agente escritor genera el capítulo, entonces el borrador cubre el `objetivo_narrativo` de `capitulos[N]` (verificable por el agente extractor en la fase siguiente) y no introduce personajes ausentes tanto del outline como de `personajes.json`.
+- Reglas ante un borrador fuera de especificación — son dos fallos distintos y se tratan distinto:
+  - **Longitud fuera de ±20%** (EX-07): se regenera **una vez**, pasando el desvío como feedback explícito ("el borrador tiene 1.900 palabras; el objetivo es 3.000 ±20%"). Si el segundo intento también falla, se acepta con aviso en el manifiesto. Es un defecto de forma, no de continuidad; no justifica detener la tanda.
+  - **Personaje no previsto** (EX-08): se detecta en la fase siguiente, cuando RF-06.1 valida las claves de `delta.personajes` contra el registro de sujetos — un personaje inventado aparece como `sujeto_validado = false` en `personajes`. Se regenera el capítulo. Si el segundo intento también introduce un personaje no previsto, el harness se detiene: dos fallos seguidos indican una entrada de outline mal planteada, no mala suerte, y seguir gastando generaciones sobre un plan roto contradice el mismo principio de EX-03.
+  - Regenerar un capítulo en esta fase **no viola INV-07**: el invariante protege capítulos *cerrados*, y un capítulo se cierra recién tras aplicar su extracción. Hasta entonces `cap_N.md` es un borrador reemplazable.
+- Criterio de aceptación: dado el contexto de RF-05.1, cuando el agente escritor genera el capítulo, entonces el borrador cubre el `objetivo_narrativo` de `capitulos[N]` (verificable por el agente extractor en la fase siguiente) y no introduce personajes ausentes tanto del outline como de `personajes.json`; y dado un borrador que incumple una de las dos reglas, cuando termina el reintento, entonces existe exactamente un `cap_N.md` en disco y el manifiesto registra cuántos intentos consumió.
 
 **RF-05.3 — Restricción de acceso del agente escritor**
 - Descripción: el agente escritor no tiene, bajo ninguna circunstancia, acceso de lectura a `05_manuscrito/`.
@@ -238,7 +246,8 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 
 **RF-07.4 — Pausa ante hallazgos**
 - Descripción: si el reporte contiene al menos una contradicción, el harness detiene el avance a capítulos siguientes hasta revisión humana.
-- Criterio de aceptación: dado un reporte con `tiene_contradicciones = true`, cuando el harness lo recibe, entonces no se invoca RF-05.1 para el siguiente capítulo hasta que el usuario humano marque el reporte como resuelto.
+- Regla: "marcar como resuelto" es una **operación del harness**, no una edición manual del manifiesto. El usuario la invoca declarando qué capítulos corrigió (mecanismo en la spec técnica §8.2). Si resolver fuera editar `manifest.json` a mano, RF-07.6 nunca se ejecutaría: el texto quedaría corregido y el log de continuidad seguiría describiendo la versión anterior.
+- Criterio de aceptación: dado un reporte con `tiene_contradicciones = true`, cuando el harness lo recibe, entonces no se invoca RF-05.1 para el siguiente capítulo hasta que el usuario humano marque el reporte como resuelto; y dado un `manifest.json` editado a mano de `pausado_por_qa` a `en_progreso` sin pasar por la operación de resolución, cuando arranca la siguiente tanda, entonces el harness detecta que el reporte sigue sin resolver y no reanuda.
 
 **RF-07.5 — Registro de recursos narrativos**
 - Descripción: el agente QA debe **escribir** `06_qa/recursos_usados.json` al terminar cada corte, acumulando los recursos narrativos detectados en la muestra con su conteo de apariciones.
@@ -249,7 +258,7 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 
 **RF-07.6 — Reextracción tras corrección humana**
 - Descripción: cuando el usuario corrige capítulos a raíz de un reporte de QA, el estado persistente derivado de esos capítulos debe regenerarse antes de reanudar.
-- Entradas: la lista de capítulos que el usuario declara haber modificado al marcar el reporte como resuelto.
+- Entradas: la lista de capítulos que el usuario declara haber modificado al invocar la operación de resolución (RF-07.4). El harness no puede adivinar cuáles tocó; por eso la lista es obligatoria y una resolución sin capítulos declarados se interpreta como "revisé y no cambié nada".
 - Reglas:
   - Para cada capítulo modificado se vuelve a ejecutar la extracción (RF-06.1) sobre su texto corregido.
   - Los hechos de `continuidad.json` cuyo `cap_origen` esté en esa lista se marcan como **superados** y se agregan los nuevos. Es la única operación que altera hechos existentes, y no los borra: los marca. `continuidad.json` sigue siendo append-only en el sentido de INV-03 — ningún registro desaparece ni pierde su trazabilidad.
@@ -267,7 +276,7 @@ Aplican a todo el sistema, no a una fase específica. Ningún requisito de la se
 - **INV-04**: los esquemas de los artefactos de estado (sección 3 de `harness-novela-terror.md`) no cambian durante la ejecución de una tanda completa de generación.
 - **INV-05**: el agente QA es el único actor con permiso de lectura sobre más de un archivo de `05_manuscrito/` a la vez.
 - **INV-06**: `capitulos_por_tanda` no afecta el contenido de ningún artefacto de estado. Una novela generada en ocho tandas de cinco capítulos debe ser indistinguible de la misma novela generada en una tanda de cuarenta — el tope solo decide cuándo se detiene la ejecución, nunca qué se escribe.
-- **INV-07**: ningún capítulo ya cerrado se regenera. Reanudar una tanda siempre avanza; nunca reescribe.
+- **INV-07**: ningún capítulo ya **cerrado** se regenera. Reanudar una tanda siempre avanza; nunca reescribe. Un capítulo se cierra tras aplicar su extracción (RF-06.3); antes de eso es un borrador y los reintentos de RF-05.2 pueden reemplazarlo.
 
 ## 7. Casos de excepción esperados
 
@@ -281,6 +290,8 @@ Comportamiento a nivel funcional — no se especifica mecanismo de implementaci�
 | **EX-04** | El contexto ensamblado (RF-05.1) excede `max_tokens_contexto_escritor`. | El harness recorta primero `resumen_rodante.md`; nunca recorta `continuidad.json` ni `personajes.json`. Si tras recortar el resumen rodante a su mínimo aún excede el límite, se detiene y reporta el problema — no trunca el log de continuidad. |
 | **EX-05** | Un parámetro de RF-CFG-01 o RF-CFG-02 está fuera de rango (`total_capitulos` fuera de 30–50, `palabras_por_capitulo` ≤ 0, `capitulos_por_tanda` ≤ 0). | El harness no inicia la ejecución y reporta qué parámetro es inválido. La validación ocurre antes de cualquier llamada al modelo, para no gastar generaciones con una configuración que igual va a fallar. |
 | **EX-06** | `total_capitulos` cambió respecto del valor con el que se generó la escaleta, y ya hay capítulos cerrados. | El harness no reanuda y reporta la discrepancia. Cambiar el tamaño de la obra a mitad de camino invalida la escaleta (INV-04); resolverlo es decisión del usuario, no del harness. |
+| **EX-07** | El borrador del capítulo N queda fuera de `palabras_por_capitulo` ±20% (RF-05.2). | Un reintento con el desvío como feedback. Si el segundo también falla, se acepta con aviso en el manifiesto y la tanda continúa. Defecto de forma: no amerita detener nada. |
+| **EX-08** | La extracción del capítulo N devuelve en `delta.personajes` una clave ausente del registro de sujetos — el borrador introdujo un personaje no previsto (RF-05.2, RF-06.1). | Se descarta el borrador y se regenera el capítulo. Si el segundo intento repite el fallo, el harness se detiene y reporta la entrada de outline como sospechosa: dos fallos seguidos señalan un plan mal planteado, y seguir generando sobre él contradice el principio de EX-03. |
 
 ## 8. Definición de "hecho" (Definition of Done) de esta especificación
 
