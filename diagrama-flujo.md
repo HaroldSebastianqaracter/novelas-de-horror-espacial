@@ -98,9 +98,12 @@ flowchart TD
         CONTRA -->|sí| PAUSA["pausar_por_qa<br/>RF-07.4 · EX-02"]
         CONTRA -->|no| SIG
         SIG --> FIN{"¿N > total_capitulos?"}
-        FIN -->|no| E0
+        FIN -->|no| TANDA{"¿se alcanzó<br/>capitulos_por_tanda?"}
+        TANDA -->|no| E0
     end
 
+    TANDA -->|sí| PARCIAL(["Fin de tanda · RF-CFG-02<br/>estado = en_progreso<br/>la próxima ejecución continúa"])
+    PARCIAL --> CKPT
     FIN -->|sí| DONE(["Novela completa<br/>estado = completo"])
     PAUSA --> HUMANO["Usuario humano revisa<br/>y marca el reporte resuelto"]
     ESPERA --> HUMANO
@@ -116,7 +119,7 @@ flowchart TD
     class STYLE,PREMISA,ACTOS,OUTLINE,BASES,CAPN,DELTA,REPORTE estado
     class EX01,EX03,EX04,PAUSA error
     class IDEA,EJEMPLOS,HUMANO,ESPERA humano
-    class DONE ok
+    class DONE,PARCIAL ok
 ```
 
 ## 2. Flujo de datos — quién lee qué
@@ -239,6 +242,12 @@ stateDiagram-v2
     en_progreso --> abortado: EX-01 / 03 / 04
     completo --> [*]
     abortado --> [*]
+
+    note left of en_progreso
+        Alcanzar capitulos_por_tanda termina la ejecución
+        pero NO cambia de estado (RF-CFG-02, INV-06):
+        por eso la próxima tanda reanuda sola
+    end note
 
     note right of pausado_por_qa
         El harness no reanuda solo (EX-02)

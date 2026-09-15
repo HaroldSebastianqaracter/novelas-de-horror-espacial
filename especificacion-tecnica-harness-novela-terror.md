@@ -150,21 +150,42 @@ No forma parte de la especificación funcional (es puramente de soporte técnico
 {
   "ultimo_capitulo_cerrado": 12,
   "ultimo_qa_ejecutado": 8,
+  "total_capitulos_esperado": 40,
   "estado": "en_progreso"   // en_progreso | pausado_por_qa | completo
 }
 ```
 
 `orchestrator/checkpoint.py` lee este archivo al iniciar; si `estado == "pausado_por_qa"`, el harness no reanuda automáticamente (implementa RF-07.4) hasta que el usuario marque el reporte correspondiente como resuelto.
 
+`total_capitulos_esperado` guarda el valor con el que se generó la escaleta. Al reanudar se compara contra `config.total_capitulos`; si difieren y `ultimo_capitulo_cerrado > 0`, se dispara EX-06.
+
+El manifiesto **no** registra nada sobre la tanda en curso (ni el tope ni cuántos capítulos lleva). El conteo de `capitulos_por_tanda` vive solo en memoria durante la ejecución: es un límite de esta corrida, no un hecho de la novela. Persistirlo daría a entender que la partición en tandas es parte del estado de la obra, y por INV-06 no lo es.
+
 ## 6. Orquestador — mapeo del loop a módulos
 
 Pseudocódigo de `orchestrator/loop.py`, con cada paso anotado al requisito funcional que implementa:
 
 ```python
-def ejecutar_tanda(config: HarnessConfig):
-    n_inicio = checkpoint.detectar_punto_de_reanudacion()  # §5
+def ejecutar_tanda(config: HarnessConfig, capitulos_por_tanda: int | None = None):
+    # El argumento pisa al del archivo de configuración (RF-CFG-03);
+    # ningún otro parámetro admite override por línea de comandos.
+    tope = capitulos_por_tanda or config.capitulos_por_tanda
+
+    estado = checkpoint.leer_estado()                       # §5
+    if estado == "pausado_por_qa":
+        raise PausadoPorQAError()                           # EX-02, RF-07.4
+    if estado == "completo":
+        return ResultadoTanda(cerrados=0, motivo="completo")
+
+    n_inicio = checkpoint.detectar_punto_de_reanudacion()   # RF-CFG-04, INV-07
+    cerrados_en_esta_tanda = 0
 
     for n in range(n_inicio, config.total_capitulos + 1):
+        if tope is not None and cerrados_en_esta_tanda >= tope:
+            # Fin limpio de tanda (RF-CFG-02): no es error ni pausa.
+            # El manifiesto queda en_progreso y la próxima ejecución sigue en n.
+            return ResultadoTanda(cerrados=cerrados_en_esta_tanda, motivo="tope_de_tanda")
+
         entrada = repository.leer_outline_entry(n)         # RF-03.1
         if entrada is None:
             raise OutlineFaltanteError(n)                   # EX-03
@@ -184,14 +205,23 @@ def ejecutar_tanda(config: HarnessConfig):
         repository.actualizar_resumen_rodante(delta)          # RF-06.4
 
         checkpoint.marcar_capitulo_cerrado(n)
+        cerrados_en_esta_tanda += 1
 
+        # El corte de QA corre por su propia cadencia, antes de evaluar el tope
+        # de tanda: cortar la tanda nunca omite ni adelanta un QA (RF-CFG-02).
         if n % config.cadencia_qa == 0:
             reporte = qa.ejecutar_corte(n)                   # RF-07.1-07.3
             repository.guardar_reporte_qa(reporte)
             if reporte.tiene_contradicciones:
                 checkpoint.pausar_por_qa(reporte)             # RF-07.4
-                return  # el harness no continúa solo
+                return ResultadoTanda(cerrados=cerrados_en_esta_tanda,
+                                      motivo="pausado_por_qa")
+
+    checkpoint.marcar_completo()
+    return ResultadoTanda(cerrados=cerrados_en_esta_tanda, motivo="novela_completa")
 ```
+
+Los tres motivos de salida limpia (`tope_de_tanda`, `pausado_por_qa`, `novela_completa`) se distinguen porque el usuario necesita saber si volver a invocar el harness continúa la novela o no. Solo `tope_de_tanda` deja el manifiesto listo para reanudar sin intervención.
 
 ## 7. Manejo de errores — excepciones concretas
 
@@ -202,6 +232,8 @@ class EstadoInvalidoError(Exception): ...      # EX-01
 class PausadoPorQAError(Exception): ...        # EX-02
 class OutlineFaltanteError(Exception): ...     # EX-03
 class ContextoExcedidoError(Exception): ...    # EX-04
+class ConfiguracionInvalidaError(Exception): ...      # EX-05
+class ConfiguracionInconsistenteError(Exception): ... # EX-06
 ```
 
 Ninguna de estas se captura silenciosamente en `orchestrator/loop.py`: todas terminan la ejecución de la tanda y dejan el `manifest.json` en un estado consistente con lo que sí se alcanzó a cerrar.
@@ -211,6 +243,7 @@ Ninguna de estas se captura silenciosamente en `orchestrator/loop.py`: todas ter
 ```json
 {
   "total_capitulos": 40,
+  "capitulos_por_tanda": 5,
   "palabras_por_capitulo": 3000,
   "ventana_resumen_rodante": 3,
   "cadencia_qa": 8,
@@ -226,6 +259,35 @@ Ninguna de estas se captura silenciosamente en `orchestrator/loop.py`: todas ter
 
 La API key de OpenRouter se lee de variable de entorno (`OPENROUTER_API_KEY`), nunca del archivo de configuración versionado.
 
+### 8.1 Validación de los parámetros de dimensionamiento
+
+`config.py` valida antes de cualquier llamada al modelo (EX-05), con un modelo Pydantic:
+
+```python
+class HarnessConfig(BaseModel):
+    total_capitulos: int = Field(ge=30, le=50)        # RF-CFG-01, acotado por RF-03.1
+    capitulos_por_tanda: int | None = Field(default=None, ge=1)  # RF-CFG-02; None = sin tope
+    palabras_por_capitulo: int = Field(gt=0)          # RF-CFG-01
+    ventana_resumen_rodante: int = Field(ge=1)
+    cadencia_qa: int = Field(ge=1)
+    max_tokens_contexto_escritor: int = Field(gt=0)
+```
+
+`capitulos_por_tanda` **no** se valida contra `total_capitulos`: un tope mayor que los capítulos restantes es válido y simplemente significa "terminá la novela" (RF-CFG-02).
+
+Al reanudar, `checkpoint.py` compara `config.total_capitulos` contra la cantidad de entradas de `capitulos.json`. Si difieren y ya hay capítulos cerrados, dispara `ConfiguracionInconsistenteError` (EX-06) en vez de reanudar — cambiar el tamaño de la obra a mitad de camino invalida la escaleta.
+
+### 8.2 Interfaz de línea de comandos
+
+```bash
+python -m harness run                    # usa capitulos_por_tanda del archivo
+python -m harness run --capitulos 3      # pisa el valor del archivo (RF-CFG-03)
+python -m harness run --hasta-el-final   # ignora el tope y sigue hasta total_capitulos
+python -m harness status                 # imprime el manifiesto sin generar nada
+```
+
+Solo `capitulos_por_tanda` admite override. `total_capitulos` y `palabras_por_capitulo` no se exponen como argumentos a propósito: pasarlos por línea de comandos invitaría a cambiarlos entre tandas, que es justo lo que EX-06 e INV-04 buscan impedir.
+
 ## 9. Plan de pruebas
 
 | Nivel | Qué cubre | Cómo |
@@ -233,6 +295,8 @@ La API key de OpenRouter se lee de variable de entorno (`OPENROUTER_API_KEY`), n
 | Unitarias | Cada criterio de aceptación de la especificación funcional que sea verificable sin LLM real (validación de esquemas, append-only de continuidad, recorte de resumen rodante, cálculo de reanudación). | `pytest`, sin llamadas externas. |
 | Integración con LLM simulado | El loop completo de `ejecutar_tanda` para 3 capítulos, con un `LLMProvider` de prueba que devuelve respuestas fijas. | Verifica que `agents/escritor.py` nunca reciba una ruta de `05_manuscrito/`, y que el manifiesto quede consistente tras una interrupción simulada a mitad de tanda. |
 | Manual, con LLM real | Corrida de 8-10 capítulos reales antes de comprometerse a una tanda completa, revisando `personajes.json` y `continuidad.json` a mano. | Igual que el checklist de `harness-novela-terror.md` §7. |
+| Equivalencia de tandas (INV-06) | Que partir la generación en tandas no cambie el resultado. | Con `LLMProvider` determinista: correr 6 capítulos de una vez y, en otro directorio, correr 3 + 3. Los artefactos de estado y los `cap_*.md` deben ser idénticos byte a byte. |
+| Reanudación (RF-CFG-04, INV-07) | Que reanudar avance y nunca reescriba. | Correr una tanda de 3, anotar los `mtime` de `cap_1..3.md`, correr otra tanda de 3, verificar que esos `mtime` no cambiaron y que aparecieron `cap_4..6.md`. |
 
 ## 10. Trazabilidad requisito → componente técnico
 
@@ -243,6 +307,12 @@ La API key de OpenRouter se lee de variable de entorno (`OPENROUTER_API_KEY`), n
 | RF-06.1 (extracción de un solo capítulo) | `agents/extractor.py::extraer` — firma solo acepta `cap_n: str`, no una lista |
 | RF-06.3 (continuidad append-only) | `state/continuidad.py::aplicar_delta` — solo expone `agregar()`, sin `eliminar()` ni `modificar()` |
 | RF-07.4 (pausa ante contradicciones) | `orchestrator/checkpoint.py::pausar_por_qa`, estado `pausado_por_qa` en el manifiesto |
+| RF-CFG-01 (dimensionamiento) | `config.py::HarnessConfig` — §8.1, rangos validados con Pydantic |
+| RF-CFG-02 (tanda parcial) | `orchestrator/loop.py::ejecutar_tanda` — contador `cerrados_en_esta_tanda`, salida `tope_de_tanda` |
+| RF-CFG-03 (precedencia CLI) | `cli.py` — solo `--capitulos` pisa el archivo; ningún otro parámetro se expone |
+| RF-CFG-04 (reanudación entre tandas) | `orchestrator/checkpoint.py::detectar_punto_de_reanudacion` |
+| INV-06 (la partición en tandas no altera el estado) | El conteo de tanda vive en memoria; el manifiesto no lo registra — §5 |
+| INV-07 (no se regenera un capítulo cerrado) | El loop arranca en `ultimo_capitulo_cerrado + 1`; `guardar_capitulo` falla si el archivo ya existe |
 | EX-01 (estado inválido) | `state/repository.py` — validación Pydantic previa a cualquier escritura |
 | EX-04 (contexto excedido) | `agents/escritor.py::recortar_resumen_rodante`, nunca toca `continuidad.json` ni `personajes.json` |
 | INV-05 (QA único con acceso amplio al manuscrito) | Solo `agents/qa.py` importa `repository.leer_muestra_manuscrito`; ningún otro módulo de `agents/` lo hace |

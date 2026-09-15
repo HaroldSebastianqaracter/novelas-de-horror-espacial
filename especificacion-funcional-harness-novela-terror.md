@@ -46,6 +46,46 @@ Vocabulario cerrado — el agente implementador debe usar estos términos de for
 
 Formato fijo por requisito: descripción, entradas, salidas, reglas, criterio de aceptación (dado/cuando/entonces).
 
+Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, sino que parametrizan la ejecución completa. El resto sigue la numeración por fase (RF-00 a RF-07).
+
+### Configuración de ejecución
+
+**RF-CFG-01 — Dimensionamiento de la novela**
+- Descripción: el usuario debe poder fijar el tamaño de la obra antes de iniciar una tanda, sin tocar código.
+- Entradas: `harness.config.json`.
+- Parámetros:
+  - `total_capitulos` — cuántos capítulos tiene la novela completa. Entero, rango 30–50 (acotado por RF-03.1, que exige que el outline tenga entre 30 y 50 entradas).
+  - `palabras_por_capitulo` — longitud objetivo de cada capítulo. Entero positivo. La tolerancia de ±20% la fija RF-05.2.
+- Reglas:
+  - `total_capitulos` determina cuántas entradas genera la fase 3 y es el criterio de fin de la generación.
+  - Ambos parámetros son inmutables durante una tanda: cambiarlos con capítulos ya cerrados invalida la escaleta y las longitudes ya generadas (ver INV-04).
+- Criterio de aceptación: dado `harness.config.json` con `total_capitulos = K`, cuando termina la fase 3, entonces `capitulos.json` tiene exactamente K entradas con `num` consecutivo de 1 a K.
+
+**RF-CFG-02 — Tanda parcial: capítulos por ejecución**
+- Descripción: el usuario debe poder escribir la novela en tandas, indicando cuántos capítulos generar en una ejecución sin comprometerse a la novela entera.
+- Entradas: `harness.config.json` y, opcionalmente, un argumento de línea de comandos.
+- Parámetro: `capitulos_por_tanda` — cuántos capítulos generar en esta ejecución. Entero positivo, o ausente/nulo para "seguir hasta `total_capitulos`".
+- Reglas:
+  - El conteo es **de capítulos cerrados en esta ejecución**, no del número de capítulo. Una tanda de 5 que arranca en el capítulo 11 termina tras cerrar el 15.
+  - Al alcanzar el tope, el harness termina de forma **limpia**: no es un error ni una pausa por QA. El manifiesto queda en `en_progreso` y la siguiente ejecución reanuda donde quedó (RF-CFG-04).
+  - El tope no altera `total_capitulos` ni la escaleta: es un límite de ejecución, no de obra.
+  - Si `capitulos_por_tanda` excede los capítulos que faltan, la ejecución termina al completar la novela y el manifiesto pasa a `completo`.
+  - El corte de tanda no adelanta ni omite un corte de QA: si el último capítulo de la tanda es múltiplo de `cadencia_qa`, el QA corre antes de terminar (RF-07.1 no se ve afectado).
+- Criterio de aceptación: dado `total_capitulos = 40`, `capitulos_por_tanda = 5` y un manifiesto con `ultimo_capitulo_cerrado = 10`, cuando termina la ejecución, entonces existen `cap_11.md` … `cap_15.md`, no existe `cap_16.md`, el manifiesto indica `ultimo_capitulo_cerrado = 15` y `estado = en_progreso`.
+
+**RF-CFG-03 — Precedencia de la línea de comandos**
+- Descripción: el valor de `capitulos_por_tanda` pasado por línea de comandos tiene prioridad sobre el del archivo de configuración.
+- Regla: la precedencia aplica **solo** a `capitulos_por_tanda`. `total_capitulos`, `palabras_por_capitulo` y el resto de los parámetros se leen exclusivamente del archivo, porque cambiarlos a mitad de una novela rompe INV-04.
+- Criterio de aceptación: dado `capitulos_por_tanda = 10` en el archivo, cuando se invoca la ejecución pasando 3 por línea de comandos, entonces se cierran 3 capítulos y no 10.
+
+**RF-CFG-04 — Reanudación entre tandas**
+- Descripción: una ejecución que arranca con capítulos ya cerrados debe continuar desde el siguiente, sin regenerar ninguno.
+- Entradas: el manifiesto de ejecución.
+- Reglas:
+  - El punto de reanudación es `ultimo_capitulo_cerrado + 1`.
+  - Si el manifiesto indica que la tanda quedó pausada por QA, la ejecución no reanuda hasta que el usuario marque el reporte como resuelto (RF-07.4). El tope de `capitulos_por_tanda` no sobrescribe esa pausa.
+- Criterio de aceptación: dado un manifiesto con `ultimo_capitulo_cerrado = 15` y `estado = en_progreso`, cuando se inicia una nueva ejecución, entonces el primer capítulo generado es el 16 y ningún archivo de `05_manuscrito/` previo se sobrescribe.
+
 ### Fase 0 — Destilado de estilo
 
 **RF-00.1 — Extracción de guía de estilo**
@@ -179,6 +219,8 @@ Aplican a todo el sistema, no a una fase específica. Ningún requisito de la se
 - **INV-03**: todo hecho en `continuidad.json` lleva `cap_origen`; no existen hechos sin trazabilidad a su capítulo de origen.
 - **INV-04**: los esquemas de los artefactos de estado (sección 3 de `harness-novela-terror.md`) no cambian durante la ejecución de una tanda completa de generación.
 - **INV-05**: el agente QA es el único actor con permiso de lectura sobre más de un archivo de `05_manuscrito/` a la vez.
+- **INV-06**: `capitulos_por_tanda` no afecta el contenido de ningún artefacto de estado. Una novela generada en ocho tandas de cinco capítulos debe ser indistinguible de la misma novela generada en una tanda de cuarenta — el tope solo decide cuándo se detiene la ejecución, nunca qué se escribe.
+- **INV-07**: ningún capítulo ya cerrado se regenera. Reanudar una tanda siempre avanza; nunca reescribe.
 
 ## 7. Casos de excepción esperados
 
@@ -190,6 +232,8 @@ Comportamiento a nivel funcional — no se especifica mecanismo de implementaci�
 | **EX-02** | El corte de QA reporta al menos una contradicción (RF-07.4). | El harness pausa el avance y espera resolución humana; no reintenta ni omite el hallazgo automáticamente. |
 | **EX-03** | Falta la entrada de outline para el capítulo N, o está incompleta. | El harness no invoca al agente escritor para ese capítulo; reporta el faltante antes de gastar una generación. |
 | **EX-04** | El contexto ensamblado (RF-05.1) excede `max_tokens_contexto_escritor`. | El harness recorta primero `resumen_rodante.md`; nunca recorta `continuidad.json` ni `personajes.json`. Si tras recortar el resumen rodante a su mínimo aún excede el límite, se detiene y reporta el problema — no trunca el log de continuidad. |
+| **EX-05** | Un parámetro de RF-CFG-01 o RF-CFG-02 está fuera de rango (`total_capitulos` fuera de 30–50, `palabras_por_capitulo` ≤ 0, `capitulos_por_tanda` ≤ 0). | El harness no inicia la ejecución y reporta qué parámetro es inválido. La validación ocurre antes de cualquier llamada al modelo, para no gastar generaciones con una configuración que igual va a fallar. |
+| **EX-06** | `total_capitulos` cambió respecto del valor con el que se generó la escaleta, y ya hay capítulos cerrados. | El harness no reanuda y reporta la discrepancia. Cambiar el tamaño de la obra a mitad de camino invalida la escaleta (INV-04); resolverlo es decisión del usuario, no del harness. |
 
 ## 8. Definición de "hecho" (Definition of Done) de esta especificación
 
