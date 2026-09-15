@@ -238,16 +238,24 @@ class ConfiguracionInconsistenteError(Exception): ... # EX-06
 
 Ninguna de estas se captura silenciosamente en `orchestrator/loop.py`: todas terminan la ejecución de la tanda y dejan el `manifest.json` en un estado consistente con lo que sí se alcanzó a cerrar.
 
-## 8. Configuración extendida (`harness.config.json`)
+## 8. Configuración extendida (`config/`)
+
+La configuración vive en una **carpeta**, no en un único archivo. El inventario completo y la razón de la partición están en §11; lo que sigue es el contenido consolidado, como referencia rápida de todos los parámetros juntos.
 
 ```json
 {
   "total_capitulos": 40,
   "capitulos_por_tanda": 5,
+  "max_llamadas_por_tanda": null,
+  "registrar_uso": true,
   "palabras_por_capitulo": 3000,
+  "idioma": "es-ES",
+  "persona_narrativa": "tercera_limitada",
+  "tiempo_verbal": "pasado",
   "ventana_resumen_rodante": 3,
   "cadencia_qa": 8,
   "max_tokens_contexto_escritor": 5000,
+  "max_hechos_por_capitulo": 4,
   "proveedores": {
     "escritor":  { "provider": "openrouter", "model": "<MODELO_CAPAZ>" },
     "extractor": { "provider": "openrouter", "model": "<MODELO_ECONOMICO>" },
@@ -267,10 +275,16 @@ La API key de OpenRouter se lee de variable de entorno (`OPENROUTER_API_KEY`), n
 class HarnessConfig(BaseModel):
     total_capitulos: int = Field(ge=30, le=50)        # RF-CFG-01, acotado por RF-03.1
     capitulos_por_tanda: int | None = Field(default=None, ge=1)  # RF-CFG-02; None = sin tope
+    max_llamadas_por_tanda: int | None = Field(default=None, ge=1)  # RF-CFG-06
+    registrar_uso: bool = True                        # RF-CFG-06
     palabras_por_capitulo: int = Field(gt=0)          # RF-CFG-01
+    idioma: str                                       # RF-CFG-05
+    persona_narrativa: Literal["primera", "tercera_limitada", "tercera_omnisciente"]
+    tiempo_verbal: Literal["presente", "pasado"]
     ventana_resumen_rodante: int = Field(ge=1)
     cadencia_qa: int = Field(ge=1)
     max_tokens_contexto_escritor: int = Field(gt=0)
+    max_hechos_por_capitulo: int = Field(gt=0)        # §11.6 — acota el crecimiento del log
 ```
 
 `capitulos_por_tanda` **no** se valida contra `total_capitulos`: un tope mayor que los capítulos restantes es válido y simplemente significa "terminá la novela" (RF-CFG-02).
@@ -316,3 +330,240 @@ Solo `capitulos_por_tanda` admite override. `total_capitulos` y `palabras_por_ca
 | EX-01 (estado inválido) | `state/repository.py` — validación Pydantic previa a cualquier escritura |
 | EX-04 (contexto excedido) | `agents/escritor.py::recortar_resumen_rodante`, nunca toca `continuidad.json` ni `personajes.json` |
 | INV-05 (QA único con acceso amplio al manuscrito) | Solo `agents/qa.py` importa `repository.leer_muestra_manuscrito`; ningún otro módulo de `agents/` lo hace |
+
+## 11. Inventario de configuración
+
+Esta sección es el listado completo de lo que el harness necesita para correr. Todo parámetro que un agente implementador pudiera verse tentado de hardcodear debe estar acá.
+
+### 11.1 Estructura: `config/` es una carpeta, no un archivo
+
+La configuración se parte en archivos por responsabilidad. Un único `harness.config.json` mezcla decisiones que cambian a ritmos muy distintos: la voz narrativa se fija una vez por novela, los proveedores se tocan cuando cambia el presupuesto, y los prompts se iteran a diario.
+
+```
+config/
+├── novela.json         # RF-CFG-01, RF-CFG-05 — inmutable durante la tanda
+├── ejecucion.json      # RF-CFG-02, RF-CFG-06 — se cambia entre tandas
+├── proveedores.json    # modelos y reintentos
+└── prompts/
+    ├── escritor.md
+    ├── extractor.md
+    └── qa.md
+```
+
+Regla que justifica la partición: `novela.json` está bajo INV-04 (no cambia con capítulos cerrados) y `ejecucion.json` está explícitamente pensado para cambiar entre tandas. Tenerlos en archivos separados hace que la validación de EX-06 sea un diff de un solo archivo, y hace visible en el control de versiones cuándo alguien tocó algo que no debía.
+
+### 11.2 `novela.json` — inmutable durante la tanda
+
+| Parámetro | Tipo | Requisito | Nota |
+|---|---|---|---|
+| `total_capitulos` | int 30–50 | RF-CFG-01 | Acotado por RF-03.1 |
+| `palabras_por_capitulo` | int > 0 | RF-CFG-01 | Tolerancia ±20% (RF-05.2) |
+| `idioma` | string | RF-CFG-05 | p. ej. `es-ES` |
+| `persona_narrativa` | enum | RF-CFG-05 | `primera` \| `tercera_limitada` \| `tercera_omnisciente` |
+| `tiempo_verbal` | enum | RF-CFG-05 | `presente` \| `pasado` |
+| `ventana_resumen_rodante` | int ≥ 1 | RF-06.4 | En capítulos |
+| `cadencia_qa` | int ≥ 1 | RF-07.1 | En capítulos |
+| `max_tokens_contexto_escritor` | int > 0 | RF-05.1 | Ver §11.6 sobre el presupuesto real |
+| `max_hechos_por_capitulo` | int > 0 | §11.6 | **Parámetro nuevo**; sin él `continuidad.json` crece sin techo |
+
+### 11.3 `ejecucion.json` — se cambia entre tandas
+
+| Parámetro | Tipo | Requisito |
+|---|---|---|
+| `capitulos_por_tanda` | int > 0 o null | RF-CFG-02 |
+| `max_llamadas_por_tanda` | int > 0 o null | RF-CFG-06 |
+| `registrar_uso` | bool | RF-CFG-06 |
+
+### 11.4 `proveedores.json`
+
+| Parámetro | Nota |
+|---|---|
+| `escritor.provider` / `.model` / `.temperature` | Modelo capaz. La temperatura del escritor es el único parámetro de muestreo que importa para la prosa |
+| `extractor.provider` / `.model` / `.temperature` | Modelo económico. Temperatura baja: la tarea es estructurada |
+| `qa.provider` / `.model` / `.temperature` | **Ver §11.7**: la asignación de modelo económico a QA está en discusión |
+| `reintentos.max_intentos` / `.backoff_base_segundos` | §3.3 |
+
+Las claves de API se leen siempre de variables de entorno, nunca de estos archivos.
+
+### 11.5 `config/prompts/` — los prompts son artefactos versionados
+
+Los prompts de los tres agentes viven en archivos, no embebidos en el código Python. Razón: son lo que más se itera, y si están en el código cada ajuste de redacción es un commit de código con diff ilegible. En archivos, el diff muestra exactamente qué instrucción cambió entre una tanda y la siguiente.
+
+El manifiesto registra el hash del prompt usado por cada rol al iniciar la tanda. Si un capítulo sale mal, se puede saber con qué versión del prompt se generó.
+
+### 11.6 Parámetros ausentes detectados al dimensionar
+
+**`max_hechos_por_capitulo`.** El presupuesto de `max_tokens_contexto_escritor` se consume mayoritariamente por `continuidad.json`, que es append-only y por tanto el único componente del contexto que crece sin techo. Con 4 hechos por capítulo a ~25 tokens cada uno, el log llega a ~3.900 tokens en el capítulo 40 y el contexto total supera los 5.000 configurados. La válvula de escape de EX-04 (recortar el resumen rodante) libera unos 350 tokens: es más chica que la fuga. El esquema de `DeltaExtraccion` acepta hoy `hechos_nuevos: list[HechoContinuidad]` sin tope, así que nada limita el crecimiento salvo la esperanza de que el extractor sea conciso.
+
+Mitigación en dos partes, ambas baratas:
+1. Tope declarativo en el esquema — `Field(max_length=max_hechos_por_capitulo)`.
+2. Subir `max_tokens_contexto_escritor` a ~12.000, que sigue siendo un orden de magnitud menos que el manuscrito.
+
+### 11.7 Decisiones abiertas
+
+| Tema | Estado |
+|---|---|
+| Modelo del agente QA | La spec asigna modelo económico. Pero QA cruza ~34.000 tokens de prosa contra ~150 hechos: es razonamiento sobre contexto largo, justo donde los modelos económicos flojean. Corre 5 veces contra las 40 del escritor, así que moverlo al modelo capaz cuesta poco. **Pendiente de decidir.** |
+| `mundo.json` | La fase 4 lo inicializa (RF-04.2) pero ningún requisito lo lista como entrada del contexto del escritor (RF-05.1). O se agrega a RF-05.1 o se documenta que es solo referencia humana. **Pendiente de decidir.** |
+| Selección entre borradores | Fuera de alcance por decisión explícita (§2 de la spec funcional). Es la diferencia principal contra Re3, que genera varias continuaciones y rerankea por coherencia. Conviene dejar registrado que es una limitación conocida, no un olvido. |
+
+## 12. Gestión de contexto — los archivos como memoria
+
+El harness no tiene memoria de sesión: cada invocación de un agente nace y muere. Lo único que persiste son archivos. Esta sección clasifica cada archivo por el rol de memoria que cumple, porque de eso depende su política de actualización.
+
+### 12.1 Clasificación
+
+| Archivo | Rol de memoria | Política de escritura | Crece |
+|---|---|---|---|
+| `style_guide.md` | Larga — inmutable | Escrito una vez en fase 0 | No |
+| `tres_actos.md` | Larga — inmutable | Escrito una vez en fase 2 | No |
+| `capitulos.json` | Larga — inmutable | Escrito una vez en fase 3 (INV-04) | No |
+| `mundo.json` | Larga — inmutable | Escrito una vez en fase 4 | No |
+| `personajes.json` | Larga — mutable | Sobrescritura por personaje (RF-06.2) | Casi no |
+| `continuidad.json` | Larga — acumulativa | Append-only (RF-06.3, INV-03) | **Sí, sin techo** |
+| `recursos_usados.json` | Larga — acumulativa | Escrito por QA en cada corte (RF-07.5) | Sí, lento |
+| `resumen_rodante.md` | **Corta** | Ventana deslizante (RF-06.4) | No, por diseño |
+| `manifest.json` | Control, no memoria narrativa | Sobrescritura | No |
+| `05_manuscrito/cap_*.md` | **No es memoria** — es la salida | Append de archivos nuevos | Sí, rápido |
+
+La distinción que importa: **memoria larga** responde "qué es verdad en esta novela"; **memoria corta** responde "dónde quedó la escena". La primera no puede perder información sin producir contradicciones; la segunda está diseñada para olvidar, y ese olvido es el que mantiene plano el costo por capítulo.
+
+El manuscrito no es memoria de ningún tipo. Es el producto. Que no se relea es la decisión central del diseño, no una limitación.
+
+### 12.2 Qué entra al contexto de cada agente
+
+| Agente | Memoria larga | Memoria corta | Manuscrito |
+|---|---|---|---|
+| Escritor | style_guide, tres_actos, capitulos[N], personajes, continuidad | resumen_rodante | **Ninguno** (INV-01) |
+| Extractor | ninguna | ninguna | Solo `cap_N.md` (INV-02) |
+| QA | continuidad completo, recursos_usados | ninguna | Últimos `cadencia_qa` capítulos (INV-05) |
+
+El extractor no recibe memoria alguna a propósito: si viera el estado acumulado, tendería a repetir hechos ya registrados en vez de extraer solo lo nuevo del capítulo.
+
+### 12.3 Estructura del log de continuidad
+
+`HechoContinuidad` guarda hoy el hecho como texto libre más su capítulo de origen. Eso obliga a que la detección de contradicciones (RF-07.2) sea enteramente juicio del modelo.
+
+La literatura sobre generación de historias largas usa una estructura más rica: DOME almacena su memoria de largo plazo como cuádruplas `<sujeto, acción, objeto, capítulo>`, lo que permite agrupar hechos por reglas mecánicas antes de consultar al modelo — misma pareja sujeto/acción con distinto objeto, tripletas idénticas repetidas, cambios de estado de una misma entidad a lo largo del tiempo.
+
+Aplicado acá, `HechoContinuidad` pasaría a:
+
+```python
+class HechoContinuidad(BaseModel):
+    sujeto: str
+    accion: str
+    objeto: str
+    hecho: str          # la formulación en prosa, para el prompt del escritor
+    cap_origen: int
+    superado_por: int | None = None   # RF-07.6
+```
+
+El beneficio no es cosmético: permite que el harness **preseleccione** los hechos candidatos a contradicción con código, en vez de pedirle al modelo que compare 150 hechos contra 34.000 tokens de prosa de una sola vez. El modelo pasa de buscar a juzgar, que es donde es confiable.
+
+Coste: el extractor tiene que producir la tripleta, no solo la frase. Es una tarea estructurada más, acorde a su rol.
+
+### 12.4 Métricas computables para el corte de QA
+
+RF-07.3 (repetición estilística) depende hoy de juicio del modelo. Hay una métrica barata que no necesita LLM: **entropía de n-gramas** sobre la muestra (Ent-2 en la literatura), que mide diversidad léxica y detecta repetición mecánicamente.
+
+Conviene calcularla en cada corte y guardarla en el reporte junto a los hallazgos. Da una serie temporal: si la entropía cae corte tras corte, la prosa se está aplanando, y eso es visible antes de que un lector humano lo note.
+
+Lo mismo con la **tasa de conflicto** (hechos en contradicción sobre hechos totales): convierte "QA encontró cosas" en un número comparable entre tandas.
+
+## 13. Ruta alternativa de implementación: Claude Code
+
+La §1 decidió harness propio en Python contra API, con la razón de que una cuenta de Claude Code no es reutilizable como API para automatización. La razón sigue siendo válida para la tanda completa desatendida. Pero para las corridas de validación que pide §9 (8–10 capítulos revisados a mano), Claude Code cubre el pipeline sin escribir el harness, y con una ventaja concreta: **algunos invariantes dejan de depender del prompt y pasan a ser configuración declarativa.**
+
+### 13.1 Mapeo de los tres agentes a subagentes
+
+Un subagente de Claude Code se define en `.claude/agents/<nombre>.md`, con frontmatter YAML y el system prompt en el cuerpo. Arranca con contexto aislado: no ve la conversación principal ni los archivos que ya se leyeron.
+
+Los campos que interesan acá son `tools` (allowlist) y `disallowedTools` (denylist). Con ellos, INV-01 e INV-05 se vuelven configuración:
+
+```markdown
+---
+name: escritor
+description: Redacta el borrador de un capítulo a partir del estado persistente
+model: opus
+tools: Read, Write
+disallowedTools: Grep, Glob, Bash, WebFetch
+memory: project
+---
+```
+
+El aislamiento de contexto del subagente da INV-02 casi gratis: el extractor solo ve el prompt que se le pasa, así que no puede acceder a capítulos anteriores aunque quisiera.
+
+Correspondencia con los invariantes:
+
+| Invariante | En el harness Python | En Claude Code |
+|---|---|---|
+| INV-01 (escritor sin manuscrito) | `escritor.py` no importa `leer_manuscrito` | `tools` sin herramientas de búsqueda, y el orquestador controla qué rutas pasa |
+| INV-02 (extractor, un capítulo) | Firma `extraer(cap_n: str)` | Aislamiento de contexto del subagente |
+| INV-05 (solo QA lee varios) | Solo `qa.py` importa `leer_muestra_manuscrito` | Solo el subagente `qa` lleva `Grep`/`Glob` en su allowlist |
+
+Honestidad sobre el alcance: ni `tools` ni el aislamiento restringen **qué rutas** puede leer un agente que sí tiene `Read`. La garantía real de INV-01 sigue estando en que el orquestador no le pase rutas de `05_manuscrito/`. Es más fuerte que solo prompt, menos fuerte que la regla de importación de §2.
+
+### 13.2 Fases como skills
+
+Cada fase del pipeline es una skill en `.claude/skills/<nombre>/SKILL.md`. Las skills admiten `context: fork` para correr en subagente, `allowed-tools` para preaprobar herramientas, y sustitución de la salida de un comando en el prompt antes de que el modelo lo vea — útil para cargar el estado sin que el modelo tenga que ir a buscarlo.
+
+```
+.claude/skills/
+├── destilar-estilo/SKILL.md     # fase 0
+├── generar-premisa/SKILL.md     # fase 1
+├── generar-sinopsis/SKILL.md    # fase 2
+├── generar-escaleta/SKILL.md    # fase 3
+├── inicializar-estado/SKILL.md  # fase 4
+├── escribir-capitulo/SKILL.md   # fases 5-6, invoca los subagentes
+└── corte-qa/SKILL.md            # fase 7
+```
+
+Las que tienen efectos irreversibles (escribir un capítulo, cerrar un corte) llevan `disable-model-invocation: true`, para que solo las dispare el usuario y no el modelo por su cuenta.
+
+### 13.3 Hooks para las validaciones
+
+Un hook `PostToolUse` con matcher `Write` puede validar el JSON contra su esquema apenas se escribe, que es exactamente EX-01. A diferencia de la validación dentro del harness, esto corre aunque el agente escriba el archivo por un camino no previsto.
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      { "matcher": "Write",
+        "hooks": [{ "type": "command", "command": "scripts/validar-estado.py" }] }
+    ]
+  }
+}
+```
+
+### 13.4 Empaquetado como plugin
+
+Un plugin agrupa skills, agentes, hooks y servidores MCP en un directorio con manifiesto `.claude-plugin/plugin.json`. Si el flujo se estabiliza, empaquetarlo lo hace instalable y versionable:
+
+```
+novela-harness/
+├── .claude-plugin/plugin.json
+├── skills/          # las 7 fases
+├── agents/          # escritor, extractor, qa
+└── hooks/hooks.json # validación de esquemas
+```
+
+### 13.5 CLAUDE.md como reglas ambientales
+
+`CLAUDE.md` se carga al inicio de cada sesión, incluida la de cada subagente. Es el lugar para los invariantes que deben regir siempre: nunca pasar rutas de `05_manuscrito/` al escritor, nunca borrar hechos de `continuidad.json`, siempre validar antes de persistir.
+
+No sustituye a las restricciones de `tools` — es la capa de intención, no la de cumplimiento.
+
+### 13.6 Qué sigue faltando por esta ruta
+
+Sigue sin cubrirse lo que §1 ya anticipaba: ejecución desatendida de una tanda larga, política de reintentos con backoff, determinismo entre corridas, y auditoría automática de qué archivos leyó cada agente (RF-05.3). Para la novela completa, el harness en Python sigue siendo la respuesta.
+
+## 14. Referencias
+
+Trabajos consultados al dimensionar la memoria y el control de continuidad:
+
+- **DOME** — memoria de largo plazo como grafo temporal de cuádruplas, detección de conflictos por reglas, métricas Ent-2 y tasa de conflicto. <https://arxiv.org/html/2412.13575>
+- **Re3** — plan, generación, reranking de continuaciones y edición por consistencia factual. Origen del patrón "plan + estado inyectado" que usa este harness. <https://arxiv.org/abs/2210.06774>
+- **DOC** — control detallado del outline y desarrollo de personajes a lo largo del tiempo. <https://aclanthology.org/2023.acl-long.190.pdf>
+- **Subagentes de Claude Code** — aislamiento de contexto y restricción declarativa de herramientas. <https://code.claude.com/docs/en/sub-agents>
+- **Skills de Claude Code** — carga progresiva, `context: fork`, scripts embebidos. <https://code.claude.com/docs/en/skills>
+- **Plugins de Claude Code** — empaquetado de skills, agentes y hooks. <https://code.claude.com/docs/en/plugins>

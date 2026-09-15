@@ -86,6 +86,26 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
   - Si el manifiesto indica que la tanda quedó pausada por QA, la ejecución no reanuda hasta que el usuario marque el reporte como resuelto (RF-07.4). El tope de `capitulos_por_tanda` no sobrescribe esa pausa.
 - Criterio de aceptación: dado un manifiesto con `ultimo_capitulo_cerrado = 15` y `estado = en_progreso`, cuando se inicia una nueva ejecución, entonces el primer capítulo generado es el 16 y ningún archivo de `05_manuscrito/` previo se sobrescribe.
 
+**RF-CFG-05 — Voz narrativa**
+- Descripción: el usuario debe poder fijar idioma, persona narrativa y tiempo verbal antes de la fase 0. Son decisiones que atraviesan toda la obra y que ningún agente debe poder cambiar a mitad de camino.
+- Entradas: configuración.
+- Parámetros:
+  - `idioma` — código de idioma en el que se escribe la novela (p. ej. `es-ES`). Afecta todas las fases: la guía de estilo, la sinopsis, la escaleta y el manuscrito se producen en este idioma.
+  - `persona_narrativa` — `primera` | `tercera_limitada` | `tercera_omnisciente`.
+  - `tiempo_verbal` — `presente` | `pasado`.
+- Reglas:
+  - Los tres parámetros se inyectan en el contexto del agente escritor en cada capítulo (RF-05.1) y en el del agente QA (RF-07.1).
+  - Son inmutables durante una tanda, por la misma razón que `total_capitulos` (INV-04).
+- Criterio de aceptación: dado `persona_narrativa = tercera_limitada` y `tiempo_verbal = pasado`, cuando se audita el prompt ensamblado de cualquier capítulo, entonces contiene ambas restricciones de forma explícita; y un corte de QA que detecte un capítulo escrito en otra persona o tiempo lo reporta como hallazgo.
+
+**RF-CFG-06 — Presupuesto de ejecución**
+- Descripción: el usuario debe poder acotar cuánto está dispuesto a gastar en una tanda, para que una configuración mal calibrada no consuma la cuota entera.
+- Parámetros:
+  - `max_llamadas_por_tanda` — tope de invocaciones al modelo en una ejecución. Ausente o nulo = sin tope.
+  - `registrar_uso` — booleano. Si está activo, cada invocación registra rol, modelo, tokens de entrada y de salida.
+- Reglas: alcanzar `max_llamadas_por_tanda` termina la tanda de forma limpia, igual que `capitulos_por_tanda` (RF-CFG-02), nunca a mitad de un capítulo: el corte se evalúa solo entre capítulos, para no dejar un capítulo escrito sin su extracción.
+- Criterio de aceptación: dado `max_llamadas_por_tanda = 10` y un capítulo que consume 2 llamadas, cuando se ejecuta la tanda, entonces se cierran 5 capítulos y el manifiesto queda en `en_progreso`.
+
 ### Fase 0 — Destilado de estilo
 
 **RF-00.1 — Extracción de guía de estilo**
@@ -209,6 +229,23 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 **RF-07.4 — Pausa ante hallazgos**
 - Descripción: si el reporte contiene al menos una contradicción, el harness detiene el avance a capítulos siguientes hasta revisión humana.
 - Criterio de aceptación: dado un reporte con `tiene_contradicciones = true`, cuando el harness lo recibe, entonces no se invoca RF-05.1 para el siguiente capítulo hasta que el usuario humano marque el reporte como resuelto.
+
+**RF-07.5 — Registro de recursos narrativos**
+- Descripción: el agente QA debe **escribir** `06_qa/recursos_usados.json` al terminar cada corte, acumulando los recursos narrativos detectados en la muestra con su conteo de apariciones.
+- Entradas: la muestra del corte actual, `06_qa/recursos_usados.json` tal como quedó del corte anterior.
+- Salidas: `06_qa/recursos_usados.json` actualizado — lista de objetos con `recurso` (descripción del recurso), `veces` (entero) y `caps` (capítulos donde apareció).
+- Reglas: es el único artefacto que escribe el agente QA. Sin este requisito, RF-07.3 no tiene fuente de datos y su criterio de aceptación es inalcanzable — nada registraría los conteos contra los que comparar.
+- Criterio de aceptación: dado un primer corte de QA sobre capítulos 1–8 donde una metáfora aparece 2 veces, cuando termina el corte, entonces `recursos_usados.json` contiene esa entrada con `veces = 2`; y si reaparece una vez en el corte de 9–16, el conteo pasa a 3 y RF-07.3 la señala.
+
+**RF-07.6 — Reextracción tras corrección humana**
+- Descripción: cuando el usuario corrige capítulos a raíz de un reporte de QA, el estado persistente derivado de esos capítulos debe regenerarse antes de reanudar.
+- Entradas: la lista de capítulos que el usuario declara haber modificado al marcar el reporte como resuelto.
+- Reglas:
+  - Para cada capítulo modificado se vuelve a ejecutar la extracción (RF-06.1) sobre su texto corregido.
+  - Los hechos de `continuidad.json` cuyo `cap_origen` esté en esa lista se marcan como **superados** y se agregan los nuevos. Es la única operación que altera hechos existentes, y no los borra: los marca. `continuidad.json` sigue siendo append-only en el sentido de INV-03 — ningún registro desaparece ni pierde su trazabilidad.
+  - `personajes.json` se recalcula para los personajes afectados; `resumen_rodante.md` se regenera si alguno de los capítulos modificados cae dentro de la ventana.
+- Criterio de aceptación: dado un reporte que llevó al usuario a corregir `cap_30.md`, cuando marca el reporte como resuelto declarando ese capítulo, entonces los hechos con `cap_origen = 30` quedan marcados como superados, existen los hechos nuevos extraídos del texto corregido, y recién entonces el manifiesto vuelve a `en_progreso`.
+- Nota: sin este requisito, corregir el texto deja el log de continuidad describiendo una versión del capítulo que ya no existe, y el siguiente corte de QA volvería a reportar la misma contradicción.
 
 ## 6. Reglas globales / invariantes
 
