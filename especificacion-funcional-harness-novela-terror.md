@@ -1,6 +1,6 @@
 # Especificación Funcional — Harness Generador de Novelas de Terror
 
-**Versión:** 1.1 — historial de cambios en `git log` sobre este archivo.
+**Versión:** 1.2 — historial de cambios en `git log` sobre este archivo.
 **Documento previo:** `harness-novela-terror.md` (estructura de carpetas y esquemas) — este documento formaliza el comportamiento requerido; no repite decisiones de implementación.
 **Lector previsto:** un agente de código que implementará el harness a partir de este documento. Donde este documento sea ambiguo, el agente debe detenerse y pedir aclaración en vez de asumir.
 
@@ -40,13 +40,14 @@ Vocabulario cerrado — el agente implementador debe usar estos términos de for
 | Agente escritor | interno | Redacta el borrador de un capítulo. Sin acceso de lectura al manuscrito acumulado. |
 | Agente extractor | interno | Actualiza el estado persistente a partir de un único capítulo. Sin acceso a capítulos anteriores. |
 | Agente QA | interno | Único actor con acceso de lectura a una muestra del manuscrito completo. Corre con cadencia fija. |
-| Harness (orquestador) | interno | Ensambla contextos, invoca agentes en el orden correcto, persiste artefactos, hace cumplir las reglas globales de la sección 6. |
+| Harness (orquestador) | interno | Sesión de Claude Code que ejecuta las skills de cada fase: ensambla contextos, invoca los subagentes en el orden correcto y hace cumplir las reglas globales de la sección 6. Delega en un núcleo Python determinista, sin llamadas a modelo, la validación, el filtrado, la persistencia y el manifiesto. |
+| Frontend de entrada | interno | Formulario web local con el que el usuario escribe la idea y la configuración antes de la fase 0. No llama a ningún modelo (RF-UI). |
 
 ## 5. Requisitos funcionales
 
 Formato fijo por requisito: descripción, entradas, salidas, reglas, criterio de aceptación (dado/cuando/entonces).
 
-Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, sino que parametrizan la ejecución completa. El resto sigue la numeración por fase (RF-00 a RF-07).
+Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, sino que parametrizan la ejecución completa. Los **RF-UI-xx** especifican el frontend con el que el usuario escribe esa configuración. El resto sigue la numeración por fase (RF-00 a RF-07).
 
 ### Configuración de ejecución
 
@@ -105,6 +106,21 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
   - `registrar_uso` — booleano. Si está activo, cada invocación registra rol, modelo, tokens de entrada y de salida.
 - Reglas: alcanzar `max_llamadas_por_tanda` termina la tanda de forma limpia, igual que `capitulos_por_tanda` (RF-CFG-02), nunca a mitad de un capítulo: el corte se evalúa solo entre capítulos, para no dejar un capítulo escrito sin su extracción.
 - Criterio de aceptación: dado `max_llamadas_por_tanda = 10` y un capítulo que consume 2 llamadas, cuando se ejecuta la tanda, entonces se cierran 5 capítulos y el manifiesto queda en `en_progreso`.
+
+### Frontend de entrada
+
+**RF-UI-01 — Formulario local de requisitos**
+- Descripción: el usuario debe poder escribir la idea de la novela y todos los parámetros de configuración desde un formulario web local, sin editar JSON a mano.
+- Entradas: lo que el usuario teclea; opcionalmente, rutas locales a los ejemplos de referencia de la fase 0.
+- Salidas: `01_concepto/idea.md`, `config/novela.json`, `config/ejecucion.json`; si se indicaron ejemplos, copia de estos a `00_referencias/`.
+- Reglas:
+  - El frontend **no invoca ningún modelo ni lee el manuscrito**: su única función es producir entradas válidas. Se lanza con `python -m harness ui` y escucha solo en la máquina local (spec técnica §15).
+  - Valida con el mismo esquema de configuración que usa el harness antes de escribir. Una configuración fuera de rango se rechaza en pantalla con el motivo; nunca llega al disco.
+- Criterio de aceptación: dado un formulario completado, cuando el usuario guarda, entonces los tres archivos existen, `config/novela.json` y `config/ejecucion.json` validan contra el esquema (EX-05 no puede dispararse con archivos escritos por el frontend), e `idea.md` contiene exactamente el texto escrito.
+
+**RF-UI-02 — Bloqueo de parámetros inmutables**
+- Descripción: con capítulos ya cerrados, el formulario impide cambiar los parámetros protegidos por INV-04, igual que RF-CFG-03 lo impide por línea de comandos.
+- Criterio de aceptación: dado un manifiesto con `ultimo_capitulo_cerrado > 0`, cuando se abre el formulario, entonces los campos que escriben en `config/novela.json` aparecen deshabilitados mostrando el motivo, y la idea y los campos de `config/ejecucion.json` siguen editables.
 
 ### Fase 0 — Destilado de estilo
 

@@ -1,7 +1,7 @@
 # Especificación Técnica — Harness Generador de Novelas de Terror
 
-**Versión:** 1.1 — historial de cambios en `git log` sobre este archivo.
-**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.1 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
+**Versión:** 1.2 — historial de cambios en `git log` sobre este archivo.
+**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.2 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
 **Lector previsto:** el agente de código que implementa el harness. Toda decisión no cubierta aquí y no derivable de la especificación funcional debe tratarse como pregunta abierta, no como espacio para asumir.
 
 ## 1. Decisiones de arquitectura declaradas
@@ -10,8 +10,9 @@ Decisiones tomadas para poder avanzar, con su razón — si alguna deja de aplic
 
 | Decisión | Razón |
 |---|---|
-| Runtime: **Python 3.11+** | Ecosistema maduro para orquestación de agentes, validación de esquemas y scripts de larga duración. |
-| Acceso a LLM vía **adapter intercambiable**, empezando por OpenRouter | La cuenta de Claude Code no es reutilizable como API para automatización. OpenRouter permite arrancar en capa gratuita y migrar a un proveedor de pago (Anthropic directo u otro modelo en OpenRouter) sin rediseñar el harness. |
+| Orquestación: **Claude Code** (sesión principal + subagentes) | Indicación de la dirección del proyecto. Cada agente del pipeline es un subagente con contexto aislado y allowlist de herramientas, así que INV-01, INV-02 e INV-05 pasan de ser reglas de prompt a configuración declarativa (§13.1). |
+| Núcleo determinista: **Python 3.11+, sin llamadas a modelo** | Todo lo que debe ser reproducible y testeable sin LLM — validación de esquemas, filtrado de continuidad, aplicación de deltas, manifiesto, `resolver`, `ensamblar`, `ui` — vive en Python y lo invocan las skills y los hooks. Claude Code decide; Python hace cumplir. |
+| Acceso a modelos: **Claude Code enrutado a OpenRouter** | `ANTHROPIC_BASE_URL` apunta a OpenRouter con una credencial de OpenRouter; la suscripción de claude.ai no interviene y no hay adapter propio (§3). Modelo por rol mediante alias de subagente. |
 | **Modelos distintos por rol** | Escritor y QA usan el modelo capaz; el extractor, el económico. El escritor por calidad de prosa. QA porque cruza ~34.000 tokens de prosa contra el log completo de hechos: es razonamiento sobre contexto largo, justo donde los modelos económicos flojean, y un falso negativo suyo es el peor fallo del sistema — una contradicción no detectada sigue viva y el escritor construye encima. El extractor sí es una tarea mecánica (un capítulo → JSON) cuyo error lo atrapa la validación de esquema. Detalle de costes en §11.7. |
 | **Esquemas formales con Pydantic** | Valida cada artefacto de estado antes de persistirlo; permite rechazar y reintentar cuando el LLM produce JSON inválido (EX-01). |
 | **Checkpointing/reanudación** | Los artefactos ya se persisten en disco por capítulo (ver `harness-novela-terror.md`); el harness debe poder detectar dónde quedó una tanda interrumpida y continuar sin repetir capítulos cerrados. |
@@ -27,11 +28,8 @@ harness/
 │   ├── outline.py             # EntradaOutline, Outline
 │   ├── qa.py                  # Hallazgo, ReporteQA
 │   └── deltas.py               # DeltaExtraccion
-├── llm/
-│   ├── base.py                # interfaz LLMProvider (abstracta)
-│   ├── openrouter.py           # implementación OpenRouter
-│   ├── anthropic_directo.py    # implementación futura, mismo contrato
-│   └── roles.py                 # mapa rol → (provider, modelo), leído de config
+│   (no hay capa llm/: el acceso a modelos es el de Claude Code enrutado a OpenRouter — §3;
+│    los agentes son subagentes en .claude/agents/ y las fases skills en .claude/skills/ — §13)
 ├── agents/
 │   ├── escritor.py             # RF-05.1, RF-05.2
 │   ├── extractor.py            # RF-06.1
@@ -44,53 +42,58 @@ harness/
 ├── orchestrator/
 │   ├── loop.py                 # loop principal fases 5-7
 │   └── checkpoint.py           # detecta último capítulo cerrado, permite reanudar
-└── cli.py                      # punto de entrada: `python -m harness run`
+└── cli.py                      # status · resolver · ensamblar · ui — la generación la dispara la skill /escribir-tanda (§13.2)
 ```
 
 Regla de dependencia que el agente implementador debe respetar: `agents/escritor.py` **no importa** `state.repository.leer_manuscrito` bajo ninguna firma — es la forma de hacer cumplir INV-01 (el escritor nunca lee capítulos cerrados) a nivel de código, no solo de prompt.
 
-## 3. Capa de acceso a LLM
+## 3. Acceso a modelos — Claude Code enrutado a OpenRouter
 
-### 3.1 Interfaz (`llm/base.py`)
+No hay capa `llm/` en Python. Los agentes son subagentes de Claude Code (§13.1) y usan la capa de modelo de Claude Code. Lo que se configura es **a dónde** manda Claude Code sus peticiones y **qué modelo** responde a cada alias.
 
-```python
-class LLMProvider(ABC):
-    @abstractmethod
-    def generate(self, *, system: str, prompt: str, model: str,
-                 max_tokens: int, temperature: float = 0.7) -> str:
-        """Devuelve el texto generado. Lanza RateLimitError o ProviderError."""
+### 3.1 Enrutamiento
 
-class RateLimitError(Exception): ...
-class ProviderError(Exception): ...
+Claude Code habla el formato Anthropic Messages (`/v1/messages`) con el host de `ANTHROPIC_BASE_URL`. OpenRouter expone ese formato directamente (lo llama "Anthropic Skin"), así que no hace falta proxy ni traductor:
+
+```bash
+export ANTHROPIC_BASE_URL="https://openrouter.ai/api"
+export ANTHROPIC_AUTH_TOKEN="TU_CLAVE_OPENROUTER_AQUI"
+export ANTHROPIC_API_KEY=""     # vacío a propósito: que ninguna clave de Anthropic pise al token
 ```
 
-Todo agente (`escritor.py`, `extractor.py`, `qa.py`) depende de `LLMProvider`, nunca de un cliente HTTP concreto — así cambiar de OpenRouter a Anthropic directo es un cambio de configuración, no de código.
+Con la credencial activa, la suscripción de claude.ai **no se usa**: cada token se factura a la cuenta de OpenRouter. Es exactamente el efecto buscado — Claude Code como orquestador, OpenRouter como proveedor.
 
-### 3.2 Selección de modelo por rol (`llm/roles.py`)
+Las mismas variables van en el bloque `env` de `.claude/settings.json` del proyecto, **salvo la credencial**, que nunca se versiona: vive en el entorno de la máquina.
 
-Se resuelve desde `config/proveedores.json` (§11.4), no está hardcodeado:
+### 3.2 Modelo por rol
 
-```json
-"proveedores": {
-  "escritor":  { "provider": "openrouter", "model": "<MODELO_CAPAZ>",     "temperature": 0.8 },
-  "extractor": { "provider": "openrouter", "model": "<MODELO_ECONOMICO>", "temperature": 0.1 },
-  "qa":        { "provider": "openrouter", "model": "<MODELO_CAPAZ>",     "temperature": 0.2 }
-}
-```
+Cada subagente declara un alias en su frontmatter (`model: opus` | `sonnet` | `haiku`). Los alias se resuelven a IDs de OpenRouter con variables de entorno:
 
-### 3.3 Política de reintentos
-
-Dado que la capa gratuita de OpenRouter tiene rate limits agresivos, todo llamado LLM pasa por una política de reintento con backoff exponencial:
-
-| Tipo de fallo | Reintentos | Backoff | Acción tras agotar reintentos |
+| Rol | Frontmatter | Variable que lo resuelve | Tipo de modelo |
 |---|---|---|---|
-| `RateLimitError` | hasta `reintentos.max_intentos` (config) | `backoff_base_segundos * 2^intento` | Aborta el capítulo actual, deja checkpoint en el capítulo previo (no avanza). |
-| JSON inválido del extractor/QA | hasta `reintentos.max_intentos`, reenviando el error de validación al modelo como corrección | fijo, 1s | Aborta y dispara EX-01. |
-| `ProviderError` (5xx, timeout) | hasta `reintentos.max_intentos` | igual que RateLimitError | Aborta y reporta al usuario, sin marcar el capítulo como cerrado. |
+| Escritor | `model: opus` | `ANTHROPIC_DEFAULT_OPUS_MODEL` | capaz |
+| QA | `model: opus` | la misma | capaz (§1, §11.7) |
+| Extractor | `model: haiku` | `ANTHROPIC_DEFAULT_HAIKU_MODEL` | económico |
+| Sesión principal (orquestador) | — | `ANTHROPIC_DEFAULT_SONNET_MODEL` | intermedio: decide, no escribe prosa |
 
-### 3.4 Conteo de tokens para RF-05.1
+Los IDs concretos se eligen en el momento de la corrida según el catálogo de OpenRouter, se documentan en `config/proveedores.json` (§11.4) y quedan registrados en el manifiesto (§5) para saber con qué se generó cada capítulo. El formato de ID es `anthropic/claude-<nombre>`; el prefijo `~` denota alias de OpenRouter y el sufijo `[1m]` solicita ventana de 1M tokens.
 
-El criterio de aceptación de RF-05.1 exige no exceder `max_tokens_contexto_escritor`. Como el conteo exacto depende del tokenizador de cada proveedor, se usa una estimación (`tiktoken` como aproximación conservadora, +15% de margen) — se documenta como aproximación, no como conteo exacto, para no dar falsa precisión.
+`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` hace que el selector `/model` liste lo que la clave de OpenRouter puede usar; sirve para elegir IDs sin salir de Claude Code.
+
+### 3.3 Modelos que no son Claude
+
+OpenRouter advierte que Claude Code está optimizado para modelos Anthropic y "puede no funcionar correctamente con otros proveedores"; Anthropic declara ese uso como no soportado. Regla del proyecto:
+
+- **Escritor y QA: siempre Claude vía OpenRouter.** Son los roles donde un fallo silencioso cuesta caro y donde importan las capacidades que otros modelos no exponen igual (thinking, tool use nativo, caché).
+- **Extractor: se permite probar un modelo no-Claude más barato.** Su tarea es mecánica y su salida la valida Pydantic (EX-01), así que un fallo es visible, no silencioso. Si aparecen errores `400` por campos que el modelo no acepta, `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1` desactiva las capacidades pre-release que Claude Code envía; si persisten, se vuelve a Claude. Es una optimización a evaluar en la corrida de validación de §9, no un punto de partida.
+
+### 3.4 Reintentos
+
+Claude Code ya reintenta por su cuenta rate limits y errores de red del proveedor. Lo que queda del lado del harness es lo que Claude Code no puede saber: un delta que no valida contra el esquema se **reintenta reenviando el error de validación al subagente extractor**, hasta `reintentos.max_intentos` (§11.4), y luego dispara EX-01. La capa gratuita de OpenRouter tiene límites agresivos; `max_llamadas_por_tanda` (RF-CFG-06) es la protección del lado del harness para que una tanda mal calibrada no agote la cuota.
+
+### 3.5 Conteo de tokens para RF-05.1
+
+El criterio de aceptación de RF-05.1 exige no exceder `max_tokens_contexto_escritor`. El helper Python de ensamblado usa una estimación conservadora (`tiktoken` +15% de margen), documentada como aproximación y no como conteo exacto, para no dar falsa precisión.
 
 ## 4. Esquemas de datos (Pydantic)
 
@@ -173,7 +176,7 @@ El manifiesto **no** registra nada sobre la tanda en curso (ni el tope ni cuánt
 
 ## 6. Orquestador — mapeo del loop a módulos
 
-Pseudocódigo de `orchestrator/loop.py`, con cada paso anotado al requisito funcional que implementa:
+Pseudocódigo del loop. Lo ejecuta la skill `/escribir-tanda` (§13.2), que llama a los helpers deterministas de `orchestrator/loop.py` para todo lo que no sea generación. Las tres llamadas a agentes — `escritor.generar_capitulo`, `extractor.extraer`, `qa.ejecutar_corte` — son **invocaciones de subagente**, no llamadas HTTP: Python ensambla el contexto y parsea la respuesta; Claude Code hace la llamada al modelo (§3). Cada paso anotado al requisito funcional que implementa:
 
 ```python
 def ejecutar_tanda(config: HarnessConfig, capitulos_por_tanda: int | None = None):
@@ -308,9 +311,9 @@ Al reanudar, `checkpoint.py` compara `config.total_capitulos` contra la cantidad
 ### 8.2 Interfaz de línea de comandos
 
 ```bash
-python -m harness run                    # usa capitulos_por_tanda del archivo
-python -m harness run --capitulos 3      # pisa el valor del archivo (RF-CFG-03)
-python -m harness run --hasta-el-final   # ignora el tope y sigue hasta total_capitulos
+/escribir-tanda                          # skill de Claude Code (§13.2): usa capitulos_por_tanda del archivo
+/escribir-tanda 3                        # pisa el valor del archivo (RF-CFG-03)
+/escribir-tanda --hasta-el-final         # ignora el tope y sigue hasta total_capitulos
 python -m harness status                 # imprime el manifiesto sin generar nada
 python -m harness resolver --reporte qa_cap_16 --capitulos 14,15
                                          # RF-07.4 + RF-07.6: marca el reporte resuelto
@@ -331,9 +334,9 @@ Solo `capitulos_por_tanda` admite override. `total_capitulos` y `palabras_por_ca
 | Nivel | Qué cubre | Cómo |
 |---|---|---|
 | Unitarias | Cada criterio de aceptación de la especificación funcional que sea verificable sin LLM real (validación de esquemas, append-only de continuidad, recorte de resumen rodante, cálculo de reanudación). | `pytest`, sin llamadas externas. |
-| Integración con LLM simulado | El loop completo de `ejecutar_tanda` para 3 capítulos, con un `LLMProvider` de prueba que devuelve respuestas fijas. | Verifica que `agents/escritor.py` nunca reciba una ruta de `05_manuscrito/`, y que el manifiesto quede consistente tras una interrupción simulada a mitad de tanda. |
+| Integración con agentes simulados | El loop completo de `ejecutar_tanda` para 3 capítulos, con las tres invocaciones de subagente sustituidas por dobles que devuelven respuestas fijas. | Verifica que `agents/escritor.py` nunca reciba una ruta de `05_manuscrito/`, y que el manifiesto quede consistente tras una interrupción simulada a mitad de tanda. |
 | Manual, con LLM real | Corrida de 8-10 capítulos reales antes de comprometerse a una tanda completa, revisando `personajes.json` y `continuidad.json` a mano. | Igual que el checklist de `harness-novela-terror.md` §7. |
-| Equivalencia de tandas (INV-06) | Que partir la generación en tandas no cambie el resultado. | Con `LLMProvider` determinista: correr 6 capítulos de una vez y, en otro directorio, correr 3 + 3. Los artefactos de estado y los `cap_*.md` deben ser idénticos byte a byte. |
+| Equivalencia de tandas (INV-06) | Que partir la generación en tandas no cambie el resultado. | Con los dobles de subagente deterministas: correr 6 capítulos de una vez y, en otro directorio, correr 3 + 3. Los artefactos de estado y los `cap_*.md` deben ser idénticos byte a byte. |
 | Reanudación (RF-CFG-04, INV-07) | Que reanudar avance y nunca reescriba. | Correr una tanda de 3, anotar los `mtime` de `cap_1..3.md`, correr otra tanda de 3, verificar que esos `mtime` no cambiaron y que aparecieron `cap_4..6.md`. |
 | **Calidad de atribución de sujeto** (RF-06.1) | Que el filtrado de RF-05.1 se apoye en datos confiables. **Es el criterio que decide si el diseño de §12.3 se sostiene.** | Sobre los 8-10 capítulos de la corrida manual: revisar a mano cada hecho de `continuidad.json` y contar cuántos tienen el `sujeto` correcto. Medir también la proporción de `sujeto_validado = false`. |
 | Cobertura del filtro (RF-05.1) | Que filtrar no omita hechos relevantes. | Para cada capítulo de la corrida manual, comparar los hechos inyectados contra el log completo y revisar si algún hecho excluido era pertinente a lo que el capítulo terminó narrando. |
@@ -344,7 +347,7 @@ Criterio de decisión para las dos filas nuevas: si la atribución de sujeto aci
 
 | Requisito funcional | Componente técnico |
 |---|---|
-| RF-05.1 (ensamblado de contexto) | `agents/escritor.py::ensamblar_contexto`, `llm/roles.py` |
+| RF-05.1 (ensamblado de contexto) | `agents/escritor.py::ensamblar_contexto` (helper determinista, único punto que decide qué rutas entran) + subagente `.claude/agents/escritor.md` sin herramienta `Read` |
 | RF-05.3 (restricción de acceso del escritor) | Regla de dependencias §2 — `escritor.py` no importa lectura de manuscrito |
 | RF-06.1 (extracción de un solo capítulo) | `agents/extractor.py::extraer` — firma solo acepta `cap_n: str`, no una lista |
 | RF-06.3 (continuidad append-only) | `state/continuidad.py::aplicar_delta` — solo expone `agregar()` y `marcar_superado()`, sin `eliminar()` ni `modificar()` |
@@ -553,9 +556,9 @@ Conviene calcularla en cada corte y guardarla en el reporte junto a los hallazgo
 
 Lo mismo con la **tasa de conflicto** (hechos en contradicción sobre hechos totales): convierte "QA encontró cosas" en un número comparable entre tandas.
 
-## 13. Ruta alternativa de implementación: Claude Code
+## 13. Ruta de implementación principal: Claude Code
 
-La §1 decidió harness propio en Python contra API, con la razón de que una cuenta de Claude Code no es reutilizable como API para automatización. La razón sigue siendo válida para la tanda completa desatendida. Pero para las corridas de validación que pide §9 (8–10 capítulos revisados a mano), Claude Code cubre el pipeline sin escribir el harness, y con una ventaja concreta: **algunos invariantes dejan de depender del prompt y pasan a ser configuración declarativa.**
+Claude Code es el orquestador del pipeline, por indicación de la dirección del proyecto. Los tres agentes son subagentes, las fases son skills, las validaciones son hooks, y el acceso a modelos es el de Claude Code enrutado a OpenRouter (§3). La ventaja no es solo ahorrarse un harness completo: **algunos invariantes dejan de depender del prompt y pasan a ser configuración declarativa.** El núcleo Python de §2 existe para cubrir con código lo que esta ruta no cubre sola (§13.6).
 
 ### 13.1 Mapeo de los tres agentes a subagentes
 
@@ -568,11 +571,13 @@ Los campos que interesan acá son `tools` (allowlist) y `disallowedTools` (denyl
 name: escritor
 description: Redacta el borrador de un capítulo a partir del estado persistente
 model: opus
-tools: Read, Write
-disallowedTools: Grep, Glob, Bash, WebFetch
+tools: Write
+disallowedTools: Read, Grep, Glob, Bash, WebFetch
 memory: project
 ---
 ```
+
+El escritor **no tiene `Read`**: el helper Python de RF-05.1 ensambla el contexto completo y se lo entrega en el prompt de invocación. Así INV-01 no depende de que al modelo "no se le ocurra" abrir `05_manuscrito/` — no tiene con qué. Solo escribe `cap_N.md`.
 
 El aislamiento de contexto del subagente da INV-02 casi gratis: el extractor solo ve el prompt que se le pasa, así que no puede acceder a capítulos anteriores aunque quisiera.
 
@@ -580,11 +585,11 @@ Correspondencia con los invariantes:
 
 | Invariante | En el harness Python | En Claude Code |
 |---|---|---|
-| INV-01 (escritor sin manuscrito) | `escritor.py` no importa `leer_manuscrito` | `tools` sin herramientas de búsqueda, y el orquestador controla qué rutas pasa |
+| INV-01 (escritor sin manuscrito) | `escritor.py` no importa `leer_manuscrito` | El subagente no tiene `Read`; el único que arma su contexto es el helper Python |
 | INV-02 (extractor, un capítulo) | Firma `extraer(cap_n: str)` | Aislamiento de contexto del subagente |
 | INV-05 (solo QA lee varios) | Solo `qa.py` importa `leer_muestra_manuscrito` | Solo el subagente `qa` lleva `Grep`/`Glob` en su allowlist |
 
-Honestidad sobre el alcance: ni `tools` ni el aislamiento restringen **qué rutas** puede leer un agente que sí tiene `Read`. La garantía real de INV-01 sigue estando en que el orquestador no le pase rutas de `05_manuscrito/`. Es más fuerte que solo prompt, menos fuerte que la regla de importación de §2.
+Honestidad sobre el alcance: `tools` no restringe **qué rutas** puede leer un agente que sí tiene `Read`. Por eso el escritor no lo tiene, y por eso el extractor y QA, que sí lo necesitan, reciben del helper Python la lista exacta de rutas permitidas en su prompt. La garantía queda repartida: la allowlist impide la herramienta, y el helper decide las rutas — dos capas, ninguna de las dos es "que el prompt lo pida".
 
 ### 13.2 Fases como skills
 
@@ -597,7 +602,7 @@ Cada fase del pipeline es una skill en `.claude/skills/<nombre>/SKILL.md`. Las s
 ├── generar-sinopsis/SKILL.md    # fase 2
 ├── generar-escaleta/SKILL.md    # fase 3
 ├── inicializar-estado/SKILL.md  # fase 4
-├── escribir-capitulo/SKILL.md   # fases 5-6, invoca los subagentes
+├── escribir-tanda/SKILL.md      # fases 5-7: loop de N capítulos (RF-CFG-02), invoca los subagentes
 └── corte-qa/SKILL.md            # fase 7
 ```
 
@@ -636,9 +641,15 @@ novela-harness/
 
 No sustituye a las restricciones de `tools` — es la capa de intención, no la de cumplimiento.
 
-### 13.6 Qué sigue faltando por esta ruta
+### 13.6 Límites conocidos de esta ruta y cómo se compensan
 
-Sigue sin cubrirse lo que §1 ya anticipaba: ejecución desatendida de una tanda larga, política de reintentos con backoff, determinismo entre corridas, y auditoría automática de qué archivos leyó cada agente (RF-05.3). Para la novela completa, el harness en Python sigue siendo la respuesta.
+| Límite | Compensación |
+|---|---|
+| Ejecución desatendida de una tanda larga: una sesión de Claude Code es interactiva | RF-CFG-02: la novela se escribe en tandas cortas (`/escribir-tanda 5`), cada una cabe en una sesión y el manifiesto reanuda la siguiente |
+| Reintentos con backoff propios | Claude Code ya reintenta rate limits y red; el único reintento del harness es el delta inválido (§3.4) |
+| Determinismo entre corridas | Todo lo que no es generación es Python puro y se prueba con `pytest` sin modelo (§9); la generación nunca fue determinista en ninguna ruta |
+| Auditoría de qué archivos leyó cada agente (RF-05.3) | Allowlist de `tools` por subagente + el helper Python es el **único** que ensambla el contexto del escritor, así que qué rutas entran es código, no criterio del modelo |
+| `tools` no restringe rutas dentro de `Read` | El escritor no tiene `Read`: recibe el contexto ya ensamblado en el prompt (§13.1). Sin herramienta de lectura, INV-01 no depende de que "no se le ocurra" leer |
 
 ## 14. Referencias
 
@@ -650,3 +661,29 @@ Trabajos consultados al dimensionar la memoria y el control de continuidad:
 - **Subagentes de Claude Code** — aislamiento de contexto y restricción declarativa de herramientas. <https://code.claude.com/docs/en/sub-agents>
 - **Skills de Claude Code** — carga progresiva, `context: fork`, scripts embebidos. <https://code.claude.com/docs/en/skills>
 - **Plugins de Claude Code** — empaquetado de skills, agentes y hooks. <https://code.claude.com/docs/en/plugins>
+
+## 15. Frontend de entrada de requisitos (`python -m harness ui`)
+
+Formulario web local para escribir lo que el modelo necesita saber antes de la fase 0. Implementa RF-UI-01 y RF-UI-02 de la spec funcional. **Solo entrada**: no llama a ningún modelo, no muestra progreso, no lee el manuscrito. Su única salida son archivos.
+
+### 15.1 Qué recoge y qué escribe
+
+| Sección del formulario | Requisito | Escribe en |
+|---|---|---|
+| Idea de la novela, texto libre | RF-01.1 | `01_concepto/idea.md` |
+| Voz narrativa: `idioma`, `persona_narrativa`, `tiempo_verbal` | RF-CFG-05 | `config/novela.json` |
+| Dimensionamiento: `total_capitulos`, `palabras_por_capitulo`, `ventana_resumen_rodante`, `cadencia_qa`, `max_tokens_contexto_escritor`, `max_hechos_por_capitulo` | RF-CFG-01, §11.2 | `config/novela.json` |
+| Ejecución: `capitulos_por_tanda`, `max_llamadas_por_tanda`, `registrar_uso` | RF-CFG-02, RF-CFG-06 | `config/ejecucion.json` |
+| Rutas locales a los ejemplos de referencia | RF-00.2 | copia a `00_referencias/` |
+
+### 15.2 Reglas de implementación
+
+- Valida con el mismo `HarnessConfig` de §8.1 **antes** de escribir. El formulario no puede producir una configuración que el harness rechazaría: EX-05 es imposible sobre archivos escritos por esta pantalla.
+- Si el manifiesto tiene `ultimo_capitulo_cerrado > 0`, los campos de `novela.json` aparecen **deshabilitados con el motivo** (INV-04, EX-06). Solo la idea y `ejecucion.json` siguen editables. Es la misma regla que RF-CFG-03 aplica a la línea de comandos, llevada a la interfaz.
+- Solo biblioteca estándar: `http.server` sirviendo una página HTML con el formulario y un endpoint `POST /guardar`. Sin dependencias nuevas, sin paso de build.
+- Escucha únicamente en `127.0.0.1`. No hay autenticación porque no hay red.
+- Al guardar, muestra la ruta de cada archivo escrito y el comando siguiente sugerido (`/destilar-estilo` si `00_referencias/` tiene contenido, o `/generar-premisa` si no).
+
+### 15.3 Fuera de alcance de esta versión
+
+Ver el progreso de la tanda, leer capítulos cerrados, resolver reportes de QA. Todo eso existe en la línea de comandos (§8.2) y es el candidato natural a una segunda versión de esta pantalla, cuando la primera novela completa muestre qué hace falta mirar.
