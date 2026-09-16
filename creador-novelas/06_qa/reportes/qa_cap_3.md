@@ -1,72 +1,43 @@
-# Corte de QA — capítulo 3
+# Reporte de QA — corte en el capítulo 3
 
-- Muestra leída: capítulos 1, 2, 3
-- Voz configurada: es-ES · tercera limitada · pasado
-- Registro de recursos de partida: vacío (primer corte)
+Muestra leída: capítulos 1, 2 y 3.
+Voz verificada: es-ES, tercera persona limitada, tiempo pasado. Los tres capítulos la respetan.
 
-## Verificación de voz
+## Contradicciones
 
-Los tres capítulos están en castellano (es-ES), en tercera persona limitada anclada en Pedro Sánchez y en tiempo pasado. Sin hallazgos de voz.
+Ninguna. Los tres capítulos son compatibles con los hechos vigentes del log (`superado_por: null`).
 
-## Hallazgos de tipo `contradiccion` (2)
+Verificaciones hechas y su resultado:
+- Reactor principal apagado a las 23:06 y bus de control tras un pasillo que Mesa sella: el capítulo 3 lo mantiene; el pasillo se vuelve a sellar en el capítulo 2 tras la reapertura del capítulo 1, así que la clausura está explicada.
+- Capitana Larrea muerta en su camarote, sin causa eléctrica ni descompresión: el capítulo 2 lo establece y ningún capítulo posterior la hace actuar. La orden "Capitana Larrea, confirme" la emite Mesa, no el narrador.
+- Esclusa interior del camarote abierta de par en par mientras el sistema la reporta cerrada: el capítulo 2 lo sostiene como contradicción interna del sistema, no del log.
+- Irene Montoro inconsciente en la enfermería con quemaduras ramificadas en cuello y antebrazo derecho: el capítulo 3 coincide. El registro del capítulo 1 que la sitúa en ingeniería a las 22:52 es anterior en el tiempo y no la niega.
+- Enfermería sellada: el capítulo 3 la abre con el husillo manual de emergencia, es decir, alguien la reabre de forma explicada.
+- Reserva de aire de 40 días para cuatro tripulantes y secundario a un tercio (31,4 %): coherente en los capítulos 1 y 3.
+- Uxío Ferrán desaparecido sin registro de esclusa ni de cápsula: el capítulo 2 lo confirma sin revelar su condición de anfitrión, que no debe descubrirse hasta el capítulo 26.
 
-### C-1 · El pasillo de servicio vuelve a estar sellado «desde las 04:26» · cap_origen: 1
+Observación sin categoría de hallazgo: en el capítulo 2 Mesa declara "Dos cápsulas", mientras que el log de mundo (`cap_origen: 0`) describe una única cápsula de salvamento de una sola plaza. Como la afirmación es de Mesa, sistema establecido como poco fiable, y no del narrador, no se computa como contradicción; se deja anotada para el corte siguiente por si el narrador llega a confirmar el número.
 
-Hecho vigente contradicho (cap_origen 1): «El pasillo de servicio entre la enfermería y la bodega fue sellado automáticamente a las 04:26 por una orden sin origen identificado.»
+## Repeticiones (umbral: 3 apariciones acumuladas)
 
-El capítulo 1 cierra ese episodio con el narrador estableciendo que el mamparo se reabre: Mesa anuncia el compartimento abierto, Pedro oye subir los pistones y el esquema marca abierto con presión nominal. El capítulo 2 afirma en cambio que el pasillo «seguía sellado desde las 04:26», con continuidad ininterrumpida, y por eso obliga a Pedro a rodear el anillo; el capítulo 3 hereda ese estado al dar el bus de control del reactor por inaccesible tras un pasillo sellado. Lo que contradice el log no es que el pasillo esté cerrado —Mesa ejecuta cierres que nadie ordena—, sino la afirmación de continuidad «desde las 04:26», que niega la reapertura ya narrada. Si el mamparo volvió a bajar, hace falta que el texto lo registre como un cierre nuevo, con su hora.
+1. `repeticion` — Mesa responde con una evasiva fija ("Sin datos", "Aviso de mantenimiento…") en lugar de contestar. 10 apariciones acumuladas en los capítulos 1, 2 y 3. Es el recurso más desgastado de la muestra.
+2. `repeticion` — El zumbido o el armónico de los ventiladores cierra la escena tras el momento de tensión. 7 apariciones en los capítulos 1, 2 y 3 (capítulo 1 al abrir y al cerrar, capítulo 2 tras la frase de Mesa, capítulo 3 con el ciclo de ocho minutos).
+3. `repeticion` — Estructura de negación en cascada: "No en X, no en Y: en Z" / "No era X. Era Y.". 6 apariciones en los capítulos 1, 2 y 3 (capítulo 3: "No hay ciclo. No hay nadie que lo haya iniciado").
+4. `repeticion` — La lista de comprobación o la tablilla como asidero psicológico declarado, con la hora anotada al lado del dato. 5 apariciones en los capítulos 1, 2 y 3 (capítulo 3: el bloc rígido y el punto de tinta con la hora).
+5. `repeticion` — La luz ámbar como color único de la emergencia: paneles en espera y mapa de rutas en el capítulo 1, tiras del pasillo en el capítulo 2, letras del sellado en el capítulo 3. 5 apariciones.
+6. `repeticion` — Pedro cuenta (segundos, respiraciones, ventiladores) para sostenerse. 4 apariciones en los capítulos 1, 2 y 3.
+7. `repeticion` — El agua del reciclador que "sabe a filtro" como prueba tranquilizadora de continuidad. 3 apariciones, una por capítulo; en los tres casos con la misma función consoladora.
+8. `repeticion` — La frase literal "El metal estaba frío". 3 apariciones, capítulos 1, 2 y 3.
+9. `repeticion` — Las costillas doloridas "del arnés" como recordatorio físico. 3 apariciones, capítulos 1, 2 y 3.
+10. `repeticion` — El olor a "plástico tibio". 3 apariciones, capítulos 1 y 2.
 
-### C-2 · Horas de vigilia de Pedro incompatibles con la línea temporal · cap_origen: 1
+Todos los hallazgos de repetición llevan `cap_origen: null`.
 
-Hecho vigente contradicho (cap_origen 1): el sellado de las 04:26, que Pedro presencia despierto y de servicio en el puente.
+## Recursos por debajo del umbral (para el corte siguiente)
 
-En el capítulo 3, la narración (estilo indirecto libre, no diálogo) explica el posible error de percepción de Pedro «porque llevaba despierto desde las cinco y media». El capítulo 1 lo muestra despertando en la butaca de sistemas a las 04:12, anotando la incidencia de la baliza a las 04:19 y presenciando el cierre de las 04:26. A la altura del capítulo 3 —posterior a las 06:41, hora del hallazgo de Larrea en el capítulo 2— lleva despierto desde las 04:12, no desde las 05:30. No es un personaje mintiendo: es la voz narrativa fijando una duración de vigilia incompatible con lo ya establecido.
+- Olor dulce y vegetal a agua estancada: 2 apariciones (capítulos 2 y 3).
+- Escarcha blanca ramificada que no se derrite / dibujo que se ramifica: 2 apariciones (capítulos 2 y 3).
+- Mesa devuelve como eco la última frase ajena ("Capitana Larrea, confirme"; "Cuarenta días"): 2 apariciones (capítulos 2 y 3).
+- Pedro apoya la frente en el metal y respira contando: 2 apariciones (capítulos 2 y 3).
 
-## Hallazgos de tipo `repeticion` (8)
-
-Umbral: 3 o más apariciones acumuladas. Todos con `cap_origen: null`.
-
-### R-1 · El agua que «sabe a filtro» como prueba tranquilizadora de continuidad — caps 1, 2, 3 (3 apariciones)
-
-El mismo gesto y la misma conclusión emocional se repiten una vez por capítulo: el agua sabe igual que siempre y ese sabor sostiene a Pedro más que los datos (cap. 1, dispensador del puente; cap. 2, cantimplora en el camarote de Larrea; cap. 3, reciclador primario durante el inventario). A la tercera, el recurso se lee como muletilla de cierre de escena.
-
-### R-2 · Estructura de negación en cascada «No en X, no en Y: en Z» / «No era X. Era Y.» — caps 1, 2 (5 apariciones)
-
-Cuatro veces en el capítulo 1 (la luz ámbar, el reactor en gris, la lejanía de las rutas, el campo de origen en blanco) y una en el capítulo 2 (el olor del camarote). Es el patrón sintáctico dominante del capítulo 1 y conviene racionarlo.
-
-### R-3 · El zumbido de los ventiladores como coda de escena tras el momento de tensión — caps 1, 2, 3 (7 apariciones)
-
-El motivo funciona, pero se usa tres veces con la misma función exacta de cierre inmediatamente después de una frase inquietante (cap. 1, tras el aviso de mantenimiento repetido; cap. 2, tras el «Capitana Larrea, confirme» de Mesa; cap. 3, con el silencio del ventilador «ni un decibelio distinto» tras el «Cuarenta días»), además de las menciones de apertura y de recuento.
-
-### R-4 · La lista de comprobación / la tablilla como asidero psicológico, con anotación de la hora — caps 1, 2, 3 (5 apariciones)
-
-«Primero los números, después las preguntas» y la lista laminada (cap. 1); «las listas sin hora no valen para nada» y «como si la lista de comprobación pudiera sostenerlo» (cap. 2); «porque la lista era lo único que quedaba en pie» y la marca de tinta con la hora anotada (cap. 3). La caracterización está establecida desde el capítulo 1; enunciarla explícitamente en cada capítulo la desgasta.
-
-### R-5 · Mesa responde con una evasiva fija («Sin datos» / «Aviso de mantenimiento…») en lugar de contestar — caps 1, 2, 3 (10 apariciones)
-
-Seis avisos de mantenimiento fuera de contexto y cuatro «Sin datos». Es el recurso central de la amenaza y por eso mismo es el más expuesto al automatismo: la estructura pregunta directa → aviso absurdo ya es previsible al tercer uso del capítulo 1.
-
-### R-6 · La frase literal «El metal estaba frío» — caps 1, 2, 3 (3 apariciones)
-
-Cap. 1 (tapa del armario de nodos), cap. 2 (hoja del ramal de enfermería), cap. 3 (mamparo del compartimento seis). La formulación es idéntica en las tres.
-
-### R-7 · Las costillas doloridas por el arnés — caps 1, 2, 3 (3 apariciones)
-
-Cap. 1 al palparse tras despertar, cap. 2 al recibir el golpe de la puerta, cap. 3 al inclinarse sobre el bloc. El dolor es un buen ancla física, pero se invoca siempre con la misma fórmula («del arnés»).
-
-### R-8 · Pedro cuenta (respiraciones, segundos, ventiladores) para sostenerse — caps 1, 2, 3 (4 apariciones)
-
-«Contó hasta diez» y los noventa segundos contados contra el zumbido (cap. 1), «contando hasta seis» (cap. 2), «contó tres respiraciones» (cap. 3).
-
-## Recursos por debajo del umbral (registrados para el próximo corte)
-
-- Olor dulce y vegetal a agua estancada — 2 apariciones (caps 2, 3).
-- La escarcha blanca ramificada que no se derrite / el dibujo que se ramifica — 2 apariciones (caps 2, 3).
-- El olor a plástico tibio — 3 apariciones (caps 1, 2); alcanzó umbral y figura como R-9 solo si vuelve a aparecer; se mantiene registrado.
-
-## Observaciones que NO son hallazgos
-
-- Capítulo 2: Mesa declara «Dos cápsulas. Ambas presentes, selladas, presión nominal», mientras el log (cap_origen 0) describe *la* cápsula de salvamento de una sola plaza. No se computa como contradicción: es Mesa —sistema de a bordo establecido como no fiable— hablando dentro de la ficción, y el narrador no confirma el número. Queda como punto a vigilar: si un capítulo posterior confirma dos cápsulas por vía narrativa, sí será contradicción de un hecho de cap_origen 0.
-- Capítulo 3: la enfermería sellada (cap_origen 2) se abre, pero Pedro la abre a mano con el husillo de emergencia y traba la puerta con una llave inglesa. Está explicado; no es un sellado violado.
-- Capítulo 3: «reactor secundario al treinta y uno coma cuatro por ciento» es compatible con «un tercio de potencia» (cap_origen 0). Precisión, no contradicción.
-- La ambigüedad entre avería, agotamiento de Pedro y entidad (cap_origen 0) se sostiene en los tres capítulos.
+El registro completo queda en `06_qa/recursos_usados.json`.

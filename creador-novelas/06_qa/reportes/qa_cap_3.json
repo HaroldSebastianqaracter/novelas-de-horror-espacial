@@ -2,60 +2,55 @@
   "cap_corte": 3,
   "hallazgos": [
     {
-      "tipo": "contradiccion",
-      "descripcion": "El capitulo 2 afirma que el pasillo de servicio entre enfermeria y bodega 'seguia sellado desde las 04:26' y obliga a Pedro a rodear el anillo, y el capitulo 3 da por inaccesible el bus de control tras ese pasillo; pero el capitulo 1 establece por narracion que el mamparo se reabrio (Mesa anuncia el compartimento abierto, Pedro oye subir los pistones, el esquema marca abierto con presion nominal). La continuidad ininterrumpida del sellado niega el hecho de cap_origen 1 tal como lo dejo el propio capitulo 1; si hubo un cierre nuevo, el texto debe registrarlo con su hora.",
-      "cap_origen": 1
-    },
-    {
-      "tipo": "contradiccion",
-      "descripcion": "El capitulo 3 narra que Pedro 'llevaba despierto desde las cinco y media', pero el capitulo 1 lo muestra despertando a las 04:12, anotando la baliza a las 04:19 y presenciando despierto el cierre sin origen de las 04:26 (hecho de cap_origen 1). No es un personaje recordando mal en dialogo: es la voz narrativa fijando una duracion de vigilia incompatible con la linea temporal establecida.",
-      "cap_origen": 1
-    },
-    {
       "tipo": "repeticion",
-      "descripcion": "El agua que 'sabe a filtro' usada como prueba tranquilizadora de continuidad, una vez por capitulo y siempre como cierre emocional de escena: dispensador del puente (cap. 1), cantimplora en el camarote de Larrea (cap. 2), reciclador primario en el inventario (cap. 3). 3 apariciones acumuladas, caps 1, 2, 3.",
+      "descripcion": "Mesa responde con una evasiva fija ('Sin datos', 'Aviso de mantenimiento...') en lugar de contestar: 10 apariciones acumuladas en los capitulos 1, 2 y 3.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "Estructura de negacion en cascada 'No en X, no en Y: en Z' / 'No era X. Era Y.': cuatro usos en el capitulo 1 (luz ambar, reactor en gris, distancia a las rutas, campo de origen en blanco) y uno en el capitulo 2 (olor del camarote de Larrea). 5 apariciones acumuladas, caps 1, 2.",
+      "descripcion": "El zumbido o el armonico de los ventiladores cierra la escena tras el momento de tension: 7 apariciones acumuladas en los capitulos 1, 2 y 3.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "El zumbido o el armonico de los ventiladores empleado como coda inmediatamente despues del momento de tension: tras el aviso de mantenimiento repetido (cap. 1), tras el 'Capitana Larrea, confirme' de Mesa (cap. 2), y como silencio 'ni un decibelio distinto' tras el 'Cuarenta dias' (cap. 3), ademas de las menciones de apertura y recuento. 7 apariciones acumuladas, caps 1, 2, 3.",
+      "descripcion": "Estructura de negacion en cascada 'No en X, no en Y: en Z' / 'No era X. Era Y.': 6 apariciones acumuladas en los capitulos 1, 2 y 3.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "La lista de comprobacion o la tablilla declarada explicitamente como asidero psicologico de Pedro, con la anotacion de la hora junto a cada dato: 'primero los numeros, despues las preguntas' y la lista laminada (cap. 1), 'las listas sin hora no valen para nada' y 'como si la lista de comprobacion pudiera sostenerlo' (cap. 2), 'la lista era lo unico que quedaba en pie' y la marca de tinta con hora (cap. 3). 5 apariciones acumuladas, caps 1, 2, 3.",
+      "descripcion": "La lista de comprobacion o la tablilla como asidero psicologico declarado, con la hora anotada al lado del dato: 5 apariciones acumuladas en los capitulos 1, 2 y 3.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "Mesa contesta con una evasiva fija en lugar de responder: seis 'Aviso de mantenimiento' fuera de contexto y cuatro 'Sin datos'. La secuencia pregunta directa seguida de aviso absurdo ya es previsible dentro del propio capitulo 1. 10 apariciones acumuladas, caps 1, 2, 3.",
+      "descripcion": "La luz ambar como color unico de la emergencia (paneles y mapa en el capitulo 1, tiras del pasillo en el 2, letras del sellado en el 3): 5 apariciones acumuladas en los capitulos 1, 2 y 3.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "La frase literal 'El metal estaba frio': tapa del armario de nodos (cap. 1), hoja del ramal de enfermeria (cap. 2), mamparo del compartimento seis (cap. 3). Formulacion identica en las tres. 3 apariciones acumuladas, caps 1, 2, 3.",
+      "descripcion": "Pedro cuenta (segundos, respiraciones, ventiladores) para sostenerse: 4 apariciones acumuladas en los capitulos 1, 2 y 3.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "Las costillas doloridas 'del arnes' como ancla fisica recurrente: al palparse tras despertar (cap. 1), al recibir el golpe de la puerta sellada (cap. 2), al inclinarse sobre el bloc (cap. 3). 3 apariciones acumuladas, caps 1, 2, 3.",
+      "descripcion": "El agua del reciclador que 'sabe a filtro' como prueba tranquilizadora de continuidad: 3 apariciones acumuladas, una en cada uno de los capitulos 1, 2 y 3.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "Pedro cuenta para sostenerse (hasta diez y los noventa segundos del reinicio en el cap. 1, hasta seis en el cap. 2, tres respiraciones en el cap. 3). 4 apariciones acumuladas, caps 1, 2, 3.",
+      "descripcion": "La frase literal 'El metal estaba frio': 3 apariciones acumuladas en los capitulos 1, 2 y 3.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "El olor a 'plastico tibio' como descriptor de ambiente: equipos del puente (cap. 1), camarote de Uxio y su negacion en el camarote de Larrea (cap. 2). 3 apariciones acumuladas, caps 1, 2.",
+      "descripcion": "Las costillas doloridas 'del arnes' como recordatorio fisico: 3 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El olor a 'plastico tibio': 3 apariciones acumuladas en los capitulos 1 y 2.",
       "cap_origen": null
     }
   ],
-  "tiene_contradicciones": true
+  "tiene_contradicciones": false
 }
