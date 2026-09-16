@@ -4,20 +4,27 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SEC-04 · Consola de puente</title>
+<link rel="icon" href="data:,">
 <script src="gsap.min.js"></script>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:#020306;overflow:hidden}
 body{color:#b9c4d2;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;-webkit-font-smoothing:antialiased}
 
-#viewport{position:fixed;inset:0;display:grid;place-items:center;background:#020306}
-#stage{width:1440px;height:900px;position:relative;overflow:hidden;transform-origin:center center;flex:none}
+/* Centrado con translate y no con grid: el escenario mide 1440x900 SIEMPRE, y cuando la ventana es
+   más baja el navegador aplica «alineación segura» y ancla el elemento arriba en vez de centrarlo,
+   con lo que el panel de mando se sale por debajo del borde. */
+#viewport{position:fixed;inset:0;background:#020306;overflow:hidden}
+#stage{width:1440px;height:900px;position:absolute;left:50%;top:50%;overflow:hidden;
+       transform-origin:center center;transform:translate(-50%,-50%)}
 #panel{position:absolute;inset:0;opacity:0}
 
 /* la atmósfera cubre TODA la pantalla, no solo el escenario: así no hay borde */
 #atmosfera{position:fixed;inset:0;pointer-events:none;z-index:90}
+/* La viñeta oscurece los bordes del DIBUJO, no la interfaz. Con la caída antigua (.78 al 68%) el
+   registro de a bordo y el panel de mando quedaban casi negros: eran ilegibles en la pantalla real. */
 #atmosfera .vineta{position:absolute;inset:0;
-  background:radial-gradient(100% 100% at 50% 46%, rgba(2,3,6,0) 26%, rgba(2,3,6,.78) 68%, #000 100%)}
+  background:radial-gradient(135% 130% at 50% 48%, rgba(2,3,6,0) 58%, rgba(2,3,6,.42) 84%, rgba(0,0,0,.72) 100%)}
 #atmosfera .grano{position:absolute;inset:0;opacity:.06;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
 #atmosfera .suciedad{position:absolute;inset:0;opacity:.55;mix-blend-mode:screen;background:
@@ -65,7 +72,9 @@ body{color:#b9c4d2;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liber
 #celdas .c{flex:1;height:13px;background:#0a1018;border:1px solid #16202b;position:relative;
   transition:background 300ms ease,height 300ms ease}
 #celdas .c.cerrado{background:#243546;border-color:#2e4358}
-#celdas .c.hallazgo{background:#4a3410;border-color:#6d4d17}
+/* `marcado`, no `hallazgo`: ese nombre ya lo usan las filas del informe de QA, y su regla
+   (display:grid con una columna de 78px) deformaba la celda de la cinta. */
+#celdas .c.marcado{background:#4a3410;border-color:#6d4d17}
 #celdas .c.activo{height:26px;background:#8b0f1d;border-color:#c41e2f;box-shadow:0 0 12px rgba(196,30,47,.5)}
 #celdas .c.corte::after{content:"";position:absolute;left:50%;top:-7px;width:1px;height:4px;
   background:#4e5d72;transform:translateX(-50%)}
@@ -220,7 +229,7 @@ input:disabled,select:disabled{color:#334152;background:#030508;cursor:not-allow
       <clipPath id="celda-qa"><polygon points="804,374 1002,368 1004,596 804,596"/></clipPath>
     </defs>
 
-    <g id="plano" stroke="#4a5b6e" fill="none" stroke-width="1" stroke-linejoin="round" stroke-linecap="round">
+    <g id="plano" stroke="#5a6d82" fill="none" stroke-width="1" stroke-linejoin="round" stroke-linecap="round">
 
       <!-- ============ CASCO PRINCIPAL ============ -->
       <path class="traza" d="M190,392 L430,376 L1000,364 L1006,596 L430,606 L190,584 Z" opacity=".95"/>
@@ -341,8 +350,8 @@ input:disabled,select:disabled{color:#334152;background:#030508;cursor:not-allow
       <text x="1000" y="318" font-size="8" letter-spacing="2" fill="#3f4d60" text-anchor="end">RADIADORES</text>
       <text x="1148" y="606" font-size="8" letter-spacing="2" fill="#3f4d60" text-anchor="end">PROPULSIÓN</text>
 
-      <text x="64" y="746" font-size="8.5" letter-spacing="2.4" fill="#334152">SEC-04 / SECCIÓN DE PROCESO · CORTE LONGITUDINAL · ESC 1:120</text>
-      <text x="1388" y="746" font-size="8.5" letter-spacing="2.4" fill="#334152" text-anchor="end">CASCO INTERIOR 1.8 mm</text>
+      <text x="64" y="706" font-size="8.5" letter-spacing="2.4" fill="#3b4a5c">SEC-04 / SECCIÓN DE PROCESO · CORTE LONGITUDINAL · ESC 1:120</text>
+      <text x="1388" y="706" font-size="8.5" letter-spacing="2.4" fill="#3b4a5c" text-anchor="end">CASCO INTERIOR 1.8 mm</text>
     </g>
 
     <g stroke="#2e3a49" fill="none" stroke-width="1" opacity=".8">
@@ -439,7 +448,10 @@ const REDUCIR=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const HAY_GSAP=typeof gsap!=="undefined";
 
 /* el escenario crece hasta llenar la pantalla; la atmósfera tapa los lados */
-function escalar(){ $("#stage").style.transform=`scale(${Math.min(innerWidth/1440, innerHeight/900)})`; }
+function escalar(){
+  const s = Math.min(innerWidth / 1440, innerHeight / 900);
+  $("#stage").style.transform = `translate(-50%,-50%) scale(${s})`;
+}
 addEventListener("resize",escalar); escalar();
 
 /* la silueta de la entrada es el MISMO casco que luego ves en corte */
@@ -590,7 +602,7 @@ function pintarCinta(){
   for(let n=1;n<=tot;n++){
     const cls=[ "c" ];
     if(n===act&&e.estado!=="pausado_por_qa")cls.push("activo");
-    else if(conH.has(n))cls.push("hallazgo");
+    else if(conH.has(n))cls.push("marcado");
     else if(n<=cerr)cls.push("cerrado");
     if(cad&&n%cad===0)cls.push("corte");
     const est=n===act?"en curso":conH.has(n)?"con hallazgos":n<=cerr?"cerrado":"sin escribir";
