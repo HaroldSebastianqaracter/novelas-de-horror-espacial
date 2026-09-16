@@ -1,0 +1,16 @@
+{
+  "tanda": "tanda_2026-09-16T19-30-34",
+  "ts_inicio": "2026-09-16T19:30:34.277+02:00",
+  "prompts_hash": {
+    "escritor": "7bffff0faad27835",
+    "extractor": "55301a2744c759d1",
+    "qa": "9ad11e887524d43e"
+  },
+  "total_capitulos": 30,
+  "capitulos_por_tanda": 3,
+  "cadencia_qa": 3,
+  "palabras_por_capitulo": 1500,
+  "max_llamadas_por_tanda": 30,
+  "version_specs": "v1.8",
+  "inicio": 4
+}

@@ -1,123 +1,102 @@
 [
   {
-    "recurso": "el agua del reciclador que 'sabe a filtro' como prueba tranquilizadora de continuidad",
-    "veces": 3,
-    "caps": [
-      1,
-      2,
-      3
-    ]
+    "recurso": "el agua del reciclador que 'sabe a filtro' (o el termo que 'sabe a metal') como prueba tranquilizadora de continuidad",
+    "veces": 4,
+    "caps": [1, 2, 3, 4]
   },
   {
     "recurso": "estructura de negacion en cascada 'No en X, no en Y: en Z' / 'No era X. Era Y.'",
-    "veces": 6,
-    "caps": [
-      1,
-      2,
-      3
-    ]
+    "veces": 12,
+    "caps": [1, 2, 3, 4, 5, 6]
   },
   {
-    "recurso": "el zumbido o armonico de los ventiladores como coda de escena tras el momento de tension",
-    "veces": 7,
-    "caps": [
-      1,
-      2,
-      3
-    ]
+    "recurso": "el zumbido o armonico de los ventiladores (o el impulsor de bodega) como coda de escena tras el momento de tension",
+    "veces": 8,
+    "caps": [1, 2, 3, 4, 5]
   },
   {
-    "recurso": "la lista de comprobacion / la tablilla como asidero psicologico declarado, con la hora anotada al lado del dato",
-    "veces": 5,
-    "caps": [
-      1,
-      2,
-      3
-    ]
+    "recurso": "la lista de comprobacion / la tablilla / el manual como asidero psicologico declarado, con la hora anotada al lado del dato",
+    "veces": 8,
+    "caps": [1, 2, 3, 4, 6]
   },
   {
-    "recurso": "Mesa responde con una evasiva fija ('Sin datos' / 'Aviso de mantenimiento...') en lugar de contestar",
-    "veces": 10,
-    "caps": [
-      1,
-      2,
-      3
-    ]
+    "recurso": "Mesa responde con una evasiva fija ('Sin datos' / 'Sin fallo declarado' / 'No consta' / 'Confirmado') en lugar de contestar",
+    "veces": 13,
+    "caps": [1, 2, 3, 4, 6]
   },
   {
     "recurso": "la frase literal 'El metal estaba frio'",
     "veces": 3,
-    "caps": [
-      1,
-      2,
-      3
-    ]
+    "caps": [1, 2, 3]
   },
   {
     "recurso": "las costillas doloridas 'del arnes'",
     "veces": 3,
-    "caps": [
-      1,
-      2,
-      3
-    ]
+    "caps": [1, 2, 3]
   },
   {
     "recurso": "Pedro cuenta (segundos, respiraciones, ventiladores) para sostenerse",
-    "veces": 4,
-    "caps": [
-      1,
-      2,
-      3
-    ]
+    "veces": 6,
+    "caps": [1, 2, 3, 4, 5]
   },
   {
-    "recurso": "el olor a 'plastico tibio'",
-    "veces": 3,
-    "caps": [
-      1,
-      2
-    ]
-  },
-  {
-    "recurso": "olor dulce y vegetal a agua estancada",
-    "veces": 2,
-    "caps": [
-      2,
-      3
-    ]
-  },
-  {
-    "recurso": "la escarcha blanca ramificada que no se derrite / el dibujo que se ramifica",
-    "veces": 2,
-    "caps": [
-      2,
-      3
-    ]
-  },
-  {
-    "recurso": "la luz ambar como color unico de la emergencia (paneles, mapa de rutas, tiras de pasillo, letras de sellado)",
+    "recurso": "el olor a 'plastico tibio' / 'ozono tibio' / 'plastico guardado'",
     "veces": 5,
-    "caps": [
-      1,
-      2,
-      3
-    ]
+    "caps": [1, 2, 4, 5]
   },
   {
-    "recurso": "Mesa devuelve como eco la ultima frase ajena ('Capitana Larrea, confirme' / 'Cuarenta dias')",
-    "veces": 2,
-    "caps": [
-      2,
-      3
-    ]
+    "recurso": "olor dulce y vegetal a agua estancada o fruta abierta",
+    "veces": 3,
+    "caps": [2, 3, 5]
   },
   {
-    "recurso": "Pedro apoya la frente contra el metal y respira contando",
+    "recurso": "la escarcha blanca ramificada que no se derrite / el dibujo que nace en los rincones y se divide y se vuelve a dividir",
+    "veces": 5,
+    "caps": [2, 3, 5, 6]
+  },
+  {
+    "recurso": "la luz ambar como color unico de la emergencia (paneles, mapa de rutas, tiras de pasillo, letras de sellado, mimico)",
+    "veces": 6,
+    "caps": [1, 2, 3, 4]
+  },
+  {
+    "recurso": "la ultima frase ajena vuelve repetida por un altavoz o un conducto ('Capitana Larrea, confirme' / 'Cuarenta dias' / 'A las nueve cuarenta y uno' / '¿Hay alguien ahi?')",
+    "veces": 5,
+    "caps": [2, 3, 4, 5]
+  },
+  {
+    "recurso": "Pedro apoya la frente contra el metal o el vidrio y respira contando",
+    "veces": 3,
+    "caps": [2, 3, 6]
+  },
+  {
+    "recurso": "el frio del metal personificado como algo que 'muerde' la piel",
+    "veces": 3,
+    "caps": [4, 5]
+  },
+  {
+    "recurso": "Pedro habla en voz alta o nombra el procedimiento a solas para oirse",
+    "veces": 3,
+    "caps": [4, 5, 6]
+  },
+  {
+    "recurso": "Pedro formula una explicacion mecanica tranquilizadora (sensor sucio, hongo, condensacion) y la sostiene contra la evidencia",
+    "veces": 3,
+    "caps": [4, 5, 6]
+  },
+  {
+    "recurso": "el impulsor de aire que arranca, sopla once segundos y se para, repetido literalmente",
     "veces": 2,
-    "caps": [
-      2,
-      3
-    ]
+    "caps": [5]
+  },
+  {
+    "recurso": "Pedro deja la palma abierta apoyada sobre la chapa o el vidrio como cierre de escena",
+    "veces": 2,
+    "caps": [5, 6]
+  },
+  {
+    "recurso": "la cifra de regimen del secundario repetida como marcador de progreso",
+    "veces": 1,
+    "caps": [4]
   }
 ]

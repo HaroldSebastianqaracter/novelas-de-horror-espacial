@@ -1,7 +1,7 @@
 {
   "Pedro Sánchez": {
-    "estado_fisico": "Costillas adoloridas por arnés. Exhausto, despierto desde las 4:12. Lleva once minutos discutiendo con la puerta cuando comienza el capítulo.",
-    "estado_psicologico": "Conmoción procesada mediante trabajo metódico. Se niega mentalmente a escribir la aritmética de supervivencia cuando Larrea y Uxío están fuera del cálculo. Momentos de disociación (dice «No te vayas todavía» sin pretenderlo). Refugiado en tareas y listas.",
+    "estado_fisico": "Brazo derecho vendado desde hace cuatro horas; la gasa ha pasado del blanco al ocre por sangrado, con dolor retrasado y profundo en el hueso.",
+    "estado_psicologico": "Investigador sistemático; procesa hechos mecánicos pero se enfrenta a una explicación que no cabe en palabras; actúa con cautela profesional.",
     "secretos_que_conoce": [
       "El reactor principal está apagado desde las 23:06.",
       "La baliza no emite confirmación de emisión.",
@@ -21,17 +21,24 @@
       "Uxío Ferrán ha desaparecido sin abrir ninguna esclusa ni cápsula de salvamento, aunque su camarote permanece intacto.",
       "El reactor principal está cortado desde 23:06 y solo accesible tras un pasillo que Mesa mantiene sellado.",
       "Irene Montoro tiene quemaduras que no son eléctricas típicas: patrón ramificado como hielo en escotilla mal aislada.",
-      "Solo él e Irene respiran a bordo, lo que transforma los 40 días de aire nominales en un número que no quiere calcular."
+      "Solo él e Irene respiran a bordo, lo que transforma los 40 días de aire nominales en un número que no quiere calcular.",
+      "Sabe que el lazo térmico de cubierta inferior fue aislado a las 9:40 para elevar el régimen del secundario, dejando esa zona a 4 grados.",
+      "La Capitana Larrea está muerta en su camarote hace cuatro días con los párpados sin cerrar.",
+      "Algo en los conductos de servicio imita la voz de la capitana y maneja las escotillas remotamente.",
+      "Mesa no respondió a sus llamadas durante el incidente.",
+      "Sabe que la unidad 12 de Vellón ingresó sin documentación, autorizada por procedimiento de carga prioritaria que Larrea permitió.",
+      "Descubre que la unidad 12 ha perdido 1480 kilos desde el embarque, quedando vacía con solo 41 kg.",
+      "Identifica una sustancia ramificada idéntica en tres lugares: el marco de la esclusa de un camarote, el interior de la unidad 12 en bodega, y el hombro de Irene Montoro."
     ],
-    "ultima_aparicion": 3
+    "ultima_aparicion": 6
   },
   "Irene Montoro": {
-    "estado_fisico": "Inconsciente en camilla de Enfermería. Hipotérmica: 35.2°C. Pulso 48 bpm, respiración 12 bpm, saturación oxígeno 94%. Quemaduras ramificadas blancas con bordes rosados: cuello (mandíbula a clavícula) y antebrazo derecho (muñeca a codo). Posiblemente en expansión. Canalizada con solución salina 500 ml, manta térmica.",
-    "estado_psicologico": "Inconsciente, sin respuesta a estímulos.",
+    "estado_fisico": "Sigue con ojos cerrados y respiración larga; las marcas en el hombro no son quemadura de arco sino un patrón ramificado que se afiniza y se hunde bajo la piel.",
+    "estado_psicologico": "Inconsciente o en letargo profundo durante el capítulo.",
     "secretos_que_conoce": [
       "Vio a Uxío Ferrán entrar en la bodega de carga la noche de la avería."
     ],
-    "ultima_aparicion": 3
+    "ultima_aparicion": 6
   },
   "Santiago Abascal": {
     "estado_fisico": "Depredador de la raza vox sin forma propia: se manifiesta como escarcha orgánica ramificada en conductos y superficies frías, y necesita calor de maquinaria para moverse. Todavía no ha sido visto.",
