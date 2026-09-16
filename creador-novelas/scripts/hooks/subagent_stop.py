@@ -9,4 +9,4 @@ from _comun import preparar, salir  # noqa: E402
 raiz, payload = preparar()
 from app import hooks  # noqa: E402
 
-salir(hooks.decidir_subagent_stop(payload, raiz))
+salir(hooks.decidir_subagent_stop(payload, raiz), payload, raiz, "SubagentStop")

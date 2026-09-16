@@ -46,6 +46,10 @@ class Rutas:
         return self.qa / "reportes"
 
     @property
+    def registro(self) -> Path:
+        return self.raiz / "07_registro"
+
+    @property
     def config(self) -> Path:
         return self.raiz / "config"
 

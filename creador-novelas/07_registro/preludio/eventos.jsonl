@@ -1,0 +1,1 @@
+{"ts": "2026-09-16T16:39:51.718+02:00", "tipo": "hook", "id": "pre_tool_use", "evento": "PreToolUse", "accion": "Bash cd \"C:/Users/harold.rodriguez/Desktop/Nueva carpeta/novelas-de-horror-espacial/creador-novelas\" && git add -A . && git reset -q -- ../diagrama.png 2>/dev/null;", "decision": "permitido"}

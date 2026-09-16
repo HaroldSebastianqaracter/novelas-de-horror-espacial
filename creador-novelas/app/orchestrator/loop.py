@@ -12,13 +12,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Protocol
 
-from app import validacion
+from app import registro, validacion
 from app.agents import escritor, extractor, qa
 from app.agents.escritor import Contexto
 from app.agents.qa import PreparacionQA
 from app.config import HarnessConfig, hash_prompts
 from app.errores import (
-    CapituloCerradoError, ContextoExcedidoError, ContratoRetornoError, EstadoInvalidoError,
+    AutovalidacionFallidaError, CapituloCerradoError, ContextoExcedidoError, ContratoRetornoError, EstadoInvalidoError,
     LongitudFueraDeRangoAviso, ManifiestoInconsistenteError, PersonajeNoPrevistoError,
 )
 from app.orchestrator import checkpoint, cursor as cur
@@ -86,8 +86,10 @@ def iniciar_tanda(raiz: Path, config: HarnessConfig, capitulos_por_tanda: int | 
     """Verifica que se pueda reanudar (EX-02, EX-06, §5), crea el cursor (descartando uno huérfano) y registra prompts_hash."""
     m = checkpoint.verificar_reanudable(raiz, config)
     tope = None if hasta_el_final else (capitulos_por_tanda or config.capitulos_por_tanda)  # RF-CFG-03
-    cursor = Cursor(inicio=m.ultimo_capitulo_cerrado + 1, tope=tope, max_llamadas=config.max_llamadas_por_tanda)
-    cur.borrar(raiz)
+    cur.borrar(raiz, "huerfano: la tanda anterior murio a mitad y esta la recalcula desde el manifiesto")
+    carpeta = registro.iniciar_tanda(raiz)  # §5.1: una carpeta por tanda
+    cursor = Cursor(inicio=m.ultimo_capitulo_cerrado + 1, tope=tope, max_llamadas=config.max_llamadas_por_tanda,
+                    registro=carpeta.relative_to(raiz).as_posix())
     cur.escribir(raiz, cursor)
     checkpoint.actualizar_prompts_hash(raiz, hash_prompts(raiz))
     if m.ultimo_error:
@@ -114,7 +116,7 @@ def tanda_siguiente(raiz: Path, config: HarnessConfig) -> ResultadoTanda:
     cursor = cur.exigir(raiz)
     resultado = evaluar_siguiente(raiz, config, cursor)
     if resultado.motivo != "seguir":
-        cur.borrar(raiz)
+        cur.borrar(raiz, resultado.motivo)
     return resultado
 
 
@@ -131,9 +133,13 @@ def preparar_capitulo(raiz: Path, config: HarnessConfig, n: int, feedback_longit
         if contexto.excede_limite():
             error = ContextoExcedidoError(n, contexto.tokens_estimados, contexto.limite)
             checkpoint.registrar_error(raiz, str(error))
-            cur.borrar(raiz)
+            registro.evento_error(raiz, error, capitulo=n)
+            cur.borrar(raiz, "EX-04")
             raise error
     escritor.persistir_contexto(contexto, raiz)
+    registro.guardar_prompt(raiz, "escritor", n, contexto.texto)  # §5.1: la copia del contexto exacto entregado
+    registro.evento(raiz, "agente_inicio", rol="escritor", capitulo=n, agent_id=None,
+                    intento=2 if feedback_longitud else 1, tokens=contexto.tokens_estimados)
     preparar_extractor(raiz, config, n)  # el prompt del extractor no depende del texto del capítulo
     cursor = cur.leer(raiz)
     if cursor is not None and cursor.capitulo_en_curso != n:
@@ -153,7 +159,11 @@ def preparar_extractor(raiz: Path, config: HarnessConfig, n: int) -> Path:
         )
     rutas = Rutas(raiz)
     rutas.prompts_trabajo.mkdir(parents=True, exist_ok=True)
-    rutas.prompt_extractor(n).write_text(extractor.preparar_prompt_extractor(n, config, raiz), encoding="utf-8")
+    texto = extractor.preparar_prompt_extractor(n, config, raiz)
+    rutas.prompt_extractor(n).write_text(texto, encoding="utf-8")
+    registro.guardar_prompt(raiz, "extractor", n, texto)
+    registro.evento(raiz, "agente_inicio", rol="extractor", capitulo=n, agent_id=None,
+                    reextraccion=n in m.reextraccion_pendiente)
     return rutas.prompt_extractor(n)
 
 
@@ -190,7 +200,12 @@ def evaluar_borrador(raiz: Path, config: HarnessConfig, n: int) -> ResultadoEscr
 
 def registrar_escritor(raiz: Path, config: HarnessConfig, n: int, linea: str) -> ResultadoEscritor:
     """Verbo `registrar-escritor`: parser de RF-08.1 y evaluación EX-07 del archivo escrito."""
-    retorno = escritor.parsear_retorno_escritor(linea)
+    registro.guardar_retorno(raiz, "escritor", n, linea)
+    try:
+        retorno = escritor.parsear_retorno_escritor(linea)
+    except AutovalidacionFallidaError as e:  # EX-10: el borrador va a descartados; el fallo se trata como EX-07/EX-08
+        registro.descartar(raiz, "escritor", n, Rutas(raiz).capitulo(n), str(e))
+        raise
     if retorno.n != n:
         raise ContratoRetornoError(f"RF-08.1: el escritor declaró cap_{retorno.n}.md y el capítulo en curso es {n}")
     resultado = evaluar_borrador(raiz, config, n)
@@ -211,11 +226,15 @@ def aplicar_delta(raiz: Path, config: HarnessConfig, n: int, delta: DeltaExtracc
 
     fichas = repo.leer_personajes(raiz)
     mundo = repo.leer_mundo(raiz)
-    registro = pers.sujetos_conocidos(fichas, mundo)
-    if isinstance(delta, DeltaExtraccion):  # solo el loop con dobles pasa el objeto ya parseado
-        validado = extractor.validar_delta(delta, registro, config, n)
-    else:  # RF-08.4: el mismo parseo y la misma validación que `validar-delta`; el harness vuelve a validar
-        validado = validacion.cargar_delta_validado(raiz, config, n, delta)
+    registro_sujetos = pers.sujetos_conocidos(fichas, mundo)
+    try:
+        if isinstance(delta, DeltaExtraccion):  # solo el loop con dobles pasa el objeto ya parseado
+            validado = extractor.validar_delta(delta, registro_sujetos, config, n)
+        else:  # RF-08.4: el mismo parseo y la misma validación que `validar-delta`; el harness vuelve a validar
+            validado = validacion.cargar_delta_validado(raiz, config, n, delta)
+    except EstadoInvalidoError as e:  # EX-01 / EX-10: el delta rechazado va a descartados con su error (§5.1)
+        registro.descartar(raiz, "extractor", n, rutas.delta(n), str(e))
+        raise
 
     cursor = cur.leer(raiz)
     if validado.claves_no_previstas:
@@ -225,10 +244,12 @@ def aplicar_delta(raiz: Path, config: HarnessConfig, n: int, delta: DeltaExtracc
             cursor.intentos_personaje = intentos
             cur.escribir(raiz, cursor)
         checkpoint.registrar_intentos(raiz, n, 2)
+        registro.descartar(raiz, "extractor", n, rutas.delta(n), f"EX-08: personajes fuera del registro {validado.claves_no_previstas}")
         if intentos >= 2:
             error = PersonajeNoPrevistoError(n, validado.claves_no_previstas)
             checkpoint.registrar_error(raiz, str(error))
-            cur.borrar(raiz)
+            registro.evento_error(raiz, error, capitulo=n)
+            cur.borrar(raiz, "EX-08")
             raise error
         return ResultadoDelta(n=n, regenerar=True, claves_no_previstas=validado.claves_no_previstas,
                               sujetos_no_validados=validado.sujetos_no_validados, hechos_agregados=0,
@@ -241,7 +262,7 @@ def aplicar_delta(raiz: Path, config: HarnessConfig, n: int, delta: DeltaExtracc
             previa = fichas.root.get(clave)
             if previa and previa.ultima_aparicion > n:
                 nuevas_fichas.root[clave] = nuevas_fichas.root[clave].model_copy(update={"ultima_aparicion": previa.ultima_aparicion})
-    log = cont.agregar(repo.leer_continuidad(raiz), d.hechos_nuevos, n, registro)
+    log = cont.agregar(repo.leer_continuidad(raiz), d.hechos_nuevos, n, registro_sujetos)
     resumen_actual = repo.leer_resumen_rodante(raiz)
     resumen = (rr.reemplazar(resumen_actual, n, d.resumen_corto) if reextraccion
                else rr.agregar(resumen_actual, n, d.resumen_corto, config.ventana_resumen_rodante))
@@ -267,8 +288,9 @@ def aplicar_delta(raiz: Path, config: HarnessConfig, n: int, delta: DeltaExtracc
 
 
 def descartar_borrador(raiz: Path, n: int) -> None:
-    """EX-08: elimina el borrador para regenerar. Nunca un capítulo cerrado (INV-07)."""
+    """EX-08: elimina el borrador para regenerar. Nunca un capítulo cerrado (INV-07). La copia queda en descartados (§5.1)."""
     m = checkpoint.exigir_manifest(raiz)
+    registro.descartar(raiz, "escritor", n, Rutas(raiz).capitulo(n), "descartar-borrador: el capítulo se regenera (EX-08 / EX-10)")
     repo.descartar_borrador(raiz, n, m.ultimo_capitulo_cerrado)
 
 
@@ -281,6 +303,8 @@ def preparar_qa(raiz: Path, config: HarnessConfig, n: int) -> PreparacionQA:
     rutas = Rutas(raiz)
     rutas.prompts_trabajo.mkdir(parents=True, exist_ok=True)
     rutas.prompt_qa(n).write_text(prep.prompt, encoding="utf-8")
+    registro.guardar_prompt(raiz, "qa", n, prep.prompt)
+    registro.evento(raiz, "agente_inicio", rol="qa", capitulo=n, agent_id=None, muestra=prep.caps_muestra)
     return prep
 
 
@@ -296,7 +320,7 @@ def cerrar_qa(raiz: Path, config: HarnessConfig, n: int) -> ResultadoQA:
 
     if reporte.tiene_contradicciones:
         checkpoint.pausar_por_qa(raiz, n)
-        cur.borrar(raiz)
+        cur.borrar(raiz, "pausado_por_qa")
         return ResultadoQA(reporte=reporte, pausado=True, metricas=metricas)
     checkpoint.registrar_qa(raiz, n)
     return ResultadoQA(reporte=reporte, pausado=False, metricas=metricas)
@@ -308,11 +332,18 @@ def ejecutar_tanda(config: HarnessConfig, raiz: Path, agentes: Agentes, capitulo
                    hasta_el_final: bool = False) -> ResultadoTanda:
     rutas = Rutas(raiz)
     cursor = iniciar_tanda(raiz, config, capitulos_por_tanda, hasta_el_final)
+
+    def _fin_doble(rol: str, n: int, retorno: str) -> None:
+        """Con dobles no hay SubagentStop: el loop deja el par agente_fin + retorno que dejaría H-10 (§5.1, §9)."""
+        cur.sumar_llamada(raiz)
+        registro.guardar_retorno(raiz, rol, n, retorno if len(retorno) < 4000 else retorno[:4000] + "\n[... doble: recortado]")
+        registro.evento(raiz, "agente_fin", rol=rol, capitulo=n, agent_id=f"doble-{rol}-{n}", turnos=1, intentos_de_validacion=0)
+
     while True:
         cursor = cur.exigir(raiz)
         decision = evaluar_siguiente(raiz, config, cursor)
         if decision.motivo != "seguir":
-            cur.borrar(raiz)
+            cur.borrar(raiz, decision.motivo)
             return decision
         n = decision.siguiente
         assert n is not None
@@ -321,20 +352,20 @@ def ejecutar_tanda(config: HarnessConfig, raiz: Path, agentes: Agentes, capitulo
         while True:
             contexto = preparar_capitulo(raiz, config, n, feedback)  # RF-05.1, EX-03, EX-04
             borrador = escritor.generar_capitulo(contexto, invocar=agentes.generar_capitulo)  # RF-05.2
-            cur.sumar_llamada(raiz)
             m = checkpoint.exigir_manifest(raiz)
             if n <= m.ultimo_capitulo_cerrado:
                 raise CapituloCerradoError(f"INV-07: el capítulo {n} ya está cerrado")
             repo.guardar_capitulo(raiz, n, borrador, reemplazar_borrador=True)  # RF-05.4
+            _fin_doble("escritor", n, f"cap_{n}.md · {escritor.contar_palabras(borrador)} palabras · personajes: (doble) · validado")
             evaluacion = evaluar_borrador(raiz, config, n)  # EX-07
             if evaluacion.reintentar:
                 feedback = evaluacion.mensaje
                 continue
             feedback = None
             texto_delta = agentes.extraer(rutas.capitulo(n).as_posix())  # RF-06.1 (INV-02: un solo capítulo)
-            cur.sumar_llamada(raiz)
             rutas.deltas_trabajo.mkdir(parents=True, exist_ok=True)
             rutas.delta(n).write_text(texto_delta, encoding="utf-8")  # el extractor real lo escribe él (RF-08.4)
+            _fin_doble("extractor", n, f"delta_cap_{n}.json · (doble) · validado")
             resultado = aplicar_delta(raiz, config, n)  # RF-06.2-06.4, EX-01, EX-08: lee y revalida el archivo
             if resultado.regenerar:
                 descartar_borrador(raiz, n)
@@ -344,7 +375,7 @@ def ejecutar_tanda(config: HarnessConfig, raiz: Path, agentes: Agentes, capitulo
         if resultado.toca_qa:  # RF-07.1, antes de evaluar el tope (RF-CFG-02)
             prep = preparar_qa(raiz, config, n)
             reporte = qa.ejecutar_corte(prep, invocar=agentes.ejecutar_corte)
-            cur.sumar_llamada(raiz)
+            _fin_doble("qa", n, f"tiene_contradicciones: {str(reporte.tiene_contradicciones).lower()}\nvalidado")
             if not rutas.reporte_qa_json(n).exists():
                 repo.guardar_reporte_qa(raiz, reporte, texto_md=_reporte_md(reporte))
             resultado_qa = cerrar_qa(raiz, config, n)

@@ -19,7 +19,9 @@ import sys
 import warnings
 from pathlib import Path
 
-from app import validacion
+import time
+
+from app import registro, validacion
 from app.agents import extractor as ag_extractor, qa as ag_qa
 from app.config import HarnessConfig, cargar_config, cargar_proveedores
 from app.errores import ConfiguracionInvalidaError, EstadoInvalidoError, HarnessError, PausadoPorQAError
@@ -81,6 +83,7 @@ def cmd_status(args, raiz: Path) -> int:
     aviso = hooks.aviso_h11(raiz)
     if aviso:
         print(aviso)
+    print(registro.texto_status(raiz))  # RF-08.5: el registro de la última tanda, no solo el manifiesto
     return 0
 
 
@@ -287,7 +290,7 @@ def cmd_tanda(args, raiz: Path) -> int:
         print(f"tanda iniciada desde el capítulo {cursor.inicio}; tope {cursor.tope or 'hasta el final'}; "
               f"tope de llamadas {cursor.max_llamadas or 'sin tope'}")
         if decision.motivo != "seguir":
-            cur.borrar(raiz)
+            cur.borrar(raiz, decision.motivo)
             _resultado(decision.motivo, cerrados=0)
         else:
             _resultado("seguir", siguiente=decision.siguiente)
@@ -346,6 +349,7 @@ def cmd_registrar_escritor(args, raiz: Path) -> int:
 def cmd_aplicar_delta(args, raiz: Path) -> int:
     config = _config(raiz)
     if args.retorno is not None:  # RF-08.1: la línea de confirmación del extractor, si el orquestador la pasa
+        registro.guardar_retorno(raiz, "extractor", args.n, args.retorno)  # §5.1: el retorno textual, valga o no
         retorno = ag_extractor.parsear_retorno_extractor(args.retorno)
         if retorno.n != args.n:
             raise EstadoInvalidoError(f"RF-08.1: el extractor declaró delta_cap_{retorno.n}.json y el capítulo es {args.n}")
@@ -387,6 +391,7 @@ def cmd_preparar_qa(args, raiz: Path) -> int:
 def cmd_cerrar_qa(args, raiz: Path) -> int:
     config = _config(raiz)
     if args.retorno is not None:  # RF-08.1: el resumen de hasta cinco líneas de QA, si el orquestador lo pasa
+        registro.guardar_retorno(raiz, "qa", args.n, args.retorno)  # §5.1
         ag_qa.parsear_retorno_qa(args.retorno)
     r = loop.cerrar_qa(raiz, config, args.n)
     conteo = r.reporte.conteo_por_tipo()
@@ -408,8 +413,10 @@ def cmd_ui(args, raiz: Path) -> int:
 
 # ---------- capa de validación (RF-08.4): la ejecuta el agente sobre su propio artefacto ----------
 
-def _imprimir_validacion(r: validacion.ResultadoValidacion) -> int:
+def _imprimir_validacion(r: validacion.ResultadoValidacion, raiz: Path, n: int) -> int:
     """Solo lectura: comprueba y devuelve el error, nunca corrige ni persiste. Código 1 si no valida."""
+    registro.evento(raiz, "validacion", rol=r.rol, artefacto=r.artefacto, valido=r.valido, errores=r.errores,
+                    avisos=r.avisos or None, capitulo=n)  # §5.1
     for aviso in r.avisos:
         print(f"aviso: {aviso}")
     if r.valido:
@@ -425,15 +432,15 @@ def _imprimir_validacion(r: validacion.ResultadoValidacion) -> int:
 
 
 def cmd_validar_capitulo(args, raiz: Path) -> int:
-    return _imprimir_validacion(validacion.validar_capitulo(raiz, _config(raiz), args.n))
+    return _imprimir_validacion(validacion.validar_capitulo(raiz, _config(raiz), args.n), raiz, args.n)
 
 
 def cmd_validar_delta(args, raiz: Path) -> int:
-    return _imprimir_validacion(validacion.validar_delta(raiz, _config(raiz), args.n))
+    return _imprimir_validacion(validacion.validar_delta(raiz, _config(raiz), args.n), raiz, args.n)
 
 
 def cmd_validar_reporte(args, raiz: Path) -> int:
-    return _imprimir_validacion(validacion.validar_reporte(raiz, args.n))
+    return _imprimir_validacion(validacion.validar_reporte(raiz, args.n), raiz, args.n)
 
 
 # ---------- parser ----------
@@ -522,11 +529,36 @@ def main(argv: list[str] | None = None) -> int:
             pass
     args = construir_parser().parse_args(argv)
     raiz = Path(args.raiz).resolve() if args.raiz else raiz_desde_entorno()
+    argumentos = [a for a in (argv if argv is not None else sys.argv[1:]) if a != args.comando]
+    inicio = time.perf_counter()
+    resultado = "ok"
     try:
-        return args.fn(args, raiz)
-    except HarnessError as e:
+        codigo = args.fn(args, raiz)
+        if codigo not in (0, None):
+            resultado = f"codigo {codigo}"
+        return codigo
+    except (HarnessError, FileNotFoundError) as e:
         print(f"ERROR {type(e).__name__}: {e}", file=sys.stderr)
+        resultado = f"error {type(e).__name__}"
+        _registrar_error_seguro(raiz, e, args)
         return 1
-    except FileNotFoundError as e:
-        print(f"ERROR FileNotFoundError: {e}", file=sys.stderr)
-        return 1
+    finally:
+        if args.comando != "ui":  # el formulario no es un tramo de la tanda
+            _registrar_verbo_seguro(raiz, args.comando, argumentos, resultado, int((time.perf_counter() - inicio) * 1000),
+                                    getattr(args, "n", None))
+
+
+def _registrar_verbo_seguro(raiz: Path, verbo: str, argumentos: list[str], resultado: str, ms: int, capitulo: int | None) -> None:
+    """Evento `verbo` (§5.1). El registro nunca hace fallar al verbo que registra."""
+    try:
+        registro.evento(raiz, "verbo", verbo=verbo, args=argumentos, resultado=resultado, ms=ms, capitulo=capitulo)
+    except Exception as e:  # noqa: BLE001
+        print(f"[registro] no se pudo anotar el verbo {verbo}: {e}", file=sys.stderr)
+
+
+def _registrar_error_seguro(raiz: Path, e: BaseException, args) -> None:
+    """Evento `error` con traza (§5.1): quien detiene la tanda lo deja escrito."""
+    try:
+        registro.evento_error(raiz, e, verbo=args.comando, capitulo=getattr(args, "n", None))
+    except Exception as e2:  # noqa: BLE001
+        print(f"[registro] no se pudo anotar el error: {e2}", file=sys.stderr)

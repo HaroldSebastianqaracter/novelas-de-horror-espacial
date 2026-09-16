@@ -9,4 +9,4 @@ from _comun import preparar, salir  # noqa: E402
 raiz, payload = preparar()
 from app import hooks  # noqa: E402
 
-salir(hooks.verificar_post_tool_use(payload, raiz))
+salir(hooks.verificar_post_tool_use(payload, raiz), payload, raiz, "PostToolUse")

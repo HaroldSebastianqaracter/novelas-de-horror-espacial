@@ -24,6 +24,7 @@ class Cursor:
     intentos_longitud: int = 0  # EX-07
     intentos_personaje: int = 0  # EX-08
     avisos: list[str] = field(default_factory=list)
+    registro: str | None = None  # carpeta de 07_registro/ de esta tanda (§5.1), relativa a la raíz
 
     def tope_alcanzado(self) -> bool:
         return self.tope is not None and self.cerrados >= self.tope
@@ -48,9 +49,15 @@ def escribir(raiz: Path, cursor: Cursor) -> None:
     path.write_text(json.dumps(asdict(cursor), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def borrar(raiz: Path) -> None:
+def borrar(raiz: Path, motivo: str | None = None) -> None:
+    """Fin de la tanda por cualquier motivo. Antes de borrarlo, deja su copia final en el registro (§5.1)."""
     path = Rutas(raiz).cursor
     if path.exists():
+        c = leer(raiz)
+        if c is not None and motivo is not None:
+            from app import registro  # import tardío: registro importa rutas, no cursor
+
+            registro.copiar_cursor_final(raiz, c, motivo)
         path.unlink()
 
 

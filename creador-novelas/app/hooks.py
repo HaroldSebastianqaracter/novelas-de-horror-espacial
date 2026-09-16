@@ -11,6 +11,7 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
+from app import registro
 from app.agents import escritor
 from app.config import cargar_config
 from app.errores import EstadoInvalidoError, HarnessError
@@ -85,7 +86,9 @@ def _bloquear(raiz: Path, payload: dict, hook: str, motivo: str) -> Decision:
                 checkpoint.registrar_error(raiz, texto)
         except HarnessError:
             pass
-        cur.borrar(raiz)
+        registro.evento(raiz, "error", excepcion="EX-09", mensaje=texto, traza=f"hook {hook}; agent_id {payload.get('agent_id')}",
+                        agent_type=payload.get("agent_type"), agent_id=payload.get("agent_id"))
+        cur.borrar(raiz, "EX-09")
     return decision
 
 
@@ -118,7 +121,7 @@ def contexto_session_start(raiz: Path) -> str:
     """H-01 (RF-08.3): la salida de `status` entra al contexto de la sesión."""
     texto = checkpoint.texto_status(raiz)
     aviso = aviso_h11(raiz)
-    return texto + (f"\n{aviso}" if aviso else "")
+    return texto + (f"\n{aviso}" if aviso else "") + "\n" + registro.texto_status(raiz)
 
 
 # ---------- PreToolUse: H-04, H-05, H-06, H-08, H-09, H-11 + copia previa para H-03 ----------
@@ -192,12 +195,16 @@ def decidir_pre_tool_use(payload: dict, raiz: Path) -> Decision:
             if not bajo(rel, "06_qa"):
                 return _bloquear(raiz, payload, "H-06", f"QA solo escribe dentro de 06_qa/ (RF-07.5); intentó {rel_posix or ruta}")
 
-    # H-09: el orquestador no lee ni toca el manuscrito (INV-08).
+    # H-09: el orquestador no lee ni toca el manuscrito (INV-08) ni el registro de ejecución (RF-08.5, §5.1).
     if not es_subagente:
         if tool in HERRAMIENTAS_LECTURA and _toca_manuscrito(tool, tool_input, rel):
             return _bloquear(raiz, payload, "H-09", "el orquestador no lee 05_manuscrito/ (INV-08); usá `python -m app ensamblar` para leer lo generado")
+        if tool in HERRAMIENTAS_LECTURA and _toca_registro(tool, tool_input, rel):
+            return _bloquear(raiz, payload, "H-09", "el orquestador no lee 07_registro/ (RF-08.5); `python -m app status` lo resume")
         if tool in HERRAMIENTAS_ESCRITURA and es_ruta_manuscrito(rel):
             return _bloquear(raiz, payload, "H-09", "el orquestador no escribe prosa ni toca 05_manuscrito/ (INV-08)")
+        if tool in HERRAMIENTAS_ESCRITURA and bajo(rel, "07_registro"):
+            return _bloquear(raiz, payload, "H-09", "el orquestador no escribe en 07_registro/: lo escriben los scripts y los hooks (RF-08.5)")
 
     # Copia previa para H-03: PostToolUse ve el archivo ya sobrescrito.
     decision = Decision()
@@ -209,6 +216,15 @@ def decidir_pre_tool_use(payload: dict, raiz: Path) -> Decision:
             rutas.continuidad_previa.write_text("[]\n", encoding="utf-8")
         decision.con_nota("copia previa de continuidad.json guardada para H-03")
     return decision
+
+
+def _toca_registro(tool: str, tool_input: dict, rel: Path | None) -> bool:
+    if bajo(rel, "07_registro"):
+        return True
+    if tool in ("Grep", "Glob"):
+        patron = " ".join(str(tool_input.get(k, "")) for k in ("pattern", "glob", "path"))
+        return "07_registro" in patron
+    return False
 
 
 def _toca_manuscrito(tool: str, tool_input: dict, rel: Path | None) -> bool:
@@ -276,7 +292,9 @@ def _fallo_verificador(raiz: Path, payload: dict, hook: str, motivo: str) -> Dec
             checkpoint.registrar_error(raiz, f"EX-01 via {hook}: {motivo}")
     except HarnessError:
         pass
-    cur.borrar(raiz)
+    registro.evento(raiz, "error", excepcion="EX-01", mensaje=f"via {hook}: {motivo}", traza=f"hook {hook}; agent_id {payload.get('agent_id')}",
+                    agent_type=payload.get("agent_type"), agent_id=payload.get("agent_id"))
+    cur.borrar(raiz, f"EX-01 via {hook}")
     registrar_choque(raiz, payload, hook)
     return Decision(bloquear=True, motivo=texto, hook=hook, detiene_tanda=True)
 
@@ -294,9 +312,14 @@ def decidir_subagent_stop(payload: dict, raiz: Path) -> Decision:
         if decision.bloquear:
             return decision  # el subagente sigue; H-10 registra cuando termine de verdad
 
-    nota = registrar_uso(payload, raiz)  # H-10
+    nota, uso = registrar_uso(payload, raiz)  # H-10
     if nota:
         decision.con_nota(nota)
+    # §5.1: agente_fin lo escribe subagent_stop.py, con los turnos del transcript y los intentos de validación (H-11).
+    registro.evento(raiz, "agente_fin", rol=agent_type, capitulo=_capitulo_activo(raiz, agent_type),
+                    agent_id=payload.get("agent_id"), turnos=uso.get("turnos"), modelo=uso.get("modelo"),
+                    intentos_de_validacion=registro.intentos_de_validacion(raiz, payload.get("agent_id")),
+                    stop_reason=payload.get("stop_reason"))
     return decision
 
 
@@ -328,13 +351,23 @@ def _h07_escritor(payload: dict, raiz: Path) -> Decision:
     return Decision().con_nota(f"H-07: segundo intento fuera de rango ({palabras} palabras); se acepta con aviso (EX-07)")
 
 
+_CAMPOS_USO = {"tokens_entrada": "input_tokens", "tokens_salida": "output_tokens",
+               "tokens_cache_lectura": "cache_read_input_tokens", "tokens_cache_creacion": "cache_creation_input_tokens"}
+
+
 def leer_uso_transcript(path: Path) -> dict:
-    """Suma tokens y toma el modelo de los mensajes assistant del transcript JSONL del subagente."""
+    """H-10 (§13.3): suma los tokens de TODOS los mensajes del asistente del transcript JSONL, no solo del último.
+
+    Un mismo mensaje aparece en varias líneas (una por bloque de contenido), con el mismo `message.id` y un
+    `usage` que crece hasta el valor final. Por cada mensaje se toma el máximo de cada campo entre sus líneas, y
+    los mensajes se suman. `turnos` es la cantidad de mensajes distintos.
+    """
     total = {"tokens_entrada": 0, "tokens_salida": 0, "tokens_cache_lectura": 0, "tokens_cache_creacion": 0,
              "turnos": 0, "modelo": None}
     if not path.exists():
         return total
-    vistos: set[str] = set()
+    por_mensaje: dict[str, dict[str, int]] = {}
+    orden: list[str] = []
     for linea in path.read_text(encoding="utf-8", errors="replace").splitlines():
         try:
             entrada = json.loads(linea)
@@ -344,34 +377,34 @@ def leer_uso_transcript(path: Path) -> dict:
             continue
         mensaje = entrada.get("message") or {}
         uso = mensaje.get("usage") or {}
-        mid = mensaje.get("id") or entrada.get("uuid")
-        if mid in vistos or not uso:
-            continue
-        vistos.add(mid)
-        total["turnos"] += 1
-        total["tokens_entrada"] += int(uso.get("input_tokens") or 0)
-        total["tokens_salida"] += int(uso.get("output_tokens") or 0)
-        total["tokens_cache_lectura"] += int(uso.get("cache_read_input_tokens") or 0)
-        total["tokens_cache_creacion"] += int(uso.get("cache_creation_input_tokens") or 0)
+        mid = str(mensaje.get("id") or entrada.get("uuid") or len(orden))
+        if mid not in por_mensaje:
+            por_mensaje[mid] = {campo: 0 for campo in _CAMPOS_USO}
+            orden.append(mid)
+        for campo, clave in _CAMPOS_USO.items():
+            por_mensaje[mid][campo] = max(por_mensaje[mid][campo], int(uso.get(clave) or 0))
         if mensaje.get("model"):
             total["modelo"] = mensaje["model"]
+    for mid in orden:
+        total["turnos"] += 1
+        for campo in _CAMPOS_USO:
+            total[campo] += por_mensaje[mid][campo]
     return total
 
 
-def registrar_uso(payload: dict, raiz: Path) -> str:
-    """H-10 (RF-CFG-06): una línea en 04_estado/uso.jsonl por invocación de subagente; suma la llamada al cursor."""
-    rutas = Rutas(raiz)
+def registrar_uso(payload: dict, raiz: Path) -> tuple[str, dict]:
+    """H-10 (RF-CFG-06): una línea en 07_registro/<tanda>/uso.jsonl por invocación de subagente; suma la llamada al cursor."""
     try:
         registrar = cargar_config(raiz).registrar_uso
     except HarnessError:
         registrar = True
     cur.sumar_llamada(raiz)
-    if not registrar:
-        return "H-10: registrar_uso = false; la llamada se contó pero no se registró"
     transcript = payload.get("agent_transcript_path")
     uso = leer_uso_transcript(Path(transcript)) if transcript else leer_uso_transcript(Path("/inexistente"))
+    if not registrar:
+        return "H-10: registrar_uso = false; la llamada se contó pero no se registró", uso
     capitulo = _capitulo_activo(raiz, payload.get("agent_type")) if checkpoint.leer_manifest(raiz) is not None else None
-    registro = {
+    linea_uso = {
         "rol": payload.get("agent_type"),
         "capitulo": capitulo,
         "modelo": uso["modelo"],
@@ -383,7 +416,7 @@ def registrar_uso(payload: dict, raiz: Path) -> str:
         "agent_id": payload.get("agent_id"),
         "stop_reason": payload.get("stop_reason"),
     }
-    rutas.estado.mkdir(parents=True, exist_ok=True)
-    with rutas.uso.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(registro, ensure_ascii=False) + "\n")
-    return f"H-10: uso registrado para {registro['rol']} (modelo {registro['modelo']}, {registro['tokens_entrada']}+{registro['tokens_salida']} tokens)"
+    with registro.ruta_uso(raiz).open("a", encoding="utf-8") as f:
+        f.write(json.dumps(linea_uso, ensure_ascii=False) + "\n")
+    return (f"H-10: uso registrado para {linea_uso['rol']} (modelo {linea_uso['modelo']}, "
+            f"{linea_uso['tokens_entrada']}+{linea_uso['tokens_salida']} tokens, {linea_uso['turnos']} turnos)"), uso

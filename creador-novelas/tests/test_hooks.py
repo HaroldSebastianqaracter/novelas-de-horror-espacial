@@ -187,8 +187,10 @@ def test_h10_registra_uso_desde_el_transcript(proyecto, tmp_path):
     payload = {"hook_event_name": "SubagentStop", "agent_type": "extractor", "agent_id": "abc", "stop_hook_active": False,
                "agent_transcript_path": str(transcript), "stop_reason": "end_turn"}
     assert stop(payload, proyecto).returncode == 0
-    registros = [json.loads(l) for l in rutas.uso.read_text(encoding="utf-8").splitlines()]
-    assert len(registros) == 1
+    from app import registro
+
+    registros = registro.leer_uso(registro.dir_actual(proyecto))  # §5.1: uso.jsonl vive en 07_registro/<tanda>/
+    assert len(registros) == 1 and not rutas.uso.exists()
     r = registros[0]
     assert (r["rol"], r["capitulo"], r["modelo"], r["tokens_entrada"], r["tokens_salida"], r["turnos"]) == ("extractor", 1, "modelo-de-prueba-a", 2500, 1000, 2)
     assert cur.leer(proyecto).llamadas == 1  # RF-CFG-06: una llamada por invocación
@@ -197,11 +199,13 @@ def test_h10_registra_uso_desde_el_transcript(proyecto, tmp_path):
 def test_h10_no_registra_dos_veces_si_h07_bloqueo(proyecto):
     rutas = Rutas(proyecto)
     base = {"agent_type": "escritor", "agent_id": "e-x", "stop_hook_active": False}
+    from app import registro
+
     assert stop(base, proyecto).returncode == 2  # bloqueado por H-07: no registra
-    assert not rutas.uso.exists()
+    assert registro.leer_uso(registro.dir_actual(proyecto)) == []
     rutas.capitulo(1).write_text("bien " * 1500, encoding="utf-8")
     assert stop(dict(base, stop_hook_active=True), proyecto).returncode == 0
-    assert len(rutas.uso.read_text(encoding="utf-8").splitlines()) == 1
+    assert len(registro.leer_uso(registro.dir_actual(proyecto))) == 1
 
 
 # ---------- EX-09 ----------
