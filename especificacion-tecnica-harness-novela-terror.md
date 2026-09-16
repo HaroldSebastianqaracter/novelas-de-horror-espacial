@@ -193,7 +193,7 @@ No forma parte de la especificación funcional (es puramente de soporte técnico
   "estado": "en_progreso",  // en_progreso | pausado_por_qa | completo — no hay "abortado", ver abajo
   "reporte_qa_pendiente": null,          // nombre del reporte sin resolver, o null (RF-07.4)
   "intentos_por_capitulo": { "7": 2 },   // solo capítulos que necesitaron reintento (EX-07/EX-08)
-  "prompts_hash": { "escritor": "…", "extractor": "…", "qa": "…" }   // §11.5,
+  "prompts_hash": { "escritor": "…", "extractor": "…", "qa": "…" },   // §11.5
   "reextraccion_pendiente": [],          // capítulos declarados corregidos y aún no reextraídos (RF-07.6, §8.2)
   "capitulo_activo": null,               // capítulo que el extractor puede leer durante una reextracción; null = ultimo_capitulo_cerrado + 1 (H-05)
   "ultimo_error": null                   // texto del último fallo que detuvo la tanda; lo muestra status
