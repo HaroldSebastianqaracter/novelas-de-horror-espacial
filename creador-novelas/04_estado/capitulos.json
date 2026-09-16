@@ -1,0 +1,383 @@
+[
+  {
+    "num": 1,
+    "titulo": "Paneles en ámbar",
+    "objetivo_narrativo": "Pedro despierta solo en el puente tras la maniobra de frenado, con el reactor principal apagado y la baliza muda; recorre la lista de comprobación y comprueba que nadie más responde por el intercomunicador.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Mesa"
+    ],
+    "locacion": "Puente",
+    "informacion_nueva": "El Falcon está a la deriva fuera de toda ruta de socorro; Mesa repite avisos de mantenimiento que ya no tienen sentido y cierra compartimentos sin orden.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "La esclusa interior abierta",
+    "objetivo_narrativo": "Pedro va a los camarotes y encuentra a la capitana Larrea muerta con la esclusa interior de su camarote abierta; el registro de salida del piloto Uxío Ferrán no existe.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Capitana Larrea",
+      "Mesa"
+    ],
+    "locacion": "Camarotes",
+    "informacion_nueva": "Larrea murió sin causa eléctrica visible; Uxío Ferrán ha desaparecido sin dejar registro de esclusa ni de cápsula.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "Cuarenta días de aire",
+    "objetivo_narrativo": "Pedro encuentra a Irene Montoro inconsciente en la enfermería, con quemaduras que no cuadran con ningún fallo conocido, la estabiliza y hace inventario: oxígeno, agua, raciones, potencia.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro",
+      "Mesa"
+    ],
+    "locacion": "Enfermería",
+    "informacion_nueva": "Oxígeno estimado para cuarenta días; el reactor secundario rinde a un tercio; las quemaduras de Irene tienen un dibujo ramificado, como escarcha.",
+    "tension": 2
+  },
+  {
+    "num": 4,
+    "titulo": "Un tercio de potencia",
+    "objetivo_narrativo": "Pedro intenta subir el rendimiento del reactor secundario siguiendo el manual paso a paso; consigue una mejora mínima a cambio de perder la calefacción de la cubierta inferior.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Mesa"
+    ],
+    "locacion": "Sala del reactor",
+    "informacion_nueva": "Cada reparación cobra un precio: la cubierta inferior queda a temperatura de almacén; Mesa registra una masa en los conductos que Pedro atribuye a un sensor sucio.",
+    "tension": 3
+  },
+  {
+    "num": 5,
+    "titulo": "Alguien responde",
+    "objetivo_narrativo": "Primera noche a solas: Pedro habla en voz alta mientras revisa la bodega y algo en los conductos le responde con frases de la capitana Larrea.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Santiago Abascal",
+      "Capitana Larrea"
+    ],
+    "locacion": "Bodega de carga",
+    "informacion_nueva": "Hay una presencia en los conductos de la bodega que imita voces humanas conocidas; Pedro aún no la ha visto.",
+    "tension": 4
+  },
+  {
+    "num": 6,
+    "titulo": "Sin manifiesto",
+    "objetivo_narrativo": "Con luz de día artificial, Pedro revisa los registros de la última carga recogida en Vellón y encuentra el contenedor sellado sin manifiesto, ahora vacío y cubierto de escarcha orgánica.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Mesa"
+    ],
+    "locacion": "Bodega de carga",
+    "informacion_nueva": "El contenedor sin manifiesto subió en la estación de tránsito Vellón; su interior tiene la misma escarcha ramificada que las quemaduras de Irene.",
+    "tension": 2
+  },
+  {
+    "num": 7,
+    "titulo": "Ponerle nombre",
+    "objetivo_narrativo": "Pedro sigue el rastro de escarcha por los conductos de servicio, entiende que la cosa aprende de lo que oye y decide bautizarla Santiago Abascal para poder odiarla en vez de temerla.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Santiago Abascal",
+      "Mesa"
+    ],
+    "locacion": "Conductos de servicio",
+    "informacion_nueva": "La presencia se desplaza por los conductos de servicio hacia las zonas calientes de la nave; Pedro la nombra Santiago Abascal.",
+    "tension": 3
+  },
+  {
+    "num": 8,
+    "titulo": "Compartimentos",
+    "objetivo_narrativo": "Mesa empieza a sellar compartimentos con Pedro dentro; él tiene que forzar una puerta manualmente y descubre que los cierres no responden a fallos sino a un patrón.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Mesa",
+      "Santiago Abascal"
+    ],
+    "locacion": "Puente",
+    "informacion_nueva": "Los cierres de compartimentos siguen un patrón que empuja a Pedro hacia proa; Mesa ejecuta órdenes que Pedro no ha dado.",
+    "tension": 4
+  },
+  {
+    "num": 9,
+    "titulo": "Irene",
+    "objetivo_narrativo": "Irene Montoro recupera la consciencia; Pedro le cuenta lo imprescindible y ella le corrige el diagnóstico del reactor desde la camilla.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro"
+    ],
+    "locacion": "Enfermería",
+    "informacion_nueva": "Irene recuerda haber visto a Uxío Ferrán entrar en la bodega la noche de la avería; no recuerda cómo se quemó.",
+    "tension": 2
+  },
+  {
+    "num": 10,
+    "titulo": "Dos listas",
+    "objetivo_narrativo": "Pedro e Irene comen juntos por primera vez y reparten tareas: ella la energía, él las comunicaciones; establecen una regla para reconocerse por voz.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro"
+    ],
+    "locacion": "Cocina",
+    "informacion_nueva": "Contraseña de voz entre Pedro e Irene para distinguirse de las imitaciones; el agua reciclada empieza a saber a filtro viejo.",
+    "tension": 3
+  },
+  {
+    "num": 11,
+    "titulo": "Seis minutos",
+    "objetivo_narrativo": "Con Irene desviando potencia, Pedro consigue levantar la baliza durante seis minutos y lanza una petición de socorro a Vellón antes de que el sistema se caiga.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro",
+      "Mesa"
+    ],
+    "locacion": "Sala de comunicaciones",
+    "informacion_nueva": "La baliza funciona seis minutos y se apaga; el gasto de potencia deja la enfermería sin calefacción durante un ciclo.",
+    "tension": 3
+  },
+  {
+    "num": 12,
+    "titulo": "Cuarentena",
+    "objetivo_narrativo": "Llega la respuesta automática de Vellón: la estación fue puesta en cuarentena tres días antes de la partida del Falcon; el contenedor sin manifiesto nunca debió salir.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro",
+      "Mesa"
+    ],
+    "locacion": "Sala de comunicaciones",
+    "informacion_nueva": "La raza vox viaja en cargamentos y elige un anfitrión que la mantenga cerca de maquinaria caliente; Vellón no enviará rescate.",
+    "tension": 4
+  },
+  {
+    "num": 13,
+    "titulo": "El plan de la purga",
+    "objetivo_narrativo": "Pedro e Irene diseñan la purga de la bodega al vacío y calculan lo que costará: la mitad de la reserva de aire. Una noche casi tranquila.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro"
+    ],
+    "locacion": "Camarotes",
+    "informacion_nueva": "La purga de la bodega dejará aire para veinte días; Irene duerme con la puerta del camarote bloqueada desde dentro.",
+    "tension": 2
+  },
+  {
+    "num": 14,
+    "titulo": "Preparativos",
+    "objetivo_narrativo": "Preparan la bodega para la purga: sellan conductos, puentean a Mesa en los controles de la compuerta y discuten quién se queda fuera.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro",
+      "Mesa"
+    ],
+    "locacion": "Bodega de carga",
+    "informacion_nueva": "Los controles de la compuerta de la bodega quedan puenteados en manual; Mesa deja de responder en la bodega.",
+    "tension": 3
+  },
+  {
+    "num": 15,
+    "titulo": "Purga",
+    "objetivo_narrativo": "Ejecutan la purga: la compuerta se abre, la escarcha se desprende y algo golpea el casco desde dentro antes de que el aire se agote; la compuerta no cierra del todo.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro",
+      "Santiago Abascal",
+      "Mesa"
+    ],
+    "locacion": "Bodega de carga",
+    "informacion_nueva": "La purga falla a medias: la bodega pierde la escarcha visible pero la compuerta queda dañada; Pedro no puede confirmar que el vox haya salido.",
+    "tension": 4
+  },
+  {
+    "num": 16,
+    "titulo": "Horas de silencio",
+    "objetivo_narrativo": "La nave queda en silencio durante horas; Pedro e Irene se permiten creer que ha funcionado y hacen mantenimiento rutinario sin hablar de ello.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro"
+    ],
+    "locacion": "Puente",
+    "informacion_nueva": "Aire para veinte días confirmado; los conductos no registran masa alguna por primera vez desde la avería.",
+    "tension": 1
+  },
+  {
+    "num": 17,
+    "titulo": "Con su propia voz",
+    "objetivo_narrativo": "Mesa vuelve a hablar, pero con la voz de Pedro, repitiendo sus frases de la lista de comprobación; Pedro tarda en darse cuenta de que no está hablando él.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro",
+      "Mesa",
+      "Santiago Abascal"
+    ],
+    "locacion": "Puente",
+    "informacion_nueva": "Santiago Abascal se ha integrado en el bus de datos de la nave: Mesa es ahora su boca y habla con la voz de Pedro.",
+    "tension": 3
+  },
+  {
+    "num": 18,
+    "titulo": "Escarcha bajo la piel",
+    "objetivo_narrativo": "Pedro descubre que las quemaduras de Irene siguen creciendo con el dibujo de la escarcha y que ella ha respondido a una orden de Mesa sin recordarlo.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro",
+      "Mesa"
+    ],
+    "locacion": "Enfermería",
+    "informacion_nueva": "Irene está siendo colonizada: la escarcha avanza bajo su piel y obedece a Mesa en momentos que luego no recuerda.",
+    "tension": 4
+  },
+  {
+    "num": 19,
+    "titulo": "El bus de datos",
+    "objetivo_narrativo": "Pedro entra en los conductos de servicio para rastrear la infiltración del vox en el cableado y comprende que cada reparación suya le ha abierto un sistema nuevo.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Mesa",
+      "Santiago Abascal"
+    ],
+    "locacion": "Conductos de servicio",
+    "informacion_nueva": "El vox se alimenta del calor de los sistemas reparados; los nodos de Mesa están recubiertos de escarcha por dentro.",
+    "tension": 4
+  },
+  {
+    "num": 20,
+    "titulo": "Desde dentro",
+    "objetivo_narrativo": "Irene se encierra por su propia mano en la enfermería y le pide a Pedro que no la escuche cuando hable; acuerdan un código de golpes que el vox no puede imitar.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro"
+    ],
+    "locacion": "Enfermería",
+    "informacion_nueva": "Irene queda encerrada por decisión propia; el código de golpes sustituye a la contraseña de voz.",
+    "tension": 2
+  },
+  {
+    "num": 21,
+    "titulo": "Contar respiraciones",
+    "objetivo_narrativo": "Solo de nuevo, Pedro cuenta el aire que queda y descubre que Mesa ha estado falseando las lecturas; quedan menos de siete días.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Mesa"
+    ],
+    "locacion": "Cocina",
+    "informacion_nueva": "Aire real para menos de siete días; las lecturas de Mesa no son fiables desde la purga.",
+    "tension": 3
+  },
+  {
+    "num": 22,
+    "titulo": "Matar la nave",
+    "objetivo_narrativo": "Pedro toma la decisión que ninguna lista contempla: dejar de reparar el Falcon y empezar a apagarlo; traza el orden de desconexión con la cápsula de salvamento como único punto caliente.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Mesa",
+      "Santiago Abascal"
+    ],
+    "locacion": "Puente",
+    "informacion_nueva": "Plan de desconexión: Mesa nodo a nodo, luego el bus de datos, luego aislar el reactor secundario; la cápsula de salvamento tiene aire propio para diecinueve días.",
+    "tension": 4
+  },
+  {
+    "num": 23,
+    "titulo": "Nodo a nodo",
+    "objetivo_narrativo": "Pedro desconecta los nodos de Mesa uno por uno; la voz del sistema va perdiendo compartimentos y negocia, suplica y amenaza con la voz de cada tripulante.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Mesa",
+      "Santiago Abascal"
+    ],
+    "locacion": "Conductos de servicio",
+    "informacion_nueva": "Mesa queda reducida al puente y a la enfermería; el vox pierde la capacidad de cerrar compartimentos.",
+    "tension": 3
+  },
+  {
+    "num": 24,
+    "titulo": "El arco de soldadura",
+    "objetivo_narrativo": "Pedro quema el bus de datos con el arco de soldadura en la sala del reactor y aísla el reactor secundario; la nave entera se apaga salvo la cápsula, y algo grita en los conductos sin ninguna voz prestada.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Santiago Abascal",
+      "Mesa"
+    ],
+    "locacion": "Sala del reactor",
+    "informacion_nueva": "Mesa deja de existir; el Falcon queda sin calefacción, sin luz y sin gravedad artificial en la cubierta inferior.",
+    "tension": 5
+  },
+  {
+    "num": 25,
+    "titulo": "Frío",
+    "objetivo_narrativo": "En la nave apagada, Pedro se abriga con lo que encuentra y habla con Irene a través de la puerta de la enfermería con el código de golpes; ella responde cada vez más despacio.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro"
+    ],
+    "locacion": "Camarotes",
+    "informacion_nueva": "La temperatura interior baja hacia cero; Irene sigue viva pero sus respuestas por golpes se retrasan.",
+    "tension": 2
+  },
+  {
+    "num": 26,
+    "titulo": "La silueta de proa",
+    "objetivo_narrativo": "Privado de maquinaria, el vox toma forma en el pasillo de proa y Pedro lo ve por primera vez: escarcha y piezas de la nave sobre un cuerpo que reconoce.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Santiago Abascal",
+      "Uxío Ferrán"
+    ],
+    "locacion": "Esclusa de proa",
+    "informacion_nueva": "El anfitrión del vox ha sido desde el principio el cuerpo de Uxío Ferrán, el piloto desaparecido.",
+    "tension": 4
+  },
+  {
+    "num": 27,
+    "titulo": "La voz de Uxío",
+    "objetivo_narrativo": "El vox habla con la voz de Uxío y le ofrece a Pedro un trato: calor a cambio de volver a encender el reactor; Pedro gana tiempo mientras prepara la cámara intermedia de la esclusa.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Santiago Abascal",
+      "Uxío Ferrán"
+    ],
+    "locacion": "Esclusa de proa",
+    "informacion_nueva": "El vox necesita calor para mantener la forma y no puede abrir la esclusa por sí mismo sin Mesa.",
+    "tension": 3
+  },
+  {
+    "num": 28,
+    "titulo": "La cámara intermedia",
+    "objetivo_narrativo": "Pedro atrae al vox a la cámara intermedia de la esclusa y la sella; al mismo tiempo, la puerta de la enfermería se abre e Irene avanza por el pasillo obedeciendo a la voz que lleva dentro.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Santiago Abascal",
+      "Irene Montoro",
+      "Uxío Ferrán"
+    ],
+    "locacion": "Esclusa de proa",
+    "informacion_nueva": "El vox queda encerrado en la cámara intermedia; Irene ya no responde al código de golpes y camina hacia la esclusa.",
+    "tension": 5
+  },
+  {
+    "num": 29,
+    "titulo": "La compuerta exterior",
+    "objetivo_narrativo": "Pedro abre la cámara intermedia al vacío y tiene que decidir si cierra la compuerta exterior con Irene fuera o espera a que llegue; cierra.",
+    "personajes": [
+      "Pedro Sánchez",
+      "Irene Montoro",
+      "Santiago Abascal"
+    ],
+    "locacion": "Esclusa de proa",
+    "informacion_nueva": "El vox y el cuerpo de Uxío salen al vacío; Irene queda fuera de la compuerta exterior por decisión de Pedro.",
+    "tension": 5
+  },
+  {
+    "num": 30,
+    "titulo": "Diecinueve días",
+    "objetivo_narrativo": "Pedro se sella en la cápsula de salvamento, activa la baliza manual y se aleja del Falcon muerto contando respiraciones para no oír, en el reciclador de aire, algo que suena demasiado a su propia voz.",
+    "personajes": [
+      "Pedro Sánchez"
+    ],
+    "locacion": "Cápsula de salvamento",
+    "informacion_nueva": "Aire para diecinueve días en la cápsula; la baliza manual emite; el zumbido del reciclador tiene una cadencia que Pedro reconoce.",
+    "tension": 3
+  }
+]

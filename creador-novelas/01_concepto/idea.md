@@ -1,0 +1,1 @@
+Pedro sanchez esta varado en el espacio en su nave estelar "falcon", esta en peligro escapando de un alienigena llamado Santiago abascal de la raza alienigena VOX, en esta historia se hablara de como escapa y repara la nave y si logra acabar con el alienigena. 

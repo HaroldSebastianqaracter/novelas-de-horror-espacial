@@ -1,0 +1,17 @@
+{
+  "ultimo_capitulo_cerrado": 3,
+  "ultimo_qa_ejecutado": 3,
+  "total_capitulos_esperado": 30,
+  "estado": "pausado_por_qa",
+  "reporte_qa_pendiente": "qa_cap_3",
+  "intentos_por_capitulo": {},
+  "prompts_hash": {
+    "escritor": "77952b61068aa061",
+    "extractor": "38b12f9649f6154f",
+    "qa": "4e4b6865aa8b878b"
+  },
+  "reextraccion_pendiente": [],
+  "resolucion_iniciada": false,
+  "capitulo_activo": null,
+  "ultimo_error": null
+}

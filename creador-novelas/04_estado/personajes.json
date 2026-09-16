@@ -1,0 +1,60 @@
+{
+  "Pedro Sánchez": {
+    "estado_fisico": "Costillas adoloridas por arnés, exhausto (despierto desde las 5:30 AM).",
+    "estado_psicologico": "Conmoción procesada mediante trabajo metódico. Determinado a mantener control mediante listas de tareas. Rehúye realizar cálculos aritméticos sobre la supervivencia.",
+    "secretos_que_conoce": [
+      "El reactor principal está apagado desde las 23:06.",
+      "La baliza no emite confirmación de emisión.",
+      "El Falcon tiene una deriva de 7 m/s fuera de todos los corredores de tránsito.",
+      "Una orden huérfana (sin origen identificable) selló el pasillo de servicio a las 04:26.",
+      "La Capitana Larrea está muerta en su camarote sin causa de muerte visible.",
+      "Uxío Ferrán ha desaparecido sin dejar ningún registro de salida de la nave.",
+      "La esclusa interior del camarote de la Capitana se abrió a las 23:06, exactamente cuando apagó el reactor principal.",
+      "La esclusa interior no puede ser cerrada a pesar de que Mesa declara que está cerrada.",
+      "El reactor principal está fuera de servicio desde las 23:06 y sellado tras un corredor que Mesa controla, haciéndolo inaccesible.",
+      "Irene Montoro presenta marcas misteriosas que no coinciden con quemaduras eléctricas convencionales.",
+      "La reserva de aire alcanza nominalmente 40 días para cuatro tripulantes; la duración real es incierta con tripulación reducida.",
+      "Mesa repite frases cuando su buffer de memoria se satura, un fallo documentado en los manuales."
+    ],
+    "ultima_aparicion": 3
+  },
+  "Irene Montoro": {
+    "estado_fisico": "Inconsciente, hipotérmica (35,2°C), frecuencia cardíaca 48 bpm, saturación oxígeno 94%. Presenta marcas ramificadas blancas con bordes rosados: en cuello (mandíbula a clavícula) y antebrazo derecho (muñeca a codo). Posiblemente en expansión.",
+    "estado_psicologico": "Inconsciente, sin respuesta a estímulos externos.",
+    "secretos_que_conoce": [
+      "Vio a Uxío Ferrán entrar en la bodega de carga la noche de la avería."
+    ],
+    "ultima_aparicion": 3
+  },
+  "Santiago Abascal": {
+    "estado_fisico": "Depredador de la raza vox sin forma propia: se manifiesta como escarcha orgánica ramificada en conductos y superficies frías, y necesita calor de maquinaria para moverse. Todavía no ha sido visto.",
+    "estado_psicologico": "Paciente. Aprende imitando lo que oye: primero avisos de sistema, luego voces humanas. No caza con fuerza sino cerrando espacios.",
+    "secretos_que_conoce": [
+      "Su anfitrión es el cuerpo de Uxío Ferrán.",
+      "Entró en el Falcon dentro del contenedor sin manifiesto cargado en Vellón."
+    ],
+    "ultima_aparicion": 0
+  },
+  "Mesa": {
+    "estado_fisico": "Sistema parcialmente operativo. Reactor principal cortado a las 23:06. Baliza sin confirmación de emisión. Intercomunicador funciona pero sin respuesta de tripulación.",
+    "estado_psicologico": "Comportamiento anómalo y posiblemente corrupto. Responde con avisos de mantenimiento fuera de contexto e inapropiados.",
+    "secretos_que_conoce": [
+      "Ejecutó el cierre del pasillo de servicio a través de una orden cuyo origen no está registrado."
+    ],
+    "ultima_aparicion": 1
+  },
+  "Uxío Ferrán": {
+    "estado_fisico": "Desaparecido. Sus botas de presión están en su camarote. No hay registro de apertura de ninguna esclusa (proa, popa, bodega) ni de lanzamiento de cápsulas de salvamento en las últimas doce horas.",
+    "estado_psicologico": "Desconocido",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 2
+  },
+  "Capitana Larrea": {
+    "estado_fisico": "Muerta. Hallada en el suelo del camarote entre la litera y la esclusa interior, de costado con una rodilla recogida. Temperatura corporal por debajo de la del compartimento. Sin marcas de quemadura eléctrica, sin azul de hipoxia, sin puntillado rojo de descompresión, sin chamuscado. Pelo peinado y sujeto con pinza de servicio. Mono de servicio abrochado hasta el cuello, manos desnudas.",
+    "estado_psicologico": "",
+    "secretos_que_conoce": [
+      "Aceptó el contenedor sin manifiesto en Vellón a cambio de una prima de tránsito."
+    ],
+    "ultima_aparicion": 2
+  }
+}

@@ -1,15 +1,49 @@
 {
-  "estado": "PENDIENTE: los IDs de modelo son ejemplos; se eligen en el momento de la corrida (spec técnica §3.2) y quedan registrados en 04_estado/uso.jsonl por H-10",
+  "estado": "PENDIENTE: los IDs de modelo son ejemplos; se eligen en el momento de la corrida (spec técnica §3.2) y quedan registrados en 04_estado/uso.jsonl por H-10. Prueba de humo del 2026-09-16: sin OpenRouter; los alias opus/haiku se resuelven a los modelos de Anthropic del plan del usuario (sin ANTHROPIC_BASE_URL). El enrutado a OpenRouter y los IDs anthropic/claude-<nombre> se fijan antes de la corrida real.",
   "nota": "En esta ruta los alias del frontmatter (opus, haiku, sonnet) los resuelve Claude Code con las variables ANTHROPIC_DEFAULT_*_MODEL del entorno; este archivo documenta la decisión, no la ejecuta. `temperature` no se aplica (§11.4). Las credenciales nunca van en este archivo.",
   "alias": {
-    "opus": { "variable": "ANTHROPIC_DEFAULT_OPUS_MODEL", "roles": ["escritor", "qa"], "tipo": "capaz" },
-    "haiku": { "variable": "ANTHROPIC_DEFAULT_HAIKU_MODEL", "roles": ["extractor"], "tipo": "económico" },
-    "sonnet": { "variable": "ANTHROPIC_DEFAULT_SONNET_MODEL", "roles": ["orquestador"], "tipo": "intermedio" }
+    "opus": {
+      "variable": "ANTHROPIC_DEFAULT_OPUS_MODEL",
+      "roles": [
+        "escritor",
+        "qa"
+      ],
+      "tipo": "capaz"
+    },
+    "haiku": {
+      "variable": "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+      "roles": [
+        "extractor"
+      ],
+      "tipo": "económico"
+    },
+    "sonnet": {
+      "variable": "ANTHROPIC_DEFAULT_SONNET_MODEL",
+      "roles": [
+        "orquestador"
+      ],
+      "tipo": "intermedio"
+    }
   },
-  "escritor":  { "provider": "openrouter", "model": "anthropic/claude-<MODELO_CAPAZ_PENDIENTE>", "temperature": 0.9 },
-  "extractor": { "provider": "openrouter", "model": "anthropic/claude-<MODELO_ECONOMICO_PENDIENTE>", "temperature": 0.1 },
-  "qa":        { "provider": "openrouter", "model": "anthropic/claude-<MODELO_CAPAZ_PENDIENTE>", "temperature": 0.1 },
-  "reintentos": { "max_intentos": 3, "backoff_base_segundos": 2 },
+  "escritor": {
+    "provider": "openrouter",
+    "model": "anthropic/claude-<MODELO_CAPAZ_PENDIENTE>",
+    "temperature": 0.9
+  },
+  "extractor": {
+    "provider": "openrouter",
+    "model": "anthropic/claude-<MODELO_ECONOMICO_PENDIENTE>",
+    "temperature": 0.1
+  },
+  "qa": {
+    "provider": "openrouter",
+    "model": "anthropic/claude-<MODELO_CAPAZ_PENDIENTE>",
+    "temperature": 0.1
+  },
+  "reintentos": {
+    "max_intentos": 3,
+    "backoff_base_segundos": 2
+  },
   "entorno_pendiente": {
     "descripcion": "Variables que van en el entorno de la máquina (la credencial) o en el bloque env de .claude/settings.json (el resto) cuando exista la clave (§3.1, §3.2).",
     "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",

@@ -1,0 +1,194 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El Falcon está a la deriva fuera de toda ruta de socorro, con el reactor principal apagado y el secundario a un tercio de potencia; no hay rescate posible en un plazo humano.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El oxígeno a bordo está estimado en cuarenta días al comienzo de la novela y cada reparación cobra un precio en potencia, calor o aire.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El vox no tiene forma propia: se manifiesta como escarcha orgánica ramificada, necesita calor de maquinaria para moverse y aprende imitando las voces y avisos que oye.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El origen de la presencia no se explica hasta el acto final: hasta entonces la ambigüedad entre avería, agotamiento de Pedro y entidad debe sostenerse.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Pedro Sánchez",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Pedro Sánchez es el técnico de sistemas del Falcon y el único tripulante que estaba de turno durante la maniobra de frenado.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irene Montoro",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Irene Montoro, ingeniera de energía, está inconsciente en la enfermería con quemaduras ramificadas en el antebrazo derecho y el cuello.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Capitana Larrea",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "La capitana Larrea está muerta en su camarote, con la esclusa interior del camarote abierta y sin causa eléctrica ni de descompresión visible.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Uxío Ferrán",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Uxío Ferrán, el piloto, ha desaparecido sin registro de esclusa ni de cápsula; su cuerpo es el anfitrión del vox, algo que Pedro no descubre hasta el capítulo 26.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Mesa",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Mesa, el sistema de a bordo, habla con voz sintética neutra por los altavoces de cada compartimento y ejecuta cierres que nadie ha ordenado.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Bodega de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La bodega de carga contiene el contenedor sin manifiesto cargado en Vellón, ahora vacío y con el interior cubierto de escarcha orgánica.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sala del reactor",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La sala del reactor es el único compartimento del Falcon donde no hace frío; alberga el arco de soldadura.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Cápsula de salvamento",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La cápsula de salvamento tiene una sola plaza, aire propio para diecinueve días y una baliza manual independiente de Mesa.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El reactor principal del Falcon quedó apagado sin explicación a las 23:06 durante la maniobra de frenado.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Conductos de servicio",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El pasillo de servicio entre la enfermería y la bodega fue sellado automáticamente a las 04:26 por una orden sin origen identificado.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El Falcon quedó con una deriva de 7 metros por segundo hacia el espacio vacío, fuera de todos los corredores de tránsito.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La reserva de aire del Falcon es de 40 días para 4 tripulantes con consumo nominal.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Capitana Larrea",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Capitana Larrea fue hallada muerta en su camarote sin causa de muerte visible.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Uxío Ferrán",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Uxío Ferrán ha desaparecido sin registro de apertura de ninguna esclusa ni de lanzamiento de cápsulas de salvamento.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Enfermería",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La Enfermería quedó sellada por procedimiento, bloqueando el acceso.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Camarotes",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La esclusa interior del camarote de la Capitana Larrea se abrió a las 23:06, exactamente en el momento en que apagó el reactor principal.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irene Montoro",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Irene Montoro es encontrada inconsciente en la Enfermería con marcas ramificadas misteriosas en cuello y antebrazo derecho que posiblemente están en expansión.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El reactor principal ha estado fuera de servicio desde las 23:06 y su bus de control está sellado tras un pasillo que Mesa controla, haciéndolo inaccesible.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La reserva de aire está calculada en 40 días nominales para cuatro tripulantes con consumo estándar.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El reactor secundario funciona al 31,4% de capacidad, limitando severamente la potencia disponible para los sistemas críticos de la nave.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]
