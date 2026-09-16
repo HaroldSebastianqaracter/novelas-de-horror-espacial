@@ -1,7 +1,7 @@
 ## Capítulo 2
 
-Tras el apagón del reactor, Pedro descubre que Uxío Ferrán ha desaparecido sin rastro de salida, y la Capitana Larrea está muerta en su camarote sin causa visible. La esclusa interior del camarote se abrió a las 23:06 (exactamente cuando apagó el reactor) y no puede ser cerrada. Mesa proporciona información contradictoria sobre el estado del sistema. La Enfermería está sellada por procedimiento.
+Pedro recorre los camarotes buscando sobrevivientes. Encuentra a Uxío Ferrán desaparecido sin registros de escape. Descubre a la Capitana Larrea muerta en su camarote sin causa identificable. La esclusa interior del camarote estaba abierta a las 23:06 (hora del apagón), pero el sistema la reporta cerrada. Una sustancia blanca desconocida cubre el marco de la esclusa.
 
 ## Capítulo 3
 
-Pedro descubre a Irene Montoro inconsciente con marcas ramificadas misteriosas en cuello y antebrazo que posiblemente se expanden. La estabiliza con suero y calor, pero las lesiones no coinciden con quemaduras eléctricas típicas. Completa un inventario de recursos: el reactor principal está offline desde hace horas (inaccesible), dejando la nave limitada al 31% de potencia secundaria y 40 días nominales de aire.
+Pedro abre manualmente la Enfermería y encuentra a Irene inconsciente con quemaduras ramificadas anómalas en cuello y antebrazo. La estabiliza con suero y manta térmica; su temperatura es 35.2°C. Mientras revisa inventario crítico (reactor offline desde 23:06, aire para 40 días, reactor secundario a 31.4%), Mesa comienza a fallar: repite «Aviso de mantenimiento. Cuarenta días» mecánicamente al saturarse su buffer. Pedro termina enfocado en las lesiones de Irene, marcando la expansión de las marcas para hacer seguimiento.

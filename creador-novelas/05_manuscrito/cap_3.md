@@ -68,7 +68,7 @@ El foco de la camilla proyectaba la sombra del gotero en la pared blanca, y la s
 
 Se levantó y acercó el foco.
 
-Comparó con el bloc, con la libreta de cabeza que llevaba desde hacía dos horas: el dibujo llegaba antes al pliegue del codo que hacía diez minutos. O no. O el gel había aclarado la piel de alrededor y ahora se veía más contraste. O estaba cansado, que era lo más probable, porque llevaba despierto desde las cinco y media y había encontrado a una capitana muerta antes del desayuno.
+Comparó con el bloc, con la libreta de cabeza que llevaba desde hacía dos horas: el dibujo llegaba antes al pliegue del codo que hacía diez minutos. O no. O el gel había aclarado la piel de alrededor y ahora se veía más contraste. O estaba cansado, que era lo más probable, porque llevaba despierto desde las cuatro y doce y había encontrado a una capitana muerta antes del desayuno.
 
 Hizo lo único razonable: sacó el estilete del kit y marcó con un punto de tinta el extremo de la rama más larga, justo bajo el pliegue. Anotó la hora. Así, dentro de seis horas, sabría si el problema estaba en la piel de Irene o en su propia cabeza, y cualquiera de las dos respuestas sería un dato.
 

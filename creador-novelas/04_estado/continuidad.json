@@ -133,7 +133,7 @@
     "sujeto_validado": true,
     "hecho": "Capitana Larrea fue hallada muerta en su camarote sin causa de muerte visible.",
     "cap_origen": 2,
-    "superado_por": null
+    "superado_por": 2
   },
   {
     "sujeto": "Uxío Ferrán",
@@ -141,7 +141,7 @@
     "sujeto_validado": true,
     "hecho": "Uxío Ferrán ha desaparecido sin registro de apertura de ninguna esclusa ni de lanzamiento de cápsulas de salvamento.",
     "cap_origen": 2,
-    "superado_por": null
+    "superado_por": 2
   },
   {
     "sujeto": "Enfermería",
@@ -149,7 +149,7 @@
     "sujeto_validado": true,
     "hecho": "La Enfermería quedó sellada por procedimiento, bloqueando el acceso.",
     "cap_origen": 2,
-    "superado_por": null
+    "superado_por": 2
   },
   {
     "sujeto": "Camarotes",
@@ -157,7 +157,7 @@
     "sujeto_validado": true,
     "hecho": "La esclusa interior del camarote de la Capitana Larrea se abrió a las 23:06, exactamente en el momento en que apagó el reactor principal.",
     "cap_origen": 2,
-    "superado_por": null
+    "superado_por": 2
   },
   {
     "sujeto": "Irene Montoro",
@@ -165,7 +165,7 @@
     "sujeto_validado": true,
     "hecho": "Irene Montoro es encontrada inconsciente en la Enfermería con marcas ramificadas misteriosas en cuello y antebrazo derecho que posiblemente están en expansión.",
     "cap_origen": 3,
-    "superado_por": null
+    "superado_por": 3
   },
   {
     "sujeto": "mundo",
@@ -173,7 +173,7 @@
     "sujeto_validado": true,
     "hecho": "El reactor principal ha estado fuera de servicio desde las 23:06 y su bus de control está sellado tras un pasillo que Mesa controla, haciéndolo inaccesible.",
     "cap_origen": 3,
-    "superado_por": null
+    "superado_por": 3
   },
   {
     "sujeto": "mundo",
@@ -181,13 +181,77 @@
     "sujeto_validado": true,
     "hecho": "La reserva de aire está calculada en 40 días nominales para cuatro tripulantes con consumo estándar.",
     "cap_origen": 3,
-    "superado_por": null
+    "superado_por": 3
   },
   {
     "sujeto": "mundo",
     "categoria": "mundo",
     "sujeto_validado": true,
     "hecho": "El reactor secundario funciona al 31,4% de capacidad, limitando severamente la potencia disponible para los sistemas críticos de la nave.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Capitana Larrea",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Capitana Larrea está muerta, encontrada en su camarote sin causa eléctrica visible, sin descompresión ni traumatismo aparente.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Uxío Ferrán",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Uxío Ferrán ha desaparecido sin registros de apertura de esclusas o cápsulas de salvamento.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Camarotes",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La esclusa interior del camarote de Larrea se abrió a las 23:06, coincidiendo con el apagón del reactor principal, pero el sistema reporta la puerta cerrada mientras está abierta de par en par.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Hay una película blanca y ramificada en el marco de la esclusa interior del camarote de Larrea que no se derrite al contacto con el calor corporal.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irene Montoro",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Irene Montoro fue encontrada inconsciente en la Enfermería con quemaduras de patrón ramificado en cuello y antebrazo derecho, sin registros médicos en las últimas veinticuatro horas.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sala del reactor",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El reactor principal está cortado desde las 23:06 y su bus de control es inaccesible tras un pasillo sellado por Mesa.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La reserva de aire nominal (40 días para cuatro tripulantes) ahora sostiene a solo Pedro e Irene, transformando la aritmética de supervivencia.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Mesa",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Mesa falla por saturación de buffer de memoria: repite mecánicamente lo último oído en lugar de responder coherentemente, un fallo documentado en el manual.",
     "cap_origen": 3,
     "superado_por": null
   }
