@@ -409,7 +409,9 @@ def crear_servidor(raiz: Path, puerto: int) -> ThreadingHTTPServer:
 def servir(raiz: Path, puerto: int = 8765) -> int:
     servidor = crear_servidor(raiz, puerto)
     puerto_real = servidor.server_address[1]
-    print(f"Formulario de entrada en http://{HOST}:{puerto_real}/  (raíz: {raiz})", flush=True)
+    print(f"Consola de puente en http://{HOST}:{puerto_real}/consola   (raíz: {raiz})", flush=True)
+    print(f"Formulario suelto en http://{HOST}:{puerto_real}/  —  los mismos parámetros, sin la consola",
+          flush=True)
     print("Ctrl+C para detener.", flush=True)
     try:
         servidor.serve_forever()

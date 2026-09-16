@@ -39,7 +39,9 @@ SKILLS: dict[str, str] = {
     "inicializar-estado": "/inicializar-estado",
     "escribir-tanda": "/escribir-tanda",
 }
-VERBOS: dict[str, list[str]] = {"ensamblar": ["ensamblar"]}
+# `--salida` va explícito aunque §8.2 diga que tiene valor por defecto: el CLI todavía lo exige.
+# Pasarlo aquí funciona con las dos versiones del verbo, así que no hay que esperar a nadie.
+VERBOS: dict[str, list[str]] = {"ensamblar": ["ensamblar", "--salida", "08_entrega/novela.md"]}
 
 # Una tanda lanzada desde la terminal no deja proceso hijo aquí; se la reconoce porque su registro
 # sigue creciendo. Por debajo de este margen se considera viva.
@@ -302,26 +304,30 @@ def _numero_de_tanda(rutas: Rutas, tanda: Path | None) -> int | None:
 def _frase(ev: dict[str, Any]) -> str | None:
     """Una línea corta de bitácora. Devuelve None para el ruido que no aporta al que mira la pantalla."""
     tipo, cap = ev.get("tipo"), ev.get("capitulo")
-    pref = f"Cap {cap:02d} · " if isinstance(cap, int) else ""
+    pref = f"Capítulo {cap}: " if isinstance(cap, int) else ""
+    rol = ev.get("rol") or "agente"
     if tipo == "agente_inicio":
-        return f"{pref}{ev.get('rol', 'agente')} en marcha"
+        return f"{pref}{rol} en marcha"
     if tipo == "agente_fin":
         turnos = ev.get("turnos")
-        return f"{pref}{ev.get('rol', 'agente')} terminado" + (f" · {turnos} turnos" if turnos else "")
+        return f"{pref}{rol} terminado" + (f" en {turnos} turnos" if turnos else "")
     if tipo == "validacion":
         if ev.get("valido"):
             # Solo las cifras: los booleanos del artefacto ("tiene_contradicciones: True") no se leen
             # bien en una línea de bitácora y el estado ya lo dice la insignia de la cabecera.
             datos = {k: v for k, v in (ev.get("datos") or {}).items() if isinstance(v, int) and not isinstance(v, bool)}
-            detalle = " · ".join(f"{v} {k}" for k, v in datos.items()) if datos else "válido"
-            return f"{pref}{ev.get('rol', '')} validado · {detalle}".replace("  ", " ")
-        return f"{pref}validación RECHAZADA · {'; '.join(ev.get('errores') or []) or 'sin detalle'}"
+            detalle = ", ".join(f"{v} {k}" for k, v in datos.items())
+            return f"{pref}{rol} validado" + (f": {detalle}" if detalle else "")
+        return f"{pref}validación rechazada: {'; '.join(ev.get('errores') or []) or 'sin detalle'}"
     if tipo == "verbo":
-        return f"{pref}{ev.get('verbo')} · {ev.get('resultado', '')}".strip(" ·")
+        # El resultado correcto es el caso normal y no aporta nada escribirlo en cada línea;
+        # lo que hay que ver de un vistazo es lo que NO salió bien.
+        res = ev.get("resultado")
+        return f"{pref}{ev.get('verbo')}" + (f", {res}" if res and res != "ok" else "")
     if tipo == "error":
-        return f"{pref}ERROR · {ev.get('mensaje') or ev.get('error') or 'sin mensaje'}"
+        return f"{pref}error: {ev.get('mensaje') or ev.get('error') or 'sin mensaje'}"
     if tipo == "hook" and ev.get("decision") != "permitido":
-        return f"{ev.get('id', 'hook')} BLOQUEÓ · {_corto(ev.get('motivo') or ev.get('accion', ''))}"
+        return f"{ev.get('id', 'hook')} bloqueó {_corto(ev.get('motivo') or ev.get('accion', ''))}"
     return None  # hooks permitidos: son la mayoría del registro y no dicen nada al usuario
 
 
