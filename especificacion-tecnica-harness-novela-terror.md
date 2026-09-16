@@ -1,7 +1,7 @@
 # Especificación Técnica — Harness Generador de Novelas de Terror
 
-**Versión:** 1.6 — historial de cambios en `git log` sobre este archivo.
-**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.6 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
+**Versión:** 1.7 — historial de cambios en `git log` sobre este archivo.
+**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.7 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
 **Lector previsto:** el agente de código que implementa el harness. Toda decisión no cubierta aquí y no derivable de la especificación funcional debe tratarse como pregunta abierta, no como espacio para asumir.
 
 ## 1. Decisiones de arquitectura declaradas
@@ -65,6 +65,7 @@ Fuera del paquete `app/` viven los archivos que Claude Code lee directamente:
 scripts/hooks/                # un script por evento; deciden por agente y ruta e invocan `app/` — §13.3
 CLAUDE.md                     # reglas ambientales, orden de fases, mapa de carpetas — §13.5
 07_registro/                  # un directorio por tanda: eventos, prompts, retornos, descartados — §5.1
+08_entrega/                   # salida derivada de `ensamblar`: la novela concatenada — §8.2
 ```
 
 `app/` nunca importa nada de `.claude/` ni de `scripts/`; la dependencia va en un solo sentido: los scripts de hooks, el CLI y los validadores que ejecutan los agentes importan `app/`.
@@ -345,6 +346,7 @@ La configuración vive en una **carpeta**, no en un único archivo. El inventari
   "capitulos_por_tanda": 5,
   "max_llamadas_por_tanda": null,
   "registrar_uso": true,
+  "origen_estilo": "referencias",
   "palabras_por_capitulo": 3000,
   "idioma": "es-ES",
   "persona_narrativa": "tercera_limitada",
@@ -374,6 +376,7 @@ class HarnessConfig(BaseModel):
     capitulos_por_tanda: int | None = Field(default=None, ge=1)  # RF-CFG-02; None = sin tope
     max_llamadas_por_tanda: int | None = Field(default=None, ge=1)  # RF-CFG-06
     registrar_uso: bool = True                        # RF-CFG-06
+    origen_estilo: Literal["referencias", "descripcion"] = "referencias"  # RF-00.1
     palabras_por_capitulo: int = Field(gt=0)          # RF-CFG-01
     idioma: str                                       # RF-CFG-05
     persona_narrativa: Literal["primera", "tercera_limitada", "tercera_omnisciente"]
@@ -404,8 +407,9 @@ python -m app resolver --reporte qa_cap_16 --capitulos 14,15
 python -m app resolver --reporte qa_cap_16 --sin-cambios
                                          # revisé y no toqué ningún capítulo: cierra en un solo paso
 python -m app resolver --cerrar      # RF-07.6 paso 3: solo si reextraccion_pendiente está vacía
-python -m app ensamblar --salida novela.md
-                                         # concatena los capítulos cerrados con su título
+python -m app ensamblar                  # concatena los capítulos cerrados con su título
+                                         # en 08_entrega/novela.md
+python -m app ensamblar --salida <ruta>  # la misma salida en otra ruta
 python -m app guardar <artefacto>    # fases 0-4: persiste con validación (EX-01) lo que generó la skill
 
 # --- capa interna: la usa la skill, un tramo del loop por verbo ---
@@ -435,7 +439,7 @@ Los tres verbos `validar-*` son la única parte del CLI que ejecuta un agente, y
 
 **`resolver`** es la única forma legítima de salir de `pausado_por_qa`. Son tres pasos, porque la reextracción invoca al extractor y los scripts no llaman a modelos: (1) `--reporte X --capitulos a,b` verifica que el reporte sea el que figura en `reporte_qa_pendiente`, marca superados los hechos con esos `cap_origen`, fija `reextraccion_pendiente = [a, b]` y `capitulo_activo = a`, para que H-05 deje al extractor leer un capítulo anterior al actual; (2) la skill `/resolver-qa` invoca al extractor por cada capítulo pendiente y aplica cada delta con `aplicar-delta --reextraccion`, que quita el capítulo de la lista, aplica el delta nuevo sobre las fichas y regenera la sección `## Capítulo N` del resumen rodante si cae en la ventana; (3) `--cerrar` pone `reporte_qa_pendiente = null` y `estado = en_progreso` solo si la lista quedó vacía. `--sin-cambios` hace (1) y (3) de una vez: no hay nada que reextraer. Si algo falla a mitad, el manifiesto conserva la lista y se retoma donde quedó. `--sin-cambios` y `--capitulos` son mutuamente excluyentes; omitir ambos es error, porque el harness no puede adivinar qué se corrigió.
 
-**`ensamblar`** concatena `cap_1.md` … `cap_K.md` para los K capítulos cerrados, anteponiendo a cada uno su `titulo` de `capitulos.json` como encabezado. No es exportación ni maquetación (fuera de alcance, spec funcional §2): es la forma de leer lo generado sin abrir 40 archivos. No lee ni modifica ningún artefacto de estado, así que puede correr en cualquier momento, incluso con la tanda pausada.
+**`ensamblar`** concatena `cap_1.md` … `cap_K.md` para los K capítulos cerrados, anteponiendo a cada uno su `titulo` de `capitulos.json` como encabezado. No es exportación ni maquetación (fuera de alcance, spec funcional §2): es la forma de leer lo generado sin abrir 40 archivos. No lee ni modifica ningún artefacto de estado, así que puede correr en cualquier momento, incluso con la tanda pausada. Escribe en `08_entrega/novela.md` salvo que `--salida` diga otra cosa. Esa carpeta es salida derivada, no estado: se borra y se regenera sin perder nada, y por eso queda fuera del control de versiones. Está fuera de `05_manuscrito/` para que esa carpeta siga siendo exactamente un archivo por capítulo y nada más, y está bajo H-09 por una razón menos obvia: un ensamblado legible por el orquestador anularía INV-08 por la puerta de atrás, porque le permitiría meterse la novela entera en contexto de una sola lectura, que es justo lo que impedirle leer capítulo a capítulo pretende evitar.
 
 ## 9. Plan de pruebas
 
@@ -499,7 +503,7 @@ Cada invariante tiene asignado **con qué** se hace cumplir (RF-08.2). "Prompt" 
 | INV-05 solo QA lee varios | solo `qa.md` lleva `Grep`, `Glob` | H-06 bloquea `Write` en `05_manuscrito/` a extractor y QA | solo `qa.py` importa la muestra | — |
 | INV-06 tandas no alteran estado | — | — | conteo en memoria; test de equivalencia §9 | — |
 | INV-07 no regenerar cerrados | — | — | `guardar_capitulo` falla si el archivo existe | — |
-| INV-08 orquestador fuera del manuscrito | — | H-09 bloquea `Read`, `Grep`, `Glob` sobre `05_manuscrito/` y `07_registro/` en la sesión principal | `status` detecta manifiesto inconsistente | edición de estado vía `Bash`: solo `CLAUDE.md` |
+| INV-08 orquestador fuera del manuscrito | — | H-09 bloquea `Read`, `Grep`, `Glob` sobre `05_manuscrito/`, `07_registro/` y `08_entrega/` en la sesión principal | `status` detecta manifiesto inconsistente | edición de estado vía `Bash`: solo `CLAUDE.md` |
 | INV-09 un solo nivel | `disallowedTools: Agent, Skill` en los tres | H-08 bloquea `Agent` cuando hay `agent_id` | — | — |
 
 ## 11. Inventario de configuración
@@ -544,6 +548,9 @@ Regla que justifica la partición: `novela.json` está bajo INV-04 (no cambia co
 | `capitulos_por_tanda` | int > 0 o null | RF-CFG-02 |
 | `max_llamadas_por_tanda` | int > 0 o null | RF-CFG-06 |
 | `registrar_uso` | bool | RF-CFG-06 |
+| `origen_estilo` | `"referencias"` o `"descripcion"` | RF-00.1 |
+
+`origen_estilo` decide de dónde sale `style_guide.md` en la fase 0 y **no admite un tercer comportamiento implícito**: con `referencias` y `00_referencias/` vacía la fase falla con el motivo, y con `descripcion` la guía se deriva de `01_concepto/idea.md` ignorando la carpeta aunque tenga textos. No hay respaldo automático de un modo al otro, porque un respaldo silencioso produce guías genéricas que nadie sabe explicar semanas después. Vive en `ejecucion.json` y no en `novela.json` porque solo tiene efecto antes del capítulo 1, así que INV-04 no lo alcanza.
 
 ### 11.4 `proveedores.json`
 
@@ -835,7 +842,7 @@ Todos los hooks del proyecto se declaran en `.claude/settings.json` y aplican a 
 | **H-06** | `PreToolUse` · `Write`, `Edit` | por agente | escritor: solo `05_manuscrito/cap_N.md`, el capítulo actual. extractor: solo `04_estado/deltas/delta_cap_N.json`, su propio delta (RF-08.4). qa: solo `06_qa/`. Toda otra ruta, bloqueada. | INV-01, INV-05, RF-07.5 |
 | **H-07** | `SubagentStop` · matcher `escritor` | escritor | Verifica que `cap_N.md` existe y que su longitud está en `palabras_por_capitulo ±20%`. Al primer fallo impide que el agente termine y le devuelve el desvío: es el reintento de EX-07 sin que el orquestador intervenga. Al segundo, lo deja terminar y anota el aviso en `intentos_por_capitulo`. Distingue primer y segundo fallo con `stop_hook_active` del payload. La forma de la línea de retorno no la revisa este hook sino `registrar-escritor` (§8.2). | EX-07, RF-05.2 |
 | **H-08** | `PreToolUse` · `Agent` | cualquier evento con `agent_id` | Bloquea. Los subagentes no lanzan subagentes. Refuerzo de `disallowedTools: Agent`. | INV-09 |
-| **H-09** | `PreToolUse` · `Read`, `Grep`, `Glob` sobre `05_manuscrito/` y `07_registro/` | sesión principal (sin `agent_id`) | Bloquea. El orquestador no lee la novela ni el registro: `ensamblar` lee la primera y `status` resume el segundo. | INV-08, RF-08.5 |
+| **H-09** | `PreToolUse` · `Read`, `Grep`, `Glob` sobre `05_manuscrito/`, `07_registro/` y `08_entrega/` | sesión principal (sin `agent_id`) | Bloquea. El orquestador no lee la novela, ni el ensamblado, ni el registro: `ensamblar` escribe el ensamblado para el usuario y `status` resume el registro. Sin `08_entrega/` en la lista, INV-08 se evadiría leyendo el ensamblado. | INV-08, RF-08.5 |
 | **H-10** | `SubagentStop` · matcher `escritor\|extractor\|qa` | los tres | Lee el transcript del subagente (`agent_transcript_path` del payload), suma los tokens de **todos** los mensajes del asistente en ese transcript, no solo del último, y toma el modelo que respondió, y añade una línea a `07_registro/<tanda>/uso.jsonl` (§5.1) con rol, capítulo, modelo y tokens. Una llamada equivale a una invocación de subagente. Es la única fuente posible de RF-CFG-06: los scripts no ven el consumo de otra manera. | RF-CFG-06, §3.2 |
 | **H-11** | `PreToolUse` · `Bash` | los tres agentes | Deja pasar **únicamente** el validador del agente activo: `python -m app validar-capitulo <N>` para el escritor, `validar-delta <N>` para el extractor, `validar-reporte <N>` para QA, con `N` resuelto por el mismo `capitulo_activo()` que usa H-05 para el escritor y el extractor, y por `ultimo_capitulo_cerrado` para QA, porque su corte evalúa el capítulo recién cerrado. **Los dos hooks llaman a la misma función**: dos implementaciones del mismo número acabarían divergiendo. Cualquier otro comando se bloquea, incluidas variantes con tuberías, encadenamiento (`;`, `&&`, `|`), sustitución (`$(...)`, backticks) o redirección: el script compara el comando completo contra el patrón exacto, no busca un prefijo. Es lo que hace segura la presencia de `Bash` en las tres fichas (§13.1). | INV-01, INV-02, RF-08.4 |
 
@@ -934,9 +941,9 @@ Pantalla web local con dos funciones: escribir los requisitos antes de la fase 0
 | Dimensionamiento: `total_capitulos`, `palabras_por_capitulo`, `ventana_resumen_rodante`, `cadencia_qa`, `max_tokens_contexto_escritor`, `max_hechos_por_capitulo` | RF-CFG-01, §11.2 | `config/novela.json` |
 | Ejecución: `capitulos_por_tanda`, `max_llamadas_por_tanda`, `registrar_uso` | RF-CFG-02, RF-CFG-06 | `config/ejecucion.json` |
 | Rutas locales a los ejemplos de referencia | RF-00.2 | copia a `00_referencias/` |
-| Sin referencias: generar la guía de estilo desde la descripción del subgénero | RF-00.2, RF-UI-03 | `config/ejecucion.json` |
+| Origen de la guía de estilo: ejemplos de `00_referencias/` o descripción del subgénero | RF-00.1, RF-UI-03 | `config/ejecucion.json`, campo `origen_estilo` |
 
-La última fila es nueva y no es cosmética. Sin ella, `/destilar-estilo` se detiene a preguntar cuando `00_referencias/` está vacía, y en modo no interactivo nadie puede contestar (RF-UI-03). Toda pregunta que una skill hacía a mitad de ejecución se resuelve aquí, antes de lanzar.
+La última fila es nueva y no es cosmética. Sin ella, `/destilar-estilo` se detiene a preguntar cuando `00_referencias/` está vacía, y en modo no interactivo nadie puede contestar (RF-UI-03). Toda pregunta que una skill hacía a mitad de ejecución se resuelve aquí, antes de lanzar. La casilla escribe `origen_estilo` (§11.3), y `/destilar-estilo` lo lee en vez de preguntar.
 
 ### 15.2 Reglas de la entrada
 
@@ -959,6 +966,8 @@ Seis botones, uno por fase, más `ensamblar`. Cada uno lanza `claude -p "/<skill
 | **Escribir tanda** | `/escribir-tanda` | existen los cinco anteriores y el manifiesto no está `pausado_por_qa` | **alto** |
 | Ensamblar | `python -m app ensamblar` | hay al menos un capítulo cerrado | ninguno |
 
+El botón de ensamblar muestra la ruta de salida y el recuento de capítulos y palabras, nunca el texto: leer la novela en el navegador está fuera de alcance (§15.6).
+
 Reglas de ejecución:
 
 - **Nunca `--bare`.** Ese modo salta hooks, subagentes, skills y `CLAUDE.md` a propósito. Sin ellos el harness deja de ser estricto: no hay H-11, no hay allowlists, no hay invariantes. Un botón que use `--bare` es un botón que ejecuta otro sistema.
@@ -973,7 +982,7 @@ Reglas de ejecución:
 En una sesión de terminal, Claude Code pregunta antes de una acción que no está preaprobada. Con `-p` nadie puede contestar, así que lo que preguntaría se deniega y la fase muere a mitad. La solución adoptada es **reglas explícitas**, no un modo permisivo global:
 
 - `.claude/settings.json` declara en `permissions.allow` exactamente lo que el orquestador necesita: invocar a los tres subagentes, ejecutar los verbos de `python -m app` y escribir en las carpetas de estado. Nada más.
-- El frontend lanza con `--permission-prompts none`, para que nada quede esperando una respuesta que no va a llegar.
+- El frontend no puede dejar nada esperando una respuesta que no va a llegar. **El nombre exacto del argumento de la CLI que garantiza ese comportamiento no lo fija esta especificación**, y tampoco la sintaxis de las entradas de `permissions.allow` que autorizan a los subagentes: ambos se leen de la versión instalada (`claude --help` y la documentación de esa versión) antes de escribir el lanzador. Un argumento copiado de este documento sin verificar se ignora en silencio o cuelga la sesión, y las dos formas de fallar son peores que no tenerlo. Lo que sí fija esta especificación es la intención: modo no interactivo, sin preguntas pendientes, con permisos declarados uno a uno y sin modo permisivo global.
 - Una regla que falte se manifiesta como una denegación que detiene la fase. No es un fallo silencioso: el registro de ejecución (§5.1) anota qué se denegó, y de ahí sale la regla que faltaba.
 
 Se elige esto y no un modo amplio como `acceptEdits` por coherencia con §13.1 y §13.3: el proyecto entero está construido sobre dar el permiso mínimo y hacerlo cumplir con hooks. Un permiso amplio en el arranque anularía esa decisión desde fuera.

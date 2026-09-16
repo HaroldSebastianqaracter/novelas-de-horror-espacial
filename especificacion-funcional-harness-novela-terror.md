@@ -1,6 +1,6 @@
 # Especificación Funcional — Harness Generador de Novelas de Terror
 
-**Versión:** 1.6 — historial de cambios en `git log` sobre este archivo.
+**Versión:** 1.7 — historial de cambios en `git log` sobre este archivo.
 **Esquemas de los artefactos:** spec técnica §4, única fuente. (El documento `harness-novela-terror.md` que citaban versiones anteriores nunca existió en el repositorio.) Este documento formaliza el comportamiento requerido; no repite decisiones de implementación.
 **Lector previsto:** un agente de código que implementará el harness a partir de este documento. Donde este documento sea ambiguo, el agente debe detenerse y pedir aclaración en vez de asumir.
 
@@ -156,6 +156,10 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 - Descripción: el sistema debe producir una guía de estilo a partir de ejemplos de referencia del subgénero de terror espacial.
 - Entradas: uno o más textos de ejemplo de terror espacial (naves, estaciones, colonias aisladas — no terror genérico de otro subgénero).
 - Salidas: `style_guide.md` (tropos recurrentes del terror espacial —p. ej. aislamiento, fallas de soporte vital, criaturas o presencias que se confunden con el entorno de la nave—, ritmo de tensión/alivio, vocabulario sensorial, longitud de frase típica).
+- Reglas:
+  - El origen de la guía lo fija `origen_estilo` (`referencias` o `descripcion`), decidido **antes** de lanzar la fase. Con `referencias` y `00_referencias/` vacía, la fase falla indicando el motivo; con `descripcion`, la guía se deriva de la idea de la novela y de la descripción del subgénero, sin ejemplos.
+  - La fase **nunca pregunta**. En modo no interactivo (RF-UI-03) nadie puede contestar, y una fase que espera una respuesta que no va a llegar se queda colgada consumiendo una sesión.
+  - Una guía derivada de la descripción deja constancia de ello en su propia cabecera. Sin esa marca, meses después nadie puede explicar por qué la prosa salió genérica.
 - Criterio de aceptación: dado un conjunto de ejemplos, cuando se ejecuta la fase, entonces `style_guide.md` no contiene ninguna oración copiada literalmente de los ejemplos de entrada.
 
 **RF-00.2 — Prohibición de embebido de texto crudo**
