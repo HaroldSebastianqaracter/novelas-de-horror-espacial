@@ -1,6 +1,6 @@
 # Especificación Funcional — Harness Generador de Novelas de Terror
 
-**Versión:** 1.7 — historial de cambios en `git log` sobre este archivo.
+**Versión:** 1.8 — historial de cambios en `git log` sobre este archivo.
 **Esquemas de los artefactos:** spec técnica §4, única fuente. (El documento `harness-novela-terror.md` que citaban versiones anteriores nunca existió en el repositorio.) Este documento formaliza el comportamiento requerido; no repite decisiones de implementación.
 **Lector previsto:** un agente de código que implementará el harness a partir de este documento. Donde este documento sea ambiguo, el agente debe detenerse y pedir aclaración en vez de asumir.
 
@@ -253,6 +253,16 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 
 ### Fase 6 — Extracción post-capítulo
 
+**RF-05.5 — Prosa no repetitiva entre capítulos**
+- Descripción: el sistema impide que el escritor reutilice sin darse cuenta las mismas frases, imágenes y giros capítulo tras capítulo.
+- Entradas: los capítulos ya cerrados (para la comprobación determinista) y la lista de recursos narrativos acumulados (para el aviso al escritor).
+- Salidas: un capítulo que no repite literalmente pasajes anteriores, y una lista de recursos agotados que crece con la novela.
+- Reglas:
+  - El escritor **sigue sin leer el manuscrito** (INV-01). La repetición se combate con lo que otros ya leyeron, no dándole acceso: el código determinista puede leerlo todo, y el extractor ya lo lee por su cuenta.
+  - Una coincidencia literal de cuatro o más palabras con contenido léxico respecto a cualquier capítulo anterior invalida el borrador y obliga a reescribir.
+  - Los recursos recurrentes que no son literales se le presentan al escritor como **agotados**, no como prohibidos: una imagen que vuelve puede ser deliberada, y lo que hace falta es que sepa que está volviendo.
+- Criterio de aceptación: dado un capítulo que reutiliza literalmente una frase de cuatro palabras con contenido de un capítulo anterior, cuando se valida, entonces se rechaza indicando la frase y el capítulo de origen; y dada una novela de tres capítulos, cuando se prepara el cuarto, entonces su prompt contiene la lista de recursos ya usados con su conteo.
+
 **RF-06.1 — Extracción de cambios de estado**
 - Descripción: un agente separado lee únicamente `cap_{N}.md` y produce los deltas de estado.
 - Entradas: `cap_{N}.md` (y solo ese archivo del manuscrito), más el **registro de sujetos conocidos**: las claves de `personajes.json`, las locaciones de `mundo.json`, y el valor literal `mundo`.
@@ -364,6 +374,18 @@ Los requisitos RF-08 no pertenecen a una fase: fijan cómo el orquestador habla 
   - El registro no forma parte del estado de la novela: borrarlo no cambia ni el manuscrito ni los artefactos, solo impide auditar. Por eso vive fuera de `04_estado/`.
   - La operación de estado (`status`) lee el registro de la última tanda, no solo el manifiesto.
 - Criterio de aceptación: dada una tanda que se detuvo por un error, cuando se abre su registro, entonces se puede reconstruir en orden qué verbos corrieron, qué recibió y devolvió cada agente, qué hooks dispararon y cuál fue el error textual que la detuvo, sin consultar la conversación en la que se ejecutó.
+
+**RF-09 — Observabilidad de la ejecución**
+- Descripción: cada tanda puede publicarse en un servicio de trazas para poder comparar corridas entre sí y responder si un cambio mejoró el resultado.
+- Entradas: el registro de ejecución de esa tanda (RF-08.5).
+- Salidas: una traza por tanda, con una observación por invocación de agente, sus métricas de consumo y las puntuaciones del corte de QA.
+- Reglas:
+  - La publicación **nunca ocurre dentro de la tanda**. Se exporta después, desde el registro. Una tanda no puede fallar, frenarse ni encarecerse por culpa de su propia observabilidad.
+  - El registro en disco sigue siendo la fuente de verdad. La traza es una vista: si el servicio desaparece, no se pierde nada auditable.
+  - Reexportar una tanda ya exportada **no duplica nada**.
+  - Por defecto no sale de la máquina ni una línea de prosa ni un prompt completo: solo estructura, consumo y métricas. Incluirlos es una decisión explícita en cada invocación, porque los prompts contienen la guía destilada de los ejemplos de referencia (RF-00.2).
+  - Las métricas de cada corte de QA se publican como puntuaciones numéricas, no como texto. Un reporte escrito no se puede comparar entre tandas; un número sí.
+- Criterio de aceptación: dada una tanda registrada, cuando se exporta dos veces seguidas, entonces el servicio muestra una sola traza y no dos; y dada una exportación con los valores por defecto, cuando se inspecciona lo enviado, entonces no aparece ninguna subcadena de más de 30 caracteres del manuscrito ni de ningún prompt.
 
 ## 6. Reglas globales / invariantes
 

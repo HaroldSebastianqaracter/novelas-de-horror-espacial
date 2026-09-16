@@ -1,7 +1,7 @@
 # Especificación Técnica — Harness Generador de Novelas de Terror
 
-**Versión:** 1.7 — historial de cambios en `git log` sobre este archivo.
-**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.7 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
+**Versión:** 1.8 — historial de cambios en `git log` sobre este archivo.
+**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.8 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
 **Lector previsto:** el agente de código que implementa el harness. Toda decisión no cubierta aquí y no derivable de la especificación funcional debe tratarse como pregunta abierta, no como espacio para asumir.
 
 ## 1. Decisiones de arquitectura declaradas
@@ -410,6 +410,9 @@ python -m app resolver --cerrar      # RF-07.6 paso 3: solo si reextraccion_pend
 python -m app ensamblar                  # concatena los capítulos cerrados con su título
                                          # en 08_entrega/novela.md
 python -m app ensamblar --salida <ruta>  # la misma salida en otra ruta
+python -m app exportar-traza <tanda>     # publica el registro de esa tanda en Langfuse (RF-09, §16)
+python -m app exportar-traza <tanda> --con-cuerpos
+                                         # incluye prompts y prosa; fuera de lo normal, §16.6
 python -m app guardar <artefacto>    # fases 0-4: persiste con validación (EX-01) lo que generó la skill
 
 # --- capa interna: la usa la skill, un tramo del loop por verbo ---
@@ -457,6 +460,8 @@ Los tres verbos `validar-*` son la única parte del CLI que ejecuta un agente, y
 | **H-11, el hook crítico** (RF-08.4) | Que `Bash` en los tres agentes sirva solo para validar. **Es la prueba que más importa de la suite**: si H-11 falla, los tres agentes tienen shell libre y caen INV-01 e INV-02. | `pytest` con payloads simulados. Casos que deben salir con código 2: `cat 05_manuscrito/cap_1.md`; `python -m app validar-capitulo 3` cuando el capítulo de la invocación es el 5; `python -m app validar-capitulo 5; cat cap_1.md`; `python -m app validar-capitulo 5 && ls`; `echo $(cat cap_1.md)`; `python -m app validar-delta 5` con `agent_type = escritor`; `python -m app status`. Debe salir con 0: exactamente el validador del rol con el capítulo correcto. |
 | Autovalidación (RF-08.4) | Que el validador que corre el agente sea el mismo código que corre el harness. | `pytest`: `validar-delta` sobre un delta con sujeto fuera del registro devuelve el mismo error que `aplicar-delta`; `validar-capitulo` sobre un borrador corto devuelve el mismo desvío que calcula EX-07. Un agente no puede aprobarse con otro criterio. |
 | Registro de ejecución (RF-08.5) | Que una tanda deje reconstruible lo que pasó. | Con dobles: correr 3 capítulos y comprobar que `eventos.jsonl` contiene, en orden, los verbos, los pares `agente_inicio`/`agente_fin` de los seis subagentes, los hooks disparados y ningún hueco; que `prompts/` y `retornos/` tienen un archivo por invocación; y que una tanda interrumpida a mitad deja un evento `error` con traza. |
+| Observabilidad (RF-09) | Que la traza refleje la tanda y que exportar dos veces no duplique. | Sin red: un doble del cliente que acumula lo enviado. Se comprueba que las cuatro cifras de tokens de §16.3 viajan (no solo entrada y salida), que una segunda exportación de la misma tanda no crea una traza nueva, y que con los valores por defecto ninguna subcadena del manuscrito ni de los prompts aparece en lo enviado. |
+| Antirrepetición (RF-05.5) | Que una repetición literal se rechace y que los recursos agotados lleguen al prompt. | Sin modelo: se construyen dos capítulos con una frase de contenido compartida y se comprueba que `validar-capitulo` la nombra junto a su capítulo de origen; y que `preparar-capitulo` incluye la lista de recursos con su conteo. Se comprueba además que una secuencia solo de palabras vacías no dispara el rechazo. |
 | Panel de fases (RF-UI-03) | Que un botón y el comando tecleado produzcan lo mismo, y que ninguno se lance fuera de su condición. | Sin modelo: los endpoints se prueban con un doble del lanzador que registra el comando en vez de ejecutarlo. Se comprueba que cada botón compone `claude -p "/<skill>"` sin `--bare`, que un botón sin condición de entrada devuelve el motivo y no lanza, y que con una ejecución viva todos quedan deshabilitados. |
 
 Criterio de decisión para las dos filas nuevas: si la atribución de sujeto acierta por debajo de ~90%, o si aparece algún hecho pertinente excluido por el filtro, hay que volver a inyectar `continuidad.json` completo y asumir el costo de contexto. El resto del esquema (`sujeto`, `categoria`, `superado_por`) se conserva igual: sigue sirviendo para QA y para RF-07.6 aunque el escritor no filtre.
@@ -994,3 +999,99 @@ La pantalla escucha sin autenticación en `127.0.0.1` y ahora puede lanzar proce
 ### 15.6 Fuera de alcance de esta versión
 
 Resolver un reporte de QA desde la pantalla (RF-UI-04 lo excluye a propósito), leer capítulos en el navegador, editar la escaleta y lanzar tandas programadas. La resolución de QA es el caso más delicado del sistema y su protocolo de tres pasos (§8.2) exige editar archivos a mano entre el primero y el segundo; llevarlo a un botón antes de haberlo ejercitado a mano sería adelantarse.
+
+## 16. Observabilidad de la ejecución (Langfuse)
+
+### 16.1 Dónde se instrumenta y por qué ahí
+
+La traza **no se emite durante la tanda**. Se exporta después, leyendo `07_registro/<tanda>/` (§5.1), con un verbo del CLI:
+
+```
+python -m app exportar-traza <tanda> [--con-cuerpos]
+```
+
+Dos razones, y las dos son de diseño, no de comodidad:
+
+- Un hook está en el camino crítico. Si emitiera por red, un servicio lento o caído frenaría o rompería una tanda que cuesta dinero de verdad. **La observabilidad no puede tumbar lo observado.**
+- Exportar desde el registro es reejecutable. Una tanda vieja se vuelve a subir cuando cambia el mapeo, y una tanda que falló a mitad se sube igual, que es justo cuando más falta hace verla.
+
+El registro sigue siendo la fuente de verdad. Langfuse es una vista de él, no el original: si el servicio desaparece, no se pierde nada auditable.
+
+### 16.2 Mapeo del registro a la traza
+
+| Objeto en Langfuse | Qué es aquí | Campos |
+|---|---|---|
+| `trace` | una tanda | nombre `tanda_<ts>`; metadata: `total_capitulos`, `capitulos_por_tanda`, `cadencia_qa`, los tres `prompts_hash` del manifiesto y la versión de estas especificaciones |
+| `span` | un capítulo | nombre `cap_N`; abarca escritor, extractor y, si toca corte, QA |
+| `generation` | una invocación de subagente | nombre `<rol>:cap_N`; `model`; `usage` (§16.3); entrada y salida solo con `--con-cuerpos` |
+| `event` | un bloqueo de hook, un fallo de autovalidación (EX-10) o un descarte de borrador (EX-08) | el `id` del hook y su motivo textual |
+| `score` | las métricas de un corte de QA y de la tanda | §16.4 |
+
+Los `prompts_hash` en la metadata no son decoración: sin ellos, comparar dos tandas no dice nada, porque no se sabe si corrieron con el mismo prompt.
+
+### 16.3 El consumo hay que mapearlo completo
+
+`uso.jsonl` trae cuatro cifras de tokens y **las cuatro tienen que viajar**: `tokens_entrada`, `tokens_salida`, `tokens_cache_lectura` y `tokens_cache_creacion`.
+
+Mapear solo entrada y salida produce trazas activamente engañosas. En la corrida de prueba, una invocación real del escritor registró 6 tokens de entrada y 42 129 de lectura de caché: casi toda la entrada real está en la caché. Una traza que solo mire `tokens_entrada` dirá que el capítulo costó seis tokens, y el panel de costes dirá cero. Es peor que no tener panel, porque un número falso se cree.
+
+El límite que esto conserva: estas cifras las lee H-10 del transcript del subagente. Son contabilidad del cliente, no la factura del proveedor. Sirven para comparar tandas entre sí, no para conciliar gasto.
+
+### 16.4 Puntuaciones
+
+Es la única parte que convierte a Langfuse en algo más que un log bonito. Sin puntuaciones no se puede responder a la única pregunta que importa: *¿este cambio mejoró la novela o solo la cambió?*
+
+| Puntuación | Tipo | De dónde sale |
+|---|---|---|
+| `qa_contradicciones` | numérica | hallazgos de tipo `contradiccion` del reporte del corte |
+| `qa_repeticiones` | numérica | hallazgos de tipo `repeticion` |
+| `qa_pasa` | booleana | negación de `tiene_contradicciones` |
+| `desvio_longitud` | numérica | el mayor desvío relativo respecto a `palabras_por_capitulo` entre los capítulos de la tanda |
+| `borradores_descartados` | numérica | descartes por EX-08 en la tanda |
+
+### 16.5 Identidad e idempotencia
+
+El `agent_id` que trae el payload del hook es lo que une `eventos.jsonl` con `uso.jsonl`, y es el identificador de la `generation`. La tanda identifica la traza. Con eso, **reexportar la misma tanda no duplica nada**: se actualiza lo que ya está. Es un requisito, no una propiedad deseable, porque el exportador se va a correr varias veces sobre la misma tanda mientras se afina el mapeo.
+
+### 16.6 Qué sale de la máquina y qué no
+
+Por defecto salen estructura, tiempos, modelos, tokens, conteos y puntuaciones. **No sale prosa ni el cuerpo de ningún prompt.**
+
+`--con-cuerpos` los incluye, y existe porque depurar un prompt sin poder verlo es imposible. Es opt-in por una razón concreta: `prompts/` contiene la guía de estilo destilada de `00_referencias/`, que está fuera del control de versiones porque pueden ser obras publicadas (RF-00.2). Lo que se decidió no versionar tampoco se sube a un servicio de terceros por descuido.
+
+### 16.7 Credenciales
+
+Las variables de Langfuse se leen del entorno, igual que la de OpenRouter (§3.1), y **nunca** de `config/`, de `.claude/settings.json` ni de los tests. Si faltan, `exportar-traza` falla con el motivo y no hace nada más. No puede romper una tanda porque no corre dentro de ninguna.
+
+### 16.8 Sin verificar contra la versión instalada
+
+Esta sección **no fija los nombres del SDK ni de sus parámetros**, por la misma razón que §15.4 no fija los argumentos de la CLI. Antes de escribir el exportador hay que comprobar dos cosas contra la versión instalada de la biblioteca:
+
+1. Si permite fijar explícitamente los instantes de inicio y fin de cada observación. El exportador publica hechos pasados: si la biblioteca solo sabe marcar «ahora», todas las trazas saldrán apiladas en el instante de la exportación y las duraciones serán falsas.
+2. Si su modelo de consumo admite las cuatro cifras de §16.3, caché incluida.
+
+Si alguna de las dos no se cumple, la alternativa es la API de ingesta por HTTP, que acepta ambos y no añade dependencia. La decisión se toma con el `--help` y la documentación delante, no con este documento.
+
+## 17. Antirrepetición de prosa
+
+El corte de QA de la corrida de prueba devolvió dos contradicciones y **ocho repeticiones**, entre ellas una frase literal idéntica en tres capítulos. No es un fallo del prompt: es una consecuencia directa de INV-01. El escritor no lee el manuscrito, así que **no tiene forma de saber que ya usó una imagen**. El resumen rodante lleva trama, no tics de prosa.
+
+La solución no puede ser dejarle leer capítulos anteriores: eso destruye el invariante que sostiene el coste y la escalabilidad del sistema. Son dos capas, ninguna de las cuales le da acceso al manuscrito.
+
+### 17.1 Capa determinista: `validar-capitulo`
+
+`validar-capitulo N` (§8.2) añade una comprobación: ninguna secuencia de cuatro o más palabras con contenido léxico puede aparecer literalmente en un capítulo anterior. Las secuencias formadas solo por palabras vacías se ignoran, o el validador saltaría en cada «en el interior de la».
+
+Esto lo hace un script, que lee todo el manuscrito sin violar nada: INV-01 restringe al **agente** escritor, no al código determinista. Es barato, no llama a ningún modelo y atrapa con certeza el caso literal («el metal estaba frío», tres capítulos). Si falla, el escritor reescribe dentro de su propio bucle de autovalidación (RF-08.4).
+
+### 17.2 Capa semántica: el extractor ya está leyendo
+
+Las repeticiones estructurales no son literales: una cadencia sintáctica, un gesto, una muletilla de un personaje. Un validador de n-gramas no las ve.
+
+El extractor sí las ve, porque lee el capítulo entero y ya está pagado. Su delta (§4) gana un campo `recursos_narrativos`: las imágenes, gestos y giros recurrentes que detecta, con su conteo acumulado. Se acumulan en el estado como los hechos de continuidad, y `preparar-capitulo` inyecta los más usados en el prompt del escritor como una lista de **recursos agotados**, no como prohibición absoluta: una imagen recurrente puede ser deliberada, y el objetivo es que el escritor sepa que la está repitiendo, no que no pueda hacerlo nunca.
+
+El coste marginal es de unos cientos de tokens por capítulo y no añade ninguna invocación de modelo.
+
+### 17.3 Lo que esto toca
+
+El esquema de `Delta` en §4 (campo nuevo), `preparar-capitulo` y `validar-capitulo` en §8.2, y el prompt del escritor en §13.1. El tope de `max_hechos_por_capitulo` no aplica a `recursos_narrativos`: son listas distintas con crecimientos distintos, y meterlas en el mismo tope haría que los tics desplazaran a los hechos de continuidad, que es exactamente al revés de lo que interesa.
