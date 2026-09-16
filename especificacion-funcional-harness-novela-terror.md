@@ -1,6 +1,6 @@
 # Especificación Funcional — Harness Generador de Novelas de Terror
 
-**Versión:** 1.5 — historial de cambios en `git log` sobre este archivo.
+**Versión:** 1.6 — historial de cambios en `git log` sobre este archivo.
 **Esquemas de los artefactos:** spec técnica §4, única fuente. (El documento `harness-novela-terror.md` que citaban versiones anteriores nunca existió en el repositorio.) Este documento formaliza el comportamiento requerido; no repite decisiones de implementación.
 **Lector previsto:** un agente de código que implementará el harness a partir de este documento. Donde este documento sea ambiguo, el agente debe detenerse y pedir aclaración en vez de asumir.
 
@@ -53,7 +53,7 @@ Vocabulario cerrado — el agente implementador debe usar estos términos de for
 
 Formato fijo por requisito: descripción, entradas, salidas, reglas, criterio de aceptación (dado/cuando/entonces).
 
-Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, sino que parametrizan la ejecución completa. Los **RF-UI-xx** especifican el frontend con el que el usuario escribe esa configuración. El resto sigue la numeración por fase (RF-00 a RF-07). Los **RF-08-xx** rigen la orquestación: qué devuelve cada agente al orquestador y cómo se hacen cumplir las reglas de la sección 6.
+Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, sino que parametrizan la ejecución completa. Los **RF-UI-xx** especifican el frontend: con él se escribe esa configuración y se lanzan las fases. El resto sigue la numeración por fase (RF-00 a RF-07). Los **RF-08-xx** rigen la orquestación: qué devuelve cada agente al orquestador y cómo se hacen cumplir las reglas de la sección 6.
 
 ### Configuración de ejecución
 
@@ -120,13 +120,35 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 - Entradas: lo que el usuario teclea; opcionalmente, rutas locales a los ejemplos de referencia de la fase 0.
 - Salidas: `01_concepto/idea.md`, `config/novela.json`, `config/ejecucion.json`; si se indicaron ejemplos, copia de estos a `00_referencias/`.
 - Reglas:
-  - El frontend **no invoca ningún modelo ni lee el manuscrito**: su única función es producir entradas válidas. Se lanza con `python -m app ui` y escucha solo en la máquina local (spec técnica §15).
+  - El frontend **no invoca ningún modelo ni lee el manuscrito**. Escribir los requisitos es su primera función; lanzar las fases (RF-UI-03) es la segunda, y para eso arranca una sesión de Claude Code en vez de hablar con un modelo. Se lanza con `python -m app ui` y escucha solo en la máquina local (spec técnica §15).
   - Valida con el mismo esquema de configuración que usa el harness antes de escribir. Una configuración fuera de rango se rechaza en pantalla con el motivo; nunca llega al disco.
 - Criterio de aceptación: dado un formulario completado, cuando el usuario guarda, entonces los tres archivos existen, `config/novela.json` y `config/ejecucion.json` validan contra el esquema (EX-05 no puede dispararse con archivos escritos por el frontend), e `idea.md` contiene exactamente el texto escrito.
 
 **RF-UI-02 — Bloqueo de parámetros inmutables**
 - Descripción: con capítulos ya cerrados, el formulario impide cambiar los parámetros protegidos por INV-04, igual que RF-CFG-03 lo impide por línea de comandos.
 - Criterio de aceptación: dado un manifiesto con `ultimo_capitulo_cerrado > 0`, cuando se abre el formulario, entonces los campos que escriben en `config/novela.json` aparecen deshabilitados mostrando el motivo, y la idea y los campos de `config/ejecucion.json` siguen editables.
+
+**RF-UI-03 — Lanzar las fases desde la pantalla**
+- Descripción: cada fase del pipeline se puede disparar con un botón, sin teclear el comando en una terminal.
+- Entradas: el estado de la novela (manifiesto y artefactos existentes), que decide qué botones están activos.
+- Salidas: los mismos artefactos que produce esa fase lanzada a mano. Ninguno distinto.
+- Reglas:
+  - El frontend **no orquesta ni invoca modelos**. Lanza una sesión de Claude Code en modo no interactivo dentro de la carpeta del proyecto y le pasa el nombre de la skill. El orquestador sigue siendo Claude Code, con sus subagentes, sus skills y sus hooks: pulsar un botón equivale exactamente a que el usuario teclee esa orden.
+  - La línea de comandos sigue funcionando igual. La pantalla es una entrada alternativa, nunca un reemplazo: todo lo que se puede hacer con un botón se puede hacer tecleando, y ninguna operación existe solo en la pantalla.
+  - Un botón cuya condición de entrada no se cumple aparece **deshabilitado con el motivo**, no oculto. El usuario tiene que poder ver qué falta.
+  - El botón de la tanda pide confirmación explícita, indicando cuántos capítulos va a escribir y el tope de llamadas. Es la única acción cara e irreversible de la pantalla.
+  - **Una ejecución a la vez.** Con una fase en marcha, los demás botones quedan deshabilitados. Dos ejecuciones simultáneas sobre el mismo estado lo corromperían.
+  - Ninguna fase lanzada así puede quedar esperando una respuesta humana a mitad: en modo no interactivo nadie puede contestar. Toda decisión que antes se preguntaba durante la ejecución pasa a ser un campo del formulario, resuelto antes de lanzar.
+- Criterio de aceptación: dado un proyecto sin escaleta, cuando se abre la pantalla, entonces el botón de la tanda está deshabilitado indicando que falta la escaleta; y dado un botón pulsado, cuando la fase termina, entonces los artefactos en disco son indistinguibles de los que deja la misma fase lanzada desde la terminal.
+
+**RF-UI-04 — Progreso, pausa y error**
+- Descripción: mientras una fase corre, la pantalla muestra en qué punto está, y al terminar muestra cómo terminó.
+- Entradas: el manifiesto y el registro de ejecución de la tanda en curso (RF-08.5).
+- Reglas:
+  - El progreso se lee del estado en disco, no de la salida del modelo. La pantalla no interpreta prosa: muestra capítulo actual, capítulos cerrados y los últimos eventos registrados.
+  - Ante una pausa de QA, la pantalla muestra el reporte y se detiene ahí. **No ofrece resolverlo.** Resolver exige declarar qué capítulos se corrigieron, y esa declaración solo tiene sentido después de editarlos a mano; un botón invitaría a cerrar el reporte sin haber corregido nada, que es justo lo que RF-07.4 impide.
+  - Ante un error, muestra el texto literal del error y la ruta del registro donde está la traza. No lo reformula ni lo oculta.
+- Criterio de aceptación: dada una tanda que pausa por contradicción, cuando termina, entonces la pantalla muestra el reporte, indica que la novela está pausada y no ofrece ninguna acción que cambie el manifiesto; y dada una tanda que falla, entonces la pantalla muestra el error textual y dónde auditarlo.
 
 ### Fase 0 — Destilado de estilo
 

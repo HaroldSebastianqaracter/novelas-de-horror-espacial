@@ -1,7 +1,7 @@
 # Especificación Técnica — Harness Generador de Novelas de Terror
 
-**Versión:** 1.5 — historial de cambios en `git log` sobre este archivo.
-**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.5 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
+**Versión:** 1.6 — historial de cambios en `git log` sobre este archivo.
+**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.6 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
 **Lector previsto:** el agente de código que implementa el harness. Toda decisión no cubierta aquí y no derivable de la especificación funcional debe tratarse como pregunta abierta, no como espacio para asumir.
 
 ## 1. Decisiones de arquitectura declaradas
@@ -49,7 +49,7 @@ app/
 │   ├── loop.py                 # loop principal fases 5-7
 │   └── checkpoint.py           # detecta último capítulo cerrado, permite reanudar
 ├── cli.py                      # capa externa y verbos internos del loop (§8.2)
-├── ui.py                       # frontend (§15)
+├── ui.py                       # frontend: formulario y panel de fases (§15)
 └── __main__.py                 # python -m app
 ```
 
@@ -453,6 +453,7 @@ Los tres verbos `validar-*` son la única parte del CLI que ejecuta un agente, y
 | **H-11, el hook crítico** (RF-08.4) | Que `Bash` en los tres agentes sirva solo para validar. **Es la prueba que más importa de la suite**: si H-11 falla, los tres agentes tienen shell libre y caen INV-01 e INV-02. | `pytest` con payloads simulados. Casos que deben salir con código 2: `cat 05_manuscrito/cap_1.md`; `python -m app validar-capitulo 3` cuando el capítulo de la invocación es el 5; `python -m app validar-capitulo 5; cat cap_1.md`; `python -m app validar-capitulo 5 && ls`; `echo $(cat cap_1.md)`; `python -m app validar-delta 5` con `agent_type = escritor`; `python -m app status`. Debe salir con 0: exactamente el validador del rol con el capítulo correcto. |
 | Autovalidación (RF-08.4) | Que el validador que corre el agente sea el mismo código que corre el harness. | `pytest`: `validar-delta` sobre un delta con sujeto fuera del registro devuelve el mismo error que `aplicar-delta`; `validar-capitulo` sobre un borrador corto devuelve el mismo desvío que calcula EX-07. Un agente no puede aprobarse con otro criterio. |
 | Registro de ejecución (RF-08.5) | Que una tanda deje reconstruible lo que pasó. | Con dobles: correr 3 capítulos y comprobar que `eventos.jsonl` contiene, en orden, los verbos, los pares `agente_inicio`/`agente_fin` de los seis subagentes, los hooks disparados y ningún hueco; que `prompts/` y `retornos/` tienen un archivo por invocación; y que una tanda interrumpida a mitad deja un evento `error` con traza. |
+| Panel de fases (RF-UI-03) | Que un botón y el comando tecleado produzcan lo mismo, y que ninguno se lance fuera de su condición. | Sin modelo: los endpoints se prueban con un doble del lanzador que registra el comando en vez de ejecutarlo. Se comprueba que cada botón compone `claude -p "/<skill>"` sin `--bare`, que un botón sin condición de entrada devuelve el motivo y no lanza, y que con una ejecución viva todos quedan deshabilitados. |
 
 Criterio de decisión para las dos filas nuevas: si la atribución de sujeto acierta por debajo de ~90%, o si aparece algún hecho pertinente excluido por el filtro, hay que volver a inyectar `continuidad.json` completo y asumir el costo de contexto. El resto del esquema (`sujeto`, `categoria`, `superado_por`) se conserva igual: sigue sirviendo para QA y para RF-07.6 aunque el escritor no filtre.
 
@@ -816,7 +817,7 @@ Cada fase del pipeline es una skill en `.claude/skills/<nombre>/SKILL.md`. Las s
 └── criterios-qa/SKILL.md            # dominio · precargada en qa (§11.8)
 ```
 
-Las que tienen efectos irreversibles (escribir un capítulo, cerrar un corte) llevan `disable-model-invocation: true`, para que solo las dispare el usuario y no el modelo por su cuenta. `/destilar-estilo` corre con `context: fork`: los textos de referencia son largos y no tienen por qué quedarse en el contexto del orquestador.
+Las que tienen efectos irreversibles (escribir un capítulo, cerrar un corte) llevan `disable-model-invocation: true`, para que solo las dispare el usuario y no el modelo por su cuenta. Esa restricción es compatible con el panel de fases de §15.3: el botón lo pulsa el usuario, así que la orden sigue siendo suya. `/destilar-estilo` corre con `context: fork`: los textos de referencia son largos y no tienen por qué quedarse en el contexto del orquestador.
 
 ### 13.3 Hooks: el mecanismo de cumplimiento
 
@@ -918,9 +919,9 @@ Trabajos consultados al dimensionar la memoria y el control de continuidad:
 - **Skills de Claude Code** — carga progresiva, `context: fork`, scripts embebidos. <https://code.claude.com/docs/en/skills>
 - **Plugins de Claude Code** — empaquetado de skills, agentes y hooks. <https://code.claude.com/docs/en/plugins>
 
-## 15. Frontend de entrada de requisitos (`python -m app ui`)
+## 15. Frontend local (`python -m app ui`)
 
-Formulario web local para escribir lo que el modelo necesita saber antes de la fase 0. Implementa RF-UI-01 y RF-UI-02 de la spec funcional. **Solo entrada**: no llama a ningún modelo, no muestra progreso, no lee el manuscrito. Su única salida son archivos.
+Pantalla web local con dos funciones: escribir los requisitos antes de la fase 0 (RF-UI-01, RF-UI-02) y lanzar las fases sin teclear comandos (RF-UI-03, RF-UI-04). No llama a ningún modelo y no orquesta nada: para lanzar una fase arranca una sesión de Claude Code, que sigue siendo el orquestador.
 
 ### 15.1 Qué recoge y qué escribe
 
@@ -931,15 +932,54 @@ Formulario web local para escribir lo que el modelo necesita saber antes de la f
 | Dimensionamiento: `total_capitulos`, `palabras_por_capitulo`, `ventana_resumen_rodante`, `cadencia_qa`, `max_tokens_contexto_escritor`, `max_hechos_por_capitulo` | RF-CFG-01, §11.2 | `config/novela.json` |
 | Ejecución: `capitulos_por_tanda`, `max_llamadas_por_tanda`, `registrar_uso` | RF-CFG-02, RF-CFG-06 | `config/ejecucion.json` |
 | Rutas locales a los ejemplos de referencia | RF-00.2 | copia a `00_referencias/` |
+| Sin referencias: generar la guía de estilo desde la descripción del subgénero | RF-00.2, RF-UI-03 | `config/ejecucion.json` |
 
-### 15.2 Reglas de implementación
+La última fila es nueva y no es cosmética. Sin ella, `/destilar-estilo` se detiene a preguntar cuando `00_referencias/` está vacía, y en modo no interactivo nadie puede contestar (RF-UI-03). Toda pregunta que una skill hacía a mitad de ejecución se resuelve aquí, antes de lanzar.
+
+### 15.2 Reglas de la entrada
 
 - Valida con el mismo `HarnessConfig` de §8.1 **antes** de escribir. El formulario no puede producir una configuración que el harness rechazaría: EX-05 es imposible sobre archivos escritos por esta pantalla.
 - Si el manifiesto tiene `ultimo_capitulo_cerrado > 0`, los campos de `novela.json` aparecen **deshabilitados con el motivo** (INV-04, EX-06). Solo la idea y `ejecucion.json` siguen editables. Es la misma regla que RF-CFG-03 aplica a la línea de comandos, llevada a la interfaz.
-- Solo biblioteca estándar: `http.server` sirviendo una página HTML con el formulario y un endpoint `POST /guardar`. Sin dependencias nuevas, sin paso de build.
-- Escucha únicamente en `127.0.0.1`. No hay autenticación porque no hay red.
-- Al guardar, muestra la ruta de cada archivo escrito y el comando siguiente sugerido (`/destilar-estilo` si `00_referencias/` tiene contenido, o `/generar-premisa` si no).
+- Solo biblioteca estándar: `http.server` sirviendo la página y los endpoints. Sin dependencias nuevas, sin paso de build.
+- Escucha únicamente en `127.0.0.1`.
 
-### 15.3 Fuera de alcance de esta versión
+### 15.3 Panel de fases
 
-Ver el progreso de la tanda, leer capítulos cerrados, resolver reportes de QA. Todo eso existe en la línea de comandos (§8.2) y es el candidato natural a una segunda versión de esta pantalla, cuando la primera novela completa muestre qué hace falta mirar.
+Seis botones, uno por fase, más `ensamblar`. Cada uno lanza `claude -p "/<skill>"` con el directorio de trabajo en la raíz del proyecto y `--output-format json`, y muestra la condición que lo habilita:
+
+| Botón | Lanza | Se habilita cuando | Coste |
+|---|---|---|---|
+| Destilar estilo | `/destilar-estilo` | hay textos en `00_referencias/`, o el formulario marcó la excepción de §15.1 | bajo |
+| Generar premisa | `/generar-premisa` | existe `01_concepto/idea.md` | bajo |
+| Generar sinopsis | `/generar-sinopsis` | existe `premisa.md` | bajo |
+| Generar escaleta | `/generar-escaleta` | existe `tres_actos.md` y `config/novela.json` valida | medio |
+| Inicializar estado | `/inicializar-estado` | existe `capitulos.json` | medio |
+| **Escribir tanda** | `/escribir-tanda` | existen los cinco anteriores y el manifiesto no está `pausado_por_qa` | **alto** |
+| Ensamblar | `python -m app ensamblar` | hay al menos un capítulo cerrado | ninguno |
+
+Reglas de ejecución:
+
+- **Nunca `--bare`.** Ese modo salta hooks, subagentes, skills y `CLAUDE.md` a propósito. Sin ellos el harness deja de ser estricto: no hay H-11, no hay allowlists, no hay invariantes. Un botón que use `--bare` es un botón que ejecuta otro sistema.
+- El proceso corre en segundo plano y la página consulta el estado por su cuenta. La pantalla no se queda bloqueada durante los minutos que tarda una tanda.
+- **Una ejecución a la vez** (RF-UI-03). El frontend guarda el identificador del proceso en curso y deshabilita todos los botones mientras viva. Al arrancar, si encuentra un cursor de tanda (§5) sin proceso vivo, lo informa: la ejecución anterior murió a mitad.
+- El botón de la tanda abre una confirmación con `capitulos_por_tanda`, `total_capitulos` y `max_llamadas_por_tanda` antes de lanzar. Es la única acción que gasta de forma apreciable y la única que cierra capítulos.
+- Las variables de entorno se heredan del proceso que arrancó el frontend, incluidas las de §3.1. El frontend **nunca** las escribe, ni las lee para mostrarlas, ni las pide por formulario: la credencial no pasa por la pantalla.
+- `--output-format json` devuelve el coste estimado de cada invocación; se registra junto al evento de la fase en `07_registro/` (§5.1). Es una estimación del cliente, no la factura.
+
+### 15.4 Permisos en modo no interactivo
+
+En una sesión de terminal, Claude Code pregunta antes de una acción que no está preaprobada. Con `-p` nadie puede contestar, así que lo que preguntaría se deniega y la fase muere a mitad. La solución adoptada es **reglas explícitas**, no un modo permisivo global:
+
+- `.claude/settings.json` declara en `permissions.allow` exactamente lo que el orquestador necesita: invocar a los tres subagentes, ejecutar los verbos de `python -m app` y escribir en las carpetas de estado. Nada más.
+- El frontend lanza con `--permission-prompts none`, para que nada quede esperando una respuesta que no va a llegar.
+- Una regla que falte se manifiesta como una denegación que detiene la fase. No es un fallo silencioso: el registro de ejecución (§5.1) anota qué se denegó, y de ahí sale la regla que faltaba.
+
+Se elige esto y no un modo amplio como `acceptEdits` por coherencia con §13.1 y §13.3: el proyecto entero está construido sobre dar el permiso mínimo y hacerlo cumplir con hooks. Un permiso amplio en el arranque anularía esa decisión desde fuera.
+
+### 15.5 Límite aceptado
+
+La pantalla escucha sin autenticación en `127.0.0.1` y ahora puede lanzar procesos que gastan dinero. El límite de confianza es la máquina: cualquier proceso local podría llamar a sus endpoints. Se acepta porque es el mismo límite que tiene la terminal, donde cualquier proceso local puede ejecutar `claude` igual. No se abre a la red, y por eso no se añade autenticación: añadirla daría una sensación de seguridad que el diseño no sostiene.
+
+### 15.6 Fuera de alcance de esta versión
+
+Resolver un reporte de QA desde la pantalla (RF-UI-04 lo excluye a propósito), leer capítulos en el navegador, editar la escaleta y lanzar tandas programadas. La resolución de QA es el caso más delicado del sistema y su protocolo de tres pasos (§8.2) exige editar archivos a mano entre el primero y el segundo; llevarlo a un botón antes de haberlo ejercitado a mano sería adelantarse.
