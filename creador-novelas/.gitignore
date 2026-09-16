@@ -10,3 +10,7 @@ __pycache__/
 # artefactos de trabajo del loop (spec técnica §8.2): no son estado
 04_estado/prompts/
 04_estado/deltas/
+
+# ejemplos de referencia del subgénero (RF-00.2): fuera de git, se conserva la carpeta
+00_referencias/*
+!00_referencias/.gitkeep
