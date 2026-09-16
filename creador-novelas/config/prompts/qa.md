@@ -21,7 +21,7 @@ Los hechos con `superado_por` distinto de null fueron reemplazados por una corre
 
 ## Qué buscar
 1. **Contradicciones**: afirmaciones de la muestra que niegan un hecho vigente del log (un personaje muerto que actúa, una puerta sellada que se abre sin que nadie la abra, un objeto perdido que reaparece). Un personaje que miente o se equivoca dentro de la ficción NO contradice el log; solo cuenta lo que el narrador establece como cierto. Cada contradicción cita el `cap_origen` del hecho contradicho.
-2. **Repeticiones estilísticas**: metáforas, imágenes o estructuras de frase recurrentes. El umbral es **3 o más apariciones** acumuladas entre lo ya registrado y esta muestra: a partir de ahí es un hallazgo de tipo `repeticion`.
+2. **Repeticiones estilísticas**: metáforas, imágenes o estructuras de frase recurrentes. Un recurso es hallazgo de tipo `repeticion` cuando cumple **las dos** condiciones (RF-07.3): (a) acumula **3 o más apariciones** entre el registro anterior y esta muestra, y (b) **aparece en esta muestra**. Un recurso que ya estaba por encima del umbral pero que **no vuelve a aparecer** en los capítulos de este corte NO es hallazgo: seguí sumándolo en el registro de recursos con su conteo intacto, pero no lo enumeres. Esto es deliberado: el conteo de repeticiones de cada corte mide si el escritor sigue repitiéndose ahora, no cuánto se repitió en el pasado, y por eso tiene que poder bajar de un corte al siguiente.
 
 ## Qué escribir (con Write, solo dentro de 06_qa/)
 1. **{{RUTA_REPORTE_MD}}**: el reporte legible, con cada hallazgo y su `cap_origen`.
