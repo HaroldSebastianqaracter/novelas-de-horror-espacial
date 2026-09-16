@@ -199,7 +199,16 @@ input:disabled,select:disabled{color:#334152;background:#030508;cursor:not-allow
 #aviso.visible{opacity:1}
 #atajos{position:absolute;left:64px;bottom:14px;z-index:12;font-size:9.5px;letter-spacing:.02em;color:#2b3644}
 #atajos b{color:#3f4d60;font-weight:400}
-@media (prefers-reduced-motion:reduce){*{animation:none !important}}
+/* Paralaje: los cuatro planos del dibujo se mueven a distinta velocidad con el raton. Es lo que
+   convierte un dibujo plano sobre negro en algo que esta DETRAS de un cristal. La luz y el bucle
+   viajan con el plano medio para no despegarse de su compartimento. */
+#plano-fondo,#plano-medio,#plano-frente,#anotaciones,#luz,#bucle{
+  transition:transform 520ms cubic-bezier(.22,.61,.36,1)}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important}
+  #plano-fondo,#plano-medio,#plano-frente,#anotaciones,#luz,#bucle{transform:none !important}
+}
 </style>
 </head>
 <body>
@@ -243,7 +252,9 @@ input:disabled,select:disabled{color:#334152;background:#030508;cursor:not-allow
     en orden.</p>
   <div id="diario"><h2>registro de a bordo</h2><div id="lineas"></div></div>
 
-  <svg viewBox="0 0 1440 900" width="1440" height="900" style="position:absolute;inset:0;display:block;filter:blur(.3px)">
+  <svg viewBox="0 0 1440 900" width="1440" height="900"
+       style="position:absolute;inset:0;display:block;filter:blur(.3px)"
+       color="#5a6d82" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-linecap="butt">
     <defs>
       <filter id="sucio"><feTurbulence type="fractalNoise" baseFrequency=".024" numOctaves="3" seed="7"/>
         <feDisplacementMap in="SourceGraphic" scale="26" xChannelSelector="R" yChannelSelector="G"/></filter>
@@ -259,143 +270,513 @@ input:disabled,select:disabled{color:#334152;background:#030508;cursor:not-allow
       <linearGradient id="manchaPasillo" x1="0" y1="0" x2="1" y2="0">
         <stop offset="0%" stop-color="#6d0c17" stop-opacity="0"/><stop offset="42%" stop-color="#c41e2f" stop-opacity=".55"/>
         <stop offset="100%" stop-color="#6d0c17" stop-opacity="0"/></linearGradient>
-      <clipPath id="celda-escritor"><polygon points="198,392 514,380 514,590 430,600 198,584"/></clipPath>
-      <clipPath id="celda-extractor"><polygon points="518,380 800,374 800,596 518,592"/></clipPath>
-      <clipPath id="celda-qa"><polygon points="804,374 1002,368 1004,596 804,596"/></clipPath>
-    </defs>
 
-    <g id="plano" stroke="#5a6d82" fill="none" stroke-width="1" stroke-linejoin="round" stroke-linecap="round">
+    <clipPath id="celda-puente">
+      <polygon points="506,252 640,226 782,236 790,254 798,428 506,430"></polygon>
+    </clipPath>
+    <clipPath id="celda-escritor">
+      <polygon points="178,438 520,434 520,632 472,621 396,605 304,583 214,549 178,502"></polygon>
+    </clipPath>
+    <clipPath id="celda-extractor">
+      <polygon points="534,434 848,431 848,628 798,625 768,653 704,657 668,633 562,631 534,631"></polygon>
+    </clipPath>
+    <clipPath id="celda-qa">
+      <polygon points="862,431 1092,437 1084,579 1006,607 898,619 862,621"></polygon>
+    </clipPath>
+    <clipPath id="casco-interior">
+      <polygon points="130,470 186,404 240,366 304,331 396,313 472,305 500,248 640,222 784,232 806,290 898,302 1006,312 1086,334 1128,364 1112,396 1140,422 1158,452 1154,515 1128,547 1084,579 1006,607 898,619 798,625 768,653 704,657 668,633 562,631 472,621 396,605 304,583 214,549 160,513"></polygon>
+    </clipPath>
+  </defs>
+    <!-- Plano de Claude Design. El original firmado esta en app/static/sec-04-corte.svg;
+         esta copia va sin su bloque de credenciales, que dentro de otro documento no valida. -->
+    <g id="corte" transform="translate(111,113) scale(0.704)">
+  <g id="plano-fondo" stroke="currentColor" fill="none" opacity="0.34">
 
-      <!-- ============ CASCO PRINCIPAL ============ -->
-      <path class="traza" d="M190,392 L430,376 L1000,364 L1006,596 L430,606 L190,584 Z" opacity=".95"/>
-      <!-- proa blindada -->
-      <path class="traza" d="M190,392 L150,428 L122,470 L122,486 L150,540 L190,584" opacity=".95"/>
-      <path d="M190,392 L196,584" opacity=".55"/>
-      <path d="M150,428 L176,452 L176,524 L150,540" opacity=".45"/>
-      <path d="M122,470 L150,470 M122,486 L150,486" opacity=".3"/>
-      <circle cx="146" cy="478" r="5.5" opacity=".5"/><circle cx="146" cy="478" r="1.6" opacity=".8"/>
-      <path d="M134,462 A 20 20 0 0 0 134,494" opacity=".35"/>
+    
+    <g stroke-width="0.5" stroke-dasharray="4 7">
+      <path d="M214,352 L214,548"></path>
+      <path d="M260,340 L260,566"></path>
+      <path d="M304,331 L304,583"></path>
+      <path d="M350,320 L350,595"></path>
+      <path d="M396,313 L396,605"></path>
+      <path d="M442,308 L442,614"></path>
+      <path d="M562,240 L562,631"></path>
+      <path d="M602,232 L602,631"></path>
+      <path d="M642,226 L642,632"></path>
+      <path d="M682,228 L682,655"></path>
+      <path d="M722,230 L722,656"></path>
+      <path d="M762,232 L762,650"></path>
+      <path d="M806,290 L806,625"></path>
+      <path d="M852,296 L852,628"></path>
+      <path d="M898,302 L898,619"></path>
+      <path d="M952,307 L952,614"></path>
+      <path d="M1006,312 L1006,607"></path>
+      <path d="M1046,322 L1046,594"></path>
+      <path d="M1086,334 L1086,580"></path>
+    </g>
 
-      <!-- ============ SUPERESTRUCTURA: PUENTE ============ -->
-      <path class="traza" d="M460,374 L474,304 L512,278 L640,266 L792,270 L812,296 L820,372" opacity=".9"/>
-      <path d="M481,300 L508,281 M489,307 L516,288 M497,314 L524,295" opacity=".55"/>
-      <path d="M540,272 L540,290 M568,270 L568,288 M596,269 L596,287" opacity=".3"/>
-      <path d="M700,266 L700,208" opacity=".55"/>
-      <path d="M690,222 L710,222 M688,236 L712,236 M692,250 L708,250" opacity=".45"/>
-      <circle cx="700" cy="204" r="2.4" fill="#4a5b6e" opacity=".9"/>
-      <path d="M752,270 A 14 12 0 0 1 780,270" opacity=".5"/>
-      <path d="M460,374 L820,372" opacity=".35" stroke-dasharray="6 5"/>
+    
+    <g stroke-width="0.5">
+      <path d="M304,337 L312,331 M304,577 L312,583"></path>
+      <path d="M396,319 L404,313 M396,599 L404,605"></path>
+      <path d="M562,246 L570,240 M562,625 L570,631"></path>
+      <path d="M642,232 L650,226 M642,626 L650,632"></path>
+      <path d="M762,238 L754,232 M762,644 L754,650"></path>
+      <path d="M898,308 L906,302 M898,613 L906,619"></path>
+      <path d="M1006,318 L1014,312 M1006,601 L1014,607"></path>
+    </g>
 
-      <!-- ============ RADIADORES DORSALES ============ -->
-      <path d="M848,364 L998,357" opacity=".5"/>
-      <g opacity=".42">
-        <path d="M856,362 L886,308"/><path d="M880,361 L910,307"/><path d="M904,360 L934,306"/>
-        <path d="M928,359 L958,305"/><path d="M952,358 L982,304"/>
+    
+    <g stroke-width="0.5" stroke-dasharray="14 6">
+      <path d="M196,398 L470,376 M196,420 L468,404"></path>
+      <path d="M520,268 L790,258"></path>
+      <path d="M180,560 L1100,560"></path>
+      <path d="M180,592 L1080,588" stroke-dasharray="9 8"></path>
+    </g>
+
+    
+    <g stroke-width="0.5">
+      <path d="M200,462 L500,462 M200,466 L500,466"></path>
+      <path d="M540,462 L840,462 M540,466 L840,466"></path>
+      <path d="M870,462 L1100,462 M870,466 L1100,466"></path>
+      <g stroke-dasharray="2 4">
+        <path d="M240,466 L240,500 M300,466 L300,500 M360,466 L360,500 M420,466 L420,500 M480,466 L480,500"></path>
+        <path d="M580,466 L580,500 M640,466 L640,500 M700,466 L700,500 M760,466 L760,500 M820,466 L820,500"></path>
+        <path d="M900,466 L900,500 M960,466 L960,500 M1020,466 L1020,500 M1080,466 L1080,500"></path>
+        <path d="M280,528 L280,578 M420,528 L420,608 M600,528 L600,630 M740,528 L740,652 M880,528 L880,616 M1020,528 L1020,600"></path>
       </g>
-      <path d="M886,308 L982,304" opacity=".3" stroke-dasharray="3 5"/>
-
-      <!-- ============ BLOQUE MOTOR ============ -->
-      <path class="traza" d="M1006,364 L1028,336 L1078,332 L1098,358 L1106,420 L1106,540 L1098,602 L1078,628 L1028,624 L1006,596" opacity=".95"/>
-      <path d="M1004,366 L1004,596" opacity=".55"/>
-      <circle cx="1052" cy="480" r="30" opacity=".4"/><circle cx="1052" cy="480" r="19" opacity=".5"/>
-      <circle cx="1052" cy="480" r="7" opacity=".7"/>
-      <path d="M1022,480 L1004,480 M1082,480 L1104,480 M1052,450 L1052,340 M1052,510 L1052,618" opacity=".25" stroke-dasharray="3 5"/>
-      <!-- toberas -->
-      <path class="traza" d="M1106,396 L1136,384 L1144,412 L1136,440 L1106,426 Z" opacity=".85"/>
-      <path class="traza" d="M1106,452 L1140,440 L1148,480 L1140,520 L1106,508 Z" opacity=".85"/>
-      <path class="traza" d="M1106,534 L1136,520 L1144,548 L1136,576 L1106,564 Z" opacity=".85"/>
-      <path d="M1118,392 L1118,432 M1120,448 L1120,512 M1118,530 L1118,570" opacity=".3"/>
-
-      <!-- ============ BODEGA VENTRAL ============ -->
-      <path class="traza" d="M470,604 L510,644 L580,662 L760,660 L830,638 L850,600" opacity=".85"/>
-      <path d="M540,652 L540,606 M620,660 L620,604 M700,660 L700,603 M780,656 L780,602" opacity=".22" stroke-dasharray="3 6"/>
-      <!-- esclusa: por aquí entramos -->
-      <path d="M612,660 L612,680 L672,680 L672,659" opacity=".7"/>
-      <path d="M622,680 L622,668 M642,682 L642,668 M662,680 L662,668" opacity=".45"/>
-      <path d="M642,682 L642,706 L716,706" opacity=".35"/>
-
-      <!-- ============ INTERIOR: SECCIÓN DE PROCESO ============ -->
-      <path class="traza" d="M196,392 L196,584" opacity=".7"/>
-      <path class="traza" d="M516,378 L516,486 M516,512 L516,592" opacity=".8"/>
-      <path class="traza" d="M802,374 L802,486 M802,512 L802,596" opacity=".8"/>
-      <!-- cuadernas -->
-      <g opacity=".26" stroke-dasharray="4 7">
-        <path d="M280,382 L280,486 M280,512 L280,590"/><path d="M370,378 L370,486 M370,512 L370,596"/>
-        <path d="M600,376 L600,486 M600,512 L600,594"/><path d="M700,375 L700,486 M700,512 L700,594"/>
-        <path d="M880,371 L880,486 M880,512 L880,596"/><path d="M950,370 L950,486 M950,512 L950,596"/>
-      </g>
-      <!-- pasillo -->
-      <path class="traza" d="M216,486 L996,486" opacity=".8"/>
-      <path class="traza" d="M216,512 L996,512" opacity=".8"/>
-      <path d="M216,486 L216,512 M996,486 L996,512" opacity=".5"/>
-      <g opacity=".85">
-        <rect x="510" y="484" width="12" height="30"/><path d="M510,484 L522,514 M522,484 L510,514" opacity=".4"/>
-        <rect x="796" y="484" width="12" height="30"/><path d="M796,484 L808,514 M808,484 L796,514" opacity=".4"/>
-      </g>
-      <!-- conducto puente → pasillo -->
-      <path d="M636,300 L636,486 M652,300 L652,486" opacity=".55"/>
-      <rect x="636" y="366" width="16" height="20" opacity=".8"/>
-      <!-- servicios -->
-      <g opacity=".2" stroke-dasharray="3 6">
-        <path d="M230,452 L505,449 M528,449 L790,446 M814,446 L990,444"/>
-        <path d="M300,530 L300,584 M660,530 L660,592 M900,530 L900,592"/>
+      
+      <path d="M332,443 L332,560 M338,443 L338,560"></path>
+      <path d="M660,443 L660,630 M666,443 L666,630"></path>
+      <path d="M994,443 L994,600 M1000,443 L1000,600"></path>
+      <g stroke-dasharray="1 4">
+        <path d="M326,470 L344,470 M326,502 L344,502 M326,534 L344,534"></path>
+        <path d="M654,478 L672,478 M654,516 L672,516 M654,556 L672,556 M654,596 L672,596"></path>
+        <path d="M988,476 L1006,476 M988,514 L1006,514 M988,552 L1006,552"></path>
       </g>
     </g>
 
+    
+    <g stroke-width="0.5">
+      <path d="M226,384 L286,384 L286,412 L226,412 Z"></path>
+      <path d="M226,392 L286,392 M226,404 L286,404"></path>
+      <path d="M300,380 L360,380 L360,410 L300,410 Z"></path>
+      <path d="M300,395 L360,395"></path>
+      <path d="M386,378 L444,378 L444,408 L386,408 Z"></path>
+      <path d="M415,378 L415,408"></path>
+      <path d="M840,318 L1080,378 M840,336 L1064,392 M840,354 L1046,404" stroke-dasharray="6 5"></path>
+      <path d="M900,330 L900,428 M960,342 L960,428 M1020,356 L1020,428" stroke-dasharray="2 6"></path>
+    </g>
+
+    
+    <g stroke-width="0.5" stroke-dasharray="1 8" opacity="0.7">
+      <path d="M220,540 L1090,540"></path>
+      <path d="M240,572 L1080,572"></path>
+      <path d="M300,604 L1040,604"></path>
+    </g>
+  </g><g id="plano-medio" stroke="currentColor" fill="none">
+
+    
+    <path id="casco-exterior" stroke-width="1.6" d="M70,470 L84,436 L120,392 L190,344 L300,312 L400,296 L470,288 L496,236 L640,210 L790,220 L806,284 L898,292 L1006,302 L1092,324 L1140,362 L1124,398 L1152,422 L1170,452 L1166,516 L1140,554 L1092,590 L1006,618 L898,630 L798,636 L768,666 L700,670 L660,644 L560,642 L470,632 L400,616 L300,594 L190,560 L120,520 L84,500 Z"></path>
+
+    
+    <path id="casco-interior-linea" stroke-width="1" opacity="0.62" d="M92,470 L104,441 L130,404 L186,364 L240,340 L304,320 L396,304 L472,296 L500,248 L640,222 L784,232 L800,292 L898,302 L1006,312 L1086,334 L1128,364 L1112,396 L1140,422 L1158,452 L1154,515 L1128,547 L1084,579 L1006,607 L898,619 L798,625 L768,653 L704,657 L668,633 L562,631 L472,621 L396,605 L304,583 L214,549 L160,513 L112,492 Z"></path>
+
+    
+    <g stroke-width="0.5" opacity="0.55">
+      <path d="M120,392 L130,404 M190,344 L186,364 M300,312 L304,320 M400,296 L396,304 M470,288 L472,296"></path>
+      <path d="M496,236 L500,248 M640,210 L640,222 M790,220 L784,232 M806,284 L800,292"></path>
+      <path d="M898,292 L898,302 M1006,302 L1006,312 M1092,324 L1086,334 M1140,362 L1128,364"></path>
+      <path d="M1092,590 L1084,579 M1006,618 L1006,607 M898,630 L898,619 M798,636 L798,625"></path>
+      <path d="M768,666 L768,653 M700,670 L704,657 M660,644 L668,633 M560,642 L562,631"></path>
+      <path d="M470,632 L472,621 M400,616 L396,605 M300,594 L304,583 M190,560 L214,549 M120,520 L160,513"></path>
+      <path d="M84,436 L92,470 L84,500"></path>
+    </g>
+
+    
+    <path stroke-width="0.5" stroke-dasharray="0.9 9" stroke-linecap="round" opacity="0.5" d="M76,470 L90,433 L126,388 L194,340 L302,307 L400,291 L468,283 L492,231 L640,205 L793,216 L810,281 L899,287 L1008,297 L1095,320 L1146,361 L1130,398 L1158,421 L1176,452 L1172,518 L1144,558 L1095,595 L1008,623 L899,635 L799,641 L770,671 L699,675 L657,647 L560,647 L469,637 L399,621 L299,599 L188,565 L117,525 L80,502 Z"></path>
+
+    
+    <g stroke-width="1">
+      <path d="M92,470 L112,492 M92,470 L104,441"></path>
+      <path d="M140,420 L140,522" opacity="0.7"></path>
+      <path d="M170,396 L170,538" opacity="0.7"></path>
+      <path d="M118,452 L162,452 M118,488 L162,488" stroke-width="0.5"></path>
+      <path d="M104,441 L170,420 M112,492 L170,514" stroke-width="0.5" stroke-dasharray="5 4"></path>
+      
+      <path d="M84,436 L120,392 L120,404 L92,444 Z" stroke-width="0.5"></path>
+      <path d="M84,500 L120,520 L120,508 L92,494 Z" stroke-width="0.5"></path>
+      <path d="M126,400 L182,358 M132,412 L192,366" stroke-width="0.5" opacity="0.6"></path>
+      <path d="M128,514 L186,540 M136,524 L196,548" stroke-width="0.5" opacity="0.6"></path>
+    </g>
+
+    
+    <path id="cubierta-principal" stroke-width="1.6" d="M170,438 L470,433 L812,430 L1156,438"></path>
+    <path stroke-width="0.5" opacity="0.6" d="M170,446 L470,441 L812,438 L1156,446"></path>
+    <g stroke-width="0.5" opacity="0.45">
+      <path d="M200,438 L200,446 M250,438 L250,446 M300,438 L300,446 M350,437 L350,445 M400,436 L400,444 M450,435 L450,443 M500,434 L500,442 M550,433 L550,441 M600,433 L600,441 M650,432 L650,440 M700,432 L700,440 M750,431 L750,439 M800,430 L800,438 M850,431 L850,439 M900,432 L900,440 M950,433 L950,441 M1000,434 L1000,442 M1050,435 L1050,443 M1100,436 L1100,444"></path>
+    </g>
+
+    
+    <g stroke-width="1.6">
+      <path id="pared-proa-puente" d="M500,248 L506,430"></path>
+      <path id="pared-puente-popa" d="M784,232 L798,430"></path>
+    </g>
+    <g stroke-width="0.5">
+      
+      <path d="M520,404 L590,404 L590,420 L520,420 Z"></path>
+      <path d="M520,412 L590,412"></path>
+      <path d="M606,404 L676,404 L676,420 L606,420 Z"></path>
+      <path d="M606,412 L676,412"></path>
+      <path d="M692,404 L762,404 L762,420 L692,420 Z"></path>
+      <path d="M692,412 L762,412"></path>
+      <path d="M516,262 L780,246" opacity="0.7"></path>
+      <path d="M516,276 L780,260" opacity="0.5" stroke-dasharray="6 5"></path>
+      
+      <path d="M760,300 L760,428 M772,300 L772,428"></path>
+      <path d="M760,312 L772,312 M760,326 L772,326 M760,340 L772,340 M760,354 L772,354 M760,368 L772,368 M760,382 L772,382 M760,396 L772,396 M760,410 L772,410"></path>
+      
+      <path d="M528,388 L752,388" opacity="0.6"></path>
+      <path d="M528,382 L528,388 M600,382 L600,388 M676,382 L676,388 M752,382 L752,388" opacity="0.6"></path>
+    </g>
+
+    
+    <g id="pared-escritor-extractor" stroke-width="1.6">
+      <path d="M520,434 L520,632"></path>
+      <path d="M534,433 L534,631"></path>
+    </g>
+    <g stroke-width="0.5" opacity="0.7">
+      <path d="M520,450 L534,450 M520,478 L534,478 M520,560 L534,560 M520,588 L534,588 M520,616 L534,616"></path>
+      <path d="M520,442 L534,456 M534,442 L520,456"></path>
+    </g>
+    <g id="pared-extractor-qa" stroke-width="1.6">
+      <path d="M848,431 L848,628"></path>
+      <path d="M862,431 L862,621"></path>
+    </g>
+    <g stroke-width="0.5" opacity="0.7">
+      <path d="M848,448 L862,448 M848,476 L862,476 M848,560 L862,560 M848,588 L862,588 M848,612 L862,612"></path>
+      <path d="M848,440 L862,454 M862,440 L848,454"></path>
+    </g>
+    
+    <path id="pared-qa-popa" stroke-width="1.6" d="M1092,437 L1084,579"></path>
+    
+    <path id="pared-proa-escritor" stroke-width="1.6" d="M178,438 L178,502"></path>
+
+    
+    <g id="pasillo" stroke-width="1">
+      <path d="M212,500 L1110,500"></path>
+      <path d="M212,528 L1110,528"></path>
+      <path d="M212,500 L212,528" stroke-width="0.5"></path>
+      <path d="M1110,500 L1110,528" stroke-width="0.5"></path>
+      
+      <g stroke-width="0.5" opacity="0.5">
+        <path d="M212,522 L1110,522"></path>
+        <path d="M230,522 L230,528 M260,522 L260,528 M290,522 L290,528 M320,522 L320,528 M350,522 L350,528 M380,522 L380,528 M410,522 L410,528 M440,522 L440,528 M470,522 L470,528 M500,522 L500,528 M560,522 L560,528 M590,522 L590,528 M620,522 L620,528 M650,522 L650,528 M680,522 L680,528 M710,522 L710,528 M740,522 L740,528 M770,522 L770,528 M800,522 L800,528 M830,522 L830,528 M880,522 L880,528 M910,522 L910,528 M940,522 L940,528 M970,522 L970,528 M1000,522 L1000,528 M1030,522 L1030,528 M1060,522 L1060,528 M1090,522 L1090,528"></path>
+      </g>
+      
+      <g stroke-width="0.5" opacity="0.65">
+        <path d="M212,508 L512,508 M542,508 L840,508 M870,508 L1110,508"></path>
+        <path d="M250,508 L250,522 M330,508 L330,522 M410,508 L410,522 M490,508 L490,522 M580,508 L580,522 M660,508 L660,522 M740,508 L740,522 M820,508 L820,522 M900,508 L900,522 M980,508 L980,522 M1060,508 L1060,522"></path>
+      </g>
+    </g>
+
+    
+    <g id="compuerta-escritor-extractor" stroke-width="1">
+      <rect x="520" y="496" width="14" height="36"></rect>
+      <path d="M520,496 L534,532 M534,496 L520,532" stroke-width="0.5" opacity="0.6"></path>
+      <path d="M516,492 L538,492 M516,536 L538,536" stroke-width="0.5"></path>
+      <circle cx="527" cy="514" r="3.5" stroke-width="0.5"></circle>
+      <path d="M527,510 L527,518 M523,514 L531,514" stroke-width="0.5"></path>
+      <path d="M538,498 L546,498 L546,530 L538,530" stroke-width="0.5" opacity="0.7"></path>
+    </g>
+    <g id="compuerta-extractor-qa" stroke-width="1">
+      <rect x="848" y="496" width="14" height="36"></rect>
+      <path d="M848,496 L862,532 M862,496 L848,532" stroke-width="0.5" opacity="0.6"></path>
+      <path d="M844,492 L866,492 M844,536 L866,536" stroke-width="0.5"></path>
+      <circle cx="855" cy="514" r="3.5" stroke-width="0.5"></circle>
+      <path d="M855,510 L855,518 M851,514 L859,514" stroke-width="0.5"></path>
+      <path d="M866,498 L874,498 L874,530 L866,530" stroke-width="0.5" opacity="0.7"></path>
+    </g>
+    
+    <g stroke-width="1">
+      <rect x="212" y="496" width="12" height="36"></rect>
+      <circle cx="218" cy="514" r="3" stroke-width="0.5"></circle>
+    </g>
+
+    
+    <g id="conducto-puente" stroke-width="1">
+      <path d="M506,300 L506,500"></path>
+      <path d="M520,300 L520,496"></path>
+      <rect x="506" y="424" width="14" height="22"></rect>
+      <path d="M506,424 L520,446" stroke-width="0.5" opacity="0.6"></path>
+      <g stroke-width="0.5" opacity="0.6">
+        <path d="M506,320 L520,320 M506,344 L520,344 M506,368 L520,368 M506,392 L520,392 M506,462 L520,462 M506,482 L520,482"></path>
+      </g>
+    </g>
+
+    
+    <g stroke-width="0.5">
+      <path d="M244,440 L244,498 M254,440 L254,498"></path>
+      <path d="M244,452 L254,452 M244,464 L254,464 M244,476 L254,476 M244,488 L254,488"></path>
+      <path d="M244,530 L244,570 M254,530 L254,570"></path>
+      <path d="M244,542 L254,542 M244,556 L254,556"></path>
+      <path d="M580,440 L580,498 M590,440 L590,498"></path>
+      <path d="M580,452 L590,452 M580,464 L590,464 M580,476 L590,476 M580,488 L590,488"></path>
+      <path d="M908,440 L908,498 M918,440 L918,498"></path>
+      <path d="M908,452 L918,452 M908,464 L918,464 M908,476 L918,476 M908,488 L918,488"></path>
+    </g>
+
+    
+    <g stroke-width="0.5">
+      <g>
+        <circle cx="400" cy="552" r="7"></circle>
+        <path d="M393,552 L407,552 M400,545 L400,559"></path>
+        <path d="M400,545 L400,536 M394,536 L406,536"></path>
+      </g>
+      <g>
+        <circle cx="462" cy="566" r="5"></circle>
+        <path d="M457,566 L467,566 M462,561 L462,571"></path>
+        <path d="M462,561 L462,552"></path>
+      </g>
+      <g>
+        <circle cx="712" cy="570" r="7"></circle>
+        <path d="M705,570 L719,570 M712,563 L712,577"></path>
+        <path d="M712,563 L712,552 M706,552 L718,552"></path>
+      </g>
+      <g>
+        <circle cx="792" cy="582" r="5"></circle>
+        <path d="M787,582 L797,582 M792,577 L792,587"></path>
+      </g>
+      <g>
+        <circle cx="1030" cy="552" r="7"></circle>
+        <path d="M1023,552 L1037,552 M1030,545 L1030,559"></path>
+        <path d="M1030,545 L1030,536 M1024,536 L1036,536"></path>
+      </g>
+      
+      <path d="M290,444 L370,444 L370,470 L290,470 Z"></path>
+      <path d="M290,456 L370,456 M310,444 L310,470 M330,444 L330,470 M350,444 L350,470"></path>
+      <path d="M608,444 L700,444 L700,470 L608,470 Z"></path>
+      <path d="M608,458 L700,458 M632,444 L632,470 M656,444 L656,470 M680,444 L680,470"></path>
+      <path d="M936,444 L1032,444 L1032,470 L936,470 Z"></path>
+      <path d="M936,457 L1032,457 M960,444 L960,470 M984,444 L984,470 M1008,444 L1008,470"></path>
+      
+      <path d="M300,536 L360,536 L360,570 L300,570 Z"></path>
+      <path d="M300,548 L360,548 M300,559 L360,559"></path>
+      <path d="M620,536 L690,536 L690,576 L620,576 Z"></path>
+      <path d="M620,548 L690,548 M620,562 L690,562"></path>
+      <path d="M940,536 L1010,536 L1010,570 L940,570 Z"></path>
+      <path d="M940,548 L1010,548 M940,559 L1010,559"></path>
+    </g>
+
+    
+    <g id="radiadores" stroke-width="1">
+      <path d="M852,296 L852,260 M900,292 L900,246 M948,296 L948,240 M996,301 L996,236 M1044,312 L1044,238 M1092,324 L1092,246"></path>
+      <path d="M840,260 L1104,238"></path>
+      <path d="M840,248 L1104,226"></path>
+      <path d="M840,248 L840,260 M1104,226 L1104,238"></path>
+      <g stroke-width="0.5" opacity="0.75">
+        <path d="M852,254 L852,242 M876,252 L876,240 M900,250 L900,238 M924,248 L924,236 M948,246 L948,234 M972,244 L972,232 M996,242 L996,230 M1020,240 L1020,228 M1044,238 L1044,226 M1068,236 L1068,224 M1092,234 L1092,222"></path>
+        <path d="M840,254 L1104,232"></path>
+      </g>
+      
+      <g stroke-width="0.5">
+        <path d="M848,292 L848,264 M856,292 L856,264"></path>
+        <path d="M1088,320 L1088,250 M1096,320 L1096,250"></path>
+        <circle cx="852" cy="280" r="4"></circle>
+        <path d="M848,280 L856,280 M852,276 L852,284"></path>
+      </g>
+    </g>
+
+    
+    <g id="bloque-motor" stroke-width="1.6">
+      <path d="M1152,422 L1170,452 L1166,516 L1140,554"></path>
+      <path d="M1170,452 L1258,452 L1272,392 L1348,392 L1360,452 L1392,452 L1392,520 L1360,520 L1348,576 L1272,576 L1258,516 L1166,516"></path>
+    </g>
+    <g stroke-width="1">
+      <path d="M1258,452 L1258,516"></path>
+      <path d="M1290,452 L1290,516 M1322,452 L1322,516"></path>
+      <path d="M1272,392 L1272,452 M1348,392 L1348,452 M1272,576 L1272,516 M1348,576 L1348,516"></path>
+      
+      <path d="M1392,458 L1428,436 L1428,478 L1392,470"></path>
+      <path d="M1392,498 L1428,490 L1428,532 L1392,510"></path>
+      <path d="M1428,436 L1440,430 M1428,478 L1440,482 M1428,490 L1440,486 M1428,532 L1440,538"></path>
+    </g>
+    <g stroke-width="0.5" opacity="0.7">
+      <path d="M1180,462 L1250,462 M1180,478 L1250,478 M1180,494 L1250,494 M1180,506 L1250,506"></path>
+      <path d="M1266,404 L1354,404 M1266,418 L1354,418 M1266,432 L1354,432"></path>
+      <path d="M1266,536 L1354,536 M1266,550 L1354,550 M1266,564 L1354,564"></path>
+      <path d="M1300,452 L1300,516 M1340,452 L1340,516" stroke-dasharray="3 5"></path>
+      <circle cx="1214" cy="484" r="9"></circle>
+      <path d="M1205,484 L1223,484 M1214,475 L1214,493"></path>
+      <circle cx="1214" cy="484" r="3"></circle>
+      
+      <path d="M1170,452 L1170,516 M1392,452 L1392,520" stroke-dasharray="4 5"></path>
+      <path stroke-dasharray="0.9 8" stroke-linecap="round" d="M1264,398 L1356,398 L1366,452 L1398,452 L1398,520 L1366,520 L1356,570 L1264,570 L1252,516 L1176,516 L1176,452 L1252,452 Z"></path>
+    </g>
+    
+    <g stroke-width="0.5">
+      <path d="M1100,470 L1180,470 M1100,476 L1180,476"></path>
+      <path d="M1100,490 L1180,490 M1100,496 L1180,496"></path>
+      <path d="M1110,470 L1110,496 M1140,470 L1140,496" stroke-dasharray="2 4"></path>
+    </g>
+
+    
+    <g id="bodega-ventral" stroke-width="1.6">
+      <path d="M562,631 L568,700 L610,730 L740,734 L790,706 L798,625"></path>
+    </g>
+    <g stroke-width="1">
+      <path d="M576,644 L786,640" opacity="0.8"></path>
+      <path d="M600,700 L600,644 M660,712 L660,642 M720,714 L720,641"></path>
+      
+      <path d="M636,714 L636,734 M708,712 L708,734"></path>
+      <path d="M636,726 L708,726"></path>
+      <path d="M648,726 L648,734 M672,726 L672,734 M696,726 L696,734"></path>
+      <circle cx="672" cy="718" r="6"></circle>
+      <path d="M666,718 L678,718 M672,712 L672,724"></path>
+    </g>
+    <g stroke-width="0.5" opacity="0.7">
+      <path d="M580,660 L790,657 M582,676 L788,672 M586,692 L784,688"></path>
+      <path d="M620,644 L620,706 M690,642 L690,714 M756,640 L756,700" stroke-dasharray="3 5"></path>
+      
+      <path d="M592,652 L776,648"></path>
+      <path d="M604,648 L604,656 M652,650 L652,658 M700,649 L700,657 M748,648 L748,656"></path>
+      <path d="M572,636 L568,700 L610,730 L740,734 L790,706 L802,632" stroke-dasharray="0.9 8" stroke-linecap="round"></path>
+    </g>
+
+    
+    <g stroke-width="0.5" opacity="0.7">
+      <path d="M232,356 L266,344 L266,334 L232,346 Z"></path>
+      <path d="M296,332 L330,324 L330,314 L296,322 Z"></path>
+      <path d="M360,318 L394,312 L394,302 L360,308 Z"></path>
+    </g>
+  </g><g id="plano-frente" stroke="currentColor" fill="none">
+
+    
+    <g stroke-width="0.5" opacity="0.5">
+      <path d="M48,42 L48,72 M48,42 L78,42"></path>
+      <path d="M1392,42 L1392,72 M1392,42 L1362,42"></path>
+      <path d="M48,858 L48,828 M48,858 L78,858"></path>
+      <path d="M1392,858 L1392,828 M1392,858 L1362,858"></path>
+      <path d="M714,44 L726,44 M720,38 L720,50"></path>
+      <path d="M714,856 L726,856 M720,850 L720,862"></path>
+    </g>
+
+    
+    <g stroke-width="1" opacity="0.8">
+      <path d="M170,782 L1160,782"></path>
+      <path d="M170,774 L170,790 M335,776 L335,788 M500,774 L500,790 M665,776 L665,788 M830,774 L830,790 M995,776 L995,788 M1160,774 L1160,790"></path>
+      <path d="M176,778 L170,782 L176,786 M1154,778 L1160,782 L1154,786" stroke-width="0.5"></path>
+    </g>
+    
+    <g stroke-width="0.5" opacity="0.7">
+      <path d="M118,300 L118,660"></path>
+      <path d="M112,300 L124,300 M112,660 L124,660"></path>
+      <path d="M118,306 L114,312 M118,306 L122,312 M118,654 L114,648 M118,654 L122,648"></path>
+      <path d="M118,438 L168,438" stroke-dasharray="4 5"></path>
+      <path d="M112,438 L124,438"></path>
+    </g>
+    
+    <g stroke-width="0.5" opacity="0.7">
+      <path d="M212,672 L1110,672" stroke-dasharray="6 5"></path>
+      <path d="M212,666 L212,678 M1110,666 L1110,678"></path>
+    </g>
+
+    
+    <g stroke-width="0.5" opacity="0.75">
+      <path d="M304,694 L304,706 M396,694 L396,706 M562,694 L562,706 M642,694 L642,706 M762,694 L762,706 M852,694 L852,706 M898,694 L898,706 M1006,694 L1006,706 M1086,694 L1086,706"></path>
+      <path d="M170,700 L1160,700" stroke-dasharray="1 9"></path>
+    </g>
+
+    
+    <g stroke-width="0.5" opacity="0.7">
+      <path d="M600,372 L600,392 L686,392"></path>
+      <circle cx="690" cy="392" r="1.7" fill="currentColor" stroke="none"></circle>
+      <path d="M300,494 L300,546 L386,546"></path>
+      <circle cx="390" cy="546" r="1.7" fill="currentColor" stroke="none"></circle>
+      <path d="M620,494 L620,600 L700,600"></path>
+      <circle cx="704" cy="600" r="1.7" fill="currentColor" stroke="none"></circle>
+      <path d="M950,494 L950,586 L1000,586"></path>
+      <circle cx="1004" cy="586" r="1.7" fill="currentColor" stroke="none"></circle>
+      <path d="M1300,392 L1300,352 L1240,352"></path>
+      <circle cx="1236" cy="352" r="1.7" fill="currentColor" stroke="none"></circle>
+      <path d="M672,734 L672,776 L744,776"></path>
+      <circle cx="748" cy="776" r="1.7" fill="currentColor" stroke="none"></circle>
+      <path d="M972,238 L972,196 L1046,196"></path>
+      <circle cx="1050" cy="196" r="1.7" fill="currentColor" stroke="none"></circle>
+      <path d="M140,470 L104,470 L104,344 L180,344"></path>
+      <circle cx="184" cy="344" r="1.7" fill="currentColor" stroke="none"></circle>
+    </g>
+  </g><g id="anotaciones" fill="currentColor" stroke="none" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+
+    <g font-size="13" letter-spacing="6.5">
+      <text x="512" y="352" id="n-puente">PUENTE</text>
+      <text x="256" y="472" id="n-escritor">ESCRITOR</text>
+      <text x="576" y="472" id="n-extractor">EXTRACTOR</text>
+      <text x="884" y="472" id="n-qa">QA</text>
+    </g>
+
+    <g font-size="9" letter-spacing="2.2" opacity="0.8">
+      <text x="512" y="370" id="t-puente">Orquestador C-04-P</text>
+      <text x="256" y="489" id="e-escritor">En espera</text>
+      <text x="576" y="489" id="e-extractor">En espera</text>
+      <text x="884" y="489" id="e-qa">En espera</text>
+    </g>
+
+    <g font-size="8.5" letter-spacing="2" opacity="0.62">
+      <text x="692" y="395">CUBIERTA 1 · MANDO</text>
+      <text x="394" y="549">BANCADA A-3</text>
+      <text x="708" y="603">COLECTOR B-7</text>
+      <text x="1008" y="589">COLECTOR C-2</text>
+      <text x="1232" y="355" text-anchor="end">BLOQUE MOTOR · 2 TOBERAS</text>
+      <text x="752" y="779">BODEGA VENTRAL · ESCLUSA V-1</text>
+      <text x="1054" y="199">RADIADORES DORSALES · 6 PANELES</text>
+      <text x="188" y="347">PROA BLINDADA · 3 CAPAS</text>
+    </g>
+
+    <g font-size="8" letter-spacing="1.6" opacity="0.55">
+      <text x="170" y="806" text-anchor="middle">0</text>
+      <text x="335" y="806" text-anchor="middle">6</text>
+      <text x="500" y="806" text-anchor="middle">12</text>
+      <text x="665" y="806" text-anchor="middle">18</text>
+      <text x="830" y="806" text-anchor="middle">24</text>
+      <text x="995" y="806" text-anchor="middle">30</text>
+      <text x="1160" y="806" text-anchor="middle">36 m</text>
+      <text x="104" y="484" text-anchor="middle" transform="rotate(-90 104 484)">13.2 m</text>
+      <text x="661" y="666" text-anchor="middle">PASILLO LONG. · 32.8 m</text>
+      <text x="304" y="688" text-anchor="middle">08</text>
+      <text x="396" y="688" text-anchor="middle">10</text>
+      <text x="562" y="688" text-anchor="middle">14</text>
+      <text x="642" y="688" text-anchor="middle">16</text>
+      <text x="762" y="688" text-anchor="middle">18</text>
+      <text x="852" y="688" text-anchor="middle">20</text>
+      <text x="898" y="688" text-anchor="middle">21</text>
+      <text x="1006" y="688" text-anchor="middle">24</text>
+      <text x="1086" y="688" text-anchor="middle">26</text>
+    </g>
+
+    <g font-size="8.5" letter-spacing="2.4" opacity="0.5">
+      <text x="64" y="852">SEC-04 / SECCIÓN DE PROCESO · CORTE LONGITUDINAL · ESC 1:120</text>
+      <text x="1376" y="852" text-anchor="end">CASCO INTERIOR 1.8 mm · PRESIÓN 0.94 atm</text>
+      <text x="64" y="70">PLANO DE TALLER · REV. 04</text>
+      <text x="1376" y="70" text-anchor="end">CUADERNAS 00-28</text>
+    </g>
+  </g>
     <g id="luz"><g id="luzInterior"></g></g>
     <g id="traspaso" opacity="0"></g>
 
-    <!-- ============ NODOS DEL BUCLE SOBRE EL PASILLO ============ -->
     <g id="bucle">
-      <g stroke="#4a5b6e" fill="none" stroke-width="1" opacity=".55">
-        <path d="M238,478 L238,468 M516,478 L516,466 M802,478 L802,466 M980,478 L980,468"/>
+      <g stroke="currentColor" fill="none" stroke-width="1" opacity=".5">
+        <path d="M200,548 L200,538 M527,548 L527,536 M855,548 L855,536 M1080,548 L1080,538"/>
       </g>
-      <g id="nodos" fill="#1a2430" stroke="#4a5b6e" stroke-width="1">
-        <rect data-nodo="preparar"  x="232" y="493" width="12" height="12" transform="rotate(45 238 499)"/>
-        <rect data-nodo="registrar" x="510" y="493" width="12" height="12" transform="rotate(45 516 499)"/>
-        <rect data-nodo="aplicar"   x="796" y="493" width="12" height="12" transform="rotate(45 802 499)"/>
-        <rect data-nodo="cerrar"    x="974" y="493" width="12" height="12" transform="rotate(45 980 499)"/>
+      <g id="nodos" fill="#101a24" stroke="currentColor" stroke-width="1">
+        <rect x="194" y="570" width="12" height="12" transform="rotate(45 200 576)"/>
+        <rect x="521" y="570" width="12" height="12" transform="rotate(45 527 576)"/>
+        <rect x="849" y="570" width="12" height="12" transform="rotate(45 855 576)"/>
+        <rect x="1074" y="570" width="12" height="12" transform="rotate(45 1080 576)"/>
       </g>
-      <circle id="paquete" cx="238" cy="499" r="3.2" fill="#e0505f" opacity="0"/>
+      <circle id="paquete" cx="200" cy="576" r="3.2" fill="#e0505f" opacity="0"/>
     </g>
 
-    <g id="rotulos" stroke="#4a5b6e" fill="none" stroke-width="1" opacity=".55">
-      <path d="M300,530 L300,556 L370,556"/><path d="M660,530 L660,568 L724,568"/>
-      <path d="M900,530 L900,556 L960,556"/>
-    </g>
-    <g id="puntos" fill="#4a5b6e" opacity=".85">
-      <circle cx="374" cy="556" r="1.7"/><circle cx="728" cy="568" r="1.7"/><circle cx="964" cy="556" r="1.7"/>
-    </g>
-
-    <g id="textos" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace">
-      <text x="528" y="318" font-size="12.5" letter-spacing="6" fill="#c9d4e2">PUENTE</text>
-      <text x="528" y="335" font-size="8.5" letter-spacing="2" fill="#8496aa" id="t-puente">Orquestador C-04-P</text>
-      <text x="720" y="710" font-size="8" letter-spacing="2" fill="#3f4d60">Esclusa SEC-04, acceso</text>
-
-      <text x="232" y="440" font-size="12.5" letter-spacing="6" fill="#7387a0" id="n-escritor">ESCRITOR</text>
-      <text x="232" y="457" font-size="8.5" letter-spacing="2" fill="#8496aa" id="e-escritor">EN ESPERA</text>
-      <text x="546" y="440" font-size="12.5" letter-spacing="6" fill="#7387a0" id="n-extractor">EXTRACTOR</text>
-      <text x="546" y="457" font-size="8.5" letter-spacing="2" fill="#8496aa" id="e-extractor">EN ESPERA</text>
-      <text x="828" y="440" font-size="12.5" letter-spacing="6" fill="#7387a0" id="n-qa">QA</text>
-      <text x="828" y="457" font-size="8.5" letter-spacing="2" fill="#8496aa" id="e-qa">EN ESPERA</text>
-
-      <text x="378" y="559" font-size="8" letter-spacing="2" fill="#3f4d60">C-04-A  redacción</text>
-      <text x="732" y="571" font-size="8" letter-spacing="2" fill="#3f4d60">C-04-B  extracción</text>
-      <text x="968" y="559" font-size="8" letter-spacing="2" fill="#3f4d60">C-04-C  continuidad</text>
-      <text x="1000" y="318" font-size="8" letter-spacing="2" fill="#3f4d60" text-anchor="end">radiadores</text>
-      <text x="1148" y="606" font-size="8" letter-spacing="2" fill="#3f4d60" text-anchor="end">propulsión</text>
-
-      <text x="64" y="706" font-size="8.5" letter-spacing="2.4" fill="#3b4a5c">Sección de proceso SEC-04, corte longitudinal 1:120</text>
-      <text x="1388" y="706" font-size="8.5" letter-spacing="2.4" fill="#3b4a5c" text-anchor="end">Casco interior 1,8 mm</text>
-    </g>
-
-    <g stroke="#2e3a49" fill="none" stroke-width="1" opacity=".8">
-      <path d="M280,676 L280,686 M370,676 L370,686 M600,676 L600,686 M700,676 L700,686 M880,676 L880,686 M950,676 L950,686"/>
-    </g>
-    <g font-size="7.5" fill="#2e3a49" letter-spacing="1.6" font-family="ui-monospace,Consolas,monospace">
-      <text x="280" y="670" text-anchor="middle">06</text><text x="370" y="670" text-anchor="middle">09</text>
-      <text x="600" y="670" text-anchor="middle">16</text><text x="700" y="670" text-anchor="middle">19</text>
-      <text x="880" y="670" text-anchor="middle">24</text><text x="950" y="670" text-anchor="middle">27</text>
     </g>
   </svg>
 
@@ -481,6 +862,22 @@ const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const REDUCIR=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const HAY_GSAP=typeof gsap!=="undefined";
+
+/* Cuatro profundidades. El fondo se mueve al reves que el frente: asi el ojo lee que hay
+   distancia entre ellos y no capas apiladas. Amplitudes en unidades del viewBox, muy cortas:
+   el paralaje convence cuando casi no se ve. */
+const CAPAS=[["#plano-fondo",-7],["#plano-medio",-2.5],["#luz",-2.5],["#bucle",-2.5],
+             ["#plano-frente",5],["#anotaciones",8]];
+function paralaje(nx,ny){
+  for(const [sel,k] of CAPAS){
+    const el=document.querySelector(sel);
+    if(el) el.style.transform=`translate(${(nx*k).toFixed(2)}px, ${(ny*k*0.55).toFixed(2)}px)`;
+  }
+}
+addEventListener("pointermove",e=>{
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  paralaje(e.clientX/innerWidth-0.5, e.clientY/innerHeight-0.5);
+},{passive:true});
 
 /* el escenario crece hasta llenar la pantalla; la atmósfera tapa los lados */
 function escalar(){
@@ -609,9 +1006,12 @@ const FASES=[
  {id:"ensamblar",rot:"Ensamblar",cond:e=>e.capitulos_cerrados>0?null:"No hay ningún capítulo cerrado todavía."}];
 
 const AGENTES={
- escritor:{clip:"celda-escritor",cx:356,cy:486,rx:190,ry:118,pared:"M516,380 L516,592",pasillo:"M240,486 L512,486 M240,512 L512,512",nodo:238},
- extractor:{clip:"celda-extractor",cx:660,cy:484,rx:168,ry:112,pared:"M802,376 L802,596",pasillo:"M522,486 L798,486 M522,512 L798,512",nodo:516},
- qa:{clip:"celda-qa",cx:903,cy:482,rx:118,ry:110,pared:"",pasillo:"M808,486 L996,486 M808,512 L996,512",nodo:802}};
+ escritor:{clip:"celda-escritor",cx:349,cy:533,rx:171,ry:99,pared:"M520,434 L520,632",
+   pasillo:"M200,560 L516,560 M200,590 L516,590",nodo:200},
+ extractor:{clip:"celda-extractor",cx:691,cy:540,rx:157,ry:105,pared:"M848,431 L848,628",
+   pasillo:"M538,560 L844,560 M538,590 L844,590",nodo:527},
+ qa:{clip:"celda-qa",cx:977,cy:526,rx:115,ry:95,pared:"",
+   pasillo:"M866,560 L1088,560 M866,588 L1088,588",nodo:855}};
 
 let ESTADO=null,ANTERIOR=null,SIN_SERVIDOR=false,LANZANDO=false;
 
@@ -672,7 +1072,7 @@ function pintarLuz(){
 function traspaso(d,h){
   const a=AGENTES[d],b=AGENTES[h]; if(!a||!b)return;
   const g=$("#traspaso");
-  g.innerHTML=`<path d="M${a.cx},499 L${b.cx},499" stroke="#c41e2f" stroke-width="2.4" stroke-linecap="round" opacity=".85" fill="none"/>`;
+  g.innerHTML=`<path d="M${a.cx},576 L${b.cx},576" stroke="#c41e2f" stroke-width="2.4" stroke-linecap="round" opacity=".85" fill="none"/>`;
   g.style.animation="none"; void g.getBoundingClientRect(); g.style.animation="pulsoPaso 950ms ease-out";
 }
 const EST_ROT={inactivo:"En espera",en_progreso:"Escribiendo",pausado_por_qa:"Pausado por QA",error:"Fallo en la ejecución"};
