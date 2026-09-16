@@ -59,6 +59,15 @@ class ContratoRetornoError(HarnessError):
     """RF-08.1: el mensaje final de un subagente no respeta su contrato de retorno."""
 
 
+class AutovalidacionFallidaError(HarnessError):
+    """EX-10: el agente agotó sus intentos de autovalidación (RF-08.4) y terminó informando el último error."""
+
+    def __init__(self, rol: str, n: int | None, detalle: str):
+        donde = f" del capítulo {n}" if n is not None else ""
+        super().__init__(f"EX-10: el {rol} no consiguió validar su salida{donde}: {detalle}")
+        self.rol, self.n, self.detalle = rol, n, detalle
+
+
 class ManifiestoInconsistenteError(HarnessError):
     """§5: manifiesto editado a mano (en_progreso con reporte_qa_pendiente no nulo) u otra combinación imposible."""
 

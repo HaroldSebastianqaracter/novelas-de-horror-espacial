@@ -24,29 +24,32 @@ Sos el orquestador. No escribís prosa, no leés `05_manuscrito/`, no editás es
 `RESULTADO: contexto_listo prompt=04_estado/prompts/escritor_cap_N.md` → leé ese archivo con Read (es estado ensamblado, no manuscrito) y pasá su contenido **completo y sin modificar** como prompt al subagente.
 
 ## 2. Invocar al escritor
-`Agent(subagent_type="escritor", prompt=<contenido de escritor_cap_N.md>)`. No agregues rutas ni instrucciones propias.
-Guardá textualmente su mensaje final y validalo:
+`Agent(subagent_type="escritor", prompt=<contenido de escritor_cap_N.md>)`. No agregues rutas ni instrucciones propias. El escritor escribe `cap_N.md`, corre su validador (`validar-capitulo N`, RF-08.4) y devuelve una línea que termina en `· validado`.
+Guardá textualmente su mensaje final y validalo (el harness vuelve a validar el archivo, §8.2):
 `.venv/Scripts/python.exe -m app registrar-escritor N "<mensaje final>"`
 - `RESULTADO: borrador_aceptado` → ir a 3.
 - `RESULTADO: reintentar_longitud feedback="..."` → volver a 1 con `--feedback` y ese texto (único reintento, EX-07).
 - `ERROR ContratoRetornoError` → reenviá al mismo escritor, una sola vez, el error textual pidiendo solo la línea de retorno; si repite, detenete y reportá.
+- `ERROR AutovalidacionFallidaError` (EX-10: el escritor agotó sus intentos) → `... descartar-borrador N` y volver a 1 con `--feedback "<detalle del error>"`, una sola vez; si repite, detenete y reportá EX-07/EX-08 con el error textual.
+- `ERROR EstadoInvalidoError` (el borrador no valida por algo distinto de la longitud) → detenete y reportá el error textual.
 
 ## 3. Invocar al extractor
 `preparar-capitulo` ya dejó su prompt en `04_estado/prompts/extractor_cap_N.md` (si hace falta regenerarlo: `.venv/Scripts/python.exe -m app preparar-extractor N`). Leé ese archivo con Read y pasalo completo: `Agent(subagent_type="extractor", prompt=<contenido>)`. No le pases el texto del capítulo: él lo lee con Read (única ruta permitida por H-05).
-Guardá su mensaje final (solo JSON) con Write en `04_estado/deltas/delta_cap_N.json` (H-02 lo valida al escribirse) y aplicalo:
-`.venv/Scripts/python.exe -m app aplicar-delta N`
+El extractor escribe él mismo `04_estado/deltas/delta_cap_N.json`, lo valida (`validar-delta N`, RF-08.4) y devuelve **una línea** `delta_cap_N.json · K hechos · P personajes · validado`. El JSON no pasa por vos: no lo pidas, no lo escribas. Guardá su línea y aplicá el delta (el harness vuelve a validar el archivo):
+`.venv/Scripts/python.exe -m app aplicar-delta N --retorno "<línea del extractor>"`
 - `RESULTADO: capitulo_cerrado toca_qa=false` → ir a 5.
 - `RESULTADO: capitulo_cerrado toca_qa=true` → ir a 4.
 - `RESULTADO: regenerar_capitulo` (EX-08, primer fallo) → `... descartar-borrador N` y volver a 1 sin feedback.
-- `ERROR EstadoInvalidoError` (JSON inválido, sujeto mal formado, tope de hechos) → reenviá al extractor el error textual y pedile el JSON corregido; hasta 3 intentos en total (§3.4); luego detenete y reportá EX-01.
+- `ERROR ContratoRetornoError` → reenviá al mismo extractor, una sola vez, el error textual pidiendo solo la línea de retorno; si repite, detenete y reportá.
+- `ERROR AutovalidacionFallidaError` o `ERROR EstadoInvalidoError` (EX-10 / EX-01: el delta no valida) → reenviá al extractor el error textual y pedile que corrija el archivo y vuelva a validar; hasta 3 invocaciones en total (§3.4); luego detenete y reportá EX-01.
 - `ERROR PersonajeNoPrevistoError` → detenete y reportá EX-08: la entrada de outline es sospechosa.
 
 ## 4. Corte de QA (N múltiplo de cadencia_qa)
-`.venv/Scripts/python.exe -m app preparar-qa N` → `RESULTADO: qa_listo prompt=04_estado/prompts/qa_cap_N.md`. Leé ese prompt y `Agent(subagent_type="qa", prompt=<contenido>)`. Guardá su mensaje final (hasta cinco líneas). Después:
-`.venv/Scripts/python.exe -m app cerrar-qa N`
+`.venv/Scripts/python.exe -m app preparar-qa N` → `RESULTADO: qa_listo prompt=04_estado/prompts/qa_cap_N.md`. Leé ese prompt y `Agent(subagent_type="qa", prompt=<contenido>)`. QA escribe sus tres archivos, los valida (`validar-reporte N`, RF-08.4) y devuelve hasta cinco líneas que incluyen `validado`. Guardá su mensaje final y cerrá el corte (el harness vuelve a validar):
+`.venv/Scripts/python.exe -m app cerrar-qa N --retorno "<mensaje final de QA>"`
 - `RESULTADO: qa_sin_contradicciones` → ir a 5.
 - `RESULTADO: pausado_por_qa reporte=qa_cap_N` → **detenete**. Mostrale al usuario la ruta `06_qa/reportes/qa_cap_N.md` y que la tanda queda pausada hasta `resolver`. No intentes resolverlo.
-- `ERROR` (QA no escribió el JSON o recursos_usados.json) → reenviá a QA el error textual una vez; si repite, detenete y reportá.
+- `ERROR` (contrato de retorno, EX-10, o QA no escribió el JSON o recursos_usados.json) → reenviá a QA el error textual una vez; si repite, detenete y reportá.
 
 ## 5. Siguiente
 `.venv/Scripts/python.exe -m app tanda siguiente`

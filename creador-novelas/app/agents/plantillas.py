@@ -23,12 +23,14 @@ MARCADORES_OBLIGATORIOS: dict[str, tuple[str, ...]] = {
         "PERSONAJES_PERMITIDOS",  # RF-05.2, EX-08
         "FEEDBACK_LONGITUD",  # EX-07
         "STYLE_GUIDE", "TRES_ACTOS", "RUTA_CAPITULO", "NUM",
+        "COMANDO_VALIDACION",  # RF-08.4: la forma canónica exacta que H-11 deja pasar
     ),
     "extractor": (
         "RUTA_CAPITULO", "NUM",  # INV-02: un solo capítulo
         "REGISTRO_PERSONAJES", "REGISTRO_LOCACIONES",  # RF-06.1
         "ESQUEMA",  # §4 con sujeto y categoria
         "MAX_HECHOS",  # §11.6
+        "RUTA_DELTA", "COMANDO_VALIDACION",  # RF-08.4: escribe y valida su propio delta
     ),
     "qa": (
         "LOG_CONTINUIDAD",  # RF-07.2, con superado_por visible
@@ -36,6 +38,7 @@ MARCADORES_OBLIGATORIOS: dict[str, tuple[str, ...]] = {
         "CAPS_MUESTRA", "RUTAS_MUESTRA",  # RF-07.1
         "IDIOMA", "PERSONA_NARRATIVA", "TIEMPO_VERBAL",  # RF-CFG-05
         "ESQUEMA_REPORTE", "RUTA_REPORTE_MD", "RUTA_REPORTE_JSON", "RUTA_RECURSOS", "NUM",
+        "COMANDO_VALIDACION",  # RF-08.4
     ),
 }
 

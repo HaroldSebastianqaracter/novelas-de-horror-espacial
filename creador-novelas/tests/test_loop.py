@@ -182,7 +182,7 @@ def test_tramos_por_cli_equivalen_al_loop(proyecto, config):
     ctx = loop.preparar_capitulo(proyecto, config, 1)
     assert rutas.prompt_escritor(1).exists() and rutas.prompt_extractor(1).exists() and rutas.hechos_inyectados(1).exists()
     repo.guardar_capitulo(proyecto, 1, dobles.generar_capitulo(ctx.texto))
-    r = loop.registrar_escritor(proyecto, config, 1, "cap_1.md · 1500 palabras · personajes: Kovacs")
+    r = loop.registrar_escritor(proyecto, config, 1, "cap_1.md · 1500 palabras · personajes: Kovacs · validado")
     assert r.dentro_de_rango and not r.reintentar
     rutas.delta(1).write_text(dobles.extraer("05_manuscrito/cap_1.md"), encoding="utf-8")
     rd = loop.aplicar_delta(proyecto, config, 1)

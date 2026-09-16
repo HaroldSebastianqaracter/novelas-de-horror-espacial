@@ -41,6 +41,11 @@ Hechos de continuidad seleccionados por el harness para este capítulo (los de m
 
 ## Qué hacer
 1. Escribí el capítulo completo con la herramienta Write en **{{RUTA_CAPITULO}}** (esa ruta exacta y ninguna otra).
-2. Terminá con **una sola línea**, sin prosa, sin resumen, sin comentarios, con esta forma exacta:
+2. Validalo (RF-08.4): ejecutá con Bash **exactamente** este comando, sin agregar ni cambiar nada:
+   `{{COMANDO_VALIDACION}}`
+   Es el único comando que el hook H-11 te deja ejecutar. Si devuelve errores, corregí el archivo completo con Write y volvé a ejecutar el mismo comando, hasta tres veces en total.
+3. Terminá con **una sola línea**, sin prosa, sin resumen, sin comentarios, con esta forma exacta:
 
-`cap_{{NUM}}.md · <número de palabras> palabras · personajes: <nombres separados por coma>`
+`cap_{{NUM}}.md · <número de palabras> palabras · personajes: <nombres separados por coma> · validado`
+
+Si tras tres intentos el validador sigue fallando (EX-10), terminá en cambio con: `cap_{{NUM}}.md · NO VALIDADO · <último error textual del validador>`.

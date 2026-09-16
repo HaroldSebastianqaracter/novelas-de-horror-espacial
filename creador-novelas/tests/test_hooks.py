@@ -67,7 +67,12 @@ def test_h06_escritura_por_agente(proyecto, config):
     assert r.returncode == 2 and "H-06" in r.stderr
     assert pre(dict(escritor, tool_input={"file_path": "04_estado/continuidad.json", "content": "x"}), proyecto).returncode == 2
     extractor = {"tool_name": "Write", "agent_type": "extractor", "agent_id": "x-1"}
-    assert pre(dict(extractor, tool_input={"file_path": "04_estado/deltas/delta_cap_3.json", "content": "x"}), proyecto).returncode == 2
+    # RF-08.4: el extractor escribe su propio delta, y solo ese
+    assert pre(dict(extractor, tool_input={"file_path": "04_estado/deltas/delta_cap_3.json", "content": "x"}), proyecto).returncode == 0
+    r = pre(dict(extractor, tool_input={"file_path": "04_estado/deltas/delta_cap_2.json", "content": "x"}), proyecto)
+    assert r.returncode == 2 and "H-06" in r.stderr and "delta_cap_3.json" in r.stderr
+    assert pre(dict(extractor, tool_input={"file_path": "04_estado/continuidad.json", "content": "x"}), proyecto).returncode == 2
+    assert pre(dict(extractor, tool_input={"file_path": "05_manuscrito/cap_3.md", "content": "x"}), proyecto).returncode == 2
     qa = {"tool_name": "Write", "agent_type": "qa", "agent_id": "q-1"}
     assert pre(dict(qa, tool_input={"file_path": "06_qa/reportes/qa_cap_3.json", "content": "x"}), proyecto).returncode == 0
     assert pre(dict(qa, tool_input={"file_path": "06_qa/recursos_usados.json", "content": "x"}), proyecto).returncode == 0

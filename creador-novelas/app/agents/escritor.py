@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Callable
 
 from app.agents import plantillas
-from app.config import HarnessConfig
-from app.errores import ContratoRetornoError, OutlineFaltanteError
+from app.config import HarnessConfig, comando_validador
+from app.errores import AutovalidacionFallidaError, ContratoRetornoError, OutlineFaltanteError
 from app.rutas import Rutas
 from app.schemas.continuidad import HechoContinuidad
 from app.state import continuidad as cont
@@ -26,9 +26,18 @@ from app.tokens import estimar_tokens
 MAX_PALABRAS_RETORNO = 40
 _RETORNO = re.compile(
     r"^(?:05_manuscrito/)?cap_(?P<n>\d+)\.md\s*[·|\-–,]\s*(?P<palabras>[\d.,\s]+?)\s*palabras\s*[·|\-–,]\s*"
-    r"personajes\s*:\s*(?P<personajes>.*)$",
+    r"personajes\s*:\s*(?P<personajes>.*?)\s*[·|\-–,]\s*validado\s*$",
     re.IGNORECASE,
 )
+_NO_VALIDADO = re.compile(r"^(?:[\w/]+/)?(?P<artefacto>[\w.]+)\s*[·|\-–,]\s*NO VALIDADO\s*[·|\-–,]?\s*(?P<detalle>.*)$", re.IGNORECASE | re.DOTALL)
+
+
+def detectar_ex10(texto: str, rol: str) -> None:
+    """EX-10: el agente terminó informando que agotó sus intentos de autovalidación (RF-08.4)."""
+    m = _NO_VALIDADO.match(texto.strip())
+    if m:
+        n = re.search(r"(\d+)", m.group("artefacto"))
+        raise AutovalidacionFallidaError(rol, int(n.group(1)) if n else None, m.group("detalle").strip() or "sin detalle")
 
 
 @dataclass
@@ -119,6 +128,7 @@ def ensamblar_contexto(n: int, config: HarnessConfig, raiz: Path, *, feedback_lo
         "PALABRAS_MAX": str(maximo),
         "PERSONAJES_PERMITIDOS": ", ".join(permitidos) if permitidos else "(ninguno)",
         "FEEDBACK_LONGITUD": feedback_longitud or "(primer intento: sin desvío previo)",
+        "COMANDO_VALIDACION": comando_validador("escritor", n),
     }
     texto = plantillas.rellenar(plantillas.cargar_plantilla(raiz, "escritor"), valores)
     tokens, metodo = estimar_tokens(texto)
@@ -165,7 +175,8 @@ def evaluar_longitud(palabras: int, config: HarnessConfig) -> tuple[bool, str]:
 
 
 def parsear_retorno_escritor(texto: str) -> RetornoEscritor:
-    """RF-08.1: una sola línea `cap_N.md · 2.940 palabras · personajes: A, B`. Rechaza prosa o varias líneas."""
+    """RF-08.1: una sola línea `cap_N.md · 2.940 palabras · personajes: A, B · validado`. Rechaza prosa o varias líneas."""
+    detectar_ex10(texto, "escritor")
     lineas = [l for l in texto.strip().splitlines() if l.strip()]
     if len(lineas) != 1:
         raise ContratoRetornoError(
@@ -177,7 +188,8 @@ def parsear_retorno_escritor(texto: str) -> RetornoEscritor:
     m = _RETORNO.match(linea)
     if not m:
         raise ContratoRetornoError(
-            "RF-08.1: la línea no tiene la forma `cap_N.md · <palabras> palabras · personajes: A, B`"
+            "RF-08.1: la línea no tiene la forma `cap_N.md · <palabras> palabras · personajes: A, B · validado` "
+            "(la confirmación `validado` es obligatoria, RF-08.4)"
         )
     palabras = int(re.sub(r"[^\d]", "", m.group("palabras")) or 0)
     personajes = [p.strip() for p in re.split(r"[,;]", m.group("personajes")) if p.strip()]

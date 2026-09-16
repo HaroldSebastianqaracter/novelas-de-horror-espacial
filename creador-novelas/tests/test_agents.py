@@ -87,14 +87,14 @@ def test_ensamblar_contexto_no_contiene_manuscrito(proyecto, config):
 
 
 def test_parser_retorno_escritor():
-    r = escritor.parsear_retorno_escritor("cap_7.md · 2.940 palabras · personajes: Kovacs, Ilse")
+    r = escritor.parsear_retorno_escritor("cap_7.md · 2.940 palabras · personajes: Kovacs, Ilse · validado")
     assert (r.n, r.palabras_declaradas, r.personajes) == (7, 2940, ["Kovacs", "Ilse"])
-    r = escritor.parsear_retorno_escritor("05_manuscrito/cap_12.md - 1500 palabras - personajes: Dara\n")
+    r = escritor.parsear_retorno_escritor("05_manuscrito/cap_12.md - 1500 palabras - personajes: Dara - validado\n")
     assert (r.n, r.palabras_declaradas) == (12, 1500)
     with pytest.raises(ContratoRetornoError, match="una línea"):
-        escritor.parsear_retorno_escritor("cap_7.md · 2940 palabras · personajes: Kovacs\nLa nave crujía en la oscuridad.")
+        escritor.parsear_retorno_escritor("cap_7.md · 2940 palabras · personajes: Kovacs · validado\nLa nave crujía en la oscuridad.")
     with pytest.raises(ContratoRetornoError, match="40 palabras"):
-        escritor.parsear_retorno_escritor("cap_7.md · 2940 palabras · personajes: " + " ".join(["nombre"] * 45))
+        escritor.parsear_retorno_escritor("cap_7.md · 2940 palabras · personajes: " + " ".join(["nombre"] * 45) + " · validado")
     with pytest.raises(ContratoRetornoError, match="forma"):
         escritor.parsear_retorno_escritor("Escribí el capítulo siete y quedó muy bien.")
     with pytest.raises(ContratoRetornoError):
@@ -157,7 +157,7 @@ def test_qa_muestra_prompt_y_parser(proyecto, config):
     assert prep.caps_muestra == [1, 2, 3]
     assert "oxígeno para 90 días" in prep.prompt and "superado_por" in prep.prompt  # log completo con superado_por visible
     assert "3 o más" in prep.prompt and "06_qa/reportes/qa_cap_3.json" in prep.prompt
-    r = qa.parsear_retorno_qa("tiene_contradicciones: true\ncontradicciones: 1 · repeticiones: 0\nreporte: 06_qa/reportes/qa_cap_3.md")
+    r = qa.parsear_retorno_qa("tiene_contradicciones: true\ncontradicciones: 1 · repeticiones: 0\nreporte: 06_qa/reportes/qa_cap_3.md\nvalidado")
     assert r.tiene_contradicciones
     with pytest.raises(ContratoRetornoError, match="líneas"):
         qa.parsear_retorno_qa("\n".join(["línea"] * 6))

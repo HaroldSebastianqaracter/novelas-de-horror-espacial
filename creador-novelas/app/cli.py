@@ -3,6 +3,8 @@
 Capa externa: status · resolver · ensamblar · guardar · ui.
 Capa interna (la usa la skill /escribir-tanda, un tramo del loop por verbo): tanda · preparar-capitulo ·
 registrar-escritor · aplicar-delta · descartar-borrador · preparar-qa · cerrar-qa.
+Capa de validación (la ejecuta cada agente sobre su propio artefacto, RF-08.4): validar-capitulo ·
+validar-delta · validar-reporte. Solo lectura; el verbo que aplica vuelve a validar.
 
 Convención de salida: líneas legibles y, al final, `RESULTADO: <clave> [campo=valor ...]` para que la skill
 decida el paso siguiente sin interpretar prosa. Errores: `ERROR <Tipo>: motivo` por stderr y código 1.
@@ -17,6 +19,8 @@ import sys
 import warnings
 from pathlib import Path
 
+from app import validacion
+from app.agents import extractor as ag_extractor, qa as ag_qa
 from app.config import HarnessConfig, cargar_config, cargar_proveedores
 from app.errores import ConfiguracionInvalidaError, EstadoInvalidoError, HarnessError, PausadoPorQAError
 from app.orchestrator import checkpoint, cursor as cur, loop
@@ -72,6 +76,11 @@ def cmd_status(args, raiz: Path) -> int:
     cursor = cur.leer(raiz)
     if cursor:
         print(f"- tanda en curso: inicio {cursor.inicio}, cerrados {cursor.cerrados}, tope {cursor.tope or 'sin tope'}, llamadas {cursor.llamadas}")
+    from app import hooks  # import tardío: hooks importa validacion y agentes
+
+    aviso = hooks.aviso_h11(raiz)
+    if aviso:
+        print(aviso)
     return 0
 
 
@@ -336,6 +345,10 @@ def cmd_registrar_escritor(args, raiz: Path) -> int:
 
 def cmd_aplicar_delta(args, raiz: Path) -> int:
     config = _config(raiz)
+    if args.retorno is not None:  # RF-08.1: la línea de confirmación del extractor, si el orquestador la pasa
+        retorno = ag_extractor.parsear_retorno_extractor(args.retorno)
+        if retorno.n != args.n:
+            raise EstadoInvalidoError(f"RF-08.1: el extractor declaró delta_cap_{retorno.n}.json y el capítulo es {args.n}")
     texto = Path(args.desde).read_text(encoding="utf-8") if args.desde else None
     r = loop.aplicar_delta(raiz, config, args.n, texto, reextraccion=args.reextraccion)
     if r.regenerar:
@@ -373,6 +386,8 @@ def cmd_preparar_qa(args, raiz: Path) -> int:
 
 def cmd_cerrar_qa(args, raiz: Path) -> int:
     config = _config(raiz)
+    if args.retorno is not None:  # RF-08.1: el resumen de hasta cinco líneas de QA, si el orquestador lo pasa
+        ag_qa.parsear_retorno_qa(args.retorno)
     r = loop.cerrar_qa(raiz, config, args.n)
     conteo = r.reporte.conteo_por_tipo()
     print(f"QA cap. {r.reporte.cap_corte}: {conteo['contradiccion']} contradicciones, {conteo['repeticion']} repeticiones; "
@@ -389,6 +404,36 @@ def cmd_ui(args, raiz: Path) -> int:
     from app import ui  # import tardío: es lo único que levanta un servidor (§15)
 
     return ui.servir(raiz, args.puerto)
+
+
+# ---------- capa de validación (RF-08.4): la ejecuta el agente sobre su propio artefacto ----------
+
+def _imprimir_validacion(r: validacion.ResultadoValidacion) -> int:
+    """Solo lectura: comprueba y devuelve el error, nunca corrige ni persiste. Código 1 si no valida."""
+    for aviso in r.avisos:
+        print(f"aviso: {aviso}")
+    if r.valido:
+        datos = " ".join(f"{k}={_formatear_valor(v)}" for k, v in r.datos.items())
+        print(f"{r.artefacto} valida" + (f" ({datos})" if datos else ""))
+        _resultado("valido", rol=r.rol, artefacto=r.artefacto, **r.datos)
+        return 0
+    print(f"{r.artefacto} NO valida; corregí exactamente esto y volvé a ejecutar el mismo comando:")
+    for i, error in enumerate(r.errores, 1):
+        print(f"  {i}. {error}")
+    _resultado("invalido", rol=r.rol, artefacto=r.artefacto, errores=r.errores)
+    return 1
+
+
+def cmd_validar_capitulo(args, raiz: Path) -> int:
+    return _imprimir_validacion(validacion.validar_capitulo(raiz, _config(raiz), args.n))
+
+
+def cmd_validar_delta(args, raiz: Path) -> int:
+    return _imprimir_validacion(validacion.validar_delta(raiz, _config(raiz), args.n))
+
+
+def cmd_validar_reporte(args, raiz: Path) -> int:
+    return _imprimir_validacion(validacion.validar_reporte(raiz, args.n))
 
 
 # ---------- parser ----------
@@ -444,6 +489,7 @@ def construir_parser() -> argparse.ArgumentParser:
     ad.add_argument("n", type=int)
     ad.add_argument("--reextraccion", action="store_true", help="RF-07.6 paso 2")
     ad.add_argument("--desde", help="archivo con el JSON; por defecto 04_estado/deltas/delta_cap_N.json")
+    ad.add_argument("--retorno", help="línea de retorno del extractor (RF-08.1); se valida antes de aplicar")
     ad.set_defaults(fn=cmd_aplicar_delta)
 
     db = sub.add_parser("descartar-borrador")
@@ -456,7 +502,15 @@ def construir_parser() -> argparse.ArgumentParser:
 
     cq = sub.add_parser("cerrar-qa")
     cq.add_argument("n", type=int)
+    cq.add_argument("--retorno", help="mensaje final de QA, hasta cinco líneas (RF-08.1); se valida antes de cerrar")
     cq.set_defaults(fn=cmd_cerrar_qa)
+
+    for verbo, fn, ayuda in (("validar-capitulo", cmd_validar_capitulo, "escritor: longitud ±20 %, solo prosa, personajes en escena"),
+                             ("validar-delta", cmd_validar_delta, "extractor: esquema, sujetos, tope de hechos"),
+                             ("validar-reporte", cmd_validar_reporte, "qa: esquema de ReporteQA y recursos_usados.json")):
+        v = sub.add_parser(verbo, help=f"RF-08.4, solo lectura; {ayuda}")
+        v.add_argument("n", type=int)
+        v.set_defaults(fn=fn)
     return p
 
 

@@ -15,8 +15,9 @@ from pathlib import Path
 from typing import Callable
 
 from app.agents import plantillas
-from app.config import HarnessConfig
-from app.errores import ContratoRetornoError
+from app.agents.escritor import detectar_ex10
+from app.config import HarnessConfig, comando_validador
+from app.errores import AutovalidacionFallidaError, ContratoRetornoError
 from app.rutas import Rutas
 from app.schemas import LogContinuidad, ReporteQA
 from app.state import repository as repo
@@ -80,21 +81,28 @@ def preparar_corte(n: int, config: HarnessConfig, raiz: Path) -> PreparacionQA:
         "RUTA_REPORTE_MD": rutas.reporte_qa_md(n).as_posix(),
         "RUTA_REPORTE_JSON": rutas.reporte_qa_json(n).as_posix(),
         "RUTA_RECURSOS": rutas.recursos_usados.as_posix(),
+        "COMANDO_VALIDACION": comando_validador("qa", n),
     }
     prompt = plantillas.rellenar(plantillas.cargar_plantilla(raiz, "qa"), valores)
     return PreparacionQA(n=n, caps_muestra=caps, rutas_muestra=rutas_muestra, prompt=prompt)
 
 
 def parsear_retorno_qa(texto: str) -> RetornoQA:
-    """RF-08.1: hasta cinco líneas con `tiene_contradicciones` y el conteo de hallazgos por tipo."""
+    """RF-08.1: hasta cinco líneas con `tiene_contradicciones`, el conteo por tipo y la confirmación `validado` (RF-08.4)."""
     lineas = [l.strip() for l in texto.strip().splitlines() if l.strip()]
     if not lineas:
         raise ContratoRetornoError("RF-08.1: el retorno de QA está vacío")
+    if lineas and re.match(r"^NO VALIDADO\b", lineas[-1], re.IGNORECASE):
+        detalle = re.sub(r"^NO VALIDADO\s*[·|\-–,:]?\s*", "", lineas[-1], flags=re.IGNORECASE)
+        raise AutovalidacionFallidaError("qa", None, detalle or "sin detalle")
+    detectar_ex10(texto, "qa")
     if len(lineas) > MAX_LINEAS_RETORNO:
         raise ContratoRetornoError(f"RF-08.1: el retorno de QA tiene {len(lineas)} líneas; el máximo es {MAX_LINEAS_RETORNO}")
     m = _BANDERA.search(texto)
     if not m:
         raise ContratoRetornoError("RF-08.1: el retorno de QA debe declarar `tiene_contradicciones: true|false`")
+    if not any(re.fullmatch(r"validado\.?", l, re.IGNORECASE) or re.search(r"\bvalidado\b", l, re.IGNORECASE) for l in lineas):
+        raise ContratoRetornoError("RF-08.1: el retorno de QA debe confirmar la validación con una línea `validado` (RF-08.4)")
     return RetornoQA(tiene_contradicciones=m.group(1).lower() in ("true", "sí", "si", "verdadero"), lineas=lineas)
 
 

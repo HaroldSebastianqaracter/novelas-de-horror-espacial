@@ -29,10 +29,19 @@ Los hechos con `superado_por` distinto de null fueron reemplazados por una corre
 {{ESQUEMA_REPORTE}}
 3. **{{RUTA_RECURSOS}}**: el registro de recursos actualizado. Partí del registro anterior, sumá las apariciones de esta muestra (`veces`) y agregá los capítulos en `caps`. Es el único artefacto de estado que escribís y es obligatorio aunque no haya repeticiones.
 
+El `.md` y el `.json` enumeran exactamente los mismos hallazgos: `cerrar-qa` cuenta con el `.json`.
+
+## Validación (RF-08.4)
+Después de escribir los tres archivos ejecutá con Bash **exactamente** este comando, sin agregar ni cambiar nada:
+`{{COMANDO_VALIDACION}}`
+Es el único comando que el hook H-11 te deja ejecutar. Si devuelve errores, corregí los archivos con Write y volvé a ejecutar el mismo comando, hasta tres veces en total.
+
 ## Mensaje final
 Hasta cinco líneas, sin el reporte completo ni citas largas:
 ```
 tiene_contradicciones: true|false
 contradicciones: <n> · repeticiones: <n>
 reporte: 06_qa/reportes/qa_cap_{{NUM}}.md
+validado
 ```
+Si tras tres intentos el validador sigue fallando (EX-10), la última línea es en cambio `NO VALIDADO · <último error textual del validador>`.

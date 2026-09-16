@@ -14,10 +14,10 @@ Condición de entrada: hay al menos un capítulo cerrado y el manifiesto está e
 
 Pasos (N = `ultimo_capitulo_cerrado`):
 1. `.venv/Scripts/python.exe -m app preparar-qa N` → `RESULTADO: qa_listo prompt=04_estado/prompts/qa_cap_N.md`.
-2. Leé ese prompt con Read y pasalo completo: `Agent(subagent_type="qa", prompt=<contenido>)`. Guardá su mensaje final.
-3. `.venv/Scripts/python.exe -m app cerrar-qa N`.
+2. Leé ese prompt con Read y pasalo completo: `Agent(subagent_type="qa", prompt=<contenido>)`. QA escribe sus tres archivos, los valida con `validar-reporte N` (RF-08.4) y devuelve hasta cinco líneas que incluyen `validado`. Guardá su mensaje final.
+3. `.venv/Scripts/python.exe -m app cerrar-qa N --retorno "<mensaje final de QA>"` (el harness vuelve a validar los archivos).
    - `RESULTADO: qa_sin_contradicciones` → reportá los conteos.
    - `RESULTADO: pausado_por_qa` → detenete y mostrale al usuario `06_qa/reportes/qa_cap_N.md`; la tanda queda pausada hasta `resolver`.
-   - `ERROR` → reenviá a QA el error textual una vez; si repite, detenete y reportá.
+   - `ERROR` (contrato de retorno, EX-10 o archivos que no validan) → reenviá a QA el error textual una vez; si repite, detenete y reportá.
 
 Retorno: motivo, conteos por tipo, ruta del reporte y el mensaje final textual de QA. Sin citar el manuscrito.

@@ -15,6 +15,14 @@ from app.rutas import Rutas
 ROLES = ("escritor", "extractor", "qa")
 SKILL_DE_DOMINIO = {"escritor": "prosa-terror-espacial", "extractor": "formato-delta", "qa": "criterios-qa"}
 
+# RF-08.4 / §13.3 "Forma canónica del comando": el único comando de Bash que H-11 deja pasar a cada rol.
+INTERPRETE = ".venv/Scripts/python.exe"  # solo el intérprete del entorno virtual; `python` a secas no se acepta
+VERBO_POR_ROL = {"escritor": "validar-capitulo", "extractor": "validar-delta", "qa": "validar-reporte"}
+
+
+def comando_validador(rol: str, n: int) -> str:
+    return f"{INTERPRETE} -m app {VERBO_POR_ROL[rol]} {n}"
+
 CAMPOS_NOVELA = (
     "total_capitulos", "palabras_por_capitulo", "idioma", "persona_narrativa", "tiempo_verbal",
     "ventana_resumen_rodante", "cadencia_qa", "max_tokens_contexto_escritor", "max_hechos_por_capitulo",

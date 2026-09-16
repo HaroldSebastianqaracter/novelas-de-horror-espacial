@@ -13,8 +13,9 @@ from pathlib import Path
 from typing import Callable
 
 from app.agents import plantillas
-from app.config import HarnessConfig
-from app.errores import EstadoInvalidoError
+from app.agents.escritor import detectar_ex10
+from app.config import HarnessConfig, comando_validador
+from app.errores import ContratoRetornoError, EstadoInvalidoError
 from app.rutas import Rutas
 from app.schemas import DeltaExtraccion
 from app.schemas.continuidad import HechoContinuidad
@@ -23,6 +24,36 @@ from app.state import personajes as pers
 from app.state import repository as repo
 
 _FENCE = re.compile(r"^```[a-zA-Z]*\s*\n(.*?)\n```\s*$", re.DOTALL)
+_RETORNO = re.compile(
+    r"^(?:04_estado/deltas/)?delta_cap_(?P<n>\d+)\.json\s*[·|\-–,]\s*(?P<hechos>\d+)\s*hechos?\s*[·|\-–,]\s*"
+    r"(?P<personajes>\d+)\s*personajes?\s*[·|\-–,]\s*validado\s*$",
+    re.IGNORECASE,
+)
+
+
+@dataclass
+class RetornoExtractor:
+    n: int
+    hechos: int
+    personajes: int
+    linea: str
+
+
+def parsear_retorno_extractor(texto: str) -> RetornoExtractor:
+    """RF-08.1: una sola línea `delta_cap_N.json · 4 hechos · 2 personajes · validado`. Nunca el JSON."""
+    detectar_ex10(texto, "extractor")
+    lineas = [l for l in texto.strip().splitlines() if l.strip()]
+    if len(lineas) != 1:
+        raise ContratoRetornoError(f"RF-08.1: el extractor debe devolver exactamente una línea; devolvió {len(lineas)}")
+    linea = lineas[0].strip()
+    if linea.startswith("{") or linea.startswith("```"):
+        raise ContratoRetornoError("RF-08.1: el extractor no devuelve el JSON: lo escribe en disco y devuelve la línea de confirmación")
+    m = _RETORNO.match(linea)
+    if not m:
+        raise ContratoRetornoError(
+            "RF-08.1: la línea no tiene la forma `delta_cap_N.json · <hechos> hechos · <personajes> personajes · validado`"
+        )
+    return RetornoExtractor(n=int(m.group("n")), hechos=int(m.group("hechos")), personajes=int(m.group("personajes")), linea=linea)
 
 ESQUEMA_DELTA = """{
   "personajes": {
@@ -73,6 +104,8 @@ def preparar_prompt_extractor(n: int, config: HarnessConfig, raiz: Path) -> str:
         "REGISTRO_LOCACIONES": ", ".join(locaciones) if locaciones else "(vacío)",
         "ESQUEMA": ESQUEMA_DELTA.replace("<NUM>", str(n)),
         "MAX_HECHOS": str(config.max_hechos_por_capitulo),
+        "RUTA_DELTA": rutas.delta(n).as_posix(),
+        "COMANDO_VALIDACION": comando_validador("extractor", n),
     }
     return plantillas.rellenar(plantillas.cargar_plantilla(raiz, "extractor"), valores)
 

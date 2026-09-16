@@ -1,4 +1,4 @@
-"""Lógica de los hooks H-01 a H-10 (spec técnica §13.3, RF-08.2, EX-09).
+"""Lógica de los hooks H-01 a H-11 (spec técnica §13.3, RF-08.2, EX-09).
 
 Los scripts de `scripts/hooks/` leen el payload por stdin y llaman a estas funciones; no tienen lógica
 propia. Una `Decision` con `bloquear = True` se traduce en código de salida 2 y el motivo por stderr.
@@ -19,10 +19,10 @@ from app.rutas import Rutas, bajo, es_ruta_manuscrito, numero_capitulo
 from app.schemas import LogContinuidad
 from app.state import continuidad as cont
 from app.state import repository as repo
+from app.validacion import ROLES, capitulo_de_invocacion, comando_validador
 
 HERRAMIENTAS_ESCRITURA = ("Write", "Edit", "MultiEdit", "NotebookEdit")
 HERRAMIENTAS_LECTURA = ("Read", "Grep", "Glob")
-ROLES = ("escritor", "extractor", "qa")
 
 
 @dataclass
@@ -46,9 +46,9 @@ def _ruta_afectada(tool_input: dict) -> str | None:
     return None
 
 
-def _capitulo_activo(raiz: Path) -> int:
-    m = checkpoint.leer_manifest(raiz)
-    return m.capitulo_actual() if m else 1
+def _capitulo_activo(raiz: Path, rol: str | None = None) -> int:
+    """La única resolución de N para H-05, H-06, H-07, H-10 y H-11 (§13.3): `validacion.capitulo_de_invocacion`."""
+    return capitulo_de_invocacion(raiz, rol)
 
 
 def _identidad(payload: dict) -> str:
@@ -91,12 +91,55 @@ def _bloquear(raiz: Path, payload: dict, hook: str, motivo: str) -> Decision:
 
 # ---------- H-01 ----------
 
+def h11_declarado(raiz: Path) -> bool:
+    """§13.6: True si .claude/settings.json declara un hook PreToolUse cuyo matcher alcanza `Bash`."""
+    path = Rutas(raiz).raiz / ".claude" / "settings.json"
+    if not path.exists():
+        return False
+    try:
+        settings = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return False
+    for entrada in (settings.get("hooks") or {}).get("PreToolUse") or []:
+        matcher = str(entrada.get("matcher") or "")
+        if matcher == "" or "Bash" in matcher.split("|"):
+            return bool(entrada.get("hooks"))
+    return False
+
+
+def aviso_h11(raiz: Path) -> str | None:
+    if h11_declarado(raiz):
+        return None
+    return ("- ATENCIÓN: H-11 no está declarado en .claude/settings.json (PreToolUse sin matcher `Bash`); "
+            "los tres agentes tendrían shell libre (§13.6). No lanzar ninguna tanda hasta corregirlo.")
+
+
 def contexto_session_start(raiz: Path) -> str:
     """H-01 (RF-08.3): la salida de `status` entra al contexto de la sesión."""
-    return checkpoint.texto_status(raiz)
+    texto = checkpoint.texto_status(raiz)
+    aviso = aviso_h11(raiz)
+    return texto + (f"\n{aviso}" if aviso else "")
 
 
-# ---------- PreToolUse: H-04, H-05, H-06, H-08, H-09 + copia previa para H-03 ----------
+# ---------- PreToolUse: H-04, H-05, H-06, H-08, H-09, H-11 + copia previa para H-03 ----------
+
+def decidir_h11(payload: dict, raiz: Path) -> Decision | None:
+    """H-11 (RF-08.4): `Bash` en los tres agentes sirve solo para su validador, con el capítulo de la invocación.
+
+    Compara el comando completo contra la forma canónica exacta (§13.3): un solo intérprete (el del entorno
+    virtual), el verbo del rol y el N resuelto por `capitulo_de_invocacion`. Todo lo demás se bloquea:
+    encadenamientos, tuberías, sustituciones, redirecciones, otro verbo, otro N u otro intérprete.
+    """
+    agent_type = payload.get("agent_type")
+    if payload.get("tool_name") != "Bash" or payload.get("agent_id") is None or agent_type not in ROLES:
+        return None
+    comando = str((payload.get("tool_input") or {}).get("command") or "").strip()
+    esperado = comando_validador(agent_type, _capitulo_activo(raiz, agent_type))
+    if comando == esperado:
+        return Decision().con_nota(f"H-11: {agent_type} ejecuta su validador ({esperado})")
+    return _bloquear(raiz, payload, "H-11",
+                     f"el {agent_type} solo puede ejecutar exactamente `{esperado}` (RF-08.4); intentó `{comando[:120]}`")
+
 
 def decidir_pre_tool_use(payload: dict, raiz: Path) -> Decision:
     rutas = Rutas(raiz)
@@ -107,6 +150,11 @@ def decidir_pre_tool_use(payload: dict, raiz: Path) -> Decision:
     ruta = _ruta_afectada(tool_input)
     rel = rutas.relativa(ruta) if ruta else None
     rel_posix = rel.as_posix() if rel else None
+
+    # H-11: Bash acotado al validador del rol (INV-01, INV-02, RF-08.4). Va primero: es la capa crítica (§13.6).
+    h11 = decidir_h11(payload, raiz)
+    if h11 is not None:
+        return h11
 
     # H-08: los subagentes no lanzan subagentes (INV-09).
     if tool == "Agent" and es_subagente:
@@ -120,7 +168,7 @@ def decidir_pre_tool_use(payload: dict, raiz: Path) -> Decision:
 
     # H-05: el extractor lee un solo capítulo, el activo (INV-02, RF-06.1 b).
     if tool == "Read" and agent_type == "extractor":
-        activo = _capitulo_activo(raiz)
+        activo = _capitulo_activo(raiz, "extractor")
         if es_ruta_manuscrito(rel) and numero_capitulo(rel) != activo:
             return _bloquear(raiz, payload, "H-05", f"el extractor solo puede leer 05_manuscrito/cap_{activo}.md (INV-02); pidió {rel_posix}")
         if rel_posix in ("04_estado/continuidad.json", "04_estado/resumen_rodante.md"):
@@ -131,12 +179,15 @@ def decidir_pre_tool_use(payload: dict, raiz: Path) -> Decision:
     # H-06: escritura por agente (INV-01, INV-05, RF-07.5).
     if tool in HERRAMIENTAS_ESCRITURA and es_subagente and agent_type in ROLES:
         if agent_type == "escritor":
-            activo = _capitulo_activo(raiz)
+            activo = _capitulo_activo(raiz, "escritor")
             permitido = f"05_manuscrito/cap_{activo}.md"
             if rel_posix != permitido:
                 return _bloquear(raiz, payload, "H-06", f"el escritor solo escribe {permitido} (INV-01); intentó {rel_posix or ruta}")
         elif agent_type == "extractor":
-            return _bloquear(raiz, payload, "H-06", "el extractor no escribe archivos: devuelve el delta en su mensaje final (RF-08.1)")
+            activo = _capitulo_activo(raiz, "extractor")
+            permitido = f"04_estado/deltas/delta_cap_{activo}.json"
+            if rel_posix != permitido:
+                return _bloquear(raiz, payload, "H-06", f"el extractor solo escribe {permitido}, su propio delta (RF-08.4); intentó {rel_posix or ruta}")
         elif agent_type == "qa":
             if not bajo(rel, "06_qa"):
                 return _bloquear(raiz, payload, "H-06", f"QA solo escribe dentro de 06_qa/ (RF-07.5); intentó {rel_posix or ruta}")
@@ -319,10 +370,7 @@ def registrar_uso(payload: dict, raiz: Path) -> str:
         return "H-10: registrar_uso = false; la llamada se contó pero no se registró"
     transcript = payload.get("agent_transcript_path")
     uso = leer_uso_transcript(Path(transcript)) if transcript else leer_uso_transcript(Path("/inexistente"))
-    m = checkpoint.leer_manifest(raiz)
-    capitulo = None
-    if m is not None:
-        capitulo = m.ultimo_capitulo_cerrado if payload.get("agent_type") == "qa" else m.capitulo_actual()
+    capitulo = _capitulo_activo(raiz, payload.get("agent_type")) if checkpoint.leer_manifest(raiz) is not None else None
     registro = {
         "rol": payload.get("agent_type"),
         "capitulo": capitulo,

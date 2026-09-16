@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Protocol
 
+from app import validacion
 from app.agents import escritor, extractor, qa
 from app.agents.escritor import Contexto
 from app.agents.qa import PreparacionQA
@@ -157,11 +158,15 @@ def preparar_extractor(raiz: Path, config: HarnessConfig, n: int) -> Path:
 
 
 def evaluar_borrador(raiz: Path, config: HarnessConfig, n: int) -> ResultadoEscritor:
-    """EX-07 sobre el archivo en disco: cuenta palabras y decide si toca el único reintento."""
+    """EX-07 sobre el archivo en disco, con el mismo validador que corre el agente (RF-08.4): decide si toca el único reintento."""
     if not repo.existe_capitulo(raiz, n):
         raise ContratoRetornoError(f"RF-05.4: no existe 05_manuscrito/cap_{n}.md")
-    palabras = escritor.contar_palabras(repo.leer_manuscrito(raiz, n))
+    v = validacion.validar_capitulo(raiz, config, n)
+    palabras = v.datos["palabras"]
     ok, mensaje = escritor.evaluar_longitud(palabras, config)
+    otros = [e for e in v.errores if e != mensaje]
+    if otros:  # lo que no es longitud (encabezados, personajes en escena ausentes) no tiene reintento EX-07: es EX-01
+        raise EstadoInvalidoError(f"el borrador del capítulo {n} no valida: " + "; ".join(otros))
     reintentar = False
     if not ok:
         m = checkpoint.exigir_manifest(raiz)
@@ -204,18 +209,13 @@ def aplicar_delta(raiz: Path, config: HarnessConfig, n: int, delta: DeltaExtracc
     elif n != m.ultimo_capitulo_cerrado + 1:
         raise ManifiestoInconsistenteError(f"INV-07: se intentó aplicar el delta del capítulo {n} y el siguiente es {m.ultimo_capitulo_cerrado + 1}")
 
-    if delta is None:
-        path = rutas.delta(n)
-        if not path.exists():
-            raise EstadoInvalidoError(f"no existe {path.as_posix()}: el orquestador debe dejar ahí el JSON del extractor")
-        delta = path.read_text(encoding="utf-8")
-    if isinstance(delta, str):
-        delta = extractor.parsear_delta(delta)
-
     fichas = repo.leer_personajes(raiz)
     mundo = repo.leer_mundo(raiz)
     registro = pers.sujetos_conocidos(fichas, mundo)
-    validado = extractor.validar_delta(delta, registro, config, n)
+    if isinstance(delta, DeltaExtraccion):  # solo el loop con dobles pasa el objeto ya parseado
+        validado = extractor.validar_delta(delta, registro, config, n)
+    else:  # RF-08.4: el mismo parseo y la misma validación que `validar-delta`; el harness vuelve a validar
+        validado = validacion.cargar_delta_validado(raiz, config, n, delta)
 
     cursor = cur.leer(raiz)
     if validado.claves_no_previstas:
@@ -287,16 +287,7 @@ def preparar_qa(raiz: Path, config: HarnessConfig, n: int) -> PreparacionQA:
 def cerrar_qa(raiz: Path, config: HarnessConfig, n: int) -> ResultadoQA:
     """RF-07.4, RF-07.5: lee qa_cap_N.json y recursos_usados.json, registra métricas y pausa si hay contradicciones."""
     rutas = Rutas(raiz)
-    reporte = repo.leer_reporte_qa(raiz, n)
-    if reporte is None:
-        raise EstadoInvalidoError(f"RF-07.2: QA no escribió {rutas.reporte_qa_json(n).as_posix()}")
-    if reporte.cap_corte != n:
-        raise EstadoInvalidoError(f"RF-07.2: el reporte dice cap_corte = {reporte.cap_corte} y el corte es {n}")
-    if not rutas.reporte_qa_md(n).exists():
-        raise EstadoInvalidoError(f"RF-07.2: QA no escribió {rutas.reporte_qa_md(n).as_posix()}")
-    if not rutas.recursos_usados.exists():
-        raise EstadoInvalidoError(f"RF-07.5: QA no escribió {rutas.recursos_usados.as_posix()}")
-    repo.leer_recursos_usados(raiz)  # valida el esquema (EX-01)
+    reporte = validacion.exigir_reporte(raiz, n)  # RF-08.4: la misma comprobación que `validar-reporte`
 
     metricas = qa.metricas_corte(raiz, qa.capitulos_muestra(n, config.cadencia_qa), reporte, repo.leer_continuidad(raiz))
     import json as _json
@@ -340,9 +331,11 @@ def ejecutar_tanda(config: HarnessConfig, raiz: Path, agentes: Agentes, capitulo
                 feedback = evaluacion.mensaje
                 continue
             feedback = None
-            delta = extractor.extraer(rutas.capitulo(n).as_posix(), invocar=agentes.extraer)  # RF-06.1
+            texto_delta = agentes.extraer(rutas.capitulo(n).as_posix())  # RF-06.1 (INV-02: un solo capítulo)
             cur.sumar_llamada(raiz)
-            resultado = aplicar_delta(raiz, config, n, delta)  # RF-06.2-06.4, EX-01, EX-08
+            rutas.deltas_trabajo.mkdir(parents=True, exist_ok=True)
+            rutas.delta(n).write_text(texto_delta, encoding="utf-8")  # el extractor real lo escribe él (RF-08.4)
+            resultado = aplicar_delta(raiz, config, n)  # RF-06.2-06.4, EX-01, EX-08: lee y revalida el archivo
             if resultado.regenerar:
                 descartar_borrador(raiz, n)
                 continue
