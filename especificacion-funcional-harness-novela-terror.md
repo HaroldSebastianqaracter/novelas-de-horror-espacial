@@ -1,6 +1,6 @@
 # Especificación Funcional — Harness Generador de Novelas de Terror
 
-**Versión:** 1.2 — historial de cambios en `git log` sobre este archivo.
+**Versión:** 1.3 — historial de cambios en `git log` sobre este archivo.
 **Documento previo:** `harness-novela-terror.md` (estructura de carpetas y esquemas) — este documento formaliza el comportamiento requerido; no repite decisiones de implementación.
 **Lector previsto:** un agente de código que implementará el harness a partir de este documento. Donde este documento sea ambiguo, el agente debe detenerse y pedir aclaración en vez de asumir.
 
@@ -31,6 +31,10 @@ Vocabulario cerrado — el agente implementador debe usar estos términos de for
 | **Agente extractor** | Lee un único capítulo recién escrito y produce los cambios (`Δ`) que deben aplicarse al estado persistente. |
 | **Agente QA** | Corre de forma periódica (no por capítulo) y detecta contradicciones o repetición estilística. |
 | **Corte de QA** | Cada ejecución de la fase 7, disparada por `cadencia_qa`. |
+| **Orquestador** | La sesión principal de Claude Code. Ejecuta las skills de fase, invoca a los tres agentes como subagentes y llama a los scripts deterministas. No escribe prosa ni toca el estado a mano. |
+| **Scripts deterministas** | Código Python sin llamadas a modelo y sin servidor: valida, filtra, persiste, lleva el manifiesto y ejecuta los hooks. Se prueba con `pytest` sin gastar tokens. |
+| **Hook** | Comando determinista que Claude Code ejecuta solo ante un evento (antes o después de una herramienta, al terminar un subagente, al abrir la sesión). El agente no lo invoca ni sabe que existe. Es el mecanismo de cumplimiento de los invariantes. |
+| **Contrato de retorno** | Lo que un subagente devuelve al orquestador en su mensaje final. Fijado por RF-08.1. |
 
 ## 4. Actores
 
@@ -40,14 +44,15 @@ Vocabulario cerrado — el agente implementador debe usar estos términos de for
 | Agente escritor | interno | Redacta el borrador de un capítulo. Sin acceso de lectura al manuscrito acumulado. |
 | Agente extractor | interno | Actualiza el estado persistente a partir de un único capítulo. Sin acceso a capítulos anteriores. |
 | Agente QA | interno | Único actor con acceso de lectura a una muestra del manuscrito completo. Corre con cadencia fija. |
-| Harness (orquestador) | interno | Sesión de Claude Code que ejecuta las skills de cada fase: ensambla contextos, invoca los subagentes en el orden correcto y hace cumplir las reglas globales de la sección 6. Delega en un núcleo Python determinista, sin llamadas a modelo, la validación, el filtrado, la persistencia y el manifiesto. |
+| Orquestador (sesión principal de Claude Code) | interno | Ejecuta las skills de cada fase: pide a los scripts el contexto ensamblado, invoca a los tres agentes en el orden fijado y decide el paso siguiente según lo que cada uno devuelve (RF-08.1). Sujeto a INV-08 e INV-09: no lee el manuscrito, no escribe prosa, no lanza más de un nivel de agentes. |
+| Scripts deterministas | interno | Código Python sin llamadas a modelo ni servidor. Validan, filtran, persisten, llevan el manifiesto y ejecutan los hooks (RF-08.2). Los invoca el orquestador por línea de comandos y Claude Code por hooks; nunca un agente directamente. |
 | Frontend de entrada | interno | Formulario web local con el que el usuario escribe la idea y la configuración antes de la fase 0. No llama a ningún modelo (RF-UI). |
 
 ## 5. Requisitos funcionales
 
 Formato fijo por requisito: descripción, entradas, salidas, reglas, criterio de aceptación (dado/cuando/entonces).
 
-Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, sino que parametrizan la ejecución completa. Los **RF-UI-xx** especifican el frontend con el que el usuario escribe esa configuración. El resto sigue la numeración por fase (RF-00 a RF-07).
+Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, sino que parametrizan la ejecución completa. Los **RF-UI-xx** especifican el frontend con el que el usuario escribe esa configuración. El resto sigue la numeración por fase (RF-00 a RF-07). Los **RF-08-xx** rigen la orquestación: qué devuelve cada agente al orquestador y cómo se hacen cumplir las reglas de la sección 6.
 
 ### Configuración de ejecución
 
@@ -282,6 +287,34 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 - Criterio de aceptación: dado un reporte que llevó al usuario a corregir `cap_30.md`, cuando marca el reporte como resuelto declarando ese capítulo, entonces los hechos con `cap_origen = 30` quedan marcados como superados, existen los hechos nuevos extraídos del texto corregido, y recién entonces el manifiesto vuelve a `en_progreso`.
 - Nota: sin este requisito, corregir el texto deja el log de continuidad describiendo una versión del capítulo que ya no existe, y el siguiente corte de QA volvería a reportar la misma contradicción.
 
+### Orquestación
+
+Los requisitos RF-08 no pertenecen a una fase: fijan cómo el orquestador habla con los agentes y cómo se hacen cumplir las reglas de la sección 6. Sin ellos, el flujo depende de que cada modelo "se porte bien"; con ellos, depende de configuración y de scripts.
+
+**RF-08.1 — Contrato de retorno de cada subagente**
+- Descripción: cada subagente termina con un mensaje final que vuelve al orquestador. Ese mensaje es el único canal de vuelta. Los artefactos van a disco, no al mensaje.
+- Reglas:
+  - **Agente escritor**: devuelve una sola línea con la ruta escrita, el conteo de palabras y los personajes que aparecieron. **Nunca devuelve prosa.** Si la prosa viajara en el mensaje, el orquestador acumularía el manuscrito en su propio contexto capítulo tras capítulo — exactamente lo que INV-01 y el diseño entero evitan.
+  - **Agente extractor**: devuelve el `DeltaExtraccion` completo en JSON, y nada más. Validarlo y aplicarlo (RF-06.2 a RF-06.4) es tarea de los scripts, no del extractor.
+  - **Agente QA**: escribe el reporte y `recursos_usados.json` en disco (RF-07.2, RF-07.5) y devuelve un resumen de hasta cinco líneas con `tiene_contradicciones` y el conteo de hallazgos por tipo.
+  - Ningún agente sabe que existen los otros: no reciben el retorno de otro agente ni referencias a él. El único que encadena es el orquestador.
+- Criterio de aceptación: dado un capítulo cerrado, cuando termina el subagente escritor, entonces su mensaje final tiene una sola línea y no contiene ningún párrafo del capítulo; y dado un corte de QA, cuando termina, entonces el mensaje final cabe en cinco líneas y el detalle está en `06_qa/reportes/`.
+
+**RF-08.2 — Cumplimiento por hooks, no por prompt**
+- Descripción: todo invariante o excepción verificable ante un evento concreto (una escritura, una lectura, el fin de un subagente) se hace cumplir con un hook. Las instrucciones (`CLAUDE.md`, prompts) declaran la intención; el hook la impide o la verifica.
+- Reglas:
+  - Un **hook bloqueante** rechaza la acción antes de que ocurra y devuelve el motivo al agente que la intentó. El agente no puede ignorarlo.
+  - Un **hook verificador** corre después de la acción y, si falla, detiene la tanda como EX-01. Nunca corrige el artefacto por su cuenta.
+  - Los hooks se declaran en la configuración del proyecto y los ejecuta Claude Code, no el agente. Como Claude Code identifica en cada evento qué agente está activo, un mismo hook aplica reglas distintas al escritor, al extractor, a QA y al orquestador.
+  - La lista de hooks y el invariante que protege cada uno está en la spec técnica §13.3. Un invariante sin hook ni allowlist que lo cubra es una **decisión documentada**, no un olvido: debe figurar en §13.6 como límite conocido.
+- Criterio de aceptación: dado cualquier invariante INV-01 a INV-09, cuando se consulta la tabla §10.1 de la spec técnica, entonces tiene asignado un mecanismo de cumplimiento (allowlist, hook, código o límite documentado); y dado un hook bloqueante, cuando el agente intenta la acción prohibida, entonces la acción no ocurre y el motivo aparece en la respuesta del agente.
+
+**RF-08.3 — Arranque de sesión informado**
+- Descripción: al abrir una sesión de Claude Code en el repositorio, el orquestador conoce el estado de la novela sin ir a buscarlo.
+- Entradas: `manifest.json`.
+- Salidas: el equivalente a `status` (spec técnica §8.2) inyectado en el contexto de la sesión al arrancar.
+- Criterio de aceptación: dada una novela con `ultimo_capitulo_cerrado = 12` y estado `pausado_por_qa`, cuando se abre una sesión nueva, entonces el orquestador puede citar ambos datos en su primer mensaje sin haber leído ningún archivo por su cuenta.
+
 ## 6. Reglas globales / invariantes
 
 Aplican a todo el sistema, no a una fase específica. Ningún requisito de la sección 5 puede implementarse de forma que las viole.
@@ -293,6 +326,8 @@ Aplican a todo el sistema, no a una fase específica. Ningún requisito de la se
 - **INV-05**: el agente QA es el único actor con permiso de lectura sobre más de un archivo de `05_manuscrito/` a la vez.
 - **INV-06**: `capitulos_por_tanda` no afecta el contenido de ningún artefacto de estado. Una novela generada en ocho tandas de cinco capítulos debe ser indistinguible de la misma novela generada en una tanda de cuarenta — el tope solo decide cuándo se detiene la ejecución, nunca qué se escribe.
 - **INV-07**: ningún capítulo ya **cerrado** se regenera. Reanudar una tanda siempre avanza; nunca reescribe. Un capítulo se cierra tras aplicar su extracción (RF-06.3); antes de eso es un borrador y los reintentos de RF-05.2 pueden reemplazarlo.
+- **INV-08**: el orquestador nunca lee `05_manuscrito/`, nunca escribe prosa y nunca edita un artefacto de estado a mano. Solo invoca skills, subagentes y la línea de comandos de los scripts. Su contexto contiene decisiones y resúmenes, no la novela.
+- **INV-09**: la delegación tiene un solo nivel. El orquestador invoca a los tres agentes; ningún agente invoca a otro ni lanza subagentes propios. Cada agente conoce únicamente lo que su prompt de invocación le entrega.
 
 ## 7. Casos de excepción esperados
 
@@ -308,6 +343,7 @@ Comportamiento a nivel funcional — no se especifica mecanismo de implementaci�
 | **EX-06** | `total_capitulos` cambió respecto del valor con el que se generó la escaleta, y ya hay capítulos cerrados. | El harness no reanuda y reporta la discrepancia. Cambiar el tamaño de la obra a mitad de camino invalida la escaleta (INV-04); resolverlo es decisión del usuario, no del harness. |
 | **EX-07** | El borrador del capítulo N queda fuera de `palabras_por_capitulo` ±20% (RF-05.2). | Un reintento con el desvío como feedback. Si el segundo también falla, se acepta con aviso en el manifiesto y la tanda continúa. Defecto de forma: no amerita detener nada. |
 | **EX-08** | La extracción del capítulo N devuelve en `delta.personajes` una clave ausente del registro de sujetos — el borrador introdujo un personaje no previsto (RF-05.2, RF-06.1). | Se descarta el borrador y se regenera el capítulo. Si el segundo intento repite el fallo, el harness se detiene y reporta la entrada de outline como sospechosa: dos fallos seguidos señalan un plan mal planteado, y seguir generando sobre él contradice el principio de EX-03. |
+| **EX-09** | Un hook bloquea una acción de un agente o del orquestador (RF-08.2): lectura de un capítulo no permitido, escritura fuera de su carpeta, intento de lanzar un subagente. | La acción no ocurre y el motivo vuelve a quien la intentó. Si el mismo agente choca dos veces con el mismo hook en la misma invocación, el harness detiene la tanda y registra el intento en el manifiesto: un agente que insiste en salirse de su carril señala un prompt mal planteado, no un accidente. |
 
 ## 8. Definición de "hecho" (Definition of Done) de esta especificación
 

@@ -1,7 +1,7 @@
 # Especificación Técnica — Harness Generador de Novelas de Terror
 
-**Versión:** 1.2 — historial de cambios en `git log` sobre este archivo.
-**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.2 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
+**Versión:** 1.3 — historial de cambios en `git log` sobre este archivo.
+**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.3 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
 **Lector previsto:** el agente de código que implementa el harness. Toda decisión no cubierta aquí y no derivable de la especificación funcional debe tratarse como pregunta abierta, no como espacio para asumir.
 
 ## 1. Decisiones de arquitectura declaradas
@@ -11,7 +11,8 @@ Decisiones tomadas para poder avanzar, con su razón — si alguna deja de aplic
 | Decisión | Razón |
 |---|---|
 | Orquestación: **Claude Code** (sesión principal + subagentes) | Indicación de la dirección del proyecto. Cada agente del pipeline es un subagente con contexto aislado y allowlist de herramientas, así que INV-01, INV-02 e INV-05 pasan de ser reglas de prompt a configuración declarativa (§13.1). |
-| Núcleo determinista: **Python 3.11+, sin llamadas a modelo** | Todo lo que debe ser reproducible y testeable sin LLM — validación de esquemas, filtrado de continuidad, aplicación de deltas, manifiesto, `resolver`, `ensamblar`, `ui` — vive en Python y lo invocan las skills y los hooks. Claude Code decide; Python hace cumplir. |
+| Scripts deterministas: **Python 3.11+, sin llamadas a modelo y sin servidor** | Todo lo que debe ser reproducible y testeable sin LLM — validación de esquemas, filtrado de continuidad, aplicación de deltas, manifiesto, `resolver`, `ensamblar`, `ui` y los scripts de los hooks — vive en Python y lo invocan las skills (por línea de comandos) y Claude Code (por hooks). No hay FastAPI ni ningún proceso escuchando, salvo el formulario local de §15 mientras el usuario lo usa. Claude Code decide; los scripts hacen cumplir. |
+| **Cumplimiento por hooks, no por prompt** (RF-08.2) | Cada invariante verificable ante un evento tiene un hook en §13.3. Los ejecuta Claude Code, no el agente: el agente ni sabe que existen. Lo que no cubre ni un hook ni una allowlist se declara límite conocido en §13.6, con nombre. |
 | Acceso a modelos: **Claude Code enrutado a OpenRouter** | `ANTHROPIC_BASE_URL` apunta a OpenRouter con una credencial de OpenRouter; la suscripción de claude.ai no interviene y no hay adapter propio (§3). Modelo por rol mediante alias de subagente. |
 | **Modelos distintos por rol** | Escritor y QA usan el modelo capaz; el extractor, el económico. El escritor por calidad de prosa. QA porque cruza ~34.000 tokens de prosa contra el log completo de hechos: es razonamiento sobre contexto largo, justo donde los modelos económicos flojean, y un falso negativo suyo es el peor fallo del sistema — una contradicción no detectada sigue viva y el escritor construye encima. El extractor sí es una tarea mecánica (un capítulo → JSON) cuyo error lo atrapa la validación de esquema. Detalle de costes en §11.7. |
 | **Esquemas formales con Pydantic** | Valida cada artefacto de estado antes de persistirlo; permite rechazar y reintentar cuando el LLM produce JSON inválido (EX-01). |
@@ -46,6 +47,19 @@ harness/
 ```
 
 Regla de dependencia que el agente implementador debe respetar: `agents/escritor.py` **no importa** `state.repository.leer_manuscrito` bajo ninguna firma — es la forma de hacer cumplir INV-01 (el escritor nunca lee capítulos cerrados) a nivel de código, no solo de prompt.
+
+Fuera del paquete `harness/` viven los archivos que Claude Code lee directamente:
+
+```
+.claude/
+├── agents/                   # escritor.md · extractor.md · qa.md — §13.1
+├── skills/                   # una carpeta por fase + skills de dominio por agente — §13.2, §11.8
+└── settings.json             # hooks (§13.3) y bloque env sin credencial (§3.1)
+scripts/hooks/                # un script por evento; deciden por agente y ruta e invocan harness/ — §13.3
+CLAUDE.md                     # reglas ambientales, orden de fases, mapa de carpetas — §13.5
+```
+
+`harness/` nunca importa nada de `.claude/` ni de `scripts/`; la dependencia va en un solo sentido: los scripts de hooks y el CLI importan `harness/`.
 
 ## 3. Acceso a modelos — Claude Code enrutado a OpenRouter
 
@@ -340,6 +354,8 @@ Solo `capitulos_por_tanda` admite override. `total_capitulos` y `palabras_por_ca
 | Reanudación (RF-CFG-04, INV-07) | Que reanudar avance y nunca reescriba. | Correr una tanda de 3, anotar los `mtime` de `cap_1..3.md`, correr otra tanda de 3, verificar que esos `mtime` no cambiaron y que aparecieron `cap_4..6.md`. |
 | **Calidad de atribución de sujeto** (RF-06.1) | Que el filtrado de RF-05.1 se apoye en datos confiables. **Es el criterio que decide si el diseño de §12.3 se sostiene.** | Sobre los 8-10 capítulos de la corrida manual: revisar a mano cada hecho de `continuidad.json` y contar cuántos tienen el `sujeto` correcto. Medir también la proporción de `sujeto_validado = false`. |
 | Cobertura del filtro (RF-05.1) | Que filtrar no omita hechos relevantes. | Para cada capítulo de la corrida manual, comparar los hechos inyectados contra el log completo y revisar si algún hecho excluido era pertinente a lo que el capítulo terminó narrando. |
+| **Hooks** (RF-08.2) | Que cada script de `scripts/hooks/` bloquee o verifique exactamente lo que dice §13.3. | `pytest` ejecuta cada script con un payload JSON simulado por stdin, con el mismo formato que envía Claude Code (`hook_event_name`, `tool_name`, `tool_input`, `agent_type`), y comprueba código de salida y mensaje. Ejemplos: un `Read` con `agent_type = extractor` sobre `cap_3.md` cuando el capítulo actual es el 5 sale con código 2; una escritura de `continuidad.json` que pierda un hecho falla; un `Agent` con `agent_id` presente sale con código 2. Sin modelo. |
+| Contrato de retorno (RF-08.1) | Que el mensaje final de cada subagente respete su forma. | Con dobles: el parser de `agents/escritor.py` rechaza un retorno multilínea o con más de ~40 palabras. En la corrida manual: guardar el mensaje final del escritor de cada capítulo y verificar que es una línea sin prosa. |
 
 Criterio de decisión para las dos filas nuevas: si la atribución de sujeto acierta por debajo de ~90%, o si aparece algún hecho pertinente excluido por el filtro, hay que volver a inyectar `continuidad.json` completo y asumir el costo de contexto. El resto del esquema (`sujeto`, `categoria`, `superado_por`) se conserva igual: sigue sirviendo para QA y para RF-07.6 aunque el escritor no filtre.
 
@@ -371,6 +387,22 @@ Criterio de decisión para las dos filas nuevas: si la atribución de sujeto aci
 | EX-01 (estado inválido) | `state/repository.py` — validación Pydantic previa a cualquier escritura |
 | EX-04 (contexto excedido) | `agents/escritor.py::recortar_resumen_rodante`, nunca toca `continuidad.json` ni `personajes.json` |
 | INV-05 (QA único con acceso amplio al manuscrito) | Solo `agents/qa.py` importa `repository.leer_muestra_manuscrito`; ningún otro módulo de `agents/` lo hace |
+
+### 10.1 Invariante → mecanismo de cumplimiento
+
+Cada invariante tiene asignado **con qué** se hace cumplir (RF-08.2). "Prompt" o "CLAUDE.md" solos no cuentan como mecanismo: son intención. Los identificadores H-xx son los hooks de §13.3.
+
+| Invariante | Allowlist del agente | Hook | Código | Límite documentado (§13.6) |
+|---|---|---|---|---|
+| INV-01 escritor sin manuscrito | `escritor.md` sin `Read`, `Grep`, `Glob`, `Bash` | H-06 limita su `Write` a `cap_N.md` | `ensamblar_contexto` es el único ensamblador | — |
+| INV-02 extractor, un capítulo | `extractor.md` sin `Grep`, `Glob`, `Bash` | H-05 bloquea `Read` fuera de `cap_N.md` | firma `extraer(cap_n)` | — |
+| INV-03 trazabilidad, append-only | — | H-03 verifica superconjunto tras `Write` | `continuidad.py` sin `eliminar()` | — |
+| INV-04 esquemas y `novela.json` inmutables | — | H-04 bloquea `Write`/`Edit` sobre `config/novela.json` con capítulos cerrados | EX-06 en `checkpoint.py` | cambiar el código de los esquemas: revisión humana |
+| INV-05 solo QA lee varios | solo `qa.md` lleva `Grep`, `Glob` | H-06 bloquea `Write` en `05_manuscrito/` a extractor y QA | solo `qa.py` importa la muestra | — |
+| INV-06 tandas no alteran estado | — | — | conteo en memoria; test de equivalencia §9 | — |
+| INV-07 no regenerar cerrados | — | — | `guardar_capitulo` falla si el archivo existe | — |
+| INV-08 orquestador fuera del manuscrito | — | H-09 bloquea `Read`, `Grep`, `Glob` sobre `05_manuscrito/` en la sesión principal | `status` detecta manifiesto inconsistente | edición de estado vía `Bash`: solo `CLAUDE.md` |
+| INV-09 un solo nivel | `disallowedTools: Agent, Skill` en los tres | H-08 bloquea `Agent` cuando hay `agent_id` | — | — |
 
 ## 11. Inventario de configuración
 
@@ -484,6 +516,30 @@ Conviene igualmente subir `max_tokens_contexto_escritor` a ~12.000: sigue siendo
 | Selección entre borradores | **Limitación aceptada.** Fuera de alcance por decisión explícita (§2 de la spec funcional). Es la diferencia principal contra Re3, que genera varias continuaciones y rerankea por coherencia. No se revisa hasta tener una novela completa que leer: sin eso no hay forma de saber si el borrador único es el cuello de botella. |
 | Deduplicación de hechos | **Limitación aceptada.** Si "la escotilla 4 quedó sellada" se extrae en el capítulo 7 y otra vez en el 9, el log tiene dos entradas. Deduplicar automáticamente es riesgoso: dos hechos parecidos pueden diferir en algo que importa, y equivocarse borra memoria. El filtrado de RF-05.1 absorbe el sobrecosto en contexto. A lo sumo QA lo reporta como hallazgo de tipo `repeticion`; nunca lo corrige solo. |
 
+### 11.8 Skills de dominio por agente y scripts de hooks
+
+Dos grupos de archivos que no son configuración de la novela pero sin los cuales el harness no corre, y que por eso van en el inventario.
+
+**Skills de dominio.** Cada agente precarga una skill con su campo `skills:` (§13.1). Es conocimiento **estable del rol**, el mismo para todos los capítulos; se distingue del prompt de invocación de `config/prompts/<rol>.md`, que es la **plantilla variable** que el helper rellena con los datos del capítulo. La regla para decidir dónde va algo: si cambia entre capítulos, al prompt; si no, a la skill.
+
+| Skill | Agente | Contenido |
+|---|---|---|
+| `.claude/skills/prosa-terror-espacial/SKILL.md` | escritor | Técnica de prosa del subgénero: manejo de ritmo, sugestión antes que exposición, cómo escribir aislamiento y escala. No es la guía de estilo de la novela (`style_guide.md` va en el prompt); es oficio general. |
+| `.claude/skills/formato-delta/SKILL.md` | extractor | El esquema `DeltaExtraccion` con dos ejemplos completos, uno correcto y uno con los errores típicos anotados: sujeto fuera del registro, hecho reiterado en vez de nuevo, resumen largo. |
+| `.claude/skills/criterios-qa/SKILL.md` | qa | Qué cuenta como contradicción y qué no (un personaje que miente no contradice el log), el umbral de repetición, cómo citar `cap_origen`, y el formato de `recursos_usados.json`. |
+
+Las tres entran en `prompts_hash` (§5) junto con `config/prompts/`: si un capítulo sale mal, se sabe con qué versión de ambas cosas se generó.
+
+**Scripts de hooks.** Un script por evento en `scripts/hooks/`, invocado por `.claude/settings.json` (§13.3). Cada uno lee el payload JSON por stdin, decide por `agent_type` y por la ruta afectada, e importa `harness/` para validar. No tienen lógica propia de negocio: la delegan al paquete, para que la misma regla que aplica el hook sea la que prueba `pytest`.
+
+```
+scripts/hooks/
+├── session_start.py      # H-01
+├── pre_tool_use.py       # H-04, H-05, H-06, H-08, H-09
+├── post_tool_use.py      # H-02, H-03
+└── subagent_stop.py      # H-07
+```
+
 ## 12. Gestión de contexto — los archivos como memoria
 
 El harness no tiene memoria de sesión: cada invocación de un agente nace y muere. Lo único que persiste son archivos. Esta sección clasifica cada archivo por el rol de memoria que cumple, porque de eso depende su política de actualización.
@@ -514,6 +570,7 @@ El manuscrito no es memoria de ningún tipo. Es el producto. Que no se relea es 
 | Escritor | style_guide, tres_actos, capitulos[N], personajes, **continuidad filtrada** (RF-05.1) | resumen_rodante | **Ninguno** (INV-01) |
 | Extractor | solo el **registro de sujetos** — nombres, sin hechos | ninguna | Solo `cap_N.md` (INV-02) |
 | QA | continuidad completo, recursos_usados | ninguna | Últimos `cadencia_qa` capítulos (INV-05) |
+| Orquestador | ninguna: solo los retornos de los agentes (RF-08.1) y la salida de `status` (H-01) | ninguna | **Ninguno** (INV-08, H-09) |
 
 El extractor no recibe memoria narrativa a propósito: si viera el estado acumulado, tendería a repetir hechos ya registrados en vez de extraer solo lo nuevo del capítulo. El registro de sujetos es la única excepción, y es deliberadamente un **vocabulario** — la lista de nombres canónicos de personajes y locaciones, sin sus estados ni sus hechos. Sirve para que el extractor nombre las entidades igual que el resto del sistema, no para que recuerde qué les pasó.
 
@@ -558,38 +615,84 @@ Lo mismo con la **tasa de conflicto** (hechos en contradicción sobre hechos tot
 
 ## 13. Ruta de implementación principal: Claude Code
 
-Claude Code es el orquestador del pipeline, por indicación de la dirección del proyecto. Los tres agentes son subagentes, las fases son skills, las validaciones son hooks, y el acceso a modelos es el de Claude Code enrutado a OpenRouter (§3). La ventaja no es solo ahorrarse un harness completo: **algunos invariantes dejan de depender del prompt y pasan a ser configuración declarativa.** El núcleo Python de §2 existe para cubrir con código lo que esta ruta no cubre sola (§13.6).
+Claude Code es el orquestador del pipeline, por indicación de la dirección del proyecto. Los tres agentes son subagentes, las fases son skills, las validaciones son hooks, y el acceso a modelos es el de Claude Code enrutado a OpenRouter (§3). La ventaja no es solo ahorrarse un harness completo: **algunos invariantes dejan de depender del prompt y pasan a ser configuración declarativa.** Los scripts deterministas de §2 existen para cubrir con código lo que esta ruta no cubre sola (§13.6), y los hooks de §13.3 son lo que hace cumplir los invariantes sin depender del prompt (RF-08.2).
 
 ### 13.1 Mapeo de los tres agentes a subagentes
 
-Un subagente de Claude Code se define en `.claude/agents/<nombre>.md`, con frontmatter YAML y el system prompt en el cuerpo. Arranca con contexto aislado: no ve la conversación principal ni los archivos que ya se leyeron.
+Un subagente de Claude Code se define en `.claude/agents/<nombre>.md`: frontmatter YAML con su configuración y el system prompt en el cuerpo. Arranca con contexto aislado: no ve la conversación principal ni los archivos que ya se leyeron. Cada agente es **un archivo**, no una carpeta: sus skills viven en `.claude/skills/` (§11.8) y sus hooks en `.claude/settings.json` (§13.3), que los aplica por agente gracias a que Claude Code informa `agent_type` en cada evento.
 
-Los campos que interesan acá son `tools` (allowlist) y `disallowedTools` (denylist). Con ellos, INV-01 e INV-05 se vuelven configuración:
+Los campos que interesan: `tools` (allowlist), `disallowedTools` (denylist), `model` (alias que §3.2 resuelve a OpenRouter), `skills` (skills precargadas en el contexto al arrancar) y `maxTurns` (tope de turnos, para que un agente que se traba no consuma cuota indefinidamente). Con `tools` y `disallowedTools`, INV-01, INV-02, INV-05 e INV-09 se vuelven configuración.
+
+**Ficha del escritor**
 
 ```markdown
 ---
 name: escritor
-description: Redacta el borrador de un capítulo a partir del estado persistente
+description: Redacta el borrador de un capítulo a partir del contexto ya ensamblado. Solo lo invoca /escribir-tanda.
 model: opus
 tools: Write
-disallowedTools: Read, Grep, Glob, Bash, WebFetch
-memory: project
+disallowedTools: Read, Grep, Glob, Bash, WebFetch, WebSearch, Agent, Skill
+skills: prosa-terror-espacial
+maxTurns: 6
 ---
 ```
 
-El escritor **no tiene `Read`**: el helper Python de RF-05.1 ensambla el contexto completo y se lo entrega en el prompt de invocación. Así INV-01 no depende de que al modelo "no se le ocurra" abrir `05_manuscrito/` — no tiene con qué. Solo escribe `cap_N.md`.
+El escritor **no tiene `Read`**: el helper Python de RF-05.1 ensambla el contexto completo y se lo entrega en el prompt de invocación. Así INV-01 no depende de que al modelo "no se le ocurra" abrir `05_manuscrito/` — no tiene con qué. Solo escribe `cap_N.md`, y H-06 le impide escribir cualquier otra ruta.
 
-El aislamiento de contexto del subagente da INV-02 casi gratis: el extractor solo ve el prompt que se le pasa, así que no puede acceder a capítulos anteriores aunque quisiera.
+Tampoco lleva `memory`. La v1.2 lo tenía con `memory: project`; se quita porque una memoria que persiste entre invocaciones es un canal por el que el escritor recordaría capítulos anteriores fuera del control del harness, que es justo lo que INV-01 prohíbe. La única memoria del escritor son los artefactos de estado que el helper le inyecta.
+
+**Ficha del extractor**
+
+```markdown
+---
+name: extractor
+description: Lee un único capítulo y devuelve el DeltaExtraccion en JSON. Solo lo invoca /escribir-tanda.
+model: haiku
+tools: Read
+disallowedTools: Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, Skill
+skills: formato-delta
+maxTurns: 4
+---
+```
+
+Tiene `Read` porque lee `cap_N.md`; H-05 bloquea cualquier otra ruta de `05_manuscrito/` (INV-02). No tiene `Write`: el delta vuelve en su mensaje final (RF-08.1) y lo persisten los scripts tras validarlo.
+
+**Ficha de QA**
+
+```markdown
+---
+name: qa
+description: Corte de continuidad y estilo sobre la muestra de capítulos. Solo lo invocan /escribir-tanda y /corte-qa.
+model: opus
+tools: Read, Grep, Glob, Write
+disallowedTools: Edit, Bash, WebFetch, WebSearch, Agent, Skill
+skills: criterios-qa
+maxTurns: 12
+---
+```
+
+Es el único con `Grep` y `Glob` (INV-05). Tiene `Write` porque escribe el reporte y `recursos_usados.json` (RF-07.5); H-06 limita esa escritura a `06_qa/`.
+
+**Lo que los tres comparten.** `Agent` y `Skill` fuera de la allowlist. Sin `Agent`, ningún agente puede lanzar subagentes: Claude Code lo permite por defecto hasta tres niveles, así que INV-09 hay que configurarlo, no viene dado. Sin `Skill`, ningún agente invoca skills por su cuenta: solo recibe la que se le precarga con `skills:`, y las skills de fase (`/escribir-tanda`, `/generar-premisa`) quedan como órdenes exclusivas del orquestador.
+
+**Contrato de retorno (RF-08.1).** El cuerpo del `.md` de cada agente termina con la forma exacta de su mensaje final, y el helper Python que parsea el retorno rechaza lo que no la cumpla:
+
+| Agente | Devuelve | No devuelve |
+|---|---|---|
+| escritor | una línea: `cap_N.md · 2.940 palabras · personajes: Kovacs, Ilse` | prosa, resúmenes, comentarios sobre el capítulo |
+| extractor | el JSON de `DeltaExtraccion`, sin texto alrededor | el texto del capítulo, explicaciones |
+| qa | hasta cinco líneas: `tiene_contradicciones`, hallazgos por tipo, ruta del reporte | el reporte completo, citas largas de la muestra |
 
 Correspondencia con los invariantes:
 
-| Invariante | En el harness Python | En Claude Code |
+| Invariante | En los scripts | En Claude Code |
 |---|---|---|
 | INV-01 (escritor sin manuscrito) | `escritor.py` no importa `leer_manuscrito` | El subagente no tiene `Read`; el único que arma su contexto es el helper Python |
-| INV-02 (extractor, un capítulo) | Firma `extraer(cap_n: str)` | Aislamiento de contexto del subagente |
-| INV-05 (solo QA lee varios) | Solo `qa.py` importa `leer_muestra_manuscrito` | Solo el subagente `qa` lleva `Grep`/`Glob` en su allowlist |
+| INV-02 (extractor, un capítulo) | Firma `extraer(cap_n: str)` | Aislamiento de contexto + H-05 sobre `Read` |
+| INV-05 (solo QA lee varios) | Solo `qa.py` importa `leer_muestra_manuscrito` | Solo `qa.md` lleva `Grep`/`Glob` |
+| INV-09 (un solo nivel) | — | `disallowedTools: Agent` en los tres + H-08 |
 
-Honestidad sobre el alcance: `tools` no restringe **qué rutas** puede leer un agente que sí tiene `Read`. Por eso el escritor no lo tiene, y por eso el extractor y QA, que sí lo necesitan, reciben del helper Python la lista exacta de rutas permitidas en su prompt. La garantía queda repartida: la allowlist impide la herramienta, y el helper decide las rutas — dos capas, ninguna de las dos es "que el prompt lo pida".
+Honestidad sobre el alcance: `tools` no restringe **qué rutas** puede leer un agente que sí tiene `Read`. Por eso el escritor no lo tiene, y por eso para el extractor y QA la restricción de rutas la pone un hook (H-05, H-06) y no el prompt. La garantía queda repartida en dos capas, allowlist y hook, y ninguna de las dos es "que el prompt lo pida".
 
 ### 13.2 Fases como skills
 
@@ -603,25 +706,57 @@ Cada fase del pipeline es una skill en `.claude/skills/<nombre>/SKILL.md`. Las s
 ├── generar-escaleta/SKILL.md    # fase 3
 ├── inicializar-estado/SKILL.md  # fase 4
 ├── escribir-tanda/SKILL.md      # fases 5-7: loop de N capítulos (RF-CFG-02), invoca los subagentes
-└── corte-qa/SKILL.md            # fase 7
+├── corte-qa/SKILL.md            # fase 7
+├── prosa-terror-espacial/SKILL.md   # dominio · precargada en escritor (§11.8)
+├── formato-delta/SKILL.md           # dominio · precargada en extractor (§11.8)
+└── criterios-qa/SKILL.md            # dominio · precargada en qa (§11.8)
 ```
 
 Las que tienen efectos irreversibles (escribir un capítulo, cerrar un corte) llevan `disable-model-invocation: true`, para que solo las dispare el usuario y no el modelo por su cuenta.
 
-### 13.3 Hooks para las validaciones
+### 13.3 Hooks: el mecanismo de cumplimiento
 
-Un hook `PostToolUse` con matcher `Write` puede validar el JSON contra su esquema apenas se escribe, que es exactamente EX-01. A diferencia de la validación dentro del harness, esto corre aunque el agente escriba el archivo por un camino no previsto.
+Un hook es un comando que Claude Code ejecuta ante un evento. **Lo ejecuta Claude Code, no el agente**: el agente no lo invoca, no lo ve en su lista de herramientas y solo se entera si el hook bloquea su acción, porque recibe el motivo. Por eso es el mecanismo de RF-08.2: convierte un invariante en algo que no depende de que el modelo lo respete.
+
+Todos los hooks del proyecto se declaran en `.claude/settings.json` y aplican a la sesión principal y a todos los subagentes. Cada evento trae en su payload `agent_type` (el nombre del subagente activo, ausente en la sesión principal) y `agent_id`, así que **un mismo script decide por agente**: la regla para el extractor no es la del escritor. Un hook bloqueante termina con código de salida 2 y el motivo por stderr; Claude Code cancela la acción y le entrega el motivo al agente. Un hook verificador que falla también sale con 2, y el orquestador trata el fallo como EX-01.
+
+| Id | Evento y matcher | Aplica a | Qué hace | Protege |
+|---|---|---|---|---|
+| **H-01** | `SessionStart` | sesión principal | Ejecuta `python -m harness status` y su salida entra al contexto de la sesión. La sesión nueva arranca sabiendo capítulo, estado y si hay reporte pendiente. | RF-08.3 |
+| **H-02** | `PostToolUse` · `Write` sobre `04_estado/*.json` | todos | Valida el archivo contra su esquema Pydantic apenas se escribe. Corre aunque el archivo se haya escrito por un camino no previsto. | EX-01 |
+| **H-03** | `PostToolUse` · `Write` sobre `continuidad.json` | todos | Compara con la versión anterior: todo hecho previo debe seguir presente, con su `cap_origen`, a lo sumo con `superado_por` nuevo. Si falta uno, falla. | INV-03, RF-06.3 |
+| **H-04** | `PreToolUse` · `Write`, `Edit` sobre `config/novela.json` | todos | Bloquea si `ultimo_capitulo_cerrado > 0`. Cambiar el tamaño o la voz de la novela con capítulos cerrados invalida la escaleta. | INV-04, EX-06 |
+| **H-05** | `PreToolUse` · `Read` | `agent_type = extractor` | Permite solo `05_manuscrito/cap_N.md` donde N es `ultimo_capitulo_cerrado + 1` leído del manifiesto. Cualquier otra ruta del manuscrito, bloqueada. | INV-02 |
+| **H-06** | `PreToolUse` · `Write`, `Edit` | por agente | escritor: solo `05_manuscrito/cap_N.md`, el capítulo actual. extractor: nada (no debería tener la herramienta; el hook es la segunda capa). qa: solo `06_qa/`. Toda otra ruta, bloqueada. | INV-01, INV-05, RF-07.5 |
+| **H-07** | `SubagentStop` · matcher `escritor` | escritor | Verifica que `cap_N.md` existe y que su longitud está en `palabras_por_capitulo ±20%`. Al primer fallo impide que el agente termine y le devuelve el desvío: es el reintento de EX-07 sin que el orquestador intervenga. Al segundo, lo deja terminar y anota el aviso en `intentos_por_capitulo`. | EX-07, RF-05.2 |
+| **H-08** | `PreToolUse` · `Agent` | cualquier evento con `agent_id` | Bloquea. Los subagentes no lanzan subagentes. Refuerzo de `disallowedTools: Agent`. | INV-09 |
+| **H-09** | `PreToolUse` · `Read`, `Grep`, `Glob` sobre `05_manuscrito/` | sesión principal (sin `agent_id`) | Bloquea. El orquestador no lee la novela; `ensamblar` la lee por él y la deja en un archivo. | INV-08 |
+
+Declaración en `settings.json`, un script por evento (§11.8):
 
 ```json
 {
   "hooks": {
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "python scripts/hooks/session_start.py" }] }
+    ],
+    "PreToolUse": [
+      { "matcher": "Write|Edit|Read|Grep|Glob|Agent",
+        "hooks": [{ "type": "command", "command": "python scripts/hooks/pre_tool_use.py" }] }
+    ],
     "PostToolUse": [
       { "matcher": "Write",
-        "hooks": [{ "type": "command", "command": "scripts/validar-estado.py" }] }
+        "hooks": [{ "type": "command", "command": "python scripts/hooks/post_tool_use.py" }] }
+    ],
+    "SubagentStop": [
+      { "matcher": "escritor",
+        "hooks": [{ "type": "command", "command": "python scripts/hooks/subagent_stop.py" }] }
     ]
   }
 }
 ```
+
+Regla de diseño: los scripts no tienen lógica de negocio propia. Importan `harness/` y llaman a la misma función que usa el CLI, para que lo que prueba `pytest` sea lo que corre el hook (§9). Un segundo choque del mismo agente contra el mismo hook en una invocación es EX-09: el script lo detecta por `agent_id` y detiene la tanda.
 
 ### 13.4 Empaquetado como plugin
 
@@ -630,16 +765,27 @@ Un plugin agrupa skills, agentes, hooks y servidores MCP en un directorio con ma
 ```
 novela-harness/
 ├── .claude-plugin/plugin.json
-├── skills/          # las 7 fases
+├── skills/          # las 7 fases + las 3 de dominio (§11.8)
 ├── agents/          # escritor, extractor, qa
-└── hooks/hooks.json # validación de esquemas
+└── hooks/hooks.json # los nueve hooks de §13.3
 ```
 
-### 13.5 CLAUDE.md como reglas ambientales
+### 13.5 CLAUDE.md: el mapa que lee la sesión nueva
 
-`CLAUDE.md` se carga al inicio de cada sesión, incluida la de cada subagente. Es el lugar para los invariantes que deben regir siempre: nunca pasar rutas de `05_manuscrito/` al escritor, nunca borrar hechos de `continuidad.json`, siempre validar antes de persistir.
+`CLAUDE.md` se carga al inicio de cada sesión, incluida la de cada subagente. Es lo primero que ve el orquestador cuando el usuario abre Claude Code en el repositorio, y por eso es donde vive el mapa completo del sistema. Junto con H-01 (estado actual inyectado), la sesión arranca sabiendo qué hay, dónde está cada cosa, en qué orden se dispara y en qué punto quedó la novela.
 
-No sustituye a las restricciones de `tools` — es la capa de intención, no la de cumplimiento.
+Contenido obligatorio, en este orden:
+
+1. **Qué es el proyecto**, en tres líneas, y la regla de las specs: donde haya ambigüedad, detenerse y preguntar.
+2. **Mapa de carpetas**: qué hay en `04_estado/`, `05_manuscrito/`, `06_qa/`, `config/`, `.claude/agents/`, `.claude/skills/`, `scripts/hooks/`, y quién puede tocar cada una.
+3. **Orden de fases** y la skill que dispara cada una, de `/destilar-estilo` a `/escribir-tanda`, con la condición de entrada de cada una (qué artefacto debe existir antes).
+4. **Reglas del orquestador**: INV-08 e INV-09 en una línea cada uno, más "nunca pasar rutas de `05_manuscrito/` al escritor" y "todo cambio de estado pasa por el CLI".
+5. **Los invariantes INV-01 a INV-07**, una línea cada uno.
+6. **Contratos de retorno** (RF-08.1): qué esperar de cada agente y qué hacer si no lo cumple: no reintentar por otra vía, reportar.
+
+Restricción de tamaño: cada subagente paga los tokens de `CLAUDE.md` en cada invocación. Se fija un tope de ~80 líneas; lo que no quepa va a las specs y `CLAUDE.md` lo referencia por sección.
+
+No sustituye a las restricciones de `tools` ni a los hooks: es la capa de intención, no la de cumplimiento (RF-08.2).
 
 ### 13.6 Límites conocidos de esta ruta y cómo se compensan
 
@@ -650,6 +796,8 @@ No sustituye a las restricciones de `tools` — es la capa de intención, no la 
 | Determinismo entre corridas | Todo lo que no es generación es Python puro y se prueba con `pytest` sin modelo (§9); la generación nunca fue determinista en ninguna ruta |
 | Auditoría de qué archivos leyó cada agente (RF-05.3) | Allowlist de `tools` por subagente + el helper Python es el **único** que ensambla el contexto del escritor, así que qué rutas entran es código, no criterio del modelo |
 | `tools` no restringe rutas dentro de `Read` | El escritor no tiene `Read`: recibe el contexto ya ensamblado en el prompt (§13.1). Sin herramienta de lectura, INV-01 no depende de que "no se le ocurra" leer |
+| El orquestador podría editar estado con `Bash` (INV-08) | H-09 cubre `Read`/`Grep`/`Glob`, no `Bash`. Se acepta: el orquestador es la sesión con la que habla el usuario y cortarle `Bash` le quita el CLI. `CLAUDE.md` lo prohíbe, H-02 valida lo que escriba y `status` detecta un manifiesto inconsistente. Límite documentado, no olvido. |
+| Un agente que ignora su contrato de retorno (RF-08.1) | El helper que parsea el retorno lo rechaza y el orquestador no avanza. No hay hook que lo impida antes: el mensaje final no es una herramienta. Se verifica, no se bloquea. |
 
 ## 14. Referencias
 
