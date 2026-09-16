@@ -16,7 +16,7 @@ from app import registro, validacion
 from app.agents import escritor, extractor, qa
 from app.agents.escritor import Contexto
 from app.agents.qa import PreparacionQA
-from app.config import HarnessConfig, hash_prompts
+from app.config import VERSION_SPECS, HarnessConfig, hash_prompts
 from app.errores import (
     AutovalidacionFallidaError, CapituloCerradoError, ContextoExcedidoError, ContratoRetornoError, EstadoInvalidoError,
     LongitudFueraDeRangoAviso, ManifiestoInconsistenteError, PersonajeNoPrevistoError,
@@ -87,11 +87,17 @@ def iniciar_tanda(raiz: Path, config: HarnessConfig, capitulos_por_tanda: int | 
     m = checkpoint.verificar_reanudable(raiz, config)
     tope = None if hasta_el_final else (capitulos_por_tanda or config.capitulos_por_tanda)  # RF-CFG-03
     cur.borrar(raiz, "huerfano: la tanda anterior murio a mitad y esta la recalcula desde el manifiesto")
-    carpeta = registro.iniciar_tanda(raiz)  # §5.1: una carpeta por tanda
+    hashes = hash_prompts(raiz)
+    carpeta = registro.iniciar_tanda(raiz, {  # §5.1: una carpeta por tanda; tanda.json lleva lo que la traza necesita (§16.2)
+        "prompts_hash": hashes, "total_capitulos": config.total_capitulos, "capitulos_por_tanda": tope,
+        "cadencia_qa": config.cadencia_qa, "palabras_por_capitulo": config.palabras_por_capitulo,
+        "max_llamadas_por_tanda": config.max_llamadas_por_tanda, "version_specs": VERSION_SPECS,
+        "inicio": m.ultimo_capitulo_cerrado + 1,
+    })
     cursor = Cursor(inicio=m.ultimo_capitulo_cerrado + 1, tope=tope, max_llamadas=config.max_llamadas_por_tanda,
                     registro=carpeta.relative_to(raiz).as_posix())
     cur.escribir(raiz, cursor)
-    checkpoint.actualizar_prompts_hash(raiz, hash_prompts(raiz))
+    checkpoint.actualizar_prompts_hash(raiz, hashes)
     if m.ultimo_error:
         checkpoint.limpiar_error(raiz)
     return cursor

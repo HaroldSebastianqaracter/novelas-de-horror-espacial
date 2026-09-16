@@ -47,8 +47,12 @@ def carpetas_tanda(raiz: Path) -> list[Path]:
     return sorted(p for p in base.iterdir() if p.is_dir() and _PATRON_TANDA.match(p.name))
 
 
-def iniciar_tanda(raiz: Path) -> Path:
-    """`tanda iniciar`: crea la carpeta de la tanda y deja el puntero para que hooks y verbos la encuentren."""
+def iniciar_tanda(raiz: Path, metadatos: dict[str, Any] | None = None) -> Path:
+    """`tanda iniciar`: crea la carpeta de la tanda y deja el puntero para que hooks y verbos la encuentren.
+
+    `metadatos` (prompts_hash y dimensionamiento con los que arranca ESTA tanda) queda en `tanda.json`: es lo que
+    el exportador pone en la traza (§16.2), porque el manifiesto solo conserva el hash de la última tanda.
+    """
     base = Rutas(raiz).registro
     nombre = "tanda_" + datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     carpeta = base / nombre
@@ -58,6 +62,9 @@ def iniciar_tanda(raiz: Path) -> Path:
         carpeta = base / f"{nombre}_{sufijo}"
     for sub in ("prompts", "retornos", "descartados"):
         (carpeta / sub).mkdir(parents=True, exist_ok=True)
+    if metadatos is not None:
+        datos = {"tanda": carpeta.name, "ts_inicio": ahora(), **metadatos}
+        (carpeta / "tanda.json").write_text(json.dumps(datos, ensure_ascii=False, indent=2, default=str) + "\n", encoding="utf-8")
     _puntero(raiz).parent.mkdir(parents=True, exist_ok=True)
     _puntero(raiz).write_text(carpeta.relative_to(raiz).as_posix(), encoding="utf-8")
     return carpeta

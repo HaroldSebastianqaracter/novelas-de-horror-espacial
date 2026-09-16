@@ -1,6 +1,6 @@
 """Interfaz de línea de comandos (spec técnica §8.2).
 
-Capa externa: status · resolver · ensamblar · guardar · ui.
+Capa externa: status · resolver · ensamblar · guardar · ui · exportar-traza (RF-09, después de la tanda).
 Capa interna (la usa la skill /escribir-tanda, un tramo del loop por verbo): tanda · preparar-capitulo ·
 registrar-escritor · aplicar-delta · descartar-borrador · preparar-qa · cerrar-qa.
 Capa de validación (la ejecuta cada agente sobre su propio artefacto, RF-08.4): validar-capitulo ·
@@ -411,12 +411,43 @@ def cmd_ui(args, raiz: Path) -> int:
     return ui.servir(raiz, args.puerto)
 
 
+def cmd_exportar_traza(args, raiz: Path) -> int:
+    """RF-09 / §16: publica el registro de una tanda en Langfuse, después de la tanda y nunca dentro de ella."""
+    from app import observabilidad  # import tardío: es lo único que habla por red
+
+    carpeta = observabilidad.resolver_tanda(raiz, args.tanda)
+    volcar = Path(args.volcar) if args.volcar else None
+    if volcar is not None and not volcar.is_absolute():
+        volcar = raiz / volcar
+    cliente = None
+    if not args.solo_volcar:
+        cliente = observabilidad.ClienteHTTP(observabilidad.credenciales_desde_entorno())  # §16.7: falla antes de leer nada
+    elif volcar is None:
+        raise ConfiguracionInvalidaError("--solo-volcar exige --volcar <archivo>: sin destino no hay nada que hacer")
+    r = observabilidad.exportar(raiz, carpeta, cliente, con_cuerpos=args.con_cuerpos, volcar=volcar)
+    t = r.traza
+    print(f"tanda {t.tanda} -> trace {t.id} ({'con' if t.con_cuerpos else 'sin'} cuerpos de prompts y retornos)")
+    print(f"metadatos: {json.dumps(t.metadatos, ensure_ascii=False)}")
+    print(f"{len(t.capitulos)} capítulos (spans), {len(t.generaciones)} invocaciones (generations), {t.eventos} eventos, "
+          f"{len(t.puntuaciones)} puntuaciones; {len(t.lote)} objetos de ingesta")
+    print(observabilidad.tabla_consumo(t))
+    print("puntuaciones: " + ", ".join(f"{k}={v}" for k, v in t.puntuaciones.items()))
+    if r.volcado is not None:
+        print(f"lote volcado en {r.volcado}")
+    if cliente is None:
+        _resultado("volcado", tanda=t.tanda, trace_id=t.id, objetos=len(t.lote), archivo=str(r.volcado))
+        return 0
+    print(f"publicado en {cliente.credenciales.host}: {r.aceptados} objetos aceptados en {r.lotes} lote(s)")
+    _resultado("exportado", tanda=t.tanda, trace_id=t.id, objetos=len(t.lote), aceptados=r.aceptados, lotes=r.lotes)
+    return 0
+
+
 # ---------- capa de validación (RF-08.4): la ejecuta el agente sobre su propio artefacto ----------
 
 def _imprimir_validacion(r: validacion.ResultadoValidacion, raiz: Path, n: int) -> int:
     """Solo lectura: comprueba y devuelve el error, nunca corrige ni persiste. Código 1 si no valida."""
     registro.evento(raiz, "validacion", rol=r.rol, artefacto=r.artefacto, valido=r.valido, errores=r.errores,
-                    avisos=r.avisos or None, capitulo=n)  # §5.1
+                    avisos=r.avisos or None, datos=r.datos or None, capitulo=n)  # §5.1; `datos` alimenta desvio_longitud (§16.4)
     for aviso in r.avisos:
         print(f"aviso: {aviso}")
     if r.valido:
@@ -471,6 +502,13 @@ def construir_parser() -> argparse.ArgumentParser:
     u = sub.add_parser("ui", help="formulario local de entrada (§15)")
     u.add_argument("--puerto", type=int, default=8765)
     u.set_defaults(fn=cmd_ui)
+
+    x = sub.add_parser("exportar-traza", help="RF-09: publica el registro de una tanda en Langfuse (después de la tanda, nunca dentro)")
+    x.add_argument("tanda", help="carpeta de 07_registro/ (tanda_<ts>) o `ultima`")
+    x.add_argument("--con-cuerpos", action="store_true", help="incluye prompts y retornos (§16.6); por defecto no sale prosa")
+    x.add_argument("--volcar", help="además, escribe el lote de ingesta completo en este archivo JSON")
+    x.add_argument("--solo-volcar", action="store_true", help="no publica: solo escribe el archivo de --volcar (nada sale de la máquina)")
+    x.set_defaults(fn=cmd_exportar_traza)
 
     t = sub.add_parser("tanda", help="verbos del cursor de tanda")
     t.add_argument("accion", choices=("iniciar", "siguiente"))
