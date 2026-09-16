@@ -199,15 +199,20 @@ def _agente_activo(eventos: list[dict[str, Any]]) -> tuple[str | None, str | Non
 
 
 def _capitulos_con_hallazgos(rutas: Rutas) -> list[int]:
-    """Los capítulos que algún informe de QA señaló. Alimenta la cinta de capítulos de la consola."""
+    """Los cortes de QA que encontraron contradicciones. Alimenta la cinta de capítulos de la consola.
+
+    Se marca el **capítulo del corte**, no el `cap_origen` de cada hallazgo. `cap_origen` señala dónde se
+    estableció el hecho que se violó, que casi nunca es donde está el error: marcarlo pintaría de ámbar
+    un capítulo correcto. El corte sí es un dato sin ambigüedad: ahí QA encontró algo.
+    """
     caps: set[int] = set()
     if not rutas.reportes_qa.is_dir():
         return []
     for informe in rutas.reportes_qa.glob("*.json"):
-        for h in _json(informe).get("hallazgos", []):
-            origen = h.get("cap_origen")
-            if isinstance(origen, int):
-                caps.add(origen)
+        datos = _json(informe)
+        corte = datos.get("cap_corte")
+        if datos.get("tiene_contradicciones") and isinstance(corte, int) and corte >= 1:
+            caps.add(corte)
     return sorted(caps)
 
 
@@ -305,7 +310,9 @@ def _frase(ev: dict[str, Any]) -> str | None:
         return f"{pref}{ev.get('rol', 'agente')} terminado" + (f" · {turnos} turnos" if turnos else "")
     if tipo == "validacion":
         if ev.get("valido"):
-            datos = ev.get("datos") or {}
+            # Solo las cifras: los booleanos del artefacto ("tiene_contradicciones: True") no se leen
+            # bien en una línea de bitácora y el estado ya lo dice la insignia de la cabecera.
+            datos = {k: v for k, v in (ev.get("datos") or {}).items() if isinstance(v, int) and not isinstance(v, bool)}
             detalle = " · ".join(f"{v} {k}" for k, v in datos.items()) if datos else "válido"
             return f"{pref}{ev.get('rol', '')} validado · {detalle}".replace("  ", " ")
         return f"{pref}validación RECHAZADA · {'; '.join(ev.get('errores') or []) or 'sin detalle'}"
@@ -314,8 +321,16 @@ def _frase(ev: dict[str, Any]) -> str | None:
     if tipo == "error":
         return f"{pref}ERROR · {ev.get('mensaje') or ev.get('error') or 'sin mensaje'}"
     if tipo == "hook" and ev.get("decision") != "permitido":
-        return f"{ev.get('id', 'hook')} BLOQUEÓ · {ev.get('motivo') or ev.get('accion', '')}"
+        return f"{ev.get('id', 'hook')} BLOQUEÓ · {_corto(ev.get('motivo') or ev.get('accion', ''))}"
     return None  # hooks permitidos: son la mayoría del registro y no dicen nada al usuario
+
+
+def _corto(texto: Any, tope: int = 64) -> str:
+    """La bitácora es una columna estrecha: una ruta absoluta la llena entera y no dice nada."""
+    limpio = " ".join(str(texto).split())
+    if "\\" in limpio or "/" in limpio:
+        limpio = " ".join(p.rsplit("\\", 1)[-1].rsplit("/", 1)[-1] for p in limpio.split(" "))
+    return limpio if len(limpio) <= tope else limpio[: tope - 1] + "…"
 
 
 def eventos(raiz: Path, limite: int = 40) -> list[dict[str, str]]:

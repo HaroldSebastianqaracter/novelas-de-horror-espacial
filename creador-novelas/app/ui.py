@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs
 
+from app import web
 from app.config import CAMPOS_EJECUCION, CAMPOS_NOVELA, HarnessConfig, construir_config
 from app.errores import ConfiguracionInvalidaError, EstadoInvalidoError
 from app.orchestrator import checkpoint
@@ -326,13 +327,63 @@ class _Manejador(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(datos)
 
-    def do_GET(self) -> None:  # noqa: N802
-        if self.path.split("?", 1)[0] != "/":
-            self._responder(404, _pagina("No encontrado", "<p>Solo existe <a href='/'>/</a> y <code>POST /guardar</code>.</p>"))
+    def _bytes(self, codigo: int, datos: bytes, tipo: str) -> None:
+        self.send_response(codigo)
+        self.send_header("Content-Type", tipo)
+        self.send_header("Content-Length", str(len(datos)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(datos)
+
+    def _json(self, codigo: int, datos: Any) -> None:
+        self._bytes(codigo, json.dumps(datos, ensure_ascii=False).encode("utf-8"),
+                    "application/json; charset=utf-8")
+
+    def _estatico(self, nombre: str) -> None:
+        """Sirve `app/static/`. Resuelve y comprueba el padre: ninguna ruta puede salir de ahí."""
+        base = (Path(__file__).parent / "static").resolve()
+        destino = (base / nombre).resolve()
+        if destino.parent != base or not destino.is_file():
+            self._responder(404, _pagina("No encontrado", "<p>No existe ese archivo.</p>"))
             return
-        self._responder(200, render_formulario(estado_formulario(self.raiz)))
+        tipos = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
+                 ".css": "text/css; charset=utf-8", ".json": "application/json; charset=utf-8",
+                 ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+                 ".webp": "image/webp", ".svg": "image/svg+xml"}
+        self._bytes(200, destino.read_bytes(), tipos.get(destino.suffix.lower(), "application/octet-stream"))
+
+    def do_GET(self) -> None:  # noqa: N802
+        ruta = self.path.split("?", 1)[0]
+        if ruta == "/":
+            self._responder(200, render_formulario(estado_formulario(self.raiz)))
+        elif ruta in ("/consola", "/consola/"):
+            # Redirección y no servir aquí el HTML: así sus rutas relativas (gsap.min.js) siguen
+            # resolviendo igual servidas que abriendo el archivo a mano.
+            self.send_response(302)
+            self.send_header("Location", "/static/consola.html")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+        elif ruta.startswith("/static/"):
+            self._estatico(ruta[len("/static/"):])
+        elif ruta == "/api/estado":
+            self._json(200, web.estado(self.raiz))
+        elif ruta == "/api/eventos":
+            self._json(200, web.eventos(self.raiz))
+        elif ruta == "/api/qa":
+            informe = web.informe_qa(self.raiz)
+            self._json(200 if informe else 404, informe or {"error": "no hay ningún informe pendiente"})
+        else:
+            self._responder(404, _pagina("No encontrado",
+                                         "<p>Existen <a href='/'>/</a> y <a href='/consola'>/consola</a>.</p>"))
 
     def do_POST(self) -> None:  # noqa: N802
+        if self.path.startswith("/api/fase/"):
+            fase = self.path[len("/api/fase/"):].strip("/")
+            try:
+                self._json(200, web.lanzar_fase(self.raiz, fase))
+            except (ValueError, RuntimeError) as e:
+                self._json(409, {"error": str(e)})
+            return
         if self.path != "/guardar":
             self._responder(404, _pagina("No encontrado", "<p>Solo existe <code>POST /guardar</code>.</p>"))
             return

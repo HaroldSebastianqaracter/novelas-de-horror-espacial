@@ -1,0 +1,158 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Referencia estructural — corte de nave</title>
+<style>
+  html,body{margin:0;height:100%;background:#05070b;}
+  body{display:grid;place-items:center;font-family:ui-monospace,"Consolas",monospace;}
+  .marco{position:relative;width:1200px;max-width:96vw;}
+  svg{display:block;width:100%;height:auto;}
+  /* viñeta */
+  .marco::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse 70% 65% at 50% 50%, transparent 40%, #05070b 100%);}
+  /* grano */
+  .marco::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;z-index:2;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");}
+</style>
+
+<div class="marco">
+<svg viewBox="0 0 1200 660" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- luz derramada del compartimento activo -->
+    <radialGradient id="herida" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#c41e2f" stop-opacity=".30"/>
+      <stop offset="55%"  stop-color="#8b0f1d" stop-opacity=".12"/>
+      <stop offset="100%" stop-color="#8b0f1d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="derrame" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#c41e2f" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#c41e2f" stop-opacity="0"/>
+    </linearGradient>
+    <style>
+      .casco   { fill:none; stroke:#5d6e83; stroke-width:1.6; }
+      .mampar  { fill:none; stroke:#45566a; stroke-width:1.2; }
+      .fino    { fill:none; stroke:#33445a; stroke-width:.8; }
+      .disc    { fill:none; stroke:#2b3a4d; stroke-width:.8; stroke-dasharray:4 5; }
+      .guia    { fill:none; stroke:#3b4c62; stroke-width:.7; }
+      .rot     { fill:#b9c4d2; font:500 11px ui-monospace,monospace; letter-spacing:.14em; }
+      .rotmin  { fill:#68788c; font:400 9px ui-monospace,monospace; letter-spacing:.12em; }
+      .cota    { fill:#4a5a6e; font:400 8px ui-monospace,monospace; letter-spacing:.1em; }
+      .activo  { fill:#e8b9bf; font:500 11px ui-monospace,monospace; letter-spacing:.14em; }
+    </style>
+  </defs>
+
+  <!-- ===== cotas de borde: marcas de escala ===== -->
+  <g class="fino" opacity=".55">
+    <line x1="60" y1="612" x2="1140" y2="612"/>
+    <g>
+      <line x1="60"  y1="606" x2="60"  y2="618"/><line x1="240" y1="608" x2="240" y2="616"/>
+      <line x1="420" y1="606" x2="420" y2="618"/><line x1="600" y1="608" x2="600" y2="616"/>
+      <line x1="780" y1="606" x2="780" y2="618"/><line x1="960" y1="608" x2="960" y2="616"/>
+      <line x1="1140" y1="606" x2="1140" y2="618"/>
+    </g>
+  </g>
+  <text class="cota" x="60"  y="634">0</text>
+  <text class="cota" x="414" y="634">12</text>
+  <text class="cota" x="774" y="634">24</text>
+  <text class="cota" x="1120" y="634">36 m</text>
+  <text class="cota" x="60"  y="60">SEC-04 · SECCIÓN DE PROCESO</text>
+  <text class="cota" x="1140" y="60" text-anchor="end">CORTE LONGITUDINAL · ESC 1:120</text>
+
+  <!-- ===== casco: silueta continua e irregular ===== -->
+  <path class="casco" d="M 52,330
+      L 96,268 L 150,246 L 196,206 L 268,186 L 300,158 L 520,152 L 540,142
+      L 880,146 L 918,176 L 992,182 L 1022,214 L 1092,220 L 1120,252
+      L 1148,262 L 1148,404 L 1120,414 L 1092,446 L 1022,452 L 992,484
+      L 918,490 L 880,520 L 540,524 L 520,514 L 300,508 L 268,480
+      L 196,460 L 150,420 L 96,398 Z"/>
+  <!-- chapas del casco -->
+  <g class="disc">
+    <path d="M 300,158 L 300,508"/><path d="M 540,142 L 540,524"/>
+    <path d="M 880,146 L 880,520"/><path d="M 992,182 L 992,484"/>
+  </g>
+  <!-- refuerzos de proa -->
+  <g class="fino" opacity=".7">
+    <path d="M 96,268 L 150,296 L 150,364 L 96,398"/>
+    <path d="M 150,296 L 196,286 M 150,364 L 196,378"/>
+  </g>
+
+  <!-- ===== cubierta: separa puente de la sección de proceso ===== -->
+  <path class="mampar" d="M 240,300 L 1120,300"/>
+  <g class="fino" opacity=".6">
+    <path d="M 240,306 L 1120,306"/>
+  </g>
+
+  <!-- ===== PUENTE (cubierta superior) ===== -->
+  <path class="mampar" d="M 470,300 L 470,176 M 830,300 L 830,172"/>
+  <text class="rot"    x="560" y="238">P U E N T E</text>
+  <text class="rotmin" x="560" y="256">ORQUESTADOR</text>
+  <circle cx="792" cy="233" r="2.6" fill="#68788c"/>
+
+  <!-- ===== mamparos: los tres compartimentos COMPARTEN PARED ===== -->
+  <!-- pared compartida escritor|extractor -->
+  <path class="mampar" d="M 560,306 L 560,404 M 560,440 L 560,516"/>
+  <!-- pared compartida extractor|qa -->
+  <path class="mampar" d="M 850,306 L 850,404 M 850,440 L 850,512"/>
+  <!-- mamparo de proa de la sección -->
+  <path class="mampar" d="M 268,306 L 268,478"/>
+  <!-- mamparo de popa -->
+  <path class="mampar" d="M 1092,306 L 1092,444"/>
+
+  <!-- compuertas en las paredes compartidas -->
+  <g class="fino">
+    <path d="M 552,404 L 568,404 M 552,440 L 568,440"/>
+    <path d="M 842,404 L 858,404 M 842,440 L 858,440"/>
+    <path d="M 556,410 L 556,434 M 564,410 L 564,434" stroke="#2b3a4d"/>
+    <path d="M 846,410 L 846,434 M 854,410 L 854,434" stroke="#2b3a4d"/>
+  </g>
+
+  <!-- ===== pasillos verticales: puente -> cada compartimento ===== -->
+  <g class="fino">
+    <path d="M 396,300 L 396,352 M 420,300 L 420,352"/>
+    <path d="M 690,300 L 690,352 M 714,300 L 714,352"/>
+    <path d="M 960,300 L 960,352 M 984,300 L 984,352"/>
+  </g>
+  <!-- pasillo longitudinal que une los tres -->
+  <g class="fino" opacity=".8">
+    <path d="M 300,422 L 1080,422"/>
+  </g>
+
+  <!-- ===== COMPARTIMENTO ACTIVO: ESCRITOR ===== -->
+  <!-- la luz llena el interior de la celda, no es un borde -->
+  <ellipse cx="412" cy="405" rx="165" ry="108" fill="url(#herida)"/>
+  <!-- y mancha la pared compartida y el pasillo que sale de él -->
+  <rect x="556" y="306" width="9" height="210" fill="url(#derrame)" opacity=".8"/>
+  <rect x="396" y="300" width="24" height="54" fill="url(#derrame)" opacity=".45"/>
+  <path d="M 560,306 L 560,404 M 560,440 L 560,516" fill="none" stroke="#c41e2f"
+        stroke-width="1.2" opacity=".55"/>
+  <text class="activo" x="322" y="392">E S C R I T O R</text>
+  <text class="rotmin" x="322" y="410" fill="#c49aa0">REDACCIÓN EN CURSO · 01:12</text>
+  <circle cx="306" cy="388" r="3" fill="#c41e2f"/>
+
+  <!-- ===== compartimentos inactivos ===== -->
+  <text class="rot"    x="612" y="392">E X T R A C T O R</text>
+  <text class="rotmin" x="612" y="410">EN ESPERA</text>
+  <circle cx="596" cy="388" r="2.6" fill="#3b4c62"/>
+
+  <text class="rot"    x="902" y="392">Q A</text>
+  <text class="rotmin" x="902" y="410">EN ESPERA · CORTE CADA 4</text>
+  <circle cx="886" cy="388" r="2.6" fill="#3b4c62"/>
+
+  <!-- ===== anotaciones con línea guía, como plano de ingeniería ===== -->
+  <g class="guia">
+    <path d="M 412,470 L 412,556 L 300,556"/>
+    <path d="M 705,470 L 705,588 L 600,588"/>
+    <path d="M 976,462 L 976,556 L 1060,556"/>
+    <path d="M 650,214 L 560,214 M 650,214 L 650,120 L 740,120"/>
+  </g>
+  <text class="cota" x="296" y="552" text-anchor="end">C-04·A  REDACCIÓN</text>
+  <text class="cota" x="596" y="584" text-anchor="end">C-04·B  EXTRACCIÓN DE ESTADO</text>
+  <text class="cota" x="1064" y="552">C-04·C  CONTROL DE CONTINUIDAD</text>
+  <text class="cota" x="744" y="116">CUBIERTA 1 · MANDO</text>
+
+  <!-- numeración de cuadernas -->
+  <g class="cota" opacity=".7">
+    <text x="300" y="540">□ 12</text><text x="560" y="540">□ 18</text>
+    <text x="850" y="536">□ 24</text><text x="1092" y="470">□ 31</text>
+  </g>
+</svg>
+</div>
