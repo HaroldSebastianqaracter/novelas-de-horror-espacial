@@ -231,6 +231,32 @@ def test_lotes_grandes_se_parten(proyecto, config):
     assert sum(len(l) for l in lotes) == len(traza.lote) * 30 and all(len(l) <= observabilidad.MAX_EVENTOS_POR_LOTE for l in lotes)
 
 
+def test_los_verbos_del_bucle_son_spans_anidados_con_su_duracion(proyecto, config):
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    ultimo = registro.leer_eventos(carpeta)[-1]["ts"]
+    registro.evento(proyecto, "verbo", verbo="preparar-capitulo", args=["1"], resultado="ok", ms=250, capitulo=1)
+    registro.evento(proyecto, "verbo", verbo="aplicar-delta", args=["1", "--retorno", "x"], resultado="error EstadoInvalidoError", ms=40, capitulo=1)
+    registro.evento(proyecto, "verbo", verbo="tanda", args=["siguiente"], resultado="ok", ms=10, capitulo=None)
+    registro.evento(proyecto, "verbo", verbo="validar-capitulo", args=["1"], resultado="ok", ms=10, capitulo=1)
+    traza = observabilidad.construir_traza(proyecto, carpeta)
+    spans = {e["body"]["name"]: e["body"] for e in traza.lote if e["type"] == "span-create"}
+    cap_1 = spans["cap_1"]
+    preparar, aplicar = spans["verbo:preparar-capitulo"], spans["verbo:aplicar-delta"]
+    assert preparar["parentObservationId"] == cap_1["id"] and aplicar["parentObservationId"] == cap_1["id"]
+    # duración real: el verbo se anota al terminar (ts) con sus ms, así que empieza en ts - ms
+    from datetime import datetime
+    assert (datetime.fromisoformat(preparar["endTime"]) - datetime.fromisoformat(preparar["startTime"])).total_seconds() == 0.25
+    assert preparar["metadata"]["ms"] == 250 and preparar["metadata"]["args"] == ["1"]
+    assert aplicar["level"] == "ERROR" and aplicar["statusMessage"] == "error EstadoInvalidoError"
+    # el span del capítulo cubre también a sus verbos
+    assert cap_1["startTime"] <= preparar["startTime"] and cap_1["endTime"] >= aplicar["endTime"] and cap_1["endTime"] >= ultimo
+    # `tanda` (sin capítulo) y `validar-*` (lo corre el agente) no son spans del bucle
+    assert "verbo:tanda" not in spans and "verbo:validar-capitulo" not in spans
+    # mismo id en dos exportaciones: el índice del evento en el registro es la identidad
+    assert preparar["id"] == next(e["body"]["id"] for e in observabilidad.construir_traza(proyecto, carpeta).lote
+                                  if e["type"] == "span-create" and e["body"]["name"] == "verbo:preparar-capitulo")
+
+
 def test_generacion_sin_fin_queda_marcada(proyecto, config):
     carpeta = _tanda_con_dobles(proyecto, config, tope=1)
     registro.evento(proyecto, "agente_inicio", rol="escritor", capitulo=2, agent_id=None, intento=1)

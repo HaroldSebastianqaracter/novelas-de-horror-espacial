@@ -10,8 +10,9 @@ hechos pasados saldrían apiladas en el instante de la exportación. Se usa la A
 de tokens (§16.3) y hace upsert por `body.id`, que es lo que hace idempotente la reexportación (§16.5). Sin
 dependencias: solo `urllib`.
 
-Mapeo (§16.2): trace = tanda · span = capítulo · generation = invocación de subagente · event = bloqueo de hook,
-EX-10 o descarte EX-08 · score = métricas del corte de QA y de la tanda (§16.4).
+Mapeo (§16.2): trace = tanda · span = capítulo · span anidado = verbo determinista del bucle con su duración real
+(`ts - ms` → `ts`) · generation = invocación de subagente · event = bloqueo de hook, EX-10 o descarte EX-08 ·
+score = métricas del corte de QA y de la tanda (§16.4).
 
 Por defecto no sale prosa ni el cuerpo de ningún prompt (§16.6): todo texto libre que viaja se compara contra los
 prompts, los borradores descartados y el manuscrito, y se omite si comparte con ellos una ventana de más de 30
@@ -26,7 +27,7 @@ import os
 import re
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Protocol
 from urllib import error as urlerror
@@ -46,6 +47,10 @@ RUTA_INGESTA = "/api/public/ingestion"
 VENTANA_PRIVACIDAD = 31  # RF-09: ninguna subcadena de más de 30 caracteres del manuscrito ni de un prompt
 MAX_EVENTOS_POR_LOTE = 100
 MAX_BYTES_POR_LOTE = 3_000_000  # el servicio corta en 3,5 MB por petición
+# §16.2: los verbos deterministas del bucle (§8.2, capa interna) que van como spans anidados en el span del capítulo.
+# `tanda iniciar/siguiente` no tiene capítulo y los `validar-*` los corre el agente dentro de su propia generation.
+VERBOS_DEL_BUCLE = ("preparar-capitulo", "preparar-extractor", "registrar-escritor", "aplicar-delta", "descartar-borrador",
+                    "preparar-qa", "cerrar-qa")
 _ESPACIO = uuid.UUID("6f1c2d3e-4b5a-4c6d-8e7f-90a1b2c3d4e5")  # namespace fijo: los ids son función de la tanda
 
 # usageDetails con los nombres de tipo de uso que Langfuse define para los modelos de Anthropic; `total` lo suma.
@@ -308,6 +313,19 @@ def _hubo_fin(evs: list[dict], rol: str) -> bool:
     return any(e.get("tipo") == "agente_fin" and e.get("rol") == rol for e in evs)
 
 
+def _inicio_de(e: dict) -> str:
+    """El instante en que empezó un evento: un `verbo` se anota al terminar con su duración en `ms`, así que su
+    inicio es `ts - ms`; el resto de los eventos empiezan y terminan en su `ts`."""
+    ts = str(e.get("ts") or "")
+    if e.get("tipo") != "verbo" or not isinstance(e.get("ms"), int):
+        return ts
+    try:
+        momento = datetime.fromisoformat(ts)
+    except ValueError:
+        return ts
+    return (momento - timedelta(milliseconds=e["ms"])).isoformat(timespec="milliseconds")
+
+
 def _descartes_de_borrador(carpeta: Path) -> list[tuple[str, int | None, str]]:
     """Un descarte EX-08 por cada borrador del escritor que `descartar-borrador` mandó a descartados/ (§5.1).
     Vale tanto para la tanda por CLI como para la corrida con dobles, que no pasa por el verbo."""
@@ -358,7 +376,7 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False) -> 
         spans[n] = id_observacion(tanda, f"cap_{n}")
         lote.append(_envolver("span-create", {
             "id": spans[n], "traceId": trace_id, "name": f"cap_{n}",
-            "startTime": evs[0].get("ts"), "endTime": evs[-1].get("ts"),
+            "startTime": min(_inicio_de(e) for e in evs), "endTime": evs[-1].get("ts"),
             "metadata": {
                 "capitulo": n,
                 "cerrado": ("aplicar-delta", n) in verbos_ok or _hubo_fin(evs, "extractor"),
@@ -367,6 +385,25 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False) -> 
                 "validaciones_invalidas": sum(1 for e in evs if e.get("tipo") == "validacion" and not e.get("valido")),
             },
         }))
+
+    # span anidado = un verbo determinista del bucle, con su duración real (§16.2): son el flujo; sin ellos la traza
+    # enseña tres llamadas a modelo sueltas y no se ve en qué paso murió una tanda que se cortó a mitad.
+    verbos_mapeados = 0
+    for i, e in enumerate(eventos):
+        if e.get("tipo") != "verbo" or e.get("verbo") not in VERBOS_DEL_BUCLE or not isinstance(e.get("capitulo"), int):
+            continue
+        verbos_mapeados += 1
+        resultado = str(e.get("resultado") or "")
+        cuerpo_verbo: dict[str, Any] = {
+            "id": id_observacion(tanda, f"verbo/{i}"), "traceId": trace_id, "name": f"verbo:{e.get('verbo')}",
+            "parentObservationId": spans.get(e["capitulo"]), "startTime": _inicio_de(e), "endTime": e.get("ts"),
+            "metadata": {"verbo": e.get("verbo"), "capitulo": e["capitulo"], "args": limpiar(e.get("args")),
+                         "resultado": resultado, "ms": e.get("ms")},
+        }
+        if resultado.startswith("error") or resultado.startswith("codigo"):
+            cuerpo_verbo["level"] = "ERROR" if resultado.startswith("error") else "WARNING"
+            cuerpo_verbo["statusMessage"] = resultado
+        lote.append(_envolver("span-create", cuerpo_verbo))
 
     # generation = una invocación de subagente, con las CUATRO cifras de tokens (§16.3)
     generaciones = _emparejar_generaciones(eventos, _uso_por_agent_id(carpeta))
