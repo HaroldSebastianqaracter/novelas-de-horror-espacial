@@ -1,6 +1,6 @@
 # Especificación Funcional — Harness Generador de Novelas de Terror
 
-**Versión:** 1.8 — historial de cambios en `git log` sobre este archivo.
+**Versión:** 1.9 — historial de cambios en `git log` sobre este archivo.
 **Esquemas de los artefactos:** spec técnica §4, única fuente. (El documento `harness-novela-terror.md` que citaban versiones anteriores nunca existió en el repositorio.) Este documento formaliza el comportamiento requerido; no repite decisiones de implementación.
 **Lector previsto:** un agente de código que implementará el harness a partir de este documento. Donde este documento sea ambiguo, el agente debe detenerse y pedir aclaración en vez de asumir.
 

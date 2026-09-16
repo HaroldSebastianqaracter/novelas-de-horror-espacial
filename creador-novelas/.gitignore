@@ -14,3 +14,6 @@ __pycache__/
 # ejemplos de referencia del subgénero (RF-00.2): fuera de git, se conserva la carpeta
 00_referencias/*
 !00_referencias/.gitkeep
+
+# Salida derivada de `ensamblar`: se regenera desde 05_manuscrito/ (spec tecnica 8.2)
+08_entrega/
