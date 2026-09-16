@@ -27,6 +27,7 @@ from app.rutas import Rutas
 from app.schemas import DeltaExtraccion, ReporteQA
 from app.state import continuidad as cont
 from app.state import personajes as pers
+from app.state import recursos as rec
 from app.state import repository as repo
 from app.state import resumen_rodante as rr
 
@@ -273,9 +274,12 @@ def aplicar_delta(raiz: Path, config: HarnessConfig, n: int, delta: DeltaExtracc
     resumen = (rr.reemplazar(resumen_actual, n, d.resumen_corto) if reextraccion
                else rr.agregar(resumen_actual, n, d.resumen_corto, config.ventana_resumen_rodante))
 
+    recursos = rec.acumular(repo.leer_recursos_narrativos(raiz), d.recursos_narrativos, n, reextraccion=reextraccion)
+
     repo.escribir_personajes(raiz, nuevas_fichas)  # RF-06.2
     repo.escribir_continuidad(raiz, log)  # RF-06.3
     repo.escribir_resumen_rodante(raiz, resumen)  # RF-06.4
+    repo.escribir_recursos_narrativos(raiz, recursos)  # RF-05.5 / §17.2: la capa semántica de la antirrepetición
 
     if reextraccion:
         checkpoint.quitar_reextraccion(raiz, n)

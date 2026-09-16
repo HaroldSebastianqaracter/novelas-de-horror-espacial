@@ -19,6 +19,7 @@ from app.rutas import Rutas
 from app.schemas.continuidad import HechoContinuidad
 from app.state import continuidad as cont
 from app.state import personajes as pers
+from app.state import recursos as rec
 from app.state import repository as repo
 from app.state import resumen_rodante as rr
 from app.tokens import estimar_tokens
@@ -50,6 +51,7 @@ class Contexto:
     hechos_inyectados: list[HechoContinuidad]
     resumen_recortado: bool = False
     feedback_longitud: str | None = None
+    recursos_inyectados: int = 0  # RF-05.5: recursos narrativos agotados que entraron al prompt
     _config: HarnessConfig | None = field(default=None, repr=False)
     _raiz: Path | None = field(default=None, repr=False)
 
@@ -105,6 +107,8 @@ def ensamblar_contexto(n: int, config: HarnessConfig, raiz: Path, *, feedback_lo
         resumen = rr.recortar_a_minimo(resumen)
     minimo, maximo = config.rango_palabras()
     permitidos = list(dict.fromkeys(list(entrada.personajes) + list(fichas.root.keys())))
+    recursos = repo.leer_recursos_narrativos(raiz)  # RF-05.5 / §17.2: estado acumulado por el extractor, no manuscrito
+    agotados = rec.mas_usados(recursos)
 
     valores = {
         "NUM": str(n),
@@ -129,13 +133,14 @@ def ensamblar_contexto(n: int, config: HarnessConfig, raiz: Path, *, feedback_lo
         "PERSONAJES_PERMITIDOS": ", ".join(permitidos) if permitidos else "(ninguno)",
         "FEEDBACK_LONGITUD": feedback_longitud or "(primer intento: sin desvío previo)",
         "COMANDO_VALIDACION": comando_validador("escritor", n),
+        "RECURSOS_AGOTADOS": rec.formatear_agotados(recursos),
     }
     texto = plantillas.rellenar(plantillas.cargar_plantilla(raiz, "escritor"), valores)
     tokens, metodo = estimar_tokens(texto)
     return Contexto(
         n=n, texto=texto, tokens_estimados=tokens, limite=config.max_tokens_contexto_escritor,
         metodo_estimacion=metodo, hechos_inyectados=hechos, resumen_recortado=resumen_minimo,
-        feedback_longitud=feedback_longitud, _config=config, _raiz=raiz,
+        feedback_longitud=feedback_longitud, recursos_inyectados=len(agotados), _config=config, _raiz=raiz,
     )
 
 

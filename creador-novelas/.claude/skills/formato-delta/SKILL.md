@@ -6,7 +6,7 @@ user-invocable: false
 
 # Formato del DeltaExtraccion
 
-Tu mensaje final es exactamente un objeto JSON con tres claves: `personajes`, `hechos_nuevos`, `resumen_corto`. Sin texto alrededor, sin bloque de código.
+El delta es exactamente un objeto JSON con cuatro claves: `personajes`, `hechos_nuevos`, `resumen_corto` y `recursos_narrativos` (RF-05.5). Lo escribís en disco con Write, sin texto alrededor, sin bloque de código; el mensaje final es solo la línea de confirmación.
 
 ## Ejemplo correcto
 Registro de sujetos recibido: personajes `Kovacs`, `Ilse`; locaciones `Puente`, `Bodega 4`; y `mundo`. Capítulo 7.
@@ -26,11 +26,17 @@ Registro de sujetos recibido: personajes `Kovacs`, `Ilse`; locaciones `Puente`, 
     { "sujeto": "Bodega 4", "categoria": "locacion", "hecho": "La Bodega 4 quedó sellada desde el puente y su atmósfera fue venteada.", "cap_origen": 7 },
     { "sujeto": "mundo", "categoria": "mundo", "hecho": "El sistema de soporte vital reserva oxígeno para 41 días con la tripulación actual.", "cap_origen": 7 }
   ],
-  "resumen_corto": "Kovacs e Ilse sellan la Bodega 4 desde el puente tras oír golpes rítmicos en el casco interior.\nKovacs se fractura el brazo en la maniobra y oculta que alguien borró el registro de apertura.\nLa escena termina con ambos en el puente, la bodega venteada y 41 días de oxígeno."
+  "resumen_corto": "Kovacs e Ilse sellan la Bodega 4 desde el puente tras oír golpes rítmicos en el casco interior.\nKovacs se fractura el brazo en la maniobra y oculta que alguien borró el registro de apertura.\nLa escena termina con ambos en el puente, la bodega venteada y 41 días de oxígeno.",
+  "recursos_narrativos": [
+    { "recurso": "golpes rítmicos en el casco interior como señal de amenaza", "veces": 3 },
+    { "recurso": "Kovacs evita mirar la escotilla (gesto de negación)", "veces": 2 },
+    { "recurso": "el zumbido de los ventiladores como coda tras la tensión", "veces": 2 },
+    { "recurso": "estructura «No era X. Era Y.»", "veces": 1 }
+  ]
 }
 ```
 
-Por qué está bien: cada `sujeto` es un nombre del registro o `mundo`; cada hecho es una oración atómica y nueva; `personajes` trae solo a quien cambió (Ilse aparece pero no cambia, así que no va); el resumen tiene 3 líneas y dice dónde quedó la escena.
+Por qué está bien: cada `sujeto` es un nombre del registro o `mundo`; cada hecho es una oración atómica y nueva; `personajes` trae solo a quien cambió (Ilse aparece pero no cambia, así que no va); el resumen tiene 3 líneas y dice dónde quedó la escena; `recursos_narrativos` describe recursos de prosa reconocibles en otro capítulo, con sus veces en este, y no cuenta para el tope de hechos.
 
 ## Ejemplo con los errores típicos (NO hacer esto)
 

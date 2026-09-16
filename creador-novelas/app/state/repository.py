@@ -17,7 +17,8 @@ from pydantic import BaseModel, ValidationError
 from app.errores import CapituloCerradoError, EstadoInvalidoError
 from app.rutas import Rutas
 from app.schemas import (
-    DeltaExtraccion, FichaPersonajes, LogContinuidad, Manifest, Mundo, Outline, RecursosUsados, ReporteQA,
+    DeltaExtraccion, FichaPersonajes, LogContinuidad, Manifest, Mundo, Outline, RecursosNarrativos, RecursosUsados,
+    ReporteQA,
 )
 from app.schemas.outline import EntradaOutline
 from app.state import continuidad as cont
@@ -74,7 +75,7 @@ def esquema_para(rutas: Rutas, rel: Path) -> type[BaseModel] | None:
         if len(partes) == 2:
             return {
                 "manifest.json": Manifest, "personajes.json": FichaPersonajes, "continuidad.json": LogContinuidad,
-                "capitulos.json": Outline, "mundo.json": Mundo,
+                "capitulos.json": Outline, "mundo.json": Mundo, "recursos_narrativos.json": RecursosNarrativos,
             }.get(partes[1])
         if len(partes) == 3 and partes[1] == "deltas" and partes[2].startswith("delta_cap_"):
             return DeltaExtraccion
@@ -172,6 +173,15 @@ def escribir_resumen_rodante(raiz: Path, texto: str) -> None:
 def escribir_texto(path: Path, texto: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(texto, encoding="utf-8")
+
+
+def leer_recursos_narrativos(raiz: Path) -> RecursosNarrativos:
+    """RF-05.5 / §17.2: los recursos recurrentes acumulados; vacío hasta el primer delta que los traiga."""
+    return leer_json(Rutas(raiz).recursos_narrativos, RecursosNarrativos) or RecursosNarrativos([])
+
+
+def escribir_recursos_narrativos(raiz: Path, recursos: RecursosNarrativos) -> None:
+    escribir_json(Rutas(raiz).recursos_narrativos, recursos)
 
 
 # ---------- manuscrito ----------

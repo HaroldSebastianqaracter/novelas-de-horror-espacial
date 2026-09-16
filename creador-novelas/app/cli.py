@@ -312,7 +312,8 @@ def cmd_preparar_capitulo(args, raiz: Path) -> int:
     contexto = loop.preparar_capitulo(raiz, config, args.n, args.feedback)
     rutas = Rutas(raiz)
     print(f"contexto del capítulo {args.n}: {contexto.tokens_estimados} tokens estimados ({contexto.metodo_estimacion}) "
-          f"de {contexto.limite}; {len(contexto.hechos_inyectados)} hechos inyectados"
+          f"de {contexto.limite}; {len(contexto.hechos_inyectados)} hechos inyectados; "
+          f"{contexto.recursos_inyectados} recursos narrativos agotados (RF-05.5)"
           + ("; resumen rodante recortado (EX-04)" if contexto.resumen_recortado else ""))
     print(f"prompt en {rutas.prompt_escritor(args.n).relative_to(raiz).as_posix()}; el escritor debe escribir "
           f"{rutas.capitulo(args.n).relative_to(raiz).as_posix()}; prompt del extractor en "

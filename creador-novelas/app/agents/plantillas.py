@@ -24,6 +24,7 @@ MARCADORES_OBLIGATORIOS: dict[str, tuple[str, ...]] = {
         "FEEDBACK_LONGITUD",  # EX-07
         "STYLE_GUIDE", "TRES_ACTOS", "RUTA_CAPITULO", "NUM",
         "COMANDO_VALIDACION",  # RF-08.4: la forma canónica exacta que H-11 deja pasar
+        "RECURSOS_AGOTADOS",  # RF-05.5 / §17.2: recursos narrativos ya usados, con su conteo; agotados, no prohibidos
     ),
     "extractor": (
         "RUTA_CAPITULO", "NUM",  # INV-02: un solo capítulo

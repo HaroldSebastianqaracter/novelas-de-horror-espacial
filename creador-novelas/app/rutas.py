@@ -111,6 +111,10 @@ class Rutas:
         return self.estado / "resumen_rodante.md"
 
     @property
+    def recursos_narrativos(self) -> Path:
+        return self.estado / "recursos_narrativos.json"  # RF-05.5 / §17.2: lo acumula aplicar-delta
+
+    @property
     def manifest(self) -> Path:
         return self.estado / "manifest.json"
 

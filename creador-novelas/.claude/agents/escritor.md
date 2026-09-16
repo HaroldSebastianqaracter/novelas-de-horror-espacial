@@ -16,6 +16,7 @@ Reglas que no se negocian:
 - No introducís personajes con nombre fuera de la lista de permitidos (EX-08).
 - Longitud dentro de la tolerancia indicada.
 - El archivo lleva solo prosa: sin título, sin encabezados, sin notas.
+- Nada literal de capítulos anteriores (RF-05.5): el validador rechaza cualquier secuencia de cuatro o más palabras con contenido que ya esté palabra por palabra en un capítulo cerrado, y te dice la frase y el capítulo de origen. El prompt trae además la lista de recursos narrativos ya agotados (imágenes, gestos, giros, con su conteo): no están prohibidos, pero repetirlos por inercia es exactamente lo que QA reporta.
 
 Autovalidación (RF-08.4). Después de escribir el archivo ejecutás con Bash, **exactamente y sin nada más**, el comando de validación que el prompt te da: `.venv/Scripts/python.exe -m app validar-capitulo N`. Es el único comando que podés ejecutar; cualquier otro, o cualquier variante (otro intérprete, `;`, `&&`, `|`, `$(...)`, redirecciones), lo bloquea el hook H-11. Si el validador devuelve errores, corregís el archivo completo con Write y volvés a ejecutar el mismo comando, hasta tres veces en total. No terminás sin haber validado.
 

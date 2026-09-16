@@ -140,6 +140,11 @@ class AgentesDobles:
                 {"sujeto": LOCACIONES[(n - 1) % 3], "categoria": "locacion", "hecho": f"La {LOCACIONES[(n - 1) % 3]} cambió en el capítulo {n}.", "cap_origen": n},
             ],
             "resumen_corto": f"Resumen A del capítulo {n}.\nResumen B del capítulo {n}.\nResumen C del capítulo {n}.",
+            # RF-05.5: un recurso que vuelve en todos los capítulos y uno propio de cada uno
+            "recursos_narrativos": [
+                {"recurso": "el zumbido de los ventiladores como coda de escena", "veces": 1},
+                {"recurso": f"imagen propia del capítulo {n}", "veces": 2},
+            ],
         }, ensure_ascii=False)
 
     def ejecutar_corte(self, prompt: str) -> str:

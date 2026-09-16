@@ -32,12 +32,17 @@ Hechos de continuidad seleccionados por el harness para este capítulo (los de m
 ## Fichas de los personajes presentes
 {{FICHAS}}
 
+## Recursos narrativos ya agotados (RF-05.5)
+Imágenes, gestos, muletillas y giros que los capítulos anteriores ya usaron, con cuántas veces y dónde. No están prohibidos: una imagen que vuelve puede ser deliberada. Lo que no puede pasar es repetirla por inercia: si volvés a uno de estos, que sea a sabiendas y con otra función; lo normal es buscar otro recurso.
+{{RECURSOS_AGOTADOS}}
+
 ## Reglas de producción
 1. Longitud objetivo: **{{PALABRAS}} palabras**, tolerancia ±20 % (entre {{PALABRAS_MIN}} y {{PALABRAS_MAX}}). Contá antes de entregar.
 2. **Prohibido introducir personajes** que no estén en esta lista: {{PERSONAJES_PERMITIDOS}}. Si la escena pide una voz nueva, usá figuras sin nombre y sin peso narrativo (una voz por el intercomunicador, una silueta) que no vuelvan a aparecer. Un personaje nuevo con nombre obliga a regenerar el capítulo.
 3. Cubrí el objetivo narrativo y entregá la información nueva; no adelantes giros que la sinopsis reserva para más adelante.
 4. Sin título ni encabezados dentro del archivo: solo la prosa del capítulo. El título lo antepone el harness al ensamblar.
 5. Desvío del intento anterior (si lo hubo): {{FEEDBACK_LONGITUD}}
+6. **Nada literal de capítulos anteriores** (RF-05.5): ninguna secuencia de cuatro o más palabras con contenido puede coincidir palabra por palabra con un capítulo ya escrito. No podés leerlos y no hace falta: el validador compara por vos y, si encuentra un pasaje repetido, te devuelve la frase y el capítulo de origen; reescribí ese pasaje con otras palabras y volvé a validar. Nombrar personajes y locaciones no cuenta como repetición.
 
 ## Qué hacer
 1. Escribí el capítulo completo con la herramienta Write en **{{RUTA_CAPITULO}}** (esa ruta exacta y ninguna otra).

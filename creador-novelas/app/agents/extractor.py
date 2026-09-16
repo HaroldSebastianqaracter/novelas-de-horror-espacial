@@ -21,6 +21,7 @@ from app.schemas import DeltaExtraccion
 from app.schemas.continuidad import HechoContinuidad
 from app.state import continuidad as cont
 from app.state import personajes as pers
+from app.state import recursos as rec
 from app.state import repository as repo
 
 _FENCE = re.compile(r"^```[a-zA-Z]*\s*\n(.*?)\n```\s*$", re.DOTALL)
@@ -72,7 +73,13 @@ ESQUEMA_DELTA = """{
       "cap_origen": <NUM>
     }
   ],
-  "resumen_corto": "3 a 5 líneas"
+  "resumen_corto": "3 a 5 líneas",
+  "recursos_narrativos": [
+    {
+      "recurso": "imagen, gesto, muletilla o giro recurrente, descrito en pocas palabras (no la cita entera)",
+      "veces": <apariciones en este capítulo>
+    }
+  ]
 }"""
 
 
@@ -141,7 +148,9 @@ def validar_delta(delta: DeltaExtraccion, registro: set[str], config: HarnessCon
     personajes = {
         clave: p.model_copy(update={"ultima_aparicion": n}) for clave, p in delta.personajes.items()
     }
-    normalizado = DeltaExtraccion(personajes=personajes, hechos_nuevos=hechos, resumen_corto=delta.resumen_corto)
+    # RF-05.5 / §17.3: los recursos narrativos no entran en el tope de hechos; el mismo recurso dos veces se funde.
+    normalizado = DeltaExtraccion(personajes=personajes, hechos_nuevos=hechos, resumen_corto=delta.resumen_corto,
+                                  recursos_narrativos=rec.fusionar(delta.recursos_narrativos))
     return DeltaValidado(
         delta=normalizado,
         claves_no_previstas=pers.claves_no_previstas(delta.personajes, registro),

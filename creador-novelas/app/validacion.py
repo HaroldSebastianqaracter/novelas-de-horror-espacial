@@ -14,6 +14,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from app import antirrepeticion
 from app.agents import escritor, extractor
 from app.config import INTERPRETE, ROLES, VERBO_POR_ROL, HarnessConfig, comando_validador  # noqa: F401  (re-export)
 from app.errores import EstadoInvalidoError
@@ -82,6 +83,16 @@ def validar_capitulo(raiz: Path, config: HarnessConfig, n: int) -> ResultadoVali
         r.datos["personajes_en_escena"] = list(entrada.personajes)
         r.datos["personajes_detectados"] = [p for p in registro
                                             if any(t.lower() in texto_bajo for t in _tokens_nombre(p))]
+    # RF-05.5 / §17.1: ninguna secuencia de 4+ palabras con contenido léxico repetida literalmente de un capítulo anterior.
+    # Lo lee código, no el agente: INV-01 restringe al escritor, no a este validador.
+    previos = {k: repo.leer_manuscrito(raiz, k) for k in range(1, n) if repo.existe_capitulo(raiz, k)}
+    if previos:
+        mundo = repo.leer_mundo(raiz)
+        nombres = list(repo.leer_personajes(raiz).root.keys()) + (mundo.nombres_locaciones() if mundo else [])
+        hallazgos = antirrepeticion.coincidencias(texto, previos, antirrepeticion.tokens_de_nombres(nombres))
+        r.datos["repeticiones_literales"] = len(hallazgos)
+        if hallazgos:
+            r.errores.append(antirrepeticion.describir(hallazgos))
     return r
 
 
