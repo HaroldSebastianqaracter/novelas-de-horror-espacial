@@ -1,0 +1,12 @@
+# entorno
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# cursor transitorio de tanda y estado de hooks (spec técnica §5)
+.tanda/
+
+# artefactos de trabajo del loop (spec técnica §8.2): no son estado
+04_estado/prompts/
+04_estado/deltas/
