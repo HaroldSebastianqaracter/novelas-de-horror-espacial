@@ -1,7 +1,7 @@
 # Especificación Funcional — Harness Generador de Novelas de Terror
 
-**Versión:** 1.3 — historial de cambios en `git log` sobre este archivo.
-**Documento previo:** `harness-novela-terror.md` (estructura de carpetas y esquemas) — este documento formaliza el comportamiento requerido; no repite decisiones de implementación.
+**Versión:** 1.4 — historial de cambios en `git log` sobre este archivo.
+**Esquemas de los artefactos:** spec técnica §4, única fuente. (El documento `harness-novela-terror.md` que citaban versiones anteriores nunca existió en el repositorio.) Este documento formaliza el comportamiento requerido; no repite decisiones de implementación.
 **Lector previsto:** un agente de código que implementará el harness a partir de este documento. Donde este documento sea ambiguo, el agente debe detenerse y pedir aclaración en vez de asumir.
 
 ## 1. Alcance
@@ -180,7 +180,7 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 **RF-04.1 — Inicialización de fichas de personajes**
 - Descripción: crear `personajes.json` con una entrada por personaje mencionado en el outline.
 - Entradas: `capitulos.json`.
-- Salidas: `personajes.json` — ver esquema en `harness-novela-terror.md` §3.
+- Salidas: `personajes.json` — esquema en la spec técnica §4.
 - Criterio de aceptación: dado `capitulos.json`, cuando se inicializan las fichas, entonces todo personaje que aparece en el campo `personajes` de al menos una entrada de outline tiene una ficha correspondiente.
 
 **RF-04.2 — Inicialización de biblia del mundo**
@@ -258,7 +258,7 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 
 **RF-07.2 — Detección de contradicciones**
 - Descripción: comparar el texto de la muestra contra `continuidad.json` y reportar cualquier afirmación que contradiga un hecho registrado.
-- Salidas: `06_qa/reportes/qa_cap_{N}.md` con lista de hallazgos, cada uno citando el `cap_origen` del hecho contradicho.
+- Salidas: `06_qa/reportes/qa_cap_{N}.md`, legible para el humano, y `qa_cap_{N}.json` con el mismo contenido en el esquema `ReporteQA` (spec técnica §4). El harness lee el JSON; el humano, el `.md`. Cada hallazgo cita el `cap_origen` del hecho contradicho.
 - Criterio de aceptación: dado un hecho en `continuidad.json` con `cap_origen = k`, cuando un capítulo posterior en la muestra lo contradice explícitamente, entonces el reporte de QA lo incluye citando `k`.
 
 **RF-07.3 — Detección de repetición estilística**
@@ -284,6 +284,7 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
   - Para cada capítulo modificado se vuelve a ejecutar la extracción (RF-06.1) sobre su texto corregido.
   - Los hechos de `continuidad.json` cuyo `cap_origen` esté en esa lista se marcan como **superados** y se agregan los nuevos. Es la única operación que altera hechos existentes, y no los borra: los marca. `continuidad.json` sigue siendo append-only en el sentido de INV-03 — ningún registro desaparece ni pierde su trazabilidad.
   - `personajes.json` se recalcula para los personajes afectados; `resumen_rodante.md` se regenera si alguno de los capítulos modificados cae dentro de la ventana.
+  - La reextracción es una invocación del agente extractor, así que **no puede hacerla la línea de comandos**: los scripts no llaman a modelos (INV-08, spec técnica §1). La resolución es un protocolo en tres pasos. (1) El usuario declara los capítulos corregidos con la operación `resolver`; los scripts marcan superados sus hechos y dejan la lista como *reextracción pendiente* en el manifiesto. (2) El orquestador, con la skill `/resolver-qa`, invoca al extractor por cada capítulo pendiente y aplica cada delta con la misma operación que usa el loop normal. (3) El cierre del reporte solo procede cuando la lista quedó vacía. Declarar que no se cambió nada es un solo paso: no hay nada que reextraer.
 - Criterio de aceptación: dado un reporte que llevó al usuario a corregir `cap_30.md`, cuando marca el reporte como resuelto declarando ese capítulo, entonces los hechos con `cap_origen = 30` quedan marcados como superados, existen los hechos nuevos extraídos del texto corregido, y recién entonces el manifiesto vuelve a `en_progreso`.
 - Nota: sin este requisito, corregir el texto deja el log de continuidad describiendo una versión del capítulo que ya no existe, y el siguiente corte de QA volvería a reportar la misma contradicción.
 
@@ -322,7 +323,7 @@ Aplican a todo el sistema, no a una fase específica. Ningún requisito de la se
 - **INV-01**: el agente escritor nunca recibe, en ningún prompt, el texto completo de un capítulo ya cerrado.
 - **INV-02**: el agente extractor nunca recibe más de un capítulo por invocación.
 - **INV-03**: todo hecho en `continuidad.json` lleva `cap_origen`; no existen hechos sin trazabilidad a su capítulo de origen.
-- **INV-04**: los esquemas de los artefactos de estado (sección 3 de `harness-novela-terror.md`) no cambian durante la ejecución de una tanda completa de generación.
+- **INV-04**: los esquemas de los artefactos de estado (spec técnica §4) no cambian durante la ejecución de una tanda completa de generación.
 - **INV-05**: el agente QA es el único actor con permiso de lectura sobre más de un archivo de `05_manuscrito/` a la vez.
 - **INV-06**: `capitulos_por_tanda` no afecta el contenido de ningún artefacto de estado. Una novela generada en ocho tandas de cinco capítulos debe ser indistinguible de la misma novela generada en una tanda de cuarenta — el tope solo decide cuándo se detiene la ejecución, nunca qué se escribe.
 - **INV-07**: ningún capítulo ya **cerrado** se regenera. Reanudar una tanda siempre avanza; nunca reescribe. Un capítulo se cierra tras aplicar su extracción (RF-06.3); antes de eso es un borrador y los reintentos de RF-05.2 pueden reemplazarlo.
