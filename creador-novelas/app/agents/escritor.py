@@ -12,16 +12,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from harness.agents import plantillas
-from harness.config import HarnessConfig
-from harness.errores import ContratoRetornoError, OutlineFaltanteError
-from harness.rutas import Rutas
-from harness.schemas.continuidad import HechoContinuidad
-from harness.state import continuidad as cont
-from harness.state import personajes as pers
-from harness.state import repository as repo
-from harness.state import resumen_rodante as rr
-from harness.tokens import estimar_tokens
+from app.agents import plantillas
+from app.config import HarnessConfig
+from app.errores import ContratoRetornoError, OutlineFaltanteError
+from app.rutas import Rutas
+from app.schemas.continuidad import HechoContinuidad
+from app.state import continuidad as cont
+from app.state import personajes as pers
+from app.state import repository as repo
+from app.state import resumen_rodante as rr
+from app.tokens import estimar_tokens
 
 MAX_PALABRAS_RETORNO = 40
 _RETORNO = re.compile(

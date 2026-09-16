@@ -12,15 +12,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from harness.agents import plantillas
-from harness.config import HarnessConfig
-from harness.errores import EstadoInvalidoError
-from harness.rutas import Rutas
-from harness.schemas import DeltaExtraccion
-from harness.schemas.continuidad import HechoContinuidad
-from harness.state import continuidad as cont
-from harness.state import personajes as pers
-from harness.state import repository as repo
+from app.agents import plantillas
+from app.config import HarnessConfig
+from app.errores import EstadoInvalidoError
+from app.rutas import Rutas
+from app.schemas import DeltaExtraccion
+from app.schemas.continuidad import HechoContinuidad
+from app.state import continuidad as cont
+from app.state import personajes as pers
+from app.state import repository as repo
 
 _FENCE = re.compile(r"^```[a-zA-Z]*\s*\n(.*?)\n```\s*$", re.DOTALL)
 

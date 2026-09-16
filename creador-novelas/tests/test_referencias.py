@@ -8,7 +8,7 @@ import re
 
 import pytest
 
-from harness.rutas import Rutas
+from app.rutas import Rutas
 from tests.conftest import RAIZ_REAL
 
 VENTANA = 31

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from harness.schemas.continuidad import HechoContinuidad
-from harness.schemas.personajes import Personaje
+from app.schemas.continuidad import HechoContinuidad
+from app.schemas.personajes import Personaje
 
 
 class DeltaExtraccion(BaseModel):

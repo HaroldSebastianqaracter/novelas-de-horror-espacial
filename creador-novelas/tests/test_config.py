@@ -4,9 +4,9 @@ import json
 
 import pytest
 
-from harness.config import HarnessConfig, cargar_config, construir_config, hash_prompts
-from harness.errores import ConfiguracionInvalidaError
-from harness.rutas import Rutas
+from app.config import HarnessConfig, cargar_config, construir_config, hash_prompts
+from app.errores import ConfiguracionInvalidaError
+from app.rutas import Rutas
 
 BASE_NOVELA = {"total_capitulos": 40, "palabras_por_capitulo": 3000, "idioma": "es-ES", "persona_narrativa": "tercera_limitada",
                "tiempo_verbal": "pasado", "ventana_resumen_rodante": 3, "cadencia_qa": 8, "max_tokens_contexto_escritor": 5000,

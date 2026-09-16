@@ -8,12 +8,12 @@ from pathlib import Path
 
 import pytest
 
-from harness.config import cargar_config
-from harness.errores import LongitudFueraDeRangoAviso, PausadoPorQAError, PersonajeNoPrevistoError, OutlineFaltanteError, ConfiguracionInconsistenteError, ManifiestoInconsistenteError
-from harness.orchestrator import checkpoint, cursor as cur, loop
-from harness.rutas import Rutas
-from harness.schemas import Outline
-from harness.state import repository as repo
+from app.config import cargar_config
+from app.errores import LongitudFueraDeRangoAviso, PausadoPorQAError, PersonajeNoPrevistoError, OutlineFaltanteError, ConfiguracionInconsistenteError, ManifiestoInconsistenteError
+from app.orchestrator import checkpoint, cursor as cur, loop
+from app.rutas import Rutas
+from app.schemas import Outline
+from app.state import repository as repo
 from tests.conftest import AgentesDobles, construir_proyecto, outline_de_prueba
 
 
@@ -32,7 +32,7 @@ def test_tanda_de_3_cierra_3_y_corre_qa_en_cadencia(proyecto, config, dobles):
     assert len(log) == 3 + 2 * 3 and [h.cap_origen for h in log.root[3:]] == [1, 1, 2, 2, 3, 3]  # cap_origen lo fija el harness
     assert repo.leer_personajes(proyecto).root["Kovacs"].ultima_aparicion == 3
     assert repo.leer_personajes(proyecto).root["Kovacs"].secretos_que_conoce == ["Secreto del capítulo 1", "Secreto del capítulo 2", "Secreto del capítulo 3"]
-    from harness.state import resumen_rodante as rr
+    from app.state import resumen_rodante as rr
     assert rr.capitulos_cubiertos(repo.leer_resumen_rodante(proyecto)) == [2, 3]  # ventana 2
     assert m.prompts_hash.keys() == {"escritor", "extractor", "qa"}
     # el escritor nunca recibió rutas de capítulos cerrados ni su texto

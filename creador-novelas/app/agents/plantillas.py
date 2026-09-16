@@ -5,8 +5,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from harness.errores import ConfiguracionInvalidaError
-from harness.rutas import Rutas
+from app.errores import ConfiguracionInvalidaError
+from app.rutas import Rutas
 
 _MARCADOR = re.compile(r"\{\{([A-Z_]+)\}\}")
 

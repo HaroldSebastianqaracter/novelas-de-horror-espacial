@@ -1,4 +1,4 @@
-"""Frontend de entrada de requisitos: `python -m harness ui` (spec técnica §15; RF-UI-01, RF-UI-02).
+"""Frontend de entrada de requisitos: `python -m app ui` (spec técnica §15; RF-UI-01, RF-UI-02).
 
 Solo entrada: no llama a ningún modelo, no muestra progreso, no lee el manuscrito. Solo biblioteca estándar
 (`http.server`), escucha únicamente en 127.0.0.1. Valida con el mismo `HarnessConfig` de §8.1 antes de escribir.
@@ -16,11 +16,11 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs
 
-from harness.config import CAMPOS_EJECUCION, CAMPOS_NOVELA, HarnessConfig, construir_config
-from harness.errores import ConfiguracionInvalidaError, EstadoInvalidoError
-from harness.orchestrator import checkpoint
-from harness.rutas import Rutas
-from harness.state import repository as repo
+from app.config import CAMPOS_EJECUCION, CAMPOS_NOVELA, HarnessConfig, construir_config
+from app.errores import ConfiguracionInvalidaError, EstadoInvalidoError
+from app.orchestrator import checkpoint
+from app.rutas import Rutas
+from app.state import repository as repo
 
 HOST = "127.0.0.1"
 EXTENSIONES_REFERENCIA = (".md", ".txt")

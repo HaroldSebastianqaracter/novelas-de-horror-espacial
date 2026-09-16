@@ -5,10 +5,10 @@ import re
 
 import pytest
 
-from harness import cli
-from harness.orchestrator import checkpoint, loop
-from harness.rutas import Rutas
-from harness.state import repository as repo
+from app import cli
+from app.orchestrator import checkpoint, loop
+from app.rutas import Rutas
+from app.state import repository as repo
 from tests.conftest import AgentesDobles, construir_proyecto, outline_de_prueba
 
 

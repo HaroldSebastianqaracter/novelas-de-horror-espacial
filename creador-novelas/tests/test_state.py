@@ -2,14 +2,14 @@
 
 import pytest
 
-from harness.errores import CapituloCerradoError, EstadoInvalidoError
-from harness.rutas import Rutas
-from harness.schemas import HechoContinuidad, LogContinuidad, Mundo, Personaje, FichaPersonajes
-from harness.schemas.outline import EntradaOutline
-from harness.state import continuidad as cont
-from harness.state import personajes as pers
-from harness.state import repository as repo
-from harness.state import resumen_rodante as rr
+from app.errores import CapituloCerradoError, EstadoInvalidoError
+from app.rutas import Rutas
+from app.schemas import HechoContinuidad, LogContinuidad, Mundo, Personaje, FichaPersonajes
+from app.schemas.outline import EntradaOutline
+from app.state import continuidad as cont
+from app.state import personajes as pers
+from app.state import repository as repo
+from app.state import resumen_rodante as rr
 
 
 def hecho(sujeto, categoria, texto, cap, validado=True, superado=None):

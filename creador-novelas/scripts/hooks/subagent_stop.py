@@ -7,6 +7,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _comun import preparar, salir  # noqa: E402
 
 raiz, payload = preparar()
-from harness import hooks  # noqa: E402
+from app import hooks  # noqa: E402
 
 salir(hooks.decidir_subagent_stop(payload, raiz))

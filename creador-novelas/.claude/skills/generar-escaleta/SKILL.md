@@ -1,7 +1,7 @@
 ---
 name: generar-escaleta
 description: Fase 3 (RF-03.1, RF-03.2). Genera 04_estado/capitulos.json con total_capitulos entradas, títulos únicos y curva de tensión con máximo en el tercio final. Crea el manifiesto.
-allowed-tools: Read, Write, Bash(.venv/Scripts/python.exe -m harness:*)
+allowed-tools: Read, Write, Bash(.venv/Scripts/python.exe -m app:*)
 disable-model-invocation: true
 ---
 
@@ -24,7 +24,7 @@ Pasos:
 3. Curva de tensión (RF-03.2): no monótonamente decreciente y con el **máximo en el tercio final**. Respirá con niveles 1-2 entre picos.
 4. Cada personaje con nombre que vaya a aparecer en la novela debe figurar en `personajes` de al menos una entrada: la fase 4 crea las fichas a partir de esta lista y el escritor no puede inventar otros (EX-08).
 5. Guardá con Write en `.tanda/borradores/capitulos.json` y persistí con
-   `.venv/Scripts/python.exe -m harness guardar outline --desde .tanda/borradores/capitulos.json`
+   `.venv/Scripts/python.exe -m app guardar outline --desde .tanda/borradores/capitulos.json`
    `guardar` valida el esquema, la cantidad, la unicidad de títulos y la curva; si falla, corregí exactamente eso y repetí.
 
 Retorno: una línea con la ruta escrita, la cantidad de entradas y el capítulo donde cae el máximo de tensión.

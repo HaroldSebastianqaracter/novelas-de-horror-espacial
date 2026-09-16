@@ -9,8 +9,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from harness.errores import ConfiguracionInvalidaError
-from harness.rutas import Rutas
+from app.errores import ConfiguracionInvalidaError
+from app.rutas import Rutas
 
 ROLES = ("escritor", "extractor", "qa")
 SKILL_DE_DOMINIO = {"escritor": "prosa-terror-espacial", "extractor": "formato-delta", "qa": "criterios-qa"}

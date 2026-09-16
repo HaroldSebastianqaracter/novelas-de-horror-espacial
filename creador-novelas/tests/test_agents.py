@@ -6,15 +6,15 @@ from pathlib import Path
 
 import pytest
 
-from harness.agents import escritor, extractor, qa
-from harness.agents.plantillas import MARCADORES_OBLIGATORIOS, verificar_checklist
-from harness.errores import ContratoRetornoError, EstadoInvalidoError, OutlineFaltanteError
-from harness.rutas import Rutas
-from harness.schemas import LogContinuidad, HechoContinuidad
-from harness.state import repository as repo
+from app.agents import escritor, extractor, qa
+from app.agents.plantillas import MARCADORES_OBLIGATORIOS, verificar_checklist
+from app.errores import ContratoRetornoError, EstadoInvalidoError, OutlineFaltanteError
+from app.rutas import Rutas
+from app.schemas import LogContinuidad, HechoContinuidad
+from app.state import repository as repo
 from tests.conftest import RAIZ_REAL
 
-FUENTES = RAIZ_REAL / "harness" / "agents"
+FUENTES = RAIZ_REAL / "app" / "agents"
 
 
 def test_escritor_no_importa_lectura_de_manuscrito():
@@ -64,7 +64,7 @@ def test_ensamblar_contexto_ex03_y_ex04(proyecto, config):
     with pytest.raises(OutlineFaltanteError):
         escritor.ensamblar_contexto(31, config, proyecto)
     texto = ""
-    from harness.state import resumen_rodante as rr
+    from app.state import resumen_rodante as rr
     for n in range(1, 3):
         texto = rr.agregar(texto, n, "relleno " * 400, 2)
     repo.escribir_resumen_rodante(proyecto, texto)

@@ -10,7 +10,7 @@ import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from harness.rutas import Rutas
+from app.rutas import Rutas
 
 
 @dataclass
@@ -57,7 +57,7 @@ def borrar(raiz: Path) -> None:
 def exigir(raiz: Path) -> Cursor:
     c = leer(raiz)
     if c is None:
-        raise RuntimeError("no hay tanda en curso: ejecutá `python -m harness tanda iniciar` primero")
+        raise RuntimeError("no hay tanda en curso: ejecutá `python -m app tanda iniciar` primero")
     return c
 
 

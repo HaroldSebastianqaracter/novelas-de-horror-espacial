@@ -12,22 +12,22 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Protocol
 
-from harness.agents import escritor, extractor, qa
-from harness.agents.escritor import Contexto
-from harness.agents.qa import PreparacionQA
-from harness.config import HarnessConfig, hash_prompts
-from harness.errores import (
+from app.agents import escritor, extractor, qa
+from app.agents.escritor import Contexto
+from app.agents.qa import PreparacionQA
+from app.config import HarnessConfig, hash_prompts
+from app.errores import (
     CapituloCerradoError, ContextoExcedidoError, ContratoRetornoError, EstadoInvalidoError,
     LongitudFueraDeRangoAviso, ManifiestoInconsistenteError, PersonajeNoPrevistoError,
 )
-from harness.orchestrator import checkpoint, cursor as cur
-from harness.orchestrator.cursor import Cursor
-from harness.rutas import Rutas
-from harness.schemas import DeltaExtraccion, ReporteQA
-from harness.state import continuidad as cont
-from harness.state import personajes as pers
-from harness.state import repository as repo
-from harness.state import resumen_rodante as rr
+from app.orchestrator import checkpoint, cursor as cur
+from app.orchestrator.cursor import Cursor
+from app.rutas import Rutas
+from app.schemas import DeltaExtraccion, ReporteQA
+from app.state import continuidad as cont
+from app.state import personajes as pers
+from app.state import repository as repo
+from app.state import resumen_rodante as rr
 
 MOTIVOS_FIN = ("tope_de_tanda", "pausado_por_qa", "novela_completa", "tope_de_llamadas", "completo")
 

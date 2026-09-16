@@ -14,13 +14,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from harness.agents import plantillas
-from harness.config import HarnessConfig
-from harness.errores import ContratoRetornoError
-from harness.rutas import Rutas
-from harness.schemas import LogContinuidad, ReporteQA
-from harness.state import repository as repo
-from harness.state.repository import leer_muestra_manuscrito
+from app.agents import plantillas
+from app.config import HarnessConfig
+from app.errores import ContratoRetornoError
+from app.rutas import Rutas
+from app.schemas import LogContinuidad, ReporteQA
+from app.state import repository as repo
+from app.state.repository import leer_muestra_manuscrito
 
 MAX_LINEAS_RETORNO = 5
 _BANDERA = re.compile(r"tiene_contradicciones\s*[:=]\s*(true|false|sí|si|no|verdadero|falso)", re.IGNORECASE)

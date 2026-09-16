@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from harness.schemas import HechoContinuidad, Manifest, Outline, ReporteQA
+from app.schemas import HechoContinuidad, Manifest, Outline, ReporteQA
 from tests.conftest import outline_de_prueba
 
 

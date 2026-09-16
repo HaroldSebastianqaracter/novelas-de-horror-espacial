@@ -7,11 +7,11 @@ from urllib.parse import urlencode
 
 import pytest
 
-from harness import ui
-from harness.config import cargar_config
-from harness.errores import ConfiguracionInvalidaError, EstadoInvalidoError
-from harness.orchestrator import checkpoint
-from harness.rutas import Rutas
+from app import ui
+from app.config import cargar_config
+from app.errores import ConfiguracionInvalidaError, EstadoInvalidoError
+from app.orchestrator import checkpoint
+from app.rutas import Rutas
 from tests.conftest import construir_proyecto
 
 FORM_OK = {

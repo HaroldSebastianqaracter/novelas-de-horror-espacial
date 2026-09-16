@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from harness.config import HarnessConfig
-from harness.errores import ConfiguracionInconsistenteError, ManifiestoInconsistenteError, PausadoPorQAError
-from harness.rutas import Rutas
-from harness.schemas import Manifest
-from harness.state import repository as repo
+from app.config import HarnessConfig
+from app.errores import ConfiguracionInconsistenteError, ManifiestoInconsistenteError, PausadoPorQAError
+from app.rutas import Rutas
+from app.schemas import Manifest
+from app.state import repository as repo
 
 
 def leer_manifest(raiz: Path) -> Manifest | None:
@@ -151,7 +151,7 @@ def cerrar_resolucion(raiz: Path) -> Manifest:
 def texto_status(raiz: Path) -> str:
     """Salida de `status` y de H-01 (RF-08.3)."""
     rutas = Rutas(raiz)
-    lineas = ["ESTADO DE LA NOVELA (python -m harness status)"]
+    lineas = ["ESTADO DE LA NOVELA (python -m app status)"]
     m = leer_manifest(raiz)
     if m is None:
         lineas.append("- manifiesto: no existe; la novela no llegó a la fase 3 (escaleta)")

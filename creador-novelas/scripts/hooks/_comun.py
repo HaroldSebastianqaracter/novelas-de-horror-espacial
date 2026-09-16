@@ -1,4 +1,4 @@
-"""Arranque compartido por los scripts de hooks: raíz del proyecto, import de harness/ y lectura del payload."""
+"""Arranque compartido por los scripts de hooks: raíz del proyecto, import de app/ y lectura del payload."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ def preparar() -> tuple[Path, dict]:
             pass
     raiz_defecto = Path(__file__).resolve().parents[2]
     raiz = Path(os.environ.get("HARNESS_RAIZ") or os.environ.get("CLAUDE_PROJECT_DIR") or raiz_defecto).resolve()
-    sys.path.insert(0, str(raiz_defecto))  # el paquete harness/ vive junto a scripts/, no necesariamente en la raíz de datos
+    sys.path.insert(0, str(raiz_defecto))  # el paquete app/ vive junto a scripts/, no necesariamente en la raíz de datos
     crudo = sys.stdin.read()
     try:
         payload = json.loads(crudo) if crudo.strip() else {}

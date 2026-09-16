@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from harness.schemas.mundo import Mundo
-from harness.schemas.outline import Outline
-from harness.schemas.personajes import FichaPersonajes, Personaje
-from harness.state.continuidad import SUJETO_MUNDO
+from app.schemas.mundo import Mundo
+from app.schemas.outline import Outline
+from app.schemas.personajes import FichaPersonajes, Personaje
+from app.state.continuidad import SUJETO_MUNDO
 
 
 def sujetos_conocidos(fichas: FichaPersonajes, mundo: Mundo | None) -> set[str]:

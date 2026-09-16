@@ -11,14 +11,14 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-from harness.agents import escritor
-from harness.config import cargar_config
-from harness.errores import EstadoInvalidoError, HarnessError
-from harness.orchestrator import checkpoint, cursor as cur
-from harness.rutas import Rutas, bajo, es_ruta_manuscrito, numero_capitulo
-from harness.schemas import LogContinuidad
-from harness.state import continuidad as cont
-from harness.state import repository as repo
+from app.agents import escritor
+from app.config import cargar_config
+from app.errores import EstadoInvalidoError, HarnessError
+from app.orchestrator import checkpoint, cursor as cur
+from app.rutas import Rutas, bajo, es_ruta_manuscrito, numero_capitulo
+from app.schemas import LogContinuidad
+from app.state import continuidad as cont
+from app.state import repository as repo
 
 HERRAMIENTAS_ESCRITURA = ("Write", "Edit", "MultiEdit", "NotebookEdit")
 HERRAMIENTAS_LECTURA = ("Read", "Grep", "Glob")
@@ -144,7 +144,7 @@ def decidir_pre_tool_use(payload: dict, raiz: Path) -> Decision:
     # H-09: el orquestador no lee ni toca el manuscrito (INV-08).
     if not es_subagente:
         if tool in HERRAMIENTAS_LECTURA and _toca_manuscrito(tool, tool_input, rel):
-            return _bloquear(raiz, payload, "H-09", "el orquestador no lee 05_manuscrito/ (INV-08); usá `python -m harness ensamblar` para leer lo generado")
+            return _bloquear(raiz, payload, "H-09", "el orquestador no lee 05_manuscrito/ (INV-08); usá `python -m app ensamblar` para leer lo generado")
         if tool in HERRAMIENTAS_ESCRITURA and es_ruta_manuscrito(rel):
             return _bloquear(raiz, payload, "H-09", "el orquestador no escribe prosa ni toca 05_manuscrito/ (INV-08)")
 

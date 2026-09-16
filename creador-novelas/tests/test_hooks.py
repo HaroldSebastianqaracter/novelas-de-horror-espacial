@@ -4,10 +4,10 @@ import json
 
 import pytest
 
-from harness.orchestrator import checkpoint, cursor as cur, loop
-from harness.orchestrator.cursor import Cursor
-from harness.rutas import Rutas
-from harness.state import repository as repo
+from app.orchestrator import checkpoint, cursor as cur, loop
+from app.orchestrator.cursor import Cursor
+from app.rutas import Rutas
+from app.state import repository as repo
 from tests.conftest import AgentesDobles, ejecutar_script_hook
 
 
@@ -94,7 +94,7 @@ def test_h09_orquestador_no_lee_manuscrito(proyecto, config):
     assert pre({"tool_name": "Glob", "tool_input": {"pattern": "05_manuscrito/*.md"}}, proyecto).returncode == 2
     assert pre({"tool_name": "Write", "tool_input": {"file_path": "05_manuscrito/cap_2.md", "content": "prosa"}}, proyecto).returncode == 2
     assert pre({"tool_name": "Read", "tool_input": {"file_path": "04_estado/prompts/escritor_cap_2.md"}}, proyecto).returncode == 0
-    assert pre({"tool_name": "Grep", "tool_input": {"pattern": "def ", "path": "harness"}}, proyecto).returncode == 0
+    assert pre({"tool_name": "Grep", "tool_input": {"pattern": "def ", "path": "app"}}, proyecto).returncode == 0
     # QA sí puede leer varios
     assert pre({"tool_name": "Read", "tool_input": {"file_path": "05_manuscrito/cap_1.md"}, "agent_type": "qa", "agent_id": "q"}, proyecto).returncode == 0
 

@@ -14,13 +14,13 @@ from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
 
-from harness.errores import CapituloCerradoError, EstadoInvalidoError
-from harness.rutas import Rutas
-from harness.schemas import (
+from app.errores import CapituloCerradoError, EstadoInvalidoError
+from app.rutas import Rutas
+from app.schemas import (
     DeltaExtraccion, FichaPersonajes, LogContinuidad, Manifest, Mundo, Outline, RecursosUsados, ReporteQA,
 )
-from harness.schemas.outline import EntradaOutline
-from harness.state import continuidad as cont
+from app.schemas.outline import EntradaOutline
+from app.state import continuidad as cont
 
 M = TypeVar("M", bound=BaseModel)
 

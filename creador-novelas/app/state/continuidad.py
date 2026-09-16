@@ -6,8 +6,8 @@ Todas las funciones devuelven un log nuevo: nunca mutan el recibido.
 
 from __future__ import annotations
 
-from harness.schemas.continuidad import HechoContinuidad, LogContinuidad
-from harness.schemas.outline import EntradaOutline
+from app.schemas.continuidad import HechoContinuidad, LogContinuidad
+from app.schemas.outline import EntradaOutline
 
 SUJETO_MUNDO = "mundo"
 

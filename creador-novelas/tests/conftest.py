@@ -14,11 +14,11 @@ import pytest
 RAIZ_REAL = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ_REAL))
 
-from harness.config import cargar_config  # noqa: E402
-from harness.orchestrator import checkpoint  # noqa: E402
-from harness.rutas import Rutas  # noqa: E402
-from harness.schemas import FichaPersonajes, LogContinuidad, Mundo, Outline, RecursosUsados, RecursoUsado  # noqa: E402
-from harness.state import repository as repo  # noqa: E402
+from app.config import cargar_config  # noqa: E402
+from app.orchestrator import checkpoint  # noqa: E402
+from app.rutas import Rutas  # noqa: E402
+from app.schemas import FichaPersonajes, LogContinuidad, Mundo, Outline, RecursosUsados, RecursoUsado  # noqa: E402
+from app.state import repository as repo  # noqa: E402
 
 PERSONAJES = ["Kovacs", "Ilse", "Dara"]
 LOCACIONES = ["Puente", "Bodega 4", "Enfermería"]

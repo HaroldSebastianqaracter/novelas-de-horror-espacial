@@ -17,14 +17,14 @@ import sys
 import warnings
 from pathlib import Path
 
-from harness.config import HarnessConfig, cargar_config, cargar_proveedores
-from harness.errores import ConfiguracionInvalidaError, EstadoInvalidoError, HarnessError, PausadoPorQAError
-from harness.orchestrator import checkpoint, cursor as cur, loop
-from harness.rutas import Rutas, raiz_desde_entorno
-from harness.schemas import FichaPersonajes, LogContinuidad, Mundo, Outline
-from harness.state import continuidad as cont
-from harness.state import personajes as pers
-from harness.state import repository as repo
+from app.config import HarnessConfig, cargar_config, cargar_proveedores
+from app.errores import ConfiguracionInvalidaError, EstadoInvalidoError, HarnessError, PausadoPorQAError
+from app.orchestrator import checkpoint, cursor as cur, loop
+from app.rutas import Rutas, raiz_desde_entorno
+from app.schemas import FichaPersonajes, LogContinuidad, Mundo, Outline
+from app.state import continuidad as cont
+from app.state import personajes as pers
+from app.state import repository as repo
 
 ARTEFACTOS = ("idea", "style_guide", "premisa", "tres_actos", "outline", "personajes", "mundo", "continuidad")
 
@@ -154,7 +154,7 @@ def cmd_resolver(args, raiz: Path) -> int:
     nuevo = checkpoint.iniciar_resolucion(raiz, args.reporte, capitulos)
     superados = sum(1 for h in log.root if h.cap_origen in capitulos and h.superado_por is not None)
     print(f"{superados} hechos marcados como superados; reextracción pendiente: {nuevo.reextraccion_pendiente}")
-    print("paso 2: corré /resolver-qa para reextraer cada capítulo; paso 3: `python -m harness resolver --cerrar`")
+    print("paso 2: corré /resolver-qa para reextraer cada capítulo; paso 3: `python -m app resolver --cerrar`")
     _resultado("reextraccion_pendiente", capitulos=nuevo.reextraccion_pendiente, capitulo_activo=nuevo.capitulo_activo)
     return 0
 
@@ -386,7 +386,7 @@ def cmd_cerrar_qa(args, raiz: Path) -> int:
 
 
 def cmd_ui(args, raiz: Path) -> int:
-    from harness import ui  # import tardío: es lo único que levanta un servidor (§15)
+    from app import ui  # import tardío: es lo único que levanta un servidor (§15)
 
     return ui.servir(raiz, args.puerto)
 
@@ -394,7 +394,7 @@ def cmd_ui(args, raiz: Path) -> int:
 # ---------- parser ----------
 
 def construir_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="python -m harness", description="Harness generador de novelas de terror espacial")
+    p = argparse.ArgumentParser(prog="python -m app", description="Harness generador de novelas de terror espacial")
     p.add_argument("--raiz", help="raíz del proyecto (por defecto HARNESS_RAIZ, CLAUDE_PROJECT_DIR o el directorio actual)")
     sub = p.add_subparsers(dest="comando", required=True)
 
