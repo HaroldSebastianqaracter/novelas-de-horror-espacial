@@ -1,7 +1,7 @@
 # Especificación Técnica — Harness Generador de Novelas de Terror
 
-**Versión:** 1.4 — historial de cambios en `git log` sobre este archivo.
-**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.4 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
+**Versión:** 1.5 — historial de cambios en `git log` sobre este archivo.
+**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.5 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
 **Lector previsto:** el agente de código que implementa el harness. Toda decisión no cubierta aquí y no derivable de la especificación funcional debe tratarse como pregunta abierta, no como espacio para asumir.
 
 ## 1. Decisiones de arquitectura declaradas
@@ -11,8 +11,10 @@ Decisiones tomadas para poder avanzar, con su razón — si alguna deja de aplic
 | Decisión | Razón |
 |---|---|
 | Orquestación: **Claude Code** (sesión principal + subagentes) | Indicación de la dirección del proyecto. Cada agente del pipeline es un subagente con contexto aislado y allowlist de herramientas, así que INV-01, INV-02 e INV-05 pasan de ser reglas de prompt a configuración declarativa (§13.1). |
-| Scripts deterministas: **Python 3.11+, sin llamadas a modelo y sin servidor** | Todo lo que debe ser reproducible y testeable sin LLM — validación de esquemas, filtrado de continuidad, aplicación de deltas, manifiesto, `resolver`, `ensamblar`, `ui` y los scripts de los hooks — vive en Python y lo invocan las skills (por línea de comandos) y Claude Code (por hooks). No hay FastAPI ni ningún proceso escuchando, salvo el formulario local de §15 mientras el usuario lo usa. Claude Code decide; los scripts hacen cumplir. |
+| Scripts deterministas: **Python 3.11+ en el paquete `app/`, sin llamadas a modelo y sin servidor** | Todo lo que debe ser reproducible y testeable sin LLM — validación de esquemas, filtrado de continuidad, aplicación de deltas, manifiesto, registro, `resolver`, `ensamblar`, `ui` y los scripts de los hooks — vive en Python y lo invocan las skills (por línea de comandos), los agentes (solo su validador, §13.1) y Claude Code (por hooks). No hay FastAPI ni ningún proceso escuchando, salvo el formulario local de §15 mientras el usuario lo usa. Claude Code decide; los scripts hacen cumplir. El paquete **no** se llama `harness/`: "harness" designa al conjunto (agentes, skills, hooks y scripts), y usar ese nombre para una de sus partes induce a error. |
 | **Cumplimiento por hooks, no por prompt** (RF-08.2) | Cada invariante verificable ante un evento tiene un hook en §13.3. Los ejecuta Claude Code, no el agente: el agente ni sabe que existen. Lo que no cubre ni un hook ni una allowlist se declara límite conocido en §13.6, con nombre. |
+| **Autovalidación dentro del bucle del agente** (RF-08.4) | Cada agente ejecuta su propio validador antes de terminar y corrige solo. Antes, una salida inválida costaba una invocación entera del orquestador para reintentar, y su error atravesaba el contexto de la sesión principal. El precio es dar `Bash` a los tres agentes, que H-11 acota a un único comando por rol. |
+| **Registro de ejecución** (RF-08.5) | Una tanda deja en `07_registro/` los eventos, los prompts, los retornos y los descartados. Sin él, depurar una tanda fallida obliga a releer la conversación del orquestador, que no es reproducible ni auditable. |
 | Acceso a modelos: **Claude Code enrutado a OpenRouter** | `ANTHROPIC_BASE_URL` apunta a OpenRouter con una credencial de OpenRouter; la suscripción de claude.ai no interviene y no hay adapter propio (§3). Modelo por rol mediante alias de subagente. |
 | **Modelos distintos por rol** | Escritor y QA usan el modelo capaz; el extractor, el económico. El escritor por calidad de prosa. QA porque cruza ~34.000 tokens de prosa contra el log completo de hechos: es razonamiento sobre contexto largo, justo donde los modelos económicos flojean, y un falso negativo suyo es el peor fallo del sistema — una contradicción no detectada sigue viva y el escritor construye encima. El extractor sí es una tarea mecánica (un capítulo → JSON) cuyo error lo atrapa la validación de esquema. Detalle de costes en §11.7. |
 | **Esquemas formales con Pydantic** | Valida cada artefacto de estado antes de persistirlo; permite rechazar y reintentar cuando el LLM produce JSON inválido (EX-01). |
@@ -23,7 +25,7 @@ Decisiones tomadas para poder avanzar, con su razón — si alguna deja de aplic
 Todas las rutas de este documento son relativas a `creador-novelas/`, la carpeta del repositorio donde vive el harness. Las specs y los diagramas quedan en la raíz del repositorio y no se mueven.
 
 ```
-harness/
+app/
 ├── config.py                 # carga y valida la carpeta config/ (§11.1)
 ├── schemas/
 │   ├── personajes.py          # Personaje, FichaPersonajes
@@ -48,23 +50,24 @@ harness/
 │   └── checkpoint.py           # detecta último capítulo cerrado, permite reanudar
 ├── cli.py                      # capa externa y verbos internos del loop (§8.2)
 ├── ui.py                       # frontend (§15)
-└── __main__.py                 # python -m harness
+└── __main__.py                 # python -m app
 ```
 
 Regla de dependencia que el agente implementador debe respetar: `agents/escritor.py` **no importa** `state.repository.leer_manuscrito` bajo ninguna firma — es la forma de hacer cumplir INV-01 (el escritor nunca lee capítulos cerrados) a nivel de código, no solo de prompt.
 
-Fuera del paquete `harness/` viven los archivos que Claude Code lee directamente:
+Fuera del paquete `app/` viven los archivos que Claude Code lee directamente:
 
 ```
 .claude/
 ├── agents/                   # escritor.md · extractor.md · qa.md — §13.1
 ├── skills/                   # una carpeta por fase + skills de dominio por agente — §13.2, §11.8
 └── settings.json             # hooks (§13.3) y bloque env sin credencial (§3.1)
-scripts/hooks/                # un script por evento; deciden por agente y ruta e invocan harness/ — §13.3
+scripts/hooks/                # un script por evento; deciden por agente y ruta e invocan `app/` — §13.3
 CLAUDE.md                     # reglas ambientales, orden de fases, mapa de carpetas — §13.5
+07_registro/                  # un directorio por tanda: eventos, prompts, retornos, descartados — §5.1
 ```
 
-`harness/` nunca importa nada de `.claude/` ni de `scripts/`; la dependencia va en un solo sentido: los scripts de hooks y el CLI importan `harness/`.
+`app/` nunca importa nada de `.claude/` ni de `scripts/`; la dependencia va en un solo sentido: los scripts de hooks, el CLI y los validadores que ejecutan los agentes importan `app/`.
 
 ## 3. Acceso a modelos — Claude Code enrutado a OpenRouter
 
@@ -196,6 +199,7 @@ No forma parte de la especificación funcional (es puramente de soporte técnico
   "prompts_hash": { "escritor": "…", "extractor": "…", "qa": "…" },   // §11.5
   "reextraccion_pendiente": [],          // capítulos declarados corregidos y aún no reextraídos (RF-07.6, §8.2)
   "capitulo_activo": null,               // capítulo que el extractor puede leer durante una reextracción; null = ultimo_capitulo_cerrado + 1 (H-05)
+  "tanda_actual": "tanda_2026-09-16T12-40-03",  // carpeta de §5.1 donde se registra la tanda en curso o la última
   "ultimo_error": null                   // texto del último fallo que detuvo la tanda; lo muestra status
 }
 ```
@@ -211,6 +215,41 @@ El manifiesto **no** registra nada sobre la tanda en curso (ni el tope ni cuánt
 Lo que sí existe es un **cursor transitorio**, `.tanda/cursor.json`, fuera de `04_estado/`, ignorado por git y borrado cuando la tanda termina. Lo escriben únicamente los verbos `tanda` del CLI (§8.2) y guarda el tope y el conteo de la tanda en curso. No es un artefacto de estado: si aparece al abrir una sesión, es que la anterior murió a mitad, y `tanda iniciar` lo descarta y recalcula desde el manifiesto. Se elige un archivo y no la memoria de la conversación del orquestador porque el conteo tiene que ser el mismo con dobles en `pytest` que con el modelo real, y la conversación no es testeable. INV-06 se mantiene: nada de lo que hay en el cursor entra en ningún artefacto de la novela.
 
 No hay estado `abortado`. Un fallo que detiene la tanda (EX-01, EX-03, EX-04, EX-08) deja el manifiesto en `en_progreso` con `ultimo_error` relleno; `status` lo muestra y la siguiente tanda arranca desde el último capítulo cerrado, que es lo que INV-07 pide. Un estado extra no aportaría información que `ultimo_error` no dé.
+
+### 5.1 Registro de ejecución (`07_registro/`)
+
+Implementa RF-08.5. El manifiesto dice **dónde está** la novela; el registro dice **qué pasó** para llegar ahí. Son cosas distintas y por eso son archivos distintos: el manifiesto se lee entero en cada arranque y tiene que seguir siendo corto, mientras que el registro crece sin límite y solo se abre cuando hay algo que auditar.
+
+Una carpeta por tanda, nombrada con la marca de tiempo de su inicio:
+
+```
+07_registro/
+└── tanda_2026-09-16T12-40-03/
+    ├── eventos.jsonl        # append-only, una línea por evento, en orden
+    ├── cursor.json          # copia final del cursor: tope, cerrados, motivo de salida
+    ├── prompts/             # el contexto exacto entregado a cada agente en cada invocación
+    ├── retornos/            # el mensaje final textual de cada subagente
+    ├── descartados/         # borradores y deltas rechazados, con el error que los rechazó
+    └── uso.jsonl            # consumo por invocación (H-10)
+```
+
+`eventos.jsonl` lleva una línea por hecho observable, siempre con `ts`, `tipo` y, cuando aplique, `capitulo`:
+
+| `tipo` | Lo escribe | Campos propios |
+|---|---|---|
+| `verbo` | el CLI, al terminar cada verbo | `verbo`, `args`, `resultado`, `ms` |
+| `agente_inicio` / `agente_fin` | `subagent_stop.py` y el verbo que prepara la invocación | `rol`, `agent_id`, `turnos`, `intentos_de_validacion` |
+| `hook` | cada script de hooks | `id` (H-xx), `agent_type`, `accion`, `decision` (`permitido`/`bloqueado`/`verificado`/`falla`), `motivo` |
+| `validacion` | los verbos `validar-*` | `rol`, `artefacto`, `valido`, `errores` |
+| `error` | quien detiene la tanda | `excepcion`, `mensaje`, `traza` |
+
+Reglas de implementación:
+
+- Escriben los scripts y los hooks. El orquestador no escribe aquí: H-09 le bloquea también esta carpeta, igual que el manuscrito.
+- `07_registro/` no es estado de la novela. Se versiona porque hace la corrida revisable, pero borrarlo no cambia el manuscrito ni un solo artefacto de `04_estado/`. Es la diferencia con `.tanda/`, que además desaparece al terminar.
+- `uso.jsonl` se mueve aquí desde `04_estado/`: es evidencia de la ejecución, no memoria de la obra.
+- `04_estado/prompts/` y `04_estado/deltas/` siguen siendo el área de trabajo de la tanda en curso, que se sobrescribe; su **copia** del momento de la invocación es la que queda en el registro. Sin esa copia no hay forma de saber qué recibió de verdad un agente, porque el archivo de trabajo ya fue pisado por el capítulo siguiente.
+- `status` (§8.2) lee el registro de la última tanda: muestra el manifiesto y, debajo, los últimos eventos y cualquier `error` sin cerrar.
 
 ## 6. Orquestador — mapeo del loop a módulos
 
@@ -287,7 +326,10 @@ class ConfiguracionInvalidaError(Exception): ...      # EX-05
 class ConfiguracionInconsistenteError(Exception): ... # EX-06
 class LongitudFueraDeRangoAviso(Warning): ...         # EX-07 — aviso, no excepción: la tanda sigue
 class PersonajeNoPrevistoError(Exception): ...        # EX-08 — solo tras el segundo intento fallido
+class AutovalidacionFallidaError(Exception): ...      # EX-10 — el agente agotó sus intentos de validar su salida
 ```
+
+EX-10 la lanza el verbo que lee el artefacto cuando el agente terminó informando que no consiguió validarlo: el artefacto se mueve a los descartados del registro (§5.1) y el fallo se trata como el de su rol — EX-01 para un delta, EX-07 o EX-08 para un borrador.
 
 EX-07 es deliberadamente un `Warning` y no una excepción: el segundo intento fuera de rango se acepta y se anota en `intentos_por_capitulo`, nada se detiene. EX-08 sí es excepción, pero `loop.py` la lanza únicamente cuando el reintento también falla; el primer fallo se resuelve regenerando sin salir del loop.
 
@@ -356,33 +398,40 @@ Dos capas. La **externa** es la que teclea el usuario. La **interna** son los ve
 /escribir-tanda 3                        # pisa el valor del archivo (RF-CFG-03)
 /escribir-tanda --hasta-el-final         # ignora el tope y sigue hasta total_capitulos
 /resolver-qa                             # skill: reextrae los capítulos pendientes (RF-07.6, paso 2)
-python -m harness status                 # manifiesto, cursor si existe, ultimo_error; no genera nada
-python -m harness resolver --reporte qa_cap_16 --capitulos 14,15
+python -m app status                 # manifiesto, cursor si existe, ultimo_error; no genera nada
+python -m app resolver --reporte qa_cap_16 --capitulos 14,15
                                          # RF-07.6 paso 1: marca superados y deja reextraccion_pendiente
-python -m harness resolver --reporte qa_cap_16 --sin-cambios
+python -m app resolver --reporte qa_cap_16 --sin-cambios
                                          # revisé y no toqué ningún capítulo: cierra en un solo paso
-python -m harness resolver --cerrar      # RF-07.6 paso 3: solo si reextraccion_pendiente está vacía
-python -m harness ensamblar --salida novela.md
+python -m app resolver --cerrar      # RF-07.6 paso 3: solo si reextraccion_pendiente está vacía
+python -m app ensamblar --salida novela.md
                                          # concatena los capítulos cerrados con su título
-python -m harness guardar <artefacto>    # fases 0-4: persiste con validación (EX-01) lo que generó la skill
+python -m app guardar <artefacto>    # fases 0-4: persiste con validación (EX-01) lo que generó la skill
 
 # --- capa interna: la usa la skill, un tramo del loop por verbo ---
-python -m harness tanda iniciar [--capitulos N | --hasta-el-final]
+python -m app tanda iniciar [--capitulos N | --hasta-el-final]
                                          # lee el manifiesto, crea .tanda/cursor.json (§5)
-python -m harness preparar-capitulo N    # EX-03 a EX-06; escribe 04_estado/prompts/escritor_cap_N.md
-python -m harness registrar-escritor N "<línea de retorno>"
+python -m app preparar-capitulo N    # EX-03 a EX-06; escribe 04_estado/prompts/escritor_cap_N.md
+python -m app registrar-escritor N "<línea de retorno>"
                                          # parser de RF-08.1: rechaza prosa o más de una línea
-python -m harness aplicar-delta N        # lee 04_estado/deltas/delta_cap_N.json; EX-01, EX-08;
+python -m app aplicar-delta N        # lee 04_estado/deltas/delta_cap_N.json; EX-01, EX-08;
                                          # cierra el capítulo y responde si toca QA
-python -m harness descartar-borrador N   # EX-08: borra el borrador para regenerar
-python -m harness preparar-qa N          # arma la muestra y las rutas permitidas del corte
-python -m harness cerrar-qa N            # lee qa_cap_N.json; pausa o continúa (RF-07.4)
-python -m harness tanda siguiente        # avanza el cursor; responde tope_de_tanda | seguir | novela_completa
+python -m app descartar-borrador N   # EX-08: borra el borrador para regenerar
+python -m app preparar-qa N          # arma la muestra y las rutas permitidas del corte
+python -m app cerrar-qa N            # lee qa_cap_N.json; pausa o continúa (RF-07.4)
+python -m app tanda siguiente        # avanza el cursor; responde tope_de_tanda | seguir | novela_completa
+
+# --- capa de validación: la usan los agentes, un validador por rol (RF-08.4) ---
+python -m app validar-capitulo N         # escritor: longitud ±20 % y personajes del registro
+python -m app validar-delta N            # extractor: esquema, sujetos, tope de hechos
+python -m app validar-reporte N          # qa: esquema de ReporteQA y recursos_usados.json
 ```
 
 Solo `capitulos_por_tanda` admite override. `total_capitulos` y `palabras_por_capitulo` no se exponen como argumentos a propósito: pasarlos por línea de comandos invitaría a cambiarlos entre tandas, que es justo lo que EX-06 e INV-04 buscan impedir.
 
-Los verbos internos escriben dos carpetas auxiliares dentro de `04_estado/`: `prompts/`, con el contexto ensamblado que el orquestador copia en la invocación del escritor (el escritor no tiene `Read`, §13.1), y `deltas/`, donde el orquestador deja el JSON que devolvió el extractor para que `aplicar-delta` lo valide (H-02 lo valida además al escribirse). Son artefactos de trabajo, no de estado: se pueden borrar sin perder nada de la novela.
+Los verbos internos escriben dos carpetas auxiliares dentro de `04_estado/`: `prompts/`, con el contexto ensamblado que el orquestador copia en la invocación del escritor (el escritor no tiene `Read`, §13.1), y `deltas/`, donde el extractor escribe y valida su propio JSON (RF-08.4) para que `aplicar-delta` lo lea ya validado (H-02 lo valida además al escribirse). Son artefactos de trabajo, no de estado: se pueden borrar sin perder nada de la novela.
+
+Los tres verbos `validar-*` son la única parte del CLI que ejecuta un agente, y siempre sobre su propio artefacto (RF-08.4). Son de solo lectura: comprueban y devuelven el error, nunca corrigen ni persisten. El que aplica sigue siendo el verbo del orquestador (`aplicar-delta`, `registrar-escritor`, `cerrar-qa`), que **vuelve a validar**: que el agente se haya validado no exime al harness de hacerlo, porque la validación del agente es una optimización del bucle, no la garantía.
 
 **`resolver`** es la única forma legítima de salir de `pausado_por_qa`. Son tres pasos, porque la reextracción invoca al extractor y los scripts no llaman a modelos: (1) `--reporte X --capitulos a,b` verifica que el reporte sea el que figura en `reporte_qa_pendiente`, marca superados los hechos con esos `cap_origen`, fija `reextraccion_pendiente = [a, b]` y `capitulo_activo = a`, para que H-05 deje al extractor leer un capítulo anterior al actual; (2) la skill `/resolver-qa` invoca al extractor por cada capítulo pendiente y aplica cada delta con `aplicar-delta --reextraccion`, que quita el capítulo de la lista, aplica el delta nuevo sobre las fichas y regenera la sección `## Capítulo N` del resumen rodante si cae en la ventana; (3) `--cerrar` pone `reporte_qa_pendiente = null` y `estado = en_progreso` solo si la lista quedó vacía. `--sin-cambios` hace (1) y (3) de una vez: no hay nada que reextraer. Si algo falla a mitad, el manifiesto conserva la lista y se retoma donde quedó. `--sin-cambios` y `--capitulos` son mutuamente excluyentes; omitir ambos es error, porque el harness no puede adivinar qué se corrigió.
 
@@ -401,6 +450,9 @@ Los verbos internos escriben dos carpetas auxiliares dentro de `04_estado/`: `pr
 | Cobertura del filtro (RF-05.1) | Que filtrar no omita hechos relevantes. | Para cada capítulo de la corrida manual, comparar los hechos inyectados contra el log completo y revisar si algún hecho excluido era pertinente a lo que el capítulo terminó narrando. |
 | **Hooks** (RF-08.2) | Que cada script de `scripts/hooks/` bloquee o verifique exactamente lo que dice §13.3. | `pytest` ejecuta cada script con un payload JSON simulado por stdin, con el mismo formato que envía Claude Code (`hook_event_name`, `tool_name`, `tool_input`, `agent_type`), y comprueba código de salida y mensaje. Ejemplos: un `Read` con `agent_type = extractor` sobre `cap_3.md` cuando el capítulo actual es el 5 sale con código 2; una escritura de `continuidad.json` que pierda un hecho falla; un `Agent` con `agent_id` presente sale con código 2. Sin modelo. |
 | Contrato de retorno (RF-08.1) | Que el mensaje final de cada subagente respete su forma. | Con dobles: el parser de `agents/escritor.py` rechaza un retorno multilínea o con más de ~40 palabras. En la corrida manual: guardar el mensaje final del escritor de cada capítulo y verificar que es una línea sin prosa. |
+| **H-11, el hook crítico** (RF-08.4) | Que `Bash` en los tres agentes sirva solo para validar. **Es la prueba que más importa de la suite**: si H-11 falla, los tres agentes tienen shell libre y caen INV-01 e INV-02. | `pytest` con payloads simulados. Casos que deben salir con código 2: `cat 05_manuscrito/cap_1.md`; `python -m app validar-capitulo 3` cuando el capítulo de la invocación es el 5; `python -m app validar-capitulo 5; cat cap_1.md`; `python -m app validar-capitulo 5 && ls`; `echo $(cat cap_1.md)`; `python -m app validar-delta 5` con `agent_type = escritor`; `python -m app status`. Debe salir con 0: exactamente el validador del rol con el capítulo correcto. |
+| Autovalidación (RF-08.4) | Que el validador que corre el agente sea el mismo código que corre el harness. | `pytest`: `validar-delta` sobre un delta con sujeto fuera del registro devuelve el mismo error que `aplicar-delta`; `validar-capitulo` sobre un borrador corto devuelve el mismo desvío que calcula EX-07. Un agente no puede aprobarse con otro criterio. |
+| Registro de ejecución (RF-08.5) | Que una tanda deje reconstruible lo que pasó. | Con dobles: correr 3 capítulos y comprobar que `eventos.jsonl` contiene, en orden, los verbos, los pares `agente_inicio`/`agente_fin` de los seis subagentes, los hooks disparados y ningún hueco; que `prompts/` y `retornos/` tienen un archivo por invocación; y que una tanda interrumpida a mitad deja un evento `error` con traza. |
 
 Criterio de decisión para las dos filas nuevas: si la atribución de sujeto acierta por debajo de ~90%, o si aparece algún hecho pertinente excluido por el filtro, hay que volver a inyectar `continuidad.json` completo y asumir el costo de contexto. El resto del esquema (`sujeto`, `categoria`, `superado_por`) se conserva igual: sigue sirviendo para QA y para RF-07.6 aunque el escritor no filtre.
 
@@ -439,14 +491,14 @@ Cada invariante tiene asignado **con qué** se hace cumplir (RF-08.2). "Prompt" 
 
 | Invariante | Allowlist del agente | Hook | Código | Límite documentado (§13.6) |
 |---|---|---|---|---|
-| INV-01 escritor sin manuscrito | `escritor.md` sin `Read`, `Grep`, `Glob`, `Bash` | H-06 limita su `Write` a `cap_N.md` | `ensamblar_contexto` es el único ensamblador | — |
-| INV-02 extractor, un capítulo | `extractor.md` sin `Grep`, `Glob`, `Bash` | H-05 bloquea `Read` fuera de `cap_N.md` | firma `extraer(cap_n)` | — |
+| INV-01 escritor sin manuscrito | `escritor.md` sin `Read`, `Grep`, `Glob` | H-06 limita su `Write` a `cap_N.md`; H-11 limita su `Bash` al validador | `ensamblar_contexto` es el único ensamblador | — |
+| INV-02 extractor, un capítulo | `extractor.md` sin `Grep`, `Glob` | H-05 bloquea `Read` fuera de `cap_N.md`; H-11 acota su `Bash` | firma `extraer(cap_n)` | — |
 | INV-03 trazabilidad, append-only | — | H-03 verifica superconjunto tras `Write` | `continuidad.py` sin `eliminar()` | — |
 | INV-04 esquemas y `novela.json` inmutables | — | H-04 bloquea `Write`/`Edit` sobre `config/novela.json` con capítulos cerrados | EX-06 en `checkpoint.py` | cambiar el código de los esquemas: revisión humana |
 | INV-05 solo QA lee varios | solo `qa.md` lleva `Grep`, `Glob` | H-06 bloquea `Write` en `05_manuscrito/` a extractor y QA | solo `qa.py` importa la muestra | — |
 | INV-06 tandas no alteran estado | — | — | conteo en memoria; test de equivalencia §9 | — |
 | INV-07 no regenerar cerrados | — | — | `guardar_capitulo` falla si el archivo existe | — |
-| INV-08 orquestador fuera del manuscrito | — | H-09 bloquea `Read`, `Grep`, `Glob` sobre `05_manuscrito/` en la sesión principal | `status` detecta manifiesto inconsistente | edición de estado vía `Bash`: solo `CLAUDE.md` |
+| INV-08 orquestador fuera del manuscrito | — | H-09 bloquea `Read`, `Grep`, `Glob` sobre `05_manuscrito/` y `07_registro/` en la sesión principal | `status` detecta manifiesto inconsistente | edición de estado vía `Bash`: solo `CLAUDE.md` |
 | INV-09 un solo nivel | `disallowedTools: Agent, Skill` en los tres | H-08 bloquea `Agent` cuando hay `agent_id` | — | — |
 
 ## 11. Inventario de configuración
@@ -577,12 +629,12 @@ Dos grupos de archivos que no son configuración de la novela pero sin los cuale
 
 Las tres entran en `prompts_hash` (§5) junto con `config/prompts/`: si un capítulo sale mal, se sabe con qué versión de ambas cosas se generó.
 
-**Scripts de hooks.** Un script por evento en `scripts/hooks/`, invocado por `.claude/settings.json` (§13.3). Cada uno lee el payload JSON por stdin, decide por `agent_type` y por la ruta afectada, e importa `harness/` para validar. No tienen lógica propia de negocio: la delegan al paquete, para que la misma regla que aplica el hook sea la que prueba `pytest`.
+**Scripts de hooks.** Un script por evento en `scripts/hooks/`, invocado por `.claude/settings.json` (§13.3). Cada uno lee el payload JSON por stdin, decide por `agent_type` y por la ruta afectada, e importa `app/` para validar. No tienen lógica propia de negocio: la delegan al paquete, para que la misma regla que aplica el hook sea la que prueba `pytest`.
 
 ```
 scripts/hooks/
 ├── session_start.py      # H-01
-├── pre_tool_use.py       # H-04, H-05, H-06, H-08, H-09 + copia previa de continuidad.json para H-03
+├── pre_tool_use.py       # H-04, H-05, H-06, H-08, H-09, H-11 + copia previa de continuidad.json para H-03
 ├── post_tool_use.py      # H-02, H-03
 └── subagent_stop.py      # H-07, H-10
 ```
@@ -662,13 +714,15 @@ Lo mismo con la **tasa de conflicto** (hechos en contradicción sobre hechos tot
 
 ## 13. Ruta de implementación principal: Claude Code
 
-Claude Code es el orquestador del pipeline, por indicación de la dirección del proyecto. Los tres agentes son subagentes, las fases son skills, las validaciones son hooks, y el acceso a modelos es el de Claude Code enrutado a OpenRouter (§3). La ventaja no es solo ahorrarse un harness completo: **algunos invariantes dejan de depender del prompt y pasan a ser configuración declarativa.** Los scripts deterministas de §2 existen para cubrir con código lo que esta ruta no cubre sola (§13.6), y los hooks de §13.3 son lo que hace cumplir los invariantes sin depender del prompt (RF-08.2).
+Claude Code es el orquestador del pipeline, por indicación de la dirección del proyecto. Los tres agentes son subagentes, las fases son skills, las validaciones son hooks, y el acceso a modelos es el de Claude Code enrutado a OpenRouter (§3). La ventaja no es solo ahorrarse un harness completo: **algunos invariantes dejan de depender del prompt y pasan a ser configuración declarativa.** Los scripts deterministas de §2 existen para cubrir con código lo que esta ruta no cubre sola (§13.6), y los hooks de §13.3 son lo que hace cumplir los invariantes sin depender del prompt (RF-08.2) y lo que acota el `Bash` que RF-08.4 obliga a dar a los tres agentes.
 
 ### 13.1 Mapeo de los tres agentes a subagentes
 
 Un subagente de Claude Code se define en `.claude/agents/<nombre>.md`: frontmatter YAML con su configuración y el system prompt en el cuerpo. Arranca con contexto aislado: no ve la conversación principal ni los archivos que ya se leyeron. Cada agente es **un archivo**, no una carpeta: sus skills viven en `.claude/skills/` (§11.8) y sus hooks en `.claude/settings.json` (§13.3), que los aplica por agente gracias a que Claude Code informa `agent_type` en cada evento.
 
 Los campos que interesan: `tools` (allowlist), `disallowedTools` (denylist), `model` (alias que §3.2 resuelve a OpenRouter), `skills` (skills precargadas en el contexto al arrancar) y `maxTurns` (tope de turnos, para que un agente que se traba no consuma cuota indefinidamente). Con `tools` y `disallowedTools`, INV-01, INV-02, INV-05 e INV-09 se vuelven configuración.
+
+**Los tres agentes llevan `Bash`, y no es una relajación.** RF-08.4 exige que cada uno valide su salida antes de terminar, y validar es ejecutar el mismo comando determinista que ejecutará después el harness. El campo `tools` **no acepta comandos acotados**: `Bash(python -m app validar-delta *)` en una allowlist o en una denylist afecta a la herramienta entera, no al comando. Así que la restricción fina la pone H-11, un hook `PreToolUse` sobre `Bash` que deja pasar **únicamente** el validador del agente activo y bloquea todo lo demás. Sin ese hook, `Bash` en el escritor permitiría un `cat 05_manuscrito/cap_1.md` y rompería INV-01: la allowlist sola no basta, y por eso la ficha y el hook se diseñan juntos.
 
 **Ficha del escritor**
 
@@ -677,14 +731,16 @@ Los campos que interesan: `tools` (allowlist), `disallowedTools` (denylist), `mo
 name: escritor
 description: Redacta el borrador de un capítulo a partir del contexto ya ensamblado. Solo lo invoca /escribir-tanda.
 model: opus
-tools: Write
-disallowedTools: Read, Grep, Glob, Bash, WebFetch, WebSearch, Agent, Skill
+tools: Write, Bash
+disallowedTools: Read, Grep, Glob, WebFetch, WebSearch, Agent, Skill
 skills: prosa-terror-espacial
-maxTurns: 6
+maxTurns: 8
 ---
 ```
 
-El escritor **no tiene `Read`**: el helper Python de RF-05.1 ensambla el contexto completo y se lo entrega en el prompt de invocación. Así INV-01 no depende de que al modelo "no se le ocurra" abrir `05_manuscrito/` — no tiene con qué. Solo escribe `cap_N.md`, y H-06 le impide escribir cualquier otra ruta.
+Escribe `cap_N.md`, ejecuta `python -m app validar-capitulo N` y corrige si la longitud se sale del rango o aparece un personaje fuera del registro. `maxTurns` sube de 6 a 8 para dar sitio a esos reintentos.
+
+El escritor **no tiene `Read`**: el helper de RF-05.1 ensambla el contexto completo y se lo entrega en el prompt de invocación. Así INV-01 no depende de que al modelo "no se le ocurra" abrir `05_manuscrito/` — no tiene con qué. `Write` lo limita H-06 a su capítulo, y `Bash` lo limita H-11 a su validador.
 
 Tampoco lleva `memory`. La v1.2 lo tenía con `memory: project`; se quita porque una memoria que persiste entre invocaciones es un canal por el que el escritor recordaría capítulos anteriores fuera del control del harness, que es justo lo que INV-01 prohíbe. La única memoria del escritor son los artefactos de estado que el helper le inyecta.
 
@@ -693,16 +749,16 @@ Tampoco lleva `memory`. La v1.2 lo tenía con `memory: project`; se quita porque
 ```markdown
 ---
 name: extractor
-description: Lee un único capítulo y devuelve el DeltaExtraccion en JSON. Solo lo invoca /escribir-tanda.
+description: Lee un único capítulo y deja su DeltaExtraccion validado en disco. Solo lo invoca /escribir-tanda.
 model: haiku
-tools: Read
-disallowedTools: Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, Skill
+tools: Read, Write, Bash
+disallowedTools: Edit, Grep, Glob, WebFetch, WebSearch, Agent, Skill
 skills: formato-delta
-maxTurns: 4
+maxTurns: 8
 ---
 ```
 
-Tiene `Read` porque lee `cap_N.md`; H-05 bloquea cualquier otra ruta de `05_manuscrito/` (INV-02). No tiene `Write`: el delta vuelve en su mensaje final (RF-08.1) y lo persisten los scripts tras validarlo.
+Cambia respecto de la v1.4. Antes devolvía el JSON en su mensaje final y no tenía `Write`; ahora escribe `04_estado/deltas/delta_cap_N.json`, ejecuta `python -m app validar-delta N` y corrige hasta que valide. Gana dos cosas: el delta inválido no llega nunca al orquestador, y el JSON deja de atravesar su contexto. `Read` lo limita H-05 a su capítulo, `Write` lo limita H-06 a su archivo de delta, y `Bash` lo limita H-11 a su validador.
 
 **Ficha de QA**
 
@@ -711,35 +767,35 @@ Tiene `Read` porque lee `cap_N.md`; H-05 bloquea cualquier otra ruta de `05_manu
 name: qa
 description: Corte de continuidad y estilo sobre la muestra de capítulos. Solo lo invocan /escribir-tanda y /corte-qa.
 model: opus
-tools: Read, Grep, Glob, Write
-disallowedTools: Edit, Bash, WebFetch, WebSearch, Agent, Skill
+tools: Read, Grep, Glob, Write, Bash
+disallowedTools: Edit, WebFetch, WebSearch, Agent, Skill
 skills: criterios-qa
-maxTurns: 12
+maxTurns: 16
 ---
 ```
 
-Es el único con `Grep` y `Glob` (INV-05). Tiene `Write` porque escribe el reporte y `recursos_usados.json` (RF-07.5); H-06 limita esa escritura a `06_qa/`.
+Es el único con `Grep` y `Glob` (INV-05). Escribe el reporte en sus dos formas y `recursos_usados.json` (RF-07.5), y ejecuta `python -m app validar-reporte N`; H-06 limita esa escritura a `06_qa/`.
 
 **Lo que los tres comparten.** `Agent` y `Skill` fuera de la allowlist. Sin `Agent`, ningún agente puede lanzar subagentes: Claude Code lo permite por defecto hasta tres niveles, así que INV-09 hay que configurarlo, no viene dado. Sin `Skill`, ningún agente invoca skills por su cuenta: solo recibe la que se le precarga con `skills:`, y las skills de fase (`/escribir-tanda`, `/generar-premisa`) quedan como órdenes exclusivas del orquestador.
 
-**Contrato de retorno (RF-08.1).** El cuerpo del `.md` de cada agente termina con la forma exacta de su mensaje final, y el helper Python que parsea el retorno rechaza lo que no la cumpla:
+**Contrato de retorno (RF-08.1).** El cuerpo del `.md` de cada agente termina con la forma exacta de su mensaje final, y el helper que parsea el retorno rechaza lo que no la cumpla. Ningún artefacto viaja en el mensaje: los tres escriben en disco y devuelven una confirmación, de modo que el contexto del orquestador no acumula ni prosa, ni JSON, ni reportes.
 
 | Agente | Devuelve | No devuelve |
 |---|---|---|
-| escritor | una línea: `cap_N.md · 2.940 palabras · personajes: Kovacs, Ilse` | prosa, resúmenes, comentarios sobre el capítulo |
-| extractor | el JSON de `DeltaExtraccion`, sin texto alrededor | el texto del capítulo, explicaciones |
+| escritor | una línea: `cap_N.md · 2.940 palabras · personajes: Kovacs, Ilse · validado` | prosa, resúmenes, comentarios sobre el capítulo |
+| extractor | una línea: `delta_cap_N.json · 4 hechos · 2 personajes · validado` | el JSON del delta, el texto del capítulo, explicaciones |
 | qa | hasta cinco líneas: `tiene_contradicciones`, hallazgos por tipo, ruta del reporte | el reporte completo, citas largas de la muestra |
 
 Correspondencia con los invariantes:
 
 | Invariante | En los scripts | En Claude Code |
 |---|---|---|
-| INV-01 (escritor sin manuscrito) | `escritor.py` no importa `leer_manuscrito` | El subagente no tiene `Read`; el único que arma su contexto es el helper Python |
-| INV-02 (extractor, un capítulo) | Firma `extraer(cap_n: str)` | Aislamiento de contexto + H-05 sobre `Read` |
+| INV-01 (escritor sin manuscrito) | `escritor.py` no importa `leer_manuscrito` | El subagente no tiene `Read`; H-11 impide leer por `Bash`; el único que arma su contexto es el helper |
+| INV-02 (extractor, un capítulo) | Firma `extraer(cap_n: str)` | Aislamiento de contexto + H-05 sobre `Read` + H-11 sobre `Bash` |
 | INV-05 (solo QA lee varios) | Solo `qa.py` importa `leer_muestra_manuscrito` | Solo `qa.md` lleva `Grep`/`Glob` |
 | INV-09 (un solo nivel) | — | `disallowedTools: Agent` en los tres + H-08 |
 
-Honestidad sobre el alcance: `tools` no restringe **qué rutas** puede leer un agente que sí tiene `Read`. Por eso el escritor no lo tiene, y por eso para el extractor y QA la restricción de rutas la pone un hook (H-05, H-06) y no el prompt. La garantía queda repartida en dos capas, allowlist y hook, y ninguna de las dos es "que el prompt lo pida".
+Honestidad sobre el alcance: `tools` no restringe **qué rutas** puede leer ni **qué comandos** puede correr un agente. La restricción fina siempre la pone un hook (H-05, H-06, H-11), nunca el prompt. La garantía queda repartida en dos capas, allowlist y hook, y ninguna de las dos es "que el prompt lo pida". Corolario operativo: **si H-11 no está activo, los tres agentes tienen `Bash` sin restricción**. Es el punto más delicado de este diseño y el que sus pruebas (§9) tienen que cubrir primero.
 
 ### 13.2 Fases como skills
 
@@ -770,7 +826,7 @@ Todos los hooks del proyecto se declaran en `.claude/settings.json` y aplican a 
 
 | Id | Evento y matcher | Aplica a | Qué hace | Protege |
 |---|---|---|---|---|
-| **H-01** | `SessionStart` | sesión principal | Ejecuta `python -m harness status` y su salida entra al contexto de la sesión. La sesión nueva arranca sabiendo capítulo, estado y si hay reporte pendiente. | RF-08.3 |
+| **H-01** | `SessionStart` | sesión principal | Ejecuta `python -m app status` y su salida entra al contexto de la sesión. La sesión nueva arranca sabiendo capítulo, estado y si hay reporte pendiente. | RF-08.3 |
 | **H-02** | `PostToolUse` · `Write` sobre `04_estado/**/*.json` y `06_qa/**/*.json` | todos | Valida el archivo contra su esquema Pydantic apenas se escribe. Corre aunque el archivo se haya escrito por un camino no previsto. | EX-01 |
 | **H-03** | `PostToolUse` · `Write` sobre `continuidad.json` | todos | Compara con la versión anterior: todo hecho previo debe seguir presente, con su `cap_origen`, a lo sumo con `superado_por` nuevo. Si falta uno, falla. Como `PostToolUse` ve el archivo ya sobrescrito, `pre_tool_use.py` guarda una copia en `.tanda/` antes de cada `Write` sobre `continuidad.json` y este hook compara contra ella. | INV-03, RF-06.3 |
 | **H-04** | `PreToolUse` · `Write`, `Edit` sobre `config/novela.json` | todos | Bloquea si `ultimo_capitulo_cerrado > 0`. Cambiar el tamaño o la voz de la novela con capítulos cerrados invalida la escaleta. | INV-04, EX-06 |
@@ -778,8 +834,9 @@ Todos los hooks del proyecto se declaran en `.claude/settings.json` y aplican a 
 | **H-06** | `PreToolUse` · `Write`, `Edit` | por agente | escritor: solo `05_manuscrito/cap_N.md`, el capítulo actual. extractor: nada (no debería tener la herramienta; el hook es la segunda capa). qa: solo `06_qa/`. Toda otra ruta, bloqueada. | INV-01, INV-05, RF-07.5 |
 | **H-07** | `SubagentStop` · matcher `escritor` | escritor | Verifica que `cap_N.md` existe y que su longitud está en `palabras_por_capitulo ±20%`. Al primer fallo impide que el agente termine y le devuelve el desvío: es el reintento de EX-07 sin que el orquestador intervenga. Al segundo, lo deja terminar y anota el aviso en `intentos_por_capitulo`. Distingue primer y segundo fallo con `stop_hook_active` del payload. La forma de la línea de retorno no la revisa este hook sino `registrar-escritor` (§8.2). | EX-07, RF-05.2 |
 | **H-08** | `PreToolUse` · `Agent` | cualquier evento con `agent_id` | Bloquea. Los subagentes no lanzan subagentes. Refuerzo de `disallowedTools: Agent`. | INV-09 |
-| **H-09** | `PreToolUse` · `Read`, `Grep`, `Glob` sobre `05_manuscrito/` | sesión principal (sin `agent_id`) | Bloquea. El orquestador no lee la novela; `ensamblar` la lee por él y la deja en un archivo. | INV-08 |
-| **H-10** | `SubagentStop` · matcher `escritor\|extractor\|qa` | los tres | Lee el transcript del subagente (`agent_transcript_path` del payload), suma los tokens de entrada y salida y toma el modelo que respondió, y añade una línea a `04_estado/uso.jsonl` con rol, capítulo, modelo y tokens. Una llamada equivale a una invocación de subagente. Es la única fuente posible de RF-CFG-06: los scripts no ven el consumo de otra manera. | RF-CFG-06, §3.2 |
+| **H-09** | `PreToolUse` · `Read`, `Grep`, `Glob` sobre `05_manuscrito/` y `07_registro/` | sesión principal (sin `agent_id`) | Bloquea. El orquestador no lee la novela ni el registro: `ensamblar` lee la primera y `status` resume el segundo. | INV-08, RF-08.5 |
+| **H-10** | `SubagentStop` · matcher `escritor\|extractor\|qa` | los tres | Lee el transcript del subagente (`agent_transcript_path` del payload), suma los tokens de **todos** los mensajes del asistente en ese transcript, no solo del último, y toma el modelo que respondió, y añade una línea a `04_estado/uso.jsonl` con rol, capítulo, modelo y tokens. Una llamada equivale a una invocación de subagente. Es la única fuente posible de RF-CFG-06: los scripts no ven el consumo de otra manera. | RF-CFG-06, §3.2 |
+| **H-11** | `PreToolUse` · `Bash` | los tres agentes | Deja pasar **únicamente** el validador del agente activo: `python -m app validar-capitulo <N>` para el escritor, `validar-delta <N>` para el extractor, `validar-reporte <N>` para QA, con `N` igual al capítulo de la invocación. Cualquier otro comando se bloquea, incluidas variantes con tuberías, encadenamiento (`;`, `&&`, `|`), sustitución (`$(...)`, backticks) o redirección: el script compara el comando completo contra el patrón exacto, no busca un prefijo. Es lo que hace segura la presencia de `Bash` en las tres fichas (§13.1). | INV-01, INV-02, RF-08.4 |
 
 Declaración en `settings.json`, un script por evento (§11.8):
 
@@ -790,7 +847,7 @@ Declaración en `settings.json`, un script por evento (§11.8):
       { "hooks": [{ "type": "command", "command": "python scripts/hooks/session_start.py" }] }
     ],
     "PreToolUse": [
-      { "matcher": "Write|Edit|Read|Grep|Glob|Agent",
+      { "matcher": "Write|Edit|Read|Grep|Glob|Agent|Bash",
         "hooks": [{ "type": "command", "command": "python scripts/hooks/pre_tool_use.py" }] }
     ],
     "PostToolUse": [
@@ -816,7 +873,7 @@ novela-harness/
 ├── .claude-plugin/plugin.json
 ├── skills/          # las 7 fases + las 3 de dominio (§11.8)
 ├── agents/          # escritor, extractor, qa
-└── hooks/hooks.json # los diez hooks de §13.3
+└── hooks/hooks.json # los once hooks de §13.3
 ```
 
 ### 13.5 CLAUDE.md: el mapa que lee la sesión nueva
@@ -830,7 +887,8 @@ Contenido obligatorio, en este orden:
 3. **Orden de fases** y la skill que dispara cada una, de `/destilar-estilo` a `/escribir-tanda`, con la condición de entrada de cada una (qué artefacto debe existir antes).
 4. **Reglas del orquestador**: INV-08 e INV-09 en una línea cada uno, más "nunca pasar rutas de `05_manuscrito/` al escritor" y "todo cambio de estado pasa por el CLI".
 5. **Los invariantes INV-01 a INV-07**, una línea cada uno.
-6. **Contratos de retorno** (RF-08.1): qué esperar de cada agente y qué hacer si no lo cumple: no reintentar por otra vía, reportar.
+6. **Contratos de retorno** (RF-08.1): qué esperar de cada agente y qué hacer si no lo cumple: no reintentar por otra vía, reportar. Ningún agente devuelve artefactos: los escribe y los valida él mismo (RF-08.4).
+7. **Dónde mira el usuario**: `status` para el estado, `07_registro/` para auditar una tanda, `ensamblar` para leer la novela.
 
 Restricción de tamaño: cada subagente paga los tokens de `CLAUDE.md` en cada invocación. Se fija un tope de ~80 líneas; lo que no quepa va a las specs y `CLAUDE.md` lo referencia por sección.
 
@@ -847,6 +905,7 @@ No sustituye a las restricciones de `tools` ni a los hooks: es la capa de intenc
 | `tools` no restringe rutas dentro de `Read` | El escritor no tiene `Read`: recibe el contexto ya ensamblado en el prompt (§13.1). Sin herramienta de lectura, INV-01 no depende de que "no se le ocurra" leer |
 | El orquestador podría editar estado con `Bash` (INV-08) | H-09 cubre `Read`/`Grep`/`Glob`, no `Bash`. Se acepta: el orquestador es la sesión con la que habla el usuario y cortarle `Bash` le quita el CLI. `CLAUDE.md` lo prohíbe, H-02 valida lo que escriba y `status` detecta un manifiesto inconsistente. Límite documentado, no olvido. |
 | Un agente que ignora su contrato de retorno (RF-08.1) | El helper que parsea el retorno lo rechaza y el orquestador no avanza. No hay hook que lo impida antes: el mensaje final no es una herramienta. Se verifica, no se bloquea. |
+| Los tres agentes tienen `Bash` (RF-08.4) | H-11 lo acota a un único comando por rol, comparando el comando completo contra el patrón exacto. Es una capa, no dos: si H-11 no corre, hay shell libre. Por eso sus pruebas encabezan §9 y `status` avisa si el hook no está declarado en `settings.json`. |
 
 ## 14. Referencias
 
@@ -859,7 +918,7 @@ Trabajos consultados al dimensionar la memoria y el control de continuidad:
 - **Skills de Claude Code** — carga progresiva, `context: fork`, scripts embebidos. <https://code.claude.com/docs/en/skills>
 - **Plugins de Claude Code** — empaquetado de skills, agentes y hooks. <https://code.claude.com/docs/en/plugins>
 
-## 15. Frontend de entrada de requisitos (`python -m harness ui`)
+## 15. Frontend de entrada de requisitos (`python -m app ui`)
 
 Formulario web local para escribir lo que el modelo necesita saber antes de la fase 0. Implementa RF-UI-01 y RF-UI-02 de la spec funcional. **Solo entrada**: no llama a ningún modelo, no muestra progreso, no lee el manuscrito. Su única salida son archivos.
 
