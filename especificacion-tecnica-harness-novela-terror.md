@@ -1024,10 +1024,14 @@ El registro sigue siendo la fuente de verdad. Langfuse es una vista de él, no e
 | `trace` | una tanda | nombre `tanda_<ts>`; metadata: `total_capitulos`, `capitulos_por_tanda`, `cadencia_qa`, los tres `prompts_hash` del manifiesto y la versión de estas especificaciones |
 | `span` | un capítulo | nombre `cap_N`; abarca escritor, extractor y, si toca corte, QA |
 | `generation` | una invocación de subagente | nombre `<rol>:cap_N`; `model`; `usage` (§16.3); entrada y salida solo con `--con-cuerpos` |
+| `span` anidado | un verbo determinista del bucle (`preparar-capitulo`, `registrar-escritor`, `aplicar-delta`, `preparar-qa`, `cerrar-qa`) | el verbo y su capítulo, con su duración real |
 | `event` | un bloqueo de hook, un fallo de autovalidación (EX-10) o un descarte de borrador (EX-08) | el `id` del hook y su motivo textual |
 | `score` | las métricas de un corte de QA y de la tanda | §16.4 |
 
-Los `prompts_hash` en la metadata no son decoración: sin ellos, comparar dos tandas no dice nada, porque no se sabe si corrieron con el mismo prompt.
+
+Los verbos van en la traza y no fuera de ella porque **son el flujo**. Sin ellos la traza enseña tres llamadas a modelo sueltas y no se ve el bucle: no se sabe si el extractor corrió antes o después de cerrar el capítulo, ni en qué paso se detuvo una tanda que murió a mitad. Duran milisegundos y no cuestan nada, y son justo lo que hay que mirar cuando el orden es lo que falló.
+ . "
+" . Los `prompts_hash` en la metadata no son decoración: sin ellos, comparar dos tandas no dice nada, porque no se sabe si corrieron con el mismo prompt.
 
 ### 16.3 El consumo hay que mapearlo completo
 
