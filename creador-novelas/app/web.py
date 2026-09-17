@@ -26,6 +26,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from app.agents import escritor
+from app.state import repository as repo
 from app.config import CAMPOS_EJECUCION, CAMPOS_NOVELA
 from app.orchestrator import checkpoint
 from app.rutas import Rutas
@@ -365,3 +367,110 @@ def informe_qa(raiz: Path) -> dict[str, Any] | None:
         return None
     datos["reporte"] = pendiente
     return datos
+
+
+# ---------- lectura (RF-UI-05): la novela escrita, capítulo a capítulo ----------
+#
+# Esta capa lee 05_manuscrito/ y eso puede chirriar contra INV-01 e INV-08, así que conviene dejar
+# escrito por qué no lo es. INV-01 prohíbe que el **escritor** relea el manuscrito, e INV-08 que lo
+# haga el **orquestador**: los dos son invariantes sobre agentes, porque un agente que lee lo ya
+# escrito lo imita. H-09 los hace cumplir bloqueando lecturas por `agent_type`. Aquí no hay ningún
+# agente: es el servidor enseñándole al usuario lo que ha pagado, que es RF-UI y el motivo de que
+# exista `ensamblar`. Ningún texto de esta capa vuelve a entrar en un prompt.
+
+def indice(raiz: Path) -> dict[str, Any]:
+    """La cinta de capítulos: cuáles están escritos, cuál cortó QA y dónde se quedó la novela."""
+    rutas = Rutas(raiz)
+    m = checkpoint.leer_manifest(raiz)
+    novela = _json(rutas.novela_json)
+    outline = _json(rutas.capitulos)
+    entradas = outline.get("root") if isinstance(outline, dict) else outline
+    entradas = entradas if isinstance(entradas, list) else []
+    titulos = {e.get("num"): e.get("titulo") for e in entradas if isinstance(e, dict)}
+
+    cerrados = m.ultimo_capitulo_cerrado if m else 0
+    total = novela.get("total_capitulos") or len(entradas) or 0
+    hallazgos = set(_capitulos_con_hallazgos(rutas))
+    # El titulo y el logline viven en la premisa (fase 1), no en la configuracion: los decide el
+    # harness al destilar, no el usuario al encargar. Se usa el mismo extractor que `ensamblar`
+    # para que la portada de la web y la del manuscrito no puedan discrepar.
+    premisa = repo.leer_premisa(raiz) or ""
+    from app.cli import _titulo_desde_premisa  # tarde: cli importa web, y al reves seria un ciclo
+    titulo = _titulo_desde_premisa(premisa)
+    logline = next((l.split(":", 1)[1].strip() for l in premisa.splitlines()
+                    if l.lower().startswith("logline:")), None)
+
+    capitulos = []
+    for n in range(1, total + 1):
+        escrito = rutas.capitulo(n).exists()
+        capitulos.append({
+            "num": n,
+            # El título de la escaleta es una previsión; el capítulo escrito puede no haberlo usado.
+            # Se enseña igual, porque es lo único que hay: el escritor no escribe encabezados (EX-07).
+            "titulo": titulos.get(n),
+            "escrito": escrito,
+            "cerrado": n <= cerrados,
+            "corte_qa": n in hallazgos,
+        })
+    return {
+        "titulo": titulo or "Sin título",
+        "logline": logline,
+        "total_capitulos": total,
+        "capitulos_cerrados": cerrados,
+        "estado": getattr(m, "estado", None) if m else None,
+        "capitulos": capitulos,
+    }
+
+
+def _hechos_de(raiz: Path, n: int) -> list[dict[str, Any]]:
+    """Los hechos que el extractor fijó EN este capítulo, con el conflicto de QA si lo hay.
+
+    Un hecho superado por otro posterior se marca en vez de ocultarse: que un dato dejara de ser
+    cierto es parte de lo que el lector está viendo, no ruido.
+    """
+    rutas = Rutas(raiz)
+    crudo = _json(rutas.continuidad)
+    hechos = crudo.get("root") if isinstance(crudo, dict) else crudo
+    hechos = hechos if isinstance(hechos, list) else []
+
+    en_conflicto: dict[int, str] = {}
+    if rutas.reportes_qa.is_dir():
+        for informe in sorted(rutas.reportes_qa.glob("*.json")):
+            datos = _json(informe)
+            for h in datos.get("hallazgos") or []:
+                if h.get("tipo") == "contradiccion" and isinstance(h.get("cap_origen"), int):
+                    en_conflicto.setdefault(h["cap_origen"], h.get("descripcion") or "")
+
+    salida = []
+    for h in hechos:
+        if not isinstance(h, dict) or h.get("cap_origen") != n:
+            continue
+        salida.append({
+            "sujeto": h.get("sujeto"),
+            "categoria": h.get("categoria"),
+            "hecho": h.get("hecho"),
+            "superado_por": h.get("superado_por"),
+            "conflicto": en_conflicto.get(n),
+        })
+    return salida
+
+
+def capitulo(raiz: Path, n: int) -> dict[str, Any] | None:
+    """El texto de un capítulo con lo que el extractor fijó al margen. `None` si aún no existe."""
+    rutas = Rutas(raiz)
+    archivo = rutas.capitulo(n)
+    if not archivo.is_file():
+        return None
+    texto = archivo.read_text(encoding="utf-8")
+    outline = _json(rutas.capitulos)
+    entradas = outline.get("root") if isinstance(outline, dict) else outline
+    entrada = next((e for e in (entradas if isinstance(entradas, list) else [])
+                    if isinstance(e, dict) and e.get("num") == n), {})
+    return {
+        "num": n,
+        "titulo": entrada.get("titulo"),
+        "locacion": entrada.get("locacion"),
+        "palabras": escritor.contar_palabras(texto),
+        "texto": texto,
+        "hechos": _hechos_de(raiz, n),
+    }

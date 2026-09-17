@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lectura · Lo que quedó despierto — Capítulo 4, El casco frío del Falcon</title>
+<style>
+  :root{
+    --fondo:#12100C;        /* metal quemado, casi negro cálido */
+    --placa:#1C1812;        /* plancha del traje */
+    --junta:#0C0A07;        /* junta entre planchas */
+    --linea:#A88A52;        /* latón envejecido: alambre y marcos */
+    --linea-tenue:#4A3D28;  /* óxido oscuro */
+    --texto:#E6DCC8;        /* hueso */
+    --texto-bajo:#9C8E74;
+    --verde:#6FE3E6;        /* cian del visor: hechos fijados, capítulo actual */
+    --rosa:#C9A15A;         /* latón claro */
+    --rojo:#C0392B;         /* revisor, cuarentena */
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--fondo);color:var(--texto);
+    font-family:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,"Times New Roman",serif;
+    font-size:20px;line-height:1.62;min-width:1024px;
+  }
+  :focus-visible{outline:2px solid var(--verde);outline-offset:3px}
+  a{color:inherit}
+  button{font:inherit;color:inherit}
+  .ui{font-family:"Arial Narrow","Helvetica Neue",Arial,"Liberation Sans Narrow","Liberation Sans",sans-serif;font-stretch:condensed;letter-spacing:.03em}
+
+  .pantalla{
+    position:relative;min-height:100vh;overflow:hidden;
+    background:
+      radial-gradient(ellipse at 50% -10%,rgba(201,161,90,.22),transparent 55%),
+      repeating-linear-gradient(180deg,var(--placa) 0 44px,var(--junta) 44px 48px),
+      var(--fondo);
+  }
+  /* roña y arañazos: vetas verticales irregulares */
+  .pantalla::before{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.5;
+    background:
+      repeating-linear-gradient(92deg,transparent 0 37px,rgba(0,0,0,.35) 37px 39px,transparent 39px 83px),
+      repeating-linear-gradient(88deg,transparent 0 61px,rgba(201,161,90,.06) 61px 62px);
+  }
+  /* remaches en las juntas */
+  .pantalla::after{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.6;
+    background:radial-gradient(circle at 6px 46px,rgba(201,161,90,.35) 1.5px,transparent 2.5px) 0 0/96px 48px repeat;
+  }
+
+  /* Marco con esquinas en escuadra */
+  .marco{position:relative;padding:14px 30px}
+  .marco::before,.marco::after{content:"";position:absolute;top:0;bottom:0;width:26px;border:1.5px solid var(--linea);box-shadow:inset 0 0 0 1px rgba(111,227,230,.18)}
+  .marco::before{left:0;border-right:0;border-radius:6px 0 0 6px}
+  .marco::after{right:0;border-left:0;border-radius:0 6px 6px 0}
+
+  /* Cabecera: título de capítulo centrado, estado a la derecha */
+  .cabecera{
+    position:sticky;top:0;z-index:2;background:linear-gradient(180deg,#1A1610,#14110C);border-bottom:1px solid var(--linea-tenue);
+    display:grid;grid-template-columns:1fr auto;align-items:center;gap:32px;
+    padding:26px 56px 18px;
+  }
+  .cabecera .marco{justify-self:center;text-align:center;min-width:560px}
+  .cabecera h1{margin:0;font-size:24px;font-weight:400;line-height:1.2;color:var(--texto)}
+  .cabecera h1 small{display:block;font-size:20px}
+  .estado{color:var(--texto-bajo);font-size:16px;text-align:right}
+  .estado b{display:block;color:var(--texto);font-weight:400;font-size:18px}
+  .estado .ticks{display:flex;gap:3px;justify-content:flex-end;margin-top:6px}
+  .estado .ticks i{width:12px;height:3px;background:var(--linea-tenue)}
+  .estado .ticks i.on{background:var(--verde)}
+  .estado .ticks i.stop{background:var(--rojo)}
+
+  /* Cinta de cuarentena del revisor */
+  .cuarentena{
+    margin:0 56px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:24px;
+    border-top:1px solid var(--rojo);border-bottom:1px solid var(--rojo);padding:8px 0;
+    color:var(--texto-bajo);font-size:14px;line-height:1.35;
+  }
+  .cuarentena p{margin:0}
+  .cuarentena b{color:var(--rojo);font-weight:400}
+  .cuarentena a{font-size:14px;text-decoration:none;border:1.5px solid var(--linea);padding:6px 12px;color:var(--texto);white-space:nowrap}
+  .cuarentena a:hover{background:rgba(168,138,82,.16)}
+
+  /* Retícula: costillar | texto | margen del Extractor */
+  .pagina{
+    display:grid;grid-template-columns:120px minmax(560px,66ch) minmax(240px,1fr);
+    gap:0 48px;padding:44px 56px 120px 40px;max-width:1500px;margin:0 auto;
+  }
+
+  /* Costillar: cuadernas en alambre */
+  .costillar{position:sticky;top:150px;align-self:start;height:calc(100vh - 200px);display:flex;flex-direction:column}
+  .costillar ol{list-style:none;margin:0;padding:0;flex:1;display:flex;flex-direction:column;justify-content:space-between;border-left:1px solid var(--linea-tenue)}
+  .costillar li{display:flex;align-items:center;min-height:0}
+  .costillar a,.costillar span{display:flex;align-items:center;gap:8px;text-decoration:none;font-size:12.5px;color:var(--texto-bajo);width:100%}
+  .costillar i{display:block;height:1.5px;background:var(--linea-tenue);width:28px;flex:none;margin-left:-1px}
+  .costillar li.leido i{background:var(--linea);width:40px}
+  .costillar li.actual i{background:var(--verde);width:56px;height:3px;box-shadow:0 0 8px rgba(111,227,230,.75)}
+  .costillar li.actual a{color:var(--verde)}
+  .costillar li.sellado i{background:transparent;border-top:1.5px dashed var(--linea-tenue)}
+  .costillar li.pausa i{background:var(--rojo);height:5px;width:20px;box-shadow:0 0 8px rgba(192,57,43,.75)}
+  .costillar li.pausa span{color:var(--rojo)}
+  .costillar a:hover{color:var(--texto)}
+
+  /* Texto */
+  .texto header{margin:0 0 40px;padding-bottom:16px;border-bottom:1px solid var(--linea-tenue)}
+  .texto .numero{display:block;font-size:14px;color:var(--texto-bajo);margin-bottom:8px}
+  .texto h2{margin:0;font-size:38px;line-height:1.05;font-weight:400;font-style:italic}
+  .texto .cierre{margin:10px 0 0;font-size:14px;color:var(--texto-bajo)}
+  .texto p{margin:0 0 1.3em;hyphens:auto;text-wrap:pretty;text-shadow:0 1px 0 rgba(0,0,0,.6)}
+  .texto .aviso{display:block;padding-left:1.4em;font-style:italic;color:var(--texto-bajo)}
+  .texto .mano{
+    display:block;margin:1.6em 0;padding:.5em 0;
+    font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif;font-weight:700;font-size:1.25em;letter-spacing:.08em;
+    color:var(--rojo);border-top:1px solid var(--rojo);border-bottom:1px solid var(--rojo);text-shadow:0 0 10px rgba(192,57,43,.7);
+  }
+  /* hechos fijados por el Extractor: se resaltan al pedirlo */
+  mark.hecho{background:transparent;color:inherit;transition:background-color 500ms ease,box-shadow 500ms ease}
+  body.hechos mark.hecho{background:rgba(111,227,230,.14);box-shadow:0 1px 0 var(--verde)}
+  body.hechos mark.hecho.conflicto{background:rgba(192,57,43,.22);box-shadow:0 1px 0 var(--rojo)}
+  .texto .siguiente{margin-top:64px;padding-top:20px;border-top:1px solid var(--linea-tenue);display:flex;justify-content:space-between;gap:24px;align-items:baseline;font-size:15px}
+  .texto .siguiente a{text-decoration:none;border:1.5px solid var(--linea);padding:8px 14px;color:var(--texto)}
+  .texto .siguiente a:hover{background:rgba(168,138,82,.16)}
+  .texto .siguiente small{display:block;color:var(--texto-bajo);margin-top:4px;font-size:12.5px}
+
+  /* Margen del Extractor */
+  .margen{font-size:13.5px;line-height:1.45;color:var(--texto-bajo)}
+  .margen h3{font-size:13.5px;font-weight:400;color:var(--texto);margin:0 0 6px}
+  .margen .quien{margin:0 0 24px;padding:0 0 12px;border-bottom:1px solid var(--linea-tenue)}
+  .margen dl{margin:0}
+  .margen dt{color:var(--verde);margin-top:16px}
+  .margen dt::before{content:"//"}
+  .margen dd{margin:2px 0 0}
+  .margen dd.conflicto{color:var(--rojo);padding-left:12px;border-left:1.5px solid var(--rojo);margin-top:6px}
+  .margen svg{width:100%;height:auto;display:block;margin-top:24px}
+  .margen svg text{font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif;font-size:11px;letter-spacing:.03em}
+  .margen .accion{margin-top:36px}
+  .margen button{
+    display:block;width:100%;text-align:left;background:transparent;border:1.5px solid var(--linea);padding:12px 14px;cursor:pointer;
+    font-size:14px;line-height:1.35;color:var(--texto);
+  }
+  .margen button:hover{background:rgba(168,138,82,.16)}
+  .margen button small{display:block;color:var(--texto-bajo);margin-top:4px}
+  body.hechos .margen button{border-color:var(--verde)}
+  .margen .actores{margin-top:36px}
+  .margen .actores ul{margin:0;padding:0;list-style:none;border-top:1px solid var(--linea-tenue)}
+  .margen .actores li{padding:6px 0;border-bottom:1px solid var(--linea-tenue)}
+  .margen .actores li b{color:var(--texto);font-weight:400}
+
+  @media (prefers-reduced-motion:reduce){mark.hecho{transition:none}}
+  @media (max-width:1280px){
+    .cabecera{padding:22px 36px 16px}
+    .cabecera .marco{min-width:480px}
+    .cuarentena{margin:0 36px}
+    .pagina{grid-template-columns:100px minmax(520px,62ch) minmax(220px,1fr);gap:0 36px;padding:36px 36px 100px 28px}
+    body{font-size:19px}
+    .texto h2{font-size:32px}
+  }
+</style>
+</head>
+<body>
+<div class="pantalla">
+  <header class="cabecera ui">
+    <div class="marco">
+      <h1 id="t-cap">Cargando<small id="t-titulo"></small></h1>
+    </div>
+    <div class="estado" role="status">
+      <b id="t-modo">Leyendo...</b>
+      <span id="t-novela"></span>
+      <div class="ticks" id="ticks" aria-hidden="true"></div>
+    </div>
+  </header>
+
+  <div class="cuarentena ui" role="status" id="cuarentena" hidden>
+    <p id="t-cuarentena"></p>
+    <a href="/consola">Ir a la producción</a>
+  </div>
+
+  <div class="pagina">
+    <nav class="costillar ui" aria-label="Capítulos"><ol id="costillar"></ol></nav>
+
+    <article class="texto" id="texto">
+      <header>
+        <span class="numero ui" id="t-locacion"></span>
+        <h2 id="t-h2"></h2>
+        <p class="cierre ui" id="t-cierre"></p>
+      </header>
+      <div id="prosa"></div>
+      <nav class="siguiente ui" aria-label="Capítulos contiguos" id="contiguos"></nav>
+    </article>
+
+    <aside class="margen ui" aria-labelledby="margen-t">
+      <div class="quien">
+        <h3 id="margen-t">Lo que el Extractor fijó en este capítulo</h3>
+        <span id="t-resumen-hechos"></span>
+      </div>
+      <dl id="hechos"></dl>
+
+      <div class="accion" id="caja-accion" hidden>
+        <button type="button" id="btn-conflicto" aria-pressed="false">Señalar lo que el Revisor discute<small id="t-btn-ayuda"></small></button>
+      </div>
+
+      <div class="actores" id="veredicto">
+        <h3>Quién ha tocado este capítulo</h3>
+        <ul id="actores"></ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var indice = null, qa = null, actual = null;
+
+function esc(s){ return String(s == null ? "" : s)
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// El capitulo es prosa sin encabezados (EX-07): parrafos separados por linea en blanco y nada mas.
+function parrafos(texto){
+  return texto.split(/\n\s*\n/).map(function(p){ return p.trim(); }).filter(Boolean)
+    .map(function(p){ return "<p>" + esc(p).replace(/\n/g, " ") + "</p>"; }).join("");
+}
+
+// El Revisor cita literalmente los pasajes que discute, entre comillas simples. Esas citas SI se
+// pueden localizar en el texto; los hechos del Extractor no, porque son parafrasis, y buscarlos
+// seria inventarse la correspondencia y pintar de verde la frase equivocada.
+function citasDelRevisor(n){
+  if (!qa || !qa.hallazgos) return [];
+  var citas = [];
+  qa.hallazgos.forEach(function(h){
+    if (h.tipo !== "contradiccion") return;
+    var d = h.descripcion || "";
+    if (d.indexOf("Cap. " + n) !== 0 && h.cap_origen !== n) return;
+    (d.match(/'([^']{12,})'/g) || []).forEach(function(c){ citas.push(c.slice(1, -1)); });
+  });
+  return citas;
+}
+
+function marcarCitas(html, citas){
+  citas.forEach(function(c){
+    var e = esc(c), i = html.indexOf(e);
+    if (i >= 0) html = html.slice(0, i) + '<mark class="hecho conflicto">' + e + "</mark>" + html.slice(i + e.length);
+  });
+  return html;
+}
+
+function pintarCostillar(){
+  $("costillar").innerHTML = indice.capitulos.map(function(c){
+    var clase = c.num === actual.num ? "actual" : (c.escrito ? "leido" : "sellado");
+    var visible = (c.num % 5 === 0 || c.num === 1 || c.num === actual.num);
+    var txt = c.num === actual.num ? c.num + ", estás aquí" : (visible ? c.num : "");
+    var tit = "Capítulo " + c.num + (c.titulo ? ": " + esc(c.titulo) : "");
+    var celda = c.escrito
+      ? '<a href="?cap=' + c.num + '"' + (c.num === actual.num ? ' aria-current="page"' : "") +
+        ' title="' + tit + '"><i aria-hidden="true"></i>' + txt + "</a>"
+      : '<span title="' + tit + ', todavía sin escribir"><i aria-hidden="true"></i>' + txt + "</span>";
+    var pausa = c.corte_qa ? '<li class="pausa"><span><i aria-hidden="true"></i>revisor</span></li>' : "";
+    return '<li class="' + clase + '">' + celda + "</li>" + pausa;
+  }).join("");
+}
+
+function pintarContiguos(){
+  var escritos = indice.capitulos.filter(function(c){ return c.escrito; }).map(function(c){ return c.num; });
+  var i = escritos.indexOf(actual.num), h = "";
+  if (i > 0) { var a = indice.capitulos[escritos[i-1]-1];
+    h += '<a href="?cap=' + a.num + '">Capítulo ' + a.num + (a.titulo ? ", " + esc(a.titulo) : "") + "<small>anterior</small></a>"; }
+  if (i >= 0 && i < escritos.length - 1) { var s = indice.capitulos[escritos[i+1]-1];
+    h += '<a href="?cap=' + s.num + '">Capítulo ' + s.num + (s.titulo ? ", " + esc(s.titulo) : "") + "<small>siguiente</small></a>"; }
+  $("contiguos").innerHTML = h;
+}
+
+function pintarHechos(){
+  var hs = actual.hechos || [];
+  $("t-resumen-hechos").textContent = hs.length
+    ? (hs.length === 1 ? "Un hecho. " : hs.length + " hechos. ") +
+      "A partir de aquí el Escritor no puede contradecirlos sin que el Revisor lo vea."
+    : "El Extractor no fijó ningún hecho nuevo en este capítulo.";
+  $("hechos").innerHTML = hs.map(function(h){
+    var s = "<dt>" + esc(h.sujeto || h.categoria || "Sin sujeto") + "</dt><dd>" + esc(h.hecho) + "</dd>";
+    if (h.superado_por) s += '<dd class="conflicto">Superado por un hecho posterior.</dd>';
+    if (h.conflicto) s += '<dd class="conflicto">' + esc(h.conflicto) + "</dd>";
+    return s;
+  }).join("");
+}
+
+function pintarActores(){
+  var hs = actual.hechos || [];
+  var ficha = indice.capitulos[actual.num - 1] || {};
+  var discutido = hs.some(function(h){ return h.conflicto; });
+  var li = ["<li><b>Escritor</b>, redactó " + actual.palabras.toLocaleString("es-ES") + " palabras.</li>",
+            "<li><b>Extractor de hechos</b>, fijó " + (hs.length || "cero") + (hs.length === 1 ? " hecho" : " hechos") + ".</li>",
+            "<li><b>Revisor de calidad</b>, " + (ficha.corte_qa
+              ? "detuvo la producción al cerrar este capítulo."
+              : discutido ? "señala este capítulo como origen de una contradicción posterior."
+                          : "no ha puesto reparos a este capítulo.") + "</li>"];
+  $("actores").innerHTML = li.join("");
+}
+
+function pintar(){
+  document.title = "Capítulo " + actual.num + " \u00b7 " + indice.titulo;
+  $("t-cap").firstChild.nodeValue = "Capítulo " + actual.num + " de " + indice.total_capitulos;
+  $("t-titulo").textContent = actual.titulo || "";
+  $("t-novela").textContent = indice.titulo;
+  $("t-h2").textContent = actual.titulo || "Capítulo " + actual.num;
+  $("t-locacion").textContent = actual.locacion ? "//" + actual.locacion : "";
+  $("t-cierre").textContent = actual.palabras.toLocaleString("es-ES") + " palabras, cerradas por el Escritor.";
+
+  $("ticks").innerHTML = indice.capitulos.map(function(c){
+    return "<i class='" + (c.corte_qa ? "stop" : c.escrito ? "on" : "") + "'></i>";
+  }).join("");
+
+  var citas = citasDelRevisor(actual.num);
+  $("prosa").innerHTML = marcarCitas(parrafos(actual.texto), citas);
+  $("caja-accion").hidden = citas.length === 0;
+  $("t-btn-ayuda").textContent = citas.length === 1
+    ? "El Revisor cita un pasaje de este capítulo en su veredicto."
+    : "El Revisor cita " + citas.length + " pasajes de este capítulo en su veredicto.";
+
+  pintarCostillar(); pintarContiguos(); pintarHechos(); pintarActores();
+}
+
+function pintarCuarentena(){
+  if (indice.estado !== "pausado_por_qa" || !qa || !qa.hallazgos) return;
+  var c = qa.hallazgos.filter(function(h){ return h.tipo === "contradiccion"; }).length;
+  var r = qa.hallazgos.filter(function(h){ return h.tipo === "repeticion"; }).length;
+  $("t-cuarentena").innerHTML = "<b>//Producción detenida en el capítulo " + esc(qa.cap_corte) + ".</b> " +
+    "El Revisor de calidad ha encontrado " + c + (c === 1 ? " contradicción" : " contradicciones") +
+    " con hechos establecidos y " + r + (r === 1 ? " repetición" : " repeticiones") +
+    " de lenguaje. Puedes leer lo cerrado; nada nuevo se escribe hasta que decidas.";
+  $("cuarentena").hidden = false;
+  $("t-modo").textContent = "Detenida...";
+}
+
+function fallo(mensaje){
+  $("t-cap").firstChild.nodeValue = "No se puede leer";
+  $("prosa").innerHTML = "<p>" + esc(mensaje) + "</p>";
+}
+
+fetch("/api/indice").then(function(r){ return r.json(); }).then(function(d){
+  indice = d;
+  var escritos = indice.capitulos.filter(function(c){ return c.escrito; });
+  if (!escritos.length) { fallo("Todavía no hay ningún capítulo escrito. Cuando el Escritor cierre el primero, aparecerá aquí."); return; }
+  var pedido = parseInt(new URLSearchParams(location.search).get("cap"), 10);
+  var n = escritos.some(function(c){ return c.num === pedido; }) ? pedido : escritos[escritos.length - 1].num;
+  return fetch("/api/qa").then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d2){ qa = d2; return fetch("/api/capitulo/" + n); })
+    .then(function(r){ return r.json(); })
+    .then(function(cap){ actual = cap; pintar(); pintarCuarentena(); });
+}).catch(function(e){ fallo("No se pudo hablar con el harness: " + e.message); });
+
+$("btn-conflicto").addEventListener("click", function(){
+  var on = document.body.classList.toggle("hechos");
+  this.setAttribute("aria-pressed", on ? "true" : "false");
+  this.firstChild.nodeValue = on ? "Ocultar lo que el Revisor discute" : "Señalar lo que el Revisor discute";
+});
+})();
+</script>
+</body>
+</html>

@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 
 import pytest
 
-from app import ui
+from app import ui, web
 from app.config import cargar_config
 from app.errores import ConfiguracionInvalidaError, EstadoInvalidoError
 from app.orchestrator import checkpoint
@@ -238,3 +238,29 @@ def test_get_bloqueado_muestra_campos_deshabilitados(servidor, proyecto):
 def test_rutas_desconocidas_dan_404(servidor):
     assert _pedir(servidor, "GET", "/otra")[0] == 404
     assert _pedir(servidor, "POST", "/otra", {})[0] == 404
+
+
+def test_el_indice_marca_lo_escrito_lo_cerrado_y_el_corte(proyecto, config):
+    """La cinta de capítulos de la lectura sale del disco, no de lo que dijo ningún agente."""
+    indice = web.indice(proyecto)
+    assert indice["total_capitulos"] == len(indice["capitulos"])
+    for c in indice["capitulos"]:
+        assert c["escrito"] == Rutas(proyecto).capitulo(c["num"]).exists()
+
+
+def test_el_capitulo_no_escrito_no_se_inventa(proyecto, config):
+    faltan = [c["num"] for c in web.indice(proyecto)["capitulos"] if not c["escrito"]]
+    if faltan:
+        assert web.capitulo(proyecto, faltan[0]) is None
+
+
+def test_los_hechos_del_margen_son_los_fijados_en_ese_capitulo(proyecto, config):
+    """Cada hecho del margen tiene que venir de ese capítulo: el margen dice «lo que se fijó aquí»."""
+    escritos = [c["num"] for c in web.indice(proyecto)["capitulos"] if c["escrito"]]
+    if not escritos:
+        pytest.skip("el proyecto de prueba no tiene capítulos escritos")
+    cap = web.capitulo(proyecto, escritos[0])
+    crudo = json.loads((Rutas(proyecto).continuidad).read_text(encoding="utf-8")) if Rutas(proyecto).continuidad.exists() else []
+    hechos = crudo.get("root") if isinstance(crudo, dict) else crudo
+    esperados = [h["hecho"] for h in (hechos or []) if isinstance(h, dict) and h.get("cap_origen") == escritos[0]]
+    assert [h["hecho"] for h in cap["hechos"]] == esperados

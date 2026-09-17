@@ -352,6 +352,14 @@ class _Manejador(BaseHTTPRequestHandler):
                  ".webp": "image/webp", ".svg": "image/svg+xml"}
         self._bytes(200, destino.read_bytes(), tipos.get(destino.suffix.lower(), "application/octet-stream"))
 
+    def _redirigir(self, destino: str) -> None:
+        """302 conservando la consulta: `/lectura?cap=4` tiene que seguir siendo el capítulo 4."""
+        consulta = self.path.split("?", 1)
+        self.send_response(302)
+        self.send_header("Location", destino + ("?" + consulta[1] if len(consulta) > 1 else ""))
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
     def do_GET(self) -> None:  # noqa: N802
         ruta = self.path.split("?", 1)[0]
         if ruta == "/":
@@ -359,12 +367,21 @@ class _Manejador(BaseHTTPRequestHandler):
         elif ruta in ("/consola", "/consola/"):
             # Redirección y no servir aquí el HTML: así sus rutas relativas (gsap.min.js) siguen
             # resolviendo igual servidas que abriendo el archivo a mano.
-            self.send_response(302)
-            self.send_header("Location", "/static/consola.html")
-            self.send_header("Content-Length", "0")
-            self.end_headers()
+            self._redirigir("/static/consola.html")
         elif ruta.startswith("/static/"):
             self._estatico(ruta[len("/static/"):])
+        elif ruta in ("/lectura", "/lectura/"):
+            self._redirigir("/static/lectura.html")
+        elif ruta == "/api/indice":
+            self._json(200, web.indice(self.raiz))
+        elif ruta.startswith("/api/capitulo/"):
+            try:
+                n = int(ruta[len("/api/capitulo/"):].strip("/"))
+            except ValueError:
+                self._json(400, {"error": "el capítulo se pide por su número"})
+                return
+            cap = web.capitulo(self.raiz, n)
+            self._json(200 if cap else 404, cap or {"error": f"el capítulo {n} todavía no está escrito"})
         elif ruta == "/api/estado":
             self._json(200, web.estado(self.raiz))
         elif ruta == "/api/eventos":
