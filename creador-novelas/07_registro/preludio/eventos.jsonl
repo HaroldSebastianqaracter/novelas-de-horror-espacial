@@ -1,0 +1,2 @@
+{"ts": "2026-09-17T17:27:36.058+02:00", "tipo": "verbo", "verbo": "guardar", "args": ["premisa", "--desde", ".tanda/borradores/premisa.md"], "resultado": "ok", "ms": 4, "capitulo": null}
+{"ts": "2026-09-17T17:29:29.018+02:00", "tipo": "verbo", "verbo": "guardar", "args": ["tres_actos", "--desde", ".tanda/borradores/tres_actos.md"], "resultado": "ok", "ms": 4, "capitulo": null}

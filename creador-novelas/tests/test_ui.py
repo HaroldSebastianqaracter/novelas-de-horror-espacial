@@ -442,3 +442,45 @@ def test_un_libro_recien_encargado_ya_existe_en_la_biblioteca(proyecto, config):
     assert indice["hay_novela"] is True
     # Sin titulo todavia: lo pone el harness al generar la premisa, no el usuario al encargar.
     assert indice["titulo"] is None and indice["idea"].startswith("Una cuadrilla")
+
+
+def test_el_lanzador_arma_el_prompt_desde_la_skill(proyecto, config):
+    """La pantalla lanzaba `claude -p "/generar-premisa"` y no pasaba nada.
+
+    En modo `-p` un comando con barra se reconoce como comando local, se resuelve y la sesion
+    termina sin llamar al modelo: `num_turns: 0`, resultado vacio y, peor, `is_error: false`, asi
+    que ni siquiera se notaba. El harness arma ahora el prompt: lee el SKILL.md, resuelve sus
+    directivas sin shell --usan `2>/dev/null` y `||`, que PowerShell rechaza-- y manda el cuerpo.
+    """
+    skill = proyecto / ".claude" / "skills" / "generar-premisa" / "SKILL.md"
+    skill.parent.mkdir(parents=True, exist_ok=True)
+    skill.write_text("""---
+name: generar-premisa
+allowed-tools: Read, Write, Bash(.venv/Scripts/python.exe -m app:*)
+disable-model-invocation: true
+---
+
+Idea del usuario:
+!`cat 01_concepto/idea.md 2>/dev/null || echo "(no existe)"`
+
+# Fase 1
+Escribi la premisa.
+""", encoding="utf-8")
+
+    prompt, herramientas = web.prompt_de_fase(proyecto, "generar-premisa")
+    assert "!`" not in prompt, "quedan directivas sin resolver"
+    assert not prompt.lstrip().startswith("/"), "no puede empezar por un comando con barra"
+    assert "---" not in prompt.split("\n")[0], "el frontmatter no se manda al modelo"
+    assert "Read" in herramientas and any(h.startswith("Bash(") for h in herramientas)
+    # En Windows la herramienta de shell es PowerShell y el permiso casa por prefijo literal, asi
+    # que hay que autorizar la equivalente y con los dos separadores.
+    assert any(h.startswith("PowerShell(") and "/" in h for h in herramientas)
+    assert any(h.startswith("PowerShell(") and "\\" in h for h in herramientas)
+
+
+def test_las_directivas_se_resuelven_sin_shell(proyecto, config):
+    """`cat`, `ls -1` y su alternativa `|| echo`, sin pasar por bash ni por PowerShell."""
+    (proyecto / "hay.txt").write_text("contenido", encoding="utf-8")
+    assert web._resolver_directiva(proyecto, "cat hay.txt") == "contenido"
+    assert web._resolver_directiva(proyecto, 'cat no.txt 2>/dev/null || echo "(no está)"') == "(no está)"
+    assert web._resolver_directiva(proyecto, 'ls -1 no_existe 2>/dev/null || echo "(vacía)"') == "(vacía)"

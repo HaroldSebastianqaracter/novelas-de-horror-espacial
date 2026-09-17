@@ -18,6 +18,7 @@ Solo biblioteca estándar, como el resto de `ui.py`.
 from __future__ import annotations
 
 import json
+import re
 import os
 import shutil
 import subprocess
@@ -178,9 +179,15 @@ def lanzar_fase(raiz: Path, fase: str) -> dict[str, Any]:
         if exe is None:
             raise RuntimeError("No encuentro el ejecutable `claude`. La pantalla no puede lanzar fases "
                                "sin él; desde la terminal siguen funcionando igual.")
+        # El prompt es el cuerpo del SKILL.md con sus directivas ya resueltas, no `/nombre-de-skill`:
+        # en modo `-p` un comando con barra no ejecuta nada (ver `prompt_de_fase`).
+        prompt, herramientas = prompt_de_fase(raiz, fase)
         # `--permission-prompts none` deniega en vez de quedarse esperando una respuesta que no llega
-        # (§15.4). Nunca `--bare`: saltaría hooks, subagentes, skills y CLAUDE.md.
-        cmd = [exe, "-p", SKILLS[fase], "--output-format", "json", "--permission-prompts", "none"]
+        # (§15.4), asi que hay que autorizar a mano lo que la fase necesita; se toma de su propio
+        # `allowed-tools`, para que la pantalla no pueda conceder mas de lo que la skill declara.
+        # Nunca `--bare`: saltaria hooks, subagentes, skills y CLAUDE.md.
+        cmd = [exe, "-p", prompt, "--output-format", "json", "--permission-prompts", "none",
+               "--allowed-tools", *herramientas]
 
     log = raiz / ".tanda" / "ultimo_lanzamiento.log"
     log.parent.mkdir(parents=True, exist_ok=True)
@@ -629,3 +636,99 @@ def borrar_novela(raiz: Path, *, forzar: bool = False) -> dict[str, Any]:
     _EN_CURSO.clear()
     return {"borrado": True, "entradas": borrados, "carpetas": list(CARPETAS_DE_NOVELA),
             "conservado": ["config/", "00_referencias/"]}
+
+
+# ---------- lanzar una fase sin depender de los comandos con barra ----------
+#
+# La pantalla lanzaba `claude -p "/generar-premisa"` y no pasaba nada: en modo `-p` un comando con
+# barra se reconoce como comando local, se resuelve y la sesion termina sin llamar al modelo
+# (`num_turns: 0`, `local_command: "custom"`, resultado vacio, y encima `is_error: false`, asi que
+# ni siquiera se notaba). Pedirle al modelo que invoque la skill tampoco vale: las de fase llevan
+# `disable-model-invocation`, que existe para que no se disparen solas.
+#
+# Asi que el harness arma el prompt el mismo: lee el SKILL.md, resuelve sus directivas y manda el
+# cuerpo como un encargo normal, que es lo unico que funciona en no interactivo. De paso deja de
+# depender del shell: las directivas `!` usan `2>/dev/null` y `||`, que PowerShell rechaza, y por
+# eso las skills ni siquiera cargaban en esta maquina.
+
+_DIRECTIVA = re.compile(r"!`([^`]+)`")
+_ALTERNATIVA = re.compile(r'^(?P<orden>.*?)\s*\|\|\s*echo\s+"(?P<si_falla>[^"]*)"\s*$')
+
+
+def _resolver_directiva(raiz: Path, orden: str) -> str:
+    """Ejecuta una directiva de SKILL.md sin shell. Solo hay tres formas y las tres son portables."""
+    alternativa = ""
+    m = _ALTERNATIVA.match(orden.strip())
+    if m:
+        orden, alternativa = m.group("orden"), m.group("si_falla")
+    orden = orden.replace("2>/dev/null", "").strip()
+
+    if orden.startswith("cat "):
+        archivo = raiz / orden[4:].strip()
+        return archivo.read_text(encoding="utf-8") if archivo.is_file() else alternativa
+    if orden.startswith("ls -1 "):
+        carpeta = raiz / orden[6:].strip()
+        if not carpeta.is_dir():
+            return alternativa
+        nombres = sorted(p.name for p in carpeta.iterdir() if p.name != ".gitkeep")
+        return "\n".join(nombres) if nombres else alternativa
+    try:
+        salida = subprocess.run(orden.split(), cwd=str(raiz), capture_output=True,
+                                text=True, timeout=60, encoding="utf-8", errors="replace")
+        return salida.stdout.strip() or alternativa
+    except (OSError, subprocess.SubprocessError):
+        return alternativa
+
+
+def _herramientas(cabecera: str) -> list[str]:
+    """`allowed-tools` del frontmatter, respetando los parentesis: `Bash(... -m app:*)` es una sola."""
+    linea = next((l for l in cabecera.splitlines() if l.startswith("allowed-tools:")), "")
+    resto, nivel, actual = linea[len("allowed-tools:"):].strip(), 0, ""
+    fuera: list[str] = []
+    for c in resto:
+        if c == "," and nivel == 0:
+            fuera.append(actual.strip()); actual = ""
+            continue
+        nivel += (c == "(") - (c == ")")
+        actual += c
+    if actual.strip():
+        fuera.append(actual.strip())
+    herramientas = [h for h in fuera if h]
+    # En Windows la herramienta de shell de Claude Code es `PowerShell`, no `Bash`, asi que una
+    # skill que solo autoriza `Bash(...)` se queda sin poder ejecutar su propio paso de persistencia.
+    # Se autoriza la equivalente con el mismo alcance: no amplia el permiso, lo traduce.
+    for h in list(herramientas):
+        if h.startswith("Bash(") and h.endswith(")"):
+            patron = h[len("Bash("):-1]
+            # Y con las dos formas de separador: la skill escribe `.venv/Scripts/python.exe`, pero
+            # en Windows el comando sale con `\`, y el permiso casa por prefijo literal.
+            for variante in {patron, patron.replace("/", "\\")}:
+                herramientas.append(f"PowerShell({variante})")
+    return herramientas
+
+
+def prompt_de_fase(raiz: Path, fase: str) -> tuple[str, list[str]]:
+    """El cuerpo del SKILL.md con sus directivas ya resueltas, y las herramientas que declara."""
+    archivo = raiz / ".claude" / "skills" / fase / "SKILL.md"
+    if not archivo.is_file():
+        raise RuntimeError(f"No existe la skill {fase}: falta {archivo.relative_to(raiz).as_posix()}")
+    texto = archivo.read_text(encoding="utf-8")
+
+    cabecera, cuerpo = "", texto
+    if texto.startswith("---"):
+        fin = texto.find("\n---", 3)
+        if fin != -1:
+            cabecera, cuerpo = texto[3:fin], texto[fin + 4:]
+
+    cuerpo = _DIRECTIVA.sub(lambda m: _resolver_directiva(raiz, m.group(1)), cuerpo)
+    encabezado = (
+        f"Ejecutá esta fase del harness de principio a fin, ahora, sin pedir confirmación y sin "
+        f"preguntar nada: no hay nadie mirando esta sesión. Las instrucciones son las de la fase "
+        f"`{fase}` y los datos que necesita ya vienen resueltos abajo. Terminá cuando el artefacto "
+        f"esté persistido; si un paso falla, corregilo y repetilo.\n\n"
+        f"Para ejecutar comandos usá la herramienta **Bash** y escribí las rutas con barras "
+        f"normales, tal como aparecen abajo. El permiso casa por prefijo literal: otra forma de "
+        f"shell, u otro separador, se deniega sin preguntar y la fase se queda a medias con el "
+        f"borrador escrito y sin persistir.\n\n"
+    )
+    return encabezado + cuerpo.strip(), _herramientas(cabecera)
