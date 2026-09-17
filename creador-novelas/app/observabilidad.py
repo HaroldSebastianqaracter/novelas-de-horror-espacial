@@ -230,6 +230,20 @@ def _metadatos_tanda(raiz: Path, carpeta: Path) -> dict:
     return {k: v for k, v in meta.items() if v is not None}
 
 
+_CODIGO_REGLA = re.compile(r"^\s*((?:RF|INV|EX)-[0-9]+(?:\.[0-9]+)*)")
+
+
+def _reglas_incumplidas(errores: list[str]) -> list[str]:
+    """Los codigos de regla de una validacion fallida, sin el texto: los mensajes citan el manuscrito (§16.6)."""
+    codigos: list[str] = []
+    for error in errores:
+        m = _CODIGO_REGLA.match(str(error))
+        codigo = m.group(1) if m else "sin-codigo"
+        if codigo not in codigos:
+            codigos.append(codigo)
+    return codigos
+
+
 def _uso_por_agent_id(carpeta: Path) -> dict[str, dict]:
     return {str(u.get("agent_id")): u for u in registro.leer_uso(carpeta) if u.get("agent_id")}
 
@@ -487,6 +501,20 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False) -> 
                 "metadata": {"hook": e.get("id"), "evento": e.get("evento"), "agent_type": e.get("agent_type"),
                              "agent_id": e.get("agent_id"), "accion": limpiar(e.get("accion")), "decision": e.get("decision"),
                              "detiene_tanda": e.get("detiene_tanda")},
+            }
+        elif tipo == "validacion" and e.get("valido") is False:
+            # X-01.2: por que fallo la autovalidacion, no solo que fallo. Sin esto no se puede saber si un
+            # cambio en el prompt del escritor reduce los reintentos, que son el gasto evitable de la tanda.
+            # Los mensajes de error citan pasajes del manuscrito, asi que a la traza solo viajan los codigos
+            # de regla y los recuentos: §16.6 prohibe que salga prosa de la novela.
+            datos = e.get("datos") or {}
+            cuerpo_evento = {
+                "name": f"validacion:{e.get('rol')}", "level": "WARNING",
+                "statusMessage": ", ".join(_reglas_incumplidas(e.get("errores") or [])) or "sin codigo de regla",
+                "metadata": {"rol": e.get("rol"), "reglas": _reglas_incumplidas(e.get("errores") or []),
+                             "errores": len(e.get("errores") or []),
+                             "palabras": datos.get("palabras"),
+                             "repeticiones_literales": datos.get("repeticiones_literales")},
             }
         elif tipo == "error":
             excepcion = str(e.get("excepcion"))

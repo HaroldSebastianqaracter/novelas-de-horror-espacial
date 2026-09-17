@@ -1,6 +1,6 @@
 # Spec-X 01 · El reintento del escritor cuesta el 22 % de la tirada
 
-**Estado:** propuesta, para discutir
+**Estado:** X-01.1 y X-01.2 implementadas (commit pendiente). X-01.3 sigue abierta.
 **Alcance:** una sola mejora. No toca el bucle, ni las fases, ni el QA.
 **Base:** `especificacion-tecnica-harness-novela-terror.md` v1.9, §17 (antirrepetición) y RF-08.4 (validación)
 **Evidencia:** traza Langfuse de `tanda_2026-09-16T19-30-34` (capítulos 4, 5 y 6) y `07_registro/` de esa tanda
@@ -46,6 +46,17 @@ La secuencia de escrituras y validaciones, reconstruida del registro:
 **La primera validación falla en los tres capítulos.** No es mala suerte: es el
 comportamiento por defecto. Cada fallo obliga a reescribir el capítulo **completo**.
 
+Los spans de capítulo de la traza lo cuentan por su cuenta, y coinciden:
+
+| Span | `validaciones_invalidas` | `invocaciones_escritor` |
+|---|---:|---:|
+| `cap_4` | 1 | 1 |
+| `cap_5` | 1 | 1 |
+| `cap_6` | **2** | 1 |
+
+El escritor se invoca **una sola vez** por capítulo: los reintentos ocurren dentro de
+esa invocación, y por eso cada uno arrastra una lectura de contexto completa.
+
 El coste de un reintento sale de restar dos filas de la tabla, que solo se
 diferencian en eso:
 
@@ -72,10 +83,22 @@ RF-05.5 prohíbe repetir literalmente 4 o más palabras con contenido de un cap�
 anterior. Pero INV-01 le impide leer los capítulos anteriores. No puede evitar la
 coincidencia por construcción: solo puede descubrirla fallando.
 
-La prueba de que esa es la regla que salta: los capítulos 2 y 3, escritos antes de que
-la comprobación estuviera activa, conservan **4 y 9** repeticiones literales en su
-versión final. Los capítulos 4, 5 y 6 tienen **0** — a cambio de una reescritura entera
-cada uno.
+El registro lo confirma: los eventos `validacion` de la tanda guardan la lista de
+errores de cada intento fallido, y **los cuatro fallos son RF-05.5 y solo RF-05.5**.
+
+| Fallo | Pasajes repetidos | Palabras del borrador | Regla |
+|---|---:|---:|---|
+| cap. 4, intento 1 | 5 | 1.386 | RF-05.5 |
+| cap. 5, intento 1 | 4 | 1.247 | RF-05.5 |
+| cap. 6, intento 1 | 11 | 1.474 | RF-05.5 |
+| cap. 6, intento 2 | 2 | 1.386 | RF-05.5 |
+
+Los cuatro borradores estaban **dentro de la tolerancia de longitud**. Ni una sola vez
+falló por extensión ni por encabezados: es siempre la antirrepetición.
+
+Los capítulos 2 y 3, escritos antes de que la comprobación estuviera activa, conservan
+**4 y 9** repeticiones literales en su versión final. Los capítulos 4, 5 y 6 tienen
+**0** — a cambio de una reescritura entera cada uno.
 
 **b) El validador ya sabe exactamente qué sobra, y ese dato se tira.**
 `validar-capitulo` devuelve los pasajes y su capítulo de origen:
@@ -106,7 +129,13 @@ Cambiar esa frase del prompt del escritor por una que le diga que corrija **solo
 pasajes señalados** con `Edit`, y que reserve `Write` para cuando el error sea de
 longitud o de encabezados, que sí son del archivo entero.
 
-Sin cambios de código ni de esquema. Solo texto de prompt.
+Hizo falta además **darle la herramienta `Edit`**, que no tenía (`tools: Write, Bash`).
+Eso amplía su superficie, así que la comprobación obligada era si el hook la vigila: la
+vigila. `H-06` filtra por `HERRAMIENTAS_ESCRITURA = ("Write", "Edit", "MultiEdit",
+"NotebookEdit")`, de modo que `Edit` queda acotado al único archivo del capítulo,
+exactamente igual que `Write`. INV-01 no se toca: sigue sin `Read`.
+
+Sin cambios de esquema ni del bucle.
 
 Ahorro esperado: los ~5.000 tokens de salida por reintento bajan a unos 200. El turno
 sigue costando su lectura de caché, así que la estimación prudente es **la mitad del
@@ -114,10 +143,21 @@ coste del reintento**, unos **3 $ y 12 minutos** en los 30 capítulos.
 
 ### X-01.2 · El registro anota por qué falló la validación
 
-Hoy el registro guarda `"resultado": "codigo 1"` y nada más. **Por eso este diagnóstico
-ha tenido que deducir la causa en lugar de leerla.** Propuesta: que el evento `verbo`
-de `validar-*` lleve la lista de reglas incumplidas (los códigos, no la prosa: nada de
-texto de la novela sale al registro).
+**Corrección sobre la primera versión de esta spec.** Decía que el registro no guarda
+el motivo del fallo. Es falso: sí lo guarda, en un evento `validacion` con la lista
+completa de errores. El agujero estaba un paso más allá — ese evento **no llegaba a
+Langfuse**, que publicaba `0 eventos`. El dato existía y nadie lo veía.
+
+El cambio, por tanto, es en el exportador: cada validación fallida viaja como un evento
+de la traza. Y viaja **solo con el código de regla y los recuentos**, porque los
+mensajes de error citan pasajes literales del manuscrito y §16.6 prohíbe que la prosa
+de la novela salga de la máquina.
+
+```json
+{"name": "validacion:escritor", "statusMessage": "RF-05.5",
+ "metadata": {"reglas": ["RF-05.5"], "errores": 1,
+              "palabras": 1386, "repeticiones_literales": 5}}
+```
 
 No ahorra un solo token. Es lo que permite comprobar si X-01.1 funciona, y lo que evita
 que el próximo diagnóstico vuelva a ser una conjetura.
@@ -142,7 +182,7 @@ Con X-01.2 puesto, una tanda de tres capítulos da la respuesta directamente:
 
 1. Número de validaciones fallidas por capítulo. Hoy: 1, 1, 2.
 2. Tokens de salida por capítulo. Hoy: 7.591, 7.118, 12.095.
-3. Reglas incumplidas, por código. Hoy: desconocido.
+3. Reglas incumplidas, por código. Hoy: RF-05.5 en los cuatro fallos, ninguna otra.
 
 Si (1) no baja pero (2) sí, X-01.1 funciona y la causa sigue viva. Si (1) baja, es que
 el umbral era el problema y la conversación se traslada a X-01.3.
@@ -162,3 +202,13 @@ La traza de la que salen estos números tenía tres defectos de instrumentación
 corregidos en el commit `70b3448`: un `agente_fin` duplicado, el capítulo tomado del
 cursor en vez del agente, y la latencia de los extractores en cero. Las cifras de esta
 spec son las de la traza ya corregida.
+
+
+## 8. Un margen que conviene vigilar
+
+El escritor tiene `maxTurns: 8`. El capítulo 6, con dos reintentos, usó **exactamente
+8**. Un tercer reintento lo habría cortado a media corrección. Si X-01.1 funciona los
+turnos bajan y el margen se recupera solo; si no funciona, este techo es lo próximo que
+va a fallar, y fallará de una forma fea: un capítulo a medio validar.
+
+No se toca ahora porque subirlo sin arreglar la causa solo hace más caro el mismo error.

@@ -286,3 +286,32 @@ def test_un_fin_tardio_no_duplica_la_generacion_ni_inventa_capitulo(proyecto, co
 
     spans = {e["body"]["name"] for e in traza.lote if e["type"] == "span-create"}
     assert "cap_2" not in spans
+
+
+def test_la_validacion_fallida_viaja_como_codigos_y_nunca_como_prosa(proyecto, config):
+    """X-01.2: sin el motivo del fallo no se puede saber si un cambio reduce los reintentos del escritor.
+
+    En tanda_2026-09-16T19-30-34 los cuatro reintentos fueron RF-05.5 y ninguno de longitud, pero eso hubo que
+    deducirlo del registro local porque la traza no lo llevaba. Los mensajes de error citan pasajes del
+    manuscrito, asi que a Langfuse solo pueden ir el codigo de regla y los recuentos (§16.6).
+    """
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    frase = "el metal estaba frio"
+    registro.evento(proyecto, "validacion", rol="escritor", artefacto="05_manuscrito/cap_1.md", valido=False,
+                    errores=[f"RF-05.5: 2 pasaje(s) repiten literalmente 4 o mas palabras: «{frase}» (cap. 1)"],
+                    avisos=None, datos={"palabras": 1386, "repeticiones_literales": 2}, capitulo=1)
+
+    traza = observabilidad.construir_traza(proyecto, carpeta)
+    evento = next(e["body"] for e in traza.lote
+                  if e["type"] == "event-create" and e["body"]["name"] == "validacion:escritor")
+    assert evento["metadata"]["reglas"] == ["RF-05.5"]
+    assert evento["metadata"]["repeticiones_literales"] == 2 and evento["metadata"]["palabras"] == 1386
+    assert frase not in json.dumps(traza.lote, ensure_ascii=False)
+
+
+def test_una_validacion_correcta_no_ensucia_la_traza(proyecto, config):
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    registro.evento(proyecto, "validacion", rol="escritor", artefacto="05_manuscrito/cap_1.md", valido=True,
+                    errores=[], avisos=None, datos={"palabras": 1500}, capitulo=1)
+    traza = observabilidad.construir_traza(proyecto, carpeta)
+    assert not [e for e in traza.lote if e["type"] == "event-create" and "validacion" in e["body"]["name"]]
