@@ -200,12 +200,12 @@
     </div>
 
     <div class="campo">
-      <div class="et">Número de capítulos<small>Cada capítulo cuesta dinero y unos cinco minutos. El revisor audita cada pocos.</small></div>
+      <div class="et">Número de capítulos<small>Cada capítulo cuesta dinero y unos cinco minutos. El revisor audita cada pocos.<span id="cotas-caps"></span></small></div>
       <div class="palotes" role="group" aria-label="Número de capítulos">
         <svg id="palotes" viewBox="0 0 520 40" height="40" role="img" aria-label="Recuento en palotes"></svg>
         <div class="ctrl">
           <button type="button" id="menos" aria-label="Un capítulo menos">−</button>
-          <input type="number" name="total_capitulos" id="total_capitulos" min="1" max="200" required>
+          <input type="number" name="total_capitulos" id="total_capitulos" required>
           <button type="button" id="mas" aria-label="Un capítulo más">+</button>
         </div>
       </div>
@@ -270,6 +270,18 @@ var OPCIONES = {
   tiempo_verbal: ["pasado", "presente"]
 };
 
+function cotas(clave){
+  var l = (estado && estado.limites && estado.limites[clave]) || {};
+  return (l.min != null ? ' min="' + l.min + '"' : "") + (l.max != null ? ' max="' + l.max + '"' : "");
+}
+
+function limitar(n){
+  var l = (estado && estado.limites && estado.limites.total_capitulos) || {};
+  if (l.min != null && n < l.min) n = l.min;
+  if (l.max != null && n > l.max) n = l.max;
+  return n;
+}
+
 function esc(s){ return String(s == null ? "" : s)
   .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
@@ -318,7 +330,7 @@ function pintarAjustes(){
       ? '<select name="' + k + '">' + OPCIONES[k].map(function(o){
           return '<option value="' + esc(o) + '"' + (String(v[k]) === o ? " selected" : "") + ">" + esc(o) + "</option>";
         }).join("") + "</select>"
-      : '<input type="number" name="' + k + '" value="' + esc(v[k]) + '" required>';
+      : '<input type="number" name="' + k + '" value="' + esc(v[k]) + '" required' + cotas(k) + ">";
     h.push("<label><span>" + esc(ETIQUETAS[k][0]) + "</span>" + control +
            (ETIQUETAS[k][1] ? "<small>" + esc(ETIQUETAS[k][1]) + "</small>" : "") + "</label>");
   });
@@ -331,6 +343,11 @@ fetch("/api/formulario").then(function(r){ return r.json(); }).then(function(d){
   estado = d;
   $("idea").value = d.idea || new URLSearchParams(location.search).get("idea") || "";
   $("total_capitulos").value = d.valores.total_capitulos;
+  $("total_capitulos").setAttribute("min", (d.limites.total_capitulos || {}).min || 1);
+  $("total_capitulos").setAttribute("max", (d.limites.total_capitulos || {}).max || 999);
+  var lc = d.limites.total_capitulos || {};
+  $("cotas-caps").textContent = (lc.min != null && lc.max != null)
+    ? " El harness admite entre " + lc.min + " y " + lc.max + "." : "";
   $("registrar_uso").checked = d.valores.registrar_uso !== false;
   pintarAjustes();
   recalcular();
@@ -359,9 +376,9 @@ fetch("/api/formulario").then(function(r){ return r.json(); }).then(function(d){
 });
 
 $("mas").addEventListener("click", function(){
-  $("total_capitulos").value = (parseInt($("total_capitulos").value,10)||0) + 1; recalcular(); });
+  $("total_capitulos").value = limitar((parseInt($("total_capitulos").value,10)||0) + 1); recalcular(); });
 $("menos").addEventListener("click", function(){
-  $("total_capitulos").value = Math.max(1, (parseInt($("total_capitulos").value,10)||1) - 1); recalcular(); });
+  $("total_capitulos").value = limitar((parseInt($("total_capitulos").value,10)||1) - 1); recalcular(); });
 $("total_capitulos").addEventListener("input", recalcular);
 })();
 </script>

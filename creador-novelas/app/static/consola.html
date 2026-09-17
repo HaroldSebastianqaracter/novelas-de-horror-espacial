@@ -88,6 +88,16 @@
   .pie .acciones button[disabled]{opacity:.4;cursor:not-allowed}
   .pie .acciones button.peligro{border-color:var(--rojo)}
   .aviso-lanzar{grid-column:1/-1;color:var(--texto-bajo);font-size:13px;margin-top:6px}
+  /* La preparacion es una secuencia con orden: se enseña entera para que se vea cuanto falta,
+     pero solo el paso pendiente lleva boton. Los demas no se pueden lanzar aunque se quiera. */
+  .preludio{grid-column:1/-1;list-style:none;margin:10px 0 0;padding:0;
+            border-top:1px solid var(--linea-tenue)}
+  .preludio li{display:grid;grid-template-columns:22px 1fr auto;gap:0 10px;align-items:baseline;
+               padding:6px 0;border-bottom:1px solid var(--linea-tenue)}
+  .preludio .marca{color:var(--verde)}
+  .preludio li[data-estado="pendiente"]{color:var(--texto-bajo)}
+  .preludio li[data-estado="ahora"]{color:var(--texto)}
+  .preludio small{grid-column:2/-1;color:var(--texto-bajo);font-size:12.5px}
   /* El diseno reservo 44px para «14:52»; el registro real anota «12:04:11» y se pegaba al texto. */
   .pie .registro li{grid-template-columns:64px 1fr}
 
@@ -282,7 +292,7 @@
 
       <!-- Cota -->
       <path d="M22 412 H 1216 M22 406 V 418 M1216 406 V 418" stroke="#3B4652" stroke-width="1" fill="none"/>
-      <text x="620" y="408" text-anchor="middle" class="bajo">El casco frío del Falcon, corte longitudinal, cubierta de trabajo</text>
+      <text x="620" y="408" text-anchor="middle" class="bajo" id="pie-plano">Corte longitudinal, cubierta de trabajo</text>
     </svg>
   </section>
 
@@ -309,6 +319,7 @@
       <h2><b id="veredicto-t">Leyendo el estado</b><span id="veredicto-h2"></span></h2>
       <p id="veredicto-p"></p>
       <div class="acciones" id="acciones"></div>
+      <ol class="preludio" id="preludio" hidden></ol>
       <p class="aviso-lanzar" id="aviso"></p>
     </div>
     <div class="registro">
@@ -347,6 +358,8 @@ function pintarCabecera(){
     ? "Capítulo " + (e.capitulo_actual || "-") + " de " + e.total_capitulos : "Sin novela en curso";
   $("t-titulo").textContent = e.titulo_capitulo || "";
   $("t-premisa").textContent = e.logline || "";
+  var pie = $("pie-plano");
+  if (pie) pie.textContent = (e.titulo ? e.titulo + ", corte" : "Corte") + " longitudinal, cubierta de trabajo";
 
   var texto = {en_progreso:"Escribiendo...", pausado_por_qa:"Detenido...",
                error:"Con un error...", inactivo:"En reposo"}[e.estado] || e.estado;
@@ -420,6 +433,49 @@ function boton(fase, etiqueta, clase){
          (lanzando ? " disabled" : "") + ">" + esc(etiqueta) + "</button>";
 }
 
+// Las cinco fases de preparacion, en el orden que fija CLAUDE.md. Cada una deja un artefacto y
+// la siguiente lo necesita: no es una lista de opciones, es una cadena.
+var PRELUDIO = [
+  {fase:"destilar-estilo", clave:"style_guide", nombre:"Destilar el estilo",
+   nota:"Lee las obras de referencia y escribe la guía de estilo."},
+  {fase:"generar-premisa", clave:"premisa", nombre:"Generar la premisa",
+   nota:"Convierte tu idea en premisa, logline y título."},
+  {fase:"generar-sinopsis", clave:"tres_actos", nombre:"Generar la sinopsis",
+   nota:"Gancho, punto medio y clímax."},
+  {fase:"generar-escaleta", clave:"capitulos", nombre:"Generar la escaleta",
+   nota:"Un objetivo, una locación y unos personajes por capítulo."},
+  {fase:"inicializar-estado", clave:"estado_inicializado", nombre:"Inicializar el estado",
+   nota:"Personajes, mundo y registro de continuidad."}
+];
+
+function pasosPendientes(){
+  var a = estado.artefactos || {};
+  return PRELUDIO.filter(function(p){
+    // Sin referencias no hay estilo que destilar: el paso se salta en vez de bloquear la cadena.
+    if (p.fase === "destilar-estilo" && !estado.tiene_referencias) return false;
+    return !a[p.clave];
+  });
+}
+
+function pintarPreludio(){
+  var a = estado.artefactos || {};
+  var pendientes = pasosPendientes();
+  var caja = $("preludio");
+  if (!a.idea || !pendientes.length || estado.estado === "en_progreso") { caja.hidden = true; return; }
+  var siguiente = pendientes[0];
+  caja.innerHTML = PRELUDIO.map(function(p){
+    var saltado = p.fase === "destilar-estilo" && !estado.tiene_referencias;
+    var hecho = !!a[p.clave] || saltado;
+    var ahora = p.fase === siguiente.fase;
+    return '<li data-estado="' + (hecho ? "hecho" : ahora ? "ahora" : "pendiente") + '">' +
+      '<span class="marca">' + (hecho ? "✓" : "·") + "</span>" +
+      "<span>" + esc(p.nombre) + "</span>" +
+      (ahora ? boton(p.fase, "Lanzar") : "<span>" + (saltado ? "sin referencias" : hecho ? "" : "en espera") + "</span>") +
+      "<small>" + esc(p.nota) + "</small></li>";
+  }).join("");
+  caja.hidden = false;
+}
+
 function pintarVeredicto(){
   var e = estado, h2 = $("veredicto-t"), extra = $("veredicto-h2"), p = $("veredicto-p"), acc = [];
 
@@ -442,12 +498,34 @@ function pintarVeredicto(){
     p.textContent = e.ultimo_error || "El manifiesto guarda el detalle.";
     acc.push(boton("escribir-tanda", "Reintentar la tanda"));
   } else {
-    h2.textContent = e.capitulos_cerrados ? "En reposo" : "Todavía no hay nada escrito";
+    var a = e.artefactos || {};
+    var faltan = pasosPendientes();
+    if (!a.idea) {
+      h2.textContent = "Todavía no hay ningún libro";
+      extra.textContent = ".";
+      p.textContent = "Empieza por el encargo: la premisa, los capítulos y los ajustes.";
+      acc.push('<a class="primario" href="/encargo">Ir al encargo</a>');
+      $("acciones").innerHTML = acc.join("");
+      $("aviso").textContent = lanzando ? "Lanzando…" : "";
+      return;
+    }
+    if (faltan.length) {
+      h2.textContent = "El libro está encargado y falta prepararlo";
+      extra.textContent = ": " + faltan.length + (faltan.length === 1 ? " paso." : " pasos.");
+      p.textContent = "Cada paso deja un artefacto que el siguiente necesita, así que van en orden. " +
+                      "Se lanzan de uno en uno y tardan un rato cada uno.";
+      $("acciones").innerHTML = "";
+      $("aviso").textContent = lanzando ? "Lanzando…" : "";
+      return;
+    }
+    h2.textContent = e.capitulos_cerrados ? "En reposo" : "Preparado, sin escribir todavía";
     extra.textContent = e.capitulos_cerrados ? ", con " + e.capitulos_cerrados + " capítulos cerrados." : ".";
     p.textContent = e.capitulos_cerrados
       ? "Puedes lanzar la siguiente tanda o montar lo que ya hay en un solo archivo."
-      : "Empieza por el encargo: la premisa, los capítulos y el tono.";
-    if (e.capitulos_cerrados) {
+      : "El estilo, la premisa, la sinopsis, la escaleta y el estado están listos. Falta escribir.";
+    if (!e.capitulos_cerrados) {
+      acc.push(boton("escribir-tanda", "Escribir la primera tanda", "primario"));
+    } else if (e.capitulos_cerrados) {
       acc.push(boton("escribir-tanda", "Escribir la siguiente tanda", "primario"));
       acc.push(boton("ensamblar", "Ensamblar lo cerrado"));
       acc.push('<a href="/lectura">Leer lo escrito</a>');
@@ -466,7 +544,7 @@ function pintarRegistro(evs){
     var grave = ev.tipo === "error" || ev.tipo === "bloqueo";
     return "<li" + (grave ? ' class="rev"' : "") + "><time>" + esc(ev.ts || "") + "</time><span>" +
            esc(ev.texto || "") + "</span></li>";
-  }).join("") || "<li><span>Todavía no hay eventos registrados.</span></li>";
+  }).join("") || "<li><time></time><span>Todavía no hay eventos registrados.</span></li>";
 }
 
 function refrescar(){
@@ -477,14 +555,15 @@ function refrescar(){
     fetch("/api/qa").then(function(r){ return r.ok ? r.json() : null; })
   ]).then(function(xs){
     estado = xs[0]; coste = xs[2]; qa = xs[3];
-    pintarCabecera(); pintarRotulos(); pintarIndicadores(); pintarVeredicto(); pintarRegistro(xs[1]);
+    pintarCabecera(); pintarRotulos(); pintarIndicadores(); pintarVeredicto();
+    pintarPreludio(); pintarRegistro(xs[1]);
   }).catch(function(e){
     $("veredicto-t").textContent = "No se puede hablar con el harness";
     $("veredicto-p").textContent = e.message;
   });
 }
 
-$("acciones").addEventListener("click", function(ev){
+function alPulsar(ev){
   var b = ev.target.closest("button[data-fase]");
   if (!b || lanzando) return;
   var fase = b.getAttribute("data-fase");
@@ -500,7 +579,9 @@ $("acciones").addEventListener("click", function(ev){
       return refrescar();
     })
     .catch(function(e){ lanzando = false; $("aviso").textContent = e.message; });
-});
+}
+$("acciones").addEventListener("click", alPulsar);
+$("preludio").addEventListener("click", alPulsar);
 
 refrescar();
 setInterval(refrescar, 5000);  // el estado se lee del disco; 5 s es suficiente y no castiga a nadie

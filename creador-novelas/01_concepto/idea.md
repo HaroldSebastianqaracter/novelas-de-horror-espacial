@@ -1,0 +1,1 @@
+Una cuadrilla de reparacion llega a una estacion minera que dejo de responder hace once dias y encuentra los turnos anotados al dia, la comida caliente y a nadie dentro.

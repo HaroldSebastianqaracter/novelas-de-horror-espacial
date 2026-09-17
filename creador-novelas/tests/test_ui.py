@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 import pytest
 
 from app import ui, web
-from app.config import cargar_config
+from app.config import HarnessConfig, cargar_config
 from app.errores import ConfiguracionInvalidaError, EstadoInvalidoError
 from app.orchestrator import checkpoint
 from app.rutas import Rutas
@@ -350,3 +350,34 @@ def test_las_cuatro_pantallas_llevan_la_misma_navegacion(proyecto, config):
         # La seccion activa se deduce del nombre del archivo: las rutas bonitas son redirecciones
         # a /static/*.html, asi que comparar con location.pathname nunca acertaria.
         assert "vestuario.html" in html and "location.pathname.split" in html
+
+
+def test_la_consola_ofrece_las_cinco_fases_de_preparacion(proyecto, config):
+    """El backend sabia lanzar las nueve fases y la pantalla solo ofrecia dos.
+
+    Para empezar una novela habia que volver a la terminal y teclear las cinco skills del preludio
+    en orden, que es justo lo que la web venia a evitar.
+    """
+    html = (Path(__file__).resolve().parents[1] / "app" / "static" / "consola.html").read_text(encoding="utf-8")
+    for fase in ("destilar-estilo", "generar-premisa", "generar-sinopsis",
+                 "generar-escaleta", "inicializar-estado", "escribir-tanda"):
+        assert fase in html, f"la consola no ofrece {fase}"
+        assert fase in web.SKILLS or fase in web.VERBOS, f"{fase} no se puede lanzar"
+
+
+def test_el_formulario_publica_las_cotas_del_esquema(proyecto, config):
+    """La hoja dejaba pedir 6 capitulos y el harness exige 30: el error salia al guardar.
+
+    Las cotas se leen de HarnessConfig en vez de escribirse en el HTML, para que no puedan quedarse
+    atras cuando cambie el esquema.
+    """
+    limites = ui.limites_de_config()
+    assert limites["total_capitulos"] == {"min": 30, "max": 50}
+    campo = HarnessConfig.model_fields["total_capitulos"]
+    cotas = {getattr(m, "ge", None) for m in campo.metadata} | {getattr(m, "le", None) for m in campo.metadata}
+    assert limites["total_capitulos"]["min"] in cotas and limites["total_capitulos"]["max"] in cotas
+
+
+def test_no_tener_informe_de_qa_no_es_un_error(proyecto, config, servidor):
+    estado, cuerpo = _pedir(servidor, "GET", "/api/qa")
+    assert estado == 200 and json.loads(cuerpo) is None

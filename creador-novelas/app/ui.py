@@ -113,6 +113,29 @@ def bloqueo_inv04(raiz: Path) -> tuple[int, str | None]:
     return cerrados, None
 
 
+def limites_de_config() -> dict[str, dict[str, int]]:
+    """Los minimos y maximos que HarnessConfig ya impone, leidos del esquema.
+
+    Escribirlos a mano en la hoja seria duplicarlos: cuando el esquema cambiara, el formulario
+    seguiria aceptando lo que ya no vale y el usuario descubriria el limite al fallar el guardado.
+    Paso exactamente eso con `total_capitulos`, que admite de 30 a 50 y la hoja dejaba poner 6.
+    """
+    limites: dict[str, dict[str, int]] = {}
+    for nombre, campo in HarnessConfig.model_fields.items():
+        cotas: dict[str, int] = {}
+        for marca in campo.metadata or ():
+            for atributo, clave in (("ge", "min"), ("gt", "min_exclusivo"),
+                                    ("le", "max"), ("lt", "max_exclusivo")):
+                valor = getattr(marca, atributo, None)
+                if isinstance(valor, int):
+                    cotas["min" if clave == "min_exclusivo" else clave] = (
+                        valor + 1 if clave == "min_exclusivo" else
+                        valor - 1 if clave == "max_exclusivo" else valor)
+        if cotas:
+            limites[nombre] = cotas
+    return limites
+
+
 def estado_formulario(raiz: Path) -> EstadoFormulario:
     """Lo que muestra el GET: valores actuales de config/ (o los defaults), la idea y el bloqueo de INV-04."""
     rutas = Rutas(raiz)
@@ -393,7 +416,8 @@ class _Manejador(BaseHTTPRequestHandler):
                              "motivo_bloqueo": e.motivo_bloqueo, "capitulos_cerrados": e.capitulos_cerrados,
                              "referencias": e.referencias,
                              "campos_novela": list(CAMPOS_NOVELA),
-                             "campos_ejecucion": list(CAMPOS_EJECUCION)})
+                             "campos_ejecucion": list(CAMPOS_EJECUCION),
+                             "limites": limites_de_config()})
         elif ruta == "/api/indice":
             self._json(200, web.indice(self.raiz))
         elif ruta.startswith("/api/capitulo/"):
@@ -420,8 +444,10 @@ class _Manejador(BaseHTTPRequestHandler):
         elif ruta == "/api/eventos":
             self._json(200, web.eventos(self.raiz))
         elif ruta == "/api/qa":
-            informe = web.informe_qa(self.raiz)
-            self._json(200 if informe else 404, informe or {"error": "no hay ningún informe pendiente"})
+            # 200 con `null` y no 404: que no haya informe pendiente es el estado normal de una
+            # novela sana, no un error. Devolver 404 llenaba la consola del navegador de rojo en
+            # cada refresco y enmascaraba los fallos de verdad.
+            self._json(200, web.informe_qa(self.raiz))
         else:
             self._responder(404, _pagina("No encontrado",
                                          "<p>Existen <a href='/'>/</a> (vestuario), <a href='/encargo'>/encargo</a>, <a href='/consola'>/consola</a> y <a href='/lectura'>/lectura</a>.</p>"))
