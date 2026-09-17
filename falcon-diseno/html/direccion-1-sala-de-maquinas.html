@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sala de máquinas — El casco frío del Falcon, producción</title>
+<style>
+  :root{
+    --fondo:#0A0D10;        /* pantalla apagada */
+    --linea:#93A6B9;        /* alambre del plano */
+    --linea-tenue:#3B4652;  /* costillas y detalle */
+    --texto:#C9D3DC;
+    --texto-bajo:#7C8B99;
+    --verde:#7BE3B2;        /* cubierta en marcha */
+    --rosa:#E39BC4;         /* cubierta con hechos fijados */
+    --rojo:#E0483C;         /* inspección, parada */
+    --ambar:#E0A21B;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--fondo);color:var(--texto);
+    font-family:"Arial Narrow","Helvetica Neue",Arial,"Liberation Sans Narrow","Liberation Sans",sans-serif;
+    font-stretch:condensed;font-size:15px;line-height:1.35;min-width:1024px;
+  }
+  a,button{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--verde);outline-offset:3px}
+
+  .pantalla{
+    position:relative;min-height:100vh;padding:36px 56px 40px;
+    display:grid;grid-template-rows:auto 1fr auto auto;gap:18px;
+    background:
+      radial-gradient(ellipse at 50% 45%,rgba(147,166,185,.07),transparent 65%),
+      var(--fondo);
+    overflow:hidden;
+  }
+  /* barrido de tubo: líneas de 2 px */
+  .pantalla::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.28) 2px 4px);
+    mix-blend-mode:multiply;
+  }
+  /* ruido tenue */
+  .pantalla::after{
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.35;
+    background:
+      repeating-linear-gradient(90deg,rgba(147,166,185,.04) 0 1px,transparent 1px 7px),
+      repeating-linear-gradient(0deg,rgba(147,166,185,.03) 0 1px,transparent 1px 11px);
+  }
+  .pantalla > *{position:relative;z-index:1}
+
+  /* Marco con esquinas en escuadra */
+  .marco{position:relative;padding:16px 28px}
+  .marco::before,.marco::after{
+    content:"";position:absolute;top:0;bottom:0;width:26px;
+    border:1.5px solid var(--linea);
+  }
+  .marco::before{left:0;border-right:0;border-radius:6px 0 0 6px}
+  .marco::after{right:0;border-left:0;border-radius:0 6px 6px 0}
+
+  .cabecera{display:grid;grid-template-columns:1fr auto;align-items:center;gap:32px}
+  .cabecera .marco{text-align:center;justify-self:center;min-width:560px}
+  .cabecera h1{margin:0;font-size:24px;font-weight:400;letter-spacing:.04em;line-height:1.2}
+  .cabecera h1 small{display:block;font-size:20px;color:var(--texto);letter-spacing:.02em}
+  .cabecera .premisa{margin:8px 0 0;color:var(--texto-bajo);font-size:14px;max-width:70ch;margin-left:auto;margin-right:auto}
+  .cargando{color:var(--texto-bajo);font-size:16px;letter-spacing:.06em;text-align:right}
+  .cargando b{display:block;color:var(--texto);font-weight:400;font-size:18px}
+  .cargando .ticks{display:flex;gap:3px;justify-content:flex-end;margin-top:6px}
+  .cargando .ticks i{width:12px;height:3px;background:var(--linea-tenue)}
+  .cargando .ticks i.on{background:var(--verde)}
+  .cargando .ticks i.stop{background:var(--rojo)}
+  body.en-marcha .cargando .ticks i.stop{background:var(--verde)}
+
+  /* Plano */
+  .plano{display:flex;align-items:center;justify-content:center;min-height:0}
+  .plano svg{width:100%;max-width:1280px;height:auto;display:block}
+  .plano text{font-family:inherit;font-size:12.5px;fill:var(--texto);letter-spacing:.02em}
+  .plano text.bajo{fill:var(--texto-bajo)}
+  .plano .cubierta{fill:transparent;stroke:var(--linea);stroke-width:1.2;transition:fill 600ms ease,stroke 600ms ease}
+  .plano .relleno{opacity:0;transition:opacity 600ms ease}
+  .plano .relleno[data-agente="revisor"]{opacity:.85}
+  body.en-marcha .plano .relleno[data-agente="revisor"]{opacity:0}
+  body.en-marcha .plano .relleno[data-agente="orquestador"]{opacity:.8;transition-delay:200ms}
+  body.en-marcha .plano .relleno[data-agente="escritor"]{opacity:.8;transition-delay:600ms}
+  body.en-marcha .plano .relleno[data-agente="extractor"]{opacity:.55;transition-delay:1000ms}
+
+  /* Indicadores: líneas, no diales */
+  .indicadores{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;padding:0 28px}
+  .ind{display:grid;grid-template-columns:1fr auto;gap:2px 16px;align-items:baseline}
+  .ind .nombre{color:var(--texto-bajo);font-size:14px}
+  .ind .valor{font-size:20px;font-variant-numeric:tabular-nums;text-align:right}
+  .ind .barra{grid-column:1/-1;height:6px;background:var(--linea-tenue);position:relative}
+  .ind .barra i{position:absolute;left:0;top:0;bottom:0;background:var(--linea)}
+  .ind .barra i.verde{background:var(--verde)}
+  .ind .barra i.rojo{background:var(--rojo)}
+  .ind .barra .marca{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ambar)}
+  .ind .nota{grid-column:1/-1;color:var(--texto-bajo);font-size:13px}
+
+  /* Pie: veredicto + registro */
+  .pie{display:grid;grid-template-columns:1fr 420px;gap:32px;align-items:start}
+  .veredicto{display:grid;grid-template-columns:1fr auto;gap:8px 24px;align-items:center}
+  .veredicto h2{margin:0;font-size:17px;font-weight:400;letter-spacing:.03em}
+  .veredicto h2 b{color:var(--rojo);font-weight:400}
+  body.en-marcha .veredicto h2 b{color:var(--verde)}
+  .veredicto p{margin:0;grid-column:1;color:var(--texto-bajo);font-size:14px}
+  .veredicto .acciones{grid-column:2;grid-row:1/3;display:flex;flex-direction:column;gap:8px}
+  .veredicto button{
+    background:transparent;border:1.5px solid var(--linea);color:var(--texto);
+    padding:9px 16px;cursor:pointer;font-size:14.5px;letter-spacing:.03em;text-align:left;
+  }
+  .veredicto button:hover{background:rgba(147,166,185,.12)}
+  .veredicto button.primario{border-color:var(--rojo);color:#fff;background:rgba(224,72,60,.18)}
+  body.en-marcha .veredicto button.primario{border-color:var(--verde);background:rgba(123,227,178,.14)}
+
+  .registro{font-size:13.5px}
+  .registro h2{margin:0 0 6px;font-size:13.5px;font-weight:400;color:var(--texto-bajo);letter-spacing:.04em}
+  .registro ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--linea-tenue)}
+  .registro li{display:grid;grid-template-columns:44px 1fr;gap:10px;padding:5px 0;border-bottom:1px solid var(--linea-tenue);line-height:1.3}
+  .registro time{color:var(--texto-bajo);font-variant-numeric:tabular-nums}
+  .registro li.rev{color:#fff}
+  .registro li.rev b{color:var(--rojo);font-weight:400}
+
+  @media (prefers-reduced-motion:reduce){
+    .plano .cubierta,.plano .relleno,.ind .barra i{transition:none}
+  }
+  @media (max-width:1280px){
+    .pantalla{padding:28px 36px 32px}
+    .cabecera .marco{min-width:480px}
+    .pie{grid-template-columns:1fr 360px}
+  }
+</style>
+</head>
+<body>
+<main class="pantalla">
+  <header class="cabecera">
+    <div class="marco">
+      <h1>Capítulo 6 de 30<small>La segunda lista de nombres</small></h1>
+      <p class="premisa">Una tripulación de seis personas despierta de la hibernación a nueve años de destino y descubre que la nave lleva despierta mucho más tiempo que ellos.</p>
+    </div>
+    <div class="cargando" role="status">
+      <b id="estado-txt">Detenido...</b>
+      Revisor de calidad
+      <div class="ticks" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="stop"></i><i></i><i></i><i></i></div>
+    </div>
+  </header>
+
+  <section class="plano" aria-label="Plano del Falcon">
+    <svg viewBox="0 0 1240 420" role="img" aria-label="Plano lateral en alambre del Falcon. De popa a proa: cubierta de ingeniería con tres toberas, torre de hibernación y bodega, cubierta de redacción sobre la espina central, bodega de hechos bajo ella, ramal seis de inspección resaltado en rojo y el puente en proa. El ramal seis está resaltado porque el Revisor ha detenido la producción.">
+      <defs>
+        <filter id="brillo" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <pattern id="costillas" width="14" height="14" patternUnits="userSpaceOnUse">
+          <path d="M7 0 V14" stroke="#3B4652" stroke-width="1"/>
+        </pattern>
+        <pattern id="malla" width="10" height="10" patternUnits="userSpaceOnUse">
+          <path d="M0 5 H10 M5 0 V10" stroke="#3B4652" stroke-width=".6"/>
+        </pattern>
+      </defs>
+
+      <!-- Casco exterior: silueta continua -->
+      <g fill="none" stroke="#93A6B9" stroke-width="1.6" stroke-linejoin="round">
+        <path d="M70 132 H 210 V 96 H 250 V 62 H 350 V 96 H 400 V 150 H 470 L 500 128 H 640 V 150 H 800 V 122 H 960 V 150 H 1020 L 1120 158 L 1198 188 L 1216 210 L 1198 232 L 1120 262 L 1020 270 H 960 V 296 H 800 V 270 H 640 V 296 H 470 V 270 H 400 V 322 H 350 V 356 H 250 V 322 H 210 V 288 H 70 Z"/>
+      </g>
+
+      <!-- Popa: cubierta de ingeniería y toberas -->
+      <g fill="none" stroke="#93A6B9" stroke-width="1.1">
+        <path d="M22 150 H 70 M22 210 H 70 M22 270 H 70"/>
+        <path d="M22 138 L 40 138 L 70 150 M22 162 L 40 162 L 70 150"/>
+        <path d="M22 198 L 40 198 L 70 210 M22 222 L 40 222 L 70 210"/>
+        <path d="M22 258 L 40 258 L 70 270 M22 282 L 40 282 L 70 270"/>
+        <ellipse cx="22" cy="150" rx="6" ry="14"/><ellipse cx="22" cy="210" rx="6" ry="14"/><ellipse cx="22" cy="270" rx="6" ry="14"/>
+        <rect x="84" y="146" width="112" height="128" fill="url(#malla)"/>
+        <path d="M84 178 H 196 M84 210 H 196 M84 242 H 196 M124 146 V 274 M156 146 V 274"/>
+        <path d="M96 132 V 288 M182 132 V 288" stroke="#3B4652"/>
+      </g>
+
+      <!-- Torre de hibernación y bodega -->
+      <g fill="none" stroke="#93A6B9" stroke-width="1.1">
+        <rect x="222" y="108" width="166" height="204" fill="url(#costillas)"/>
+        <path d="M222 150 H 388 M222 192 H 388 M222 234 H 388 M222 276 H 388"/>
+        <!-- seis pods de hibernación, vacíos -->
+        <g stroke="#93A6B9" stroke-width="1">
+          <rect x="236" y="116" width="20" height="28" rx="6"/><rect x="262" y="116" width="20" height="28" rx="6"/><rect x="288" y="116" width="20" height="28" rx="6"/>
+          <rect x="314" y="116" width="20" height="28" rx="6"/><rect x="340" y="116" width="20" height="28" rx="6"/><rect x="366" y="116" width="16" height="28" rx="6"/>
+        </g>
+        <path d="M250 62 V 96 M350 62 V 96 M262 74 H 338 M262 86 H 338" stroke="#3B4652"/>
+        <path d="M250 322 V 356 M350 322 V 356 M262 334 H 338 M262 346 H 338" stroke="#3B4652"/>
+      </g>
+
+      <!-- Espina central -->
+      <g fill="none" stroke="#3B4652" stroke-width="1">
+        <rect x="400" y="182" width="620" height="56" fill="url(#costillas)"/>
+        <path d="M400 210 H 1020" stroke="#93A6B9" stroke-width="1.4"/>
+        <path d="M400 196 H 1020 M400 224 H 1020"/>
+      </g>
+
+      <!-- Cubierta de redacción (Escritor), sobre la espina -->
+      <g>
+        <rect class="relleno" data-agente="escritor" x="500" y="128" width="140" height="54" fill="#7BE3B2" filter="url(#brillo)"/>
+        <rect class="cubierta" x="500" y="128" width="140" height="54"/>
+        <path d="M512 140 H 628 M512 152 H 600 M512 164 H 620 M512 176 H 580" stroke="#93A6B9" stroke-width="1" fill="none"/>
+      </g>
+      <!-- Puente (Orquestador), proa -->
+      <g>
+        <path class="relleno" data-agente="orquestador" d="M1020 158 L 1120 158 L 1198 188 L 1216 210 L 1198 232 L 1120 262 L 1020 262 Z" fill="#7BE3B2" filter="url(#brillo)"/>
+        <path class="cubierta" d="M1020 158 L 1120 158 L 1198 188 L 1216 210 L 1198 232 L 1120 262 L 1020 262 Z"/>
+        <path d="M1040 172 H 1110 L 1170 194 M1040 248 H 1110 L 1170 226 M1060 158 V 262 M1100 158 V 262" stroke="#3B4652" stroke-width="1" fill="none"/>
+        <path d="M1130 186 L 1180 202 M1130 234 L 1180 218" stroke="#93A6B9" stroke-width="1" fill="none"/>
+      </g>
+      <!-- Bodega de hechos (Extractor), bajo la espina -->
+      <g>
+        <rect class="relleno" data-agente="extractor" x="640" y="238" width="160" height="58" fill="#E39BC4" filter="url(#brillo)"/>
+        <rect class="cubierta" x="640" y="238" width="160" height="58"/>
+        <g stroke="#93A6B9" stroke-width="1" fill="none">
+          <rect x="650" y="248" width="26" height="16"/><rect x="682" y="248" width="26" height="16"/><rect x="714" y="248" width="26" height="16"/><rect x="746" y="248" width="26" height="16"/>
+          <rect x="650" y="270" width="26" height="16"/><rect x="682" y="270" width="26" height="16"/><rect x="714" y="270" width="26" height="16"/>
+        </g>
+      </g>
+      <!-- Ramal seis, inspección (Revisor), resaltado -->
+      <g>
+        <rect class="relleno" data-agente="revisor" x="800" y="122" width="160" height="60" fill="#E0483C" filter="url(#brillo)"/>
+        <rect class="cubierta" x="800" y="122" width="160" height="60"/>
+        <path d="M812 134 L 836 170 L 812 170 Z M948 134 L 924 170 L 948 170 Z" fill="none" stroke="#0A0D10" stroke-width="1.2"/>
+        <path d="M850 140 H 910 M850 152 H 910 M850 164 H 910" stroke="#0A0D10" stroke-width="1.2" fill="none"/>
+      </g>
+
+      <!-- Etiquetas con líneas guía -->
+      <g fill="none" stroke="#93A6B9" stroke-width=".9">
+        <path d="M140 132 V 108 M300 62 V 40 M570 128 V 100 M720 296 V 330 M880 122 V 94 M1120 158 V 128 M140 288 V 318 M300 356 V 384 M470 270 V 340"/>
+      </g>
+      <text x="146" y="104">//Ingeniería, motores</text>
+      <text x="306" y="36">//Hibernación, seis pods vacíos</text>
+      <text x="576" y="96">//Cubierta de redacción</text>
+      <text x="576" y="112" class="bajo">Escritor, capítulo 7 en espera</text>
+      <text x="726" y="345">//Bodega de hechos</text>
+      <text x="726" y="361" class="bajo">Extractor, 41 hechos fijados</text>
+      <text x="886" y="90" fill="#E0483C">//Ramal seis, inspección</text>
+      <text x="886" y="106" class="bajo">Revisor, ha detenido la nave</text>
+      <text x="1126" y="124">//Puente</text>
+      <text x="1126" y="140" class="bajo">Orquestador, esperando</text>
+      <text x="146" y="333" class="bajo">//Cubierta de ingeniería</text>
+      <text x="306" y="399" class="bajo">//Bodega de minería, herramientas</text>
+      <text x="476" y="355" class="bajo">//Espina, ramales uno a cinco</text>
+
+      <!-- Cota -->
+      <path d="M22 412 H 1216 M22 406 V 418 M1216 406 V 418" stroke="#3B4652" stroke-width="1" fill="none"/>
+      <text x="620" y="408" text-anchor="middle" class="bajo">El casco frío del Falcon, corte longitudinal, cubierta de trabajo</text>
+    </svg>
+  </section>
+
+  <section class="indicadores" aria-label="Indicadores de producción">
+    <div class="ind">
+      <span class="nombre">Capítulos cerrados</span><span class="valor">6 de 30</span>
+      <div class="barra" aria-hidden="true"><i class="verde" style="width:20%"></i><span class="marca" style="left:20%"></span></div>
+      <span class="nota">El revisor audita cada cuatro; la marca ámbar es la última auditoría.</span>
+    </div>
+    <div class="ind">
+      <span class="nombre">Gastado hasta el veredicto</span><span class="valor">14,20 €</span>
+      <div class="barra" aria-hidden="true"><i class="rojo" style="width:35.5%"></i></div>
+      <span class="nota">De un máximo autorizado de 40 €. No se devuelve lo escrito.</span>
+    </div>
+    <div class="ind">
+      <span class="nombre">Tiempo de producción</span><span class="valor">3 h 12 min</span>
+      <div class="barra" aria-hidden="true"><i style="width:53%"></i></div>
+      <span class="nota">De las 6 h previstas. En pausa la máquina no cobra.</span>
+    </div>
+  </section>
+
+  <footer class="pie">
+    <div class="marco veredicto" role="alert">
+      <h2><b id="veredicto-t">El revisor ha detenido la producción</b> al cerrar el capítulo 6.</h2>
+      <p id="veredicto-p">Dos contradicciones con hechos ya establecidos y quince repeticiones de lenguaje. Nada se escribe hasta que decidas.</p>
+      <div class="acciones">
+        <button type="button" class="primario">Leer el informe del revisor</button>
+        <button type="button" id="btn-reanudar" aria-pressed="false">Reanudar bajo mi responsabilidad</button>
+      </div>
+    </div>
+    <div class="registro">
+      <h2>Registro de a bordo</h2>
+      <ol reversed>
+        <li class="rev"><time>14:52</time><span><b>Revisor:</b> el cortador de Vlk está en el ramal seis en el cap. 4 y en el taller en el cap. 6. La voz de cuarentena cambia de género entre el 2 y el 5. «Olía a hierro caliente» aparece cuatro veces.</span></li>
+        <li><time>14:49</time><span>Extractor: siete hechos nuevos del capítulo 6, uno en conflicto.</span></li>
+        <li><time>14:41</time><span>Escritor: capítulo 6 cerrado, 2.610 palabras.</span></li>
+        <li><time>14:12</time><span>Orquestador: encarga el capítulo 6 con 34 hechos vigentes.</span></li>
+        <li><time>13:27</time><span>Escritor: capítulo 4 cerrado, «Lo que quedó despierto».</span></li>
+      </ol>
+    </div>
+  </footer>
+</main>
+
+<script>
+  // Único movimiento orquestado: reanudar apaga el ramal rojo y reenciende puente, redacción y bodega en orden.
+  (function(){
+    var b=document.getElementById('btn-reanudar');
+    var t=document.getElementById('veredicto-t'), p=document.getElementById('veredicto-p'), e=document.getElementById('estado-txt');
+    b.addEventListener('click',function(){
+      var on=document.body.classList.toggle('en-marcha');
+      b.setAttribute('aria-pressed',on?'true':'false');
+      if(on){
+        t.textContent='Producción reanudada bajo tu responsabilidad';
+        p.textContent='El revisor ha anotado tu decisión. Las dos contradicciones quedan abiertas y volverá a auditar en el capítulo 10.';
+        b.textContent='Volver a detener';
+        e.textContent='Escribiendo...';
+      }else{
+        t.textContent='El revisor ha detenido la producción';
+        p.textContent='Dos contradicciones con hechos ya establecidos y quince repeticiones de lenguaje. Nada se escribe hasta que decidas.';
+        b.textContent='Reanudar bajo mi responsabilidad';
+        e.textContent='Detenido...';
+      }
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lo que quedó despierto — Capítulo 4, El casco frío del Falcon</title>
+<style>
+  :root{
+    --fondo:#12100C;        /* metal quemado, casi negro cálido */
+    --placa:#1C1812;        /* plancha del traje */
+    --junta:#0C0A07;        /* junta entre planchas */
+    --linea:#A88A52;        /* latón envejecido: alambre y marcos */
+    --linea-tenue:#4A3D28;  /* óxido oscuro */
+    --texto:#E6DCC8;        /* hueso */
+    --texto-bajo:#9C8E74;
+    --verde:#6FE3E6;        /* cian del visor: hechos fijados, capítulo actual */
+    --rosa:#C9A15A;         /* latón claro */
+    --rojo:#C0392B;         /* revisor, cuarentena */
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--fondo);color:var(--texto);
+    font-family:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,"Times New Roman",serif;
+    font-size:20px;line-height:1.62;min-width:1024px;
+  }
+  :focus-visible{outline:2px solid var(--verde);outline-offset:3px}
+  a{color:inherit}
+  button{font:inherit;color:inherit}
+  .ui{font-family:"Arial Narrow","Helvetica Neue",Arial,"Liberation Sans Narrow","Liberation Sans",sans-serif;font-stretch:condensed;letter-spacing:.03em}
+
+  .pantalla{
+    position:relative;min-height:100vh;overflow:hidden;
+    background:
+      radial-gradient(ellipse at 50% -10%,rgba(201,161,90,.22),transparent 55%),
+      repeating-linear-gradient(180deg,var(--placa) 0 44px,var(--junta) 44px 48px),
+      var(--fondo);
+  }
+  /* roña y arañazos: vetas verticales irregulares */
+  .pantalla::before{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.5;
+    background:
+      repeating-linear-gradient(92deg,transparent 0 37px,rgba(0,0,0,.35) 37px 39px,transparent 39px 83px),
+      repeating-linear-gradient(88deg,transparent 0 61px,rgba(201,161,90,.06) 61px 62px);
+  }
+  /* remaches en las juntas */
+  .pantalla::after{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.6;
+    background:radial-gradient(circle at 6px 46px,rgba(201,161,90,.35) 1.5px,transparent 2.5px) 0 0/96px 48px repeat;
+  }
+
+  /* Marco con esquinas en escuadra */
+  .marco{position:relative;padding:14px 30px}
+  .marco::before,.marco::after{content:"";position:absolute;top:0;bottom:0;width:26px;border:1.5px solid var(--linea);box-shadow:inset 0 0 0 1px rgba(111,227,230,.18)}
+  .marco::before{left:0;border-right:0;border-radius:6px 0 0 6px}
+  .marco::after{right:0;border-left:0;border-radius:0 6px 6px 0}
+
+  /* Cabecera: título de capítulo centrado, estado a la derecha */
+  .cabecera{
+    position:sticky;top:0;z-index:2;background:linear-gradient(180deg,#1A1610,#14110C);border-bottom:1px solid var(--linea-tenue);
+    display:grid;grid-template-columns:1fr auto;align-items:center;gap:32px;
+    padding:26px 56px 18px;
+  }
+  .cabecera .marco{justify-self:center;text-align:center;min-width:560px}
+  .cabecera h1{margin:0;font-size:24px;font-weight:400;line-height:1.2;color:var(--texto)}
+  .cabecera h1 small{display:block;font-size:20px}
+  .estado{color:var(--texto-bajo);font-size:16px;text-align:right}
+  .estado b{display:block;color:var(--texto);font-weight:400;font-size:18px}
+  .estado .ticks{display:flex;gap:3px;justify-content:flex-end;margin-top:6px}
+  .estado .ticks i{width:12px;height:3px;background:var(--linea-tenue)}
+  .estado .ticks i.on{background:var(--verde)}
+  .estado .ticks i.stop{background:var(--rojo)}
+
+  /* Cinta de cuarentena del revisor */
+  .cuarentena{
+    margin:0 56px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:24px;
+    border-top:1px solid var(--rojo);border-bottom:1px solid var(--rojo);padding:8px 0;
+    color:var(--texto-bajo);font-size:14px;line-height:1.35;
+  }
+  .cuarentena p{margin:0}
+  .cuarentena b{color:var(--rojo);font-weight:400}
+  .cuarentena a{font-size:14px;text-decoration:none;border:1.5px solid var(--linea);padding:6px 12px;color:var(--texto);white-space:nowrap}
+  .cuarentena a:hover{background:rgba(168,138,82,.16)}
+
+  /* Retícula: costillar | texto | margen del Extractor */
+  .pagina{
+    display:grid;grid-template-columns:120px minmax(560px,66ch) minmax(240px,1fr);
+    gap:0 48px;padding:44px 56px 120px 40px;max-width:1500px;margin:0 auto;
+  }
+
+  /* Costillar: cuadernas en alambre */
+  .costillar{position:sticky;top:150px;align-self:start;height:calc(100vh - 200px);display:flex;flex-direction:column}
+  .costillar ol{list-style:none;margin:0;padding:0;flex:1;display:flex;flex-direction:column;justify-content:space-between;border-left:1px solid var(--linea-tenue)}
+  .costillar li{display:flex;align-items:center;min-height:0}
+  .costillar a,.costillar span{display:flex;align-items:center;gap:8px;text-decoration:none;font-size:12.5px;color:var(--texto-bajo);width:100%}
+  .costillar i{display:block;height:1.5px;background:var(--linea-tenue);width:28px;flex:none;margin-left:-1px}
+  .costillar li.leido i{background:var(--linea);width:40px}
+  .costillar li.actual i{background:var(--verde);width:56px;height:3px;box-shadow:0 0 8px rgba(111,227,230,.75)}
+  .costillar li.actual a{color:var(--verde)}
+  .costillar li.sellado i{background:transparent;border-top:1.5px dashed var(--linea-tenue)}
+  .costillar li.pausa i{background:var(--rojo);height:5px;width:20px;box-shadow:0 0 8px rgba(192,57,43,.75)}
+  .costillar li.pausa span{color:var(--rojo)}
+  .costillar a:hover{color:var(--texto)}
+
+  /* Texto */
+  .texto header{margin:0 0 40px;padding-bottom:16px;border-bottom:1px solid var(--linea-tenue)}
+  .texto .numero{display:block;font-size:14px;color:var(--texto-bajo);margin-bottom:8px}
+  .texto h2{margin:0;font-size:38px;line-height:1.05;font-weight:400;font-style:italic}
+  .texto .cierre{margin:10px 0 0;font-size:14px;color:var(--texto-bajo)}
+  .texto p{margin:0 0 1.3em;hyphens:auto;text-wrap:pretty;text-shadow:0 1px 0 rgba(0,0,0,.6)}
+  .texto .aviso{display:block;padding-left:1.4em;font-style:italic;color:var(--texto-bajo)}
+  .texto .mano{
+    display:block;margin:1.6em 0;padding:.5em 0;
+    font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif;font-weight:700;font-size:1.25em;letter-spacing:.08em;
+    color:var(--rojo);border-top:1px solid var(--rojo);border-bottom:1px solid var(--rojo);text-shadow:0 0 10px rgba(192,57,43,.7);
+  }
+  /* hechos fijados por el Extractor: se resaltan al pedirlo */
+  mark.hecho{background:transparent;color:inherit;transition:background-color 500ms ease,box-shadow 500ms ease}
+  body.hechos mark.hecho{background:rgba(111,227,230,.14);box-shadow:0 1px 0 var(--verde)}
+  body.hechos mark.hecho.conflicto{background:rgba(192,57,43,.22);box-shadow:0 1px 0 var(--rojo)}
+  .texto .siguiente{margin-top:64px;padding-top:20px;border-top:1px solid var(--linea-tenue);display:flex;justify-content:space-between;gap:24px;align-items:baseline;font-size:15px}
+  .texto .siguiente a{text-decoration:none;border:1.5px solid var(--linea);padding:8px 14px;color:var(--texto)}
+  .texto .siguiente a:hover{background:rgba(168,138,82,.16)}
+  .texto .siguiente small{display:block;color:var(--texto-bajo);margin-top:4px;font-size:12.5px}
+
+  /* Margen del Extractor */
+  .margen{font-size:13.5px;line-height:1.45;color:var(--texto-bajo)}
+  .margen h3{font-size:13.5px;font-weight:400;color:var(--texto);margin:0 0 6px}
+  .margen .quien{margin:0 0 24px;padding:0 0 12px;border-bottom:1px solid var(--linea-tenue)}
+  .margen dl{margin:0}
+  .margen dt{color:var(--verde);margin-top:16px}
+  .margen dt::before{content:"//"}
+  .margen dd{margin:2px 0 0}
+  .margen dd.conflicto{color:var(--rojo);padding-left:12px;border-left:1.5px solid var(--rojo);margin-top:6px}
+  .margen svg{width:100%;height:auto;display:block;margin-top:24px}
+  .margen svg text{font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif;font-size:11px;letter-spacing:.03em}
+  .margen .accion{margin-top:36px}
+  .margen button{
+    display:block;width:100%;text-align:left;background:transparent;border:1.5px solid var(--linea);padding:12px 14px;cursor:pointer;
+    font-size:14px;line-height:1.35;color:var(--texto);
+  }
+  .margen button:hover{background:rgba(168,138,82,.16)}
+  .margen button small{display:block;color:var(--texto-bajo);margin-top:4px}
+  body.hechos .margen button{border-color:var(--verde)}
+  .margen .actores{margin-top:36px}
+  .margen .actores ul{margin:0;padding:0;list-style:none;border-top:1px solid var(--linea-tenue)}
+  .margen .actores li{padding:6px 0;border-bottom:1px solid var(--linea-tenue)}
+  .margen .actores li b{color:var(--texto);font-weight:400}
+
+  @media (prefers-reduced-motion:reduce){mark.hecho{transition:none}}
+  @media (max-width:1280px){
+    .cabecera{padding:22px 36px 16px}
+    .cabecera .marco{min-width:480px}
+    .cuarentena{margin:0 36px}
+    .pagina{grid-template-columns:100px minmax(520px,62ch) minmax(220px,1fr);gap:0 36px;padding:36px 36px 100px 28px}
+    body{font-size:19px}
+    .texto h2{font-size:32px}
+  }
+</style>
+</head>
+<body>
+<div class="pantalla">
+  <header class="cabecera ui">
+    <div class="marco">
+      <h1>Capítulo 4 de 30<small>Lo que quedó despierto</small></h1>
+    </div>
+    <div class="estado" role="status">
+      <b>Leyendo...</b>
+      El casco frío del Falcon
+      <div class="ticks" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="stop"></i><i></i><i></i><i></i></div>
+    </div>
+  </header>
+
+  <div class="cuarentena ui" role="status">
+    <p><b>//Producción detenida en el capítulo 6.</b> El Revisor de calidad ha encontrado dos contradicciones con hechos establecidos y quince repeticiones de lenguaje. Puedes leer lo cerrado; nada nuevo se escribe hasta que decidas.</p>
+    <a href="#veredicto">Ver el veredicto</a>
+  </div>
+
+  <div class="pagina">
+    <nav class="costillar ui" aria-label="Capítulos">
+      <ol>
+        <li class="leido"><a href="#c1"><i aria-hidden="true"></i>1</a></li>
+        <li class="leido"><a href="#c2"><i aria-hidden="true"></i>2</a></li>
+        <li class="leido"><a href="#c3"><i aria-hidden="true"></i>3</a></li>
+        <li class="actual"><a href="#c4" aria-current="page"><i aria-hidden="true"></i>4, estás aquí</a></li>
+        <li class="leido"><a href="#c5"><i aria-hidden="true"></i>5</a></li>
+        <li class="leido"><a href="#c6"><i aria-hidden="true"></i>6</a></li>
+        <li class="pausa"><span><i aria-hidden="true"></i>revisor</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>7</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>8</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>9</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>10</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>15</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>20</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>25</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>30</span></li>
+      </ol>
+    </nav>
+
+    <article class="texto" id="c4">
+      <header>
+        <span class="numero ui">//Cubierta de ingeniería, ramal seis</span>
+        <h2>Lo que quedó despierto</h2>
+        <p class="cierre ui">Cerrado por el Escritor a las 13:27, revisado sin reparos en la auditoría del capítulo 4.</p>
+      </header>
+
+      <p>La cubierta de ingeniería olía a hierro caliente y a algo más dulce que Vlk no quiso terminar de nombrar. <mark class="hecho">Las luces de emergencia iban y venían en un ciclo de tres segundos: rojo, nada, rojo.</mark> En cada intervalo de oscuridad el pasillo parecía haber cambiado un poco de forma, y ella había aprendido a no comprobarlo.</p>
+
+      <p>El cortador pesaba lo que pesa una herramienta, no lo que pesa un arma. Eso era lo peor. <mark class="hecho">Estaba diseñado para abrir mamparos de aleación en gravedad cero, con una empuñadura pensada para guantes de trabajo y un seguro que había que soltar con el pulgar</mark> mientras se sujetaba el cuerpo con las piernas. Nadie había previsto que alguien lo llevara así, <mark class="hecho conflicto">contra el pecho, avanzando de espaldas a lo largo de una pared.</mark></p>
+
+      <p><mark class="hecho">El aviso de cuarentena seguía repitiéndose por los altavoces del ramal seis, la misma voz sintética que llevaba sonando desde antes de que ellos despertaran.</mark>
+        <span class="aviso">Permanezcan en sus puestos. La situación está bajo control. El personal médico acudirá a su sección.</span>
+        Vlk había contado las repeticiones durante la primera hora y luego lo había dejado, porque contar implicaba que en algún momento iba a parar.</p>
+
+      <p>En el mamparo, alguien había escrito con las manos, y no con tinta:</p>
+      <span class="mano">NO VOLVÁIS A DORMIR.</span>
+
+      <nav class="siguiente ui" aria-label="Capítulos contiguos">
+        <a href="#c3">Capítulo 3, la cubierta vacía<small>anterior</small></a>
+        <a href="#c5">Capítulo 5, Permanezcan en sus puestos<small>siguiente, cerrado</small></a>
+      </nav>
+    </article>
+
+    <aside class="margen ui" aria-labelledby="margen-t">
+      <div class="quien">
+        <h3 id="margen-t">Lo que el Extractor fijó en este capítulo</h3>
+        Siete hechos. A partir de aquí el Escritor no puede contradecirlos sin que el Revisor lo vea.
+      </div>
+      <dl>
+        <dt>Vlk</dt>
+        <dd>Lleva el cortador de mamparos contra el pecho. Avanza de espaldas por la cubierta de ingeniería.</dd>
+        <dd class="conflicto">En conflicto con el capítulo 6, donde el cortador sigue guardado en el taller. Es una de las dos contradicciones del veredicto.</dd>
+        <dt>El cortador</dt>
+        <dd>Herramienta de minería. Seguro que se suelta con el pulgar. Pensado para gravedad cero y guantes de trabajo.</dd>
+        <dt>Luces de emergencia</dt>
+        <dd>Ciclo de tres segundos: rojo, nada, rojo.</dd>
+        <dt>Aviso de cuarentena</dt>
+        <dd>Suena en el ramal seis desde antes del despertar. Tres frases, siempre las mismas.</dd>
+        <dt>El mamparo</dt>
+        <dd>Escrito a mano, no con tinta: «No volváis a dormir».</dd>
+      </dl>
+
+      <svg viewBox="0 0 300 160" role="img" aria-label="Plano en alambre del ramal seis: Vlk avanza de espaldas por el pasillo hacia el mamparo escrito; el altavoz de cuarentena a media distancia. Vlk resaltada en verde, el mamparo en rojo.">
+        <defs>
+          <filter id="brillo2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <pattern id="malla2" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M0 5 H10 M5 0 V10" stroke="#4A3D28" stroke-width=".6"/></pattern>
+        </defs>
+        <g fill="url(#malla2)" stroke="#A88A52" stroke-width="1.2">
+          <path d="M10 30 h 200 v 40 h -40 v 60 h -160 z"/>
+          <path d="M210 30 h 80 v 100 h -120 v -60 h 40 z"/>
+        </g>
+        <path d="M60 30 v 40 M110 30 v 40 M160 30 v 40 M60 90 h 110" stroke="#4A3D28" stroke-width="1" stroke-dasharray="3 4" fill="none"/>
+        <path d="M186 44 l 10 -6 v 24 l -10 -6 z M200 46 q 6 6 0 12 M204 42 q 10 10 0 20" fill="none" stroke="#A88A52" stroke-width="1.2"/>
+        <circle cx="46" cy="52" r="6" fill="#6FE3E6" filter="url(#brillo2)"/>
+        <path d="M54 52 L 96 52 M 88 46 L 96 52 L 88 58" fill="none" stroke="#6FE3E6" stroke-width="1.5"/>
+        <path d="M38 52 L 20 52" fill="none" stroke="#6FE3E6" stroke-width="1.5" stroke-dasharray="2 3"/>
+        <path d="M250 62 h 30" stroke="#C0392B" stroke-width="5" filter="url(#brillo2)"/>
+        <text x="228" y="86" fill="#C0392B">//Mamparo escrito</text>
+        <text x="14" y="146" fill="#9C8E74">//Ramal seis, cubierta de ingeniería</text>
+        <text x="34" y="44" fill="#6FE3E6">//Vlk, mirando atrás</text>
+        <text x="180" y="30" fill="#9C8E74">//Altavoz</text>
+      </svg>
+
+      <div class="accion">
+        <button type="button" id="btn-hechos" aria-pressed="false">Resaltar los hechos fijados en el texto<small>Las frases que el Extractor tomó como hechos se iluminan en verde; la que entra en conflicto, en rojo.</small></button>
+      </div>
+
+      <div class="actores" id="veredicto">
+        <h3>Quién ha tocado este capítulo</h3>
+        <ul>
+          <li><b>Escritor</b>, redactó 2.560 palabras a partir del plan y de 27 hechos vigentes.</li>
+          <li><b>Extractor de hechos</b>, fijó siete hechos; uno entra en conflicto más adelante.</li>
+          <li><b>Revisor de calidad</b>, lo aprobó en la auditoría del capítulo 4; en la del 6 lo señala como origen de una contradicción.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+  // Único movimiento orquestado: resaltar en el texto los hechos que el Extractor fijó.
+  (function(){
+    var b=document.getElementById('btn-hechos');
+    b.addEventListener('click',function(){
+      var on=document.body.classList.toggle('hechos');
+      b.setAttribute('aria-pressed',on?'true':'false');
+      b.firstChild.textContent=on?'Ocultar los hechos fijados':'Resaltar los hechos fijados en el texto';
+    });
+  })();
+</script>
+</body>
+</html>
