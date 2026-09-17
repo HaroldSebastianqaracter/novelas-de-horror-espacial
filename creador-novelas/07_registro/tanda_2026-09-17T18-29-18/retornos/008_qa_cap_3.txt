@@ -1,0 +1,4 @@
+tiene_contradicciones: false
+contradicciones: 0 · repeticiones: 6
+reporte: 06_qa/reportes/qa_cap_3.md
+validado

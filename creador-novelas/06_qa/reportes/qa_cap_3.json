@@ -1,0 +1,36 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Calor residual de lo humano comprobado con la mano como prueba de presencia reciente: la llave de vaso 'caliente de mano' (cap. 1), el asiento del comedor con temperatura de cuerpo y los mangos de las once herramientas del taller (cap. 2), y 'como se retiran de algo que todavia esta caliente' (cap. 3). 4 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Tic de dialogo: un personaje deduce presencia humana con la formula 'Entonces hay alguien' / 'Entonces hay gente' (Teo en caps. 1 y 2, Bruno en cap. 3). 3 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio como respuesta con la misma construccion: 'Ilaria no contesto', 'Nadie le contesto' (cap. 1), 'Ilaria no contesto enseguida', 'Nadie le contesto', 'Ilaria no respondio' (cap. 2), 'nadie le contestaba' (cap. 3). 6 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Los extractores tirando del vapor como cierre de ambiente: 'los extractores tiraban' (cap. 1), el vaho atrapado por los extractores y el zumbido final 'tirando del vapor de las bandejas' (cap. 2). 3 apariciones acumuladas en los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura correctiva 'no era X: era Y' / 'no estaban X: estaban Y, que es distinto': el ruido del comedor y las herramientas del banco (cap. 2), 'no era miedo sino la irritacion' (cap. 1). 3 apariciones acumuladas en los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Verificar algo 'dos veces' ante la incredulidad: Teo da las gracias dos veces y Ndeye recorre la lista dos veces (cap. 1), Ilaria lee la hora dos veces (cap. 2), Ndeye comprueba dos veces la hora del asiento (cap. 3). 5 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

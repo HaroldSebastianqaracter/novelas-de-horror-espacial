@@ -1,99 +1,111 @@
-El acople entró limpio al primer intento, y eso fue lo primero que a Ilaria Vensa no le gustó.
+El acople mordió en el segundo intento, con ese chasquido corto y satisfecho que Ilaria Vensa había aprendido a reconocer como el sonido de una estación sana. Se quedó mirando el indicador de presión del umbilical durante más tiempo del necesario. Verde. Estable. Ni una fluctuación mientras el brazo del *Cabo Tenue* terminaba de asentarse contra el collarín de Vigía-9.
 
-Llevaba dieciséis horas de aproximación mirando la mancha de Vigía-9 crecer contra el negro, y durante dieciséis horas se había preparado para lo de siempre: el cabeceo lento de una estación sin control de actitud, los anillos de amarre helados, la maniobra a pulso con el remolcador quejándose en las cuadernas. Nada de eso ocurrió. Vigía-9 mantenía su rotación con la precisión de un reloj atendido. Las guías del muelle se iluminaron cuando el Cabo Tenue estuvo a doscientos metros, verdes y ordenadas, como si alguien las hubiera encendido para ellos. El collar del acople mordió el mamparo y los pestillos cerraron con un chasquido doble, sano, de manual.
+—Sella —dijo Bruno Achaval, detrás de ella—. Sella como si nos estuvieran esperando.
 
-—Presión estable al otro lado —dijo Ndeye Kamara desde el puesto de la derecha, sin levantar la voz—. Un bar ciento dos. Temperatura diecinueve coma cuatro.
+Ilaria no contestó. En Perla-Alta el umbilical había tardado cuarenta minutos en encontrar una junta que no estuviera mordida por el hielo. En Cuarto Anillo habían tenido que cortar el collarín entero con lanza térmica, y al otro lado los esperaba una neblina de partículas en suspensión que se les pegó a las viseras durante dos días. Tres estaciones muertas, y en las tres el primer trámite había sido pelear con la puerta.
 
-—Repetí eso.
+Aquí la puerta se abrió sola, con un suspiro neumático de mantenimiento reciente.
 
-—Diecinueve coma cuatro. Hay calefacción, Ilaria.
+—Presión de la estación, ciento uno con dos —recitó Ndeye Kamara desde su consola, sin levantar la vista—. Oxígeno diecinueve con nueve. Dióxido en rango. Temperatura veintiuno coma cinco.
 
-Bruno Achaval soltó una risa corta por la nariz, ya de pie, ya con el arnés fuera y la bolsa de herramientas colgada del hombro. Llevaba desde el desayuno diciendo que aquello iba a ser una avería de antena y un cable, y el dato le daba la razón antes de tiempo, que era como más le gustaba tenerla.
+—Veintiuno coma cinco —repitió Bruno.
 
-—Once días callados con la calefacción puesta —dijo—. Se les fundió el emisor, se quedaron sin repuesto y están ahí dentro esperando que alguien les traiga uno. Cuatro horas y nos vamos.
+—Es lo que dice.
 
-Ilaria no contestó. Había hecho ese mismo viaje tres veces, a tres estaciones que también habían dejado de acusar, y las tres veces el olor la había recibido antes que nadie: ese dulzor mineral de las despresurizaciones, el frío que se te mete por la costura de los guantes, el polvo suspendido que no cae nunca. Sabía cómo olía eso. Se lo sabía de memoria, como una oración fea. En las tres había habido cuerpos. Era lo único que los protocolos daban por descontado y lo único en lo que ella confiaba: que si una estación se calla, es porque se ha muerto, y los muertos se quedan donde están.
+—Once días sin baliza y la calefacción puesta.
 
-Aquí el tablero decía diecinueve coma cuatro.
+—Es lo que dice —repitió Ndeye, y esta vez sí levantó la vista, y lo que tenía en la cara no era miedo sino la irritación concreta de quien ha venido a arreglar un problema y todavía no consigue verlo.
 
-—Trajes puestos igual —ordenó—. Casco abierto, visor arriba, pero puestos. Teo, revisá los sellos de todos y después los tuyos.
+Teo Riffel estaba en el mamparo de babor, peleándose con el cierre lumbar del traje. Llevaba peleándose con él desde que habían cruzado la órbita de aproximación. Ilaria lo observó de reojo: el chico tiraba de la correa hacia arriba cuando había que empujarla hacia abajo, y lo hacía con una concentración feroz, como si la correa fuera el examen.
 
-Teo Riffel ya estaba de pie. Se le notaba el esfuerzo por parecer que llevaba haciendo aquello toda la vida y el fracaso completo del esfuerzo: el traje le quedaba ancho en los hombros, se le enredaban las correas del cinturón portaherramientas y cada vez que se agachaba una llave se le iba al suelo con estrépito. Pasó por los tres, tirando de los cierres del cuello, tocando las juntas con los dedos como le habían enseñado en el curso de cuatro semanas que era toda su vida profesional.
+—Riffel.
 
-—Sellos conformes —dijo, y la voz se le fue un poco hacia arriba al final.
+—Sí, jefa.
 
-—Conformes —confirmó Ilaria—. Bien.
+—Abajo y después hacia ti.
 
-La escotilla interior se abrió sola cuando igualó presiones. No hubo que forzar nada, no hubo que meter la barra. Se deslizó a un lado con un siseo educado y detrás había un pasillo iluminado.
+Teo lo hizo. El cierre entró al primer tirón. El chico se puso rojo y dio las gracias dos veces.
 
-Nadie dijo nada durante unos segundos.
+Ilaria repasó el protocolo en voz alta porque el protocolo se repite en voz alta, aunque lo sepan todos, aunque sea el cuarto viaje: trajes puestos hasta confirmación de atmósfera con los sensores de mano, no con los de la estación; nadie se separa; el que encuentre un cuerpo no lo toca, lo fotografía y avisa. Bruno bufó en la palabra *cuerpo*. Teo asintió con la seriedad de quien está memorizando.
 
-Era un pasillo normal. Era exactamente eso lo que resultaba difícil de mirar: paneles beis, tiras lumínicas en el ángulo del techo, el suelo de rejilla con una alfombrilla antideslizante gastada en el centro por el paso de mucha gente durante muchos años. Las luces estaban en la gama cálida del ciclo diurno. Al fondo, un extractor zumbaba con una nota grave y constante.
+Cruzaron.
 
-Ilaria entró primera. Se subió el visor del todo y respiró por la nariz.
+Lo primero fue la luz. Vigía-9 los recibió con el ciclo diurno completo, los plafones del muelle al ochenta por ciento, la franja amarilla del suelo recién repintada en el tramo de carga. Ilaria había entrado en tres estaciones apagadas y en las tres el haz del casco había sido lo único que existía: un tubo de claridad de cuatro metros y, más allá, nada. Aquí no hacía falta encender nada. Se vio la sombra propia proyectada nítida sobre el mamparo y aquello, absurdamente, fue lo que le puso el cuerpo en alerta.
 
-Aire. Aire limpio, tibio, con el fondo de aceite y metal caliente que tienen todas las estaciones en funcionamiento, y por encima, muy tenue, algo que tardó un momento en identificar porque no tenía ningún derecho a estar ahí: comida. Caldo. Cebolla.
+Bruno pasó el sensor de mano por el aire y esperó los treinta segundos reglamentarios con una impaciencia que le hacía golpear el pulgar contra la carcasa.
 
-—Hay olor a cocina —dijo Ndeye a su espalda, y lo dijo con la entonación exacta de quien apunta una lectura anómala en un cuaderno.
+—Respirable —dijo—. Respirable de verdad. Mejor que la del remolcador.
 
-—Hay olor a cocina —repitió Ilaria.
+Se quitó el casco antes de que Ilaria autorizara. Ella iba a decírselo y no lo dijo, porque en ese momento el aire de la estación le llegó también a ella por el sello abierto, y no olía a nada.
 
-Bruno pasó entre las dos, se subió el visor también y avanzó tres pasos por la alfombrilla.
+Ese era el asunto. No olía a nada.
 
-—¡Eh! —gritó, y el grito rebotó por el pasillo con una nitidez insoportable—. ¡Cuadrilla de reparación del Cabo Tenue! ¿Hay alguien?
+Una despresurización deja un olor. Ilaria lo habría reconocido con los ojos cerrados: ese fondo metálico y dulzón, la humedad congelada que vuelve a soltarse cuando represurizas, el tufo lento de lo que llevaba semanas a menos treinta y empieza a no estarlo. Un incendio deja otro, más honesto. Lo que había en el muelle de Vigía-9 era aire de jornada: filtros limpios, una nota tibia de aceite de guías, y por debajo, muy abajo, algo que Ilaria tardó tres segundos en identificar y que le costó admitir cuando lo hizo.
 
-El extractor siguió zumbando. Nada más.
+Comida.
 
-Volvió a gritar dos veces más, una hacia cada ramal del cruce, con esa seguridad de hombre que ha entrado a docenas de cascos rotos y espera que alguien asome la cabeza y le señale el problema. Después dejó de gritar y se quedó quieto, y Ilaria vio cómo se le movía la mandíbula.
+—¿Eso es cebolla? —dijo Teo.
 
-—Ndeye, a comunicaciones —dijo ella—. Es tu encargo, hacelo primero. Quiero la baliza acusando y quiero enlace con el exterior antes que ninguna otra cosa. Teo, con ella. Bruno, conmigo.
+Nadie le contestó.
 
-—¿Y qué reparamos? —preguntó Bruno—. Porque yo vine a reparar algo.
+Ndeye ya se había arrodillado junto al terminal de muelle y lo había despertado con dos toques. El panel respondió al instante, sin pedir credenciales, con el mismo verde tranquilo del indicador de presión. Ilaria se puso a su espalda y leyó por encima del hombro.
 
-—A eso vamos.
+—Registro de atraque —dijo Ndeye—. Nos ha fichado.
 
-Encontraron el comedor a cuarenta metros del cruce, siguiendo el olor.
+—¿Cómo que nos ha fichado?
 
-Había dieciocho bandejas servidas en las mesas largas. No dieciocho abandonadas de cualquier manera: dieciocho puestas, con el cubierto a la derecha, el vaso lleno, el pan partido en algunas. De los cuencos subía vapor, un vapor fino y continuo que los extractores del techo iban recogiendo en un hilo oblicuo y limpio. Ilaria acercó el dorso de la mano a uno sin tocarlo. Quemaba.
+—*Cabo Tenue*, remolcador de reparaciones, acople confirmado. —Ndeye deslizó el dedo—. Hora, matrícula, tonelaje. Correcto todo. —Se detuvo—. Y el atraque anterior.
 
-En la silla más cercana había una chaqueta de faena colgada del respaldo, del derecho, con las mangas cayendo.
+—¿Cuándo?
 
-Bruno no dijo nada. Fue hasta el mostrador de servicio, miró detrás, miró la cocina, volvió. Tenía una expresión que Ilaria no le había visto nunca y que le costó reconocer porque en la cara de Bruno Achaval no cabía: estaba buscando a alguien a quien pedirle explicaciones y no lo encontraba.
+—Hace cuatro meses. Un carguero de mineral. Salida registrada. —Subió y bajó por la lista dos veces, despacio, como quien busca una línea que debería estar y va a tener que aceptar que no está—. No hay nada entre medias. Ninguna nave. Ninguna salida. Nadie se fue de aquí, Vensa.
 
-—Esto se sirvió hace diez minutos —dijo al final.
+Bruno se había adelantado veinte metros por el pasillo de servicio, con la linterna colgando inútil del cinturón, y su voz les llegó de vuelta con un eco corto.
 
-—Sí.
+—¡Aquí hay un carro de herramienta a medio montar!
 
-—Nosotros llevamos veinte acoplados.
+Fueron hacia él. El carro estaba junto a un panel de conducto abierto, con los tornillos alineados en fila sobre un paño magnético y la placa apoyada contra la pared. Alguien había desmontado aquello con método y había dejado la mitad del trabajo esperando. Bruno se agachó, cogió la llave de vaso que descansaba encima del paño y la sopesó.
 
-—Sí.
+Luego se quedó muy quieto.
 
-Ilaria sacó el lector y registró el compartimento entero, barrido completo, como marcaba el procedimiento. Sin anomalías atmosféricas. Sin trazas biológicas en suspensión. Sin partículas de combustión. La estación estaba más limpia que el Cabo Tenue.
+—Está caliente.
 
-Recorrieron el nivel entero en cuarenta minutos y fue siempre lo mismo. El taller de mantenimiento tenía una amoladora sobre el banco con el disco aún girando por inercia y la pieza sujeta en el tornillo a medio desbarbar; Ilaria puso la palma sobre el mango y estaba templado, con esa tibieza de cosa recién soltada. En el dormitorio común, catorce literas hechas y tres deshechas. En la enfermería, un armario de fármacos cerrado y completo. En la sala de bombas, la lectura de consumo de oxígeno de las últimas veinticuatro horas: un consumo de ciento trece personas, plano, sin escalones.
+—Estará al sol de una luminaria.
 
-No había cuerpos. No había sangre. No había una sola marca de arrastre en el suelo de rejilla, ni un panel forzado, ni un mensaje rayado en un mamparo, ni el desorden que deja la gente cuando corre. Ilaria buscó las tres cosas que buscaba siempre —el sello reventado, la mancha, la nota— y no encontró ninguna de las tres, y por primera vez en veinte años de oficio se dio cuenta de que no tenía un cuarto sitio donde mirar.
+—Ilaria. —Fue la primera vez en el viaje que la llamó por el nombre—. Está caliente de mano.
 
-La radio del cuello crepitó.
+Se la pasó. Ella la tuvo un momento en la palma y sí: el mango tenía esa tibieza específica, blanda, que no da ningún radiador, la que deja un guante que acaba de soltar la herramienta. Se le fue enfriando entre los dedos mientras la sostenía y ese enfriamiento fue lo peor de todo, porque significaba que había estado más caliente hacía un minuto, y más caliente aún hacía dos, y que la curva, si uno la seguía hacia atrás, llevaba a una mano.
 
-—Ilaria. —Era Ndeye, y hablaba despacio, midiendo cada palabra—. Estoy en comunicaciones. La antena está perfecta. No hay avería.
+—Ciento nueve personas —dijo Ndeye en voz baja. No se lo decía a nadie; estaba haciendo la cuenta que todos estaban haciendo—. Ciento nueve. Una dotación entera no se esconde.
 
-—Repetí.
+Barrieron el muelle y los dos ramales de servicio siguiendo el procedimiento, en pareja, marcando cada compuerta con tiza. No encontraron nada de lo que Ilaria había venido preparada a encontrar. No había placas reventadas ni mamparos combados. No había manchas. No había arañazos en el interior de un armario de emergencia, ni un traje de vacío puesto a medias, ni un mensaje grabado en la pintura con la punta de un destornillador por alguien que sabía que se le acababa el tiempo. En Cuarto Anillo había habido dieciséis mensajes así. Ilaria los había leído todos, uno por uno, agachada, porque el protocolo decía fotografiar y ella además leía.
 
-—Que no hay avería. Emite. La estuve alimentando a mano y emite con potencia nominal en las tres bandas. —Una pausa—. Pero no vuelve nada de fuera. Nada. Ni las balizas de tránsito, ni el faro del sector, ni el eco de nuestro propio remolcador. Lo único que entra por el receptor es tráfico interno.
+Aquí las paredes estaban limpias y los extractores tiraban.
 
-Bruno se había acercado al oírla. Ilaria le sostuvo la mirada mientras preguntaba:
+—Kamara —dijo—. Necesito el enlace. Quiero mandar un parte de situación antes de meternos más adentro.
 
-—¿Interno de qué?
+Ndeye tardó veinte minutos en montar el repetidor portátil en el mástil auxiliar del muelle. Ilaria la vio trabajar con las manos rápidas y la mandíbula apretada, y vio el momento exacto en que algo dejó de cuadrarle: Ndeye se quitó un auricular, se lo volvió a poner, ajustó una ganancia, negó con la cabeza.
 
-—De aquí. Partes de turno. —Ndeye carraspeó—. Voces de la dotación pasando novedades de galería. Están fechados. Los once días, uno por uno, hasta hoy.
+—Transmite —dijo.
 
-Al fondo del pasillo, el extractor cambió de nota un instante y volvió a la suya.
+—Bien.
 
-—Ciento nueve personas —dijo Bruno, y lo dijo bajito, para él—. Aquí figuran ciento nueve en plantilla. ¿Adónde se va uno desde aquí?
+—No, jefa. Transmite. —Se giró—. La antena sale. El vatímetro sube. La señal se va de aquí. Pero lo que me vuelve es tráfico de dentro.
 
-Ilaria miró la rejilla del suelo, la alfombrilla gastada en el centro, las luces tibias del ciclo diurno que dentro de seis horas se atenuarían solas para la noche porque alguien, en algún momento, las había programado así y nadie las había apagado.
+—Rebote.
 
-—A ninguna parte —contestó—. No se va uno a ninguna parte. —Se ajustó los guantes—. Vamos a comunicaciones. Y desde ahora nadie anda solo.
+—No es rebote. Son partes de turno. —Ndeye se quedó callada un segundo, buscando cómo decirlo sin decir nada estúpido—. Gente dando novedades de sector.
 
-Volvieron por donde habían venido. En el comedor, las bandejas seguían echando vapor.
+Teo, que estaba a dos pasos, dijo:
+
+—Entonces hay alguien.
+
+Y lo dijo con alivio. Lo dijo con una alegría tan limpia, tan joven, que a Ilaria se le encogió algo en el pecho antes de saber por qué. El chico ya estaba mirando pasillo adentro, hacia la luz amarilla del ciclo diurno, con la cara de quien va a poder trabajar por fin, a acreditarse, a que lo vean.
+
+—Hay alguien —repitió Teo—. ¿Vamos?
+
+Ilaria miró la llave de vaso, que llevaba diez minutos en su mano y ya estaba a temperatura de estación.
+
+—Vamos —dijo—. Pero nadie firma nada hasta que yo lo diga.
+
+Bruno se rió por la nariz y echó a andar el primero, porque la avería estaba dentro y él había venido a cerrarla. Detrás quedó el muelle, iluminado y en orden, con el carro de herramienta esperando que alguien terminara de montar el conducto.

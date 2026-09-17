@@ -1,0 +1,14 @@
+{
+  "inicio": 1,
+  "tope": 3,
+  "max_llamadas": 30,
+  "cerrados": 0,
+  "llamadas": 0,
+  "capitulo_en_curso": 1,
+  "intentos_longitud": 0,
+  "intentos_personaje": 0,
+  "avisos": [],
+  "registro": "07_registro/tanda_2026-09-17T17-49-15",
+  "motivo_salida": "huerfano: la tanda anterior murio a mitad y esta la recalcula desde el manifiesto",
+  "ts_fin": "2026-09-17T18:29:18.004+02:00"
+}

@@ -1,0 +1,11 @@
+[
+  { "recurso": "calor residual de lo humano comprobado con la mano (herramienta, asiento, mango) como prueba de presencia reciente", "veces": 4, "caps": [1, 2, 3] },
+  { "recurso": "tic de dialogo 'Entonces hay alguien' / 'Entonces hay gente' para deducir presencia humana", "veces": 3, "caps": [1, 2, 3] },
+  { "recurso": "el silencio como respuesta: 'no contesto' / 'nadie le contesto' / 'no respondio'", "veces": 6, "caps": [1, 2, 3] },
+  { "recurso": "los extractores tirando del vapor como cierre de ambiente", "veces": 3, "caps": [1, 2] },
+  { "recurso": "estructura correctiva 'no era X: era Y' / 'no estaban X: estaban Y, que es distinto'", "veces": 3, "caps": [1, 2] },
+  { "recurso": "verificar algo 'dos veces' ante la incredulidad", "veces": 5, "caps": [1, 2, 3] },
+  { "recurso": "el verde tranquilo o estable del indicador como normalidad inquietante", "veces": 2, "caps": [1] },
+  { "recurso": "el ciclo diurno al ochenta por ciento y la luz amarilla del pasillo", "veces": 2, "caps": [1] },
+  { "recurso": "la firma o la planilla tratada como sujeto que actua por si solo", "veces": 2, "caps": [2, 3] }
+]

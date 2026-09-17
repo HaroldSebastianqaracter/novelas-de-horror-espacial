@@ -1,14 +1,14 @@
 {
-  "ultimo_capitulo_cerrado": 0,
-  "ultimo_qa_ejecutado": 0,
+  "ultimo_capitulo_cerrado": 3,
+  "ultimo_qa_ejecutado": 3,
   "total_capitulos_esperado": 6,
   "estado": "en_progreso",
   "reporte_qa_pendiente": null,
   "intentos_por_capitulo": {},
   "prompts_hash": {
-    "escritor": "cf2003f01b23f4ea",
-    "extractor": "55301a2744c759d1",
-    "qa": "9ad11e887524d43e"
+    "escritor": "9b036acf225b22f4",
+    "extractor": "4812a4623694c738",
+    "qa": "b640f22352c321e8"
   },
   "reextraccion_pendiente": [],
   "resolucion_iniciada": false,
