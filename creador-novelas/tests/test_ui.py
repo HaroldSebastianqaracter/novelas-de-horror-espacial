@@ -214,7 +214,7 @@ def test_servidor_escucha_solo_en_loopback(servidor):
 
 
 def test_get_muestra_el_formulario_y_post_guarda(servidor, proyecto):
-    estado, pagina = _pedir(servidor, "GET", "/")
+    estado, pagina = _pedir(servidor, "GET", "/encargo-simple")
     assert estado == 200 and "name='idea'" in pagina and "value='1500'" in pagina
     estado, pagina = _pedir(servidor, "POST", "/guardar", dict(FORM_OK, idea="Idea desde el navegador."))
     assert estado == 200 and "Guardado" in pagina and "config/novela.json" in pagina and "/generar-premisa" in pagina
@@ -231,7 +231,7 @@ def test_post_invalido_devuelve_400_con_el_motivo_y_no_escribe(servidor, proyect
 
 def test_get_bloqueado_muestra_campos_deshabilitados(servidor, proyecto):
     _cerrar_capitulos(proyecto, 3)
-    estado, pagina = _pedir(servidor, "GET", "/")
+    estado, pagina = _pedir(servidor, "GET", "/encargo-simple")
     assert estado == 200 and "<fieldset disabled>" in pagina and "INV-04" in pagina
 
 
@@ -264,3 +264,38 @@ def test_los_hechos_del_margen_son_los_fijados_en_ese_capitulo(proyecto, config)
     hechos = crudo.get("root") if isinstance(crudo, dict) else crudo
     esperados = [h["hecho"] for h in (hechos or []) if isinstance(h, dict) and h.get("cap_origen") == escritos[0]]
     assert [h["hecho"] for h in cap["hechos"]] == esperados
+
+
+def test_el_encargo_solo_congela_lo_que_congela_INV_04(proyecto, config, servidor):
+    """La pantalla no puede ser mas restrictiva que el harness.
+
+    Con capitulos cerrados, INV-04 vuelve inmutable `config/novela.json`, pero la idea y
+    `config/ejecucion.json` siguen editables. Si la API no dijera que campos son de cada grupo, la
+    hoja tendria que adivinarlo y acabaria bloqueando de mas.
+    """
+    estado, cuerpo = _pedir(servidor, "GET", "/api/formulario")
+    datos = json.loads(cuerpo)
+    assert estado == 200
+    assert set(datos["campos_novela"]).isdisjoint(datos["campos_ejecucion"])
+    assert "total_capitulos" in datos["campos_novela"]
+    assert "capitulos_por_tanda" in datos["campos_ejecucion"]
+    assert "idea" not in datos["campos_novela"]
+
+
+def test_las_cuatro_pantallas_se_sirven(proyecto, config, servidor):
+    for ruta in ("/", "/encargo", "/consola", "/lectura"):
+        estado, _ = _pedir(servidor, "GET", ruta)
+        assert estado == 302, f"{ruta} deberia redirigir a su HTML, devolvio {estado}"
+    for archivo in ("vestuario.html", "encargo.html", "consola.html", "lectura.html"):
+        estado, _ = _pedir(servidor, "GET", "/static/" + archivo)
+        assert estado == 200, f"{archivo} no se sirve"
+
+
+def test_la_redireccion_conserva_la_consulta(proyecto, config, servidor):
+    """`/lectura?cap=4` perdia el capitulo y abria siempre el ultimo."""
+    conexion = http.client.HTTPConnection("127.0.0.1", servidor.server_address[1])
+    conexion.request("GET", "/lectura?cap=4")
+    respuesta = conexion.getresponse()
+    assert respuesta.status == 302
+    assert respuesta.getheader("Location") == "/static/lectura.html?cap=4"
+    conexion.close()

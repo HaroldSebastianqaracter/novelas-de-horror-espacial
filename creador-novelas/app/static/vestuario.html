@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vestuario — Elegir novela</title>
+<style>
+  :root{
+    --fondo:#12100C;--placa:#1C1812;--junta:#0C0A07;
+    --linea:#A88A52;--linea-tenue:#4A3D28;
+    --texto:#E6DCC8;--texto-bajo:#9C8E74;
+    --visor:#6FE3E6;--rojo:#C0392B;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--fondo);color:var(--texto);
+    font-family:"Arial Narrow","Helvetica Neue",Arial,"Liberation Sans Narrow","Liberation Sans",sans-serif;
+    font-stretch:condensed;letter-spacing:.03em;font-size:15px;line-height:1.35;min-width:1024px;
+  }
+  a,button,input{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--visor);outline-offset:3px}
+  .serif{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;letter-spacing:0;font-stretch:normal}
+
+  .pantalla{
+    position:relative;min-height:100vh;overflow:hidden;padding:36px 56px 44px;
+    display:grid;grid-template-rows:auto 1fr;gap:28px;
+    background:
+      radial-gradient(ellipse at 50% -10%,rgba(201,161,90,.22),transparent 55%),
+      repeating-linear-gradient(180deg,var(--placa) 0 44px,var(--junta) 44px 48px),
+      var(--fondo);
+  }
+  .pantalla::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.5;
+    background:repeating-linear-gradient(92deg,transparent 0 37px,rgba(0,0,0,.35) 37px 39px,transparent 39px 83px),
+               repeating-linear-gradient(88deg,transparent 0 61px,rgba(201,161,90,.06) 61px 62px)}
+  .pantalla::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.6;
+    background:radial-gradient(circle at 6px 46px,rgba(201,161,90,.35) 1.5px,transparent 2.5px) 0 0/96px 48px repeat}
+  .pantalla > *{position:relative;z-index:1}
+
+  .marco{position:relative;padding:14px 30px}
+  .marco::before,.marco::after{content:"";position:absolute;top:0;bottom:0;width:26px;border:1.5px solid var(--linea);box-shadow:inset 0 0 0 1px rgba(111,227,230,.18)}
+  .marco::before{left:0;border-right:0;border-radius:6px 0 0 6px}
+  .marco::after{right:0;border-left:0;border-radius:0 6px 6px 0}
+
+  header{display:grid;grid-template-columns:1fr auto;align-items:center;gap:32px}
+  header .marco{justify-self:center;text-align:center;min-width:620px}
+  header h1{margin:0;font-size:24px;font-weight:400;line-height:1.2}
+  header h1 small{display:block;font-size:15px;color:var(--texto-bajo);margin-top:4px}
+  .cuenta{text-align:right;color:var(--texto-bajo);font-size:15px}
+  .cuenta b{display:block;color:var(--texto);font-weight:400;font-size:22px;font-variant-numeric:tabular-nums}
+
+  /* Trajes: cada novela es una barra de vida en su percha */
+  .trajes{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:0 28px;align-items:end}
+  .traje{display:grid;grid-template-columns:64px 1fr;gap:0 16px;align-items:end;padding-bottom:16px;border-bottom:1px solid var(--linea-tenue)}
+  .traje .barra{display:block;width:64px}
+  .traje .datos{display:flex;flex-direction:column;gap:6px;padding-bottom:6px}
+  .traje h2{margin:0;font-size:20px;line-height:1.05;font-weight:400}
+  .traje h2::before{content:"//";color:var(--linea)}
+  .traje .premisa{margin:0;color:var(--texto-bajo);font-size:14px;line-height:1.35}
+  .traje .estado{font-size:14px;color:var(--texto);font-variant-numeric:tabular-nums}
+  .traje .estado.visor{color:var(--visor)}
+  .traje .estado.rojo{color:var(--rojo)}
+  .traje .estado.bajo{color:var(--texto-bajo)}
+  .traje .acciones{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .traje .acciones a,.traje .acciones button{
+    display:block;text-decoration:none;text-align:left;cursor:pointer;
+    border:1.5px solid var(--linea);background:transparent;color:var(--texto);padding:8px 12px;font-size:14px;
+  }
+  .traje .acciones a:hover,.traje .acciones button:hover{background:rgba(168,138,82,.16)}
+  .traje .acciones .primaria{border-color:var(--visor);color:var(--visor);background:rgba(111,227,230,.08)}
+  .traje .acciones .primaria:hover{background:rgba(111,227,230,.18)}
+  .traje .acciones .rojo{border-color:var(--rojo);color:#fff;background:rgba(192,57,43,.2)}
+  .traje.cancelada h2{color:var(--texto-bajo);text-decoration:line-through;text-decoration-color:var(--rojo)}
+  .traje.nueva .barra rect[fill="#17201F"]{transition:fill 300ms ease}
+  .traje.nueva input{width:100%;background:rgba(0,0,0,.35);border:0;border-bottom:1.5px solid var(--linea);padding:8px 6px;font-size:15px;color:var(--texto)}
+  .traje.nueva input::placeholder{color:var(--texto-bajo)}
+  .traje.nueva input:focus{outline:none;border-bottom-color:var(--visor)}
+  /* Único movimiento: al conectar el traje nuevo, el primer segmento se encienda y la carcasa parpadea a cian */
+  .traje.nueva.conectado .barra rect:nth-last-of-type(1){fill:var(--visor);filter:url(#g5)}
+  .traje.nueva.conectado .barra > rect:first-of-type{stroke:var(--visor);transition:stroke 600ms ease}
+  @media (prefers-reduced-motion:reduce){.traje.nueva .barra rect,.traje.nueva.conectado .barra > rect:first-of-type{transition:none}}
+  @media (max-width:1280px){
+    .pantalla{padding:28px 36px 36px}
+    .trajes{gap:0 18px}
+    header .marco{min-width:520px}
+    .traje h2{font-size:18px}
+  }
+  /* El diseno reparte cinco columnas iguales porque enseñaba cinco novelas inventadas. El harness
+     lleva una por carpeta, asi que las perchas toman su ancho natural y se alinean a la izquierda;
+     la rejilla sigue creciendo sola si algun dia cuelgan mas trajes. */
+  .trajes{grid-template-columns:repeat(auto-fit,minmax(300px,360px));justify-content:start;gap:0 56px}
+  .traje .acciones a,.traje .acciones button{text-align:left}
+</style>
+</head>
+<body>
+<main class="pantalla">
+  <header>
+    <div class="marco">
+      <h1>Vestuario<small>Cada novela es un traje colgado con su barra de vida: los segmentos encendidos son capítulos cerrados. Elige uno o conecta un traje nuevo.</small></h1>
+    </div>
+    <div class="cuenta" role="status"><b id="v-coste">—</b><span id="n-coste">leyendo el gasto</span></div>
+  </header>
+
+  <ul class="trajes" id="trajes"></ul>
+</main>
+
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+
+function esc(s){ return String(s == null ? "" : s)
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function dinero(n, moneda){
+  if (n == null) return "—";
+  return n.toLocaleString("es-ES", {style:"currency", currency: moneda || "USD",
+                                    currencyDisplay:"narrowSymbol", maximumFractionDigits:2});
+}
+
+// La barra del diseño: segmentos de 14px cada 18px, de abajo arriba. El alto depende del numero de
+// capitulos, que es lo que hace que un traje de 30 cuelgue mas que uno de 18.
+function barra(id, total, cerrados, corte, cadencia){
+  if (!total) total = 1;
+  var primero = 24 + 18 * (total - 1);
+  var alto = primero + 34;
+  var p = ['<svg viewBox="0 0 64 ' + alto + '" class="barra" style="height:' + Math.min(alto, 522) + 'px"',
+           ' role="img" aria-label="Barra de ' + total + ' segmentos, ' + cerrados + ' encendidos">',
+           '<defs><filter id="' + id + '" x="-60%" y="-60%" width="220%" height="220%">',
+           '<feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/>',
+           '<feMergeNode in="SourceGraphic"/></feMerge></filter></defs>',
+           '<rect x="14" y="6" width="36" height="' + (alto-12) + '" rx="8" fill="#1C1812" stroke="#A88A52" stroke-width="1.5"/>',
+           '<rect x="20" y="16" width="24" height="' + (alto-32) + '" rx="3" fill="#0C0A07" stroke="#4A3D28" stroke-width="1"/>',
+           '<circle cx="8" cy="12" r="2" fill="#A88A52"/><circle cx="56" cy="12" r="2" fill="#A88A52"/>',
+           '<path d="M4 12 H 12 M52 12 H 60" stroke="#A88A52" stroke-width="1.5"/>',
+           '<circle cx="8" cy="' + (alto-12) + '" r="2" fill="#A88A52"/><circle cx="56" cy="' + (alto-12) + '" r="2" fill="#A88A52"/>',
+           '<path d="M4 ' + (alto-12) + ' H 12 M52 ' + (alto-12) + ' H 60" stroke="#A88A52" stroke-width="1.5"/>'];
+  for (var i = 1; i <= total; i++) {
+    var y = primero - 18 * (i - 1);
+    if (i === corte)
+      p.push('<rect x="23" y="' + y + '" width="18" height="14" rx="1.5" fill="#C0392B" filter="url(#' + id + ')"/>');
+    else if (i <= cerrados)
+      p.push('<rect x="23" y="' + y + '" width="18" height="14" rx="1.5" fill="#6FE3E6" filter="url(#' + id + ')"/>');
+    else
+      p.push('<rect x="23" y="' + y + '" width="18" height="14" rx="1.5" fill="#17201F" stroke="#24302F" stroke-width=".8"/>');
+  }
+  // Las marcas rojas del canto son las auditorias: donde el revisor puede pararlo todo.
+  if (cadencia) for (var c = cadencia; c <= total; c += cadencia)
+    p.push('<path d="M10 ' + (primero - 18*(c-1) + 7) + ' H 14" stroke="#C0392B" stroke-width="2"/>');
+  return p.join("") + "</svg>";
+}
+
+function trajeNuevo(){
+  return '<li class="traje">' + barra("gn", 30, 0, 0, 0) +
+    '<div class="datos"><h2>Traje nuevo</h2>' +
+    '<p class="premisa serif">Treinta segmentos apagados. Escribe una premisa y conéctalo; pasarás a la orden de trabajo.</p>' +
+    '<label for="premisa-nueva" class="estado bajo">Premisa</label>' +
+    '<input id="premisa-nueva" class="serif" placeholder="[Quién despierta, dónde, y qué no debería estar ahí]">' +
+    '<div class="acciones"><button type="button" class="primaria" id="btn-conectar">Conectar el traje</button></div>' +
+    "</div></li>";
+}
+
+function trajeActual(ix, coste){
+  var cerrados = ix.capitulos_cerrados || 0, total = ix.total_capitulos || 0;
+  var corte = (ix.capitulos.filter(function(c){ return c.corte_qa; })[0] || {}).num || 0;
+  var parada = ix.estado === "pausado_por_qa";
+  var linea = parada ? '<span class="estado rojo">Detenida por el revisor en el capítulo ' + corte + "</span>"
+            : cerrados >= total && total ? '<span class="estado">Terminada</span>'
+            : '<span class="estado">En producción, van ' + cerrados + " de " + total + "</span>";
+  return '<li class="traje">' + barra("g1", total, cerrados, parada ? corte : 0, ix.cadencia_qa) +
+    '<div class="datos"><h2>' + esc(ix.titulo) + "</h2>" +
+    '<p class="premisa serif">' + esc(ix.logline || "Sin logline todavía.") + "</p>" + linea +
+    '<span class="estado">' + cerrados + " de " + total + " segmentos, " +
+      (coste ? dinero(coste.total, coste.moneda) : "—") + "</span>" +
+    '<div class="acciones">' +
+      '<a class="' + (parada ? "rojo" : "") + '" href="/consola">' +
+        (parada ? "Volver a la producción" : "Vigilar la producción") + "</a>" +
+      (cerrados ? '<a href="/lectura">Leer lo cerrado</a>' : "") +
+    "</div></div></li>";
+}
+
+Promise.all([
+  fetch("/api/indice").then(function(r){ return r.json(); }),
+  fetch("/api/coste").then(function(r){ return r.ok ? r.json() : null; })
+]).then(function(xs){
+  var ix = xs[0], coste = xs[1];
+  var hay = ix.total_capitulos > 0;
+  $("trajes").innerHTML = (hay ? trajeActual(ix, coste) : "") + trajeNuevo();
+  $("v-coste").textContent = coste ? dinero(coste.total, coste.moneda) : "—";
+  $("n-coste").textContent = coste
+    ? "gastados en " + (hay ? "un traje" : "ningún traje") + ", contando el preludio"
+    : "no se pudo leer el gasto";
+
+  var b = $("btn-conectar");
+  if (b) b.addEventListener("click", function(){
+    var premisa = ($("premisa-nueva").value || "").trim();
+    location.href = "/encargo" + (premisa ? "?idea=" + encodeURIComponent(premisa) : "");
+  });
+}).catch(function(e){
+  $("trajes").innerHTML = "<li><p>No se pudo hablar con el harness: " + esc(e.message) + "</p></li>";
+});
+})();
+</script>
+</body>
+</html>

@@ -7,6 +7,7 @@ La lógica (`estado_formulario`, `procesar_guardado`) está separada del servido
 
 from __future__ import annotations
 
+import dataclasses
 import html
 import json
 import shutil
@@ -363,7 +364,18 @@ class _Manejador(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         ruta = self.path.split("?", 1)[0]
         if ruta == "/":
-            self._responder(200, render_formulario(estado_formulario(self.raiz)))
+            self._redirigir("/static/vestuario.html")
+        elif ruta in ("/vestuario", "/vestuario/"):
+            self._redirigir("/static/vestuario.html")
+        elif ruta in ("/encargo", "/encargo/"):
+            self._redirigir("/static/encargo.html")
+        elif ruta in ("/encargo-simple", "/encargo-simple/"):
+            # `?idea=` la trae el boton «Conectar el traje» del vestuario, para no escribirla dos veces.
+            estado = estado_formulario(self.raiz)
+            idea = parse_qs(self.path.split("?", 1)[1]).get("idea", [""])[0] if "?" in self.path else ""
+            if idea and not estado.idea:
+                estado = dataclasses.replace(estado, idea=idea)
+            self._responder(200, render_formulario(estado))
         elif ruta in ("/consola", "/consola/"):
             # Redirección y no servir aquí el HTML: así sus rutas relativas (gsap.min.js) siguen
             # resolviendo igual servidas que abriendo el archivo a mano.
@@ -372,6 +384,16 @@ class _Manejador(BaseHTTPRequestHandler):
             self._estatico(ruta[len("/static/"):])
         elif ruta in ("/lectura", "/lectura/"):
             self._redirigir("/static/lectura.html")
+        elif ruta == "/api/formulario":
+            e = estado_formulario(self.raiz)
+            # Los dos grupos viajan por separado porque INV-04 solo congela `novela.json`: con
+            # capitulos cerrados, la idea y los ajustes de ejecucion siguen siendo editables, y una
+            # pantalla que lo bloquee todo seria mas restrictiva que el harness.
+            self._json(200, {"valores": e.valores, "idea": e.idea, "bloqueado": e.bloqueado,
+                             "motivo_bloqueo": e.motivo_bloqueo, "capitulos_cerrados": e.capitulos_cerrados,
+                             "referencias": e.referencias,
+                             "campos_novela": list(CAMPOS_NOVELA),
+                             "campos_ejecucion": list(CAMPOS_EJECUCION)})
         elif ruta == "/api/indice":
             self._json(200, web.indice(self.raiz))
         elif ruta.startswith("/api/capitulo/"):
@@ -402,7 +424,7 @@ class _Manejador(BaseHTTPRequestHandler):
             self._json(200 if informe else 404, informe or {"error": "no hay ningún informe pendiente"})
         else:
             self._responder(404, _pagina("No encontrado",
-                                         "<p>Existen <a href='/'>/</a> y <a href='/consola'>/consola</a>.</p>"))
+                                         "<p>Existen <a href='/'>/</a> (vestuario), <a href='/encargo'>/encargo</a>, <a href='/consola'>/consola</a> y <a href='/lectura'>/lectura</a>.</p>"))
 
     def do_POST(self) -> None:  # noqa: N802
         if self.path.startswith("/api/fase/"):

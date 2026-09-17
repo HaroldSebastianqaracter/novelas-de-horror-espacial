@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orden de trabajo — Encargo de novela</title>
+<style>
+  :root{
+    --mesa:#D9DCD6;        /* la mesa gris sobre la que está el impreso */
+    --papel:#F6F6F2;       /* impreso, blanco frío, no crema */
+    --calco:#2E4A7D;       /* azul de papel carbón: lo que la máquina imprime */
+    --tinta:#17191C;       /* lo que escribe la persona */
+    --sello:#A8281F;       /* tampón */
+    --lapiz:#6E726B;       /* anotaciones al margen */
+    --regla:#B9BDB6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--mesa);color:var(--tinta);
+    font-family:Helvetica,"Helvetica Neue",Arial,"Liberation Sans",sans-serif;
+    font-size:14px;line-height:1.4;min-width:1024px;
+    padding:40px 0 72px;
+  }
+  :focus-visible{outline:3px solid var(--calco);outline-offset:2px}
+  button,input,textarea,select{font:inherit;color:inherit}
+
+  /* Hoja + margen de anotaciones */
+  .mesa{width:min(1200px,calc(100% - 64px));margin:0 auto;display:grid;grid-template-columns:1fr 300px;gap:0 36px;align-items:start}
+  .hoja{
+    background:var(--papel);
+    box-shadow:0 1px 0 #fff inset,0 18px 40px -22px rgba(0,0,0,.45),0 0 0 1px #c8ccc5;
+    padding:40px 48px 48px;position:relative;
+  }
+  /* agujeros de archivador */
+  .hoja::before{
+    content:"";position:absolute;left:-1px;top:0;bottom:0;width:20px;
+    background:radial-gradient(circle at 10px 50%,var(--mesa) 5px,transparent 5.5px) 0 0/20px 220px repeat-y;
+    background-position:0 90px;
+  }
+
+  /* Cabecera impresa (azul calco) */
+  .cab{display:grid;grid-template-columns:1fr auto;gap:24px;border-bottom:3px double var(--calco);padding-bottom:14px;color:var(--calco)}
+  .cab h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.01em;line-height:1.05}
+  .cab p{margin:6px 0 0;font-size:13px;max-width:62ch}
+  .num{text-align:right;font-size:13px}
+  .num b{display:block;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--tinta)}
+
+  /* Campos: etiqueta impresa a la izquierda, escritura de la persona en serif */
+  .campo{display:grid;grid-template-columns:168px 1fr;gap:0 20px;padding:18px 0 14px;border-bottom:1px solid var(--regla)}
+  .campo > label,.campo > .et{color:var(--calco);font-size:13px;padding-top:6px}
+  .campo > .et small{display:block;color:var(--lapiz);margin-top:4px;line-height:1.35}
+  .campo > label small{display:block;color:var(--lapiz);margin-top:4px;line-height:1.35}
+  .escrito{
+    font-family:Georgia,"Iowan Old Style","Palatino Linotype","Book Antiqua",serif;
+    font-size:17px;line-height:1.5;color:var(--tinta);
+  }
+  textarea.escrito,input.escrito{
+    width:100%;border:0;background:
+      repeating-linear-gradient(transparent 0 25px, var(--regla) 25px 26px);
+    background-attachment:local;
+    padding:0 2px 6px;resize:vertical;line-height:26px;font-size:17px;
+    border-bottom:1px solid var(--tinta);
+  }
+  textarea.escrito:focus,input.escrito:focus{outline:none;border-bottom:2px solid var(--calco)}
+  input.escrito{line-height:30px;height:34px;background:none}
+
+  /* Recuento de capítulos: 30 palotes en SVG, se tachan de cinco en cinco */
+  .palotes{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .palotes svg{height:38px;width:auto;display:block}
+  .palotes .ctrl{display:flex;align-items:center;gap:6px}
+  .palotes button{width:36px;height:36px;border:1px solid var(--tinta);background:var(--papel);cursor:pointer;font-size:18px;line-height:1}
+  .palotes button:hover{background:#eceee8}
+  .palotes output{font-family:Georgia,serif;font-size:20px;min-width:2.2ch;text-align:center}
+
+  /* Casillas de tono, marcadas a mano */
+  .tonos{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 24px}
+  .tonos label{display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start;cursor:pointer;font-size:14px;line-height:1.35}
+  .tonos input{appearance:none;margin:2px 0 0;width:16px;height:16px;border:1.5px solid var(--calco);background:var(--papel);position:relative;cursor:pointer}
+  .tonos input:checked::after{
+    content:"";position:absolute;left:-3px;top:-6px;width:22px;height:22px;
+    background:
+      linear-gradient(to top right,transparent 46%,var(--tinta) 47%,var(--tinta) 53%,transparent 54%),
+      linear-gradient(to top left,transparent 46%,var(--tinta) 47%,var(--tinta) 53%,transparent 54%);
+  }
+  .tonos label s{color:var(--lapiz)}
+
+  /* Obras de referencia: tres renglones */
+  .obras{display:grid;gap:8px}
+  .obras input{height:32px}
+  .obras .hueco{color:var(--lapiz);font-style:italic}
+
+  /* Personal asignado: los agentes firman */
+  .personal{margin-top:8px}
+  .personal table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .personal th{color:var(--calco);text-align:left;font-weight:400;padding:8px 8px 8px 0;border-bottom:1px solid var(--calco)}
+  .personal td{padding:10px 8px 10px 0;border-bottom:1px solid var(--regla);vertical-align:top}
+  .personal td:first-child{font-weight:700;white-space:nowrap}
+  .personal .firma{font-family:Georgia,serif;font-style:italic;color:var(--tinta);font-size:16px}
+  .personal .firma svg{height:26px;width:auto;display:block}
+  .personal .potestad{color:var(--sello);font-weight:700}
+
+  /* Pie: condiciones + firma */
+  .pie{display:grid;grid-template-columns:1fr 300px;gap:32px;margin-top:28px;align-items:end}
+  .condiciones{font-size:13px;color:var(--tinta);line-height:1.5;border-left:0}
+  .condiciones p{margin:0 0 8px}
+  .condiciones strong{color:var(--calco)}
+  .firmar{position:relative}
+  .firmar button{
+    width:100%;height:56px;border:2px solid var(--tinta);background:var(--tinta);color:var(--papel);
+    font-size:16px;font-weight:700;cursor:pointer;
+  }
+  .firmar button:hover{background:#2a2d31}
+  .firmar button[disabled]{background:var(--papel);color:var(--lapiz);border-color:var(--lapiz);cursor:default}
+  .firmar .nota{font-size:12.5px;color:var(--lapiz);margin:8px 0 0;text-align:center}
+
+  /* Tampón RECIBIDO: aparece al firmar, el único movimiento de la pantalla */
+  .tampon{
+    position:absolute;right:-28px;top:-120px;width:260px;pointer-events:none;
+    transform:rotate(-9deg) scale(1.6);opacity:0;
+    transition:transform 260ms cubic-bezier(.2,1.4,.4,1),opacity 180ms ease;
+  }
+  .tampon.puesto{transform:rotate(-9deg) scale(1);opacity:1}
+  @media (prefers-reduced-motion:reduce){.tampon{transition:none}}
+
+  /* Margen de la mesa: anotaciones a lápiz */
+  .margen{padding-top:56px;color:var(--lapiz);font-size:13.5px;line-height:1.5;display:grid;gap:22px}
+  .margen h2{font-size:13.5px;font-weight:700;margin:0 0 4px;color:var(--tinta)}
+  .margen p{margin:0}
+  .margen .coste{font-family:Georgia,serif;color:var(--tinta);font-size:30px;line-height:1;margin:2px 0 4px}
+  .margen .coste small{font-family:Helvetica,Arial,sans-serif;font-size:13px;color:var(--lapiz)}
+  .margen svg{width:100%;height:auto;display:block}
+
+  @media (max-width:1280px){
+    .mesa{width:calc(100% - 48px);grid-template-columns:1fr 260px;gap:0 28px}
+    .hoja{padding:32px 36px 40px}
+    .campo{grid-template-columns:150px 1fr}
+    .pie{grid-template-columns:1fr 260px}
+  }
+  /* El bloque de tono del diseno listaba opciones inventadas; aqui la hoja lleva los ajustes que
+     el harness acepta de verdad, en dos columnas para que no alargue la orden. */
+  .ajustes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 24px}
+  .ajustes label{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:baseline;
+                 border-bottom:1px solid var(--calco);padding-bottom:3px}
+  .ajustes input,.ajustes select{border:0;background:transparent;font:inherit;color:var(--tinta);
+                                 text-align:right;width:9rem}
+  .ajustes small{grid-column:1/-1;color:var(--lapiz);font-size:12px}
+  .bloqueo{border:1px solid var(--sello);color:var(--sello);padding:10px 14px;margin:0 0 18px}
+  .fallo{color:var(--sello)}
+</style>
+</head>
+<body>
+<div class="mesa">
+  <form class="hoja" id="hoja" method="post" action="/guardar">
+    <header class="cab">
+      <div>
+        <h1 id="titulo">Orden de trabajo para una novela de terror espacial</h1>
+        <p>Rellene los campos. Al firmar, el encargo pasa al Orquestador y usted deja de
+          intervenir: podrá vigilar la producción, detenerla y leer el resultado, pero no corregirlo
+          mientras se escribe.</p>
+      </div>
+      <div class="num">Orden n.º<b id="folio">—</b><span id="fecha"></span></div>
+    </header>
+
+    <p class="bloqueo" id="bloqueo" hidden></p>
+
+    <div class="campo">
+      <div class="et">Premisa<small>Lo que la máquina sabrá de su historia. Todo lo demás lo decidirá ella, incluido el título.</small></div>
+      <textarea name="idea" id="idea" class="escrito" required rows="3"
+        placeholder="Quién despierta, dónde, y qué no debería estar ahí"></textarea>
+    </div>
+
+    <div class="campo">
+      <div class="et">Número de capítulos<small>Cada capítulo cuesta dinero y unos cinco minutos. El revisor audita cada pocos.</small></div>
+      <div class="palotes" role="group" aria-label="Número de capítulos">
+        <svg id="palotes" viewBox="0 0 520 40" height="40" role="img" aria-label="Recuento en palotes"></svg>
+        <div class="ctrl">
+          <button type="button" id="menos" aria-label="Un capítulo menos">−</button>
+          <input type="number" name="total_capitulos" id="total_capitulos" min="1" max="200" required>
+          <button type="button" id="mas" aria-label="Un capítulo más">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="campo">
+      <div class="et">Obras de referencia<small>El Orquestador destila su estilo antes de escribir. Nunca las cita. Una ruta por línea.</small></div>
+      <div>
+        <textarea name="referencias" id="referencias" class="escrito" rows="2"
+          placeholder="C:\ruta\al\ejemplo.txt"></textarea>
+        <small id="ya-hay"></small>
+      </div>
+    </div>
+
+    <div class="campo">
+      <div class="et">Ajustes de producción<small>Los valores por defecto sirven. Cámbielos solo si sabe qué hacen.</small></div>
+      <div class="ajustes" id="ajustes"></div>
+    </div>
+
+    <div class="firmar">
+      <div>
+        <label><input type="checkbox" name="registrar_uso" id="registrar_uso"> Registrar el uso de tokens</label>
+        <small>Sin esto no hay forma de saber lo que cuesta cada capítulo.</small>
+      </div>
+      <button type="submit"  id="firmar">Firmar el encargo</button>
+    </div>
+  </form>
+
+  <aside class="margen">
+    <div><h2>Lo que costará</h2><p><b id="coste">—</b></p><small id="coste-nota"></small></div>
+    <div><h2>Lo que tardará</h2><p><b id="tiempo">—</b></p><p >La máquina no se acelera, y usted no puede escribir mientras trabaja.</p></div>
+    <div><h2>Dónde puede pararse</h2><svg id="paradas" viewBox="0 0 300 60" height="60" role="img" aria-label="Puntos de auditoría"></svg><small id="paradas-nota"></small></div>
+    <div><h2>Lo que no podrá hacer</h2><p>Cambiar la premisa, el tono o el número de capítulos una vez empezada. Sí puede detener la producción en cualquier momento; lo escrito se queda.</p></div>
+  </aside>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var estado = null;
+
+// Coste medido en la unica tanda real: 0,55 $ por capitulo cerrado. Es una estimacion declarada
+// como tal, no una promesa: el precio real lo cuenta `web.coste` sobre el uso ya registrado.
+var COSTE_POR_CAPITULO = 0.55, MINUTOS_POR_CAPITULO = 12;
+
+var ETIQUETAS = {
+  palabras_por_capitulo: ["Palabras por capítulo", "Tolerancia de ±20 %."],
+  cadencia_qa: ["El revisor audita cada", "capítulos. Más a menudo es más caro y más seguro."],
+  capitulos_por_tanda: ["Capítulos por tanda", "Cuántos se escriben de una sentada."],
+  max_llamadas_por_tanda: ["Llamadas máximas por tanda", "Tope de seguridad: si se pasa, para."],
+  ventana_resumen_rodante: ["Resúmenes que ve el escritor", "Cuántos capítulos atrás recuerda."],
+  max_hechos_por_capitulo: ["Hechos nuevos por capítulo", "Cuántos puede fijar el extractor."],
+  max_tokens_contexto_escritor: ["Contexto del escritor", "Tope de tokens de su prompt."],
+  idioma: ["Idioma", ""],
+  persona_narrativa: ["Persona narrativa", ""],
+  tiempo_verbal: ["Tiempo verbal", ""]
+};
+var OPCIONES = {
+  idioma: ["es-ES", "es-419", "en-US"],
+  persona_narrativa: ["tercera_limitada", "primera", "tercera_omnisciente"],
+  tiempo_verbal: ["pasado", "presente"]
+};
+
+function esc(s){ return String(s == null ? "" : s)
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function palotes(n){
+  // Grupos de cinco, el quinto tachado: es como cuenta una persona, no como cuenta una barra de progreso.
+  var p = [], x = 6, y1 = 8, y2 = 32;
+  for (var i = 1; i <= Math.min(n, 60); i++) {
+    if (i % 5 === 0) { p.push('<path d="M' + (x-30) + ' ' + (y2-4) + ' L ' + (x+4) + ' ' + (y1+4) + '"/>'); x += 14; }
+    else { p.push('<path d="M' + x + ' ' + y1 + ' V ' + y2 + '"/>'); x += 7; }
+  }
+  if (n > 60) p.push('<text x="' + (x+8) + '" y="28" font-size="14">y ' + (n-60) + ' más</text>');
+  $("palotes").innerHTML = '<g stroke="#17191C" stroke-width="1.6" fill="#17191C">' + p.join("") + "</g>";
+}
+
+function paradas(n, cadencia){
+  if (!cadencia) { $("paradas").innerHTML = ""; return; }
+  var p = ['<path d="M14 30 H 286" stroke="#6E726B" stroke-width="1"/>'];
+  for (var c = cadencia; c <= n; c += cadencia) {
+    var x = 14 + (286-14) * (c/n);
+    p.push('<path d="M' + x.toFixed(1) + ' 20 V 40" stroke="#A8281F" stroke-width="2"/>');
+  }
+  p.push('<text x="14" y="56" font-size="11" fill="#6E726B">cap. 1</text>');
+  p.push('<text x="286" y="56" font-size="11" fill="#6E726B" text-anchor="end">cap. ' + n + "</text>");
+  $("paradas").innerHTML = p.join("");
+  $("paradas-nota").textContent = "En cada marca roja el revisor puede detenerlo todo. Son " +
+    Math.floor(n/cadencia) + " puntos de parada.";
+}
+
+function recalcular(){
+  var n = parseInt($("total_capitulos").value, 10) || 0;
+  var cad = parseInt((document.querySelector('[name="cadencia_qa"]')||{}).value, 10) || 0;
+  palotes(n); paradas(n, cad);
+  $("coste").textContent = (n * COSTE_POR_CAPITULO).toLocaleString("es-ES",
+    {style:"currency", currency:"USD", currencyDisplay:"narrowSymbol", maximumFractionDigits:2}) + " aprox.";
+  $("coste-nota").textContent = "A unos 0,55 $ por capítulo cerrado, medido sobre la única tanda que se ha "
+    + "corrido de verdad. Lo escrito no se devuelve.";
+  var min = n * MINUTOS_POR_CAPITULO;
+  $("tiempo").textContent = min >= 60 ? Math.floor(min/60) + " h " + (min%60) + " min" : min + " min";
+}
+
+function pintarAjustes(){
+  var v = estado.valores, h = [];
+  Object.keys(ETIQUETAS).forEach(function(k){
+    if (!(k in v)) return;
+    var control = OPCIONES[k]
+      ? '<select name="' + k + '">' + OPCIONES[k].map(function(o){
+          return '<option value="' + esc(o) + '"' + (String(v[k]) === o ? " selected" : "") + ">" + esc(o) + "</option>";
+        }).join("") + "</select>"
+      : '<input type="number" name="' + k + '" value="' + esc(v[k]) + '" required>';
+    h.push("<label><span>" + esc(ETIQUETAS[k][0]) + "</span>" + control +
+           (ETIQUETAS[k][1] ? "<small>" + esc(ETIQUETAS[k][1]) + "</small>" : "") + "</label>");
+  });
+  $("ajustes").innerHTML = h.join("");
+  var cad = document.querySelector('[name="cadencia_qa"]');
+  if (cad) cad.addEventListener("input", recalcular);
+}
+
+fetch("/api/formulario").then(function(r){ return r.json(); }).then(function(d){
+  estado = d;
+  $("idea").value = d.idea || new URLSearchParams(location.search).get("idea") || "";
+  $("total_capitulos").value = d.valores.total_capitulos;
+  $("registrar_uso").checked = d.valores.registrar_uso !== false;
+  pintarAjustes();
+  recalcular();
+
+  $("folio").textContent = String(d.capitulos_cerrados || 0).padStart(4, "0");
+  $("fecha").textContent = new Date().toLocaleDateString("es-ES",
+    {weekday:"long", day:"numeric", month:"long"});
+  $("ya-hay").textContent = d.referencias && d.referencias.length
+    ? "Ya hay " + d.referencias.length + " en 00_referencias/: " + d.referencias.join(", ") + "."
+    : "No hay ninguna todavía. Sin referencias el estilo se destila solo de la premisa.";
+
+  if (d.bloqueado) {
+    // INV-04 congela solo config/novela.json. La idea, las referencias y los ajustes de ejecucion
+    // siguen siendo editables, asi que bloquear la hoja entera seria mas restrictivo que el harness.
+    $("bloqueo").textContent = d.motivo_bloqueo;
+    $("bloqueo").hidden = false;
+    (d.campos_novela || []).forEach(function(k){
+      var c = $("hoja").querySelector('[name="' + k + '"]');
+      if (c) { c.disabled = true; c.title = "Congelado por INV-04: ya hay capitulos cerrados."; }
+    });
+    $("firmar").textContent = "Guardar lo que sigue siendo editable";
+  }
+}).catch(function(e){
+  $("bloqueo").textContent = "No se pudo hablar con el harness: " + e.message;
+  $("bloqueo").hidden = false;
+});
+
+$("mas").addEventListener("click", function(){
+  $("total_capitulos").value = (parseInt($("total_capitulos").value,10)||0) + 1; recalcular(); });
+$("menos").addEventListener("click", function(){
+  $("total_capitulos").value = Math.max(1, (parseInt($("total_capitulos").value,10)||1) - 1); recalcular(); });
+$("total_capitulos").addEventListener("input", recalcular);
+})();
+</script>
+</body>
+</html>

@@ -444,6 +444,7 @@ def indice(raiz: Path) -> dict[str, Any]:
         "logline": logline,
         "total_capitulos": total,
         "capitulos_cerrados": cerrados,
+        "cadencia_qa": novela.get("cadencia_qa"),
         "estado": getattr(m, "estado", None) if m else None,
         "capitulos": capitulos,
     }
