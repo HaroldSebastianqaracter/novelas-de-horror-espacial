@@ -185,7 +185,7 @@ Promise.all([
   fetch("/api/coste").then(function(r){ return r.ok ? r.json() : null; })
 ]).then(function(xs){
   var ix = xs[0], coste = xs[1];
-  var hay = ix.total_capitulos > 0;
+  var hay = ix.hay_novela;
   $("trajes").innerHTML = (hay ? trajeActual(ix, coste) : "") + trajeNuevo();
   $("v-coste").textContent = coste ? dinero(coste.total, coste.moneda) : "—";
   $("n-coste").textContent = coste

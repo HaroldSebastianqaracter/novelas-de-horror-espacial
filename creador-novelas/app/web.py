@@ -440,6 +440,9 @@ def indice(raiz: Path) -> dict[str, Any]:
             "corte_qa": n in hallazgos,
         })
     return {
+        # Que exista una novela no lo decide `config/novela.json`, que conserva los ajustes aunque
+        # se borre todo: lo decide que haya manifiesto, premisa o algun capitulo en el disco.
+        "hay_novela": bool(m or titulo or any(c["escrito"] for c in capitulos)),
         "titulo": titulo or "Sin título",
         "logline": logline,
         "total_capitulos": total,
