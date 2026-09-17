@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from app.errores import ConfiguracionInvalidaError
 from app.rutas import Rutas
 
-VERSION_SPECS = "v1.8"  # versión de las especificaciones que implementa este código; viaja en la traza (§16.2)
+VERSION_SPECS = "v1.9"  # versión de las especificaciones que implementa este código; viaja en la traza (§16.2)
 ROLES = ("escritor", "extractor", "qa")
 SKILL_DE_DOMINIO = {"escritor": "prosa-terror-espacial", "extractor": "formato-delta", "qa": "criterios-qa"}
 

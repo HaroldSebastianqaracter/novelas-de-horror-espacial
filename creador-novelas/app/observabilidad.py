@@ -236,20 +236,47 @@ def _uso_por_agent_id(carpeta: Path) -> dict[str, dict]:
 
 def _emparejar_generaciones(eventos: list[dict], uso: dict[str, dict]) -> list[Generacion]:
     """Cada `agente_fin` cierra el `agente_inicio` más reciente sin cerrar de su (rol, capítulo) (LIFO: un
-    agente que murió sin fin no absorbe el fin del reintento). Un inicio sin fin queda como generación abierta."""
+    agente que murió sin fin no absorbe el fin del reintento). Un inicio sin fin queda como generación abierta.
+
+    Dos defensas contra lo que el registro trae de fábrica, porque el hook estampa el `agente_fin` con el
+    cursor vivo y no con el estado del agente que termina:
+
+    - Un `agent_id` no puede cerrarse dos veces. El hook emite el fin más de una vez para el mismo subagente
+      (visto en tanda_2026-09-16T19-30-34: el extractor `a1adf…` cierra en el cap. 5 y diez segundos después
+      vuelve a cerrar en el cap. 6). Sin esta guarda el duplicado genera una observación con el mismo `id`
+      —que se deriva del `agent_id`— y el upsert de Langfuse pisa la buena con la mala: el duplicado no
+      encuentra su `inicio`, así que su `startTime` cae sobre el `endTime` y la latencia queda en cero.
+    - El capítulo lo pone el `inicio`, no el `fin`. Un fin que llega después de que el cursor avanzara trae el
+      capítulo siguiente, y llega a inventarse capítulos que no existen (el `extractor:cap_7` de esa tanda es
+      en realidad el extractor del 6). El inicio sí tiene el capítulo con el que se lanzó el agente.
+
+    Las dos solo actúan cuando el emparejamiento directo falla, así que un registro sano pasa por aquí intacto.
+    La causa está en el hook y hay que arreglarla allí; esto es lo que impide que un registro torcido se
+    publique como si fuera bueno."""
     pendientes: dict[tuple, list[dict]] = {}
     generaciones: list[Generacion] = []
     orden: dict[tuple, int] = {}
+    cerrados: set[str] = set()
     for e in eventos:
         if e.get("tipo") == "agente_inicio":
             pendientes.setdefault((e.get("rol"), e.get("capitulo")), []).append(e)
         elif e.get("tipo") == "agente_fin":
-            clave = (e.get("rol"), e.get("capitulo"))
+            agent_id = e.get("agent_id")
+            if agent_id and str(agent_id) in cerrados:
+                continue
+            if agent_id:
+                cerrados.add(str(agent_id))
+            rol = e.get("rol")
+            clave = (rol, e.get("capitulo"))
+            if not pendientes.get(clave):
+                abiertas = [k for k, v in pendientes.items() if k[0] == rol and v]
+                if abiertas:
+                    clave = max(abiertas, key=lambda k: pendientes[k][-1].get("ts") or "")
             inicio = pendientes[clave].pop() if pendientes.get(clave) else None
             orden[clave] = orden.get(clave, 0) + 1
-            u = uso.get(str(e.get("agent_id")), {})
+            u = uso.get(str(agent_id), {})
             generaciones.append(Generacion(
-                rol=e.get("rol"), capitulo=e.get("capitulo"), agent_id=e.get("agent_id"),
+                rol=rol, capitulo=inicio.get("capitulo") if inicio else e.get("capitulo"), agent_id=agent_id,
                 inicio=inicio.get("ts") if inicio else None, fin=e.get("ts"),
                 modelo=u.get("modelo") or e.get("modelo"),
                 uso={campo: int(u.get(campo) or 0) for campo in CLAVES_USO},
@@ -364,9 +391,14 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False) -> 
 
     # span = un capítulo: abarca todos los eventos con ese `capitulo` (verbos, agentes, validaciones)
     por_capitulo: dict[int, list[dict]] = {}
+    # El `capitulo` de un `agente_fin` lo pone el cursor vivo y no el agente que termina, así que puede
+    # nombrar un capítulo que nunca se escribió (el `cap_7` de tanda_2026-09-16T19-30-34). Un fin no abre
+    # capítulo por sí solo: se suma al de un capítulo que algún otro evento haya declarado.
+    declarados = {e.get("capitulo") for e in eventos
+                  if isinstance(e.get("capitulo"), int) and e.get("tipo") != "agente_fin"}
     for e in eventos:
         n = e.get("capitulo")
-        if isinstance(n, int):
+        if isinstance(n, int) and n in declarados:
             por_capitulo.setdefault(n, []).append(e)
     capitulos = sorted(por_capitulo)
     verbos_ok = {(e.get("verbo"), e.get("capitulo")) for e in eventos if e.get("tipo") == "verbo" and e.get("resultado") == "ok"}

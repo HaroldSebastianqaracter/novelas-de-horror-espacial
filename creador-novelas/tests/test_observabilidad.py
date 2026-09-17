@@ -7,6 +7,7 @@ import re
 import pytest
 
 from app import cli, observabilidad, registro
+from app.config import VERSION_SPECS
 from app.errores import ConfiguracionInvalidaError
 from app.orchestrator import loop
 from app.rutas import Rutas
@@ -71,7 +72,7 @@ def test_la_traza_refleja_la_tanda(proyecto, config):
     # metadata: dimensionamiento, los tres prompts_hash de ESA tanda (tanda.json) y la versión de las specs
     assert trace["metadata"]["total_capitulos"] == 30 and trace["metadata"]["capitulos_por_tanda"] == 3 and trace["metadata"]["cadencia_qa"] == 3
     assert set(trace["metadata"]["prompts_hash"]) == {"escritor", "extractor", "qa"} and trace["metadata"]["metadatos_origen"] == "tanda.json"
-    assert trace["metadata"]["version_specs"] == "v1.8" and trace["metadata"]["motivo_salida"] == "tope_de_tanda"
+    assert trace["metadata"]["version_specs"] == VERSION_SPECS and trace["metadata"]["motivo_salida"] == "tope_de_tanda"
     # un span por capítulo, con inicio y fin explícitos tomados del registro, no de "ahora"
     spans = [e["body"] for e in traza.lote if e["type"] == "span-create"]
     assert [s["name"] for s in spans] == ["cap_1", "cap_2", "cap_3"]
@@ -263,3 +264,25 @@ def test_generacion_sin_fin_queda_marcada(proyecto, config):
     traza = observabilidad.construir_traza(proyecto, carpeta)
     abierta = next(e["body"] for e in traza.lote if e["type"] == "generation-create" and e["body"]["name"] == "escritor:cap_2")
     assert abierta["level"] == "WARNING" and "endTime" not in abierta
+
+
+def test_un_fin_tardio_no_duplica_la_generacion_ni_inventa_capitulo(proyecto, config):
+    """El hook estampa el `agente_fin` con el cursor vivo, no con el estado del agente que termina.
+
+    Visto en tanda_2026-09-16T19-30-34: el mismo extractor cerró dos veces, la segunda ya con el cursor en el
+    capítulo siguiente, y el extractor del 6 se registró como `cap_7`. El `id` de la observación se deriva del
+    `agent_id`, así que el duplicado pisaba a la buena en el upsert de Langfuse y le dejaba latencia cero.
+    """
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    registro.evento(proyecto, "agente_inicio", rol="extractor", capitulo=1, agent_id=None, intento=1)
+    registro.evento(proyecto, "agente_fin", rol="extractor", capitulo=1, agent_id="aaa", turnos=4)
+    registro.evento(proyecto, "agente_fin", rol="extractor", capitulo=2, agent_id="aaa", turnos=4)
+
+    traza = observabilidad.construir_traza(proyecto, carpeta)
+    extractores = [e["body"] for e in traza.lote
+                   if e["type"] == "generation-create" and e["body"]["metadata"].get("agent_id") == "aaa"]
+    assert [g["name"] for g in extractores] == ["extractor:cap_1"]
+    assert extractores[0]["startTime"] < extractores[0]["endTime"]
+
+    spans = {e["body"]["name"] for e in traza.lote if e["type"] == "span-create"}
+    assert "cap_2" not in spans
