@@ -2,7 +2,7 @@
 name: escribir-tanda
 description: Fases 5-7 (spec técnica §6). Escribe capítulos en tanda invocando a escritor, extractor y qa como subagentes, avanzando el loop tramo a tramo con los verbos internos del CLI (§8.2). Uso: /escribir-tanda [N | --hasta-el-final].
 argument-hint: "[N | --hasta-el-final]"
-allowed-tools: Read, Write, Agent, Bash(.venv/Scripts/python.exe -m app:*)
+allowed-tools: Read, Write, Edit, Agent, Bash(.venv/Scripts/python.exe -m app:*)
 disable-model-invocation: true
 ---
 

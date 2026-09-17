@@ -478,6 +478,56 @@ Escribi la premisa.
     assert any(h.startswith("PowerShell(") and "\\" in h for h in herramientas)
 
 
+def test_el_lanzador_senala_git_bash_para_que_los_hooks_corran(monkeypatch, tmp_path):
+    """En Windows Claude Code ejecuta los hooks con Git Bash; sin él no fallan, simplemente no corren.
+
+    Se descubrió midiendo una tanda real: 28 minutos y 8 $ sin un solo evento de hook, o sea sin H-06
+    (confina las escrituras), sin H-10 (registra el uso) y sin H-11 (confina la terminal).
+    """
+    import os as _os
+    bash = tmp_path / "Git" / "bin" / "bash.exe"
+    bash.parent.mkdir(parents=True)
+    bash.write_text("", encoding="utf-8")
+
+    # Con la variable ya puesta y apuntando a un archivo real, se respeta.
+    monkeypatch.setattr(_os, "name", "nt")
+    monkeypatch.setenv("CLAUDE_CODE_GIT_BASH_PATH", str(bash))
+    assert web.git_bash() == str(bash)
+    assert web.entorno_de_lanzamiento()["CLAUDE_CODE_GIT_BASH_PATH"] == str(bash)
+
+    # Apuntando a algo que no existe, se ignora y se busca; sin nada que encontrar, None.
+    monkeypatch.setenv("CLAUDE_CODE_GIT_BASH_PATH", str(tmp_path / "no-existe.exe"))
+    monkeypatch.setattr(web.shutil, "which", lambda _: None)
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "vacio"))
+    monkeypatch.setattr(web.Path, "exists", lambda self: False)
+    assert web.git_bash() is None
+
+
+def test_sin_git_bash_la_fase_de_agentes_no_se_lanza(monkeypatch, proyecto, config):
+    """Vale más una fase que no arranca que una tanda entera sin su valla de invariantes."""
+    import os as _os
+    monkeypatch.setattr(_os, "name", "nt")
+    monkeypatch.setattr(web, "ejecutable_claude", lambda: "claude.exe")
+    monkeypatch.setattr(web, "git_bash", lambda: None)
+    web._EN_CURSO.clear()
+    with pytest.raises(RuntimeError, match="Git Bash"):
+        web.lanzar_fase(proyecto, "escribir-tanda")
+
+
+def test_la_tanda_autoriza_edit_para_que_el_reintento_no_reescriba_el_capitulo(proyecto, config):
+    """Spec-X 01: el escritor corrige los pasajes de RF-05.5 con Edit, no reescribiendo 1.400 palabras.
+
+    La skill no lo autorizaba, así que el Edit se denegaba y el escritor caía en Write: se midió en una
+    tanda real, con los dos Edit denegados en el log del lanzamiento. H-06 confina el Edit al capítulo
+    del escritor igual que el Write, así que autorizarlo no amplía a dónde puede escribir.
+    """
+    from app.hooks import HERRAMIENTAS_ESCRITURA
+    assert "Edit" in HERRAMIENTAS_ESCRITURA, "sin esto, autorizar Edit daría una escritura sin valla"
+    skill = Path(__file__).resolve().parents[1] / ".claude" / "skills" / "escribir-tanda" / "SKILL.md"
+    herramientas = web._herramientas(skill.read_text(encoding="utf-8"))
+    assert "Edit" in herramientas and "Write" in herramientas
+
+
 def test_las_directivas_se_resuelven_sin_shell(proyecto, config):
     """`cat`, `ls -1` y su alternativa `|| echo`, sin pasar por bash ni por PowerShell."""
     (proyecto / "hay.txt").write_text("contenido", encoding="utf-8")

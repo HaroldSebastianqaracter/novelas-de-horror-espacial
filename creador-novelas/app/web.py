@@ -135,6 +135,49 @@ def ejecutable_claude() -> str | None:
     return None
 
 
+def git_bash() -> str | None:
+    """Ruta de `bash.exe` de Git para Windows, que es con lo que Claude Code ejecuta los hooks.
+
+    En Windows los comandos de hook corren a través de Git Bash. Si no se encuentra, los hooks **no
+    fallan ruidosamente: no corren**, y la tanda entera se ejecuta sin la valla de invariantes (H-06
+    confina las escrituras, H-10 registra el uso, H-11 confina la terminal). Pasó de verdad: una tanda
+    de 28 minutos y 8 $ salió sin un solo evento de hook y nada lo delató.
+
+    Fuera de Windows no hace falta: los hooks corren en el shell del sistema.
+    """
+    if os.name != "nt":
+        return None
+    puesto = os.environ.get("CLAUDE_CODE_GIT_BASH_PATH")
+    if puesto and Path(puesto).exists():
+        return puesto
+    # Desde el git del PATH: `<raiz>/cmd/git.exe` y `<raiz>/bin/git.exe` son las dos disposiciones.
+    git = shutil.which("git")
+    if git:
+        for padre in Path(git).resolve().parents[:2]:
+            candidato = padre / "bin" / "bash.exe"
+            if candidato.exists():
+                return str(candidato)
+    local = os.environ.get("LOCALAPPDATA", "")
+    for c in (Path(r"C:\Program Files\Git\bin\bash.exe"),
+              Path(local) / "Programs" / "Git" / "bin" / "bash.exe" if local else None):
+        if c is not None and c.exists():
+            return str(c)
+    return None
+
+
+def entorno_de_lanzamiento() -> dict[str, str]:
+    """El entorno del proceso `claude`, con Git Bash señalado para que los hooks corran (RF-08.5).
+
+    Se resuelve acá y no como variable de sistema para que funcione en cualquier máquina que clone el
+    repositorio, sin depender de que alguien se acuerde de exportarla.
+    """
+    entorno = dict(os.environ)
+    bash = git_bash()
+    if bash:
+        entorno["CLAUDE_CODE_GIT_BASH_PATH"] = bash
+    return entorno
+
+
 def proceso_vivo() -> bool:
     proc = _EN_CURSO.get("proc")
     return proc is not None and proc.poll() is None
@@ -209,6 +252,16 @@ def lanzar_fase(raiz: Path, fase: str) -> dict[str, Any]:
         if exe is None:
             raise RuntimeError("No encuentro el ejecutable `claude`. La pantalla no puede lanzar fases "
                                "sin él; desde la terminal siguen funcionando igual.")
+        # Sin Git Bash los hooks no corren y la fase se ejecutaría sin la valla de invariantes. Antes
+        # eso pasaba en silencio; ahora no se lanza. Vale más una fase que no arranca que una tanda de
+        # media hora sin H-06, H-10 ni H-11.
+        if os.name == "nt" and git_bash() is None:
+            raise RuntimeError(
+                "No encuentro Git Bash (`bash.exe`), y en Windows Claude Code ejecuta los hooks con él. "
+                "Sin hooks la tanda correría sin sus invariantes (H-06, H-10, H-11) y sin registro de "
+                "uso, así que no se lanza. Instalá Git para Windows o apuntá CLAUDE_CODE_GIT_BASH_PATH "
+                "a tu `bash.exe`."
+            )
         # El prompt es el cuerpo del SKILL.md con sus directivas ya resueltas, no `/nombre-de-skill`:
         # en modo `-p` un comando con barra no ejecuta nada (ver `prompt_de_fase`).
         prompt, herramientas = prompt_de_fase(raiz, fase)
@@ -222,7 +275,8 @@ def lanzar_fase(raiz: Path, fase: str) -> dict[str, Any]:
     log = raiz / ".tanda" / "ultimo_lanzamiento.log"
     log.parent.mkdir(parents=True, exist_ok=True)
     fh = log.open("wb")
-    proc = subprocess.Popen(cmd, cwd=str(raiz), stdout=fh, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
+    proc = subprocess.Popen(cmd, cwd=str(raiz), stdout=fh, stderr=subprocess.STDOUT,
+                            stdin=subprocess.DEVNULL, env=entorno_de_lanzamiento())
     _EN_CURSO.clear()
     _EN_CURSO.update({"proc": proc, "fase": fase, "desde": time.time(), "log": str(log), "raiz": raiz})
     return {"lanzada": fase, "pid": proc.pid, "log": str(log)}
