@@ -220,6 +220,16 @@ def registrar_escritor(raiz: Path, config: HarnessConfig, n: int, linea: str) ->
     return resultado
 
 
+def _corte_qa_sin_cerrar(m, config: HarnessConfig) -> bool:
+    """¿El último capítulo cerrado tocaba auditoría y el corte todavía no se cerró?
+
+    Con el corte solapado (§6) el revisor y el escritor del capítulo siguiente trabajan a la vez;
+    esto es lo que impide que el segundo se cierre antes que el primero.
+    """
+    ultimo = m.ultimo_capitulo_cerrado
+    return bool(ultimo) and ultimo % config.cadencia_qa == 0 and m.ultimo_qa_ejecutado < ultimo
+
+
 def aplicar_delta(raiz: Path, config: HarnessConfig, n: int, delta: DeltaExtraccion | str | None = None,
                   reextraccion: bool = False) -> ResultadoDelta:
     """RF-06.1 a RF-06.4 (y RF-07.6 paso 2 con `reextraccion`). Nada se escribe si algo no valida (EX-01)."""
@@ -230,6 +240,15 @@ def aplicar_delta(raiz: Path, config: HarnessConfig, n: int, delta: DeltaExtracc
             raise ManifiestoInconsistenteError(f"RF-07.6: el capítulo {n} no está en reextraccion_pendiente {m.reextraccion_pendiente}")
     elif n != m.ultimo_capitulo_cerrado + 1:
         raise ManifiestoInconsistenteError(f"INV-07: se intentó aplicar el delta del capítulo {n} y el siguiente es {m.ultimo_capitulo_cerrado + 1}")
+    if not reextraccion and _corte_qa_sin_cerrar(m, config):
+        # El corte de QA se solapa con la escritura del capítulo siguiente para no pagar su tiempo
+        # dos veces, pero cerrar ese capítulo antes que el corte movería `ultimo_capitulo_cerrado`,
+        # y de ahí sale el capítulo con el que los hooks resuelven a QA (§13.3): su `validar-reporte`
+        # dejaría de casar con H-11 a media auditoría. El corte se cierra primero.
+        raise ManifiestoInconsistenteError(
+            f"RF-07.4: queda sin cerrar el corte de QA del capítulo {m.ultimo_capitulo_cerrado}; "
+            f"corré `cerrar-qa {m.ultimo_capitulo_cerrado}` antes de cerrar el capítulo {n}"
+        )
 
     fichas = repo.leer_personajes(raiz)
     mundo = repo.leer_mundo(raiz)

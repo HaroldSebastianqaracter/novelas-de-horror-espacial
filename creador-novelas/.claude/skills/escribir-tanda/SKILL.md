@@ -44,12 +44,27 @@ El extractor escribe él mismo `04_estado/deltas/delta_cap_N.json`, lo valida (`
 - `ERROR AutovalidacionFallidaError` o `ERROR EstadoInvalidoError` (EX-10 / EX-01: el delta no valida) → reenviá al extractor el error textual y pedile que corrija el archivo y vuelva a validar; hasta 3 invocaciones en total (§3.4); luego detenete y reportá EX-01.
 - `ERROR PersonajeNoPrevistoError` → detenete y reportá EX-08: la entrada de outline es sospechosa.
 
-## 4. Corte de QA (N múltiplo de cadencia_qa)
-`.venv/Scripts/python.exe -m app preparar-qa N` → `RESULTADO: qa_listo prompt=04_estado/prompts/qa_cap_N.md`. Leé ese prompt y `Agent(subagent_type="qa", prompt=<contenido>)`. QA escribe sus tres archivos, los valida (`validar-reporte N`, RF-08.4) y devuelve hasta cinco líneas que incluyen `validado`. Guardá su mensaje final y cerrá el corte (el harness vuelve a validar):
+## 4. Corte de QA (N múltiplo de cadencia_qa), en paralelo con el capítulo siguiente
+
+QA audita capítulos **ya cerrados**, así que no necesita nada del capítulo que viene: los dos pueden trabajar a la vez y ahí se ahorra el tiempo entero del corte. Se hace así, en este orden:
+
+**a)** `.venv/Scripts/python.exe -m app preparar-qa N` → `RESULTADO: qa_listo prompt=04_estado/prompts/qa_cap_N.md`. Leé ese prompt con Read.
+
+**b)** `.venv/Scripts/python.exe -m app tanda siguiente`
+- `RESULTADO: seguir siguiente=M` → `... preparar-capitulo M` y leé `04_estado/prompts/escritor_cap_M.md`. Seguí en (c) con los dos prompts en la mano.
+- Cualquier otro motivo (`tope_de_tanda`, `novela_completa`...) → no hay capítulo que solapar: invocá solo a QA, seguí en (d) y al terminar reportá ese motivo.
+
+**c)** En **un solo mensaje**, invocá los dos subagentes a la vez, para que corran en paralelo:
+`Agent(subagent_type="qa", prompt=<qa_cap_N.md>)` y `Agent(subagent_type="escritor", prompt=<escritor_cap_M.md>)`.
+Cada uno escribe y valida lo suyo, y no se pisan: QA solo toca `06_qa/` y el escritor solo su `cap_M.md` (H-06).
+
+**d)** Cerrá **primero el corte**, siempre, antes de tocar el capítulo M:
 `.venv/Scripts/python.exe -m app cerrar-qa N --retorno "<mensaje final de QA>"`
-- `RESULTADO: qa_sin_contradicciones` → ir a 5.
-- `RESULTADO: pausado_por_qa reporte=qa_cap_N` → **detenete**. Mostrale al usuario la ruta `06_qa/reportes/qa_cap_N.md` y que la tanda queda pausada hasta `resolver`. No intentes resolverlo.
+- `RESULTADO: qa_sin_contradicciones` → recién ahora seguí con M: `... registrar-escritor M "<mensaje final del escritor>"`, y tratá lo que devuelva con **la misma tabla del paso 2** (reintento de longitud, contrato de retorno, EX-10...). Si acepta el borrador, seguí al **paso 3** con M.
+- `RESULTADO: pausado_por_qa reporte=qa_cap_N` → `... descartar-borrador M` y **detenete**. El capítulo M se escribió mientras QA auditaba y no se cierra: se descarta. Mostrale al usuario la ruta `06_qa/reportes/qa_cap_N.md` y que la tanda queda pausada hasta `resolver`. No intentes resolverlo.
 - `ERROR` (contrato de retorno, EX-10, o QA no escribió el JSON o recursos_usados.json) → reenviá a QA el error textual una vez; si repite, detenete y reportá.
+
+**No cierres el capítulo M antes que el corte.** `aplicar-delta M` mueve `ultimo_capitulo_cerrado`, y de ahí sale el capítulo con el que los hooks resuelven a QA (§13.3): su `validar-reporte N` dejaría de casar con H-11 a media auditoría. El harness lo rechaza si lo intentás, pero el orden correcto es este.
 
 ## 5. Siguiente
 `.venv/Scripts/python.exe -m app tanda siguiente`

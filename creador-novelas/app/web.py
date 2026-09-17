@@ -54,6 +54,11 @@ VERBOS: dict[str, list[str]] = {"ensamblar": ["ensamblar", "--salida", "08_entre
 # capitulos, porque el harness no puede comprobarlo y seria una mentira anotada en el registro.
 FASES_DINAMICAS = ("reanudar",)
 
+# Modelo del orquestador de las fases con agentes. No redacta: ejecuta verbos, lee la línea
+# RESULTADO y despacha subagentes (INV-08). Cada subagente declara el suyo en `.claude/agents/`,
+# de modo que este valor no influye en con qué modelo se escribe la novela.
+MODELO_ORQUESTADOR = "opus"
+
 # Una tanda lanzada desde la terminal no deja proceso hijo aquí; se la reconoce porque su registro
 # sigue creciendo. Por debajo de este margen se considera viva.
 MARGEN_VIVA_S = 180
@@ -269,8 +274,13 @@ def lanzar_fase(raiz: Path, fase: str) -> dict[str, Any]:
         # (§15.4), asi que hay que autorizar a mano lo que la fase necesita; se toma de su propio
         # `allowed-tools`, para que la pantalla no pueda conceder mas de lo que la skill declara.
         # Nunca `--bare`: saltaria hooks, subagentes, skills y CLAUDE.md.
+        # El orquestador no escribe prosa: llama verbos, lee la línea RESULTADO y despacha subagentes
+        # (INV-08). Sin fijar modelo heredaba el de la cuenta, y en la tanda del 17/09 eso fueron
+        # 5,76 $ de 8,05 -el 72 %- para un trabajo mecánico, más que todo lo que costó escribir la
+        # novela. Se fija explícitamente; cada subagente declara el suyo en .claude/agents/, así que
+        # esto no toca con qué modelo se escribe el texto.
         cmd = [exe, "-p", prompt, "--output-format", "json", "--permission-prompts", "none",
-               "--allowed-tools", *herramientas]
+               "--model", MODELO_ORQUESTADOR, "--allowed-tools", *herramientas]
 
     log = raiz / ".tanda" / "ultimo_lanzamiento.log"
     log.parent.mkdir(parents=True, exist_ok=True)

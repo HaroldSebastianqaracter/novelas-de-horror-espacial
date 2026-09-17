@@ -17,6 +17,28 @@ from app.state import repository as repo
 from tests.conftest import AgentesDobles, construir_proyecto, outline_de_prueba
 
 
+def test_el_corte_de_qa_se_cierra_antes_que_el_capitulo_solapado(proyecto, config, dobles):
+    """El corte corre en paralelo con el capítulo siguiente, pero no puede cerrarse después que él.
+
+    Los hooks resuelven el capítulo de QA con `ultimo_capitulo_cerrado` (§13.3). Si el capítulo
+    solapado se cerrara primero, ese número se movería a media auditoría y el `validar-reporte` de QA
+    dejaría de casar con H-11. El harness lo rechaza en vez de dejarlo pasar.
+    """
+    loop.ejecutar_tanda(config, proyecto, dobles)  # cierra 1, 2 y 3, con corte en el 3
+    m = checkpoint.leer_manifest(proyecto)
+    assert (m.ultimo_capitulo_cerrado, m.ultimo_qa_ejecutado) == (3, 3)
+
+    # Se simula el corte del 3 todavía sin cerrar y se intenta cerrar el capítulo 4.
+    checkpoint._actualizar(proyecto, ultimo_qa_ejecutado=0)
+    assert loop._corte_qa_sin_cerrar(checkpoint.leer_manifest(proyecto), config)
+    with pytest.raises(ManifiestoInconsistenteError, match="corte de QA"):
+        loop.aplicar_delta(proyecto, config, 4)
+
+    # Con el corte ya cerrado, el capítulo siguiente puede cerrarse con normalidad.
+    checkpoint._actualizar(proyecto, ultimo_qa_ejecutado=3)
+    assert not loop._corte_qa_sin_cerrar(checkpoint.leer_manifest(proyecto), config)
+
+
 def test_tanda_de_3_cierra_3_y_corre_qa_en_cadencia(proyecto, config, dobles):
     with warnings.catch_warnings():
         warnings.simplefilter("error")

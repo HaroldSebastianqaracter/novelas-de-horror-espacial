@@ -514,6 +514,42 @@ def test_sin_git_bash_la_fase_de_agentes_no_se_lanza(monkeypatch, proyecto, conf
         web.lanzar_fase(proyecto, "escribir-tanda")
 
 
+def test_el_orquestador_corre_con_un_modelo_fijado(monkeypatch, proyecto, config):
+    """El orquestador no redacta: llama verbos y despacha subagentes, y heredaba el modelo de la cuenta.
+
+    En la tanda del 17/09 eso fueron 5,76 $ de 8,05 (72 %) para un trabajo mecánico, más que todo lo
+    que costó escribir la novela. Los subagentes declaran su modelo aparte, así que fijarlo acá no
+    cambia con qué se escribe el texto.
+    """
+    import os as _os
+    capturado = {}
+
+    class _Proc:
+        pid = 1234
+
+        def poll(self):
+            return None
+
+    def _popen(cmd, **kw):
+        capturado["cmd"] = cmd
+        return _Proc()
+
+    skill = proyecto / ".claude" / "skills" / "generar-premisa"
+    skill.mkdir(parents=True, exist_ok=True)
+    (skill / "SKILL.md").write_text(
+        "---\nname: generar-premisa\nallowed-tools: Read, Write\n---\n\n# Fase 1\nEscribí la premisa.\n",
+        encoding="utf-8")
+
+    monkeypatch.setattr(_os, "name", "posix")  # sin la comprobación de Git Bash, que es de Windows
+    monkeypatch.setattr(web, "ejecutable_claude", lambda: "claude.exe")
+    monkeypatch.setattr(web.subprocess, "Popen", _popen)
+    web._EN_CURSO.clear()
+    web.lanzar_fase(proyecto, "generar-premisa")
+    cmd = capturado["cmd"]
+    assert "--model" in cmd and cmd[cmd.index("--model") + 1] == web.MODELO_ORQUESTADOR
+    web._EN_CURSO.clear()
+
+
 def test_la_tanda_autoriza_edit_para_que_el_reintento_no_reescriba_el_capitulo(proyecto, config):
     """Spec-X 01: el escritor corrige los pasajes de RF-05.5 con Edit, no reescribiendo 1.400 palabras.
 
