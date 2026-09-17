@@ -327,8 +327,10 @@ def render_resultado(resultado: ResultadoGuardado, raiz: Path) -> str:
 <h2>Archivos escritos</h2><ul>{escritos}</ul>
 {bloque_copiados}
 <h2>Siguiente paso</h2>
-<p>En la sesión de Claude Code, teclear: <code>{html.escape(resultado.comando_siguiente)}</code></p>
-<p><a href='/'>Volver al formulario</a></p>
+<p>Sigue en <a href='/consola'>la consola de producción</a>, que lleva la secuencia entera y lanza
+cada paso por ti. El primero es <code>{html.escape(resultado.comando_siguiente)}</code>.</p>
+<p>También se puede teclear ese comando en una sesión de Claude Code; hace exactamente lo mismo.</p>
+<p><a href='/encargo'>Volver al encargo</a> · <a href='/'>Biblioteca</a></p>
 """
     return _pagina("creador-novelas · guardado", cuerpo)
 

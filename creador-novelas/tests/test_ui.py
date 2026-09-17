@@ -403,3 +403,19 @@ def test_la_longitud_de_la_obra_la_elige_el_usuario(proyecto, config):
     for n in (0, 201):
         with pytest.raises(ConfiguracionInvalidaError):
             con(n)
+
+
+def test_firmar_el_encargo_lleva_a_la_consola_y_no_a_la_terminal(proyecto, config, servidor):
+    """La pagina de confirmacion se escribio cuando la web no sabia lanzar fases.
+
+    Decia «En la sesion de Claude Code, teclear: /generar-premisa» y enlazaba de vuelta al
+    formulario, asi que despues de encargar un libro parecia que el resto iba por terminal.
+    """
+    estado, pagina = _pedir(servidor, "POST", "/guardar", dict(FORM_OK, idea="una idea nueva"))
+    assert estado == 200
+    assert "/consola" in pagina, "la confirmacion no lleva a la consola"
+    assert "Volver al encargo" in pagina and "/encargo" in pagina
+
+    # Y la hoja de encargo no se queda en esa pagina: firma por fetch y salta a produccion.
+    html = (Path(__file__).resolve().parents[1] / "app" / "static" / "encargo.html").read_text(encoding="utf-8")
+    assert 'fetch("/guardar"' in html and 'location.href = "/consola"' in html

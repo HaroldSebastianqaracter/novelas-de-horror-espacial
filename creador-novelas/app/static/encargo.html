@@ -375,6 +375,29 @@ fetch("/api/formulario").then(function(r){ return r.json(); }).then(function(d){
   $("bloqueo").hidden = false;
 });
 
+// Firmar el encargo lleva a la consola, que es donde esta la secuencia de preparacion. Sin esto
+// el formulario caia en la pagina llana de confirmacion, escrita cuando la web todavia no sabia
+// lanzar fases, y el usuario acababa pensando que el resto habia que hacerlo en la terminal.
+$("hoja").addEventListener("submit", function(ev){
+  ev.preventDefault();
+  var boton = $("firmar");
+  boton.disabled = true; boton.textContent = "Guardando…";
+  fetch("/guardar", {method:"POST", body:new URLSearchParams(new FormData($("hoja")))})
+    .then(function(r){ return r.text().then(function(t){ return {ok:r.ok, t:t}; }); })
+    .then(function(x){
+      if (x.ok) { location.href = "/consola"; return; }
+      var m = x.t.match(/EX-05[^<]*/);
+      $("bloqueo").textContent = m ? m[0] : "No se guardó: revisa los campos.";
+      $("bloqueo").hidden = false;
+      boton.disabled = false; boton.textContent = "Firmar el encargo";
+      $("bloqueo").scrollIntoView({block:"center"});
+    })
+    .catch(function(e){
+      $("bloqueo").textContent = e.message; $("bloqueo").hidden = false;
+      boton.disabled = false; boton.textContent = "Firmar el encargo";
+    });
+});
+
 $("mas").addEventListener("click", function(){
   $("total_capitulos").value = limitar((parseInt($("total_capitulos").value,10)||0) + 1); recalcular(); });
 $("menos").addEventListener("click", function(){
