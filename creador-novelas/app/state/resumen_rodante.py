@@ -29,12 +29,45 @@ def serializar(secciones: list[tuple[int, str]]) -> str:
     return "\n\n".join(f"## Capítulo {n}\n\n{resumen.strip()}" for n, resumen in secciones) + "\n"
 
 
-def agregar(texto: str, n: int, resumen: str, ventana: int) -> str:
-    """RF-06.4: incorpora el resumen del capítulo N y descarta los más antiguos si se excede la ventana."""
+def agregar(texto: str, n: int, resumen: str) -> str:
+    """RF-06.4: incorpora el resumen del capítulo N y conserva todos los anteriores.
+
+    X-02.3: el almacenamiento ya no descarta los resúmenes viejos. Lo que se recorta es lo que se le
+    entrega al escritor (`para_escritor`), no lo que se guarda: así el arco completo sigue disponible y
+    una reextracción (RF-07.6) puede regenerar la sección de cualquier capítulo, no solo los recientes.
+    """
     secciones = [(k, r) for k, r in parsear(texto) if k != n]
     secciones.append((n, resumen.strip()))
     secciones.sort(key=lambda s: s[0])
-    return serializar(secciones[-ventana:])
+    return serializar(secciones)
+
+
+def _primera_frase(resumen: str) -> str:
+    """La primera oración del resumen, para la línea única de los capítulos fuera de la ventana."""
+    texto = " ".join(resumen.split())
+    corte = texto.find(". ")
+    return texto[: corte + 1] if corte != -1 else texto
+
+
+def para_escritor(texto: str, ventana: int) -> str:
+    """X-02.3: los últimos `ventana` capítulos completos; los anteriores, una línea cada uno.
+
+    El escritor ve así todo el arco por menos del 1 % del contexto, sin recibir prosa literal de la novela
+    (lo que dispararía RF-05.5): un resumen es paráfrasis, no manuscrito.
+    """
+    secciones = parsear(texto)
+    if not secciones:
+        return ""
+    if ventana < 1:
+        ventana = 1
+    completos = secciones[-ventana:]
+    anteriores = secciones[:-ventana]
+    partes = []
+    if anteriores:
+        partes.append("### Capítulos anteriores, en una línea cada uno")
+        partes.append("\n".join(f"- Capítulo {n}: {_primera_frase(r)}" for n, r in anteriores))
+    partes.append(serializar(completos).rstrip("\n"))
+    return "\n\n".join(partes) + "\n"
 
 
 def reemplazar(texto: str, n: int, resumen: str) -> str:

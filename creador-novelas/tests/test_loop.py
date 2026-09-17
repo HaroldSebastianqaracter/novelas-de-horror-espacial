@@ -33,7 +33,10 @@ def test_tanda_de_3_cierra_3_y_corre_qa_en_cadencia(proyecto, config, dobles):
     assert repo.leer_personajes(proyecto).root["Kovacs"].ultima_aparicion == 3
     assert repo.leer_personajes(proyecto).root["Kovacs"].secretos_que_conoce == ["Secreto del capítulo 1", "Secreto del capítulo 2", "Secreto del capítulo 3"]
     from app.state import resumen_rodante as rr
-    assert rr.capitulos_cubiertos(repo.leer_resumen_rodante(proyecto)) == [2, 3]  # ventana 2
+    # X-02.3: el almacenamiento conserva todos los capítulos; la ventana (2) solo recorta lo que se entrega.
+    resumen = repo.leer_resumen_rodante(proyecto)
+    assert rr.capitulos_cubiertos(resumen) == [1, 2, 3]
+    assert rr.capitulos_cubiertos(rr.para_escritor(resumen, config.ventana_resumen_rodante)) == [2, 3]
     assert m.prompts_hash.keys() == {"escritor", "extractor", "qa"}
     # el escritor nunca recibió rutas de capítulos cerrados ni su texto
     for i, prompt in enumerate(dobles.prompts_escritor, start=1):

@@ -54,6 +54,10 @@ def test_filtrar_para_capitulo_incluye_de_mas_nunca_de_menos():
     textos = [h.hecho for h in cont.filtrar_para_capitulo(log, entrada)]
     assert textos == ["Regla del universo.", "Kovacs herido.", "El puente sin luz.", "Sujeto sin validar."]
     assert len(log) == 8  # selección de lectura: no escribe
+    # X-02.1: con un conjunto de personajes ampliado (los permitidos), entra también el hecho de Ilse,
+    # que con la lista de la escaleta quedaba fuera. El filtro incluye de más, nunca de menos.
+    ampliado = [h.hecho for h in cont.filtrar_para_capitulo(log, entrada, {"Kovacs", "Ilse"})]
+    assert "Ilse ausente." in ampliado and "Kovacs herido." in ampliado
 
 
 def test_es_superconjunto_detecta_perdida_cambio_y_marca_borrada():
@@ -95,23 +99,37 @@ def test_aplicar_delta_personajes_une_secretos_y_fija_ultima_aparicion():
     assert fichas.root["Kovacs"].ultima_aparicion == 2  # no muta
 
 
-def test_resumen_rodante_ventana_nunca_excede_y_recorte_a_minimo():
+def test_resumen_rodante_guarda_todos_y_recorte_a_minimo():
+    # X-02.3: el almacenamiento conserva todos los capítulos; la ventana recorta al entregar, no al guardar.
     texto = ""
     for n in range(1, 6):
-        texto = rr.agregar(texto, n, f"Resumen {n}.", ventana=3)
-        assert len(rr.capitulos_cubiertos(texto)) <= 3
-    assert rr.capitulos_cubiertos(texto) == [3, 4, 5]
-    assert rr.parsear(texto)[0] == (3, "Resumen 3.")
-    minimo = rr.recortar_a_minimo(texto)
+        texto = rr.agregar(texto, n, f"Resumen {n}.")
+    assert rr.capitulos_cubiertos(texto) == [1, 2, 3, 4, 5]
+    assert rr.parsear(texto)[0] == (1, "Resumen 1.")
+    minimo = rr.recortar_a_minimo(texto)  # EX-04: sigue siendo la última sección
     assert rr.capitulos_cubiertos(minimo) == [5]
     assert rr.recortar_a_minimo("") == ""
 
 
-def test_resumen_rodante_reemplazar_solo_si_esta_en_ventana():
-    texto = rr.agregar(rr.agregar("", 4, "Viejo 4.", 3), 5, "Cinco.", 3)
+def test_resumen_rodante_para_escritor_recorta_los_viejos_a_una_linea():
+    # X-02.3: los últimos `ventana` completos; los anteriores, una línea (su primera frase) cada uno.
+    texto = ""
+    for n in range(1, 6):
+        texto = rr.agregar(texto, n, f"Pasó algo en {n}. Y una segunda frase que no debe verse.")
+    entregado = rr.para_escritor(texto, ventana=2)
+    assert "## Capítulo 4" in entregado and "## Capítulo 5" in entregado  # los dos últimos, completos
+    assert "una segunda frase que no debe verse" in entregado.split("## Capítulo 4")[1]  # el completo la conserva
+    assert "- Capítulo 1: Pasó algo en 1." in entregado  # los viejos, una línea
+    assert "- Capítulo 3: Pasó algo en 3." in entregado
+    assert "segunda frase que no debe verse" not in entregado.split("## Capítulo 4")[0]  # los viejos, no
+    assert rr.para_escritor("", 2) == ""
+
+
+def test_resumen_rodante_reemplazar_solo_si_esta_presente():
+    texto = rr.agregar(rr.agregar("", 4, "Viejo 4."), 5, "Cinco.")
     nuevo = rr.reemplazar(texto, 4, "Nuevo 4.")
     assert rr.parsear(nuevo) == [(4, "Nuevo 4."), (5, "Cinco.")]
-    assert rr.reemplazar(texto, 1, "Fuera de ventana.") == texto
+    assert rr.reemplazar(texto, 1, "No está.") == texto  # un capítulo que no se guardó no se agrega
 
 
 def test_guardar_capitulo_inv07_y_descartar_borrador(proyecto):

@@ -272,7 +272,7 @@ def aplicar_delta(raiz: Path, config: HarnessConfig, n: int, delta: DeltaExtracc
     log = cont.agregar(repo.leer_continuidad(raiz), d.hechos_nuevos, n, registro_sujetos)
     resumen_actual = repo.leer_resumen_rodante(raiz)
     resumen = (rr.reemplazar(resumen_actual, n, d.resumen_corto) if reextraccion
-               else rr.agregar(resumen_actual, n, d.resumen_corto, config.ventana_resumen_rodante))
+               else rr.agregar(resumen_actual, n, d.resumen_corto))  # X-02.3: se guardan todos; la ventana recorta al entregar
 
     recursos = rec.acumular(repo.leer_recursos_narrativos(raiz), d.recursos_narrativos, n, reextraccion=reextraccion)
 

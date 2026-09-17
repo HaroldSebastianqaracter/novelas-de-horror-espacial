@@ -1,6 +1,6 @@
 # Spec-X 02 · El escritor puede escribir sobre seis personajes y solo conoce a dos
 
-**Estado:** propuesta, para discutir
+**Estado:** aplicada en v1.11. X-02.1, X-02.2, X-02.3, X-02.4a y X-02.4b implementadas con tests (203 en verde). La opción recomendada de X-02.1 (documentar a todos los permitidos, sin estrechar la lista) es la que se implementó.
 **Alcance:** qué estado y qué previsión se le entregan al escritor. No toca el bucle, ni las fases, ni el QA.
 **Base:** `especificacion-tecnica-harness-novela-terror.md` v1.9, §11 (estado) y RF-03/RF-04
 **Evidencia:** prompt `005_escritor_cap_6.md`, `04_estado/continuidad.json` y el informe `qa_cap_6.md`

@@ -1,6 +1,6 @@
 # Especificación Funcional — Harness Generador de Novelas de Terror
 
-**Versión:** 1.10 — historial de cambios en `git log` sobre este archivo.
+**Versión:** 1.11 — historial de cambios en `git log` sobre este archivo. La v1.11 aplica Spec-X 02 (qué estado llega al escritor): al escritor viajan las fichas y los hechos de continuidad de **todos** los personajes permitidos, no solo los de la escaleta (X-02.1, amplía RF-05.1); cada ficha lleva la **posición** del personaje al cierre de su última aparición, que fija el extractor (X-02.2, amplía RF-06.2); el resumen rodante conserva **todos** los capítulos y la ventana solo recorta lo que se entrega —los últimos completos, los anteriores en una línea— (X-02.3, redefine RF-06.4); y el escritor recibe la **locación del capítulo siguiente** con el encargo de dejar la escena para que continúe allí, nunca su información nueva (X-02.4b, amplía RF-05.1). La escaleta no nombra un personaje cuyo nombre es un giro antes del capítulo del giro (X-02.4a, amplía RF-03.1). Detalle y evidencia en `spec-x-02-estado-que-llega-al-escritor.md`.
 **Esquemas de los artefactos:** spec técnica §4, única fuente. (El documento `harness-novela-terror.md` que citaban versiones anteriores nunca existió en el repositorio.) Este documento formaliza el comportamiento requerido; no repite decisiones de implementación.
 **Lector previsto:** un agente de código que implementará el harness a partir de este documento. Donde este documento sea ambiguo, el agente debe detenerse y pedir aclaración en vez de asumir.
 

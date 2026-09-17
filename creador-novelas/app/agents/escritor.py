@@ -84,9 +84,10 @@ def _formatear_fichas(fichas: dict) -> str:
     for nombre, f in fichas.items():
         secretos = "; ".join(f.secretos_que_conoce) if f.secretos_que_conoce else "ninguno registrado"
         ultima = f"cap. {f.ultima_aparicion}" if f.ultima_aparicion > 0 else "todavía no apareció"
+        posicion = f.posicion.strip() or "sin registrar"  # X-02.2
         bloques.append(
             f"### {nombre}\n- Estado físico: {f.estado_fisico}\n- Estado psicológico: {f.estado_psicologico}\n"
-            f"- Secretos que conoce: {secretos}\n- Última aparición: {ultima}"
+            f"- Secretos que conoce: {secretos}\n- Dónde quedó: {posicion}\n- Última aparición: {ultima}"
         )
     return "\n\n".join(bloques)
 
@@ -101,14 +102,27 @@ def ensamblar_contexto(n: int, config: HarnessConfig, raiz: Path, *, feedback_lo
 
     fichas = repo.leer_personajes(raiz)
     log = repo.leer_continuidad(raiz)
-    hechos = cont.filtrar_para_capitulo(log, entrada)
-    resumen = repo.leer_resumen_rodante(raiz)
-    if resumen_minimo:
-        resumen = rr.recortar_a_minimo(resumen)
     minimo, maximo = config.rango_palabras()
     permitidos = list(dict.fromkeys(list(entrada.personajes) + list(fichas.root.keys())))
+    # X-02.1: los hechos y las fichas de TODOS los personajes permitidos, no solo los de la escaleta. La
+    # escaleta es una previsión; si el escritor mueve una escena, un personaje permitido pero no previsto
+    # llegaba sin ficha ni continuidad y escribía sobre él a ciegas.
+    hechos = cont.filtrar_para_capitulo(log, entrada, set(permitidos))
+    resumen = repo.leer_resumen_rodante(raiz)
+    resumen = (rr.recortar_a_minimo(resumen) if resumen_minimo
+               else rr.para_escritor(resumen, config.ventana_resumen_rodante))  # X-02.3
     recursos = repo.leer_recursos_narrativos(raiz)  # RF-05.5 / §17.2: estado acumulado por el extractor, no manuscrito
     agotados = rec.mas_usados(recursos)
+    # X-02.4b: del capítulo siguiente, solo su locación y el encargo de dejar la escena para que continúe
+    # allí. Nunca su `informacion_nueva`, que es justo lo que el escritor no debe adelantar.
+    siguiente = repo.leer_outline_entry(raiz, n + 1)
+    if siguiente is None:
+        relevo = "Este es el último capítulo de la novela: cerrá el arco, no dejes nada abierto para un capítulo posterior."
+    else:
+        relevo = (f"El capítulo siguiente ({n + 1}) transcurre en: {siguiente.locacion}. "
+                  "Dejá esta escena de modo que la acción pueda continuar allí (los personajes que sigan "
+                  "en juego, en camino o ya en esa locación), sin narrar lo que ocurrirá en él ni adelantar "
+                  "su información nueva.")
 
     valores = {
         "NUM": str(n),
@@ -126,7 +140,8 @@ def ensamblar_contexto(n: int, config: HarnessConfig, raiz: Path, *, feedback_lo
         "TRES_ACTOS": repo.leer_tres_actos(raiz).strip() or "(sin sinopsis)",
         "HECHOS": _formatear_hechos(hechos),
         "RESUMEN_RODANTE": resumen.strip() or "(este es el primer capítulo: no hay escena previa)",
-        "FICHAS": _formatear_fichas(pers.fichas_presentes(fichas, entrada.personajes)),
+        "FICHAS": _formatear_fichas(pers.fichas_presentes(fichas, permitidos)),  # X-02.1: todos los permitidos
+        "RELEVO": relevo,
         "PALABRAS": str(config.palabras_por_capitulo),
         "PALABRAS_MIN": str(minimo),
         "PALABRAS_MAX": str(maximo),

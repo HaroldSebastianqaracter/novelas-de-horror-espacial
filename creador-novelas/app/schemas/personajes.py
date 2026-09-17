@@ -10,6 +10,7 @@ class Personaje(BaseModel):
     estado_psicologico: str
     secretos_que_conoce: list[str] = []
     ultima_aparicion: int
+    posicion: str = ""  # X-02.2: dónde queda el personaje al cerrar su última aparición; lo fija el extractor
 
 
 class FichaPersonajes(RootModel[dict[str, Personaje]]):

@@ -1,7 +1,7 @@
 # Especificación Técnica — Harness Generador de Novelas de Terror
 
-**Versión:** 1.10 — historial de cambios en `git log` sobre este archivo.
-**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.10 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
+**Versión:** 1.11 — historial de cambios en `git log` sobre este archivo. Cambios v1.11 (Spec-X 02): `continuidad.filtrar_para_capitulo(log, entrada, personajes=None)` acepta el conjunto de personajes permitidos y el escritor le pasa todos (X-02.1); el esquema `Personaje` (§4) gana el campo `posicion: str = ""`, que fija el extractor (X-02.2); `resumen_rodante.agregar(texto, n, resumen)` deja de recortar por ventana —guarda todos los capítulos— y `resumen_rodante.para_escritor(texto, ventana)` entrega los últimos completos y los anteriores en una línea (X-02.3); el prompt del escritor gana el marcador `{{RELEVO}}` con la locación del capítulo siguiente (X-02.4b).
+**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.11 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
 **Lector previsto:** el agente de código que implementa el harness. Toda decisión no cubierta aquí y no derivable de la especificación funcional debe tratarse como pregunta abierta, no como espacio para asumir.
 
 ## 1. Decisiones de arquitectura declaradas
@@ -128,6 +128,7 @@ class Personaje(BaseModel):
     estado_fisico: str
     estado_psicologico: str
     secretos_que_conoce: list[str] = []
+    posicion: str = ""              # X-02.2: dónde queda al cierre de su última aparición; lo fija el extractor
     ultima_aparicion: int
 
 class FichaPersonajes(RootModel[dict[str, Personaje]]): ...

@@ -19,6 +19,7 @@ MARCADORES_OBLIGATORIOS: dict[str, tuple[str, ...]] = {
         "HECHOS",  # RF-05.1, ya filtrados por el harness
         "RESUMEN_RODANTE",  # RF-06.4
         "FICHAS",  # RF-04.1
+        "RELEVO",  # X-02.4b: locación del capítulo siguiente y encargo de dejar la escena para que continúe allí
         "PALABRAS", "PALABRAS_MIN", "PALABRAS_MAX",  # RF-05.2
         "PERSONAJES_PERMITIDOS",  # RF-05.2, EX-08
         "FEEDBACK_LONGITUD",  # EX-07

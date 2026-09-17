@@ -29,8 +29,12 @@ Hechos de continuidad seleccionados por el harness para este capítulo (los de m
 ## Dónde quedó la escena (resumen rodante de los últimos capítulos)
 {{RESUMEN_RODANTE}}
 
-## Fichas de los personajes presentes
+## Fichas de los personajes que podés usar
+Incluye a todos los personajes permitidos, no solo a los de la escaleta de este capítulo: si movés una escena y aparece uno, acá tenés su estado y dónde quedó. «Dónde quedó» es su posición al final de su última aparición; respetala salvo que este capítulo la cambie.
 {{FICHAS}}
+
+## Hacia dónde sigue la novela
+{{RELEVO}}
 
 ## Recursos narrativos ya agotados (RF-05.5)
 Imágenes, gestos, muletillas y giros que los capítulos anteriores ya usaron, con cuántas veces y dónde. No están prohibidos: una imagen que vuelve puede ser deliberada. Lo que no puede pasar es repetirla por inercia: si volvés a uno de estos, que sea a sabiendas y con otra función; lo normal es buscar otro recurso.

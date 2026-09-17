@@ -40,13 +40,18 @@ def marcar_superado(log: LogContinuidad, caps: list[int]) -> LogContinuidad:
     return LogContinuidad(resultado)
 
 
-def filtrar_para_capitulo(log: LogContinuidad, entrada: EntradaOutline) -> list[HechoContinuidad]:
+def filtrar_para_capitulo(log: LogContinuidad, entrada: EntradaOutline,
+                          personajes: set[str] | None = None) -> list[HechoContinuidad]:
     """RF-05.1: selección de lectura, no escribe.
 
     Entran los hechos vigentes cuyo sujeto es un personaje o la locación del capítulo; entran siempre los de
     categoria = "mundo" y los de sujeto_validado = False. El filtro puede incluir de más, nunca de menos.
+
+    `personajes` permite ampliar el conjunto por defecto (los de la entrada de escaleta). El escritor pasa
+    aquí todos los personajes permitidos (X-02.1): un personaje al que la regla 2 le deja escribir tiene que
+    llegar con sus hechos vigentes, o el escritor escribe a ciegas sobre él.
     """
-    personajes = set(entrada.personajes)
+    personajes = set(entrada.personajes) if personajes is None else set(personajes)
     seleccion = []
     for h in log.root:
         if h.superado_por is not None:

@@ -62,6 +62,7 @@ ESQUEMA_DELTA = """{
       "estado_fisico": "string",
       "estado_psicologico": "string",
       "secretos_que_conoce": ["string"],
+      "posicion": "dónde queda al final del capítulo: locación y situación ('Enfermería, inconsciente'; 'de camino a la bodega')",
       "ultima_aparicion": <NUM>
     }
   },
