@@ -3,1226 +3,479 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SEC-04 · Consola de puente</title>
-<link rel="icon" href="data:,">
-<script src="gsap.min.js"></script>
+<title>Sala de máquinas — El casco frío del Falcon, producción</title>
 <style>
-/* Dos voces tipográficas, y la distinción es del tema: los instrumentos de la nave están
-   grabados (monoespaciada, cifras tabulares) y la documentación que viaja con ella está
-   impresa (serif). Todo en monoespaciada, prosa incluida, es lo que hace que un panel
-   oscuro se lea como una terminal genérica. */
-:root{
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  --prosa: ui-serif, Georgia, "Times New Roman", serif;
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:#020306;overflow:hidden}
-body{color:#b9c4d2;font-family:var(--mono);-webkit-font-smoothing:antialiased}
+  :root{
+    --fondo:#0A0D10;        /* pantalla apagada */
+    --linea:#93A6B9;        /* alambre del plano */
+    --linea-tenue:#3B4652;  /* costillas y detalle */
+    --texto:#C9D3DC;
+    --texto-bajo:#7C8B99;
+    --verde:#7BE3B2;        /* cubierta en marcha */
+    --rosa:#E39BC4;         /* cubierta con hechos fijados */
+    --rojo:#E0483C;         /* inspección, parada */
+    --ambar:#E0A21B;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--fondo);color:var(--texto);
+    font-family:"Arial Narrow","Helvetica Neue",Arial,"Liberation Sans Narrow","Liberation Sans",sans-serif;
+    font-stretch:condensed;font-size:15px;line-height:1.35;min-width:1024px;
+  }
+  a,button{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--verde);outline-offset:3px}
 
-/* Centrado con translate y no con grid: el escenario mide 1440x900 SIEMPRE, y cuando la ventana es
-   más baja el navegador aplica «alineación segura» y ancla el elemento arriba en vez de centrarlo,
-   con lo que el panel de mando se sale por debajo del borde. */
-#viewport{position:fixed;inset:0;background:#020306;overflow:hidden}
-#stage{width:1440px;height:900px;position:absolute;left:50%;top:50%;overflow:hidden;
-       transform-origin:center center;transform:translate(-50%,-50%)}
-#panel{position:absolute;inset:0;opacity:0}
+  .pantalla{
+    position:relative;min-height:100vh;padding:36px 56px 40px;
+    display:grid;grid-template-rows:auto 1fr auto auto;gap:18px;
+    background:
+      radial-gradient(ellipse at 50% 45%,rgba(147,166,185,.07),transparent 65%),
+      var(--fondo);
+    overflow:hidden;
+  }
+  /* barrido de tubo: líneas de 2 px */
+  .pantalla::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.28) 2px 4px);
+    mix-blend-mode:multiply;
+  }
+  /* ruido tenue */
+  .pantalla::after{
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.35;
+    background:
+      repeating-linear-gradient(90deg,rgba(147,166,185,.04) 0 1px,transparent 1px 7px),
+      repeating-linear-gradient(0deg,rgba(147,166,185,.03) 0 1px,transparent 1px 11px);
+  }
+  .pantalla > *{position:relative;z-index:1}
 
-/* la atmósfera cubre TODA la pantalla, no solo el escenario: así no hay borde */
-#atmosfera{position:fixed;inset:0;pointer-events:none;z-index:90}
-/* La viñeta oscurece los bordes del DIBUJO, no la interfaz. Con la caída antigua (.78 al 68%) el
-   registro de a bordo y el panel de mando quedaban casi negros: eran ilegibles en la pantalla real. */
-#atmosfera .vineta{position:absolute;inset:0;
-  background:radial-gradient(135% 130% at 50% 48%, rgba(2,3,6,0) 58%, rgba(2,3,6,.42) 84%, rgba(0,0,0,.72) 100%)}
-#atmosfera .grano{position:absolute;inset:0;opacity:.06;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
-#atmosfera .suciedad{position:absolute;inset:0;opacity:.55;mix-blend-mode:screen;background:
-  radial-gradient(52% 34% at 16% 10%, rgba(120,140,170,.05), transparent 70%),
-  radial-gradient(26% 44% at 86% 80%, rgba(120,140,170,.04), transparent 70%),
-  radial-gradient(18% 14% at 64% 20%, rgba(150,120,120,.035), transparent 70%)}
+  /* Marco con esquinas en escuadra */
+  .marco{position:relative;padding:16px 28px}
+  .marco::before,.marco::after{
+    content:"";position:absolute;top:0;bottom:0;width:26px;
+    border:1.5px solid var(--linea);
+  }
+  .marco::before{left:0;border-right:0;border-radius:6px 0 0 6px}
+  .marco::after{right:0;border-left:0;border-radius:0 6px 6px 0}
 
-@keyframes respira{0%,100%{opacity:.58}50%{opacity:1}}
-@keyframes alertaQA{0%,100%{opacity:.3}50%{opacity:.62}}
-@keyframes barrido{0%{transform:translateY(-200px)}100%{transform:translateY(1100px)}}
-@keyframes motas{0%{transform:translate(0,0)}100%{transform:translate(-26px,-56px)}}
-@keyframes pulsoPaso{0%{opacity:0}16%{opacity:.95}100%{opacity:0}}
-@keyframes entraTexto{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .cabecera{display:grid;grid-template-columns:1fr auto;align-items:center;gap:32px}
+  .cabecera .marco{text-align:center;justify-self:center;min-width:560px}
+  .cabecera h1{margin:0;font-size:24px;font-weight:400;letter-spacing:.04em;line-height:1.2}
+  .cabecera h1 small{display:block;font-size:20px;color:var(--texto);letter-spacing:.02em}
+  .cabecera .premisa{margin:8px 0 0;color:var(--texto-bajo);font-size:14px;max-width:70ch;margin-left:auto;margin-right:auto}
+  .cargando{color:var(--texto-bajo);font-size:16px;letter-spacing:.06em;text-align:right}
+  .cargando b{display:block;color:var(--texto);font-weight:400;font-size:18px}
+  .cargando .ticks{display:flex;gap:3px;justify-content:flex-end;margin-top:6px}
+  .cargando .ticks i{width:12px;height:3px;background:var(--linea-tenue)}
+  .cargando .ticks i.on{background:var(--verde)}
+  .cargando .ticks i.stop{background:var(--rojo)}
+  body.en-marcha .cargando .ticks i.stop{background:var(--verde)}
 
-.cifras{position:absolute;left:64px;top:30px;display:flex;gap:70px;z-index:12}
-.cifra .et{font-size:10px;letter-spacing:.04em;color:#4e5d72}
-.cifra .n{font-size:42px;color:#c9d4e2;line-height:1.05;margin-top:2px;font-variant-numeric:tabular-nums}
-.cifra .n small{font-size:19px;color:#4e5d72}
+  /* Plano */
+  .plano{display:flex;align-items:center;justify-content:center;min-height:0}
+  .plano svg{width:100%;max-width:1280px;height:auto;display:block}
+  .plano text{font-family:inherit;font-size:12.5px;fill:var(--texto);letter-spacing:.02em}
+  .plano text.bajo{fill:var(--texto-bajo)}
+  .plano .cubierta{fill:transparent;stroke:var(--linea);stroke-width:1.2;transition:fill 600ms ease,stroke 600ms ease}
+  .plano .relleno{opacity:0;transition:opacity 600ms ease}
+  body[data-vista="pausado_por_qa"] .plano .relleno[data-agente="revisor"]{opacity:.85}
+  body[data-activo="qa"] .plano .relleno[data-agente="revisor"]{opacity:.85}
+  body[data-activo="orquestador"] .plano .relleno[data-agente="orquestador"]{opacity:.8}
+  body[data-activo="escritor"] .plano .relleno[data-agente="escritor"]{opacity:.8}
+  body[data-activo="extractor"] .plano .relleno[data-agente="extractor"]{opacity:.55}
+  /* En marcha sin saber aun quien trabaja: el puente queda tenue para que no parezca apagada. */
+  body[data-vista="en_progreso"]:not([data-activo]) .plano .relleno[data-agente="orquestador"]{opacity:.35}
+  .pie .acciones button[disabled]{opacity:.4;cursor:not-allowed}
+  .pie .acciones button.peligro{border-color:var(--rojo)}
+  .aviso-lanzar{grid-column:1/-1;color:var(--texto-bajo);font-size:13px;margin-top:6px}
+  /* El diseno reservo 44px para «14:52»; el registro real anota «12:04:11» y se pegaba al texto. */
+  .pie .registro li{grid-template-columns:64px 1fr}
 
-/* La única puerta a los parámetros. Antes solo existía la tecla P, que es lo mismo que no existir. */
-#btn-param{position:absolute;left:64px;top:126px;z-index:13;background:none;cursor:pointer;
-  border:1px solid #223041;border-left:2px solid #6d0c17;padding:9px 16px 10px;
-  font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#a3b2c4;
-  transition:border-color 200ms ease,color 200ms ease,background 200ms ease}
-#btn-param:hover,#btn-param:focus-visible{border-color:#3b4c62;border-left-color:#c41e2f;
-  color:#e6edf5;background:#070d15;outline:none}
-#btn-param .k{color:#4e5d72;margin-left:10px}
-#btn-param.urgente{border-left-color:#c41e2f;color:#e6edf5}
+  /* Indicadores: líneas, no diales */
+  .indicadores{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;padding:0 28px}
+  .ind{display:grid;grid-template-columns:1fr auto;gap:2px 16px;align-items:baseline}
+  .ind .nombre{color:var(--texto-bajo);font-size:14px}
+  .ind .valor{font-size:20px;font-variant-numeric:tabular-nums;text-align:right}
+  .ind .barra{grid-column:1/-1;height:6px;background:var(--linea-tenue);position:relative}
+  .ind .barra i{position:absolute;left:0;top:0;bottom:0;background:var(--linea)}
+  .ind .barra i.verde{background:var(--verde)}
+  .ind .barra i.rojo{background:var(--rojo)}
+  .ind .barra .marca{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ambar)}
+  .ind .nota{grid-column:1/-1;color:var(--texto-bajo);font-size:13px}
 
-#insignia{position:absolute;left:64px;top:180px;z-index:12;display:flex;align-items:center;gap:9px;
-  font-size:10px;letter-spacing:.04em;color:#6e7e92}
-#insignia .punto{width:6px;height:6px;background:#4e5d72;flex:none}
-#insignia.en_progreso .punto{background:#c41e2f;animation:respira 2.4s ease-in-out infinite}
-#insignia.en_progreso{color:#c2ccd9}
-#insignia.pausado_por_qa .punto{background:#d99a2b}#insignia.pausado_por_qa{color:#d99a2b}
-#insignia.error .punto{background:#c41e2f}#insignia.error{color:#e0505f}
+  /* Pie: veredicto + registro */
+  .pie{display:grid;grid-template-columns:1fr 420px;gap:32px;align-items:start}
+  .veredicto{display:grid;grid-template-columns:1fr auto;gap:8px 24px;align-items:center}
+  .veredicto h2{margin:0;font-size:17px;font-weight:400;letter-spacing:.03em}
+  .veredicto h2 b{color:var(--rojo);font-weight:400}
+  body.en-marcha .veredicto h2 b{color:var(--verde)}
+  .veredicto p{margin:0;grid-column:1;color:var(--texto-bajo);font-size:14px}
+  .veredicto .acciones{grid-column:2;grid-row:1/3;display:flex;flex-direction:column;gap:8px}
+  .veredicto button{
+    background:transparent;border:1.5px solid var(--linea);color:var(--texto);
+    padding:9px 16px;cursor:pointer;font-size:14.5px;letter-spacing:.03em;text-align:left;
+  }
+  .veredicto button:hover{background:rgba(147,166,185,.12)}
+  .veredicto button.primario{border-color:var(--rojo);color:#fff;background:rgba(224,72,60,.18)}
+  body.en-marcha .veredicto button.primario{border-color:var(--verde);background:rgba(123,227,178,.14)}
 
-#vitales{position:absolute;left:64px;top:224px;z-index:12;display:flex;flex-direction:column;gap:7px}
-#vitales .v{display:flex;gap:10px;font-size:9.5px;letter-spacing:.04em;color:#4e5d72;align-items:baseline}
-#vitales .v b{font-weight:400;color:#8fa0b5;font-variant-numeric:tabular-nums;min-width:66px;display:inline-block}
-#vitales .v.mal b{color:#d99a2b}
-#vitales .v.critico b{color:#e0505f}
+  .registro{font-size:13.5px}
+  .registro h2{margin:0 0 6px;font-size:13.5px;font-weight:400;color:var(--texto-bajo);letter-spacing:.04em}
+  .registro ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--linea-tenue)}
+  .registro li{display:grid;grid-template-columns:44px 1fr;gap:10px;padding:5px 0;border-bottom:1px solid var(--linea-tenue);line-height:1.3}
+  .registro time{color:var(--texto-bajo);font-variant-numeric:tabular-nums}
+  .registro li.rev{color:#fff}
+  .registro li.rev b{color:var(--rojo);font-weight:400}
 
-/* Una pantalla vacía es una invitación a actuar, no un panel apagado. */
-#arranque{position:absolute;left:64px;top:312px;width:272px;z-index:12;margin:0;
-  font-family:var(--prosa);font-size:13px;line-height:1.66;color:#8b99ab}
-#arranque[hidden]{display:none}
-
-#diario{position:absolute;right:52px;top:36px;width:210px;z-index:12}
-#diario h2{font-size:10px;letter-spacing:.04em;color:#4e5d72;padding-bottom:9px;margin:0;
-  border-bottom:1px solid #121a24;font-weight:400}
-#lineas{display:flex;flex-direction:column;gap:9px;padding-top:11px}
-#lineas div{display:flex;gap:9px;font-size:10px;line-height:1.5;animation:entraTexto 340ms ease both}
-#lineas .h{color:#4e5d72;flex:none}#lineas .t{color:#b3bfcd}
-
-/* ---------- cinta de capítulos: la novela entera de un vistazo ---------- */
-#cinta{position:absolute;left:64px;right:52px;bottom:116px;z-index:12}
-#cinta .et{display:flex;justify-content:space-between;font-size:9.5px;letter-spacing:.04em;
-  color:#4e5d72;margin-bottom:8px}
-#celdas{display:flex;gap:2px;align-items:flex-end;height:26px}
-#celdas .c{flex:1;height:13px;background:#0a1018;border:1px solid #16202b;position:relative;
-  transition:background 300ms ease,height 300ms ease}
-#celdas .c.cerrado{background:#243546;border-color:#2e4358}
-/* `marcado`, no `hallazgo`: ese nombre ya lo usan las filas del informe de QA, y su regla
-   (display:grid con una columna de 78px) deformaba la celda de la cinta. */
-#celdas .c.marcado{background:#4a3410;border-color:#6d4d17}
-#celdas .c.activo{height:26px;background:#8b0f1d;border-color:#c41e2f;box-shadow:0 0 12px rgba(196,30,47,.5)}
-#celdas .c.corte::after{content:"";position:absolute;left:50%;top:-7px;width:1px;height:4px;
-  background:#4e5d72;transform:translateX(-50%)}
-#celdas .c .tip{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%);
-  background:#05090f;border:1px solid #161f2b;padding:5px 8px;font-size:8.5px;letter-spacing:.1em;
-  color:#8496aa;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity 140ms;z-index:22}
-#celdas .c:hover .tip{opacity:1;visibility:visible}
-
-#mando{position:absolute;left:64px;right:52px;bottom:38px;z-index:12;
-  display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#121a24;border:1px solid #161f2b}
-.tecla{position:relative;background:#04070c;border:0;padding:14px 12px;cursor:pointer;
-  color:#8496aa;font:inherit;font-size:10.5px;letter-spacing:.02em;text-align:left;
-  display:flex;align-items:baseline;gap:9px;
-  transition:background 200ms ease,color 200ms ease}
-/* El número se queda porque las fases SÍ son una secuencia: no se puede escribir una tanda
-   antes de tener escaleta. Va en línea, no como etiqueta flotando encima. */
-.tecla .idx{font-size:9px;color:#334152;font-variant-numeric:tabular-nums}
-.tecla:hover:not(:disabled){background:#080d15;color:#dfe6ee}
-.tecla:disabled{cursor:not-allowed;color:#334152}.tecla:disabled .idx{color:#212c39}
-.tecla.cara{color:#c2ccd9}.tecla.cara .idx{color:#8b0f1d}
-.tecla.cara:not(:disabled){box-shadow:inset 0 -2px 0 #6d0c17}
-.tecla.cara:hover:not(:disabled){background:#100709;color:#fff;box-shadow:inset 0 -2px 0 #c41e2f}
-.tecla .motivo{position:absolute;left:0;bottom:calc(100% + 7px);width:250px;z-index:20;
-  background:#05090f;border:1px solid #161f2b;border-left:2px solid #8b0f1d;padding:10px 12px;
-  font-family:var(--prosa);font-size:12.5px;line-height:1.6;color:#94a2b4;letter-spacing:0;
-  opacity:0;visibility:hidden;transition:opacity 160ms ease}
-.tecla:disabled:hover .motivo{opacity:1;visibility:visible}
-
-.barrido{position:absolute;left:0;right:0;top:0;height:190px;pointer-events:none;z-index:8;
-  background:linear-gradient(180deg,rgba(185,196,210,0) 0%,rgba(185,196,210,.022) 52%,rgba(185,196,210,0) 100%);
-  animation:barrido 28s linear infinite}
-#motas{position:absolute;inset:-80px;pointer-events:none;z-index:5;opacity:.5;
-  animation:motas 34s linear infinite alternate}
-
-#intro{position:absolute;inset:0;z-index:40;background:#000;overflow:hidden}
-#saltar{position:absolute;right:26px;bottom:22px;z-index:44;font-size:8.5px;letter-spacing:.3em;
-  color:#2b3644;background:none;border:0;cursor:pointer;font-family:inherit}
-#saltar:hover{color:#6e7e92}
-#compuerta{position:absolute;inset:0;z-index:42;opacity:0}
-#compuerta .hoja{position:absolute;left:0;width:100%;height:50.4%}
-#compuerta .arriba{top:0;border-bottom:1px solid #1d2733;
-  background:linear-gradient(180deg,#04060a 0%,#04060a 80%,#080e16 100%)}
-#compuerta .abajo{bottom:0;border-top:1px solid #1d2733;
-  background:linear-gradient(0deg,#04060a 0%,#04060a 80%,#080e16 100%)}
-#compuerta .sello{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:43;
-  font-size:9px;letter-spacing:.44em;color:#3f4d60;white-space:nowrap;text-align:center;line-height:2.4}
-
-.panel{position:absolute;inset:0;z-index:25;background:rgba(0,0,0,.9);display:none;opacity:0;transition:opacity 300ms ease}
-.panel.visible{display:block;opacity:1}
-.marco{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:1000px;max-height:756px;
-  overflow:auto;background:#04070c;border:1px solid #161f2b;padding:30px 34px 34px}
-.marco.estrecho{width:560px}
-.marco h3{margin:0 0 4px;font-size:11px;letter-spacing:.32em;color:#c9d4e2;font-weight:500}
-.marco .sub{font-size:9px;letter-spacing:.2em;color:#4e5d72;margin-bottom:22px}
-.marco.alerta{border-left:2px solid #8b0f1d}.marco.aviso{border-left:2px solid #d99a2b}
-.hallazgo{display:grid;grid-template-columns:78px 1fr;gap:14px;padding:11px 0;border-top:1px solid #0e1620;
-  font-size:10.5px;line-height:1.65}
-.hallazgo .cod{color:#8b0f1d;letter-spacing:.06em;font-size:9.5px;padding-top:3px}
-.hallazgo .cod.rep{color:#4e5d72}
-/* Los hallazgos son prosa escrita por el agente de QA, no datos: van en serif y con medida
-   de lectura, no en monoespaciada a todo lo ancho. */
-.hallazgo .txt{color:#aeb9c8;font-family:var(--prosa);font-size:13px;line-height:1.62;letter-spacing:0}
-.col2{display:grid;grid-template-columns:1fr 1fr;gap:34px}
-.col2 h4{margin:0 0 6px;font-size:10px;letter-spacing:.04em;color:#4e5d72;font-weight:400}
-.nota{border-left:2px solid #6d0c17;padding:2px 0 2px 16px;margin-top:26px;
-  font-family:var(--prosa);font-size:13px;line-height:1.7;color:#8b99ab;max-width:66ch}
-pre.traza{background:#020408;border:1px solid #121a24;padding:14px;margin:0;overflow:auto;
-  font-size:10px;line-height:1.6;color:#c2ccd9;white-space:pre-wrap;word-break:break-word}
-.acciones{display:flex;gap:1px;margin-top:26px;background:#121a24;border:1px solid #161f2b}
-.acciones button{flex:1;background:#04070c;border:0;padding:13px;cursor:pointer;color:#8496aa;
-  font:inherit;font-size:9.5px;letter-spacing:.2em;transition:background 180ms,color 180ms}
-.acciones button:hover{background:#080d15;color:#dfe6ee}
-.acciones button.peligro:hover{background:#100709;color:#fff;box-shadow:inset 0 -2px 0 #c41e2f}
-#config .marco{width:1120px}
-.grupos{display:grid;grid-template-columns:1fr 1fr;gap:26px 34px}
-fieldset{border:1px solid #121a24;padding:16px 18px 18px;margin:0;min-width:0}
-fieldset.ancho{grid-column:1/-1}
-legend{font-size:9px;letter-spacing:.28em;color:#3f4d60;padding:0 8px}
-label{display:block;font-size:9px;letter-spacing:.16em;color:#5d6d80;margin:12px 0 5px}
-label:first-of-type{margin-top:2px}
-input,select,textarea{width:100%;background:#020408;border:1px solid #121a24;color:#c9d4e2;font:inherit;
-  font-size:11px;padding:8px 10px;letter-spacing:.04em}
-input:focus,select:focus,textarea:focus{outline:0;border-color:#334152}
-textarea{min-height:104px;resize:vertical;line-height:1.65}
-input:disabled,select:disabled{color:#334152;background:#030508;cursor:not-allowed}
-.par{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
-.bloqueo{border:1px solid #161f2b;border-left:2px solid #d99a2b;padding:10px 13px;margin-bottom:20px;
-  font-size:9.5px;line-height:1.7;color:#d99a2b;letter-spacing:.05em;display:none}
-.bloqueo.visible{display:block}
-.radios{display:flex;gap:1px;background:#121a24;border:1px solid #121a24;margin-top:5px}
-.radios label{flex:1;margin:0;background:#020408;padding:9px 11px;cursor:pointer;color:#5d6d80;
-  font-size:9px;letter-spacing:.14em;text-align:center;transition:background 160ms,color 160ms}
-.radios input{position:absolute;opacity:0;width:0;height:0}
-.radios label:has(input:checked){background:#080d15;color:#c2ccd9;box-shadow:inset 0 -2px 0 #8b0f1d}
-#aviso{position:absolute;left:50%;bottom:172px;transform:translateX(-50%);z-index:30;background:#05090f;
-  border:1px solid #161f2b;border-left:2px solid #8b0f1d;padding:11px 18px;font-size:9.5px;
-  letter-spacing:.14em;color:#c2ccd9;opacity:0;transition:opacity 260ms ease;pointer-events:none}
-#aviso.visible{opacity:1}
-#atajos{position:absolute;left:64px;bottom:14px;z-index:12;font-size:9.5px;letter-spacing:.02em;color:#2b3644}
-#atajos b{color:#3f4d60;font-weight:400}
-/* Paralaje: los cuatro planos del dibujo se mueven a distinta velocidad con el raton. Es lo que
-   convierte un dibujo plano sobre negro en algo que esta DETRAS de un cristal. La luz y el bucle
-   viajan con el plano medio para no despegarse de su compartimento. */
-#plano-fondo,#plano-medio,#plano-frente,#anotaciones,#luz,#bucle{
-  transition:transform 520ms cubic-bezier(.22,.61,.36,1)}
-
-@media (prefers-reduced-motion:reduce){
-  *{animation:none !important}
-  #plano-fondo,#plano-medio,#plano-frente,#anotaciones,#luz,#bucle{transform:none !important}
-}
+  @media (prefers-reduced-motion:reduce){
+    .plano .cubierta,.plano .relleno,.ind .barra i{transition:none}
+  }
+  @media (max-width:1280px){
+    .pantalla{padding:28px 36px 32px}
+    .cabecera .marco{min-width:480px}
+    .pie{grid-template-columns:1fr 360px}
+  }
 </style>
 </head>
 <body>
+<main class="pantalla">
+  <header class="cabecera">
+    <div class="marco">
+      <h1 id="t-cap">Cargando<small id="t-titulo"></small></h1>
+      <p class="premisa" id="t-premisa"></p>
+    </div>
+    <div class="cargando" role="status">
+      <b id="estado-txt">...</b>
+      <span id="t-agente"></span>
+      <div class="ticks" id="ticks" aria-hidden="true"></div>
+    </div>
+  </header>
 
-<div id="viewport"><div id="stage">
+<section class="plano" aria-label="Plano del Falcon">
+    <svg viewBox="0 0 1240 420" role="img" aria-label="Plano lateral en alambre del Falcon. De popa a proa: cubierta de ingeniería con tres toberas, torre de hibernación y bodega, cubierta de redacción sobre la espina central, bodega de hechos bajo ella, ramal seis de inspección resaltado en rojo y el puente en proa. El ramal seis está resaltado porque el Revisor ha detenido la producción.">
+      <defs>
+        <filter id="brillo" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <pattern id="costillas" width="14" height="14" patternUnits="userSpaceOnUse">
+          <path d="M7 0 V14" stroke="#3B4652" stroke-width="1"/>
+        </pattern>
+        <pattern id="malla" width="10" height="10" patternUnits="userSpaceOnUse">
+          <path d="M0 5 H10 M5 0 V10" stroke="#3B4652" stroke-width=".6"/>
+        </pattern>
+      </defs>
 
-<div id="intro">
-  <svg id="espacio" viewBox="0 0 1440 900" width="1440" height="900" style="position:absolute;inset:0">
-    <defs>
-      <radialGradient id="nebulosa" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#1a2430" stop-opacity=".55"/>
-        <stop offset="55%" stop-color="#0d131c" stop-opacity=".28"/>
-        <stop offset="100%" stop-color="#000" stop-opacity="0"/></radialGradient>
-      <radialGradient id="nebulosaRoja" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#3a0c14" stop-opacity=".4"/>
-        <stop offset="100%" stop-color="#000" stop-opacity="0"/></radialGradient>
-    </defs>
-    <ellipse id="neb1" cx="1010" cy="300" rx="520" ry="330" fill="url(#nebulosa)"/>
-    <ellipse id="neb2" cx="380" cy="660" rx="430" ry="260" fill="url(#nebulosaRoja)"/>
-    <g id="estrellas3"></g><g id="estrellas2"></g><g id="estrellas1"></g>
-    <g id="nave" opacity="0"></g>
-  </svg>
-  <div id="compuerta">
-    <div class="hoja arriba"></div><div class="hoja abajo"></div>
-    <div class="sello" id="sello">Esclusa de proceso SEC-04<br>presurizando</div>
-  </div>
-  <button id="saltar" type="button">Saltar (Esc)</button>
-</div>
-
-<div id="panel">
-  <div class="cifras">
-    <div class="cifra"><div class="et">capítulo</div><div class="n" id="c-cap">--<small id="c-cap-tot">/--</small></div></div>
-    <div class="cifra"><div class="et">tanda</div><div class="n" id="c-tanda">--</div></div>
-    <div class="cifra"><div class="et">cerrados</div><div class="n" id="c-cerr">--<small id="c-cerr-tot">/--</small></div></div>
-  </div>
-  <button id="btn-param" type="button">Parámetros de la novela<span class="k">P</span></button>
-  <div id="insignia"><span class="punto"></span><span id="insignia-txt">Sin conexión</span></div>
-  <div id="vitales"></div>
-  <p id="arranque" hidden>Todavía no hay novela. Empezá por los parámetros: la idea de la que sale
-    todo, cuántos capítulos tendrá y con qué voz se escribe. Después se encienden las fases de abajo,
-    en orden.</p>
-  <div id="diario"><h2>registro de a bordo</h2><div id="lineas"></div></div>
-
-  <svg viewBox="0 0 1440 900" width="1440" height="900"
-       style="position:absolute;inset:0;display:block;filter:blur(.3px)"
-       color="#5a6d82" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-linecap="butt">
-    <defs>
-      <filter id="sucio"><feTurbulence type="fractalNoise" baseFrequency=".024" numOctaves="3" seed="7"/>
-        <feDisplacementMap in="SourceGraphic" scale="26" xChannelSelector="R" yChannelSelector="G"/></filter>
-      <radialGradient id="foco" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#e0303f" stop-opacity=".55"/><stop offset="32%" stop-color="#a5121f" stop-opacity=".32"/>
-        <stop offset="68%" stop-color="#6d0c17" stop-opacity=".1"/><stop offset="100%" stop-color="#6d0c17" stop-opacity="0"/></radialGradient>
-      <radialGradient id="focoAmbar" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#d99a2b" stop-opacity=".34"/><stop offset="60%" stop-color="#d99a2b" stop-opacity=".08"/>
-        <stop offset="100%" stop-color="#d99a2b" stop-opacity="0"/></radialGradient>
-      <linearGradient id="manchaPared" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#6d0c17" stop-opacity="0"/><stop offset="36%" stop-color="#c41e2f" stop-opacity=".85"/>
-        <stop offset="64%" stop-color="#c41e2f" stop-opacity=".8"/><stop offset="100%" stop-color="#6d0c17" stop-opacity="0"/></linearGradient>
-      <linearGradient id="manchaPasillo" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#6d0c17" stop-opacity="0"/><stop offset="42%" stop-color="#c41e2f" stop-opacity=".55"/>
-        <stop offset="100%" stop-color="#6d0c17" stop-opacity="0"/></linearGradient>
-
-    <clipPath id="celda-puente">
-      <polygon points="506,252 640,226 782,236 790,254 798,428 506,430"></polygon>
-    </clipPath>
-    <clipPath id="celda-escritor">
-      <polygon points="178,438 520,434 520,632 472,621 396,605 304,583 214,549 178,502"></polygon>
-    </clipPath>
-    <clipPath id="celda-extractor">
-      <polygon points="534,434 848,431 848,628 798,625 768,653 704,657 668,633 562,631 534,631"></polygon>
-    </clipPath>
-    <clipPath id="celda-qa">
-      <polygon points="862,431 1092,437 1084,579 1006,607 898,619 862,621"></polygon>
-    </clipPath>
-    <clipPath id="casco-interior">
-      <polygon points="130,470 186,404 240,366 304,331 396,313 472,305 500,248 640,222 784,232 806,290 898,302 1006,312 1086,334 1128,364 1112,396 1140,422 1158,452 1154,515 1128,547 1084,579 1006,607 898,619 798,625 768,653 704,657 668,633 562,631 472,621 396,605 304,583 214,549 160,513"></polygon>
-    </clipPath>
-  </defs>
-    <!-- Plano de Claude Design. El original firmado esta en app/static/sec-04-corte.svg;
-         esta copia va sin su bloque de credenciales, que dentro de otro documento no valida. -->
-    <g id="corte" transform="translate(111,113) scale(0.704)">
-  <g id="plano-fondo" stroke="currentColor" fill="none" opacity="0.34">
-
-    
-    <g stroke-width="0.5" stroke-dasharray="4 7">
-      <path d="M214,352 L214,548"></path>
-      <path d="M260,340 L260,566"></path>
-      <path d="M304,331 L304,583"></path>
-      <path d="M350,320 L350,595"></path>
-      <path d="M396,313 L396,605"></path>
-      <path d="M442,308 L442,614"></path>
-      <path d="M562,240 L562,631"></path>
-      <path d="M602,232 L602,631"></path>
-      <path d="M642,226 L642,632"></path>
-      <path d="M682,228 L682,655"></path>
-      <path d="M722,230 L722,656"></path>
-      <path d="M762,232 L762,650"></path>
-      <path d="M806,290 L806,625"></path>
-      <path d="M852,296 L852,628"></path>
-      <path d="M898,302 L898,619"></path>
-      <path d="M952,307 L952,614"></path>
-      <path d="M1006,312 L1006,607"></path>
-      <path d="M1046,322 L1046,594"></path>
-      <path d="M1086,334 L1086,580"></path>
-    </g>
-
-    
-    <g stroke-width="0.5">
-      <path d="M304,337 L312,331 M304,577 L312,583"></path>
-      <path d="M396,319 L404,313 M396,599 L404,605"></path>
-      <path d="M562,246 L570,240 M562,625 L570,631"></path>
-      <path d="M642,232 L650,226 M642,626 L650,632"></path>
-      <path d="M762,238 L754,232 M762,644 L754,650"></path>
-      <path d="M898,308 L906,302 M898,613 L906,619"></path>
-      <path d="M1006,318 L1014,312 M1006,601 L1014,607"></path>
-    </g>
-
-    
-    <g stroke-width="0.5" stroke-dasharray="14 6">
-      <path d="M196,398 L470,376 M196,420 L468,404"></path>
-      <path d="M520,268 L790,258"></path>
-      <path d="M180,560 L1100,560"></path>
-      <path d="M180,592 L1080,588" stroke-dasharray="9 8"></path>
-    </g>
-
-    
-    <g stroke-width="0.5">
-      <path d="M200,462 L500,462 M200,466 L500,466"></path>
-      <path d="M540,462 L840,462 M540,466 L840,466"></path>
-      <path d="M870,462 L1100,462 M870,466 L1100,466"></path>
-      <g stroke-dasharray="2 4">
-        <path d="M240,466 L240,500 M300,466 L300,500 M360,466 L360,500 M420,466 L420,500 M480,466 L480,500"></path>
-        <path d="M580,466 L580,500 M640,466 L640,500 M700,466 L700,500 M760,466 L760,500 M820,466 L820,500"></path>
-        <path d="M900,466 L900,500 M960,466 L960,500 M1020,466 L1020,500 M1080,466 L1080,500"></path>
-        <path d="M280,528 L280,578 M420,528 L420,608 M600,528 L600,630 M740,528 L740,652 M880,528 L880,616 M1020,528 L1020,600"></path>
+      <!-- Casco exterior: silueta continua -->
+      <g fill="none" stroke="#93A6B9" stroke-width="1.6" stroke-linejoin="round">
+        <path d="M70 132 H 210 V 96 H 250 V 62 H 350 V 96 H 400 V 150 H 470 L 500 128 H 640 V 150 H 800 V 122 H 960 V 150 H 1020 L 1120 158 L 1198 188 L 1216 210 L 1198 232 L 1120 262 L 1020 270 H 960 V 296 H 800 V 270 H 640 V 296 H 470 V 270 H 400 V 322 H 350 V 356 H 250 V 322 H 210 V 288 H 70 Z"/>
       </g>
-      
-      <path d="M332,443 L332,560 M338,443 L338,560"></path>
-      <path d="M660,443 L660,630 M666,443 L666,630"></path>
-      <path d="M994,443 L994,600 M1000,443 L1000,600"></path>
-      <g stroke-dasharray="1 4">
-        <path d="M326,470 L344,470 M326,502 L344,502 M326,534 L344,534"></path>
-        <path d="M654,478 L672,478 M654,516 L672,516 M654,556 L672,556 M654,596 L672,596"></path>
-        <path d="M988,476 L1006,476 M988,514 L1006,514 M988,552 L1006,552"></path>
+
+      <!-- Popa: cubierta de ingeniería y toberas -->
+      <g fill="none" stroke="#93A6B9" stroke-width="1.1">
+        <path d="M22 150 H 70 M22 210 H 70 M22 270 H 70"/>
+        <path d="M22 138 L 40 138 L 70 150 M22 162 L 40 162 L 70 150"/>
+        <path d="M22 198 L 40 198 L 70 210 M22 222 L 40 222 L 70 210"/>
+        <path d="M22 258 L 40 258 L 70 270 M22 282 L 40 282 L 70 270"/>
+        <ellipse cx="22" cy="150" rx="6" ry="14"/><ellipse cx="22" cy="210" rx="6" ry="14"/><ellipse cx="22" cy="270" rx="6" ry="14"/>
+        <rect x="84" y="146" width="112" height="128" fill="url(#malla)"/>
+        <path d="M84 178 H 196 M84 210 H 196 M84 242 H 196 M124 146 V 274 M156 146 V 274"/>
+        <path d="M96 132 V 288 M182 132 V 288" stroke="#3B4652"/>
       </g>
-    </g>
 
-    
-    <g stroke-width="0.5">
-      <path d="M226,384 L286,384 L286,412 L226,412 Z"></path>
-      <path d="M226,392 L286,392 M226,404 L286,404"></path>
-      <path d="M300,380 L360,380 L360,410 L300,410 Z"></path>
-      <path d="M300,395 L360,395"></path>
-      <path d="M386,378 L444,378 L444,408 L386,408 Z"></path>
-      <path d="M415,378 L415,408"></path>
-      <path d="M840,318 L1080,378 M840,336 L1064,392 M840,354 L1046,404" stroke-dasharray="6 5"></path>
-      <path d="M900,330 L900,428 M960,342 L960,428 M1020,356 L1020,428" stroke-dasharray="2 6"></path>
-    </g>
-
-    
-    <g stroke-width="0.5" stroke-dasharray="1 8" opacity="0.7">
-      <path d="M220,540 L1090,540"></path>
-      <path d="M240,572 L1080,572"></path>
-      <path d="M300,604 L1040,604"></path>
-    </g>
-  </g><g id="plano-medio" stroke="currentColor" fill="none">
-
-    
-    <path id="casco-exterior" stroke-width="1.6" d="M70,470 L84,436 L120,392 L190,344 L300,312 L400,296 L470,288 L496,236 L640,210 L790,220 L806,284 L898,292 L1006,302 L1092,324 L1140,362 L1124,398 L1152,422 L1170,452 L1166,516 L1140,554 L1092,590 L1006,618 L898,630 L798,636 L768,666 L700,670 L660,644 L560,642 L470,632 L400,616 L300,594 L190,560 L120,520 L84,500 Z"></path>
-
-    
-    <path id="casco-interior-linea" stroke-width="1" opacity="0.62" d="M92,470 L104,441 L130,404 L186,364 L240,340 L304,320 L396,304 L472,296 L500,248 L640,222 L784,232 L800,292 L898,302 L1006,312 L1086,334 L1128,364 L1112,396 L1140,422 L1158,452 L1154,515 L1128,547 L1084,579 L1006,607 L898,619 L798,625 L768,653 L704,657 L668,633 L562,631 L472,621 L396,605 L304,583 L214,549 L160,513 L112,492 Z"></path>
-
-    
-    <g stroke-width="0.5" opacity="0.55">
-      <path d="M120,392 L130,404 M190,344 L186,364 M300,312 L304,320 M400,296 L396,304 M470,288 L472,296"></path>
-      <path d="M496,236 L500,248 M640,210 L640,222 M790,220 L784,232 M806,284 L800,292"></path>
-      <path d="M898,292 L898,302 M1006,302 L1006,312 M1092,324 L1086,334 M1140,362 L1128,364"></path>
-      <path d="M1092,590 L1084,579 M1006,618 L1006,607 M898,630 L898,619 M798,636 L798,625"></path>
-      <path d="M768,666 L768,653 M700,670 L704,657 M660,644 L668,633 M560,642 L562,631"></path>
-      <path d="M470,632 L472,621 M400,616 L396,605 M300,594 L304,583 M190,560 L214,549 M120,520 L160,513"></path>
-      <path d="M84,436 L92,470 L84,500"></path>
-    </g>
-
-    
-    <path stroke-width="0.5" stroke-dasharray="0.9 9" stroke-linecap="round" opacity="0.5" d="M76,470 L90,433 L126,388 L194,340 L302,307 L400,291 L468,283 L492,231 L640,205 L793,216 L810,281 L899,287 L1008,297 L1095,320 L1146,361 L1130,398 L1158,421 L1176,452 L1172,518 L1144,558 L1095,595 L1008,623 L899,635 L799,641 L770,671 L699,675 L657,647 L560,647 L469,637 L399,621 L299,599 L188,565 L117,525 L80,502 Z"></path>
-
-    
-    <g stroke-width="1">
-      <path d="M92,470 L112,492 M92,470 L104,441"></path>
-      <path d="M140,420 L140,522" opacity="0.7"></path>
-      <path d="M170,396 L170,538" opacity="0.7"></path>
-      <path d="M118,452 L162,452 M118,488 L162,488" stroke-width="0.5"></path>
-      <path d="M104,441 L170,420 M112,492 L170,514" stroke-width="0.5" stroke-dasharray="5 4"></path>
-      
-      <path d="M84,436 L120,392 L120,404 L92,444 Z" stroke-width="0.5"></path>
-      <path d="M84,500 L120,520 L120,508 L92,494 Z" stroke-width="0.5"></path>
-      <path d="M126,400 L182,358 M132,412 L192,366" stroke-width="0.5" opacity="0.6"></path>
-      <path d="M128,514 L186,540 M136,524 L196,548" stroke-width="0.5" opacity="0.6"></path>
-    </g>
-
-    
-    <path id="cubierta-principal" stroke-width="1.6" d="M170,438 L470,433 L812,430 L1156,438"></path>
-    <path stroke-width="0.5" opacity="0.6" d="M170,446 L470,441 L812,438 L1156,446"></path>
-    <g stroke-width="0.5" opacity="0.45">
-      <path d="M200,438 L200,446 M250,438 L250,446 M300,438 L300,446 M350,437 L350,445 M400,436 L400,444 M450,435 L450,443 M500,434 L500,442 M550,433 L550,441 M600,433 L600,441 M650,432 L650,440 M700,432 L700,440 M750,431 L750,439 M800,430 L800,438 M850,431 L850,439 M900,432 L900,440 M950,433 L950,441 M1000,434 L1000,442 M1050,435 L1050,443 M1100,436 L1100,444"></path>
-    </g>
-
-    
-    <g stroke-width="1.6">
-      <path id="pared-proa-puente" d="M500,248 L506,430"></path>
-      <path id="pared-puente-popa" d="M784,232 L798,430"></path>
-    </g>
-    <g stroke-width="0.5">
-      
-      <path d="M520,404 L590,404 L590,420 L520,420 Z"></path>
-      <path d="M520,412 L590,412"></path>
-      <path d="M606,404 L676,404 L676,420 L606,420 Z"></path>
-      <path d="M606,412 L676,412"></path>
-      <path d="M692,404 L762,404 L762,420 L692,420 Z"></path>
-      <path d="M692,412 L762,412"></path>
-      <path d="M516,262 L780,246" opacity="0.7"></path>
-      <path d="M516,276 L780,260" opacity="0.5" stroke-dasharray="6 5"></path>
-      
-      <path d="M760,300 L760,428 M772,300 L772,428"></path>
-      <path d="M760,312 L772,312 M760,326 L772,326 M760,340 L772,340 M760,354 L772,354 M760,368 L772,368 M760,382 L772,382 M760,396 L772,396 M760,410 L772,410"></path>
-      
-      <path d="M528,388 L752,388" opacity="0.6"></path>
-      <path d="M528,382 L528,388 M600,382 L600,388 M676,382 L676,388 M752,382 L752,388" opacity="0.6"></path>
-    </g>
-
-    
-    <g id="pared-escritor-extractor" stroke-width="1.6">
-      <path d="M520,434 L520,632"></path>
-      <path d="M534,433 L534,631"></path>
-    </g>
-    <g stroke-width="0.5" opacity="0.7">
-      <path d="M520,450 L534,450 M520,478 L534,478 M520,560 L534,560 M520,588 L534,588 M520,616 L534,616"></path>
-      <path d="M520,442 L534,456 M534,442 L520,456"></path>
-    </g>
-    <g id="pared-extractor-qa" stroke-width="1.6">
-      <path d="M848,431 L848,628"></path>
-      <path d="M862,431 L862,621"></path>
-    </g>
-    <g stroke-width="0.5" opacity="0.7">
-      <path d="M848,448 L862,448 M848,476 L862,476 M848,560 L862,560 M848,588 L862,588 M848,612 L862,612"></path>
-      <path d="M848,440 L862,454 M862,440 L848,454"></path>
-    </g>
-    
-    <path id="pared-qa-popa" stroke-width="1.6" d="M1092,437 L1084,579"></path>
-    
-    <path id="pared-proa-escritor" stroke-width="1.6" d="M178,438 L178,502"></path>
-
-    
-    <g id="pasillo" stroke-width="1">
-      <path d="M212,500 L1110,500"></path>
-      <path d="M212,528 L1110,528"></path>
-      <path d="M212,500 L212,528" stroke-width="0.5"></path>
-      <path d="M1110,500 L1110,528" stroke-width="0.5"></path>
-      
-      <g stroke-width="0.5" opacity="0.5">
-        <path d="M212,522 L1110,522"></path>
-        <path d="M230,522 L230,528 M260,522 L260,528 M290,522 L290,528 M320,522 L320,528 M350,522 L350,528 M380,522 L380,528 M410,522 L410,528 M440,522 L440,528 M470,522 L470,528 M500,522 L500,528 M560,522 L560,528 M590,522 L590,528 M620,522 L620,528 M650,522 L650,528 M680,522 L680,528 M710,522 L710,528 M740,522 L740,528 M770,522 L770,528 M800,522 L800,528 M830,522 L830,528 M880,522 L880,528 M910,522 L910,528 M940,522 L940,528 M970,522 L970,528 M1000,522 L1000,528 M1030,522 L1030,528 M1060,522 L1060,528 M1090,522 L1090,528"></path>
+      <!-- Torre de hibernación y bodega -->
+      <g fill="none" stroke="#93A6B9" stroke-width="1.1">
+        <rect x="222" y="108" width="166" height="204" fill="url(#costillas)"/>
+        <path d="M222 150 H 388 M222 192 H 388 M222 234 H 388 M222 276 H 388"/>
+        <!-- seis pods de hibernación, vacíos -->
+        <g stroke="#93A6B9" stroke-width="1">
+          <rect x="236" y="116" width="20" height="28" rx="6"/><rect x="262" y="116" width="20" height="28" rx="6"/><rect x="288" y="116" width="20" height="28" rx="6"/>
+          <rect x="314" y="116" width="20" height="28" rx="6"/><rect x="340" y="116" width="20" height="28" rx="6"/><rect x="366" y="116" width="16" height="28" rx="6"/>
+        </g>
+        <path d="M250 62 V 96 M350 62 V 96 M262 74 H 338 M262 86 H 338" stroke="#3B4652"/>
+        <path d="M250 322 V 356 M350 322 V 356 M262 334 H 338 M262 346 H 338" stroke="#3B4652"/>
       </g>
-      
-      <g stroke-width="0.5" opacity="0.65">
-        <path d="M212,508 L512,508 M542,508 L840,508 M870,508 L1110,508"></path>
-        <path d="M250,508 L250,522 M330,508 L330,522 M410,508 L410,522 M490,508 L490,522 M580,508 L580,522 M660,508 L660,522 M740,508 L740,522 M820,508 L820,522 M900,508 L900,522 M980,508 L980,522 M1060,508 L1060,522"></path>
+
+      <!-- Espina central -->
+      <g fill="none" stroke="#3B4652" stroke-width="1">
+        <rect x="400" y="182" width="620" height="56" fill="url(#costillas)"/>
+        <path d="M400 210 H 1020" stroke="#93A6B9" stroke-width="1.4"/>
+        <path d="M400 196 H 1020 M400 224 H 1020"/>
       </g>
-    </g>
 
-    
-    <g id="compuerta-escritor-extractor" stroke-width="1">
-      <rect x="520" y="496" width="14" height="36"></rect>
-      <path d="M520,496 L534,532 M534,496 L520,532" stroke-width="0.5" opacity="0.6"></path>
-      <path d="M516,492 L538,492 M516,536 L538,536" stroke-width="0.5"></path>
-      <circle cx="527" cy="514" r="3.5" stroke-width="0.5"></circle>
-      <path d="M527,510 L527,518 M523,514 L531,514" stroke-width="0.5"></path>
-      <path d="M538,498 L546,498 L546,530 L538,530" stroke-width="0.5" opacity="0.7"></path>
-    </g>
-    <g id="compuerta-extractor-qa" stroke-width="1">
-      <rect x="848" y="496" width="14" height="36"></rect>
-      <path d="M848,496 L862,532 M862,496 L848,532" stroke-width="0.5" opacity="0.6"></path>
-      <path d="M844,492 L866,492 M844,536 L866,536" stroke-width="0.5"></path>
-      <circle cx="855" cy="514" r="3.5" stroke-width="0.5"></circle>
-      <path d="M855,510 L855,518 M851,514 L859,514" stroke-width="0.5"></path>
-      <path d="M866,498 L874,498 L874,530 L866,530" stroke-width="0.5" opacity="0.7"></path>
-    </g>
-    
-    <g stroke-width="1">
-      <rect x="212" y="496" width="12" height="36"></rect>
-      <circle cx="218" cy="514" r="3" stroke-width="0.5"></circle>
-    </g>
-
-    
-    <g id="conducto-puente" stroke-width="1">
-      <path d="M506,300 L506,500"></path>
-      <path d="M520,300 L520,496"></path>
-      <rect x="506" y="424" width="14" height="22"></rect>
-      <path d="M506,424 L520,446" stroke-width="0.5" opacity="0.6"></path>
-      <g stroke-width="0.5" opacity="0.6">
-        <path d="M506,320 L520,320 M506,344 L520,344 M506,368 L520,368 M506,392 L520,392 M506,462 L520,462 M506,482 L520,482"></path>
-      </g>
-    </g>
-
-    
-    <g stroke-width="0.5">
-      <path d="M244,440 L244,498 M254,440 L254,498"></path>
-      <path d="M244,452 L254,452 M244,464 L254,464 M244,476 L254,476 M244,488 L254,488"></path>
-      <path d="M244,530 L244,570 M254,530 L254,570"></path>
-      <path d="M244,542 L254,542 M244,556 L254,556"></path>
-      <path d="M580,440 L580,498 M590,440 L590,498"></path>
-      <path d="M580,452 L590,452 M580,464 L590,464 M580,476 L590,476 M580,488 L590,488"></path>
-      <path d="M908,440 L908,498 M918,440 L918,498"></path>
-      <path d="M908,452 L918,452 M908,464 L918,464 M908,476 L918,476 M908,488 L918,488"></path>
-    </g>
-
-    
-    <g stroke-width="0.5">
+      <!-- Cubierta de redacción (Escritor), sobre la espina -->
       <g>
-        <circle cx="400" cy="552" r="7"></circle>
-        <path d="M393,552 L407,552 M400,545 L400,559"></path>
-        <path d="M400,545 L400,536 M394,536 L406,536"></path>
+        <rect class="relleno" data-agente="escritor" x="500" y="128" width="140" height="54" fill="#7BE3B2" filter="url(#brillo)"/>
+        <rect class="cubierta" x="500" y="128" width="140" height="54"/>
+        <path d="M512 140 H 628 M512 152 H 600 M512 164 H 620 M512 176 H 580" stroke="#93A6B9" stroke-width="1" fill="none"/>
       </g>
+      <!-- Puente (Orquestador), proa -->
       <g>
-        <circle cx="462" cy="566" r="5"></circle>
-        <path d="M457,566 L467,566 M462,561 L462,571"></path>
-        <path d="M462,561 L462,552"></path>
+        <path class="relleno" data-agente="orquestador" d="M1020 158 L 1120 158 L 1198 188 L 1216 210 L 1198 232 L 1120 262 L 1020 262 Z" fill="#7BE3B2" filter="url(#brillo)"/>
+        <path class="cubierta" d="M1020 158 L 1120 158 L 1198 188 L 1216 210 L 1198 232 L 1120 262 L 1020 262 Z"/>
+        <path d="M1040 172 H 1110 L 1170 194 M1040 248 H 1110 L 1170 226 M1060 158 V 262 M1100 158 V 262" stroke="#3B4652" stroke-width="1" fill="none"/>
+        <path d="M1130 186 L 1180 202 M1130 234 L 1180 218" stroke="#93A6B9" stroke-width="1" fill="none"/>
       </g>
+      <!-- Bodega de hechos (Extractor), bajo la espina -->
       <g>
-        <circle cx="712" cy="570" r="7"></circle>
-        <path d="M705,570 L719,570 M712,563 L712,577"></path>
-        <path d="M712,563 L712,552 M706,552 L718,552"></path>
+        <rect class="relleno" data-agente="extractor" x="640" y="238" width="160" height="58" fill="#E39BC4" filter="url(#brillo)"/>
+        <rect class="cubierta" x="640" y="238" width="160" height="58"/>
+        <g stroke="#93A6B9" stroke-width="1" fill="none">
+          <rect x="650" y="248" width="26" height="16"/><rect x="682" y="248" width="26" height="16"/><rect x="714" y="248" width="26" height="16"/><rect x="746" y="248" width="26" height="16"/>
+          <rect x="650" y="270" width="26" height="16"/><rect x="682" y="270" width="26" height="16"/><rect x="714" y="270" width="26" height="16"/>
+        </g>
       </g>
+      <!-- Ramal seis, inspección (Revisor), resaltado -->
       <g>
-        <circle cx="792" cy="582" r="5"></circle>
-        <path d="M787,582 L797,582 M792,577 L792,587"></path>
+        <rect class="relleno" data-agente="revisor" x="800" y="122" width="160" height="60" fill="#E0483C" filter="url(#brillo)"/>
+        <rect class="cubierta" x="800" y="122" width="160" height="60"/>
+        <path d="M812 134 L 836 170 L 812 170 Z M948 134 L 924 170 L 948 170 Z" fill="none" stroke="#0A0D10" stroke-width="1.2"/>
+        <path d="M850 140 H 910 M850 152 H 910 M850 164 H 910" stroke="#0A0D10" stroke-width="1.2" fill="none"/>
       </g>
-      <g>
-        <circle cx="1030" cy="552" r="7"></circle>
-        <path d="M1023,552 L1037,552 M1030,545 L1030,559"></path>
-        <path d="M1030,545 L1030,536 M1024,536 L1036,536"></path>
+
+      <!-- Etiquetas con líneas guía -->
+      <g fill="none" stroke="#93A6B9" stroke-width=".9">
+        <path d="M140 132 V 108 M300 62 V 40 M570 128 V 100 M720 296 V 330 M880 122 V 94 M1120 158 V 128 M140 288 V 318 M300 356 V 384 M470 270 V 340"/>
       </g>
-      
-      <path d="M290,444 L370,444 L370,470 L290,470 Z"></path>
-      <path d="M290,456 L370,456 M310,444 L310,470 M330,444 L330,470 M350,444 L350,470"></path>
-      <path d="M608,444 L700,444 L700,470 L608,470 Z"></path>
-      <path d="M608,458 L700,458 M632,444 L632,470 M656,444 L656,470 M680,444 L680,470"></path>
-      <path d="M936,444 L1032,444 L1032,470 L936,470 Z"></path>
-      <path d="M936,457 L1032,457 M960,444 L960,470 M984,444 L984,470 M1008,444 L1008,470"></path>
-      
-      <path d="M300,536 L360,536 L360,570 L300,570 Z"></path>
-      <path d="M300,548 L360,548 M300,559 L360,559"></path>
-      <path d="M620,536 L690,536 L690,576 L620,576 Z"></path>
-      <path d="M620,548 L690,548 M620,562 L690,562"></path>
-      <path d="M940,536 L1010,536 L1010,570 L940,570 Z"></path>
-      <path d="M940,548 L1010,548 M940,559 L1010,559"></path>
-    </g>
+      <text x="146" y="104">//Ingeniería, motores</text>
+      <text x="306" y="36">//Hibernación, seis pods vacíos</text>
+      <text x="576" y="96">//Cubierta de redacción</text>
+      <text x="576" y="112" class="bajo" id="r-escritor">Escritor, capítulo 7 en espera</text>
+      <text x="726" y="345">//Bodega de hechos</text>
+      <text x="726" y="361" class="bajo" id="r-extractor">Extractor, 41 hechos fijados</text>
+      <text x="886" y="90" fill="#E0483C">//Ramal seis, inspección</text>
+      <text x="886" y="106" class="bajo" id="r-revisor">Revisor, ha detenido la nave</text>
+      <text x="1080" y="124">//Puente</text>
+      <text x="1080" y="140" class="bajo">Orquestador, esperando</text>
+      <text x="146" y="333" class="bajo">//Cubierta de ingeniería</text>
+      <text x="306" y="399" class="bajo">//Bodega de minería, herramientas</text>
+      <text x="476" y="355" class="bajo">//Espina, ramales uno a cinco</text>
 
-    
-    <g id="radiadores" stroke-width="1">
-      <path d="M852,296 L852,260 M900,292 L900,246 M948,296 L948,240 M996,301 L996,236 M1044,312 L1044,238 M1092,324 L1092,246"></path>
-      <path d="M840,260 L1104,238"></path>
-      <path d="M840,248 L1104,226"></path>
-      <path d="M840,248 L840,260 M1104,226 L1104,238"></path>
-      <g stroke-width="0.5" opacity="0.75">
-        <path d="M852,254 L852,242 M876,252 L876,240 M900,250 L900,238 M924,248 L924,236 M948,246 L948,234 M972,244 L972,232 M996,242 L996,230 M1020,240 L1020,228 M1044,238 L1044,226 M1068,236 L1068,224 M1092,234 L1092,222"></path>
-        <path d="M840,254 L1104,232"></path>
-      </g>
-      
-      <g stroke-width="0.5">
-        <path d="M848,292 L848,264 M856,292 L856,264"></path>
-        <path d="M1088,320 L1088,250 M1096,320 L1096,250"></path>
-        <circle cx="852" cy="280" r="4"></circle>
-        <path d="M848,280 L856,280 M852,276 L852,284"></path>
-      </g>
-    </g>
+      <!-- Cota -->
+      <path d="M22 412 H 1216 M22 406 V 418 M1216 406 V 418" stroke="#3B4652" stroke-width="1" fill="none"/>
+      <text x="620" y="408" text-anchor="middle" class="bajo">El casco frío del Falcon, corte longitudinal, cubierta de trabajo</text>
+    </svg>
+  </section>
 
-    
-    <g id="bloque-motor" stroke-width="1.6">
-      <path d="M1152,422 L1170,452 L1166,516 L1140,554"></path>
-      <path d="M1170,452 L1258,452 L1272,392 L1348,392 L1360,452 L1392,452 L1392,520 L1360,520 L1348,576 L1272,576 L1258,516 L1166,516"></path>
-    </g>
-    <g stroke-width="1">
-      <path d="M1258,452 L1258,516"></path>
-      <path d="M1290,452 L1290,516 M1322,452 L1322,516"></path>
-      <path d="M1272,392 L1272,452 M1348,392 L1348,452 M1272,576 L1272,516 M1348,576 L1348,516"></path>
-      
-      <path d="M1392,458 L1428,436 L1428,478 L1392,470"></path>
-      <path d="M1392,498 L1428,490 L1428,532 L1392,510"></path>
-      <path d="M1428,436 L1440,430 M1428,478 L1440,482 M1428,490 L1440,486 M1428,532 L1440,538"></path>
-    </g>
-    <g stroke-width="0.5" opacity="0.7">
-      <path d="M1180,462 L1250,462 M1180,478 L1250,478 M1180,494 L1250,494 M1180,506 L1250,506"></path>
-      <path d="M1266,404 L1354,404 M1266,418 L1354,418 M1266,432 L1354,432"></path>
-      <path d="M1266,536 L1354,536 M1266,550 L1354,550 M1266,564 L1354,564"></path>
-      <path d="M1300,452 L1300,516 M1340,452 L1340,516" stroke-dasharray="3 5"></path>
-      <circle cx="1214" cy="484" r="9"></circle>
-      <path d="M1205,484 L1223,484 M1214,475 L1214,493"></path>
-      <circle cx="1214" cy="484" r="3"></circle>
-      
-      <path d="M1170,452 L1170,516 M1392,452 L1392,520" stroke-dasharray="4 5"></path>
-      <path stroke-dasharray="0.9 8" stroke-linecap="round" d="M1264,398 L1356,398 L1366,452 L1398,452 L1398,520 L1366,520 L1356,570 L1264,570 L1252,516 L1176,516 L1176,452 L1252,452 Z"></path>
-    </g>
-    
-    <g stroke-width="0.5">
-      <path d="M1100,470 L1180,470 M1100,476 L1180,476"></path>
-      <path d="M1100,490 L1180,490 M1100,496 L1180,496"></path>
-      <path d="M1110,470 L1110,496 M1140,470 L1140,496" stroke-dasharray="2 4"></path>
-    </g>
+  <section class="indicadores" aria-label="Indicadores de producción">
+    <div class="ind">
+      <span class="nombre">Capítulos cerrados</span><span class="valor" id="v-caps">-</span>
+      <div class="barra" aria-hidden="true"><i class="verde" id="b-caps" style="width:0%"></i><span class="marca" id="m-caps" style="left:0%"></span></div>
+      <span class="nota" id="n-caps"></span>
+    </div>
+    <div class="ind">
+      <span class="nombre">Gastado hasta ahora</span><span class="valor" id="v-coste">-</span>
+      <div class="barra" aria-hidden="true"><i class="rojo" id="b-coste" style="width:0%"></i></div>
+      <span class="nota" id="n-coste"></span>
+    </div>
+    <div class="ind">
+      <span class="nombre" id="e-tiempo">Tiempo</span><span class="valor" id="v-tiempo">-</span>
+      <div class="barra" aria-hidden="true"><i id="b-tiempo" style="width:0%"></i></div>
+      <span class="nota" id="n-tiempo"></span>
+    </div>
+  </section>
 
-    
-    <g id="bodega-ventral" stroke-width="1.6">
-      <path d="M562,631 L568,700 L610,730 L740,734 L790,706 L798,625"></path>
-    </g>
-    <g stroke-width="1">
-      <path d="M576,644 L786,640" opacity="0.8"></path>
-      <path d="M600,700 L600,644 M660,712 L660,642 M720,714 L720,641"></path>
-      
-      <path d="M636,714 L636,734 M708,712 L708,734"></path>
-      <path d="M636,726 L708,726"></path>
-      <path d="M648,726 L648,734 M672,726 L672,734 M696,726 L696,734"></path>
-      <circle cx="672" cy="718" r="6"></circle>
-      <path d="M666,718 L678,718 M672,712 L672,724"></path>
-    </g>
-    <g stroke-width="0.5" opacity="0.7">
-      <path d="M580,660 L790,657 M582,676 L788,672 M586,692 L784,688"></path>
-      <path d="M620,644 L620,706 M690,642 L690,714 M756,640 L756,700" stroke-dasharray="3 5"></path>
-      
-      <path d="M592,652 L776,648"></path>
-      <path d="M604,648 L604,656 M652,650 L652,658 M700,649 L700,657 M748,648 L748,656"></path>
-      <path d="M572,636 L568,700 L610,730 L740,734 L790,706 L802,632" stroke-dasharray="0.9 8" stroke-linecap="round"></path>
-    </g>
-
-    
-    <g stroke-width="0.5" opacity="0.7">
-      <path d="M232,356 L266,344 L266,334 L232,346 Z"></path>
-      <path d="M296,332 L330,324 L330,314 L296,322 Z"></path>
-      <path d="M360,318 L394,312 L394,302 L360,308 Z"></path>
-    </g>
-  </g><g id="plano-frente" stroke="currentColor" fill="none">
-
-    
-    <g stroke-width="0.5" opacity="0.5">
-      <path d="M48,42 L48,72 M48,42 L78,42"></path>
-      <path d="M1392,42 L1392,72 M1392,42 L1362,42"></path>
-      <path d="M48,858 L48,828 M48,858 L78,858"></path>
-      <path d="M1392,858 L1392,828 M1392,858 L1362,858"></path>
-      <path d="M714,44 L726,44 M720,38 L720,50"></path>
-      <path d="M714,856 L726,856 M720,850 L720,862"></path>
-    </g>
-
-    
-    <g stroke-width="1" opacity="0.8">
-      <path d="M170,782 L1160,782"></path>
-      <path d="M170,774 L170,790 M335,776 L335,788 M500,774 L500,790 M665,776 L665,788 M830,774 L830,790 M995,776 L995,788 M1160,774 L1160,790"></path>
-      <path d="M176,778 L170,782 L176,786 M1154,778 L1160,782 L1154,786" stroke-width="0.5"></path>
-    </g>
-    
-    <g stroke-width="0.5" opacity="0.7">
-      <path d="M118,300 L118,660"></path>
-      <path d="M112,300 L124,300 M112,660 L124,660"></path>
-      <path d="M118,306 L114,312 M118,306 L122,312 M118,654 L114,648 M118,654 L122,648"></path>
-      <path d="M118,438 L168,438" stroke-dasharray="4 5"></path>
-      <path d="M112,438 L124,438"></path>
-    </g>
-    
-    <g stroke-width="0.5" opacity="0.7">
-      <path d="M212,672 L1110,672" stroke-dasharray="6 5"></path>
-      <path d="M212,666 L212,678 M1110,666 L1110,678"></path>
-    </g>
-
-    
-    <g stroke-width="0.5" opacity="0.75">
-      <path d="M304,694 L304,706 M396,694 L396,706 M562,694 L562,706 M642,694 L642,706 M762,694 L762,706 M852,694 L852,706 M898,694 L898,706 M1006,694 L1006,706 M1086,694 L1086,706"></path>
-      <path d="M170,700 L1160,700" stroke-dasharray="1 9"></path>
-    </g>
-
-    
-    <g stroke-width="0.5" opacity="0.7">
-      <path d="M600,372 L600,392 L686,392"></path>
-      <circle cx="690" cy="392" r="1.7" fill="currentColor" stroke="none"></circle>
-      <path d="M300,494 L300,546 L386,546"></path>
-      <circle cx="390" cy="546" r="1.7" fill="currentColor" stroke="none"></circle>
-      <path d="M620,494 L620,600 L700,600"></path>
-      <circle cx="704" cy="600" r="1.7" fill="currentColor" stroke="none"></circle>
-      <path d="M950,494 L950,586 L1000,586"></path>
-      <circle cx="1004" cy="586" r="1.7" fill="currentColor" stroke="none"></circle>
-      <path d="M1300,392 L1300,352 L1240,352"></path>
-      <circle cx="1236" cy="352" r="1.7" fill="currentColor" stroke="none"></circle>
-      <path d="M672,734 L672,776 L744,776"></path>
-      <circle cx="748" cy="776" r="1.7" fill="currentColor" stroke="none"></circle>
-      <path d="M972,238 L972,196 L1046,196"></path>
-      <circle cx="1050" cy="196" r="1.7" fill="currentColor" stroke="none"></circle>
-      <path d="M140,470 L104,470 L104,344 L180,344"></path>
-      <circle cx="184" cy="344" r="1.7" fill="currentColor" stroke="none"></circle>
-    </g>
-  </g><g id="anotaciones" fill="currentColor" stroke="none" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
-
-    <g font-size="13" letter-spacing="6.5">
-      <text x="512" y="352" id="n-puente">PUENTE</text>
-      <text x="256" y="472" id="n-escritor">ESCRITOR</text>
-      <text x="576" y="472" id="n-extractor">EXTRACTOR</text>
-      <text x="884" y="472" id="n-qa">QA</text>
-    </g>
-
-    <g font-size="9" letter-spacing="2.2" opacity="0.8">
-      <text x="512" y="370" id="t-puente">Orquestador C-04-P</text>
-      <text x="256" y="489" id="e-escritor">En espera</text>
-      <text x="576" y="489" id="e-extractor">En espera</text>
-      <text x="884" y="489" id="e-qa">En espera</text>
-    </g>
-
-    <g font-size="8.5" letter-spacing="2" opacity="0.62">
-      <text x="692" y="395">CUBIERTA 1 · MANDO</text>
-      <text x="394" y="549">BANCADA A-3</text>
-      <text x="708" y="603">COLECTOR B-7</text>
-      <text x="1008" y="589">COLECTOR C-2</text>
-      <text x="1232" y="355" text-anchor="end">BLOQUE MOTOR · 2 TOBERAS</text>
-      <text x="752" y="779">BODEGA VENTRAL · ESCLUSA V-1</text>
-      <text x="1054" y="199">RADIADORES DORSALES · 6 PANELES</text>
-      <text x="188" y="347">PROA BLINDADA · 3 CAPAS</text>
-    </g>
-
-    <g font-size="8" letter-spacing="1.6" opacity="0.55">
-      <text x="170" y="806" text-anchor="middle">0</text>
-      <text x="335" y="806" text-anchor="middle">6</text>
-      <text x="500" y="806" text-anchor="middle">12</text>
-      <text x="665" y="806" text-anchor="middle">18</text>
-      <text x="830" y="806" text-anchor="middle">24</text>
-      <text x="995" y="806" text-anchor="middle">30</text>
-      <text x="1160" y="806" text-anchor="middle">36 m</text>
-      <text x="104" y="484" text-anchor="middle" transform="rotate(-90 104 484)">13.2 m</text>
-      <text x="661" y="666" text-anchor="middle">PASILLO LONG. · 32.8 m</text>
-      <text x="304" y="688" text-anchor="middle">08</text>
-      <text x="396" y="688" text-anchor="middle">10</text>
-      <text x="562" y="688" text-anchor="middle">14</text>
-      <text x="642" y="688" text-anchor="middle">16</text>
-      <text x="762" y="688" text-anchor="middle">18</text>
-      <text x="852" y="688" text-anchor="middle">20</text>
-      <text x="898" y="688" text-anchor="middle">21</text>
-      <text x="1006" y="688" text-anchor="middle">24</text>
-      <text x="1086" y="688" text-anchor="middle">26</text>
-    </g>
-
-    <g font-size="8.5" letter-spacing="2.4" opacity="0.5">
-      <text x="64" y="852">SEC-04 / SECCIÓN DE PROCESO · CORTE LONGITUDINAL · ESC 1:120</text>
-      <text x="1376" y="852" text-anchor="end">CASCO INTERIOR 1.8 mm · PRESIÓN 0.94 atm</text>
-      <text x="64" y="70">PLANO DE TALLER · REV. 04</text>
-      <text x="1376" y="70" text-anchor="end">CUADERNAS 00-28</text>
-    </g>
-  </g>
-    <g id="luz"><g id="luzInterior"></g></g>
-    <g id="traspaso" opacity="0"></g>
-
-    <g id="bucle">
-      <g stroke="currentColor" fill="none" stroke-width="1" opacity=".5">
-        <path d="M200,548 L200,538 M527,548 L527,536 M855,548 L855,536 M1080,548 L1080,538"/>
-      </g>
-      <g id="nodos" fill="#101a24" stroke="currentColor" stroke-width="1">
-        <rect x="194" y="570" width="12" height="12" transform="rotate(45 200 576)"/>
-        <rect x="521" y="570" width="12" height="12" transform="rotate(45 527 576)"/>
-        <rect x="849" y="570" width="12" height="12" transform="rotate(45 855 576)"/>
-        <rect x="1074" y="570" width="12" height="12" transform="rotate(45 1080 576)"/>
-      </g>
-      <circle id="paquete" cx="200" cy="576" r="3.2" fill="#e0505f" opacity="0"/>
-    </g>
-
-    </g>
-  </svg>
-
-  <svg id="motas" viewBox="0 0 1600 1060"></svg>
-  <div class="barrido"></div>
-
-  <div id="cinta">
-    <div class="et"><span>capítulos</span><span id="cinta-res"></span></div>
-    <div id="celdas"></div>
-  </div>
-
-  <div id="mando"></div>
-  <div id="aviso"></div>
-  <div id="atajos"><b>Q</b> abre el informe de QA. <b>Esc</b> cierra lo que esté abierto.</div>
-
-  <div class="panel" id="confirmar"><div class="marco estrecho alerta">
-    <h3>Escribir una tanda</h3><div class="sub">La única acción que gasta dinero y cierra capítulos</div>
-    <div id="confirmar-cuerpo" style="font-size:10.5px;line-height:1.9;color:#a3afc0"></div>
-    <div class="acciones"><button type="button" data-cerrar="confirmar">Cancelar</button>
-      <button type="button" class="peligro" id="confirmar-si">Escribir la tanda</button></div></div></div>
-
-  <div class="panel" id="qa"><div class="marco aviso">
-    <h3>Pausado por QA</h3><div class="sub" id="qa-sub"></div>
-    <div class="col2"><div><h4>Contradicciones</h4><div id="qa-contra"></div></div>
-      <div><h4>Repeticiones</h4><div id="qa-repe"></div></div></div>
-    <div class="nota">La corrección se hace a mano, fuera de esta consola. Esta pantalla no ofrece
-      resolver el informe a propósito: cerrarlo exige declarar qué capítulos se corrigieron, y esa
-      declaración solo tiene sentido después de haberlos editado de verdad.</div>
-    <div class="acciones"><button type="button" data-cerrar="qa">Volver al puente</button></div></div></div>
-
-  <div class="panel" id="error"><div class="marco alerta">
-    <h3>Fallo en la ejecución</h3><div class="sub">El texto literal del error, sin reformular</div>
-    <pre class="traza" id="error-txt"></pre><div class="nota" id="error-ruta"></div>
-    <div class="acciones"><button type="button" data-cerrar="error">Volver al puente</button></div></div></div>
-
-  <div class="panel" id="config"><div class="marco">
-    <h3>Parámetros de la novela</h3><div class="sub">Se validan antes de escribirse en disco</div>
-    <div class="bloqueo" id="bloqueo"></div>
-    <form id="formulario"><div class="grupos">
-      <fieldset class="ancho"><legend>Idea</legend>
-        <textarea name="idea" placeholder="La premisa de la que sale todo."></textarea></fieldset>
-      <fieldset><legend>Voz narrativa</legend>
-        <label>Idioma</label><input name="idioma" data-novela value="es-ES">
-        <label>Persona narrativa</label>
-        <select name="persona_narrativa" data-novela><option value="primera">primera</option>
-          <option value="tercera_limitada" selected>tercera limitada</option>
-          <option value="tercera_omnisciente">tercera omnisciente</option></select>
-        <label>Tiempo verbal</label>
-        <select name="tiempo_verbal" data-novela><option value="pasado" selected>pasado</option>
-          <option value="presente">presente</option></select></fieldset>
-      <fieldset><legend>Dimensionamiento</legend><div class="par">
-        <div><label>Total de capítulos</label><input type="number" name="total_capitulos" data-novela min="30" max="50" value="30"></div>
-        <div><label>Palabras por capítulo</label><input type="number" name="palabras_por_capitulo" data-novela min="1" value="1500"></div>
-        <div><label>Ventana de resumen</label><input type="number" name="ventana_resumen_rodante" data-novela min="1" value="3"></div>
-        <div><label>Cadencia de QA</label><input type="number" name="cadencia_qa" data-novela min="1" value="4"></div>
-        <div><label>Tope de contexto</label><input type="number" name="max_tokens_contexto_escritor" data-novela min="1" value="5000"></div>
-        <div><label>Hechos por capítulo</label><input type="number" name="max_hechos_por_capitulo" data-novela min="1" value="4"></div>
-      </div></fieldset>
-      <fieldset><legend>Ejecución</legend><div class="par">
-        <div><label>Capítulos por tanda</label><input type="number" name="capitulos_por_tanda" min="1" value="3"></div>
-        <div><label>Tope de llamadas</label><input type="number" name="max_llamadas_por_tanda" min="1" placeholder="sin tope"></div></div>
-        <label>Registrar uso</label>
-        <div class="radios"><label><input type="radio" name="registrar_uso" value="true" checked>Sí</label>
-          <label><input type="radio" name="registrar_uso" value="false">No</label></div></fieldset>
-      <fieldset><legend>Origen de la guía de estilo</legend>
-        <div class="radios"><label><input type="radio" name="origen_estilo" value="referencias" checked>Textos de referencia</label>
-          <label><input type="radio" name="origen_estilo" value="descripcion">Desde la descripción</label></div>
-        <div style="font-size:9px;line-height:1.75;color:#4e5d72;margin-top:12px;letter-spacing:.05em">
-          Con <b style="color:#8496aa">textos de referencia</b> y la carpeta vacía, la fase falla indicando
-          el motivo. Con <b style="color:#8496aa">desde la descripción</b> la guía se deriva de la idea e
-          ignora la carpeta. No hay respaldo automático de un modo al otro.</div></fieldset>
-    </div><div class="acciones"><button type="button" data-cerrar="config">Descartar</button>
-      <button type="submit" class="peligro">Guardar parámetros</button></div></form></div></div>
-</div>
-</div></div>
-
-<div id="atmosfera"><div class="suciedad"></div><div class="vineta"></div><div class="grano"></div></div>
+  <footer class="pie">
+    <div class="marco veredicto" role="alert">
+      <h2><b id="veredicto-t">Leyendo el estado</b><span id="veredicto-h2"></span></h2>
+      <p id="veredicto-p"></p>
+      <div class="acciones" id="acciones"></div>
+      <p class="aviso-lanzar" id="aviso"></p>
+    </div>
+    <div class="registro">
+      <h2>Registro de a bordo</h2>
+      <ol reversed id="registro"></ol>
+    </div>
+  </footer>
+</main>
 
 <script>
+(function(){
 "use strict";
-const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const rnd=(a,b)=>a+Math.random()*(b-a);
-const REDUCIR=matchMedia("(prefers-reduced-motion: reduce)").matches;
-const HAY_GSAP=typeof gsap!=="undefined";
+var $ = function(id){ return document.getElementById(id); };
+var estado = null, qa = null, coste = null, lanzando = false;
 
-/* Cuatro profundidades. El fondo se mueve al reves que el frente: asi el ojo lee que hay
-   distancia entre ellos y no capas apiladas. Amplitudes en unidades del viewBox, muy cortas:
-   el paralaje convence cuando casi no se ve. */
-const CAPAS=[["#plano-fondo",-7],["#plano-medio",-2.5],["#luz",-2.5],["#bucle",-2.5],
-             ["#plano-frente",5],["#anotaciones",8]];
-function paralaje(nx,ny){
-  for(const [sel,k] of CAPAS){
-    const el=document.querySelector(sel);
-    if(el) el.style.transform=`translate(${(nx*k).toFixed(2)}px, ${(ny*k*0.55).toFixed(2)}px)`;
-  }
-}
-addEventListener("pointermove",e=>{
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
-  paralaje(e.clientX/innerWidth-0.5, e.clientY/innerHeight-0.5);
-},{passive:true});
+function esc(s){ return String(s == null ? "" : s)
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
-/* el escenario crece hasta llenar la pantalla; la atmósfera tapa los lados */
-function escalar(){
-  const s = Math.min(innerWidth / 1440, innerHeight / 900);
-  $("#stage").style.transform = `translate(-50%,-50%) scale(${s})`;
-}
-addEventListener("resize",escalar); escalar();
-
-/* la silueta de la entrada es el MISMO casco que luego ves en corte */
-const SILUETA=`
- <path d="M190,392 L430,376 L1000,364 L1006,596 L430,606 L190,584 Z" fill="#04070c" stroke="#33455a" stroke-width="1.4"/>
- <path d="M190,392 L150,428 L122,470 L122,486 L150,540 L190,584 Z" fill="#04070c" stroke="#33455a" stroke-width="1.4"/>
- <path d="M460,374 L474,304 L512,278 L640,266 L792,270 L812,296 L820,372 Z" fill="#050910" stroke="#33455a" stroke-width="1.4"/>
- <path d="M1006,364 L1028,336 L1078,332 L1098,358 L1106,420 L1106,540 L1098,602 L1078,628 L1028,624 L1006,596 Z" fill="#04070c" stroke="#33455a" stroke-width="1.4"/>
- <path d="M1106,396 L1136,384 L1144,412 L1136,440 L1106,426 Z M1106,452 L1140,440 L1148,480 L1140,520 L1106,508 Z M1106,534 L1136,520 L1144,548 L1136,576 L1106,564 Z" fill="#070d15" stroke="#33455a" stroke-width="1.2"/>
- <path d="M470,604 L510,644 L580,662 L760,660 L830,638 L850,600 Z" fill="#04070c" stroke="#33455a" stroke-width="1.3"/>
- <g stroke="#2b3b4e" stroke-width="1" fill="none" opacity=".85">
-   <path d="M856,362 L886,308 M880,361 L910,307 M904,360 L934,306 M928,359 L958,305 M952,358 L982,304"/>
-   <path d="M700,266 L700,208 M690,222 L710,222 M688,236 L712,236"/>
- </g>
- <g fill="#8b0f1d"><circle cx="356" cy="486" r="7" opacity=".9"/></g>
- <g fill="#4e5d72"><circle cx="540" cy="282" r="1.8"/><circle cx="568" cy="280" r="1.8"/><circle cx="596" cy="279" r="1.8"/>
-   <circle cx="1052" cy="480" r="3" opacity=".7"/><circle cx="642" cy="672" r="2" opacity=".6"/></g>`;
-
-function sembrar(){
-  $("#nave").innerHTML=SILUETA;
-  const capas=[["#estrellas1",120,1.5,.95],["#estrellas2",150,1,.6],["#estrellas3",190,.65,.34]];
-  for(const [sel,n,r,op] of capas){
-    let s="";
-    for(let i=0;i<n;i++) s+=`<circle cx="${rnd(-200,1640).toFixed(0)}" cy="${rnd(-150,1050).toFixed(0)}" r="${(r*rnd(.5,1.3)).toFixed(2)}" fill="#c8d4e4" opacity="${(op*rnd(.4,1)).toFixed(2)}"/>`;
-    $(sel).innerHTML=s;
-  }
-  let m=""; for(let i=0;i<46;i++)
-    m+=`<circle cx="${rnd(0,1600).toFixed(0)}" cy="${rnd(0,1060).toFixed(0)}" r="${rnd(.5,1.5).toFixed(2)}" fill="#9fb0c4" opacity="${rnd(.05,.2).toFixed(2)}"/>`;
-  $("#motas").innerHTML=m;
+function dinero(n, moneda){
+  if (n == null) return "-";
+  return n.toLocaleString("es-ES", {style:"currency", currency: moneda || "USD", currencyDisplay:"narrowSymbol", maximumFractionDigits:2});
 }
 
-function entrar(){
-  const fin=()=>{ const i=$("#intro"); if(i)i.remove();
-    if(HAY_GSAP)gsap.set("#panel",{opacity:1}); else $("#panel").style.opacity=1;
-    ambiente(); parpadeoLuz(); };
-  if(REDUCIR||sessionStorage.getItem("sec04-visto")==="1"||!HAY_GSAP){fin();return;}
-  sessionStorage.setItem("sec04-visto","1");
-  gsap.set("#panel",{opacity:0});
-  const trazos=$$("#plano .traza");
-  trazos.forEach(p=>{const L=p.getTotalLength?p.getTotalLength():3000;
-    gsap.set(p,{strokeDasharray:L,strokeDashoffset:L});});
-  gsap.set(["#rotulos","#textos","#puntos","#bucle"],{opacity:0});
-  const tl=gsap.timeline({onComplete:fin});
-  tl.fromTo(["#estrellas1","#estrellas2","#estrellas3"],{opacity:0},{opacity:1,duration:1.1,stagger:.12},0)
-    .fromTo(["#neb1","#neb2"],{opacity:0},{opacity:1,duration:1.6,stagger:.2},0)
-    .fromTo("#nave",{opacity:0,scale:.035,transformOrigin:"50% 50%"},{opacity:1,scale:.055,duration:1.5,ease:"power1.inOut"},.35);
-  tl.to("#nave",{scale:1.05,duration:1.9,ease:"power3.in",transformOrigin:"50% 50%"},1.7)
-    .to("#estrellas1",{scale:4.2,opacity:0,duration:1.9,ease:"power3.in",transformOrigin:"50% 50%"},1.7)
-    .to("#estrellas2",{scale:2.6,opacity:.15,duration:1.9,ease:"power2.in",transformOrigin:"50% 50%"},1.7)
-    .to("#estrellas3",{scale:1.7,opacity:.08,duration:1.9,ease:"power1.in",transformOrigin:"50% 50%"},1.7)
-    .to(["#neb1","#neb2"],{scale:2.2,opacity:0,duration:1.9,ease:"power2.in",transformOrigin:"50% 50%"},1.7);
-  tl.to("#nave",{scale:7,opacity:0,duration:.55,ease:"power2.in",transformOrigin:"50% 50%"},3.5)
-    .fromTo("#compuerta",{opacity:0},{opacity:1,duration:.3},3.55)
-    .fromTo("#sello",{opacity:0},{opacity:1,duration:.4},3.75);
-  tl.to("#sello",{opacity:0,duration:.3},4.55)
-    .to("#compuerta .arriba",{yPercent:-100,duration:1.25,ease:"power2.inOut"},4.7)
-    .to("#compuerta .abajo",{yPercent:100,duration:1.25,ease:"power2.inOut"},4.7)
-    .to("#panel",{opacity:1,duration:.7},4.95);
-  tl.to(trazos,{strokeDashoffset:0,duration:1.5,ease:"power1.out",stagger:.03},5.1)
-    .to("#bucle",{opacity:1,duration:.5},6.0)
-    .to("#rotulos",{opacity:.55,duration:.5},6.1)
-    .to(["#textos","#puntos"],{opacity:1,duration:.6},6.2)
-    .fromTo("#luz",{opacity:0},{opacity:1,duration:.9,ease:"power2.out"},6.5)
-    .to("#panel",{opacity:.25,duration:.06},6.62).to("#panel",{opacity:1,duration:.1},6.68)
-    .to("#panel",{opacity:.4,duration:.05},6.86).to("#panel",{opacity:1,duration:.12},6.91);
-  const saltar=()=>tl.progress(1);
-  $("#saltar").addEventListener("click",saltar);
-  addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#intro"))saltar();});
+function duracion(segundos){
+  if (segundos == null || !isFinite(segundos)) return "-";
+  var h = Math.floor(segundos/3600), m = Math.round((segundos%3600)/60);
+  return h ? h + " h " + m + " min" : m + " min";
 }
 
-/* fallo de corriente general, raro */
-function ambiente(){
-  if(REDUCIR||!HAY_GSAP)return;
-  const fallo=()=>{gsap.timeline({onComplete:()=>gsap.delayedCall(rnd(16,42),fallo)})
-    .to("#panel",{opacity:.36,duration:.05}).to("#panel",{opacity:1,duration:.09})
-    .to("#panel",{opacity:.58,duration:.04},"+=0.07").to("#panel",{opacity:1,duration:.11});};
-  gsap.delayedCall(rnd(12,26),fallo);
-}
+var NOMBRE_AGENTE = {escritor:"Escritor", extractor:"Extractor de hechos",
+                     qa:"Revisor de calidad", orquestador:"Orquestador"};
 
-/* el fluorescente del compartimento activo: estertor irregular, luego se estabiliza */
-function parpadeoLuz(){
-  if(REDUCIR||!HAY_GSAP)return;
-  const otra=()=>gsap.delayedCall(rnd(9,21),parpadeoLuz);
-  const g=$("#luz");
-  const hayLuz=ESTADO&&(ESTADO.agente_activo||ESTADO.estado==="pausado_por_qa");
-  if(!g||!hayLuz){otra();return;}
-  const rot=ESTADO.estado==="pausado_por_qa"?$("#n-qa"):$("#n-"+ESTADO.agente_activo);
-  const tl=gsap.timeline({onComplete:otra});
-  tl.to(g,{opacity:.07,duration:.042}).to(g,{opacity:1,duration:.05})
-    .to(g,{opacity:.2,duration:.036}).to(g,{opacity:.88,duration:.07})
-    .to(g,{opacity:.1,duration:.03}).to(g,{opacity:.55,duration:.05})
-    .to(g,{opacity:1,duration:.26,ease:"power2.out"});
-  if(rot)tl.to(rot,{opacity:.25,duration:.04},0).to(rot,{opacity:1,duration:.05},.09)
-           .to(rot,{opacity:.4,duration:.03},.2).to(rot,{opacity:1,duration:.22},.26);
-}
-
-const VITALES=[
- {et:"presión",v:.94,u:" atm",d:.004,min:.88,mal:.91,crit:.895},
- {et:"oxígeno",v:19.1,u:" %",d:.09,min:17.4,mal:18.6,crit:18},
- {et:"casco",v:-38,u:" °C",d:.7,min:-52,mal:-44,crit:-49},
- {et:"reactor",v:41,u:" %",d:.35,min:32,mal:37,crit:34}];
-function pintarVitales(){$("#vitales").innerHTML=VITALES.map((x,i)=>
-  `<div class="v" id="v${i}"><span style="min-width:62px;display:inline-block">${x.et}</span><b>--</b></div>`).join("");}
-function derivarVitales(){VITALES.forEach((x,i)=>{
-  x.v=Math.max(x.min,x.v+rnd(-x.d,x.d*.82));
-  const el=$("#v"+i); if(!el)return;
-  el.querySelector("b").textContent=(Math.abs(x.v)<10?x.v.toFixed(2):x.v.toFixed(1))+x.u;
-  el.className="v"+(x.v<x.crit?" critico":x.v<x.mal?" mal":"");});}
-
-const FASES=[
- {id:"destilar-estilo",rot:"Destilar estilo",cond:e=>e.tiene_referencias||e.origen_estilo==="descripcion"?null:"No hay textos en 00_referencias/ y el origen de la guía está en «textos de referencia»."},
- {id:"generar-premisa",rot:"Generar premisa",cond:e=>e.artefactos?.idea?null:"Falta 01_concepto/idea.md. Escribí la idea en parámetros."},
- {id:"generar-sinopsis",rot:"Generar sinopsis",cond:e=>e.artefactos?.premisa?null:"Falta premisa.md. Lanzá antes «generar premisa»."},
- {id:"generar-escaleta",rot:"Generar escaleta",cond:e=>e.artefactos?.tres_actos?null:"Falta tres_actos.md."},
- {id:"inicializar-estado",rot:"Inicializar estado",cond:e=>e.artefactos?.capitulos?null:"Falta capitulos.json."},
- {id:"escribir-tanda",rot:"Escribir tanda",cara:true,cond:e=>{
-   if(e.estado==="pausado_por_qa")return"Pausada por un informe de QA. Corregí los capítulos y cerrá el informe desde la terminal.";
-   if(!e.artefactos?.estado_inicializado)return"El estado no está inicializado.";
-   if(e.capitulos_cerrados>=e.total_capitulos)return"La novela está completa.";return null;}},
- {id:"ensamblar",rot:"Ensamblar",cond:e=>e.capitulos_cerrados>0?null:"No hay ningún capítulo cerrado todavía."}];
-
-const AGENTES={
- escritor:{clip:"celda-escritor",cx:349,cy:533,rx:171,ry:99,pared:"M520,434 L520,632",
-   pasillo:"M200,560 L516,560 M200,590 L516,590",nodo:200},
- extractor:{clip:"celda-extractor",cx:691,cy:540,rx:157,ry:105,pared:"M848,431 L848,628",
-   pasillo:"M538,560 L844,560 M538,590 L844,590",nodo:527},
- qa:{clip:"celda-qa",cx:977,cy:526,rx:115,ry:95,pared:"",
-   pasillo:"M866,560 L1088,560 M866,588 L1088,588",nodo:855}};
-
-let ESTADO=null,ANTERIOR=null,SIN_SERVIDOR=false,LANZANDO=false;
-
-function pintarMando(){
-  $("#mando").innerHTML=FASES.map((f,i)=>`<button class="tecla${f.cara?" cara":""}" data-fase="${f.id}" disabled>
-    <span class="idx">${String(i+1).padStart(2,"0")}</span>${f.rot}<span class="motivo"></span></button>`).join("");
-  $$("#mando .tecla").forEach(b=>b.addEventListener("click",()=>pulsar(b.dataset.fase)));
-}
-function refrescarMando(){
-  FASES.forEach(f=>{const b=$(`[data-fase="${f.id}"]`);let m=null;
-    if(!ESTADO)m="Sin conexión con el harness.";
-    else if(ESTADO.estado==="en_progreso"||LANZANDO)m="Hay una ejecución en marcha. Una sola cada vez: dos sobre el mismo estado lo corromperían.";
-    else m=f.cond(ESTADO);
-    b.disabled=!!m;b.querySelector(".motivo").textContent=m||"";});
-}
-
-/* ---------- cinta de capítulos: el macro del proceso ---------- */
-function pintarCinta(){
-  const e=ESTADO; if(!e)return;
-  const tot=e.total_capitulos||30, cerr=e.capitulos_cerrados||0, act=e.capitulo_actual||0;
-  const cad=e.cadencia_qa||0, conH=new Set(e.capitulos_con_hallazgos||[]);
-  let h="";
-  for(let n=1;n<=tot;n++){
-    const cls=[ "c" ];
-    if(n===act&&e.estado!=="pausado_por_qa")cls.push("activo");
-    else if(conH.has(n))cls.push("marcado");
-    else if(n<=cerr)cls.push("cerrado");
-    if(cad&&n%cad===0)cls.push("corte");
-    const est=n===act?"en curso":conH.has(n)?"con hallazgos":n<=cerr?"cerrado":"sin escribir";
-    h+=`<div class="${cls.join(" ")}"><span class="tip">Capítulo ${n}: ${est}${cad && n % cad === 0 ? ", corte de QA" : ""}</span></div>`;
-  }
-  $("#celdas").innerHTML=h;
-  $("#cinta-res").textContent=`${cerr} cerrados, ${tot-cerr} por escribir` + (cad?`. QA cada ${cad}`:"");
-}
-
-function pintarLuz(){
-  const e=ESTADO,g=$("#luzInterior"); if(!g)return;
-  const pausa=e&&e.estado==="pausado_por_qa";
-  const act=pausa?"qa":(e&&e.agente_activo);
-  const paq=$("#paquete");
-  if(!act||!AGENTES[act]){g.innerHTML="";if(paq)paq.setAttribute("opacity","0");return;}
-  const a=AGENTES[act],grad=pausa?"focoAmbar":"foco",tono=pausa?"#d99a2b":"#c41e2f";
-  g.style.animation=pausa?"alertaQA 2.4s ease-in-out infinite":"respira 4.6s ease-in-out infinite";
-  g.innerHTML=`<g clip-path="url(#${a.clip})">
-      <g filter="url(#sucio)"><ellipse cx="${a.cx}" cy="${a.cy}" rx="${a.rx}" ry="${a.ry}" fill="url(#${grad})"/></g>
-      <ellipse cx="${a.cx+14}" cy="${a.cy-10}" rx="88" ry="56" fill="${tono}" opacity=".14"/></g>
-    ${a.pared&&!pausa?`<path d="${a.pared}" stroke="url(#manchaPared)" stroke-width="2.2" fill="none"/>`:""}
-    ${a.pasillo?`<path d="${a.pasillo}" stroke="url(#manchaPasillo)" stroke-width="1.6" fill="none" opacity="${pausa?.35:1}"/>`:""}
-    <circle cx="${a.cx+14}" cy="${a.cy-18}" r="9" fill="${tono}" opacity=".12"/>
-    <circle cx="${a.cx+14}" cy="${a.cy-18}" r="1.8" fill="${pausa?"#e8c27a":"#e0505f"}"/>`;
-  if(paq){
-    paq.setAttribute("opacity",pausa?"0":"1"); paq.setAttribute("fill",tono);
-    if(HAY_GSAP&&!REDUCIR)gsap.to(paq,{attr:{cx:a.nodo},duration:1.1,ease:"power2.inOut"});
-    else paq.setAttribute("cx",a.nodo);
-  }
-  $$("#nodos rect").forEach(r=>r.setAttribute("fill", "#1a2430"));
-}
-function traspaso(d,h){
-  const a=AGENTES[d],b=AGENTES[h]; if(!a||!b)return;
-  const g=$("#traspaso");
-  g.innerHTML=`<path d="M${a.cx},576 L${b.cx},576" stroke="#c41e2f" stroke-width="2.4" stroke-linecap="round" opacity=".85" fill="none"/>`;
-  g.style.animation="none"; void g.getBoundingClientRect(); g.style.animation="pulsoPaso 950ms ease-out";
-}
-const EST_ROT={inactivo:"En espera",en_progreso:"Escribiendo",pausado_por_qa:"Pausado por QA",error:"Fallo en la ejecución"};
 function pintarCabecera(){
-  const e=ESTADO; if(!e){$("#insignia-txt").textContent="Sin conexión";return;}
-  $("#c-cap").firstChild.nodeValue=String(e.capitulo_actual??0).padStart(2,"0");
-  $("#c-cap-tot").textContent="/"+(e.total_capitulos??0);
-  $("#c-tanda").textContent=e.tanda_numero??"--";
-  $("#c-cerr").firstChild.nodeValue=String(e.capitulos_cerrados??0).padStart(2,"0");
-  $("#c-cerr-tot").textContent="/"+(e.total_capitulos??0);
-  $("#insignia").className=e.estado||"";
-  $("#insignia-txt").textContent=EST_ROT[e.estado]||"En espera";
-  $("#t-puente").textContent="Orquestador C-04-P   "+(e.estado==="en_progreso"?"cadena activa":"turno retenido");
-  // Sin idea escrita no hay novela que lanzar: la pantalla lo dice y señala la única puerta.
-  const sinEmpezar=!e.artefactos?.idea;
-  $("#arranque").hidden=!sinEmpezar;
-  $("#btn-param").classList.toggle("urgente",sinEmpezar);
-  ["escritor","extractor","qa"].forEach(rol=>{
-    const pausa=e.estado==="pausado_por_qa"&&rol==="qa";
-    const activo=(e.estado!=="pausado_por_qa"&&e.agente_activo===rol)||pausa;
-    $("#n-"+rol).setAttribute("fill",activo?(pausa?"#e8c27a":"#e6edf5"):"#7387a0");
-    $("#e-"+rol).setAttribute("fill",activo?(pausa?"#c9a35e":"#c4767f"):"#8496aa");
-    $("#e-"+rol).textContent=detalle(rol,e,activo);});
-}
-function detalle(rol,e,activo){
-  if(rol==="qa"&&e.estado==="pausado_por_qa")return"Hallazgos sin resolver";
-  if(!activo)return rol==="qa"?`En espera, corte cada ${e.cadencia_qa??"?"}`:"En espera";
-  const t=e.agente_desde?transcurrido(e.agente_desde):"";
-  if(rol==="escritor")return `Redacción en curso, ${t}`;
-  if(rol==="extractor")return `Extrayendo estado, ${t}`;
-  return `Revisando continuidad, ${t}`;
-}
-const fmt=n=>(n==null?"—":String(n).replace(/\B(?=(\d{3})+(?!\d))/g,"."));
-function transcurrido(iso){const s=Math.max(0,Math.floor((Date.now()-new Date(iso).getTime())/1000));
-  return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");}
-function pintarDiario(ev){$("#lineas").innerHTML=(ev||[]).slice(0,9).map((l,i)=>
-  `<div style="opacity:${(1-i*.09).toFixed(2)}"><span class="h">${esc(l.ts)}</span><span class="t">${esc(l.texto)}</span></div>`).join("");}
-function pintarQA(inf){
-  if(!inf)return;
-  $("#qa-sub").textContent=`Informe ${inf.reporte||""}, corte en el capítulo ${inf.cap_corte}`;
-  const filas=(t,c)=>(inf.hallazgos||[]).filter(h=>h.tipo===t).map(h=>
-    `<div class="hallazgo"><div class="cod ${c}">${esc(h.cap_origen?("C"+String(h.cap_origen).padStart(2,"0")):"—")}</div>
-     <div class="txt">${esc(h.descripcion)}</div></div>`).join("")||`<div class="hallazgo"><div class="cod">—</div><div class="txt">Ninguna.</div></div>`;
-  $("#qa-contra").innerHTML=filas("contradiccion","");$("#qa-repe").innerHTML=filas("repeticion","rep");
-}
-function pulsar(id){
-  if(id==="escribir-tanda"){const e=ESTADO;
-    $("#confirmar-cuerpo").innerHTML=`Va a escribir <b style="color:#e6edf5">${e.capitulos_por_tanda}</b> capítulos,
-      del <b style="color:#e6edf5">${e.capitulo_actual}</b> en adelante, sobre un total de
-      <b style="color:#e6edf5">${e.total_capitulos}</b>.<br>Tope de llamadas:
-      <b style="color:#e6edf5">${e.max_llamadas_por_tanda??"sin tope"}</b>.<br><br>
-      <span style="color:#8496aa">Cada capítulo cerrado es irreversible sin corregirlo a mano.</span>`;
-    abrir("confirmar");return;}
-  lanzar(id);
-}
-async function lanzar(id){
-  if(LANZANDO)return;LANZANDO=true;refrescarMando();
-  try{const r=await fetch("/api/fase/"+encodeURIComponent(id),{method:"POST"});
-    if(!r.ok)throw new Error(await r.text()||("HTTP "+r.status));
-    avisar("En marcha: "+id.replace(/-/g," "));await sondear();
-  }catch(err){LANZANDO=false;
-    if(SIN_SERVIDOR){avisar("Demostración: no hay harness detrás");return;}
-    $("#error-txt").textContent=String(err&&err.message||err);
-    $("#error-ruta").textContent="La traza completa está en 07_registro/, en la carpeta de la tanda en curso.";
-    abrir("error");
-  }finally{setTimeout(()=>{LANZANDO=false;refrescarMando();},600);}
-}
-function avisar(t){const a=$("#aviso");a.textContent=t;a.classList.add("visible");
-  clearTimeout(avisar._t);avisar._t=setTimeout(()=>a.classList.remove("visible"),2600);}
-const abrir=id=>$("#"+id).classList.add("visible");
-const cerrar=id=>$("#"+id).classList.remove("visible");
-$$("[data-cerrar]").forEach(b=>b.addEventListener("click",()=>cerrar(b.dataset.cerrar)));
-addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#intro"))$$(".panel.visible").forEach(p=>p.classList.remove("visible"));});
-$("#confirmar-si").addEventListener("click",()=>{cerrar("confirmar");lanzar("escribir-tanda");});
-$("#btn-param").addEventListener("click",()=>abrirConfig());
-function abrirConfig(){
-  const e=ESTADO,bloq=e&&e.capitulos_cerrados>0;
-  $("#bloqueo").classList.toggle("visible",!!bloq);
-  if(bloq)$("#bloqueo").textContent=`La novela tiene ${e.capitulos_cerrados} capítulos cerrados. Los parámetros de voz y dimensionamiento quedan bloqueados: cambiarlos a mitad rompería la coherencia de lo ya escrito.`;
-  $$("[data-novela]").forEach(i=>i.disabled=!!bloq);
-  if(e&&e.config)for(const [k,v] of Object.entries(e.config)){
-    const c=document.querySelector(`[name="${k}"]`);if(!c)continue;
-    if(c.type==="radio"){const r=document.querySelector(`[name="${k}"][value="${v}"]`);if(r)r.checked=true;}
-    else c.value=v;}
-  abrir("config");
-}
-$("#formulario").addEventListener("submit",async ev=>{
-  ev.preventDefault();
-  const datos=Object.fromEntries(new FormData(ev.target).entries());
-  try{const r=await fetch("/guardar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(datos)});
-    if(!r.ok)throw new Error(await r.text()||("HTTP "+r.status));
-    cerrar("config");avisar("Parámetros guardados");sondear();
-  }catch(err){
-    if(SIN_SERVIDOR){cerrar("config");avisar("Demostración: no se guardó nada");return;}
-    $("#error-txt").textContent=String(err&&err.message||err);
-    $("#error-ruta").textContent="La configuración no se escribió: el harness la rechazó antes de tocar el disco.";
-    abrir("error");}
-});
-async function sondear(){
-  try{const [e,ev]=await Promise.all([
-      fetch("/api/estado").then(r=>{if(!r.ok)throw 0;return r.json();}),
-      fetch("/api/eventos").then(r=>r.ok?r.json():[]).catch(()=>[])]);
-    SIN_SERVIDOR=false;aplicar(e,ev);
-    if(e.estado==="pausado_por_qa"&&!pintarQA._hecho){
-      const inf=await fetch("/api/qa").then(r=>r.ok?r.json():null).catch(()=>null);
-      if(inf){pintarQA(inf);pintarQA._hecho=true;}}
-    if(e.estado!=="pausado_por_qa")pintarQA._hecho=false;
-  }catch{if(!SIN_SERVIDOR){SIN_SERVIDOR=true;demostracion();}}
-}
-function aplicar(e,ev){
-  ANTERIOR=ESTADO;ESTADO=e;
-  if(ANTERIOR&&ANTERIOR.agente_activo&&e.agente_activo&&ANTERIOR.agente_activo!==e.agente_activo)
-    traspaso(ANTERIOR.agente_activo,e.agente_activo);
-  pintarCabecera();pintarLuz();pintarCinta();pintarDiario(ev);refrescarMando();
-}
-function demostracion(){
-  const base={total_capitulos:30,capitulos_cerrados:7,capitulo_actual:8,tanda_numero:2,
-    capitulos_por_tanda:3,max_llamadas_por_tanda:null,cadencia_qa:4,palabras_objetivo:1500,
-    tiene_referencias:true,origen_estilo:"referencias",capitulos_con_hallazgos:[5,6],
-    artefactos:{idea:true,premisa:true,tres_actos:true,capitulos:true,estado_inicializado:true},
-    config:{idioma:"es-ES",total_capitulos:30,palabras_por_capitulo:1500,cadencia_qa:4,capitulos_por_tanda:3,origen_estilo:"referencias"}};
-  const guion=[
-    {estado:"en_progreso",agente_activo:"escritor",palabras_actual:640,txt:"Capítulo 08 · redacción en curso"},
-    {estado:"en_progreso",agente_activo:"escritor",palabras_actual:1180,txt:"Capítulo 08 · 1.180 palabras"},
-    {estado:"en_progreso",agente_activo:"extractor",palabras_actual:1512,txt:"Capítulo 08 escrito · 1.512 palabras"},
-    {estado:"en_progreso",agente_activo:"qa",palabras_actual:1512,txt:"Corte de QA sobre 05-08"},
-    {estado:"pausado_por_qa",agente_activo:null,palabras_actual:1512,txt:"QA: 2 contradicciones · cadena en pausa"}];
-  let i=0;const ev=[];
-  const paso=()=>{const g=guion[i%guion.length];
-    ev.unshift({ts:new Date().toTimeString().slice(0,8),texto:g.txt});
-    aplicar({...base,...g,agente_desde:new Date(Date.now()-72000).toISOString()},ev);
-    if(g.estado==="pausado_por_qa")pintarQA(QA_DEMO);i++;};
-  paso();clearInterval(demostracion._t);demostracion._t=setInterval(paso,5200);
-  avisar("Demostración: sin harness detrás");
-}
-const QA_DEMO={reporte:"qa_cap_8",cap_corte:8,hallazgos:[
- {tipo:"contradiccion",cap_origen:5,descripcion:"El módulo de esclusa 3 queda sellado en el capítulo 5 y Vaslav lo cruza a pie en el 7 sin mención de reapertura."},
- {tipo:"contradiccion",cap_origen:6,descripcion:"La temperatura del casco baja a −40 °C en el 6; en el 8 el agua de la bodega sigue líquida."},
- {tipo:"repeticion",cap_origen:null,descripcion:"Imagen del pasillo que respira, casi literal en ambos cierres de capítulo."},
- {tipo:"repeticion",cap_origen:null,descripcion:"Estructura idéntica: hallazgo, radio muerta, luces que se apagan por secciones."}]};
-addEventListener("keydown",e=>{
-  if(e.target.matches("input,textarea,select"))return;
-  if(e.key==="p"||e.key==="P")abrirConfig();
-  if((e.key==="q"||e.key==="Q")&&ESTADO&&ESTADO.estado==="pausado_por_qa")abrir("qa");});
+  var e = estado;
+  $("t-cap").firstChild.nodeValue = e.total_capitulos
+    ? "Capítulo " + (e.capitulo_actual || "-") + " de " + e.total_capitulos : "Sin novela en curso";
+  $("t-titulo").textContent = e.titulo_capitulo || "";
+  $("t-premisa").textContent = e.logline || "";
 
-sembrar();pintarMando();pintarVitales();derivarVitales();
-entrar();sondear();
-setInterval(sondear,3000);
-setInterval(()=>{if(ESTADO&&ESTADO.agente_activo)pintarCabecera();},1000);
-setInterval(derivarVitales,2400);
+  var texto = {en_progreso:"Escribiendo...", pausado_por_qa:"Detenido...",
+               error:"Con un error...", inactivo:"En reposo"}[e.estado] || e.estado;
+  $("estado-txt").textContent = texto;
+  $("t-agente").textContent = e.agente_activo ? NOMBRE_AGENTE[e.agente_activo] || e.agente_activo
+                                              : (e.estado === "pausado_por_qa" ? "Revisor de calidad" : "");
+  document.body.setAttribute("data-vista", e.estado);
+  if (e.agente_activo) document.body.setAttribute("data-activo", e.agente_activo);
+  else document.body.removeAttribute("data-activo");
+
+  var total = e.total_capitulos || 0, cerrados = e.capitulos_cerrados || 0;
+  var cortes = {}; (e.capitulos_con_hallazgos || []).forEach(function(n){ cortes[n] = true; });
+  var t = [];
+  for (var i = 1; i <= total; i++)
+    t.push("<i class='" + (cortes[i] ? "stop" : i <= cerrados ? "on" : "") + "'></i>");
+  $("ticks").innerHTML = t.join("");
+}
+
+function pintarRotulos(){
+  var e = estado;
+  var r = function(id, txt){ var n = $(id); if (n) n.textContent = txt; };
+  r("r-escritor", e.agente_activo === "escritor"
+      ? "Escritor, escribiendo el capítulo " + e.capitulo_actual
+      : "Escritor, capítulo " + (e.capitulo_actual || "-") + " en espera");
+  r("r-extractor", e.agente_activo === "extractor"
+      ? "Extractor, leyendo el capítulo " + e.capitulo_actual : "Extractor de hechos");
+  r("r-revisor", e.estado === "pausado_por_qa"
+      ? "Revisor, ha detenido la nave" : e.agente_activo === "qa" ? "Revisor, auditando" : "Revisor, en espera");
+  r("r-orquestador", e.agente_activo === "orquestador" ? "Orquestador, repartiendo" : "Orquestador, espera");
+}
+
+function pintarIndicadores(){
+  var e = estado, total = e.total_capitulos || 0, cerrados = e.capitulos_cerrados || 0;
+  $("v-caps").textContent = cerrados + " de " + (total || "-");
+  $("b-caps").style.width = total ? (cerrados/total*100).toFixed(1) + "%" : "0%";
+  var ultima = e.cadencia_qa ? Math.floor(cerrados / e.cadencia_qa) * e.cadencia_qa : 0;
+  $("m-caps").style.width = "2px";
+  $("m-caps").style.left = total ? (ultima/total*100).toFixed(1) + "%" : "0%";
+  $("n-caps").textContent = e.cadencia_qa
+    ? "El revisor audita cada " + e.cadencia_qa + "; la marca ámbar es la última auditoría."
+    : "";
+
+  if (coste) {
+    $("v-coste").textContent = dinero(coste.total, coste.moneda);
+    var porCap = cerrados ? coste.total / cerrados : 0;
+    $("b-coste").style.width = total && porCap ? Math.min(100, coste.total/(porCap*total)*100).toFixed(1) + "%" : "0%";
+    $("n-coste").textContent = cerrados
+      ? "A " + dinero(porCap, coste.moneda) + " por capítulo cerrado; la novela entera saldría por "
+        + dinero(porCap*total, coste.moneda) + "."
+      : "Todavía no hay ningún capítulo cerrado que promediar.";
+    if (coste.modelos_sin_precio && coste.modelos_sin_precio.length)
+      $("n-coste").textContent += " Sin precio para " + coste.modelos_sin_precio.join(", ") + ": no están contados.";
+  }
+
+  if (e.agente_activo && e.agente_desde) {
+    var seg = (Date.now() - new Date(e.agente_desde).getTime())/1000;
+    $("e-tiempo").textContent = "Lleva trabajando";
+    $("v-tiempo").textContent = duracion(seg);
+    $("b-tiempo").style.width = Math.min(100, seg/600*100).toFixed(1) + "%";
+    $("n-tiempo").textContent = "Un capítulo tarda unos cinco minutos. En pausa la máquina no cobra.";
+  } else {
+    $("e-tiempo").textContent = "Tiempo";
+    $("v-tiempo").textContent = "en reposo";
+    $("b-tiempo").style.width = "0%";
+    $("n-tiempo").textContent = "Nada en marcha ahora mismo.";
+  }
+}
+
+function boton(fase, etiqueta, clase){
+  return '<button type="button" data-fase="' + fase + '"' + (clase ? ' class="' + clase + '"' : "") +
+         (lanzando ? " disabled" : "") + ">" + esc(etiqueta) + "</button>";
+}
+
+function pintarVeredicto(){
+  var e = estado, h2 = $("veredicto-t"), extra = $("veredicto-h2"), p = $("veredicto-p"), acc = [];
+
+  if (e.estado === "pausado_por_qa" && qa) {
+    var c = (qa.hallazgos||[]).filter(function(x){ return x.tipo === "contradiccion"; }).length;
+    var r = (qa.hallazgos||[]).filter(function(x){ return x.tipo === "repeticion"; }).length;
+    h2.textContent = "El revisor ha detenido la producción";
+    extra.textContent = " al cerrar el capítulo " + qa.cap_corte + ".";
+    p.textContent = c + (c===1?" contradicción":" contradicciones") + " con hechos ya establecidos y " +
+                    r + (r===1?" repetición":" repeticiones") + " de lenguaje. Nada se escribe hasta que decidas.";
+    acc.push('<a class="primario" href="/lectura?cap=' + qa.cap_corte + '">Leer el capítulo señalado</a>');
+    acc.push(boton("reanudar", "Reanudar bajo mi responsabilidad", "peligro"));
+  } else if (e.estado === "en_progreso") {
+    h2.textContent = "La máquina está trabajando";
+    extra.textContent = e.agente_activo ? ". Ahora mismo, el " + (NOMBRE_AGENTE[e.agente_activo]||e.agente_activo) + "." : ".";
+    p.textContent = "No se puede lanzar nada más mientras tanto: dos ejecuciones sobre el mismo estado lo corromperían.";
+  } else if (e.estado === "error") {
+    h2.textContent = "La última ejecución terminó con un error";
+    extra.textContent = ".";
+    p.textContent = e.ultimo_error || "El manifiesto guarda el detalle.";
+    acc.push(boton("escribir-tanda", "Reintentar la tanda"));
+  } else {
+    h2.textContent = e.capitulos_cerrados ? "En reposo" : "Todavía no hay nada escrito";
+    extra.textContent = e.capitulos_cerrados ? ", con " + e.capitulos_cerrados + " capítulos cerrados." : ".";
+    p.textContent = e.capitulos_cerrados
+      ? "Puedes lanzar la siguiente tanda o montar lo que ya hay en un solo archivo."
+      : "Empieza por el encargo: la premisa, los capítulos y el tono.";
+    if (e.capitulos_cerrados) {
+      acc.push(boton("escribir-tanda", "Escribir la siguiente tanda", "primario"));
+      acc.push(boton("ensamblar", "Ensamblar lo cerrado"));
+      acc.push('<a href="/lectura">Leer lo escrito</a>');
+    } else {
+      acc.push('<a class="primario" href="/">Ir al encargo</a>');
+    }
+  }
+  $("acciones").innerHTML = acc.join("");
+  $("aviso").textContent = lanzando ? "Lanzando…" : "";
+}
+
+function pintarRegistro(evs){
+  // Los eventos llegan como {ts, tipo, texto}. El tipo decide si la linea se destaca en rojo:
+  // un bloqueo de hook o un error son lo unico que merece robar la atencion en un registro.
+  $("registro").innerHTML = (evs||[]).map(function(ev){
+    var grave = ev.tipo === "error" || ev.tipo === "bloqueo";
+    return "<li" + (grave ? ' class="rev"' : "") + "><time>" + esc(ev.ts || "") + "</time><span>" +
+           esc(ev.texto || "") + "</span></li>";
+  }).join("") || "<li><span>Todavía no hay eventos registrados.</span></li>";
+}
+
+function refrescar(){
+  return Promise.all([
+    fetch("/api/estado").then(function(r){ return r.json(); }),
+    fetch("/api/eventos").then(function(r){ return r.json(); }),
+    fetch("/api/coste").then(function(r){ return r.ok ? r.json() : null; }),
+    fetch("/api/qa").then(function(r){ return r.ok ? r.json() : null; })
+  ]).then(function(xs){
+    estado = xs[0]; coste = xs[2]; qa = xs[3];
+    pintarCabecera(); pintarRotulos(); pintarIndicadores(); pintarVeredicto(); pintarRegistro(xs[1]);
+  }).catch(function(e){
+    $("veredicto-t").textContent = "No se puede hablar con el harness";
+    $("veredicto-p").textContent = e.message;
+  });
+}
+
+$("acciones").addEventListener("click", function(ev){
+  var b = ev.target.closest("button[data-fase]");
+  if (!b || lanzando) return;
+  var fase = b.getAttribute("data-fase");
+  if (fase === "reanudar" && !confirm(
+      "Reanudar sin corregir nada.\n\nEl revisor deja constancia de que aceptaste su veredicto y las " +
+      "contradicciones quedan abiertas en la novela. Esto no se deshace.")) return;
+  lanzando = true; pintarVeredicto();
+  fetch("/api/fase/" + fase, {method:"POST"})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, d:d}; }); })
+    .then(function(x){
+      lanzando = false;
+      if (!x.ok) { $("aviso").textContent = x.d.error || "No se pudo lanzar."; return; }
+      return refrescar();
+    })
+    .catch(function(e){ lanzando = false; $("aviso").textContent = e.message; });
+});
+
+refrescar();
+setInterval(refrescar, 5000);  // el estado se lee del disco; 5 s es suficiente y no castiga a nadie
+})();
 </script>
 </body>
 </html>

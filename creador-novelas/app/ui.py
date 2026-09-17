@@ -382,6 +382,17 @@ class _Manejador(BaseHTTPRequestHandler):
                 return
             cap = web.capitulo(self.raiz, n)
             self._json(200 if cap else 404, cap or {"error": f"el capítulo {n} todavía no está escrito"})
+        elif ruta == "/favicon.ico":
+            # Sin esto el navegador pide el icono en cada carga y anota un 404 en la consola, que
+            # luego se confunde con un fallo real al depurar. Es la silueta del Falcon con el ramal
+            # seis encendido: lo mismo que enseña el plano.
+            icono = ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>"
+                     "<rect width='32' height='32' fill='#0A0D10'/>"
+                     "<path d='M3 15h14l6 3-6 3H3z' fill='none' stroke='#93A6B9' stroke-width='1.4'/>"
+                     "<rect x='17' y='11' width='7' height='4' fill='#E0483C'/></svg>")
+            self._bytes(200, icono.encode("utf-8"), "image/svg+xml")
+        elif ruta == "/api/coste":
+            self._json(200, web.coste(self.raiz))
         elif ruta == "/api/estado":
             self._json(200, web.estado(self.raiz))
         elif ruta == "/api/eventos":

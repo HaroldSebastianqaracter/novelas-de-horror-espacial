@@ -1,0 +1,19 @@
+{
+  "nota": "Precios en USD por millon de tokens, por modelo y por tipo de uso. NO son una estimacion: se derivaron dividiendo los `costDetails` entre los `usageDetails` de la traza de tanda_2026-09-16T19-30-34 publicada en Langfuse, que es la misma tabla que usa Langfuse para calcular el coste. Salen numeros exactos y redondos, lo que confirma la derivacion.",
+  "revisar": "Cuando cambie el modelo o su precio, esta tabla queda obsoleta en silencio y la web enseñara un coste equivocado con toda confianza. Un modelo que no este aqui no se estima: se cuenta aparte y la web lo dice.",
+  "moneda": "USD",
+  "por_millon": {
+    "claude-opus-5": {
+      "tokens_entrada": 5.0,
+      "tokens_salida": 25.0,
+      "tokens_cache_lectura": 0.5,
+      "tokens_cache_creacion": 6.25
+    },
+    "claude-haiku-4-5-20251001": {
+      "tokens_entrada": 1.0,
+      "tokens_salida": 5.0,
+      "tokens_cache_lectura": 0.1,
+      "tokens_cache_creacion": 1.25
+    }
+  }
+}

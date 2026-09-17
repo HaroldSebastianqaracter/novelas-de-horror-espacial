@@ -43,7 +43,15 @@ SKILLS: dict[str, str] = {
 }
 # `--salida` va explícito aunque §8.2 diga que tiene valor por defecto: el CLI todavía lo exige.
 # Pasarlo aquí funciona con las dos versiones del verbo, así que no hay que esperar a nadie.
-VERBOS: dict[str, list[str]] = {"ensamblar": ["ensamblar", "--salida", "08_entrega/novela.md"]}
+VERBOS: dict[str, list[str]] = {"ensamblar": ["ensamblar", "--salida", "08_entrega/novela.md"],
+                                # Paso 3 de RF-07.4: cierra la resolucion y devuelve el manifiesto a activo.
+                                "cerrar-resolucion": ["resolver", "--cerrar"]}
+
+# `reanudar` es el unico verbo que la pantalla arma en el momento, porque lleva dentro el nombre del
+# reporte pendiente y ese lo dice el manifiesto. Es `resolver --sin-cambios`, es decir: acepto el
+# veredicto tal como esta y sigo. No existe una variante desde la web que afirme haber corregido
+# capitulos, porque el harness no puede comprobarlo y seria una mentira anotada en el registro.
+FASES_DINAMICAS = ("reanudar",)
 
 # Una tanda lanzada desde la terminal no deja proceso hijo aquí; se la reconoce porque su registro
 # sigue creciendo. Por debajo de este margen se considera viva.
@@ -150,14 +158,20 @@ def _cerrar_proceso() -> dict[str, Any] | None:
 
 def lanzar_fase(raiz: Path, fase: str) -> dict[str, Any]:
     """Arranca la fase en segundo plano. No espera: la pantalla consulta el estado por su cuenta."""
-    if fase not in SKILLS and fase not in VERBOS:
+    if fase not in SKILLS and fase not in VERBOS and fase not in FASES_DINAMICAS:
         raise ValueError(f"Fase desconocida: {fase}")
     _cerrar_proceso()
     if proceso_vivo():
         raise RuntimeError("Ya hay una ejecución en marcha. Una sola cada vez: dos sobre el mismo "
                            "estado lo corromperían.")
 
-    if fase in VERBOS:
+    if fase == "reanudar":
+        m = checkpoint.leer_manifest(raiz)
+        pendiente = getattr(m, "reporte_qa_pendiente", None) if m else None
+        if getattr(m, "estado", None) != "pausado_por_qa" or not pendiente:
+            raise RuntimeError("No hay ninguna pausa por QA que reanudar.")
+        cmd = [_python(raiz), "-m", "app", "resolver", "--reporte", pendiente, "--sin-cambios"]
+    elif fase in VERBOS:
         cmd = [_python(raiz), "-m", "app", *VERBOS[fase]]
     else:
         exe = ejecutable_claude()
@@ -254,8 +268,21 @@ def estado(raiz: Path) -> dict[str, Any]:
     total = novela.get("total_capitulos") or meta.get("total_capitulos") or 0
     activo = cursor.get("capitulo_en_curso") or cap_agente or (cerrados + 1 if cerrados < total else total)
 
+    # Titulo de la novela y del capitulo en curso: la consola los enseña y salen del mismo sitio
+    # que usa `ensamblar`, para que la portada de la web y la del manuscrito no discrepen.
+    premisa = repo.leer_premisa(raiz) or ""
+    from app.cli import _titulo_desde_premisa  # tarde: cli importa web, y al reves seria un ciclo
+    outline = _json(rutas.capitulos)
+    entradas = outline.get("root") if isinstance(outline, dict) else outline
+    entrada = next((e for e in (entradas if isinstance(entradas, list) else [])
+                    if isinstance(e, dict) and e.get("num") == activo), {})
+
     return {
         "estado": vista,
+        "titulo": _titulo_desde_premisa(premisa),
+        "logline": next((l.split(":", 1)[1].strip() for l in premisa.splitlines()
+                         if l.lower().startswith("logline:")), None),
+        "titulo_capitulo": entrada.get("titulo"),
         "tanda": tanda.name if tanda else None,
         "tanda_numero": _numero_de_tanda(rutas, tanda),
         "capitulo_actual": activo,
@@ -473,4 +500,60 @@ def capitulo(raiz: Path, n: int) -> dict[str, Any] | None:
         "palabras": escritor.contar_palabras(texto),
         "texto": texto,
         "hechos": _hechos_de(raiz, n),
+    }
+
+
+# ---------- coste (RF-UI): lo que llevas gastado, contado en casa ----------
+
+def _precios(raiz: Path) -> dict[str, Any]:
+    return _json(raiz / "config" / "precios.json")
+
+
+def coste(raiz: Path) -> dict[str, Any]:
+    """Suma en dinero todo el uso registrado, recorriendo las tandas de 07_registro/.
+
+    Los precios salen de config/precios.json, derivados de los `costDetails` de Langfuse. Un modelo
+    sin precio NO se estima: se cuenta aparte y la web lo dice, porque un coste incompleto que se
+    presenta como completo es peor que no enseñar ninguno.
+    """
+    tabla = _precios(raiz)
+    por_millon = tabla.get("por_millon") or {}
+    total = 0.0
+    tokens = 0
+    sin_precio: set[str] = set()
+    por_rol: dict[str, float] = {}
+
+    registro = Rutas(raiz).registro
+    # Todas las carpetas con uso, no solo las `tanda_*`: el preludio (fases 0 a 3) tambien cuesta.
+    carpetas = sorted(c for c in registro.iterdir() if (c / "uso.jsonl").is_file()) if registro.is_dir() else []
+    vistos: set[str] = set()
+    for carpeta in carpetas:
+        for fila in _lineas_jsonl(carpeta / "uso.jsonl"):
+            # Mismo deduplicado que el exportador de trazas: H-10 anota el fin de un subagente mas de
+            # una vez, y sin esta guarda la misma invocacion se cobra dos veces.
+            agente = str(fila.get("agent_id") or "")
+            if agente and agente in vistos:
+                continue
+            if agente:
+                vistos.add(agente)
+            modelo = fila.get("modelo")
+            campos = {k: int(fila.get(k) or 0) for k in
+                      ("tokens_entrada", "tokens_salida", "tokens_cache_lectura", "tokens_cache_creacion")}
+            tokens += sum(campos.values())
+            precio = por_millon.get(modelo)
+            if not precio:
+                if modelo:
+                    sin_precio.add(str(modelo))
+                continue
+            gasto = sum(campos[k] * (precio.get(k) or 0) / 1_000_000 for k in campos)
+            total += gasto
+            por_rol[fila.get("rol") or "?"] = por_rol.get(fila.get("rol") or "?", 0.0) + gasto
+
+    return {
+        "moneda": tabla.get("moneda") or "USD",
+        "total": round(total, 4),
+        "tokens": tokens,
+        "por_rol": {k: round(v, 4) for k, v in sorted(por_rol.items(), key=lambda x: -x[1])},
+        "modelos_sin_precio": sorted(sin_precio),
+        "carpetas_con_uso": len(carpetas),
     }
