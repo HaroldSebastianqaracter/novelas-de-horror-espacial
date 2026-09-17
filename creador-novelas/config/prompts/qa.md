@@ -32,7 +32,7 @@ Los hechos con `superado_por` distinto de null fueron reemplazados por una corre
 El `.md` y el `.json` enumeran exactamente los mismos hallazgos: `cerrar-qa` cuenta con el `.json`.
 
 ## Validación (RF-08.4)
-Después de escribir los tres archivos ejecutá con Bash **exactamente** este comando, sin agregar ni cambiar nada:
+Después de escribir los tres archivos ejecutá con tu herramienta de terminal **exactamente** este comando, sin agregar ni cambiar nada:
 `{{COMANDO_VALIDACION}}`
 Es el único comando que el hook H-11 te deja ejecutar. Si devuelve errores, corregí los archivos con Write y volvé a ejecutar el mismo comando, hasta tres veces en total.
 

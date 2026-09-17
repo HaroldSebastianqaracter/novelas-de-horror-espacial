@@ -23,6 +23,10 @@ from app.state import repository as repo
 from app.validacion import ROLES, capitulo_de_invocacion, comando_validador
 
 HERRAMIENTAS_ESCRITURA = ("Write", "Edit", "MultiEdit", "NotebookEdit")
+# La herramienta de terminal no se llama igual en todas las plataformas: en Windows es `PowerShell`.
+# H-11 tiene que vigilarlas todas, porque un agente con una terminal que el hook no mira puede
+# ejecutar cualquier cosa, y H-11 existe justo para que solo pueda ejecutar su validador.
+HERRAMIENTAS_TERMINAL = ("Bash", "PowerShell")
 HERRAMIENTAS_LECTURA = ("Read", "Grep", "Glob")
 
 
@@ -134,11 +138,14 @@ def decidir_h11(payload: dict, raiz: Path) -> Decision | None:
     encadenamientos, tuberías, sustituciones, redirecciones, otro verbo, otro N u otro intérprete.
     """
     agent_type = payload.get("agent_type")
-    if payload.get("tool_name") != "Bash" or payload.get("agent_id") is None or agent_type not in ROLES:
+    if payload.get("tool_name") not in HERRAMIENTAS_TERMINAL or payload.get("agent_id") is None             or agent_type not in ROLES:
         return None
     comando = str((payload.get("tool_input") or {}).get("command") or "").strip()
     esperado = comando_validador(agent_type, _capitulo_activo(raiz, agent_type))
-    if comando == esperado:
+    # El separador de ruta no cambia lo que hace el comando, y en Windows el agente lo escribe con
+    # `\` mientras la forma canonica lleva `/`. Se compara sobre una sola forma para no bloquear el
+    # unico comando permitido por un detalle de la plataforma.
+    if comando.replace("\\", "/") == esperado.replace("\\", "/"):
         return Decision().con_nota(f"H-11: {agent_type} ejecuta su validador ({esperado})")
     return _bloquear(raiz, payload, "H-11",
                      f"el {agent_type} solo puede ejecutar exactamente `{esperado}` (RF-08.4); intentó `{comando[:120]}`")

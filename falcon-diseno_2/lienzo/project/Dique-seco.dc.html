@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+
+  :root{
+    --abismo:#06070A;        /* negro casi absoluto, frío */
+    --acero:#0E1116;         /* superficies */
+    --acero-alto:#161B22;    /* superficies iluminadas */
+    --hilo:rgba(214,218,216,.14);   /* líneas finas */
+    --hilo-fuerte:rgba(214,218,216,.32);
+    --niebla:#D6DAD8;        /* texto principal */
+    --niebla-baja:#8A9399;   /* texto secundario */
+    --halogeno:#E8D9B5;      /* luz cálida de foco */
+    --emergencia:#B3261E;    /* luz roja de emergencia */
+    --emergencia-luz:rgba(179,38,30,.55);
+    --fosforo:#A8D8C8;       /* lo que la máquina fija: verde-gris apagado */
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{background:var(--abismo);color:var(--niebla)}
+  a,button,input,textarea{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--halogeno);outline-offset:3px}
+
+  .atm{position:absolute;inset:0;pointer-events:none}
+  .atm-luz{
+    background:
+      radial-gradient(ellipse 58% 42% at 28% -8%,rgba(232,217,181,.17),transparent 62%),
+      radial-gradient(ellipse 34% 60% at 104% 58%,var(--emergencia-luz),transparent 62%),
+      radial-gradient(ellipse 50% 30% at 60% 110%,rgba(179,38,30,.16),transparent 70%);
+  }
+  .atm-vineta{background:radial-gradient(ellipse 70% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.62) 100%)}
+  .atm-grano{background:#7a7a7a;filter:url(#grano);opacity:.10;mix-blend-mode:overlay}
+  .atm-polvo{
+    opacity:.35;
+    background:
+      radial-gradient(circle at 18% 22%,rgba(232,217,181,.35) 0 .8px,transparent 1.6px),
+      radial-gradient(circle at 63% 11%,rgba(232,217,181,.25) 0 .7px,transparent 1.5px),
+      radial-gradient(circle at 41% 37%,rgba(232,217,181,.28) 0 .6px,transparent 1.4px),
+      radial-gradient(circle at 77% 44%,rgba(232,217,181,.22) 0 .9px,transparent 1.8px),
+      radial-gradient(circle at 12% 61%,rgba(232,217,181,.2) 0 .6px,transparent 1.3px),
+      radial-gradient(circle at 88% 80%,rgba(214,218,216,.18) 0 .7px,transparent 1.5px);
+    background-size:900px 700px,1100px 800px,700px 900px,1300px 600px,800px 1000px,1000px 900px;
+  }
+  .escena > *{position:relative;z-index:1}
+  .escena > .atm,.escena > .focos{position:absolute;inset:0;pointer-events:none;z-index:0}
+  .escena > .atm-grano,.escena > .atm-vineta{z-index:2}
+  .escena{position:relative;overflow:hidden;background:var(--abismo)}
+
+  /* Panel de vidrio ahumado: la interfaz flota sobre la oscuridad */
+  .vidrio{
+    background:linear-gradient(180deg,rgba(22,27,34,.72),rgba(14,17,22,.78));
+    border:1px solid var(--hilo);
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.9),inset 0 1px 0 rgba(232,217,181,.08);
+    backdrop-filter:blur(6px);
+  }
+  .hairline{border-top:1px solid var(--hilo)}
+  /* Sangre: la luz roja del fondo fluye despacio, como un líquido que baja por el mamparo */
+  .escena > .atm-sangre{left:auto;right:-8%;width:56%;top:-10%;bottom:-10%;opacity:.85;filter:url(#sangre) blur(2px);mix-blend-mode:screen;
+    background:
+      radial-gradient(ellipse 34% 46% at 78% 26%,rgba(179,38,30,.55),rgba(120,16,14,.25) 45%,transparent 70%),
+      radial-gradient(ellipse 28% 60% at 92% 62%,rgba(150,22,20,.6),rgba(90,10,10,.2) 50%,transparent 72%),
+      radial-gradient(ellipse 40% 30% at 62% 96%,rgba(140,20,18,.5),transparent 70%);
+    background-size:100% 100%;background-repeat:no-repeat;
+    transform-origin:100% 50%}
+  @keyframes fluir{
+    0%{background-position:0 0,0 0,0 0;transform:translateY(-2%) scale(1)}
+    50%{background-position:-6% 8%,3% -6%,-4% 4%;transform:translateY(1.5%) scale(1.04)}
+    100%{background-position:4% 14%,-5% 6%,6% -3%;transform:translateY(4%) scale(1.02)}
+  }
+  @media (prefers-reduced-motion:reduce){.escena > .atm-sangre{animation:none}}
+
+  /* Haz de luz volumétrico desde el foco, y filo rojo de emergencia en el borde derecho */
+  .atm-haz{background:conic-gradient(from 152deg at 20% -12%,transparent 0deg,transparent 16deg,rgba(232,217,181,.085) 24deg,rgba(232,217,181,.035) 34deg,transparent 46deg)}
+  .atm-filo{background:linear-gradient(270deg,rgba(179,38,30,.55),rgba(179,38,30,.12) 3px,transparent 70px)}
+  .atm-filo::after{content:"";position:absolute;right:0;top:0;bottom:0;width:2px;background:var(--emergencia);box-shadow:0 0 24px 4px rgba(179,38,30,.7)}
+  .escena > .atm-filo{z-index:2}
+  /* Estructura del mamparo: costillas verticales en perspectiva, muy tenues */
+  .atm-mamparo{opacity:.9;
+    background:
+      repeating-linear-gradient(90deg,transparent 0 118px,rgba(214,218,216,.035) 118px 119px,transparent 119px 120px),
+      linear-gradient(180deg,rgba(214,218,216,.05),transparent 18%,transparent 82%,rgba(0,0,0,.6))}
+  /* Texto fantasma: enorme, casi invisible, en serif itálica */
+  .fantasma{position:absolute;pointer-events:none;z-index:0;font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;
+    color:transparent;-webkit-text-stroke:1px rgba(232,217,181,.10);letter-spacing:-.04em;line-height:.8;user-select:none;white-space:nowrap}
+  .escena > .fantasma{position:absolute;z-index:0}
+  /* Botones: vidrio con filo iluminado */
+  .btn-luz{position:relative;overflow:hidden}
+  .btn-luz::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.08),transparent 55%);pointer-events:none}
+  /* Regla ornamental: hilo con un punto rojo al final, como un piloto */
+  .regla-piloto{position:relative;height:1px;background:linear-gradient(90deg,var(--hilo-fuerte),var(--hilo) 70%,transparent)}
+  .regla-piloto::after{content:"";position:absolute;right:0;top:-3px;width:7px;height:7px;border-radius:50%;background:var(--emergencia);box-shadow:0 0 12px 2px rgba(179,38,30,.8)}
+
+  .pantalla .focos{background:
+      conic-gradient(from 168deg at 10% -8%,transparent 0 6deg,rgba(232,217,181,.09) 12deg,transparent 24deg),
+      conic-gradient(from 168deg at 30% -8%,transparent 0 6deg,rgba(232,217,181,.09) 12deg,transparent 24deg),
+      conic-gradient(from 168deg at 50% -8%,transparent 0 6deg,rgba(232,217,181,.09) 12deg,transparent 24deg),
+      conic-gradient(from 168deg at 70% -8%,transparent 0 6deg,rgba(232,217,181,.035) 12deg,transparent 24deg),
+      conic-gradient(from 168deg at 90% -8%,transparent 0 6deg,rgba(232,217,181,.09) 12deg,transparent 24deg)}
+  /* Riel de perchas: una barra de acero cruza la parte alta y de ella cuelga cada traje */
+  .trajes::before{content:"";position:absolute;left:-24px;right:-24px;top:0;height:10px;
+    background:linear-gradient(180deg,#3A4148,#161B22 60%,#0A0D10);box-shadow:0 6px 18px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.12)}
+  .traje{position:relative;padding-top:0}
+  .traje .gancho{position:absolute;left:32px;top:-56px;width:24px;height:auto;transform:translateX(-50%);filter:drop-shadow(0 6px 8px rgba(0,0,0,.8))}
+  .traje .barra{filter:drop-shadow(0 28px 34px rgba(0,0,0,.95)) drop-shadow(0 0 18px rgba(168,216,200,.12))}
+  .traje.cancelada .barra{filter:drop-shadow(0 28px 34px rgba(0,0,0,.95)) grayscale(1) brightness(.7)}
+  /* Suelo: reflejo bajo cada traje */
+  .traje::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:70px;pointer-events:none;
+    background:radial-gradient(ellipse 50% 100% at 22px 100%,rgba(168,216,200,.10),transparent 70%)}
+  .traje.cancelada::after{background:none}
+  .traje h2{font-size:22px;font-style:italic;color:var(--halogeno);text-shadow:0 0 22px rgba(232,217,181,.22)}
+  .traje.cancelada h2{color:var(--niebla-baja);text-shadow:none}
+  .traje .premisa{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-size:14px;color:#A9B1B5}
+  .traje .estado{font-size:13px}
+  header h1{font-size:40px}
+  header .fantasma{left:56px;top:-30px;font-size:210px;-webkit-text-stroke:1px rgba(232,217,181,.07)}
+  .trajes{position:relative;padding-top:64px;align-items:start}
+  .traje{align-items:start}
+  .traje .gancho{top:-58px}
+  .cuenta b{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;font-size:26px;color:var(--halogeno)}
+
+
+  body{font-family:"Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;letter-spacing:.02em;font-size:15px;line-height:1.35;min-width:1024px}
+  .serif{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;letter-spacing:0}
+  .pantalla{height:100%;padding:36px 56px 44px;display:grid;grid-template-rows:auto 1fr;gap:28px}
+  /* Un foco sobre cada percha */
+  .pantalla .focos{position:absolute;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse 9% 55% at 10% 40%,rgba(232,217,181,.10),transparent 70%),
+      radial-gradient(ellipse 9% 55% at 30% 40%,rgba(232,217,181,.10),transparent 70%),
+      radial-gradient(ellipse 9% 55% at 50% 40%,rgba(232,217,181,.10),transparent 70%),
+      radial-gradient(ellipse 9% 55% at 70% 40%,rgba(232,217,181,.05),transparent 70%),
+      radial-gradient(ellipse 9% 55% at 90% 40%,rgba(232,217,181,.10),transparent 70%)}
+  .marco{position:relative;padding:14px 30px}
+  .marco::before,.marco::after{content:"";position:absolute;top:0;bottom:0;width:22px;border:1px solid var(--hilo-fuerte)}
+  .marco::before{left:0;border-right:0}.marco::after{right:0;border-left:0}
+  header{display:grid;grid-template-columns:1fr auto;align-items:center;gap:32px}
+  header .marco{justify-self:center;text-align:center;min-width:620px}
+  header h1{margin:0;font-size:30px;font-weight:400;line-height:1.1;color:var(--halogeno);font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;letter-spacing:0;text-shadow:0 0 30px rgba(232,217,181,.25)}
+  header h1 small{display:block;font-size:14px;color:var(--niebla-baja);margin-top:8px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-style:normal;letter-spacing:.02em}
+  .cuenta{text-align:right;color:var(--niebla-baja);font-size:14px}
+  .cuenta b{display:block;color:var(--niebla);font-weight:400;font-size:22px;font-variant-numeric:tabular-nums}
+
+  .trajes{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:0 28px;align-items:end}
+  .traje{display:grid;grid-template-columns:64px 1fr;gap:0 16px;align-items:end;padding-bottom:16px;border-bottom:1px solid var(--hilo)}
+  .traje .barra{display:block;width:64px;filter:drop-shadow(0 20px 30px rgba(0,0,0,.8))}
+  .traje .datos{display:flex;flex-direction:column;gap:6px;padding-bottom:6px}
+  .traje h2{margin:0;font-size:19px;line-height:1.1;font-weight:400;color:var(--niebla);font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;letter-spacing:0}
+  .traje .premisa{margin:0;color:var(--niebla-baja);font-size:13.5px;line-height:1.4}
+  .traje .estado{font-size:13.5px;color:var(--niebla);font-variant-numeric:tabular-nums}
+  .traje .estado.visor{color:var(--fosforo)}
+  .traje .estado.rojo{color:#E0685C}
+  .traje .estado.bajo{color:var(--niebla-baja)}
+  .traje .acciones{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .traje .acciones a,.traje .acciones button{display:block;text-decoration:none;text-align:left;cursor:pointer;border:1px solid var(--hilo-fuerte);background:transparent;color:var(--niebla);padding:8px 12px;font-size:13.5px}
+  .traje .acciones a:hover,.traje .acciones button:hover{background:rgba(214,218,216,.08)}
+  .traje .acciones .primaria{border-color:var(--halogeno);color:var(--halogeno);background:rgba(232,217,181,.08);box-shadow:0 0 24px -8px rgba(232,217,181,.4)}
+  .traje .acciones .primaria:hover{background:rgba(232,217,181,.16)}
+  .traje .acciones .rojo{border-color:var(--emergencia);color:#F0C2BC;background:rgba(179,38,30,.18);box-shadow:0 0 24px -8px rgba(179,38,30,.7)}
+  .traje.cancelada h2{color:var(--niebla-baja);text-decoration:line-through;text-decoration-color:var(--emergencia)}
+  .traje.nueva input{width:100%;background:rgba(0,0,0,.4);border:0;border-bottom:1px solid var(--hilo-fuerte);padding:8px 6px;font-size:14px;color:var(--niebla)}
+  .traje.nueva input::placeholder{color:var(--niebla-baja);font-style:italic}
+  .traje.nueva input:focus{outline:none;border-bottom-color:var(--halogeno)}
+  .traje.nueva .barra rect{transition:fill 400ms ease,stroke 600ms ease}
+  .traje.nueva.conectado .barra rect:nth-last-of-type(1){fill:var(--fosforo);filter:url(#g5)}
+  .traje.nueva.conectado .barra > rect:first-of-type{stroke:var(--halogeno)}
+  @media (prefers-reduced-motion:reduce){.traje.nueva .barra rect{transition:none}}
+  @media (max-width:1280px){.pantalla{padding:28px 36px 36px}.trajes{gap:0 18px}header .marco{min-width:520px}.traje h2{font-size:17px}}
+
+  .dc-root{width:1440px;height:1000px;overflow:hidden;position:relative}
+  </style>
+</helmet>
+<div class="dc-root" style="width: 1440px; height: 1000px; box-sizing: border-box; display: flex; flex-direction: column;">
+
+<main class="pantalla escena"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="grano"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></svg>
+<div class="atm atm-luz" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="sangre" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.012" numOctaves="3" seed="7" result="ruido"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="ruido" scale="90" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter></svg>
+<div class="atm atm-sangre" aria-hidden="true"></div>
+
+<div class="atm atm-polvo" aria-hidden="true"></div>
+<div class="atm atm-grano" aria-hidden="true"></div>
+<div class="atm atm-vineta" aria-hidden="true"></div>
+<div class="atm atm-mamparo" aria-hidden="true"></div>
+<div class="atm atm-haz" aria-hidden="true"></div>
+<div class="atm atm-filo" aria-hidden="true"></div>
+
+<div class="focos" aria-hidden="true"></div>
+  <header><span class="fantasma" aria-hidden="true">Vestuario</span>
+    <div class="marco">
+      <h1>Vestuario<small>Cada novela es un traje colgado con su barra de vida: los segmentos encendidos son capítulos cerrados. Elige uno o conecta un traje nuevo.</small></h1>
+    </div>
+    <div class="cuenta" role="status"><b>61,90 €</b>gastados este mes en cuatro trajes</div>
+  </header>
+
+  <ul class="trajes">
+    <li class="traje"><svg class="gancho" viewBox="0 0 24 56" aria-hidden="true"><path d="M12 2 a 7 7 0 1 0 0.01 0 M12 16 V 30 a 8 8 0 0 0 16 0" fill="none" stroke="#8B939A" stroke-width="2.4" transform="translate(-4 0)"/><path d="M8 30 V 56" stroke="#5C656C" stroke-width="3"/></svg>
+      <svg viewBox="0 0 64 580" class="barra" style="height:522px" role="img" aria-label="Barra de 30 segmentos, 6 encendidos">
+<defs><filter id="g1" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect x="14" y="6" width="36" height="568" rx="8" fill="#10141A" stroke="#6B7378" stroke-width="1.5"/>
+<rect x="20" y="16" width="24" height="548" rx="3" fill="#05070A" stroke="#2A3138" stroke-width="1"/>
+<circle cx="8" cy="12" r="2" fill="#6B7378"/><circle cx="56" cy="12" r="2" fill="#6B7378"/>
+<path d="M4 12 H 12 M52 12 H 60" stroke="#6B7378" stroke-width="1.5"/>
+<circle cx="8" cy="568" r="2" fill="#6B7378"/><circle cx="56" cy="568" r="2" fill="#6B7378"/>
+<path d="M4 568 H 12 M52 568 H 60" stroke="#6B7378" stroke-width="1.5"/>
+<rect x="23" y="546" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g1)"/>
+<rect x="23" y="528" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g1)"/>
+<rect x="23" y="510" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g1)"/>
+<rect x="23" y="492" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g1)"/>
+<rect x="23" y="474" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g1)"/>
+<rect x="23" y="456" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g1)"/>
+<rect x="23" y="438" width="18" height="14" rx="1.5" fill="#B3261E" filter="url(#g1)"/>
+<rect x="23" y="420" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="402" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="384" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="366" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="348" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="330" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="312" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="294" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="276" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="258" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="240" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="222" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="204" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="186" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="168" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="150" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="132" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="114" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="96" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="78" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="60" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="42" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="24" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<path d="M10 499.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 427.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 355.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 283.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 211.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 139.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 67.0 H 14" stroke="#B3261E" stroke-width="2"/>
+</svg>
+      <div class="datos">
+        <h2>El casco frío del Falcon</h2>
+        <p class="premisa serif">Una tripulación de seis despierta a nueve años de destino y descubre que la nave lleva despierta mucho más tiempo que ellos.</p>
+        <span class="estado rojo">Detenida por el revisor en el capítulo 6</span>
+        <span class="estado">6 de 30 segmentos, 14,20 €</span>
+        <div class="acciones">
+          <a class="rojo" href="#produccion-falcon">Volver a la producción</a>
+          <a href="#lectura-falcon">Leer lo cerrado</a>
+        </div>
+      </div>
+    </li>
+
+    <li class="traje"><svg class="gancho" viewBox="0 0 24 56" aria-hidden="true"><path d="M12 2 a 7 7 0 1 0 0.01 0 M12 16 V 30 a 8 8 0 0 0 16 0" fill="none" stroke="#8B939A" stroke-width="2.4" transform="translate(-4 0)"/><path d="M8 30 V 56" stroke="#5C656C" stroke-width="3"/></svg>
+      <svg viewBox="0 0 64 472" class="barra" style="height:425px" role="img" aria-label="Barra de 24 segmentos, 24 encendidos">
+<defs><filter id="g2" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect x="14" y="6" width="36" height="460" rx="8" fill="#10141A" stroke="#6B7378" stroke-width="1.5"/>
+<rect x="20" y="16" width="24" height="440" rx="3" fill="#05070A" stroke="#2A3138" stroke-width="1"/>
+<circle cx="8" cy="12" r="2" fill="#6B7378"/><circle cx="56" cy="12" r="2" fill="#6B7378"/>
+<path d="M4 12 H 12 M52 12 H 60" stroke="#6B7378" stroke-width="1.5"/>
+<circle cx="8" cy="460" r="2" fill="#6B7378"/><circle cx="56" cy="460" r="2" fill="#6B7378"/>
+<path d="M4 460 H 12 M52 460 H 60" stroke="#6B7378" stroke-width="1.5"/>
+<rect x="23" y="438" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="420" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="402" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="384" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="366" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="348" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="330" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="312" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="294" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="276" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="258" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="240" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="222" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="204" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="186" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="168" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="150" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="132" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="114" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="96" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="78" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="60" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="42" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<rect x="23" y="24" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g2)"/>
+<path d="M10 391.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 319.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 247.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 175.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 103.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 31.0 H 14" stroke="#B3261E" stroke-width="2"/>
+</svg>
+      <div class="datos">
+        <h2>La cuota de oxígeno</h2>
+        <p class="premisa serif">Un carguero de mineral raciona el aire por turnos y el sindicato de a bordo empieza a decidir quién respira.</p>
+        <span class="estado visor">Terminada el 2 de septiembre</span>
+        <span class="estado">24 de 24 segmentos, 25,20 €</span>
+        <div class="acciones">
+          <a class="primaria" href="#lectura-oxigeno">Leer</a>
+          <a href="#exportar-oxigeno">Descargar el manuscrito</a>
+        </div>
+      </div>
+    </li>
+
+    <li class="traje"><svg class="gancho" viewBox="0 0 24 56" aria-hidden="true"><path d="M12 2 a 7 7 0 1 0 0.01 0 M12 16 V 30 a 8 8 0 0 0 16 0" fill="none" stroke="#8B939A" stroke-width="2.4" transform="translate(-4 0)"/><path d="M8 30 V 56" stroke="#5C656C" stroke-width="3"/></svg>
+      <svg viewBox="0 0 64 400" class="barra" style="height:360px" role="img" aria-label="Barra de 20 segmentos, 11 encendidos">
+<defs><filter id="g3" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect x="14" y="6" width="36" height="388" rx="8" fill="#10141A" stroke="#6B7378" stroke-width="1.5"/>
+<rect x="20" y="16" width="24" height="368" rx="3" fill="#05070A" stroke="#2A3138" stroke-width="1"/>
+<circle cx="8" cy="12" r="2" fill="#6B7378"/><circle cx="56" cy="12" r="2" fill="#6B7378"/>
+<path d="M4 12 H 12 M52 12 H 60" stroke="#6B7378" stroke-width="1.5"/>
+<circle cx="8" cy="388" r="2" fill="#6B7378"/><circle cx="56" cy="388" r="2" fill="#6B7378"/>
+<path d="M4 388 H 12 M52 388 H 60" stroke="#6B7378" stroke-width="1.5"/>
+<rect x="23" y="366" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g3)"/>
+<rect x="23" y="348" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g3)"/>
+<rect x="23" y="330" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g3)"/>
+<rect x="23" y="312" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g3)"/>
+<rect x="23" y="294" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g3)"/>
+<rect x="23" y="276" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g3)"/>
+<rect x="23" y="258" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g3)"/>
+<rect x="23" y="240" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g3)"/>
+<rect x="23" y="222" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g3)"/>
+<rect x="23" y="204" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g3)"/>
+<rect x="23" y="186" width="18" height="14" rx="1.5" fill="#A8D8C8" filter="url(#g3)"/>
+<rect x="23" y="168" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="150" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="132" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="114" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="96" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="78" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="60" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="42" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="24" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<path d="M10 319.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 247.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 175.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 103.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 31.0 H 14" stroke="#B3261E" stroke-width="2"/>
+</svg>
+      <div class="datos">
+        <h2>Salmos para la tripulación de relevo</h2>
+        <p class="premisa serif">El turno de relevo encuentra al anterior rezando en la cubierta de fundición, y las oraciones describen la avería antes de que ocurra.</p>
+        <span class="estado visor">En producción, el Escritor va por el 12</span>
+        <span class="estado">11 de 20 segmentos, 11,55 €</span>
+        <div class="acciones">
+          <a class="primaria" href="#produccion-salmos">Vigilar la producción</a>
+          <a href="#lectura-salmos">Leer lo cerrado</a>
+        </div>
+      </div>
+    </li>
+
+    <li class="traje cancelada"><svg class="gancho" viewBox="0 0 24 56" aria-hidden="true"><path d="M12 2 a 7 7 0 1 0 0.01 0 M12 16 V 30 a 8 8 0 0 0 16 0" fill="none" stroke="#8B939A" stroke-width="2.4" transform="translate(-4 0)"/><path d="M8 30 V 56" stroke="#5C656C" stroke-width="3"/></svg>
+      <svg viewBox="0 0 64 364" class="barra" style="height:328px" role="img" aria-label="Barra de 18 segmentos, 3 encendidos">
+<defs><filter id="g4" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect x="14" y="6" width="36" height="352" rx="8" fill="#10141A" stroke="#6B7378" stroke-width="1.5"/>
+<rect x="20" y="16" width="24" height="332" rx="3" fill="#05070A" stroke="#2A3138" stroke-width="1"/>
+<circle cx="8" cy="12" r="2" fill="#6B7378"/><circle cx="56" cy="12" r="2" fill="#6B7378"/>
+<path d="M4 12 H 12 M52 12 H 60" stroke="#6B7378" stroke-width="1.5"/>
+<circle cx="8" cy="352" r="2" fill="#6B7378"/><circle cx="56" cy="352" r="2" fill="#6B7378"/>
+<path d="M4 352 H 12 M52 352 H 60" stroke="#6B7378" stroke-width="1.5"/>
+<rect x="23" y="330" width="18" height="14" rx="1.5" fill="#4F585E"/>
+<rect x="23" y="312" width="18" height="14" rx="1.5" fill="#4F585E"/>
+<rect x="23" y="294" width="18" height="14" rx="1.5" fill="#4F585E"/>
+<rect x="23" y="276" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="258" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="240" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="222" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="204" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="186" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="168" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="150" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="132" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="114" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="96" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="78" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="60" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="42" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="24" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<path d="M10 283.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 211.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 139.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 67.0 H 14" stroke="#B3261E" stroke-width="2"/>
+</svg>
+      <div class="datos">
+        <h2>Turno de noche en la cubierta de fundición</h2>
+        <p class="premisa serif">Cancelada por ti en el capítulo 3. Los tres segmentos se conservan y se cobraron.</p>
+        <span class="estado bajo">Cancelada el 28 de agosto</span>
+        <span class="estado bajo">3 de 18 segmentos, 3,15 €</span>
+        <div class="acciones">
+          <a href="#lectura-fundicion">Leer los tres capítulos</a>
+          <a href="#desguace-fundicion">Desguazar</a>
+        </div>
+      </div>
+    </li>
+
+    <li class="traje nueva" id="traje-nuevo"><svg class="gancho" viewBox="0 0 24 56" aria-hidden="true"><path d="M12 2 a 7 7 0 1 0 0.01 0 M12 16 V 30 a 8 8 0 0 0 16 0" fill="none" stroke="#8B939A" stroke-width="2.4" transform="translate(-4 0)"/><path d="M8 30 V 56" stroke="#5C656C" stroke-width="3"/></svg>
+      <svg viewBox="0 0 64 580" class="barra" style="height:522px" role="img" aria-label="Barra de 30 segmentos, 0 encendidos">
+<defs><filter id="g5" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect x="14" y="6" width="36" height="568" rx="8" fill="#10141A" stroke="#6B7378" stroke-width="1.5"/>
+<rect x="20" y="16" width="24" height="548" rx="3" fill="#05070A" stroke="#2A3138" stroke-width="1"/>
+<circle cx="8" cy="12" r="2" fill="#6B7378"/><circle cx="56" cy="12" r="2" fill="#6B7378"/>
+<path d="M4 12 H 12 M52 12 H 60" stroke="#6B7378" stroke-width="1.5"/>
+<circle cx="8" cy="568" r="2" fill="#6B7378"/><circle cx="56" cy="568" r="2" fill="#6B7378"/>
+<path d="M4 568 H 12 M52 568 H 60" stroke="#6B7378" stroke-width="1.5"/>
+<rect x="23" y="546" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="528" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="510" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="492" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="474" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="456" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="438" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="420" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="402" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="384" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="366" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="348" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="330" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="312" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="294" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="276" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="258" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="240" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="222" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="204" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="186" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="168" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="150" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="132" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="114" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="96" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="78" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="60" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="42" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<rect x="23" y="24" width="18" height="14" rx="1.5" fill="#12171C" stroke="#232A31" stroke-width=".8"/>
+<path d="M10 499.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 427.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 355.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 283.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 211.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 139.0 H 14" stroke="#B3261E" stroke-width="2"/>
+<path d="M10 67.0 H 14" stroke="#B3261E" stroke-width="2"/>
+</svg>
+      <div class="datos">
+        <h2>Traje nuevo</h2>
+        <p class="premisa serif">Treinta segmentos apagados. Escribe una premisa y conéctalo; pasarás a la orden de trabajo.</p>
+        <label for="premisa-nueva" class="estado bajo">Premisa</label>
+        <input id="premisa-nueva" class="serif" placeholder="[Quién despierta, dónde, y qué no debería estar ahí]">
+        <div class="acciones">
+          <button type="button" class="primaria btn-luz" id="btn-conectar">Conectar el traje</button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</main>
+
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -24,7 +24,7 @@ Reglas:
 - `recursos_narrativos` (RF-05.5): entre 3 y 8 recursos de prosa que este capítulo usa y que un lector notaría si volvieran: imágenes sensoriales (el zumbido de los ventiladores como coda de escena), gestos físicos repetidos (palparse las costillas), muletillas de un personaje (Mesa contestando «Sin datos»), estructuras sintácticas marcadas («No era X. Era Y.»), frases literales que suenan a fórmula. Cada uno con `recurso` (descripción corta, de 3 a 12 palabras, sin citar la frase entera) y `veces` (cuántas veces aparece en este capítulo). Describí el recurso de forma que otro lector lo reconozca en otro capítulo: «el agua que sabe a filtro como consuelo», no «una frase sobre el agua». Esta lista no cuenta para el tope de {{MAX_HECHOS}} hechos: el harness la acumula aparte y se la muestra al escritor como recursos ya agotados.
 
 ## Validación (RF-08.4)
-Después de escribir el archivo ejecutá con Bash **exactamente** este comando, sin agregar ni cambiar nada:
+Después de escribir el archivo ejecutá con tu herramienta de terminal **exactamente** este comando, sin agregar ni cambiar nada:
 `{{COMANDO_VALIDACION}}`
 Es el único comando que el hook H-11 te deja ejecutar. Si devuelve errores, corregí el archivo completo con Write y volvé a ejecutar el mismo comando, hasta tres veces en total. Los avisos (sujeto fuera del registro, EX-08) no son errores: no los arregles quitando datos.
 

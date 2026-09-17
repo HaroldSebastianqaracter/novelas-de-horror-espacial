@@ -1,0 +1,122 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Vigía-9 es una estación minera que lleva once días sin acusar su baliza, pero sigue en jornada: luces en ciclo, aire limpio, calefacción y maquinaria en marcha. No hubo despresurización, incendio ni violencia.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los ciento nueve trabajadores de la dotación no están en ninguna parte y no hay cuerpos, sangre ni mensajes de auxilio. Lo que dejaron —bandejas calientes, herramientas tibias, planillas firmadas— sigue en su sitio.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El registro laboral de la estación es la autoridad sobre quién existe a bordo: lo firmado ocurrió, lo no firmado queda abierto, y un relevo solo se confirma cuando alguien se presenta a trabajar.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Nada retiene físicamente a la cuadrilla: las compuertas obedecen y el Cabo Tenue responde. Lo que habita Vigía-9 no caza desde el vacío; es la costumbre de la jornada, que se alimenta de quien acepta que le toca.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "No hay enlace con el exterior: la antena transmite, pero solo devuelve tráfico interno de la dotación ausente. La cuadrilla está incomunicada desde el atraque.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La cuadrilla del remolcador de reparaciones Cabo Tenue son cuatro: Ilaria Vensa (jefa de cuadrilla), Bruno Achaval (soldador), Ndeye Kamara (técnica de comunicaciones) y Teo Riffel (aprendiz). Los trajo un contrato de reparación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ilaria Vensa",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ha hecho el mismo viaje a otras tres estaciones muertas y sabe cómo huele una despresurización; en todas ellas hubo cuerpos.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ndeye Kamara",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Viene enviada con el encargo concreto de devolverle la voz a la estación y restablecer el enlace de la baliza.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Teo Riffel",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es su primer contrato fuera de órbita y firma su hoja de horas con letra cuidada: el trabajo es lo único que lo acredita como persona.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Bruno Achaval",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Veterano de cascos rotos y poco amigo de los protocolos; su intención desde el atraque es cerrar la avería y largarse.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Marga Sudo",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Era la capataz de Vigía-9 y no está a bordo, pero sus planillas de relevo siguen firmadas al día, incluida la hora exacta del atraque del Cabo Tenue.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vigía-9 — comedor",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Los extractores siguen tirando del vapor de unas bandejas servidas hace minutos, con las mesas dispuestas para una dotación completa.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vigía-9 — cuarto de comunicaciones",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La antena está intacta y emite, pero lo único que vuelve son partes de turno de la dotación ausente fechados en los últimos once días.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vigía-9 — galería de perforación",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La maquinaria de perforación sigue en marcha sin nadie que la atienda, y los rótulos de sección amanecen con escarcha.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vigía-9 — muelle de atraque",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El acople del Cabo Tenue funciona con normalidad y la estación recibió al remolcador con presión estable y las luces en ciclo diurno.",
+    "cap_origen": 0,
+    "superado_por": null
+  }
+]

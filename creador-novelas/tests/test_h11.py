@@ -133,3 +133,36 @@ def test_status_avisa_si_h11_no_esta_declarado(proyecto, capsys):
     (settings_dir / "settings.json").write_text(json.dumps({"hooks": {"PreToolUse": [{"matcher": "Write|Bash", "hooks": [{"type": "command", "command": "x"}]}]}}), encoding="utf-8")
     assert cli.main(["status"]) == 0
     assert "H-11 no está declarado" not in capsys.readouterr().out
+
+
+def terminal(comando, agent_type, raiz, herramienta="PowerShell", agent_id="ag-h11-ps"):
+    payload = {"hook_event_name": "PreToolUse", "tool_name": herramienta,
+               "tool_input": {"command": comando, "description": "x"},
+               "agent_type": agent_type, "agent_id": agent_id}
+    return ejecutar_script_hook("pre_tool_use", payload, raiz)
+
+
+def test_h11_vigila_tambien_powershell(con_cinco):
+    """La terminal no se llama igual en todas las plataformas: en Windows es `PowerShell`.
+
+    Los agentes declaraban `tools: ... Bash` y en Windows se quedaban sin terminal, asi que no
+    podian autovalidarse y la tanda moria con EX-10. Darles `PowerShell` sin que H-11 la mirara
+    habria sido peor que el fallo: un agente con una terminal que el hook no vigila puede ejecutar
+    cualquier cosa, y H-11 existe para que solo pueda ejecutar su validador.
+    """
+    assert terminal("python -c 'print(1)'", "escritor", con_cinco).returncode != 0
+    assert terminal(f"{CANONICO} validar-capitulo 5; rm -rf .", "escritor", con_cinco).returncode != 0
+    assert terminal(f"{CANONICO} validar-reporte 4", "escritor", con_cinco).returncode != 0  # verbo de otro rol
+    assert terminal(f"{CANONICO} validar-capitulo 5", "escritor", con_cinco).returncode == 0
+
+
+def test_h11_acepta_el_validador_con_barras_de_windows(con_cinco):
+    r"""El agente escribe la ruta con `` y la forma canonica lleva `/`.
+
+    El separador no cambia lo que hace el comando, y bloquear por eso dejaba al escritor sin poder
+    ejecutar el unico comando que tiene permitido.
+    """
+    con_barras = CANONICO.replace("/", "\\")
+    assert con_barras != CANONICO
+    assert terminal(f"{con_barras} validar-capitulo 5", "escritor", con_cinco).returncode == 0
+    assert bash(f"{con_barras} validar-capitulo 5", "escritor", con_cinco).returncode == 0

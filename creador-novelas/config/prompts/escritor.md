@@ -46,7 +46,7 @@ Imágenes, gestos, muletillas y giros que los capítulos anteriores ya usaron, c
 
 ## Qué hacer
 1. Escribí el capítulo completo con la herramienta Write en **{{RUTA_CAPITULO}}** (esa ruta exacta y ninguna otra).
-2. Validalo (RF-08.4): ejecutá con Bash **exactamente** este comando, sin agregar ni cambiar nada:
+2. Validalo (RF-08.4): ejecutá con tu herramienta de terminal **exactamente** este comando, sin agregar ni cambiar nada:
    `{{COMANDO_VALIDACION}}`
    Es el único comando que el hook H-11 te deja ejecutar. Si devuelve errores, corregí y volvé a ejecutar el mismo comando, hasta tres veces en total. **Corregí con Edit, no reescribiendo el archivo**: los errores de RF-05.5 te dan la frase exacta y su capítulo de origen, así que son un Edit por frase, cambiando solo esas palabras. Reservá Write para los errores que afectan al archivo entero: longitud fuera de tolerancia o encabezados. Reescribir 1.400 palabras para cambiar cuatro es tirar la tanda.
 3. Terminá con **una sola línea**, sin prosa, sin resumen, sin comentarios, con esta forma exacta:

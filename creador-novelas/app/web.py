@@ -152,9 +152,39 @@ def _cerrar_proceso() -> dict[str, Any] | None:
         except OSError:
             pass
     fin = {"fase": _EN_CURSO.get("fase"), "codigo": proc.returncode, "log": _EN_CURSO.get("log")}
+    _anotar_coste_de_fase(_EN_CURSO.get("raiz"), fin["fase"], _EN_CURSO.get("log"))
     _EN_CURSO.clear()
     _EN_CURSO["ultimo"] = fin
     return fin
+
+
+# Las fases del preludio no tienen subagentes, asi que H-10 --que anota lo que gasta cada subagente--
+# no ve ni un token suyo. Sin esto la consola anunciaba «0,00 $ gastados» despues de gastar de
+# verdad, que es peor que no enseñar coste. `escribir-tanda` queda fuera a proposito: es la unica
+# que lanza subagentes, y su uso ya lo cuenta H-10; sumar tambien el de su sesion seria contarlo dos
+# veces.
+SIN_SUBAGENTES = tuple(f for f in SKILLS if f != "escribir-tanda")
+
+
+def _anotar_coste_de_fase(raiz: Path | None, fase: str | None, log: str | None) -> None:
+    """Guarda lo que costo una fase lanzada desde la pantalla. Nunca hace fallar el cierre."""
+    if not raiz or fase not in SIN_SUBAGENTES or not log:
+        return
+    try:
+        datos = json.loads(Path(log).read_text(encoding="utf-8"))
+        uso = datos.get("usage") or {}
+        fila = {"ts": datetime.now().astimezone().isoformat(timespec="milliseconds"),
+                "fase": fase, "coste_usd": float(datos.get("total_cost_usd") or 0),
+                "turnos": datos.get("num_turns"),
+                "tokens": sum(int(uso.get(k) or 0) for k in
+                              ("input_tokens", "output_tokens",
+                               "cache_creation_input_tokens", "cache_read_input_tokens"))}
+        destino = Rutas(raiz).registro / "fases.jsonl"
+        destino.parent.mkdir(parents=True, exist_ok=True)
+        with destino.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(fila, ensure_ascii=False) + "\n")
+    except Exception as e:  # noqa: BLE001
+        print(f"[registro] no se pudo anotar el coste de {fase}: {e}")
 
 
 def lanzar_fase(raiz: Path, fase: str) -> dict[str, Any]:
@@ -194,7 +224,7 @@ def lanzar_fase(raiz: Path, fase: str) -> dict[str, Any]:
     fh = log.open("wb")
     proc = subprocess.Popen(cmd, cwd=str(raiz), stdout=fh, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
     _EN_CURSO.clear()
-    _EN_CURSO.update({"proc": proc, "fase": fase, "desde": time.time(), "log": str(log)})
+    _EN_CURSO.update({"proc": proc, "fase": fase, "desde": time.time(), "log": str(log), "raiz": raiz})
     return {"lanzada": fase, "pid": proc.pid, "log": str(log)}
 
 
@@ -561,6 +591,14 @@ def coste(raiz: Path) -> dict[str, Any]:
             gasto = sum(campos[k] * (precio.get(k) or 0) / 1_000_000 for k in campos)
             total += gasto
             por_rol[fila.get("rol") or "?"] = por_rol.get(fila.get("rol") or "?", 0.0) + gasto
+
+    # Las fases del preludio no pasan por H-10; su coste lo anota la pantalla al cerrar el proceso.
+    fases = _lineas_jsonl(registro / "fases.jsonl") if registro.is_dir() else []
+    for fila in fases:
+        gasto = float(fila.get("coste_usd") or 0)
+        total += gasto
+        tokens += int(fila.get("tokens") or 0)
+        por_rol["preludio"] = por_rol.get("preludio", 0.0) + gasto
 
     return {
         "moneda": tabla.get("moneda") or "USD",

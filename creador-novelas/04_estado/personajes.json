@@ -1,0 +1,39 @@
+{
+  "Ilaria Vensa": {
+    "estado_fisico": "Cuarentona endurecida por tres viajes previos a estaciones muertas; sana, con el cansancio acumulado de una travesía larga y el reflejo de revisar sellos antes de respirar.",
+    "estado_psicologico": "Jefa de cuadrilla convencida de que sabe lo que va a encontrar: un accidente legible. Se apoya en el procedimiento como en una religión y todavía no sospecha que el procedimiento es el peligro.",
+    "secretos_que_conoce": [
+      "Que en las tres estaciones muertas anteriores siempre hubo cuerpos, y que la ausencia de cuerpos no figura en ningún protocolo que haya leído."
+    ],
+    "ultima_aparicion": 0
+  },
+  "Bruno Achaval": {
+    "estado_fisico": "Soldador veterano, manos quemadas y espalda castigada; fuerte, con la costumbre de trabajar más horas de las firmadas.",
+    "estado_psicologico": "Impaciente y despectivo con los protocolos; quiere cerrar la avería y largarse. Su identidad entera está hecha del oficio, y no concibe abandonar un trabajo a medio hacer.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 0
+  },
+  "Ndeye Kamara": {
+    "estado_fisico": "Técnica de comunicaciones, delgada, con el oído gastado de años de auriculares; en buen estado físico.",
+    "estado_psicologico": "Metódica y escéptica, llega con el encargo concreto de devolverle la voz a la estación. Confía en que todo silencio tiene una causa medible.",
+    "secretos_que_conoce": [
+      "Que la baliza de Vigía-9 dejó de acusar hace once días sin emitir ninguna señal de avería previa."
+    ],
+    "ultima_aparicion": 0
+  },
+  "Teo Riffel": {
+    "estado_fisico": "Aprendiz joven en su primer contrato fuera de órbita; sano, todavía torpe con el traje y con el peso de las herramientas.",
+    "estado_psicologico": "Ansioso por acreditarse ante los demás; firma su hoja de horas con letra cuidada porque el trabajo es lo único que lo prueba como persona. Obedece cualquier orden antes de pensarla.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 0
+  },
+  "Marga Sudo": {
+    "estado_fisico": "Capataz de la dotación de Vigía-9; no está a bordo en ningún sentido comprobable, pero su turno figura activo y sus planillas siguen firmándose al día.",
+    "estado_psicologico": "Lo que queda de ella es voluntad administrativa: la insistencia de que el relevo continúe y de que ningún turno quede sin cerrar.",
+    "secretos_que_conoce": [
+      "Cómo se disolvió su dotación turno a turno sin que el trabajo se interrumpiera nunca.",
+      "Que un relevo solo se confirma cuando alguien se presenta a trabajar."
+    ],
+    "ultima_aparicion": 0
+  }
+}

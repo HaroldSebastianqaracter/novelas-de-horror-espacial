@@ -1,0 +1,34 @@
+{
+  "reglas": [
+    "Vigía-9 funciona con normalidad: ciclo de luces, aire limpio, extractores y calefacción en servicio. Nada en la estación está averiado salvo la baliza, que lleva once días sin acusar.",
+    "El registro laboral de la estación es la autoridad última sobre quién existe a bordo: lo que está firmado ocurrió, y lo que no está firmado queda abierto.",
+    "Un relevo solo se confirma cuando alguien se presenta a trabajar, aunque sea por reflejo y aunque sea para reparar la propia avería que lo trajo.",
+    "Nada retiene físicamente a nadie en Vigía-9: las compuertas obedecen, el remolcador responde, no hay violencia ni despresurización. Lo que atrapa es el turno sin cerrar.",
+    "La antena transmite pero no alcanza el exterior: lo único que vuelve es tráfico interno, partes de turno de la dotación ausente con fechas de los últimos once días.",
+    "La estación registra a sus ocupantes antes de que actúen: horas de descanso anotadas antes del descanso, firmas en el panel antes del trabajo.",
+    "No hay entidad visible ni depredador: lo que habita la estación es la costumbre de la jornada, que se alimenta de quien acepta que le toca."
+  ],
+  "objetos": [
+    "Remolcador de reparaciones Cabo Tenue, atracado en el muelle de Vigía-9.",
+    "Panel de relevos con las planillas de la capataz Marga Sudo, firmadas al día hasta la hora exacta del atraque de la cuadrilla.",
+    "Registro laboral de la estación, en el que se escriben entradas nuevas sin que nadie las teclee.",
+    "Baliza de Vigía-9, muda desde hace once días.",
+    "Llave de torsión de Bruno Achaval, herramienta de su oficio.",
+    "Hoja de horas de Teo Riffel, firmada con letra cuidada.",
+    "Bandejas servidas y calientes en el comedor, sostenidas por los extractores en marcha.",
+    "Herramientas del taller que conservan el calor de manos ausentes."
+  ],
+  "linea_de_tiempo": [
+    "Día 0: la dotación de ciento nueve trabajadores de Vigía-9 opera con normalidad; la disolución turno a turno ya ha empezado sin que nadie lo note.",
+    "Día 11 antes del atraque: la baliza emite su último acuse y calla, sin señal previa de avería.",
+    "Once días de silencio: la estación sigue en jornada, los partes de turno se emiten hacia adentro y las planillas se firman al día.",
+    "Hora del atraque: el Cabo Tenue acopla en el muelle de Vigía-9 con cuatro tripulantes; la planilla de Marga Sudo ya está firmada hasta esa hora exacta."
+  ],
+  "locaciones": {
+    "Vigía-9 — muelle de atraque": "Bahía de acople donde el Cabo Tenue queda amarrado. Pasarela limpia, luces en ciclo, presión estable y ningún signo de evacuación: el umbral por el que la cuadrilla entra a una jornada en curso.",
+    "Vigía-9 — comedor": "Sala de rancho con mesas dispuestas y bandejas servidas que todavía humean bajo los extractores. La evidencia más doméstica y más insoportable de que aquí se estaba comiendo hace minutos.",
+    "Vigía-9 — cuarto de comunicaciones": "Cubículo de la antena y los equipos de enlace. Transmite sin alcanzar el exterior y devuelve tráfico interno: voces de la dotación ausente repitiendo partes de turno. Aquí se reconstruye la lógica del registro y se borra el parte final.",
+    "Vigía-9 — puente": "Puesto de mando y observación desde el que se vigila la estación entera. Lugar de vigilias, de escuchas imposibles y de la decisión de no trabajar más.",
+    "Vigía-9 — galería de perforación": "Tramo industrial profundo de la estación minera, frío y ruidoso de maquinaria en marcha, con rótulos de sección que la escarcha reescribe. Allí se va quien acepta un relevo."
+  }
+}

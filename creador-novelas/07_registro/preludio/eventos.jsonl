@@ -1,2 +1,6 @@
 {"ts": "2026-09-17T17:27:36.058+02:00", "tipo": "verbo", "verbo": "guardar", "args": ["premisa", "--desde", ".tanda/borradores/premisa.md"], "resultado": "ok", "ms": 4, "capitulo": null}
 {"ts": "2026-09-17T17:29:29.018+02:00", "tipo": "verbo", "verbo": "guardar", "args": ["tres_actos", "--desde", ".tanda/borradores/tres_actos.md"], "resultado": "ok", "ms": 4, "capitulo": null}
+{"ts": "2026-09-17T17:40:53.625+02:00", "tipo": "verbo", "verbo": "guardar", "args": ["outline", "--desde", ".tanda/borradores/capitulos.json"], "resultado": "ok", "ms": 7, "capitulo": null}
+{"ts": "2026-09-17T17:42:32.967+02:00", "tipo": "verbo", "verbo": "guardar", "args": ["personajes", "--desde", ".tanda/borradores/personajes.json"], "resultado": "ok", "ms": 3, "capitulo": null}
+{"ts": "2026-09-17T17:42:59.093+02:00", "tipo": "verbo", "verbo": "guardar", "args": ["mundo", "--desde", ".tanda/borradores/mundo.json"], "resultado": "ok", "ms": 2, "capitulo": null}
+{"ts": "2026-09-17T17:43:25.136+02:00", "tipo": "verbo", "verbo": "guardar", "args": ["continuidad", "--desde", ".tanda/borradores/continuidad.json"], "resultado": "ok", "ms": 3, "capitulo": null}

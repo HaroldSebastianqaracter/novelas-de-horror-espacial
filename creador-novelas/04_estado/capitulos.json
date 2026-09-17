@@ -1,0 +1,87 @@
+[
+  {
+    "num": 1,
+    "titulo": "Once días sin acuse",
+    "objetivo_narrativo": "Presentar a la cuadrilla del Cabo Tenue y su atraque en Vigía-9: una estación que lleva once días muda pero que recibe a los cuatro con las luces en ciclo, el aire limpio y ningún cuerpo.",
+    "personajes": [
+      "Ilaria Vensa",
+      "Bruno Achaval",
+      "Ndeye Kamara",
+      "Teo Riffel"
+    ],
+    "locacion": "Vigía-9 — muelle de atraque",
+    "informacion_nueva": "La estación no sufrió despresurización ni violencia: los ciento nueve trabajadores faltan sin dejar rastro, y el sistema sigue funcionando con normalidad.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "Bandejas que todavía humean",
+    "objetivo_narrativo": "Recorrer el comedor y el taller mientras la evidencia se vuelve insoportablemente doméstica, y cerrar con el hallazgo de la planilla firmada hasta la hora del atraque.",
+    "personajes": [
+      "Ilaria Vensa",
+      "Bruno Achaval",
+      "Teo Riffel",
+      "Marga Sudo"
+    ],
+    "locacion": "Vigía-9 — comedor",
+    "informacion_nueva": "Las planillas de relevo de la capataz Marga Sudo están firmadas al día, incluida la hora exacta en que la cuadrilla atracó, y las herramientas del taller conservan calor de manos.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "Tráfico interno",
+    "objetivo_narrativo": "Ndeye intenta devolverle la voz a la estación y descubre que la antena transmite pero solo devuelve conversación de la dotación ausente; Ilaria encuentra el asiento nuevo con los cuatro nombres.",
+    "personajes": [
+      "Ndeye Kamara",
+      "Ilaria Vensa",
+      "Bruno Achaval"
+    ],
+    "locacion": "Vigía-9 — cuarto de comunicaciones",
+    "informacion_nueva": "No hay señal al exterior, solo partes de turno de los últimos once días; en el registro laboral aparece una entrada posterior a su llegada que asigna a los cuatro al turno de noche.",
+    "tension": 4
+  },
+  {
+    "num": 4,
+    "titulo": "La escarcha reescribe los rótulos",
+    "objetivo_narrativo": "Bajar el pulso a una vigilia de observación en la que la estación demuestra que ya les lleva la contabilidad, y permitir que Ilaria lea el archivo de Sudo.",
+    "personajes": [
+      "Teo Riffel",
+      "Ndeye Kamara",
+      "Ilaria Vensa",
+      "Bruno Achaval",
+      "Marga Sudo"
+    ],
+    "locacion": "Vigía-9 — puente",
+    "informacion_nueva": "La dotación anterior no desapareció de golpe: se disolvió turno a turno, cada firma relevando a alguien que ya solo existía en la planilla, sin que el trabajo se interrumpiera nunca.",
+    "tension": 2
+  },
+  {
+    "num": 5,
+    "titulo": "Turno sin cerrar",
+    "objetivo_narrativo": "Bruno decide desatracar y descubre que no puede soltar la llave de torsión; se lo llevan al oficio delante de los demás y la cuadrilla entiende de qué está hecha la cosa que habita Vigía-9.",
+    "personajes": [
+      "Bruno Achaval",
+      "Ilaria Vensa",
+      "Ndeye Kamara",
+      "Teo Riffel"
+    ],
+    "locacion": "Vigía-9 — galería de perforación",
+    "informacion_nueva": "Nada retiene físicamente a la cuadrilla: lo que atrapa es el turno abierto, y cada uno ya ha aceptado un relevo tres veces.",
+    "tension": 4
+  },
+  {
+    "num": 6,
+    "titulo": "Las dos plazas vacantes",
+    "objetivo_narrativo": "Sostener la última vigilia negándose a trabajar, perder a Teo ante una alarma que nadie más oye y desatracar incompletas sin dejar constancia de la misión.",
+    "personajes": [
+      "Ilaria Vensa",
+      "Ndeye Kamara",
+      "Teo Riffel",
+      "Bruno Achaval",
+      "Marga Sudo"
+    ],
+    "locacion": "Vigía-9 — cuarto de comunicaciones",
+    "informacion_nueva": "El relevo solo se confirma cuando alguien se presenta a trabajar; declarar la misión sería registrarla, así que Ndeye borra el parte y Vigía-9 queda esperando a la próxima cuadrilla con dos plazas libres.",
+    "tension": 5
+  }
+]

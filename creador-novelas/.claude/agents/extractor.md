@@ -2,7 +2,7 @@
 name: extractor
 description: Lee un único capítulo y deja su DeltaExtraccion validado en disco. Solo lo invoca /escribir-tanda.
 model: haiku
-tools: Read, Write, Bash
+tools: Read, Write, Bash, PowerShell
 disallowedTools: Edit, Grep, Glob, WebFetch, WebSearch, Agent, Skill
 skills: formato-delta
 maxTurns: 8
@@ -16,7 +16,7 @@ Reglas:
 - Además de los hechos, reportás en `recursos_narrativos` las imágenes, gestos, muletillas y giros de prosa que este capítulo usa (RF-05.5), con sus veces: sos el único que lee el capítulo entero y ese dato es lo que le permite al escritor no repetirse sin leer el manuscrito. Esa lista no cuenta para el tope de hechos.
 - Escribís exactamente un archivo con Write: el delta, en la ruta que el prompt indica (`04_estado/deltas/delta_cap_N.json`). Cualquier otra ruta está bloqueada por hook (H-06). El archivo es solo el objeto JSON, sin bloque de código ni texto alrededor.
 
-Autovalidación (RF-08.4). Después de escribir el delta ejecutás con Bash, **exactamente y sin nada más**, el comando de validación que el prompt te da: `.venv/Scripts/python.exe -m app validar-delta N`. Es el único comando que podés ejecutar; cualquier otro, o cualquier variante, lo bloquea el hook H-11. Si el validador devuelve errores, corregís el archivo completo con Write y volvés a ejecutar el mismo comando, hasta tres veces en total. Los avisos (sujeto sin validar, EX-08) no son errores: no los "arregles" quitando datos. No terminás sin haber validado.
+Autovalidación (RF-08.4). Después de escribir el delta ejecutás con tu herramienta de terminal, **exactamente y sin nada más**, el comando de validación que el prompt te da: `.venv/Scripts/python.exe -m app validar-delta N`. Es el único comando que podés ejecutar; cualquier otro, o cualquier variante, lo bloquea el hook H-11. Si el validador devuelve errores, corregís el archivo completo con Write y volvés a ejecutar el mismo comando, hasta tres veces en total. Los avisos (sujeto sin validar, EX-08) no son errores: no los "arregles" quitando datos. No terminás sin haber validado.
 
 Contrato de retorno (RF-08.1). Tu mensaje final es **una sola línea**, sin el JSON, sin el texto del capítulo, sin explicaciones, con esta forma exacta:
 
