@@ -1,7 +1,7 @@
 # Spec-X 02 · El escritor puede escribir sobre seis personajes y solo conoce a dos
 
 **Estado:** propuesta, para discutir
-**Alcance:** qué estado se le entrega al escritor. No toca el bucle, ni las fases, ni el QA.
+**Alcance:** qué estado y qué previsión se le entregan al escritor. No toca el bucle, ni las fases, ni el QA.
 **Base:** `especificacion-tecnica-harness-novela-terror.md` v1.9, §11 (estado) y RF-03/RF-04
 **Evidencia:** prompt `005_escritor_cap_6.md`, `04_estado/continuidad.json` y el informe `qa_cap_6.md`
 
@@ -95,6 +95,46 @@ completo de la novela por menos del 1 % del contexto.
 Esto no es lo mismo que darle los capítulos anteriores en prosa, que es una idea que
 esta spec **rechaza** por la razón de §4.
 
+### X-02.4 · El escritor no sabe qué viene después, y eso ya rompió un giro
+
+La escaleta completa existe: 30 entradas con título, objetivo narrativo, personajes,
+locación, información nueva y nivel de tensión. Al escritor le llega **solo la suya**.
+Ni el título del capítulo siguiente aparece en su prompt. Lo único que mira hacia
+adelante es la sinopsis en tres actos, que da el arco pero no lo que toca justo después,
+y una regla que le pide «no adelantes giros que la sinopsis reserva para más adelante»
+sin decirle cuáles son.
+
+**Dos consecuencias, y la primera ya ocurrió.**
+
+**a) La escaleta filtra los giros por la lista de personajes.** Según la entrada del
+capítulo 7, es ahí donde Pedro bautiza a la presencia. El QA lo encontró ocurriendo en
+el capítulo 5. La causa está a la vista en la propia escaleta:
+
+| Cap | Personajes en escena | Locación |
+|---|---|---|
+| 5 | Pedro, *la presencia, ya con su nombre*, Capitana Larrea | Bodega de carga |
+| 6 | Pedro, Mesa | Bodega de carga |
+| 7 | Pedro, *la presencia*, Mesa — **aquí es donde se le pone el nombre** | Conductos de servicio |
+
+La entidad figura como personaje desde el capítulo 5, con el nombre que se supone que
+Pedro le inventa en el 7. El escritor del 5 recibió ese nombre en su lista de personajes
+en escena y lo usó. No desobedeció: el giro estaba en su prompt.
+
+Esto no se arregla en el armado del prompt sino en la escaleta: **un personaje cuyo
+nombre es en sí mismo un giro no puede aparecer nombrado en entradas anteriores a ese
+giro.** Antes de esa entrada se le designa por su función («la presencia»).
+
+**b) Nadie prepara el relevo.** El capítulo 6 transcurre en la bodega de carga; el 7
+empieza en los conductos de servicio. El escritor del 6 no lo sabe, así que cierra donde
+le parece y el del 7 hereda un salto que tiene que remendar.
+
+Propuesta: entregarle del capítulo siguiente **dos datos y solo dos** — su locación y
+una línea de «dónde tiene que quedar la escena». Nunca su `informacion_nueva`, que es
+precisamente lo que no debe adelantar. Unos 120 tokens.
+
+Es el complemento de X-02.2: no basta con saber dónde **quedó** cada personaje, hace
+falta saber dónde tiene que **quedar**.
+
 ## 4. Lo que esta spec rechaza, y por qué
 
 Se estudió entregarle al escritor los capítulos anteriores —el último entero, el
@@ -126,7 +166,11 @@ estructurados, nunca prosa de la novela.**
 1. Contradicciones por corte de QA. Hoy: 2 en el capítulo 6.
 2. Que ningún personaje nombrado en un capítulo carezca de ficha en el prompt de ese
    capítulo. Hoy: cuatro de seis.
-3. Tokens de entrada del escritor. Hoy: ~165.000. Las tres propuestas suman ~2.200.
+3. Giros que se disparan antes de su capítulo. Hoy: 1 medido (el bautizo, dos
+   capítulos antes).
+4. Capítulos que empiezan en una locación distinta de donde cerró el anterior sin
+   transición escrita. Hoy: sin medir.
+5. Tokens de entrada del escritor. Hoy: ~165.000. Las cuatro propuestas suman ~2.320.
 
 ## 6. Qué NO propone
 
