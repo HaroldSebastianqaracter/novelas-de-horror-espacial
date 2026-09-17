@@ -299,3 +299,24 @@ def test_la_redireccion_conserva_la_consulta(proyecto, config, servidor):
     assert respuesta.status == 302
     assert respuesta.getheader("Location") == "/static/lectura.html?cap=4"
     conexion.close()
+
+
+def test_no_se_borra_la_novela_con_trabajo_fuera_de_git(proyecto, config, monkeypatch):
+    """El borrado solo es reversible mientras lo borrado este confirmado en git.
+
+    La primera version partia cada linea de `git status --porcelain` por el primer espacio, y una
+    modificacion sin indexar es « M ruta»: el estado salia vacio y la guarda dejaba pasar
+    exactamente el caso que tenia que detener. Borro una novela de verdad al probarla.
+    """
+    monkeypatch.setattr(web, "_hay_cambios_sin_guardar", lambda raiz: ["05_manuscrito/cap_1.md"])
+    with pytest.raises(RuntimeError, match="sin confirmar"):
+        web.borrar_novela(proyecto)
+    # Con `forzar` se borra igual: la guarda protege del descuido, no del que insiste.
+    web.borrar_novela(proyecto, forzar=True)
+
+
+def test_el_parseo_de_git_status_detecta_las_modificaciones_sin_indexar():
+    salida = " M creador-novelas/05_manuscrito/cap_1.md\nM  otro.md\n?? nuevo.md\n"
+    filas = [(l[:2], l[3:].strip()) for l in salida.splitlines()]
+    assert [r for e, r in filas if e.strip() and e != "!!"] == [
+        "creador-novelas/05_manuscrito/cap_1.md", "otro.md", "nuevo.md"]

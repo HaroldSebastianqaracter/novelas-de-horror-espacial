@@ -176,6 +176,7 @@ function trajeActual(ix, coste){
       '<a class="' + (parada ? "rojo" : "") + '" href="/consola">' +
         (parada ? "Volver a la producción" : "Vigilar la producción") + "</a>" +
       (cerrados ? '<a href="/lectura">Leer lo cerrado</a>' : "") +
+      '<button type="button" class="rojo" id="btn-borrar">Desguazar el traje</button>' +
     "</div></div></li>";
 }
 
@@ -190,6 +191,25 @@ Promise.all([
   $("n-coste").textContent = coste
     ? "gastados en " + (hay ? "un traje" : "ningún traje") + ", contando el preludio"
     : "no se pudo leer el gasto";
+
+  var d = $("btn-borrar");
+  if (d) d.addEventListener("click", function(){
+    var aparte = "\n\n";
+    if (!confirm(
+      "Desguazar «" + ix.titulo + "»." + aparte +
+      "Se borran los " + ix.capitulos_cerrados + " capítulos escritos, los hechos, los informes " +
+      "de calidad y el registro de ejecución. Las obras de referencia y los ajustes se quedan." + aparte +
+      "Lo borrado sigue en git, así que se puede recuperar con git restore, pero desde la web no."
+    )) return;
+    d.disabled = true; d.textContent = "Desguazando…";
+    fetch("/api/borrar-novela", {method:"POST"})
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+      .then(function(x){
+        if (!x.ok) { alert(x.j.error); d.disabled = false; d.textContent = "Desguazar el traje"; return; }
+        location.reload();
+      })
+      .catch(function(e){ alert(e.message); d.disabled = false; d.textContent = "Desguazar el traje"; });
+  });
 
   var b = $("btn-conectar");
   if (b) b.addEventListener("click", function(){

@@ -427,6 +427,13 @@ class _Manejador(BaseHTTPRequestHandler):
                                          "<p>Existen <a href='/'>/</a> (vestuario), <a href='/encargo'>/encargo</a>, <a href='/consola'>/consola</a> y <a href='/lectura'>/lectura</a>.</p>"))
 
     def do_POST(self) -> None:  # noqa: N802
+        if self.path.split("?", 1)[0] == "/api/borrar-novela":
+            forzar = "forzar=1" in self.path
+            try:
+                self._json(200, web.borrar_novela(self.raiz, forzar=forzar))
+            except RuntimeError as e:
+                self._json(409, {"error": str(e)})
+            return
         if self.path.startswith("/api/fase/"):
             fase = self.path[len("/api/fase/"):].strip("/")
             try:

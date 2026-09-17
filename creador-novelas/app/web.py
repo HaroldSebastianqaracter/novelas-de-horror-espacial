@@ -558,3 +558,68 @@ def coste(raiz: Path) -> dict[str, Any]:
         "modelos_sin_precio": sorted(sin_precio),
         "carpetas_con_uso": len(carpetas),
     }
+
+
+# ---------- borrar la novela (RF-UI): empezar otra sin arrastrar la anterior ----------
+
+# Lo que se lleva por delante un borrado. `config/` no entra: los ajustes son del usuario y los
+# vuelve a tocar en el encargo. `00_referencias/` tampoco, y esa es la exclusion importante: son
+# archivos suyos, con derechos de autor, que estan fuera de git y no se podrian recuperar.
+CARPETAS_DE_NOVELA = ("04_estado", "05_manuscrito", "06_qa", "07_registro", "08_entrega", ".tanda")
+
+
+def _hay_cambios_sin_guardar(raiz: Path) -> list[str]:
+    """Archivos de la novela modificados o sin seguimiento que git todavia no conoce."""
+    try:
+        salida = subprocess.run(["git", "status", "--porcelain", "--", *CARPETAS_DE_NOVELA],
+                                cwd=str(raiz), capture_output=True, text=True, timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return []  # sin git no se puede comprobar; el aviso de la pantalla ya advierte
+    if salida.returncode != 0:
+        return []
+    sucios = []
+    for linea in salida.stdout.splitlines():
+        # El formato porcelain son DOS columnas fijas: indice y arbol de trabajo. Una modificacion
+        # sin indexar es « M ruta», con un espacio delante, asi que partir por el primer espacio
+        # devuelve un estado vacio y se cuela justo el caso que hay que detener.
+        estado_git, ruta = linea[:2], linea[3:].strip().strip('"')
+        if estado_git.strip() and estado_git != "!!":
+            sucios.append(ruta)
+    return sucios
+
+
+def borrar_novela(raiz: Path, *, forzar: bool = False) -> dict[str, Any]:
+    """Vacia el estado de la novela para poder encargar otra.
+
+    Se niega si hay algo en marcha, y se niega si hay trabajo que git no tenga: el manuscrito, el
+    informe de QA y el registro estan versionados, asi que borrarlos es recuperable con `git
+    restore`, pero solo mientras esten confirmados. Borrar lo que solo existe en disco seria
+    destruir horas de maquina pagadas, y esa es exactamente la clase de error que no se deshace.
+    """
+    _cerrar_proceso()
+    if proceso_vivo():
+        raise RuntimeError("Hay una ejecución en marcha. Espera a que termine antes de borrar.")
+
+    sucios = _hay_cambios_sin_guardar(raiz)
+    if sucios and not forzar:
+        raise RuntimeError(
+            "Hay cambios sin confirmar en la novela, así que borrarla perdería trabajo que git no "
+            f"puede devolver ({len(sucios)} archivo(s), el primero {sucios[0]}). Confirma o descarta "
+            "esos cambios y vuelve a intentarlo.")
+
+    borrados = 0
+    for nombre in CARPETAS_DE_NOVELA:
+        carpeta = raiz / nombre
+        if not carpeta.is_dir():
+            continue
+        for hijo in sorted(carpeta.iterdir(), reverse=True):
+            if hijo.name == ".gitkeep":
+                continue
+            if hijo.is_dir():
+                shutil.rmtree(hijo, ignore_errors=True)
+            else:
+                hijo.unlink(missing_ok=True)
+            borrados += 1
+    _EN_CURSO.clear()
+    return {"borrado": True, "entradas": borrados, "carpetas": list(CARPETAS_DE_NOVELA),
+            "conservado": ["config/", "00_referencias/"]}
