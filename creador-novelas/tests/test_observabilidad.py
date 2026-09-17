@@ -282,7 +282,12 @@ def test_un_fin_tardio_no_duplica_la_generacion_ni_inventa_capitulo(proyecto, co
     extractores = [e["body"] for e in traza.lote
                    if e["type"] == "generation-create" and e["body"]["metadata"].get("agent_id") == "aaa"]
     assert [g["name"] for g in extractores] == ["extractor:cap_1"]
-    assert extractores[0]["startTime"] < extractores[0]["endTime"]
+    # La generacion tiene que arrancar en su `agente_inicio`, no en su propio fin. Comparar contra
+    # el evento y no pedir `startTime < endTime` es lo unico estable: con la suite entera corriendo,
+    # el inicio y el fin caen en el mismo milisegundo y la comparacion estricta falla sin motivo.
+    inicios = {e["ts"] for e in registro.leer_eventos(carpeta) if e.get("tipo") == "agente_inicio"}
+    assert extractores[0]["startTime"] in inicios
+    assert extractores[0]["startTime"] <= extractores[0]["endTime"]
 
     spans = {e["body"]["name"] for e in traza.lote if e["type"] == "span-create"}
     assert "cap_2" not in spans

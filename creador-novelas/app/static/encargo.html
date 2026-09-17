@@ -147,9 +147,38 @@
   .ajustes small{grid-column:1/-1;color:var(--lapiz);font-size:12px}
   .bloqueo{border:1px solid var(--sello);color:var(--sello);padding:10px 14px;margin:0 0 18px}
   .fallo{color:var(--sello)}
+  .ir{display:flex;flex-wrap:wrap;gap:2px;align-items:baseline;padding:10px 28px;font-size:13.5px;
+      border-bottom:1px solid color-mix(in srgb, currentColor 18%, transparent)}
+  .ir b{font-weight:400;opacity:.45;margin-right:14px}
+  .ir a{color:inherit;opacity:.5;text-decoration:none;padding:3px 11px;border:1px solid transparent}
+  .ir a:hover{opacity:1}
+  .ir a:focus-visible{opacity:1;outline:2px solid currentColor;outline-offset:1px}
+  .ir a[aria-current="page"]{opacity:1;border-color:color-mix(in srgb, currentColor 45%, transparent)}
+  @media (max-width:640px){ .ir{padding:8px 16px} }
 </style>
 </head>
 <body>
+<nav class="ir" aria-label="Secciones">
+  <b>Creador de novelas</b>
+  <a href="/">Biblioteca</a>
+  <a href="/encargo">Encargo</a>
+  <a href="/consola">Producción</a>
+  <a href="/lectura">Lectura</a>
+</nav>
+<script>
+  // Marca la seccion en la que estas. Va aqui y no en cada pagina para que las cuatro barras sean
+  // literalmente la misma y no se desincronicen al tocar una.
+  (function(){
+    // Las paginas se sirven desde /static/*.html --las rutas bonitas son redirecciones--, asi que
+    // la seccion activa se deduce del nombre del archivo y no de la ruta, que nunca coincidiria.
+    var donde = {"vestuario.html":"/", "encargo.html":"/encargo",
+                 "consola.html":"/consola", "lectura.html":"/lectura"};
+    var aqui = donde[location.pathname.split("/").pop()] || location.pathname;
+    document.querySelectorAll(".ir a").forEach(function(a){
+      if (a.getAttribute("href") === aqui) a.setAttribute("aria-current", "page");
+    });
+  })();
+</script>
 <div class="mesa">
   <form class="hoja" id="hoja" method="post" action="/guardar">
     <header class="cab">

@@ -90,13 +90,42 @@
      la rejilla sigue creciendo sola si algun dia cuelgan mas trajes. */
   .trajes{grid-template-columns:repeat(auto-fit,minmax(300px,360px));justify-content:start;gap:0 56px}
   .traje .acciones a,.traje .acciones button{text-align:left}
+  .ir{display:flex;flex-wrap:wrap;gap:2px;align-items:baseline;padding:10px 28px;font-size:13.5px;
+      border-bottom:1px solid color-mix(in srgb, currentColor 18%, transparent)}
+  .ir b{font-weight:400;opacity:.45;margin-right:14px}
+  .ir a{color:inherit;opacity:.5;text-decoration:none;padding:3px 11px;border:1px solid transparent}
+  .ir a:hover{opacity:1}
+  .ir a:focus-visible{opacity:1;outline:2px solid currentColor;outline-offset:1px}
+  .ir a[aria-current="page"]{opacity:1;border-color:color-mix(in srgb, currentColor 45%, transparent)}
+  @media (max-width:640px){ .ir{padding:8px 16px} }
 </style>
 </head>
 <body>
+<nav class="ir" aria-label="Secciones">
+  <b>Creador de novelas</b>
+  <a href="/">Biblioteca</a>
+  <a href="/encargo">Encargo</a>
+  <a href="/consola">Producción</a>
+  <a href="/lectura">Lectura</a>
+</nav>
+<script>
+  // Marca la seccion en la que estas. Va aqui y no en cada pagina para que las cuatro barras sean
+  // literalmente la misma y no se desincronicen al tocar una.
+  (function(){
+    // Las paginas se sirven desde /static/*.html --las rutas bonitas son redirecciones--, asi que
+    // la seccion activa se deduce del nombre del archivo y no de la ruta, que nunca coincidiria.
+    var donde = {"vestuario.html":"/", "encargo.html":"/encargo",
+                 "consola.html":"/consola", "lectura.html":"/lectura"};
+    var aqui = donde[location.pathname.split("/").pop()] || location.pathname;
+    document.querySelectorAll(".ir a").forEach(function(a){
+      if (a.getAttribute("href") === aqui) a.setAttribute("aria-current", "page");
+    });
+  })();
+</script>
 <main class="pantalla">
   <header>
     <div class="marco">
-      <h1>Vestuario<small>Cada novela es un traje colgado con su barra de vida: los segmentos encendidos son capítulos cerrados. Elige uno o conecta un traje nuevo.</small></h1>
+      <h1>Biblioteca<small>Cada libro tiene su columna: un segmento por capítulo, encendidos los que ya están escritos. Abre uno o empieza otro.</small></h1>
     </div>
     <div class="cuenta" role="status"><b id="v-coste">—</b><span id="n-coste">leyendo el gasto</span></div>
   </header>
@@ -152,11 +181,11 @@ function barra(id, total, cerrados, corte, cadencia){
 
 function trajeNuevo(){
   return '<li class="traje">' + barra("gn", 30, 0, 0, 0) +
-    '<div class="datos"><h2>Traje nuevo</h2>' +
-    '<p class="premisa serif">Treinta segmentos apagados. Escribe una premisa y conéctalo; pasarás a la orden de trabajo.</p>' +
+    '<div class="datos"><h2>Libro nuevo</h2>' +
+    '<p class="premisa serif">Treinta capítulos por escribir. Cuenta de qué va y pasarás a la orden de trabajo, donde se fijan los capítulos, las palabras y el resto.</p>' +
     '<label for="premisa-nueva" class="estado bajo">Premisa</label>' +
     '<input id="premisa-nueva" class="serif" placeholder="[Quién despierta, dónde, y qué no debería estar ahí]">' +
-    '<div class="acciones"><button type="button" class="primaria" id="btn-conectar">Conectar el traje</button></div>' +
+    '<div class="acciones"><button type="button" class="primaria" id="btn-conectar">Empezar el libro</button></div>' +
     "</div></li>";
 }
 
@@ -170,13 +199,13 @@ function trajeActual(ix, coste){
   return '<li class="traje">' + barra("g1", total, cerrados, parada ? corte : 0, ix.cadencia_qa) +
     '<div class="datos"><h2>' + esc(ix.titulo) + "</h2>" +
     '<p class="premisa serif">' + esc(ix.logline || "Sin logline todavía.") + "</p>" + linea +
-    '<span class="estado">' + cerrados + " de " + total + " segmentos, " +
+    '<span class="estado">' + cerrados + " de " + total + " capítulos escritos, " +
       (coste ? dinero(coste.total, coste.moneda) : "—") + "</span>" +
     '<div class="acciones">' +
       '<a class="' + (parada ? "rojo" : "") + '" href="/consola">' +
         (parada ? "Volver a la producción" : "Vigilar la producción") + "</a>" +
       (cerrados ? '<a href="/lectura">Leer lo cerrado</a>' : "") +
-      '<button type="button" class="rojo" id="btn-borrar">Desguazar el traje</button>' +
+      '<button type="button" class="rojo" id="btn-borrar">Borrar este libro</button>' +
     "</div></div></li>";
 }
 
@@ -189,26 +218,26 @@ Promise.all([
   $("trajes").innerHTML = (hay ? trajeActual(ix, coste) : "") + trajeNuevo();
   $("v-coste").textContent = coste ? dinero(coste.total, coste.moneda) : "—";
   $("n-coste").textContent = coste
-    ? "gastados en " + (hay ? "un traje" : "ningún traje") + ", contando el preludio"
+    ? "gastados en " + (hay ? "este libro" : "ningún libro") + ", contando el preludio"
     : "no se pudo leer el gasto";
 
   var d = $("btn-borrar");
   if (d) d.addEventListener("click", function(){
     var aparte = "\n\n";
     if (!confirm(
-      "Desguazar «" + ix.titulo + "»." + aparte +
+      "Borrar «" + ix.titulo + "»." + aparte +
       "Se borran los " + ix.capitulos_cerrados + " capítulos escritos, los hechos, los informes " +
       "de calidad y el registro de ejecución. Las obras de referencia y los ajustes se quedan." + aparte +
       "Lo borrado sigue en git, así que se puede recuperar con git restore, pero desde la web no."
     )) return;
-    d.disabled = true; d.textContent = "Desguazando…";
+    d.disabled = true; d.textContent = "Borrando…";
     fetch("/api/borrar-novela", {method:"POST"})
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
       .then(function(x){
-        if (!x.ok) { alert(x.j.error); d.disabled = false; d.textContent = "Desguazar el traje"; return; }
+        if (!x.ok) { alert(x.j.error); d.disabled = false; d.textContent = "Borrar este libro"; return; }
         location.reload();
       })
-      .catch(function(e){ alert(e.message); d.disabled = false; d.textContent = "Desguazar el traje"; });
+      .catch(function(e){ alert(e.message); d.disabled = false; d.textContent = "Borrar este libro"; });
   });
 
   var b = $("btn-conectar");

@@ -3,6 +3,7 @@
 import http.client
 import json
 import threading
+from pathlib import Path
 from urllib.parse import urlencode
 
 import pytest
@@ -336,3 +337,16 @@ def test_borrar_se_lleva_la_idea_y_la_premisa(proyecto, config):
     assert not rutas.idea.exists()
     # Lo que no se toca: sin git detras, borrarlo seria irreversible.
     assert (proyecto / "config").is_dir() and (proyecto / "00_referencias").is_dir()
+
+
+def test_las_cuatro_pantallas_llevan_la_misma_navegacion(proyecto, config):
+    """Sin barra no hay forma de ir de una pantalla a otra: se llegaba y no se podia volver."""
+    estatico = Path(__file__).resolve().parents[1] / "app" / "static"
+    for archivo in ("vestuario.html", "encargo.html", "consola.html", "lectura.html"):
+        html = (estatico / archivo).read_text(encoding="utf-8")
+        assert 'class="ir"' in html, f"{archivo} no lleva navegación"
+        for destino in ('href="/"', 'href="/encargo"', 'href="/consola"', 'href="/lectura"'):
+            assert destino in html, f"{archivo} no enlaza {destino}"
+        # La seccion activa se deduce del nombre del archivo: las rutas bonitas son redirecciones
+        # a /static/*.html, asi que comparar con location.pathname nunca acertaria.
+        assert "vestuario.html" in html and "location.pathname.split" in html
