@@ -419,3 +419,26 @@ def test_firmar_el_encargo_lleva_a_la_consola_y_no_a_la_terminal(proyecto, confi
     # Y la hoja de encargo no se queda en esa pagina: firma por fetch y salta a produccion.
     html = (Path(__file__).resolve().parents[1] / "app" / "static" / "encargo.html").read_text(encoding="utf-8")
     assert 'fetch("/guardar"' in html and 'location.href = "/consola"' in html
+
+
+def test_un_libro_recien_encargado_ya_existe_en_la_biblioteca(proyecto, config):
+    """Firmar el encargo escribe `01_concepto/idea.md` y nada mas: ni titulo, ni premisa, ni
+    manifiesto. La biblioteca miraba solo esos tres, asi que el libro recien encargado no aparecia
+    y la unica percha visible era la del libro nuevo: parecia que no se habia guardado.
+    """
+    rutas = Rutas(proyecto)
+    # Se vacia todo lo que delata a un libro para partir de una carpeta sin ninguno.
+    for archivo in (rutas.idea, rutas.premisa, rutas.manifest):
+        if archivo.exists():
+            archivo.unlink()
+    for n in range(1, 60):
+        if rutas.capitulo(n).exists():
+            rutas.capitulo(n).unlink()
+    assert web.indice(proyecto)["hay_novela"] is False
+
+    rutas.idea.parent.mkdir(parents=True, exist_ok=True)
+    rutas.idea.write_text("Una cuadrilla llega a una estación que dejó de responder.", encoding="utf-8")
+    indice = web.indice(proyecto)
+    assert indice["hay_novela"] is True
+    # Sin titulo todavia: lo pone el harness al generar la premisa, no el usuario al encargar.
+    assert indice["titulo"] is None and indice["idea"].startswith("Una cuadrilla")

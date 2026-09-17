@@ -182,7 +182,7 @@ function barra(id, total, cerrados, corte, cadencia){
 function trajeNuevo(){
   return '<li class="traje">' + barra("gn", 30, 0, 0, 0) +
     '<div class="datos"><h2>Libro nuevo</h2>' +
-    '<p class="premisa serif">Treinta capítulos por escribir. Cuenta de qué va y pasarás a la orden de trabajo, donde se fijan los capítulos, las palabras y el resto.</p>' +
+    '<p class="premisa serif">Cuenta de qué va, o déjalo en blanco y escríbelo luego. En cualquier caso pasarás a la orden de trabajo, que es donde se fijan los capítulos, las palabras y el resto.</p>' +
     '<label for="premisa-nueva" class="estado bajo">Premisa</label>' +
     '<input id="premisa-nueva" class="serif" placeholder="[Quién despierta, dónde, y qué no debería estar ahí]">' +
     '<div class="acciones"><button type="button" class="primaria" id="btn-conectar">Empezar el libro</button></div>' +
@@ -193,17 +193,23 @@ function trajeActual(ix, coste){
   var cerrados = ix.capitulos_cerrados || 0, total = ix.total_capitulos || 0;
   var corte = (ix.capitulos.filter(function(c){ return c.corte_qa; })[0] || {}).num || 0;
   var parada = ix.estado === "pausado_por_qa";
+  // Un libro recien encargado todavia no tiene titulo ni premisa: los pone el harness al
+  // prepararlo. Hasta entonces se le llama por su idea, que es lo unico suyo que existe.
+  var preparado = !!ix.titulo;
   var linea = parada ? '<span class="estado rojo">Detenida por el revisor en el capítulo ' + corte + "</span>"
+            : !preparado ? '<span class="estado">Encargado, sin preparar</span>'
             : cerrados >= total && total ? '<span class="estado">Terminada</span>'
-            : '<span class="estado">En producción, van ' + cerrados + " de " + total + "</span>";
+            : cerrados ? '<span class="estado">En producción, van ' + cerrados + " de " + total + "</span>"
+            : '<span class="estado">Preparado, sin escribir</span>';
   return '<li class="traje">' + barra("g1", total, cerrados, parada ? corte : 0, ix.cadencia_qa) +
-    '<div class="datos"><h2>' + esc(ix.titulo) + "</h2>" +
-    '<p class="premisa serif">' + esc(ix.logline || "Sin logline todavía.") + "</p>" + linea +
+    '<div class="datos"><h2>' + esc(ix.titulo || "Libro sin título todavía") + "</h2>" +
+    '<p class="premisa serif">' + esc(ix.logline || ix.idea || "Sin premisa todavía.") + "</p>" + linea +
     '<span class="estado">' + cerrados + " de " + total + " capítulos escritos, " +
       (coste ? dinero(coste.total, coste.moneda) : "—") + "</span>" +
     '<div class="acciones">' +
       '<a class="' + (parada ? "rojo" : "") + '" href="/consola">' +
-        (parada ? "Volver a la producción" : "Vigilar la producción") + "</a>" +
+        (parada ? "Volver a la producción" : !preparado ? "Seguir preparándolo"
+                                                        : "Vigilar la producción") + "</a>" +
       (cerrados ? '<a href="/lectura">Leer lo cerrado</a>' : "") +
       '<button type="button" class="rojo" id="btn-borrar">Borrar este libro</button>' +
     "</div></div></li>";

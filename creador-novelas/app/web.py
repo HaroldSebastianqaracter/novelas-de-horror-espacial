@@ -422,6 +422,7 @@ def indice(raiz: Path) -> dict[str, Any]:
     # harness al destilar, no el usuario al encargar. Se usa el mismo extractor que `ensamblar`
     # para que la portada de la web y la del manuscrito no puedan discrepar.
     premisa = repo.leer_premisa(raiz) or ""
+    idea = (repo.leer_texto(rutas.idea) or "").strip() if rutas.idea.exists() else ""
     from app.cli import _titulo_desde_premisa  # tarde: cli importa web, y al reves seria un ciclo
     titulo = _titulo_desde_premisa(premisa)
     logline = next((l.split(":", 1)[1].strip() for l in premisa.splitlines()
@@ -442,8 +443,9 @@ def indice(raiz: Path) -> dict[str, Any]:
     return {
         # Que exista una novela no lo decide `config/novela.json`, que conserva los ajustes aunque
         # se borre todo: lo decide que haya manifiesto, premisa o algun capitulo en el disco.
-        "hay_novela": bool(m or titulo or any(c["escrito"] for c in capitulos)),
-        "titulo": titulo or "Sin título",
+        "hay_novela": bool(m or titulo or idea or any(c["escrito"] for c in capitulos)),
+        "idea": idea,
+        "titulo": titulo or None,
         "logline": logline,
         "total_capitulos": total,
         "capitulos_cerrados": cerrados,
