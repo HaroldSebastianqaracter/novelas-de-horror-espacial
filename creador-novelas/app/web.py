@@ -565,7 +565,8 @@ def coste(raiz: Path) -> dict[str, Any]:
 # Lo que se lleva por delante un borrado. `config/` no entra: los ajustes son del usuario y los
 # vuelve a tocar en el encargo. `00_referencias/` tampoco, y esa es la exclusion importante: son
 # archivos suyos, con derechos de autor, que estan fuera de git y no se podrian recuperar.
-CARPETAS_DE_NOVELA = ("04_estado", "05_manuscrito", "06_qa", "07_registro", "08_entrega", ".tanda")
+CARPETAS_DE_NOVELA = ("01_concepto", "04_estado", "05_manuscrito", "06_qa", "07_registro",
+                      "08_entrega", ".tanda")
 
 
 def _hay_cambios_sin_guardar(raiz: Path) -> list[str]:

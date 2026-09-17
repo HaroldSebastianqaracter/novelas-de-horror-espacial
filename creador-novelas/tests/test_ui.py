@@ -320,3 +320,19 @@ def test_el_parseo_de_git_status_detecta_las_modificaciones_sin_indexar():
     filas = [(l[:2], l[3:].strip()) for l in salida.splitlines()]
     assert [r for e, r in filas if e.strip() and e != "!!"] == [
         "creador-novelas/05_manuscrito/cap_1.md", "otro.md", "nuevo.md"]
+
+
+def test_borrar_se_lleva_la_idea_y_la_premisa(proyecto, config):
+    """Si `01_concepto/` sobrevive, la novela nueva hereda la premisa de la vieja.
+
+    Se descubrio borrando de verdad: el vestuario seguia anunciando «El casco frio del Falcon»
+    despues del borrado, porque el titulo se extrae de 01_concepto/premisa.md.
+    """
+    assert "01_concepto" in web.CARPETAS_DE_NOVELA
+    rutas = Rutas(proyecto)
+    rutas.idea.parent.mkdir(parents=True, exist_ok=True)
+    rutas.idea.write_text("una idea vieja", encoding="utf-8")
+    web.borrar_novela(proyecto, forzar=True)
+    assert not rutas.idea.exists()
+    # Lo que no se toca: sin git detras, borrarlo seria irreversible.
+    assert (proyecto / "config").is_dir() and (proyecto / "00_referencias").is_dir()
