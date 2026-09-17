@@ -1,48 +1,20 @@
-"""Construye app/static/lectura.html: la piel de la direccion 3 sobre datos del harness."""
-from pathlib import Path
+"""Construye app/static/lectura.html: la piel de la dirección 3 sobre datos del harness."""
+from comun import NAV_HTML, REDUCIDO_JS, atmosfera_de, escribir, leer_maqueta
 
-BASE = Path(r"C:\Users\harold.rodriguez\Desktop\Nueva carpeta\novelas-de-horror-espacial")
-src = (BASE / "falcon-diseno/html/direccion-3-luz-de-emergencia.html").read_text(encoding="utf-8")
-cabeza = src[:src.index("<body>")]
+src, cabeza = leer_maqueta("direccion-3-luz-de-emergencia.html", """
+  /* La capital grande es solo para la prosa. El <p> del cierre, dentro de la cabecera del
+     capítulo, también es el primero de su padre y heredaba la letra gigante. */
+  .texto header .cierre::first-letter{float:none;font-size:inherit;line-height:inherit;padding:0;
+                                      color:inherit;font-style:inherit;text-shadow:none}
+  /* overflow:hidden convierte la escena en contenedor de desplazamiento y la cabecera pegajosa
+     deja de pegarse al hacer scroll; clip recorta igual sin ese efecto secundario. */
+  .escena{overflow:clip}
+""")
 cabeza = cabeza.replace("<title>", "<title>Lectura · ", 1) if "<title>" in cabeza else cabeza
 
-# --- barra de navegacion, comun a las cuatro pantallas ---
-NAV_CSS = """  .ir{display:flex;flex-wrap:wrap;gap:2px;align-items:baseline;padding:10px 28px;font-size:13.5px;
-      border-bottom:1px solid color-mix(in srgb, currentColor 18%, transparent)}
-  .ir b{font-weight:400;opacity:.45;margin-right:14px}
-  .ir a{color:inherit;opacity:.5;text-decoration:none;padding:3px 11px;border:1px solid transparent}
-  .ir a:hover{opacity:1}
-  .ir a:focus-visible{opacity:1;outline:2px solid currentColor;outline-offset:1px}
-  .ir a[aria-current="page"]{opacity:1;border-color:color-mix(in srgb, currentColor 45%, transparent)}
-  @media (max-width:640px){ .ir{padding:8px 16px} }
-"""
-NAV_HTML = """<nav class="ir" aria-label="Secciones">
-  <b>Creador de novelas</b>
-  <a href="/">Biblioteca</a>
-  <a href="/encargo">Encargo</a>
-  <a href="/consola">Producción</a>
-  <a href="/lectura">Lectura</a>
-</nav>
-<script>
-  // Marca la seccion en la que estas. Va aqui y no en cada pagina para que las cuatro barras sean
-  // literalmente la misma y no se desincronicen al tocar una.
-  (function(){
-    // Las paginas se sirven desde /static/*.html --las rutas bonitas son redirecciones--, asi que
-    // la seccion activa se deduce del nombre del archivo y no de la ruta, que nunca coincidiria.
-    var donde = {"vestuario.html":"/", "encargo.html":"/encargo",
-                 "consola.html":"/consola", "lectura.html":"/lectura"};
-    var aqui = donde[location.pathname.split("/").pop()] || location.pathname;
-    document.querySelectorAll(".ir a").forEach(function(a){
-      if (a.getAttribute("href") === aqui) a.setAttribute("aria-current", "page");
-    });
-  })();
-</script>
-"""
-assert "</style>" in cabeza, "la maqueta no trae hoja de estilos donde colgar la navegacion"
-cabeza = cabeza.replace("</style>", NAV_CSS + "</style>", 1)
-
 CUERPO = r'''<body>
-''' + NAV_HTML + r'''<div class="pantalla">
+<div class="pantalla escena">
+''' + NAV_HTML + atmosfera_de(src) + r'''
   <header class="cabecera ui">
     <div class="marco">
       <h1 id="t-cap">Cargando<small id="t-titulo"></small></h1>
@@ -63,16 +35,17 @@ CUERPO = r'''<body>
     <nav class="costillar ui" aria-label="Capítulos"><ol id="costillar"></ol></nav>
 
     <article class="texto" id="texto">
-      <header>
+      <header><span class="fantasma" id="fantasma" aria-hidden="true"></span>
         <span class="numero ui" id="t-locacion"></span>
         <h2 id="t-h2"></h2>
         <p class="cierre ui" id="t-cierre"></p>
+        <div class="regla-piloto" aria-hidden="true"></div>
       </header>
       <div id="prosa"></div>
       <nav class="siguiente ui" aria-label="Capítulos contiguos" id="contiguos"></nav>
     </article>
 
-    <aside class="margen ui" aria-labelledby="margen-t">
+    <aside class="margen ui vidrio" aria-labelledby="margen-t">
       <div class="quien">
         <h3 id="margen-t">Lo que el Extractor fijó en este capítulo</h3>
         <span id="t-resumen-hechos"></span>
@@ -80,7 +53,7 @@ CUERPO = r'''<body>
       <dl id="hechos"></dl>
 
       <div class="accion" id="caja-accion" hidden>
-        <button type="button" id="btn-conflicto" aria-pressed="false">Señalar lo que el Revisor discute<small id="t-btn-ayuda"></small></button>
+        <button type="button" id="btn-conflicto" class="btn-luz" aria-pressed="false">Señalar lo que el Revisor discute<small id="t-btn-ayuda"></small></button>
       </div>
 
       <div class="actores" id="veredicto">
@@ -100,15 +73,15 @@ var indice = null, qa = null, actual = null;
 function esc(s){ return String(s == null ? "" : s)
   .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
-// El capitulo es prosa sin encabezados (EX-07): parrafos separados por linea en blanco y nada mas.
+// El capítulo es prosa sin encabezados (EX-07): párrafos separados por línea en blanco y nada más.
 function parrafos(texto){
   return texto.split(/\n\s*\n/).map(function(p){ return p.trim(); }).filter(Boolean)
     .map(function(p){ return "<p>" + esc(p).replace(/\n/g, " ") + "</p>"; }).join("");
 }
 
-// El Revisor cita literalmente los pasajes que discute, entre comillas simples. Esas citas SI se
-// pueden localizar en el texto; los hechos del Extractor no, porque son parafrasis, y buscarlos
-// seria inventarse la correspondencia y pintar de verde la frase equivocada.
+// El Revisor cita literalmente los pasajes que discute, entre comillas simples. Esas citas SÍ se
+// pueden localizar en el texto; los hechos del Extractor no, porque son paráfrasis, y buscarlos
+// sería inventarse la correspondencia y pintar de verde la frase equivocada.
 function citasDelRevisor(n){
   if (!qa || !qa.hallazgos) return [];
   var citas = [];
@@ -182,10 +155,11 @@ function pintarActores(){
 }
 
 function pintar(){
-  document.title = "Capítulo " + actual.num + " \u00b7 " + indice.titulo;
+  document.title = "Capítulo " + actual.num + " · " + indice.titulo;
   $("t-cap").firstChild.nodeValue = "Capítulo " + actual.num + " de " + indice.total_capitulos;
   $("t-titulo").textContent = actual.titulo || "";
   $("t-novela").textContent = indice.titulo;
+  $("fantasma").textContent = actual.num;
   $("t-h2").textContent = actual.titulo || "Capítulo " + actual.num;
   $("t-locacion").textContent = actual.locacion ? "//" + actual.locacion : "";
   $("t-cierre").textContent = actual.palabras.toLocaleString("es-ES") + " palabras, cerradas por el Escritor.";
@@ -240,10 +214,8 @@ $("btn-conflicto").addEventListener("click", function(){
 });
 })();
 </script>
-</body>
+''' + REDUCIDO_JS + r'''</body>
 </html>
 '''
 
-destino = BASE / "creador-novelas/app/static/lectura.html"
-destino.write_text(cabeza + CUERPO, encoding="utf-8")
-print("lectura.html:", len(cabeza + CUERPO), "bytes")
+escribir("lectura.html", cabeza + CUERPO)

@@ -1,61 +1,32 @@
-"""Construye app/static/encargo.html: la orden de trabajo de la direccion 2 sobre el formulario real."""
-from pathlib import Path
+"""Construye app/static/encargo.html: la orden de trabajo de la dirección 2 sobre el formulario real."""
+from comun import NAV_HTML, REDUCIDO_JS, atmosfera_de, escribir, leer_maqueta
 
-BASE = Path(r"C:\Users\harold.rodriguez\Desktop\Nueva carpeta\novelas-de-horror-espacial")
-src = (BASE / "falcon-diseno/html/direccion-2-orden-de-trabajo.html").read_text(encoding="utf-8")
-cabeza = src[:src.index("<body>")]
-
-cabeza = cabeza.replace("</style>", """  /* El bloque de tono del diseno listaba opciones inventadas; aqui la hoja lleva los ajustes que
+src, cabeza = leer_maqueta("direccion-2-orden-de-trabajo.html", """
+  /* El bloque de tono del diseño listaba opciones inventadas; aquí la hoja lleva los ajustes que
      el harness acepta de verdad, en dos columnas para que no alargue la orden. */
   .ajustes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 24px}
   .ajustes label{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:baseline;
-                 border-bottom:1px solid var(--calco);padding-bottom:3px}
-  .ajustes input,.ajustes select{border:0;background:transparent;font:inherit;color:var(--tinta);
-                                 text-align:right;width:9rem}
-  .ajustes small{grid-column:1/-1;color:var(--lapiz);font-size:12px}
-  .bloqueo{border:1px solid var(--sello);color:var(--sello);padding:10px 14px;margin:0 0 18px}
-  .fallo{color:var(--sello)}
-</style>""")
-
-# --- barra de navegacion, comun a las cuatro pantallas ---
-NAV_CSS = """  .ir{display:flex;flex-wrap:wrap;gap:2px;align-items:baseline;padding:10px 28px;font-size:13.5px;
-      border-bottom:1px solid color-mix(in srgb, currentColor 18%, transparent)}
-  .ir b{font-weight:400;opacity:.45;margin-right:14px}
-  .ir a{color:inherit;opacity:.5;text-decoration:none;padding:3px 11px;border:1px solid transparent}
-  .ir a:hover{opacity:1}
-  .ir a:focus-visible{opacity:1;outline:2px solid currentColor;outline-offset:1px}
-  .ir a[aria-current="page"]{opacity:1;border-color:color-mix(in srgb, currentColor 45%, transparent)}
-  @media (max-width:640px){ .ir{padding:8px 16px} }
-"""
-NAV_HTML = """<nav class="ir" aria-label="Secciones">
-  <b>Creador de novelas</b>
-  <a href="/">Biblioteca</a>
-  <a href="/encargo">Encargo</a>
-  <a href="/consola">Producción</a>
-  <a href="/lectura">Lectura</a>
-</nav>
-<script>
-  // Marca la seccion en la que estas. Va aqui y no en cada pagina para que las cuatro barras sean
-  // literalmente la misma y no se desincronicen al tocar una.
-  (function(){
-    // Las paginas se sirven desde /static/*.html --las rutas bonitas son redirecciones--, asi que
-    // la seccion activa se deduce del nombre del archivo y no de la ruta, que nunca coincidiria.
-    var donde = {"vestuario.html":"/", "encargo.html":"/encargo",
-                 "consola.html":"/consola", "lectura.html":"/lectura"};
-    var aqui = donde[location.pathname.split("/").pop()] || location.pathname;
-    document.querySelectorAll(".ir a").forEach(function(a){
-      if (a.getAttribute("href") === aqui) a.setAttribute("aria-current", "page");
-    });
-  })();
-</script>
-"""
-assert "</style>" in cabeza, "la maqueta no trae hoja de estilos donde colgar la navegacion"
-cabeza = cabeza.replace("</style>", NAV_CSS + "</style>", 1)
+                 border-bottom:1px solid var(--hilo);padding-bottom:3px;color:var(--niebla)}
+  .ajustes input,.ajustes select{border:0;background:transparent;font:inherit;color:var(--niebla);
+                                 text-align:right;width:7rem;color-scheme:dark}
+  .ajustes small{grid-column:1/-1;color:var(--niebla-baja);font-size:12px}
+  /* El diseño cuenta los capítulos con un <output>; aquí se teclean, y el campo tiene que verse
+     como ese número escrito a mano y no como un control de sistema. */
+  .palotes input[type=number]{width:4.5rem;border:0;border-bottom:1px solid var(--hilo-fuerte);background:transparent;
+    font-family:Georgia,"Iowan Old Style",serif;font-size:20px;text-align:center;color:var(--niebla);color-scheme:dark}
+  .palotes input[type=number]:focus{outline:none;border-bottom-color:var(--halogeno)}
+  .bloqueo{border:1px solid var(--emergencia);color:#E0685C;padding:10px 14px;margin:18px 0 0;background:rgba(179,38,30,.10)}
+  .condiciones label{display:flex;gap:10px;align-items:baseline;color:var(--niebla);cursor:pointer;margin-bottom:4px}
+  .condiciones input[type=checkbox]{accent-color:var(--halogeno)}
+  .hoja input:disabled,.hoja select:disabled,.hoja textarea:disabled{opacity:.5}
+""")
 
 CUERPO = '''<body>
-''' + NAV_HTML + '''<div class="mesa">
-  <form class="hoja" id="hoja" method="post" action="/guardar">
-    <header class="cab">
+<div class="escena">
+''' + NAV_HTML + atmosfera_de(src) + '''
+<div class="mesa">
+  <form class="hoja" id="hoja" method="post" action="/guardar"><svg class="clip" viewBox="0 0 120 44" aria-hidden="true"><path d="M12 44 V 14 a 8 8 0 0 1 8 -8 h 80 a 8 8 0 0 1 8 8 V 44" fill="none" stroke="#7C848B" stroke-width="3"/><path d="M28 44 V 20 a 4 4 0 0 1 4 -4 h 56 a 4 4 0 0 1 4 4 V 44" fill="none" stroke="#3A4148" stroke-width="2"/><rect x="40" y="0" width="40" height="14" rx="3" fill="#9AA2A9"/><rect x="40" y="0" width="40" height="5" rx="3" fill="#C9D0D5"/></svg>
+    <header class="cab"><span class="fantasma" id="fantasma" aria-hidden="true"></span>
       <div>
         <h1 id="titulo">Orden de trabajo para una novela de terror espacial</h1>
         <p>Rellene los campos. Al firmar, el encargo pasa al Orquestador y usted deja de
@@ -68,7 +39,7 @@ CUERPO = '''<body>
     <p class="bloqueo" id="bloqueo" hidden></p>
 
     <div class="campo">
-      <div class="et">Premisa<small>Lo que la máquina sabrá de su historia. Todo lo demás lo decidirá ella, incluido el título.</small></div>
+      <label for="idea">Premisa<small>Lo que la máquina sabrá de su historia. Todo lo demás lo decidirá ella, incluido el título.</small></label>
       <textarea name="idea" id="idea" class="escrito" required rows="3"
         placeholder="Quién despierta, dónde, y qué no debería estar ahí"></textarea>
     </div>
@@ -86,7 +57,7 @@ CUERPO = '''<body>
     </div>
 
     <div class="campo">
-      <div class="et">Obras de referencia<small>El Orquestador destila su estilo antes de escribir. Nunca las cita. Una ruta por línea.</small></div>
+      <label for="referencias">Obras de referencia<small>El Orquestador destila su estilo antes de escribir. Nunca las cita. Una ruta por línea.</small></label>
       <div>
         <textarea name="referencias" id="referencias" class="escrito" rows="2"
           placeholder="C:\\ruta\\al\\ejemplo.txt"></textarea>
@@ -99,21 +70,37 @@ CUERPO = '''<body>
       <div class="ajustes" id="ajustes"></div>
     </div>
 
-    <div class="firmar">
-      <div>
+    <div class="pie">
+      <div class="condiciones">
         <label><input type="checkbox" name="registrar_uso" id="registrar_uso"> Registrar el uso de tokens</label>
-        <small>Sin esto no hay forma de saber lo que cuesta cada capítulo.</small>
+        <p>Sin esto no hay forma de saber lo que cuesta cada capítulo.</p>
+        <p><strong>Condiciones.</strong> Se factura por capítulo cerrado, aunque el revisor lo rechace
+          después. Si el revisor detiene la producción, usted decide si reanuda bajo su responsabilidad;
+          lo escrito hasta entonces se conserva y se cobra.</p>
       </div>
-      <button type="submit"  id="firmar">Firmar el encargo</button>
+      <div class="firmar">
+        <svg class="tampon" id="tampon" viewBox="0 0 260 120" aria-hidden="true">
+          <g fill="none" stroke="#A8281F" stroke-width="3">
+            <rect x="6" y="6" width="248" height="108" rx="4"/>
+            <rect x="14" y="14" width="232" height="92" rx="2" stroke-width="1.5"/>
+          </g>
+          <text x="130" y="58" text-anchor="middle" fill="#A8281F" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="34">Recibido</text>
+          <text x="130" y="86" text-anchor="middle" fill="#A8281F" font-family="Helvetica,Arial,sans-serif" font-size="14" id="tampon-fecha">Orquestador</text>
+          <path d="M40 96 L 220 96" stroke="#A8281F" stroke-width="1" stroke-dasharray="3 4"/>
+        </svg>
+        <button type="submit" id="firmar" class="btn-luz">Firmar el encargo</button>
+        <p class="nota" id="nota-firma">A partir de aquí solo se mira.</p>
+      </div>
     </div>
   </form>
 
-  <aside class="margen">
-    <div><h2>Lo que costará</h2><p><b id="coste">—</b></p><small id="coste-nota"></small></div>
-    <div><h2>Lo que tardará</h2><p><b id="tiempo">—</b></p><p >La máquina no se acelera, y usted no puede escribir mientras trabaja.</p></div>
-    <div><h2>Dónde puede pararse</h2><svg id="paradas" viewBox="0 0 300 60" height="60" role="img" aria-label="Puntos de auditoría"></svg><small id="paradas-nota"></small></div>
-    <div><h2>Lo que no podrá hacer</h2><p>Cambiar la premisa, el tono o el número de capítulos una vez empezada. Sí puede detener la producción en cualquier momento; lo escrito se queda.</p></div>
+  <aside class="margen" aria-label="Anotaciones al margen">
+    <div><h2>Lo que costará</h2><p class="coste" id="coste">—</p><p id="coste-nota"></p></div>
+    <div><h2>Lo que tardará</h2><p><b id="tiempo">—</b></p><p>La máquina no se acelera, y usted no puede escribir mientras trabaja.</p></div>
+    <div><h2>Dónde puede pararse</h2><svg id="paradas" viewBox="0 0 300 60" height="60" role="img" aria-label="Puntos de auditoría"></svg><p id="paradas-nota"></p></div>
+    <div><h2>Lo que no podrá hacer</h2><p>Cambiar la premisa ni el número de capítulos una vez empezada. Sí puede detener la producción en cualquier momento; lo escrito se queda.</p></div>
   </aside>
+</div>
 </div>
 
 <script>
@@ -122,7 +109,7 @@ CUERPO = '''<body>
 var $ = function(id){ return document.getElementById(id); };
 var estado = null;
 
-// Coste medido en la unica tanda real: 0,55 $ por capitulo cerrado. Es una estimacion declarada
+// Coste medido en la única tanda real: 0,55 $ por capítulo cerrado. Es una estimación declarada
 // como tal, no una promesa: el precio real lo cuenta `web.coste` sobre el uso ya registrado.
 var COSTE_POR_CAPITULO = 0.55, MINUTOS_POR_CAPITULO = 12;
 
@@ -166,19 +153,20 @@ function palotes(n){
     if (i % 5 === 0) { p.push('<path d="M' + (x-30) + ' ' + (y2-4) + ' L ' + (x+4) + ' ' + (y1+4) + '"/>'); x += 14; }
     else { p.push('<path d="M' + x + ' ' + y1 + ' V ' + y2 + '"/>'); x += 7; }
   }
-  if (n > 60) p.push('<text x="' + (x+8) + '" y="28" font-size="14">y ' + (n-60) + ' más</text>');
-  $("palotes").innerHTML = '<g stroke="#17191C" stroke-width="1.6" fill="#17191C">' + p.join("") + "</g>";
+  if (n > 60) p.push('<text x="' + (x+8) + '" y="28" font-size="14" fill="#8A9399">y ' + (n-60) + ' más</text>');
+  $("palotes").innerHTML = '<g stroke="#E8D9B5" stroke-width="1.6" stroke-linecap="round" fill="none">' + p.join("") + "</g>";
 }
 
 function paradas(n, cadencia){
   if (!cadencia) { $("paradas").innerHTML = ""; return; }
-  var p = ['<path d="M14 30 H 286" stroke="#6E726B" stroke-width="1"/>'];
+  var p = ['<path d="M14 30 H 286" stroke="#4A525A" stroke-width="1.5"/>', '<g id="hitos">'];
   for (var c = cadencia; c <= n; c += cadencia) {
     var x = 14 + (286-14) * (c/n);
-    p.push('<path d="M' + x.toFixed(1) + ' 20 V 40" stroke="#A8281F" stroke-width="2"/>');
+    p.push('<path d="M' + x.toFixed(1) + ' 20 V 40" stroke="#B3261E" stroke-width="3"/>');
   }
-  p.push('<text x="14" y="56" font-size="11" fill="#6E726B">cap. 1</text>');
-  p.push('<text x="286" y="56" font-size="11" fill="#6E726B" text-anchor="end">cap. ' + n + "</text>");
+  p.push("</g>");
+  p.push('<text x="14" y="56" font-size="11">cap. 1</text>');
+  p.push('<text x="286" y="56" font-size="11" text-anchor="end">cap. ' + n + "</text>");
   $("paradas").innerHTML = p.join("");
   $("paradas-nota").textContent = "En cada marca roja el revisor puede detenerlo todo. Son " +
     Math.floor(n/cadencia) + " puntos de parada.";
@@ -188,8 +176,8 @@ function recalcular(){
   var n = parseInt($("total_capitulos").value, 10) || 0;
   var cad = parseInt((document.querySelector('[name="cadencia_qa"]')||{}).value, 10) || 0;
   palotes(n); paradas(n, cad);
-  $("coste").textContent = (n * COSTE_POR_CAPITULO).toLocaleString("es-ES",
-    {style:"currency", currency:"USD", currencyDisplay:"narrowSymbol", maximumFractionDigits:2}) + " aprox.";
+  $("coste").innerHTML = esc((n * COSTE_POR_CAPITULO).toLocaleString("es-ES",
+    {style:"currency", currency:"USD", currencyDisplay:"narrowSymbol", maximumFractionDigits:2})) + " <small>aprox.</small>";
   $("coste-nota").textContent = "A unos 0,55 $ por capítulo cerrado, medido sobre la única tanda que se ha "
     + "corrido de verdad. Lo escrito no se devuelve.";
   var min = n * MINUTOS_POR_CAPITULO;
@@ -226,7 +214,9 @@ fetch("/api/formulario").then(function(r){ return r.json(); }).then(function(d){
   pintarAjustes();
   recalcular();
 
-  $("folio").textContent = String(d.capitulos_cerrados || 0).padStart(4, "0");
+  var folio = String(d.capitulos_cerrados || 0).padStart(4, "0");
+  $("folio").textContent = folio;
+  $("fantasma").textContent = folio;
   $("fecha").textContent = new Date().toLocaleDateString("es-ES",
     {weekday:"long", day:"numeric", month:"long"});
   $("ya-hay").textContent = d.referencias && d.referencias.length
@@ -234,13 +224,13 @@ fetch("/api/formulario").then(function(r){ return r.json(); }).then(function(d){
     : "No hay ninguna todavía. Sin referencias el estilo se destila solo de la premisa.";
 
   if (d.bloqueado) {
-    // INV-04 congela solo config/novela.json. La idea, las referencias y los ajustes de ejecucion
-    // siguen siendo editables, asi que bloquear la hoja entera seria mas restrictivo que el harness.
+    // INV-04 congela solo config/novela.json. La idea, las referencias y los ajustes de ejecución
+    // siguen siendo editables, así que bloquear la hoja entera sería más restrictivo que el harness.
     $("bloqueo").textContent = d.motivo_bloqueo;
     $("bloqueo").hidden = false;
     (d.campos_novela || []).forEach(function(k){
       var c = $("hoja").querySelector('[name="' + k + '"]');
-      if (c) { c.disabled = true; c.title = "Congelado por INV-04: ya hay capitulos cerrados."; }
+      if (c) { c.disabled = true; c.title = "Congelado por INV-04: ya hay capítulos cerrados."; }
     });
     $("firmar").textContent = "Guardar lo que sigue siendo editable";
   }
@@ -249,9 +239,9 @@ fetch("/api/formulario").then(function(r){ return r.json(); }).then(function(d){
   $("bloqueo").hidden = false;
 });
 
-// Firmar el encargo lleva a la consola, que es donde esta la secuencia de preparacion. Sin esto
-// el formulario caia en la pagina llana de confirmacion, escrita cuando la web todavia no sabia
-// lanzar fases, y el usuario acababa pensando que el resto habia que hacerlo en la terminal.
+// Firmar el encargo lleva a la consola, que es donde está la secuencia de preparación. Sin esto
+// el formulario caía en la página llana de confirmación, escrita cuando la web todavía no sabía
+// lanzar fases, y el usuario acababa pensando que el resto había que hacerlo en la terminal.
 $("hoja").addEventListener("submit", function(ev){
   ev.preventDefault();
   var boton = $("firmar");
@@ -259,7 +249,19 @@ $("hoja").addEventListener("submit", function(ev){
   fetch("/guardar", {method:"POST", body:new URLSearchParams(new FormData($("hoja")))})
     .then(function(r){ return r.text().then(function(t){ return {ok:r.ok, t:t}; }); })
     .then(function(x){
-      if (x.ok) { location.href = "/consola"; return; }
+      if (x.ok) {
+        // El único movimiento de la pantalla: cae el tampón «Recibido» y la hoja se bloquea. Se le
+        // deja verse un momento antes de pasar a la consola.
+        $("tampon-fecha").textContent = "Orquestador, " + new Date().toLocaleString("es-ES",
+          {day:"numeric", month:"short", hour:"2-digit", minute:"2-digit"});
+        $("tampon").classList.add("puesto");
+        boton.textContent = "Encargado. En manos del Orquestador";
+        $("nota-firma").textContent = "Pasando a la producción…";
+        document.querySelectorAll(".hoja input, .hoja textarea, .hoja select, .hoja .palotes button")
+          .forEach(function(el){ el.disabled = true; });
+        setTimeout(function(){ location.href = "/consola"; }, 900);
+        return;
+      }
       var m = x.t.match(/EX-05[^<]*/);
       $("bloqueo").textContent = m ? m[0] : "No se guardó: revisa los campos.";
       $("bloqueo").hidden = false;
@@ -279,10 +281,8 @@ $("menos").addEventListener("click", function(){
 $("total_capitulos").addEventListener("input", recalcular);
 })();
 </script>
-</body>
+''' + REDUCIDO_JS + '''</body>
 </html>
 '''
 
-destino = BASE / "creador-novelas/app/static/encargo.html"
-destino.write_text(cabeza + CUERPO, encoding="utf-8")
-print("encargo.html:", len(cabeza + CUERPO), "bytes")
+escribir("encargo.html", cabeza + CUERPO)

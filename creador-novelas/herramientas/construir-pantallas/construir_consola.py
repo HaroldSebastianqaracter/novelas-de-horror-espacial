@@ -1,16 +1,14 @@
-"""Construye app/static/consola.html: la direccion 1 sobre datos del harness."""
-import re
-from pathlib import Path
+"""Construye app/static/consola.html: la dirección 1 sobre datos del harness."""
+from comun import NAV_HTML, escribir, leer_maqueta
 
-BASE = Path(r"C:\Users\harold.rodriguez\Desktop\Nueva carpeta\novelas-de-horror-espacial")
-src = (BASE / "falcon-diseno/html/direccion-1-sala-de-maquinas.html").read_text(encoding="utf-8")
+src, cabeza = leer_maqueta("direccion-1-sala-de-maquinas.html")
 
-cabeza = src[:src.index("<body>")]
-# El plano entero, tal como lo entrego el diseno. No se toca: solo se le da nombre a las cubiertas.
+# El plano entero, tal como lo entregó el diseño. No se toca: solo se le da nombre a las cubiertas.
 plano = src[src.index('<section class="plano"'):src.index("</section>", src.index('<section class="plano"')) + len("</section>")]
 
-# Las cubiertas se encienden segun quien trabaje, no con un interruptor global. Se sustituyen las
-# reglas binarias de `body.en-marcha` por otras gobernadas por `body[data-activo]` y `[data-vista]`.
+# Las cubiertas se encienden según quién trabaje, no con un interruptor global. La maqueta gobierna
+# todo con `body.en-marcha` (reanudar/detener); aquí manda `body[data-vista]` (el estado del
+# manifiesto) y `body[data-activo]` (el agente que está trabajando ahora mismo).
 VIEJAS = """  .plano .relleno[data-agente="revisor"]{opacity:.85}
   body.en-marcha .plano .relleno[data-agente="revisor"]{opacity:0}
   body.en-marcha .plano .relleno[data-agente="orquestador"]{opacity:.8;transition-delay:200ms}
@@ -21,13 +19,13 @@ NUEVAS = """  body[data-vista="pausado_por_qa"] .plano .relleno[data-agente="rev
   body[data-activo="orquestador"] .plano .relleno[data-agente="orquestador"]{opacity:.8}
   body[data-activo="escritor"] .plano .relleno[data-agente="escritor"]{opacity:.8}
   body[data-activo="extractor"] .plano .relleno[data-agente="extractor"]{opacity:.55}
-  /* En marcha sin saber aun quien trabaja: el puente queda tenue para que no parezca apagada. */
+  /* En marcha sin saber aún quién trabaja: el puente queda tenue para que no parezca apagada. */
   body[data-vista="en_progreso"]:not([data-activo]) .plano .relleno[data-agente="orquestador"]{opacity:.35}
   .pie .acciones button[disabled]{opacity:.4;cursor:not-allowed}
   .pie .acciones button.peligro{border-color:var(--rojo)}
   .aviso-lanzar{grid-column:1/-1;color:var(--texto-bajo);font-size:13px;margin-top:6px}
-  /* La preparacion es una secuencia con orden: se enseña entera para que se vea cuanto falta,
-     pero solo el paso pendiente lleva boton. Los demas no se pueden lanzar aunque se quiera. */
+  /* La preparación es una secuencia con orden: se enseña entera para que se vea cuánto falta,
+     pero solo el paso pendiente lleva botón. Los demás no se pueden lanzar aunque se quiera. */
   .preludio{grid-column:1/-1;list-style:none;margin:10px 0 0;padding:0;
             border-top:1px solid var(--linea-tenue)}
   .preludio li{display:grid;grid-template-columns:22px 1fr auto;gap:0 10px;align-items:baseline;
@@ -36,69 +34,74 @@ NUEVAS = """  body[data-vista="pausado_por_qa"] .plano .relleno[data-agente="rev
   .preludio li[data-estado="pendiente"]{color:var(--texto-bajo)}
   .preludio li[data-estado="ahora"]{color:var(--texto)}
   .preludio small{grid-column:2/-1;color:var(--texto-bajo);font-size:12.5px}
-  /* El diseno reservo 44px para «14:52»; el registro real anota «12:04:11» y se pegaba al texto. */
-  .pie .registro li{grid-template-columns:64px 1fr}"""
-assert VIEJAS in cabeza, "las reglas de encendido no estan donde se esperaba"
+  /* El diseño reservó 44px para «14:52»; el registro real anota «12:04:11» y se pegaba al texto. */
+  .pie .registro li{grid-template-columns:64px 1fr}
+  /* La barra de navegación es la primera fila de la pantalla y va de borde a borde. */
+  .pantalla{grid-template-rows:auto auto 1fr auto auto}
+  .pantalla > .ir{margin:-36px -56px 0}
+  @media (max-width:1280px){.pantalla > .ir{margin:-28px -36px 0}}
+  /* En reposo el veredicto no es una alarma: sin rojo en el titular ni en el halo, y el botón de
+     arrancar en verde, que es el color de «en marcha». */
+  body[data-vista="inactivo"] .veredicto h2 b{color:var(--texto)}
+  body[data-vista="inactivo"] .veredicto.marco::before,body[data-vista="inactivo"] .veredicto.marco::after{animation-name:halo}
+  body[data-vista="inactivo"] .veredicto button.primario{border-color:var(--verde);color:#fff;background:rgba(123,227,178,.14)}"""
+assert VIEJAS in cabeza, "las reglas de encendido no están donde se esperaba"
 cabeza = cabeza.replace(VIEJAS, NUEVAS)
 
-# Los subrotulos de las cubiertas llevan el estado de cada agente: hay que poder escribirlos.
+# El parpadeo: la maqueta hace latir el ramal en rojo siempre (la animación pisa la opacidad, así
+# que se vería aun con el revisor apagado) y lo apaga con `en-marcha`. Aquí late solo cuando el
+# revisor ha detenido la nave; y cuando un agente trabaja, respira su cubierta y ninguna otra.
+PARPADEO_VIEJO = """  .plano .relleno[data-agente="revisor"]{animation:parpadeo-emergencia 1.6s steps(1,end) infinite}
+  .cargando .ticks i.stop{animation:parpadeo-emergencia 1.6s steps(1,end) infinite}
+  body.en-marcha .plano .relleno[data-agente="revisor"],body.en-marcha .cargando .ticks i.stop{animation:none}
+  body.en-marcha .plano .relleno[data-agente="orquestador"]{animation:parpadeo-trabajo 2.4s ease-in-out .2s infinite}
+  body.en-marcha .plano .relleno[data-agente="escritor"]{animation:parpadeo-trabajo 1.4s ease-in-out .6s infinite}
+  body.en-marcha .plano .relleno[data-agente="extractor"]{animation:parpadeo-trabajo-bajo 3s ease-in-out 1s infinite}"""
+PARPADEO_NUEVO = """  body[data-vista="pausado_por_qa"] .plano .relleno[data-agente="revisor"]{animation:parpadeo-emergencia 1.6s steps(1,end) infinite}
+  body[data-vista="pausado_por_qa"] .cargando .ticks i.stop{animation:parpadeo-emergencia 1.6s steps(1,end) infinite}
+  body[data-activo="qa"] .plano .relleno[data-agente="revisor"]{animation:parpadeo-trabajo 1.8s ease-in-out infinite}
+  body[data-activo="orquestador"] .plano .relleno[data-agente="orquestador"]{animation:parpadeo-trabajo 2.4s ease-in-out .2s infinite}
+  body[data-activo="escritor"] .plano .relleno[data-agente="escritor"]{animation:parpadeo-trabajo 1.4s ease-in-out .6s infinite}
+  body[data-activo="extractor"] .plano .relleno[data-agente="extractor"]{animation:parpadeo-trabajo-bajo 3s ease-in-out 1s infinite}"""
+assert PARPADEO_VIEJO in cabeza, "las reglas de parpadeo no están donde se esperaba"
+cabeza = cabeza.replace(PARPADEO_VIEJO, PARPADEO_NUEVO)
+
+# Al reanudar, la maqueta pintaba de verde las marcas de parada de la cabecera. Aquí esas marcas
+# son los capítulos con hallazgos y siguen siéndolo aunque la máquina vuelva a andar.
+TICKS_VERDES = "  body.en-marcha .cargando .ticks i.stop{background:var(--verde)}\n"
+assert TICKS_VERDES in cabeza
+cabeza = cabeza.replace(TICKS_VERDES, "")
+# Lo que queda de `en-marcha` (titular en verde, halo normal, haz rojo más lento) es lo que debe
+# pasar mientras la máquina trabaja.
+cabeza = cabeza.replace("body.en-marcha", 'body[data-vista="en_progreso"]')
+assert "en-marcha" not in cabeza
+
+# Los subrótulos de las cubiertas llevan el estado de cada agente: hay que poder escribirlos.
 for viejo, ident in (("Escritor, capítulo 7 en espera", "r-escritor"),
                      ("Extractor, 41 hechos fijados", "r-extractor"),
                      ("Revisor, ha detenido la nave", "r-revisor"),
                      ("Orquestador, espera", "r-orquestador")):
     assert viejo in plano, viejo
     plano = plano.replace(f">{viejo}<", f' id="{ident}">{viejo}<')
-# El rotulo del puente se sale por la derecha del viewBox, que mide 1240: «Orquestador, esperando»
+# El rótulo del puente se sale por la derecha del viewBox, que mide 1240: «Orquestador, esperando»
 # empieza en 1126 y no cabe. Se corre a la izquierda en vez de recortar el texto.
 plano = plano.replace('<text x="1126"', '<text x="1080"')
-# El pie del plano nombraba «El casco frio del Falcon» a fuego. Es el libro en produccion.
+# El pie del plano nombraba «El casco frío del Falcon» a fuego. Es el libro en producción.
 plano = plano.replace(">El casco frío del Falcon, corte longitudinal, cubierta de trabajo<",
                       ' id="pie-plano">Corte longitudinal, cubierta de trabajo<')
-
-# --- barra de navegacion, comun a las cuatro pantallas ---
-NAV_CSS = """  .ir{display:flex;flex-wrap:wrap;gap:2px;align-items:baseline;padding:10px 28px;font-size:13.5px;
-      border-bottom:1px solid color-mix(in srgb, currentColor 18%, transparent)}
-  .ir b{font-weight:400;opacity:.45;margin-right:14px}
-  .ir a{color:inherit;opacity:.5;text-decoration:none;padding:3px 11px;border:1px solid transparent}
-  .ir a:hover{opacity:1}
-  .ir a:focus-visible{opacity:1;outline:2px solid currentColor;outline-offset:1px}
-  .ir a[aria-current="page"]{opacity:1;border-color:color-mix(in srgb, currentColor 45%, transparent)}
-  @media (max-width:640px){ .ir{padding:8px 16px} }
-"""
-NAV_HTML = """<nav class="ir" aria-label="Secciones">
-  <b>Creador de novelas</b>
-  <a href="/">Biblioteca</a>
-  <a href="/encargo">Encargo</a>
-  <a href="/consola">Producción</a>
-  <a href="/lectura">Lectura</a>
-</nav>
-<script>
-  // Marca la seccion en la que estas. Va aqui y no en cada pagina para que las cuatro barras sean
-  // literalmente la misma y no se desincronicen al tocar una.
-  (function(){
-    // Las paginas se sirven desde /static/*.html --las rutas bonitas son redirecciones--, asi que
-    // la seccion activa se deduce del nombre del archivo y no de la ruta, que nunca coincidiria.
-    var donde = {"vestuario.html":"/", "encargo.html":"/encargo",
-                 "consola.html":"/consola", "lectura.html":"/lectura"};
-    var aqui = donde[location.pathname.split("/").pop()] || location.pathname;
-    document.querySelectorAll(".ir a").forEach(function(a){
-      if (a.getAttribute("href") === aqui) a.setAttribute("aria-current", "page");
-    });
-  })();
-</script>
-"""
-assert "</style>" in cabeza, "la maqueta no trae hoja de estilos donde colgar la navegacion"
-cabeza = cabeza.replace("</style>", NAV_CSS + "</style>", 1)
+assert 'id="pie-plano"' in plano
 
 CUERPO = '''<body>
-''' + NAV_HTML + '''<main class="pantalla">
-  <header class="cabecera">
+<main class="pantalla">
+  <div class="fx fx-barrido" aria-hidden="true"></div>
+  <div class="fx fx-haz" aria-hidden="true"></div>
+''' + NAV_HTML + '''  <header class="cabecera">
     <div class="marco">
       <h1 id="t-cap">Cargando<small id="t-titulo"></small></h1>
       <p class="premisa" id="t-premisa"></p>
     </div>
     <div class="cargando" role="status">
-      <b id="estado-txt">...</b>
+      <b id="estado-txt"><span id="estado-palabra">...</span><span class="puntos" id="puntos" aria-hidden="true" hidden></span></b>
       <span id="t-agente"></span>
       <div class="ticks" id="ticks" aria-hidden="true"></div>
     </div>
@@ -169,11 +172,16 @@ function pintarCabecera(){
   $("t-titulo").textContent = e.titulo_capitulo || "";
   $("t-premisa").textContent = e.logline || "";
   var pie = $("pie-plano");
-  if (pie) pie.textContent = (e.titulo ? e.titulo + ", corte" : "Corte") + " longitudinal, cubierta de trabajo";
+  // Centrado en la cota; con el título delante crecía hacia la izquierda y pisaba la etiqueta de la
+  // bodega de minería, así que lleva el título o la coletilla, no las dos cosas.
+  if (pie) pie.textContent = e.titulo ? e.titulo + ", corte longitudinal" : "Corte longitudinal, cubierta de trabajo";
 
-  var texto = {en_progreso:"Escribiendo...", pausado_por_qa:"Detenido...",
-               error:"Con un error...", inactivo:"En reposo"}[e.estado] || e.estado;
-  $("estado-txt").textContent = texto;
+  // Los puntos suspensivos se escriben solos (CSS) mientras la máquina hace algo o espera una
+  // decisión; en reposo o con error no hay nada que esperar y se quitan.
+  var palabra = {en_progreso:"Escribiendo", pausado_por_qa:"Detenido",
+                 error:"Con un error", inactivo:"En reposo"}[e.estado] || e.estado;
+  $("estado-palabra").textContent = palabra;
+  $("puntos").hidden = !(e.estado === "en_progreso" || e.estado === "pausado_por_qa");
   $("t-agente").textContent = e.agente_activo ? NOMBRE_AGENTE[e.agente_activo] || e.agente_activo
                                               : (e.estado === "pausado_por_qa" ? "Revisor de calidad" : "");
   document.body.setAttribute("data-vista", e.estado);
@@ -243,7 +251,7 @@ function boton(fase, etiqueta, clase){
          (lanzando ? " disabled" : "") + ">" + esc(etiqueta) + "</button>";
 }
 
-// Las cinco fases de preparacion, en el orden que fija CLAUDE.md. Cada una deja un artefacto y
+// Las cinco fases de preparación, en el orden que fija CLAUDE.md. Cada una deja un artefacto y
 // la siguiente lo necesita: no es una lista de opciones, es una cadena.
 var PRELUDIO = [
   {fase:"destilar-estilo", clave:"style_guide", nombre:"Destilar el estilo",
@@ -278,7 +286,7 @@ function pintarPreludio(){
     var hecho = !!a[p.clave] || saltado;
     var ahora = p.fase === siguiente.fase;
     return '<li data-estado="' + (hecho ? "hecho" : ahora ? "ahora" : "pendiente") + '">' +
-      '<span class="marca">' + (hecho ? "\u2713" : "\u00b7") + "</span>" +
+      '<span class="marca">' + (hecho ? "\\u2713" : "\\u00b7") + "</span>" +
       "<span>" + esc(p.nombre) + "</span>" +
       (ahora ? boton(p.fase, "Lanzar") : "<span>" + (saltado ? "sin referencias" : hecho ? "" : "en espera") + "</span>") +
       "<small>" + esc(p.nota) + "</small></li>";
@@ -311,36 +319,34 @@ function pintarVeredicto(){
     var a = e.artefactos || {};
     var faltan = pasosPendientes();
     if (!a.idea) {
-      h2.textContent = "Todav\u00eda no hay ning\u00fan libro";
+      h2.textContent = "Todavía no hay ningún libro";
       extra.textContent = ".";
-      p.textContent = "Empieza por el encargo: la premisa, los cap\u00edtulos y los ajustes.";
+      p.textContent = "Empieza por el encargo: la premisa, los capítulos y los ajustes.";
       acc.push('<a class="primario" href="/encargo">Ir al encargo</a>');
       $("acciones").innerHTML = acc.join("");
-      $("aviso").textContent = lanzando ? "Lanzando\u2026" : "";
+      $("aviso").textContent = lanzando ? "Lanzando…" : "";
       return;
     }
     if (faltan.length) {
-      h2.textContent = "El libro est\u00e1 encargado y falta prepararlo";
+      h2.textContent = "El libro está encargado y falta prepararlo";
       extra.textContent = ": " + faltan.length + (faltan.length === 1 ? " paso." : " pasos.");
-      p.textContent = "Cada paso deja un artefacto que el siguiente necesita, as\u00ed que van en orden. " +
+      p.textContent = "Cada paso deja un artefacto que el siguiente necesita, así que van en orden. " +
                       "Se lanzan de uno en uno y tardan un rato cada uno.";
       $("acciones").innerHTML = "";
-      $("aviso").textContent = lanzando ? "Lanzando\u2026" : "";
+      $("aviso").textContent = lanzando ? "Lanzando…" : "";
       return;
     }
-    h2.textContent = e.capitulos_cerrados ? "En reposo" : "Preparado, sin escribir todav\u00eda";
-    extra.textContent = e.capitulos_cerrados ? ", con " + e.capitulos_cerrados + " cap\u00edtulos cerrados." : ".";
+    h2.textContent = e.capitulos_cerrados ? "En reposo" : "Preparado, sin escribir todavía";
+    extra.textContent = e.capitulos_cerrados ? ", con " + e.capitulos_cerrados + " capítulos cerrados." : ".";
     p.textContent = e.capitulos_cerrados
       ? "Puedes lanzar la siguiente tanda o montar lo que ya hay en un solo archivo."
-      : "El estilo, la premisa, la sinopsis, la escaleta y el estado est\u00e1n listos. Falta escribir.";
+      : "El estilo, la premisa, la sinopsis, la escaleta y el estado están listos. Falta escribir.";
     if (!e.capitulos_cerrados) {
       acc.push(boton("escribir-tanda", "Escribir la primera tanda", "primario"));
-    } else if (e.capitulos_cerrados) {
+    } else {
       acc.push(boton("escribir-tanda", "Escribir la siguiente tanda", "primario"));
       acc.push(boton("ensamblar", "Ensamblar lo cerrado"));
       acc.push('<a href="/lectura">Leer lo escrito</a>');
-    } else {
-      acc.push('<a class="primario" href="/">Ir al encargo</a>');
     }
   }
   $("acciones").innerHTML = acc.join("");
@@ -348,8 +354,8 @@ function pintarVeredicto(){
 }
 
 function pintarRegistro(evs){
-  // Los eventos llegan como {ts, tipo, texto}. El tipo decide si la linea se destaca en rojo:
-  // un bloqueo de hook o un error son lo unico que merece robar la atencion en un registro.
+  // Los eventos llegan como {ts, tipo, texto}. El tipo decide si la línea se destaca en rojo:
+  // un bloqueo de hook o un error son lo único que merece robar la atención en un registro.
   $("registro").innerHTML = (evs||[]).map(function(ev){
     var grave = ev.tipo === "error" || ev.tipo === "bloqueo";
     return "<li" + (grave ? ' class="rev"' : "") + "><time>" + esc(ev.ts || "") + "</time><span>" +
@@ -401,6 +407,4 @@ setInterval(refrescar, 5000);  // el estado se lee del disco; 5 s es suficiente 
 </html>
 '''
 
-destino = BASE / "creador-novelas/app/static/consola.html"
-destino.write_text(cabeza + CUERPO, encoding="utf-8")
-print("consola.html:", len(cabeza + CUERPO), "bytes")
+escribir("consola.html", cabeza + CUERPO)

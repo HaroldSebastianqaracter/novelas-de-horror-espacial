@@ -69,7 +69,6 @@
   .cargando .ticks i{width:12px;height:3px;background:var(--linea-tenue)}
   .cargando .ticks i.on{background:var(--verde)}
   .cargando .ticks i.stop{background:var(--rojo)}
-  body.en-marcha .cargando .ticks i.stop{background:var(--verde)}
 
   /* Plano */
   .plano{display:flex;align-items:center;justify-content:center;min-height:0}
@@ -83,13 +82,13 @@
   body[data-activo="orquestador"] .plano .relleno[data-agente="orquestador"]{opacity:.8}
   body[data-activo="escritor"] .plano .relleno[data-agente="escritor"]{opacity:.8}
   body[data-activo="extractor"] .plano .relleno[data-agente="extractor"]{opacity:.55}
-  /* En marcha sin saber aun quien trabaja: el puente queda tenue para que no parezca apagada. */
+  /* En marcha sin saber aún quién trabaja: el puente queda tenue para que no parezca apagada. */
   body[data-vista="en_progreso"]:not([data-activo]) .plano .relleno[data-agente="orquestador"]{opacity:.35}
   .pie .acciones button[disabled]{opacity:.4;cursor:not-allowed}
   .pie .acciones button.peligro{border-color:var(--rojo)}
   .aviso-lanzar{grid-column:1/-1;color:var(--texto-bajo);font-size:13px;margin-top:6px}
-  /* La preparacion es una secuencia con orden: se enseña entera para que se vea cuanto falta,
-     pero solo el paso pendiente lleva boton. Los demas no se pueden lanzar aunque se quiera. */
+  /* La preparación es una secuencia con orden: se enseña entera para que se vea cuánto falta,
+     pero solo el paso pendiente lleva botón. Los demás no se pueden lanzar aunque se quiera. */
   .preludio{grid-column:1/-1;list-style:none;margin:10px 0 0;padding:0;
             border-top:1px solid var(--linea-tenue)}
   .preludio li{display:grid;grid-template-columns:22px 1fr auto;gap:0 10px;align-items:baseline;
@@ -98,8 +97,29 @@
   .preludio li[data-estado="pendiente"]{color:var(--texto-bajo)}
   .preludio li[data-estado="ahora"]{color:var(--texto)}
   .preludio small{grid-column:2/-1;color:var(--texto-bajo);font-size:12.5px}
-  /* El diseno reservo 44px para «14:52»; el registro real anota «12:04:11» y se pegaba al texto. */
+  /* El diseño reservó 44px para «14:52»; el registro real anota «12:04:11» y se pegaba al texto. */
   .pie .registro li{grid-template-columns:64px 1fr}
+  /* La barra de navegación es la primera fila de la pantalla y va de borde a borde. */
+  .pantalla{grid-template-rows:auto auto 1fr auto auto}
+  .pantalla > .ir{margin:-36px -56px 0}
+  @media (max-width:1280px){.pantalla > .ir{margin:-28px -36px 0}}
+  /* En reposo el veredicto no es una alarma: sin rojo en el titular ni en el halo, y el botón de
+     arrancar en verde, que es el color de «en marcha». */
+  body[data-vista="inactivo"] .veredicto h2 b{color:var(--texto)}
+  body[data-vista="inactivo"] .veredicto.marco::before,body[data-vista="inactivo"] .veredicto.marco::after{animation-name:halo}
+  body[data-vista="inactivo"] .veredicto button.primario{border-color:var(--verde);color:#fff;background:rgba(123,227,178,.14)}
+  /* Parpadeo de los bloques activos: el ramal en parada late como una luz de emergencia; en marcha, cada cubierta respira a su ritmo */
+  @keyframes parpadeo-emergencia{0%,44%{opacity:.9}45%,54%{opacity:.12}55%,64%{opacity:.8}65%,72%{opacity:.18}73%,100%{opacity:.9}}
+  @keyframes parpadeo-trabajo{0%,100%{opacity:.85}50%{opacity:.28}}
+  @keyframes parpadeo-trabajo-bajo{0%,100%{opacity:.6}50%{opacity:.18}}
+  body[data-vista="pausado_por_qa"] .plano .relleno[data-agente="revisor"]{animation:parpadeo-emergencia 1.6s steps(1,end) infinite}
+  body[data-vista="pausado_por_qa"] .cargando .ticks i.stop{animation:parpadeo-emergencia 1.6s steps(1,end) infinite}
+  body[data-activo="qa"] .plano .relleno[data-agente="revisor"]{animation:parpadeo-trabajo 1.8s ease-in-out infinite}
+  body[data-activo="orquestador"] .plano .relleno[data-agente="orquestador"]{animation:parpadeo-trabajo 2.4s ease-in-out .2s infinite}
+  body[data-activo="escritor"] .plano .relleno[data-agente="escritor"]{animation:parpadeo-trabajo 1.4s ease-in-out .6s infinite}
+  body[data-activo="extractor"] .plano .relleno[data-agente="extractor"]{animation:parpadeo-trabajo-bajo 3s ease-in-out 1s infinite}
+  @media (prefers-reduced-motion:reduce){.plano .relleno,.cargando .ticks i.stop{animation:none !important}}
+
 
   /* Indicadores: líneas, no diales */
   .indicadores{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;padding:0 28px}
@@ -118,7 +138,7 @@
   .veredicto{display:grid;grid-template-columns:1fr auto;gap:8px 24px;align-items:center}
   .veredicto h2{margin:0;font-size:17px;font-weight:400;letter-spacing:.03em}
   .veredicto h2 b{color:var(--rojo);font-weight:400}
-  body.en-marcha .veredicto h2 b{color:var(--verde)}
+  body[data-vista="en_progreso"] .veredicto h2 b{color:var(--verde)}
   .veredicto p{margin:0;grid-column:1;color:var(--texto-bajo);font-size:14px}
   .veredicto .acciones{grid-column:2;grid-row:1/3;display:flex;flex-direction:column;gap:8px}
   .veredicto button{
@@ -127,7 +147,7 @@
   }
   .veredicto button:hover{background:rgba(147,166,185,.12)}
   .veredicto button.primario{border-color:var(--rojo);color:#fff;background:rgba(224,72,60,.18)}
-  body.en-marcha .veredicto button.primario{border-color:var(--verde);background:rgba(123,227,178,.14)}
+  body[data-vista="en_progreso"] .veredicto button.primario{border-color:var(--verde);background:rgba(123,227,178,.14)}
 
   .registro{font-size:13.5px}
   .registro h2{margin:0 0 6px;font-size:13.5px;font-weight:400;color:var(--texto-bajo);letter-spacing:.04em}
@@ -139,6 +159,44 @@
 
   @media (prefers-reduced-motion:reduce){
     .plano .cubierta,.plano .relleno,.ind .barra i{transition:none}
+  }
+
+  /* Efectos de luz de la pantalla de a bordo */
+  .pantalla > .fx{position:absolute;inset:0;pointer-events:none;z-index:2}
+  /* barrido de tubo: una banda clara recorre la pantalla de arriba abajo */
+  .fx-barrido{background:linear-gradient(180deg,transparent 0,rgba(147,166,185,.05) 45%,rgba(201,214,224,.10) 50%,rgba(147,166,185,.05) 55%,transparent 100%);
+    background-size:100% 220px;background-repeat:no-repeat;animation:barrido 7s linear infinite;mix-blend-mode:screen}
+  @keyframes barrido{0%{background-position:0 -240px}100%{background-position:0 calc(100% + 240px)}}
+  /* haz rojo giratorio de emergencia: cruza la pantalla en diagonal cada pocos segundos */
+  .fx-haz{background:linear-gradient(100deg,transparent 40%,rgba(224,72,60,.10) 47%,rgba(224,72,60,.22) 50%,rgba(224,72,60,.10) 53%,transparent 60%);
+    background-size:60% 100%;background-repeat:no-repeat;animation:haz 6.5s cubic-bezier(.4,0,.6,1) infinite;mix-blend-mode:screen}
+  @keyframes haz{0%,12%{background-position:-80% 0}60%,100%{background-position:200% 0}}
+  body[data-vista="en_progreso"] .fx-haz{animation-duration:11s;opacity:.35}
+  /* parpadeo del tubo: micro-caídas de brillo irregulares */
+  .pantalla > .cabecera,.pantalla > .plano,.pantalla > .indicadores,.pantalla > .pie{animation:tubo 9s steps(1,end) infinite}
+  @keyframes tubo{0%,100%{opacity:1}7%{opacity:.93}8%{opacity:1}31%{opacity:.96}32%{opacity:1}57%{opacity:.9}58%{opacity:1}59%{opacity:.97}60%{opacity:1}83%{opacity:.94}84%{opacity:1}}
+  /* el plano brilla como un holograma, y sus etiquetas titilan */
+  .plano svg{filter:drop-shadow(0 0 6px rgba(147,166,185,.35)) drop-shadow(0 0 22px rgba(147,166,185,.12))}
+  .plano text{animation:titilar 4.5s steps(1,end) infinite}
+  .plano text:nth-of-type(3n){animation-delay:1.3s}.plano text:nth-of-type(3n+1){animation-delay:2.7s}
+  @keyframes titilar{0%,100%{opacity:1}41%{opacity:.55}42%{opacity:1}43%{opacity:.7}44%{opacity:1}}
+  /* marcos: el filo respira con un halo */
+  .marco::before,.marco::after{box-shadow:0 0 12px rgba(147,166,185,.25),inset 0 0 6px rgba(147,166,185,.12);animation:halo 3.2s ease-in-out infinite}
+  @keyframes halo{0%,100%{box-shadow:0 0 10px rgba(147,166,185,.18),inset 0 0 6px rgba(147,166,185,.10)}50%{box-shadow:0 0 22px rgba(147,166,185,.45),inset 0 0 10px rgba(147,166,185,.22)}}
+  .veredicto.marco::before,.veredicto.marco::after{animation-name:halo-rojo}
+  @keyframes halo-rojo{0%,100%{box-shadow:0 0 10px rgba(224,72,60,.18)}50%{box-shadow:0 0 24px rgba(224,72,60,.5)}}
+  body[data-vista="en_progreso"] .veredicto.marco::before,body[data-vista="en_progreso"] .veredicto.marco::after{animation-name:halo}
+  /* "Detenido..." con los puntos escribiéndose */
+  .cargando b .puntos::after{content:"...";animation:puntos 1.5s steps(1,end) infinite}
+  @keyframes puntos{0%{content:"."}33%{content:".."}66%{content:"..."}}
+  .cargando b{text-shadow:0 0 12px rgba(201,211,220,.45)}
+  .cargando .ticks i.on{box-shadow:0 0 8px rgba(123,227,178,.7)}
+  .cargando .ticks i.stop{box-shadow:0 0 10px rgba(224,72,60,.9)}
+  .ind .barra i.verde{box-shadow:0 0 10px rgba(123,227,178,.6)}
+  .ind .barra i.rojo{box-shadow:0 0 10px rgba(224,72,60,.7)}
+  .registro li.rev{text-shadow:0 0 10px rgba(224,72,60,.35)}
+  @media (prefers-reduced-motion:reduce){
+    .fx-barrido,.fx-haz,.pantalla > .cabecera,.pantalla > .plano,.pantalla > .indicadores,.pantalla > .pie,.plano text,.marco::before,.marco::after,.cargando b .puntos::after{animation:none !important}
   }
   @media (max-width:1280px){
     .pantalla{padding:28px 36px 32px}
@@ -156,6 +214,9 @@
 </style>
 </head>
 <body>
+<main class="pantalla">
+  <div class="fx fx-barrido" aria-hidden="true"></div>
+  <div class="fx fx-haz" aria-hidden="true"></div>
 <nav class="ir" aria-label="Secciones">
   <b>Creador de novelas</b>
   <a href="/">Biblioteca</a>
@@ -164,11 +225,11 @@
   <a href="/lectura">Lectura</a>
 </nav>
 <script>
-  // Marca la seccion en la que estas. Va aqui y no en cada pagina para que las cuatro barras sean
+  // Marca la sección en la que estás. Va aquí y no en cada página para que las cuatro barras sean
   // literalmente la misma y no se desincronicen al tocar una.
   (function(){
-    // Las paginas se sirven desde /static/*.html --las rutas bonitas son redirecciones--, asi que
-    // la seccion activa se deduce del nombre del archivo y no de la ruta, que nunca coincidiria.
+    // Las páginas se sirven desde /static/*.html --las rutas bonitas son redirecciones--, así que
+    // la sección activa se deduce del nombre del archivo y no de la ruta, que nunca coincidiría.
     var donde = {"vestuario.html":"/", "encargo.html":"/encargo",
                  "consola.html":"/consola", "lectura.html":"/lectura"};
     var aqui = donde[location.pathname.split("/").pop()] || location.pathname;
@@ -177,14 +238,13 @@
     });
   })();
 </script>
-<main class="pantalla">
   <header class="cabecera">
     <div class="marco">
       <h1 id="t-cap">Cargando<small id="t-titulo"></small></h1>
       <p class="premisa" id="t-premisa"></p>
     </div>
     <div class="cargando" role="status">
-      <b id="estado-txt">...</b>
+      <b id="estado-txt"><span id="estado-palabra">...</span><span class="puntos" id="puntos" aria-hidden="true" hidden></span></b>
       <span id="t-agente"></span>
       <div class="ticks" id="ticks" aria-hidden="true"></div>
     </div>
@@ -359,11 +419,16 @@ function pintarCabecera(){
   $("t-titulo").textContent = e.titulo_capitulo || "";
   $("t-premisa").textContent = e.logline || "";
   var pie = $("pie-plano");
-  if (pie) pie.textContent = (e.titulo ? e.titulo + ", corte" : "Corte") + " longitudinal, cubierta de trabajo";
+  // Centrado en la cota; con el título delante crecía hacia la izquierda y pisaba la etiqueta de la
+  // bodega de minería, así que lleva el título o la coletilla, no las dos cosas.
+  if (pie) pie.textContent = e.titulo ? e.titulo + ", corte longitudinal" : "Corte longitudinal, cubierta de trabajo";
 
-  var texto = {en_progreso:"Escribiendo...", pausado_por_qa:"Detenido...",
-               error:"Con un error...", inactivo:"En reposo"}[e.estado] || e.estado;
-  $("estado-txt").textContent = texto;
+  // Los puntos suspensivos se escriben solos (CSS) mientras la máquina hace algo o espera una
+  // decisión; en reposo o con error no hay nada que esperar y se quitan.
+  var palabra = {en_progreso:"Escribiendo", pausado_por_qa:"Detenido",
+                 error:"Con un error", inactivo:"En reposo"}[e.estado] || e.estado;
+  $("estado-palabra").textContent = palabra;
+  $("puntos").hidden = !(e.estado === "en_progreso" || e.estado === "pausado_por_qa");
   $("t-agente").textContent = e.agente_activo ? NOMBRE_AGENTE[e.agente_activo] || e.agente_activo
                                               : (e.estado === "pausado_por_qa" ? "Revisor de calidad" : "");
   document.body.setAttribute("data-vista", e.estado);
@@ -433,7 +498,7 @@ function boton(fase, etiqueta, clase){
          (lanzando ? " disabled" : "") + ">" + esc(etiqueta) + "</button>";
 }
 
-// Las cinco fases de preparacion, en el orden que fija CLAUDE.md. Cada una deja un artefacto y
+// Las cinco fases de preparación, en el orden que fija CLAUDE.md. Cada una deja un artefacto y
 // la siguiente lo necesita: no es una lista de opciones, es una cadena.
 var PRELUDIO = [
   {fase:"destilar-estilo", clave:"style_guide", nombre:"Destilar el estilo",
@@ -468,7 +533,7 @@ function pintarPreludio(){
     var hecho = !!a[p.clave] || saltado;
     var ahora = p.fase === siguiente.fase;
     return '<li data-estado="' + (hecho ? "hecho" : ahora ? "ahora" : "pendiente") + '">' +
-      '<span class="marca">' + (hecho ? "✓" : "·") + "</span>" +
+      '<span class="marca">' + (hecho ? "\u2713" : "\u00b7") + "</span>" +
       "<span>" + esc(p.nombre) + "</span>" +
       (ahora ? boton(p.fase, "Lanzar") : "<span>" + (saltado ? "sin referencias" : hecho ? "" : "en espera") + "</span>") +
       "<small>" + esc(p.nota) + "</small></li>";
@@ -525,12 +590,10 @@ function pintarVeredicto(){
       : "El estilo, la premisa, la sinopsis, la escaleta y el estado están listos. Falta escribir.";
     if (!e.capitulos_cerrados) {
       acc.push(boton("escribir-tanda", "Escribir la primera tanda", "primario"));
-    } else if (e.capitulos_cerrados) {
+    } else {
       acc.push(boton("escribir-tanda", "Escribir la siguiente tanda", "primario"));
       acc.push(boton("ensamblar", "Ensamblar lo cerrado"));
       acc.push('<a href="/lectura">Leer lo escrito</a>');
-    } else {
-      acc.push('<a class="primario" href="/">Ir al encargo</a>');
     }
   }
   $("acciones").innerHTML = acc.join("");
@@ -538,8 +601,8 @@ function pintarVeredicto(){
 }
 
 function pintarRegistro(evs){
-  // Los eventos llegan como {ts, tipo, texto}. El tipo decide si la linea se destaca en rojo:
-  // un bloqueo de hook o un error son lo unico que merece robar la atencion en un registro.
+  // Los eventos llegan como {ts, tipo, texto}. El tipo decide si la línea se destaca en rojo:
+  // un bloqueo de hook o un error son lo único que merece robar la atención en un registro.
   $("registro").innerHTML = (evs||[]).map(function(ev){
     var grave = ev.tipo === "error" || ev.tipo === "bloqueo";
     return "<li" + (grave ? ' class="rev"' : "") + "><time>" + esc(ev.ts || "") + "</time><span>" +
