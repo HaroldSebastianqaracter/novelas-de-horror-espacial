@@ -21,7 +21,7 @@ def test_config_valida_y_rango_de_palabras():
 
 
 @pytest.mark.parametrize("campo,valor", [
-    ("total_capitulos", 29), ("total_capitulos", 51), ("palabras_por_capitulo", 0),
+    ("total_capitulos", 0), ("total_capitulos", 201), ("palabras_por_capitulo", 0),
     ("persona_narrativa", "segunda"), ("tiempo_verbal", "futuro"), ("cadencia_qa", 0), ("max_hechos_por_capitulo", 0),
 ])
 def test_ex05_parametros_fuera_de_rango(campo, valor):

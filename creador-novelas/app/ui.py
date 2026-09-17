@@ -55,7 +55,7 @@ CAMPOS_VOZ = (
     ("tiempo_verbal", "Tiempo verbal", "RF-CFG-05"),
 )
 CAMPOS_DIMENSION = (
-    ("total_capitulos", "Total de capítulos", "RF-CFG-01 · entre 30 y 50"),
+    ("total_capitulos", "Total de capítulos", "RF-CFG-01 · de 1 a 200"),
     ("palabras_por_capitulo", "Palabras por capítulo", "RF-CFG-01 · tolerancia ±20 %"),
     ("ventana_resumen_rodante", "Ventana del resumen rodante", "RF-06.4 · en capítulos, >= 1"),
     ("cadencia_qa", "Cadencia de QA", "RF-07.1 · cada cuántos capítulos corre el corte, >= 1"),

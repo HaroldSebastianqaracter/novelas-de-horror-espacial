@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from app.errores import ConfiguracionInvalidaError
 from app.rutas import Rutas
 
-VERSION_SPECS = "v1.9"  # versión de las especificaciones que implementa este código; viaja en la traza (§16.2)
+VERSION_SPECS = "v1.10"  # versión de las especificaciones que implementa este código; viaja en la traza (§16.2)
 ROLES = ("escritor", "extractor", "qa")
 SKILL_DE_DOMINIO = {"escritor": "prosa-terror-espacial", "extractor": "formato-delta", "qa": "criterios-qa"}
 
@@ -36,7 +36,7 @@ class HarnessConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    total_capitulos: int = Field(ge=30, le=50)  # RF-CFG-01, acotado por RF-03.1
+    total_capitulos: int = Field(ge=1, le=200)  # RF-CFG-01; el maximo es un seguro de coste
     capitulos_por_tanda: int | None = Field(default=None, ge=1)  # RF-CFG-02; None = sin tope
     max_llamadas_por_tanda: int | None = Field(default=None, ge=1)  # RF-CFG-06
     registrar_uso: bool = True  # RF-CFG-06

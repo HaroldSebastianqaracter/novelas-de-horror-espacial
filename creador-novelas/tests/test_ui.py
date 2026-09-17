@@ -9,10 +9,13 @@ from urllib.parse import urlencode
 import pytest
 
 from app import ui, web
-from app.config import HarnessConfig, cargar_config
+from app.config import (CAMPOS_EJECUCION, CAMPOS_NOVELA, HarnessConfig,
+                        cargar_config, construir_config)
 from app.errores import ConfiguracionInvalidaError, EstadoInvalidoError
 from app.orchestrator import checkpoint
 from app.rutas import Rutas
+
+DEFAULTS_CFG = dict(ui.DEFAULTS)
 from tests.conftest import construir_proyecto
 
 FORM_OK = {
@@ -78,8 +81,8 @@ def test_campos_vacios_de_ejecucion_son_null_y_checkbox_ausente_es_false(tmp_pat
 
 
 @pytest.mark.parametrize("campo,valor,texto", [
-    ("total_capitulos", "10", "total_capitulos"),
-    ("total_capitulos", "51", "total_capitulos"),
+    ("total_capitulos", "0", "total_capitulos"),
+    ("total_capitulos", "201", "total_capitulos"),
     ("palabras_por_capitulo", "0", "palabras_por_capitulo"),
     ("palabras_por_capitulo", "muchas", "palabras_por_capitulo"),
     ("cadencia_qa", "", "cadencia_qa"),
@@ -105,7 +108,7 @@ def test_error_de_validacion_no_pisa_una_config_previa(proyecto):
     rutas = Rutas(proyecto)
     antes = (rutas.novela_json.read_bytes(), rutas.ejecucion_json.read_bytes(), rutas.idea.read_bytes())
     with pytest.raises(ConfiguracionInvalidaError):
-        ui.procesar_guardado(proyecto, dict(FORM_OK, idea="otra idea", total_capitulos="99"))
+        ui.procesar_guardado(proyecto, dict(FORM_OK, idea="otra idea", total_capitulos="999"))
     assert (rutas.novela_json.read_bytes(), rutas.ejecucion_json.read_bytes(), rutas.idea.read_bytes()) == antes
 
 
@@ -225,7 +228,7 @@ def test_get_muestra_el_formulario_y_post_guarda(servidor, proyecto):
 def test_post_invalido_devuelve_400_con_el_motivo_y_no_escribe(servidor, proyecto):
     rutas = Rutas(proyecto)
     antes = rutas.novela_json.read_bytes()
-    estado, pagina = _pedir(servidor, "POST", "/guardar", dict(FORM_OK, total_capitulos="7"))
+    estado, pagina = _pedir(servidor, "POST", "/guardar", dict(FORM_OK, total_capitulos="0"))
     assert estado == 400 and "No se guardó nada" in pagina and "total_capitulos" in pagina
     assert rutas.novela_json.read_bytes() == antes
 
@@ -366,13 +369,13 @@ def test_la_consola_ofrece_las_cinco_fases_de_preparacion(proyecto, config):
 
 
 def test_el_formulario_publica_las_cotas_del_esquema(proyecto, config):
-    """La hoja dejaba pedir 6 capitulos y el harness exige 30: el error salia al guardar.
+    """La hoja dejaba pedir capitulos que el esquema rechazaba y el error salia al guardar.
 
     Las cotas se leen de HarnessConfig en vez de escribirse en el HTML, para que no puedan quedarse
     atras cuando cambie el esquema.
     """
     limites = ui.limites_de_config()
-    assert limites["total_capitulos"] == {"min": 30, "max": 50}
+    assert limites["total_capitulos"] == {"min": 1, "max": 200}
     campo = HarnessConfig.model_fields["total_capitulos"]
     cotas = {getattr(m, "ge", None) for m in campo.metadata} | {getattr(m, "le", None) for m in campo.metadata}
     assert limites["total_capitulos"]["min"] in cotas and limites["total_capitulos"]["max"] in cotas
@@ -381,3 +384,22 @@ def test_el_formulario_publica_las_cotas_del_esquema(proyecto, config):
 def test_no_tener_informe_de_qa_no_es_un_error(proyecto, config, servidor):
     estado, cuerpo = _pedir(servidor, "GET", "/api/qa")
     assert estado == 200 and json.loads(cuerpo) is None
+
+
+def test_la_longitud_de_la_obra_la_elige_el_usuario(proyecto, config):
+    """El rango 30-50 no venia de ninguna limitacion del harness: era la decision de que esto
+    generaba novelas. Un relato de seis capitulos recibe el mismo tratamiento a menor escala.
+
+    El maximo se conserva por otro motivo: a unos 0,55 $ por capitulo, teclear 300 donde iban 30
+    cuesta unos 165 $. Es un seguro contra el error de dedo, no una regla estetica.
+    """
+    def con(n):
+        novela = {k: v for k, v in DEFAULTS_CFG.items() if k in CAMPOS_NOVELA} | {"total_capitulos": n}
+        ejecucion = {k: v for k, v in DEFAULTS_CFG.items() if k in CAMPOS_EJECUCION}
+        return construir_config(novela, ejecucion)
+
+    for n in (1, 6, 30, 200):
+        assert con(n).total_capitulos == n
+    for n in (0, 201):
+        with pytest.raises(ConfiguracionInvalidaError):
+            con(n)

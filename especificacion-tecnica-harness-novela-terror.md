@@ -1,7 +1,7 @@
 # Especificación Técnica — Harness Generador de Novelas de Terror
 
-**Versión:** 1.9 — historial de cambios en `git log` sobre este archivo.
-**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.9 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
+**Versión:** 1.10 — historial de cambios en `git log` sobre este archivo.
+**Documento base:** `especificacion-funcional-harness-novela-terror.md` v1.10 — todo lo que sigue implementa esos requisitos (RF-XX) sin redefinir su comportamiento.
 **Lector previsto:** el agente de código que implementa el harness. Toda decisión no cubierta aquí y no derivable de la especificación funcional debe tratarse como pregunta abierta, no como espacio para asumir.
 
 ## 1. Decisiones de arquitectura declaradas
@@ -372,7 +372,7 @@ La API key de OpenRouter se lee de variable de entorno (`OPENROUTER_API_KEY`), n
 
 ```python
 class HarnessConfig(BaseModel):
-    total_capitulos: int = Field(ge=30, le=50)        # RF-CFG-01, acotado por RF-03.1
+    total_capitulos: int = Field(ge=1, le=200)        # RF-CFG-01; el máximo es un seguro de coste
     capitulos_por_tanda: int | None = Field(default=None, ge=1)  # RF-CFG-02; None = sin tope
     max_llamadas_por_tanda: int | None = Field(default=None, ge=1)  # RF-CFG-06
     registrar_uso: bool = True                        # RF-CFG-06
@@ -536,7 +536,7 @@ Regla que justifica la partición: `novela.json` está bajo INV-04 (no cambia co
 
 | Parámetro | Tipo | Requisito | Nota |
 |---|---|---|---|
-| `total_capitulos` | int 30–50 | RF-CFG-01 | Acotado por RF-03.1 |
+| `total_capitulos` | int 1–200 | RF-CFG-01 | El máximo acota el gasto, no la forma |
 | `palabras_por_capitulo` | int > 0 | RF-CFG-01 | Tolerancia ±20% (RF-05.2) |
 | `idioma` | string | RF-CFG-05 | p. ej. `es-ES` |
 | `persona_narrativa` | enum | RF-CFG-05 | `primera` \| `tercera_limitada` \| `tercera_omnisciente` |

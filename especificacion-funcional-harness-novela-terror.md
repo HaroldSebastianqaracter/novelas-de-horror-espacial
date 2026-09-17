@@ -1,6 +1,6 @@
 # Especificación Funcional — Harness Generador de Novelas de Terror
 
-**Versión:** 1.9 — historial de cambios en `git log` sobre este archivo.
+**Versión:** 1.10 — historial de cambios en `git log` sobre este archivo.
 **Esquemas de los artefactos:** spec técnica §4, única fuente. (El documento `harness-novela-terror.md` que citaban versiones anteriores nunca existió en el repositorio.) Este documento formaliza el comportamiento requerido; no repite decisiones de implementación.
 **Lector previsto:** un agente de código que implementará el harness a partir de este documento. Donde este documento sea ambiguo, el agente debe detenerse y pedir aclaración en vez de asumir.
 
@@ -61,7 +61,7 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 - Descripción: el usuario debe poder fijar el tamaño de la obra antes de iniciar una tanda, sin tocar código.
 - Entradas: `config/novela.json` (spec técnica §11.2).
 - Parámetros:
-  - `total_capitulos` — cuántos capítulos tiene la novela completa. Entero, rango 30–50 (acotado por RF-03.1, que exige que el outline tenga entre 30 y 50 entradas).
+  - `total_capitulos` — cuántos capítulos tiene la obra completa. Entero, de 1 a 200. El mínimo de 30 que fijaba la versión anterior no respondía a ninguna limitación del harness: era la decisión de que esto generaba novelas. Quien quiera un relato de seis capítulos obtiene el mismo tratamiento —escaleta, hechos de continuidad, auditorías— sobre una obra más corta. **El máximo sí tiene motivo, y no es estético:** a unos 0,55 $ por capítulo cerrado, teclear 300 donde iban 30 cuesta unos 165 $. Es un seguro contra el error de dedo.
   - `palabras_por_capitulo` — longitud objetivo de cada capítulo. Entero positivo. La tolerancia de ±20% la fija RF-05.2.
 - Reglas:
   - `total_capitulos` determina cuántas entradas genera la fase 3 y es el criterio de fin de la generación.
@@ -192,7 +192,7 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 ### Fase 3 — Escaleta de capítulos
 
 **RF-03.1 — Generación de outline**
-- Descripción: generar entre 30 y 50 entradas de outline a partir de la sinopsis.
+- Descripción: generar exactamente `total_capitulos` entradas de outline a partir de la sinopsis. Por debajo de tres capítulos la sinopsis en tres actos y la cadencia de QA dejan de significar gran cosa, pero nada se rompe: el harness hace lo mismo a menor escala.
 - Entradas: `tres_actos.md`, `premisa.md`.
 - Salidas: `capitulos.json`, array de objetos con los campos: `num`, `titulo`, `objetivo_narrativo`, `personajes`, `locacion`, `informacion_nueva`, `tension` (entero 1–5).
 - Regla: los títulos se generan **aquí, no en el escritor**. La fase 3 ve los 40 capítulos a la vez y puede darles un estilo consistente y evitar repeticiones; cada instancia del escritor, en cambio, inventaría el suyo sin saber cómo son los otros 39 — el mismo problema que todo el harness existe para evitar.
@@ -411,7 +411,7 @@ Comportamiento a nivel funcional — no se especifica mecanismo de implementaci�
 | **EX-02** | El corte de QA reporta al menos una contradicción (RF-07.4). | El harness pausa el avance y espera resolución humana; no reintenta ni omite el hallazgo automáticamente. |
 | **EX-03** | Falta la entrada de outline para el capítulo N, o está incompleta. | El harness no invoca al agente escritor para ese capítulo; reporta el faltante antes de gastar una generación. |
 | **EX-04** | El contexto ensamblado (RF-05.1) excede `max_tokens_contexto_escritor`. | El harness recorta primero `resumen_rodante.md`; nunca recorta `continuidad.json` ni `personajes.json`. Si tras recortar el resumen rodante a su mínimo aún excede el límite, se detiene y reporta el problema — no trunca el log de continuidad. |
-| **EX-05** | Un parámetro de RF-CFG-01 o RF-CFG-02 está fuera de rango (`total_capitulos` fuera de 30–50, `palabras_por_capitulo` ≤ 0, `capitulos_por_tanda` ≤ 0). | El harness no inicia la ejecución y reporta qué parámetro es inválido. La validación ocurre antes de cualquier llamada al modelo, para no gastar generaciones con una configuración que igual va a fallar. |
+| **EX-05** | Un parámetro de RF-CFG-01 o RF-CFG-02 está fuera de rango (`total_capitulos` fuera de 1–200, `palabras_por_capitulo` ≤ 0, `capitulos_por_tanda` ≤ 0). | El harness no inicia la ejecución y reporta qué parámetro es inválido. La validación ocurre antes de cualquier llamada al modelo, para no gastar generaciones con una configuración que igual va a fallar. |
 | **EX-06** | `total_capitulos` cambió respecto del valor con el que se generó la escaleta, y ya hay capítulos cerrados. | El harness no reanuda y reporta la discrepancia. Cambiar el tamaño de la obra a mitad de camino invalida la escaleta (INV-04); resolverlo es decisión del usuario, no del harness. |
 | **EX-07** | El borrador del capítulo N queda fuera de `palabras_por_capitulo` ±20% (RF-05.2). | Un reintento con el desvío como feedback. Si el segundo también falla, se acepta con aviso en el manifiesto y la tanda continúa. Defecto de forma: no amerita detener nada. |
 | **EX-08** | La extracción del capítulo N devuelve en `delta.personajes` una clave ausente del registro de sujetos — el borrador introdujo un personaje no previsto (RF-05.2, RF-06.1). | Se descarta el borrador y se regenera el capítulo. Si el segundo intento repite el fallo, el harness se detiene y reporta la entrada de outline como sospechosa: dos fallos seguidos señalan un plan mal planteado, y seguir generando sobre él contradice el principio de EX-03. |

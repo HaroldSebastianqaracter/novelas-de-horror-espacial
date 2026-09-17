@@ -1,6 +1,6 @@
 # Diagrama de flujo — Harness Generador de Novelas de Terror Espacial
 
-Fuente: `especificacion-funcional-harness-novela-terror.md` v1.9 y `especificacion-tecnica-harness-novela-terror.md` v1.9.
+Fuente: `especificacion-funcional-harness-novela-terror.md` v1.10 y `especificacion-tecnica-harness-novela-terror.md` v1.10.
 
 El **0** es el resumen para explicar el sistema a alguien de cero. Los otros cuatro se reparten el detalle: el **1** es el flujo de control (qué corre y en qué orden), el **2** el flujo de datos (quién lee qué — el invariante central del diseño), el **3** el detalle de una iteración y el **4** la máquina de estados que sostiene la reanudación.
 
@@ -57,7 +57,7 @@ flowchart TD
         F2 --> ACTOS[/"tres_actos.md<br/>gancho · medio · clímax"/]
         ACTOS --> F3["Fase 3<br/>Escaleta<br/>RF-03.1 · RF-03.2"]
         PREMISA --> F3
-        F3 --> OUTLINE[/"capitulos.json<br/>30-50 entradas · tensión 1-5"/]
+        F3 --> OUTLINE[/"capitulos.json<br/>total_capitulos entradas · tensión 1-5"/]
         OUTLINE --> F4["Fase 4<br/>Bases de estado<br/>RF-04.1 · 04.2 · 04.3"]
         ACTOS --> F4
         F4 --> BASES[/"personajes.json<br/>mundo.json<br/>continuidad.json"/]
