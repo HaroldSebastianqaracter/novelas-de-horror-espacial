@@ -27,6 +27,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from app import registro
 from app.agents import escritor
 from app.state import repository as repo
 from app.config import CAMPOS_EJECUCION, CAMPOS_NOVELA
@@ -200,37 +201,79 @@ def _cerrar_proceso() -> dict[str, Any] | None:
         except OSError:
             pass
     fin = {"fase": _EN_CURSO.get("fase"), "codigo": proc.returncode, "log": _EN_CURSO.get("log")}
-    _anotar_coste_de_fase(_EN_CURSO.get("raiz"), fin["fase"], _EN_CURSO.get("log"))
+    _anotar_coste_de_fase(_EN_CURSO.get("raiz"), fin["fase"], _EN_CURSO.get("log"),
+                          _EN_CURSO.get("desde"))
     _EN_CURSO.clear()
     _EN_CURSO["ultimo"] = fin
     return fin
 
 
-# Las fases del preludio no tienen subagentes, asi que H-10 --que anota lo que gasta cada subagente--
-# no ve ni un token suyo. Sin esto la consola anunciaba «0,00 $ gastados» despues de gastar de
-# verdad, que es peor que no enseñar coste. `escribir-tanda` queda fuera a proposito: es la unica
-# que lanza subagentes, y su uso ya lo cuenta H-10; sumar tambien el de su sesion seria contarlo dos
-# veces.
 SIN_SUBAGENTES = tuple(f for f in SKILLS if f != "escribir-tanda")
 
+# Qué campo del resumen de `claude -p` corresponde a cada columna de `uso.jsonl`.
+_CAMPOS_USO = {"tokens_entrada": "input_tokens", "tokens_salida": "output_tokens",
+               "tokens_cache_lectura": "cache_read_input_tokens",
+               "tokens_cache_creacion": "cache_creation_input_tokens"}
 
-def _anotar_coste_de_fase(raiz: Path | None, fase: str | None, log: str | None) -> None:
-    """Guarda lo que costo una fase lanzada desde la pantalla. Nunca hace fallar el cierre."""
-    if not raiz or fase not in SIN_SUBAGENTES or not log:
+
+def _uso_del_orquestador(raiz: Path, datos: dict) -> dict[str, int]:
+    """Lo que consumió la sesión que orquesta, sin lo que ya anotaron sus subagentes.
+
+    El resumen de `claude -p` viene agregado: incluye a la sesión y a todos los subagentes que
+    despachó. H-10 ya anotó a los subagentes uno por uno, así que publicar el total entero los
+    contaría dos veces. La resta deja lo que gastó el orquestador por su cuenta, que hasta ahora no
+    aparecía en ninguna parte: en la tanda del 18/09 eran 4,21 $ de los 5,52 $ que costó de verdad, y
+    Langfuse enseñaba 1,31 $ con toda confianza.
+    """
+    total = datos.get("usage") or {}
+    ya_contado = {c: 0 for c in _CAMPOS_USO}
+    for u in registro.leer_uso(registro.dir_actual(raiz)):
+        for columna in _CAMPOS_USO:
+            ya_contado[columna] += int(u.get(columna) or 0)
+    return {columna: max(0, int(total.get(origen) or 0) - ya_contado[columna])
+            for columna, origen in _CAMPOS_USO.items()}
+
+
+def _anotar_coste_de_fase(raiz: Path | None, fase: str | None, log: str | None,
+                          desde: float | None = None) -> None:
+    """Guarda lo que costó una fase lanzada desde la pantalla. Nunca hace fallar el cierre.
+
+    Deja dos rastros: la línea de `fases.jsonl` que alimenta el gasto de la pantalla, y --esto es lo
+    nuevo-- el consumo del orquestador como una invocación más en `uso.jsonl`, con su `agente_inicio`
+    y su `agente_fin`, para que el exportador lo publique junto a los agentes (§16.3). Sin ello el
+    preludio entero no existía en Langfuse y cada tanda declaraba una cuarta parte de su coste.
+    """
+    if not raiz or not fase or not log:
         return
     try:
         datos = json.loads(Path(log).read_text(encoding="utf-8"))
         uso = datos.get("usage") or {}
-        fila = {"ts": datetime.now().astimezone().isoformat(timespec="milliseconds"),
-                "fase": fase, "coste_usd": float(datos.get("total_cost_usd") or 0),
-                "turnos": datos.get("num_turns"),
-                "tokens": sum(int(uso.get(k) or 0) for k in
-                              ("input_tokens", "output_tokens",
-                               "cache_creation_input_tokens", "cache_read_input_tokens"))}
-        destino = Rutas(raiz).registro / "fases.jsonl"
-        destino.parent.mkdir(parents=True, exist_ok=True)
-        with destino.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(fila, ensure_ascii=False) + "\n")
+        if fase in SIN_SUBAGENTES:
+            fila = {"ts": datetime.now().astimezone().isoformat(timespec="milliseconds"),
+                    "fase": fase, "coste_usd": float(datos.get("total_cost_usd") or 0),
+                    "turnos": datos.get("num_turns"),
+                    "tokens": sum(int(uso.get(k) or 0) for k in _CAMPOS_USO.values())}
+            destino = Rutas(raiz).registro / "fases.jsonl"
+            destino.parent.mkdir(parents=True, exist_ok=True)
+            with destino.open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(fila, ensure_ascii=False) + "\n")
+
+        propio = _uso_del_orquestador(raiz, datos)
+        if not any(propio.values()):
+            return
+        agent_id = f"orq-{fase}-{int(desde or time.time())}"
+        inicio = (datetime.fromtimestamp(desde).astimezone().isoformat(timespec="milliseconds")
+                  if desde else None)
+        if inicio:
+            registro.evento(raiz, "agente_inicio", rol="orquestador", capitulo=None,
+                            agent_id=agent_id, fase=fase, ts=inicio)
+        registro.evento(raiz, "agente_fin", rol="orquestador", capitulo=None, agent_id=agent_id,
+                        fase=fase, turnos=datos.get("num_turns"), modelo=MODELO_ORQUESTADOR)
+        with registro.ruta_uso(raiz).open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"rol": "orquestador", "capitulo": None, "fase": fase,
+                                 "modelo": MODELO_ORQUESTADOR, **propio,
+                                 "turnos": datos.get("num_turns"), "agent_id": agent_id,
+                                 "stop_reason": datos.get("subtype")}, ensure_ascii=False) + "\n")
     except Exception as e:  # noqa: BLE001
         print(f"[registro] no se pudo anotar el coste de {fase}: {e}")
 

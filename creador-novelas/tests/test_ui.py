@@ -514,6 +514,46 @@ def test_sin_git_bash_la_fase_de_agentes_no_se_lanza(monkeypatch, proyecto, conf
         web.lanzar_fase(proyecto, "escribir-tanda")
 
 
+def test_el_consumo_del_orquestador_se_anota_y_llega_a_la_traza(proyecto, config):
+    """Langfuse declaraba una cuarta parte del coste real y el preludio no existía allí.
+
+    H-10 solo anota subagentes, así que la sesión que orquesta no aparecía en ninguna parte: en la
+    tanda del 18/09 eran 4,21 $ de los 5,52 $ que costó. El resumen de `claude -p` viene agregado
+    (sesión + subagentes), de modo que lo suyo es esa suma menos lo que H-10 ya contó.
+    """
+    import time as _t
+    from app import observabilidad as obs
+    from app import registro as reg
+
+    carpeta = reg.dir_actual(proyecto)
+    carpeta.mkdir(parents=True, exist_ok=True)
+    # Un subagente ya anotado por H-10, con su par de eventos.
+    reg.evento(proyecto, "agente_inicio", rol="escritor", capitulo=1, agent_id="sub1")
+    reg.evento(proyecto, "agente_fin", rol="escritor", capitulo=1, agent_id="sub1")
+    with (carpeta / "uso.jsonl").open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps({"rol": "escritor", "capitulo": 1, "modelo": "claude-opus-5", "agent_id": "sub1",
+                             "tokens_entrada": 100, "tokens_salida": 1_000,
+                             "tokens_cache_lectura": 50_000, "tokens_cache_creacion": 2_000}) + "\n")
+
+    log = proyecto / "salida.json"
+    log.write_text(json.dumps({"type": "result", "subtype": "success", "num_turns": 9,
+                               "total_cost_usd": 3.0,
+                               "usage": {"input_tokens": 150, "output_tokens": 5_000,
+                                         "cache_read_input_tokens": 200_000,
+                                         "cache_creation_input_tokens": 9_000}}), encoding="utf-8")
+    web._anotar_coste_de_fase(proyecto, "escribir-tanda", str(log), _t.time() - 60)
+
+    filas = [u for u in reg.leer_uso(carpeta) if u["rol"] == "orquestador"]
+    assert len(filas) == 1, "el orquestador tiene que quedar anotado como una invocación más"
+    # Lo suyo es el total menos lo que ya contó H-10: si no se restara, se contaría dos veces.
+    assert filas[0]["tokens_salida"] == 5_000 - 1_000
+    assert filas[0]["tokens_cache_lectura"] == 200_000 - 50_000
+    assert filas[0]["turnos"] == 9
+
+    traza = obs.construir_traza(proyecto, carpeta)
+    assert "orquestador" in [g.rol for g in traza.generaciones], "el exportador debe publicarlo"
+
+
 def test_el_registro_solo_anuncia_los_hooks_que_de_verdad_frenaron_algo():
     """La bitácora decía «H-02 bloqueó» siete veces en una tanda donde no se bloqueó nada.
 
