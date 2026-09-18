@@ -343,3 +343,22 @@ def test_una_vuelta_puede_cambiar_un_ajuste_sin_tocar_el_archivo_de_premisas():
     # dejarse un cambio puesto, y el archivo dejaría de describir el experimento entero.
     r = corredor.aplicar_overrides(encargos, {"escritor_emite_delta": True})
     assert r[0]["config"] == {"cadencia_qa": 1, "escritor_emite_delta": True}
+
+
+def test_una_columna_nueva_no_descuadra_la_tabla(vacio):
+    corredor.correr_novela(vacio, dict(ENCARGO, nombre="vieja"), ejecutar=FaseDoble(vacio), aviso=lambda _: None)
+    csv_ = vacio / "09_archivo" / corredor.CORRIDAS_CSV
+
+    # Una tabla escrita cuando había menos columnas: añadir a secas correría todos los valores un
+    # sitio y nadie se enteraría, porque un CSV descuadrado se lee igual de bien.
+    lineas = csv_.read_text(encoding="utf-8").splitlines()
+    csv_.write_text("\n".join([",".join(lineas[0].split(",")[:6]), ",".join(lineas[1].split(",")[:6])]) + "\n",
+                    encoding="utf-8")
+
+    corredor.correr_novela(vacio, dict(ENCARGO, nombre="nueva"), ejecutar=FaseDoble(vacio), aviso=lambda _: None)
+
+    import csv as _csv
+    with csv_.open(encoding="utf-8", newline="") as fh:
+        filas = list(_csv.DictReader(fh))
+    assert [f["novela"] for f in filas] == ["vieja", "nueva"]  # rehecha desde el JSONL, sin perder nada
+    assert all(f["capitulos"] == "3" for f in filas)

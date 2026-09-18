@@ -259,11 +259,27 @@ def fila_csv(fila: dict[str, Any]) -> dict[str, Any]:
     return plano
 
 
+def _cabecera_de(destino: Path) -> list[str]:
+    if not destino.is_file():
+        return []
+    with destino.open(encoding="utf-8", newline="") as fh:
+        return next(csv.reader(fh), [])
+
+
 def escribir_csv(raiz: Path, fila: dict[str, Any]) -> Path:
-    """Añade la corrida al CSV, con cabecera si es la primera."""
+    """Añade la corrida al CSV, y lo rehace entero si la tabla ha cambiado de columnas.
+
+    Añadir a secas parece inofensivo y no lo es: al sumar `premisas`, `resoluciones` y
+    `correcciones` las filas nuevas se escribieron bajo la cabecera vieja, y las columnas quedaron
+    corridas un sitio --el nombre de la novela pasó a ser «3» y el fallo, «0»--. Nada avisa, porque
+    un CSV descuadrado se lee igual de bien. Si la cabecera no coincide, se rehace desde el JSONL,
+    que es el registro que manda.
+    """
     destino = raiz / archivo.ARCHIVO / CORRIDAS_CSV
     destino.parent.mkdir(parents=True, exist_ok=True)
     plano = fila_csv(fila)
+    if destino.is_file() and _cabecera_de(destino) != list(plano):
+        return reconstruir_csv(raiz)
     nuevo = not destino.exists()
     with destino.open("a", encoding="utf-8", newline="") as fh:
         escritor = csv.DictWriter(fh, fieldnames=list(plano), extrasaction="ignore")
