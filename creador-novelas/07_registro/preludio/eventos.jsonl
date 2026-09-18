@@ -1,1 +1,1 @@
-{"ts": "2026-09-18T17:52:42.094+02:00", "tipo": "verbo", "verbo": "archivar", "args": ["--nombre", "repostaje-cortada-a-mano", "--forzar"], "resultado": "ok", "ms": 34, "capitulo": null}
+{"ts": "2026-09-18T18:18:43.829+02:00", "tipo": "verbo", "verbo": "archivar", "args": ["--nombre", "brote-cortada-a-mano", "--forzar"], "resultado": "ok", "ms": 27, "capitulo": null}

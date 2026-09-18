@@ -1,0 +1,21 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 1 afirma que 'bajaron al nivel dos los cinco' (tripulacion completa, incluida Duna Oyarzo) y poco despues el mismo narrador establece que Oyarzo 'venia del puente por el otro extremo'. Contradice el hecho vigente de que Duna Oyarzo tiene asignada la guardia del puente en la noche del cuarto dia.",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Motivo del registro que 'anota': 'el sistema anoto la apertura', 'el registro anoto el cierre con su hora exacta' y 'Keth anoto la hora'. 3 apariciones acumuladas. Capitulos: 1.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Insistencia en el numero doce en posiciones de enfasis: 'doce contenedores', 'Doce, siempre doce' y 'doce anos cruzandolo'. 3 apariciones acumuladas. Capitulos: 1.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

@@ -1,0 +1,55 @@
+{
+  "Ibarra": {
+    "estado_fisico": "Sin heridas visibles.",
+    "estado_psicologico": "Alerta, decisiva, toma decisiones rápidas bajo presión sin alarma aparente.",
+    "secretos_que_conoce": [
+      "La nave está a once días del puerto más cercano sin ayuda disponible en la ruta."
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Sole": {
+    "estado_fisico": "Sin heridas visibles, en el pasillo del nivel dos durante el evento.",
+    "estado_psicologico": "Asustado pero funcional; empalidece visiblemente pero participa en el sellado.",
+    "secretos_que_conoce": [
+      "Conoce el circuito entero de conductos de la nave.",
+      "Está convencido de que la presencia es demasiado grande para caber en los conductos."
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Keth": {
+    "estado_fisico": "Sin heridas visibles, en la zona de control o puente.",
+    "estado_psicologico": "Funcional, registrador preciso de eventos, mantiene el control emocional.",
+    "secretos_que_conoce": [
+      "La esclusa se abrió sin orden en el sistema y se cerró con precisión exacta.",
+      "Dispone de un registro exacto de horas del evento."
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Marrec": {
+    "estado_fisico": "Estado incierto; su voz se quiebra en mitad del protocolo pero participa en el sellado después.",
+    "estado_psicologico": "Fue interrumpido en el contacto pero se recuperó y ejecutó las órdenes de sellado.",
+    "secretos_que_conoce": [
+      "El protocolo de contacto tiene diecinueve fases.",
+      "La presencia no respondió a la identificación de nave."
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Duna Oyarzo": {
+    "estado_fisico": "Atacada e incapacitada; en el suelo del pasillo del nivel dos.",
+    "estado_psicologico": "Incapacitada; no hay datos sobre su estado consciente.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "la presencia": {
+    "estado_fisico": "Hostil, de tamaño anómalo; demasiado grande para pasillos de dos personas de frente, pero capaz de acceder a conductos.",
+    "estado_psicologico": "Inteligente, hostil; abre y cierra esclusas con precisión, ataca, se oculta en conductos.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  }
+}

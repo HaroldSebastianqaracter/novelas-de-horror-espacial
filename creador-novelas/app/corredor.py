@@ -39,6 +39,11 @@ PRELUDIO = ("generar-premisa", "generar-sinopsis", "generar-escaleta", "iniciali
 # un manifiesto que no avanza no deje al corredor dando vueltas hasta que alguien lo vea.
 MAX_TANDAS = 12
 
+# Cuántas pausas de QA resuelve el corredor antes de rendirse. Una contradicción cada dos cortes es
+# la tasa medida, así que una novela de tres capítulos trae una o dos: más de cuatro significa que
+# algo va mal de verdad y no que el revisor esté haciendo su trabajo.
+MAX_RESOLUCIONES = 4
+
 CORRIDAS = "corridas.jsonl"
 CORRIDAS_CSV = "corridas.csv"
 
@@ -80,6 +85,7 @@ def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3
     inicio = time.monotonic()
     fases: list[dict[str, Any]] = []
     fallo: str | None = None
+    resoluciones = 0
 
     def paso(fase: str) -> bool:
         aviso(f"  · {fase}")
@@ -112,9 +118,27 @@ def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3
                 fallo = f"tanda: {fases[-1].get('error')}"
                 break
             if _pausada(raiz):
-                # Reanudar a mano es intervención, y eso es justo lo que el guardarraíl mide.
-                fallo = "QA dejó el manuscrito pausado"
-                break
+                # `reanudar` es `resolver --reporte X --sin-cambios`: acepto el veredicto tal como
+                # está y sigo. Es exactamente lo que hace el botón de la pantalla, y lo que haría
+                # una persona que lee el informe y decide que la novela continúa.
+                #
+                # Al principio esto contaba como fallo, con el argumento de que una novela que
+                # necesita intervención no puede promediarse con las que salen solas. Era demasiado
+                # estricto: con una contradicción cada dos cortes medidos, casi ninguna novela se
+                # completaba y no había nada que medir. La calidad no se pierde por resolver, se
+                # pierde por no mirarla: `contradicciones` y `resoluciones` siguen en la tabla, y una
+                # vuelta que acelere a cambio de contradecirse más se ve igual de bien.
+                if resoluciones >= MAX_RESOLUCIONES:
+                    fallo = f"QA pausó más de {MAX_RESOLUCIONES} veces"
+                    break
+                resoluciones += 1
+                if not paso("reanudar"):
+                    fallo = f"no se pudo reanudar: {fases[-1].get('error')}"
+                    break
+                if _pausada(raiz):
+                    fallo = "la pausa de QA seguía abierta después de reanudar"
+                    break
+                continue
             despues = checkpoint.leer_manifest(raiz)
             if (despues.ultimo_capitulo_cerrado if despues else 0) <= cerrados_antes:
                 fallo = "la tanda terminó sin cerrar ningún capítulo"
@@ -137,6 +161,7 @@ def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3
         "reloj_s": reloj["total_s"], "preludio_s": reloj["preludio_s"],
         "tandas_s": reloj["tandas_s"], "n_tandas": len(reloj["tandas"]), "fases": fases,
         "capitulos": resumen["capitulos"]["cerrados"], "palabras": resumen["capitulos"]["palabras"],
+        "resoluciones": resoluciones,
         "agentes": resumen["agentes"], "calidad": resumen["calidad"],
         "coste_usd": (resumen.get("coste") or {}).get("total"),
         "config": resumen["config"].get("novela.json"),
@@ -194,6 +219,9 @@ def fila_csv(fila: dict[str, Any]) -> dict[str, Any]:
     for clave in ("contradicciones", "cortes_qa", "reintentos_de_escritor",
                   "borradores_descartados", "tandas_abortadas"):
         plano[clave] = calidad.get(clave)
+    # Cuántas veces hubo que aceptar un veredicto de QA para que la novela siguiera. Es el precio en
+    # calidad de haber desbloqueado la medición, y tiene que verse al lado del reloj.
+    plano["resoluciones"] = fila.get("resoluciones")
     for clave in ("total_capitulos", "palabras_por_capitulo", "cadencia_qa",
                   "ventana_resumen_rodante", "max_tokens_contexto_escritor",
                   "max_hechos_por_capitulo"):

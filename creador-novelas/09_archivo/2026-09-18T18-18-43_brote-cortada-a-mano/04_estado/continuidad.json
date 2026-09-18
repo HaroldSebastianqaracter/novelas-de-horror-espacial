@@ -1,0 +1,122 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los planos de atmosfera del Vesania recogen un unico circuito de recicladores para todos los modulos habitables, de modo que el aire que respira cualquier modulo sellado es el mismo que respira el resto de la nave.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El inventario de a bordo registra tres trajes de vacio operativos para una tripulacion de cinco.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El manual de emergencias del Vesania fija nueve horas de modulos habitables vacios para completar un purgado total de la atmosfera.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las cartas de ruta situan el punto de socorro mas proximo a once semanas de viaje desde el tramo muerto en el que navega la nave.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El diario de a bordo cuenta cuarenta y un dias de travesia al empezar la guardia tercera, sobre una ruta prevista de ciento veinte dias.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El protocolo medico de a bordo recoge procedimientos para traumatismos, descompresion y cuadros infecciosos con agente identificado; para masas de crecimiento rapido sin fiebre ni agente identificable no hay entrada en el protocolo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La documentacion de la carga va sellada y el rol de la nave no acredita a ninguno de los cinco tripulantes para inventariarla.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La disciplina de aislamiento de a bordo prescribe raciones pasadas por esclusa y dos comunicaciones diarias por intercomunicador con el modulo sellado.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tamar Ruiz",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Tamar Ruiz manda el Vesania y consta como avalista de la deuda de dinero que Bruno Sarmiento tiene con Ovidio Lekue.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Josu Adame",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Josu Adame es el ingeniero de atmosfera y el unico tripulante con certificacion para intervenir el circuito de recicladores; en la travesia anterior tapo una averia de Ovidio Lekue sin anotarla en el registro de mantenimiento.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irune Castel",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Irune Castel es la medica de a bordo y su cuaderno clinico registra dos travesias completas sin un solo paciente grave.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Bruno Sarmiento",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Bruno Sarmiento hace guardia baja, comparte litera y turnos con Ovidio Lekue junto al conducto de retorno de atmosfera, y le debe a Ovidio un dinero que no ha terminado de saldar.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ovidio Lekue",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ovidio Lekue hace guardia baja con Bruno Sarmiento, lleva la cuenta de lo que cada tripulante le debe y sabe que Josu Adame le tapo una averia en la travesia anterior.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vesania - modulo de enfermeria",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El modulo de enfermeria tiene dos camastros abatibles, una lampara de exploracion sobre riel y una escotilla con visor que puede sellarse desde dentro; su toma de aire es la del circuito comun.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vesania - sala de recicladores",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La sala de recicladores aloja la columna de filtrado con bandejas extraibles y un registro de mantenimiento por guardia, y zumba a ritmo constante.",
+    "cap_origen": 0,
+    "superado_por": null
+  }
+]

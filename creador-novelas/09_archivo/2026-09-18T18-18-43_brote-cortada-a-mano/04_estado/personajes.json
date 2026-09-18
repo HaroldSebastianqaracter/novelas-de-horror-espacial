@@ -1,0 +1,49 @@
+{
+  "Tamar Ruiz": {
+    "estado_fisico": "Sana, con el cansancio acumulado de cuarenta y un dias de guardias repartidas; duerme en el camarote de mando, lejos del conducto de retorno.",
+    "estado_psicologico": "Gobierna la nave como quien administra una deuda: contable, contenida, atenta a lo que habra que registrar despues. Confia en que el tramo muerto se cruce sin incidencias que exijan decisiones que no pueda justificar por escrito.",
+    "secretos_que_conoce": [
+      "Avalo ella la deuda de dinero que Bruno Sarmiento tiene con Ovidio Lekue",
+      "La carga que llevan va sellada y ninguno de los cinco tiene autorizacion para inventariarla"
+    ],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "Josu Adame": {
+    "estado_fisico": "Sano en apariencia, con las manos marcadas por el mantenimiento de filtros; no se ha revisado a si mismo.",
+    "estado_psicologico": "Practico y literal, mas comodo con numeros que con personas. Le tranquiliza ser el unico que entiende de verdad el circuito de atmosfera y le inquieta lo mismo, porque nadie puede corregirle.",
+    "secretos_que_conoce": [
+      "Tapo una averia de Ovidio Lekue en la travesia anterior y no la anoto en el registro de mantenimiento"
+    ],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "Irune Castel": {
+    "estado_fisico": "Sana segun su ultima autoexploracion, hecha sin instrumental fino; respira el mismo aire que el resto.",
+    "estado_psicologico": "Dos travesias sin un paciente serio le han dejado una confianza sin poner a prueba. Se apoya en el protocolo y en su cuaderno clinico; escribe todo lo que ve porque escribirlo la sostiene.",
+    "secretos_que_conoce": [
+      "Su cuaderno clinico registra dos travesias completas sin un solo paciente grave y ninguna urgencia real atendida a bordo"
+    ],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "Bruno Sarmiento": {
+    "estado_fisico": "Guardia baja, cuerpo hecho al trabajo de carga; duerme en la litera pegada al conducto de retorno de atmosfera.",
+    "estado_psicologico": "Acomodaticio y observador, con una precision incomoda para describir lo que le pasa por dentro. Evita el tema del dinero que debe y aguanta las bromas de Ovidio sin devolverlas.",
+    "secretos_que_conoce": [
+      "Debe a Ovidio Lekue una cantidad de dinero que no ha terminado de saldar y que avalo la capitana"
+    ],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "Ovidio Lekue": {
+    "estado_fisico": "Guardia baja, fuerte y descuidado; comparte litera y turnos con Bruno, junto al mismo conducto de retorno.",
+    "estado_psicologico": "Negociador por costumbre: todo trato es una palanca guardada para mas tarde. Se rie de lo que le asusta y lleva la cuenta de lo que cada uno le debe.",
+    "secretos_que_conoce": [
+      "Lleva la cuenta de la deuda de Bruno Sarmiento y de quien la avalo",
+      "Sabe que Josu Adame le tapo una averia en la travesia anterior"
+    ],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  }
+}

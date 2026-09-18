@@ -74,15 +74,35 @@ def test_una_novela_entera_se_encadena_y_se_archiva(vacio):
     assert json.loads(corridas[0])["nombre"] == "capsula"
 
 
-def test_una_novela_pausada_por_qa_cuenta_como_fallida_y_no_espera_a_nadie(vacio):
-    doble = FaseDoble(vacio, pausar=True)
+def test_una_pausa_de_qa_se_resuelve_sola_y_la_novela_sigue(vacio):
+    class PausaYReanuda(FaseDoble):
+        def __call__(self, raiz, fase, **kwargs):
+            if fase == "reanudar":
+                self.llamadas.append(fase)
+                checkpoint.limpiar_error(raiz)
+                checkpoint._actualizar(raiz, estado="en_progreso", reporte_qa_pendiente=None)
+                self.pausar = False  # el revisor ya dio su veredicto y se aceptó
+                return {"fase": fase, "codigo": 0, "segundos": 2.0}
+            return super().__call__(raiz, fase, **kwargs)
+
+    doble = PausaYReanuda(vacio, pausar=True)
     fila = corredor.correr_novela(vacio, ENCARGO, ejecutar=doble, aviso=lambda _: None)
 
-    # Reanudar es intervención, y que una novela pare a mitad es justo uno de los guardarraíles: no
-    # puede promediarse con las que salieron solas, ni dejar al corredor esperando a que alguien mire.
+    # `reanudar` es lo que hace el botón de la pantalla: aceptar el veredicto y seguir. Contarlo como
+    # fallo dejaba casi todas las novelas sin terminar --hay una contradicción cada dos cortes-- y
+    # sin novelas completas no hay velocidad que medir. La calidad no se pierde: se anota.
+    assert "reanudar" in doble.llamadas
+    assert fila["completa"] is True
+    assert fila["resoluciones"] == 1
+    assert corredor.fila_csv(fila)["resoluciones"] == 1
+
+
+def test_una_pausa_que_no_se_deja_resolver_no_deja_al_corredor_dando_vueltas(vacio):
+    doble = FaseDoble(vacio, pausar=True)  # reanudar no arregla nada: sigue pausada
+    fila = corredor.correr_novela(vacio, ENCARGO, ejecutar=doble, aviso=lambda _: None)
+
     assert fila["completa"] is False
-    assert "pausado" in fila["fallo"]
-    assert "ensamblar" not in doble.llamadas
+    assert "seguía abierta" in fila["fallo"]
     assert checkpoint.leer_manifest(vacio) is None  # archivada igual: el árbol queda listo
 
 

@@ -1,0 +1,33 @@
+{
+  "reglas": [
+    "El Vereda Sur es un remolcador de carga que arrastra un tren de doce contenedores por el tramo muerto de la ruta; el trayecto completo hasta puerto es de once días desde la noche del cuarto día de viaje.",
+    "El retardo de señal en el tramo muerto convierte cualquier llamada de socorro en un mensaje que se contestará mucho después de que haga falta, y el registro de tráfico no sitúa ninguna nave a distancia de rescate durante el trayecto.",
+    "La nave se compartimenta cerrando mamparos internos sección por sección; cada mamparo que baja reduce el volumen transitable tanto para lo que se quiera encerrar como para quien lo cierra.",
+    "Un circuito de conductos de servicio de mantenimiento recorre la nave entera y comunica las secciones por encima de los mamparos; sus bocas de registro pueden soldarse desde el lado seguro.",
+    "El sistema de a bordo registra cada apertura y cierre de mamparo y de esclusa con su hora, y ese registro puede consultarse después desde una tableta de carga.",
+    "El escáner de proximidad del tren de contenedores tiene ventanas periódicas en las que no devuelve lectura alguna.",
+    "El pasillo de acceso puede purgarse al vacío desde el panel de emergencia, y la secuencia exige mantener el circuito cerrado a mano desde el lado que queda fuera del mamparo.",
+    "El manual de la compañía prescribe un procedimiento de contacto de diecinueve fases que Marrec conoce de memoria; nada en él contempla que el contacto no responda."
+  ],
+  "objetos": [
+    "Tableta de carga de Keth: lleva el manifiesto de los doce contenedores y permite cruzar la cuenta con los registros de apertura de mamparos y esclusas.",
+    "Tren de doce contenedores remolcado por el Vereda Sur, vigilado solo por el escáner de proximidad.",
+    "Esclusa de carga del Vereda Sur, con registro propio de aperturas y cierres.",
+    "Lámparas de servicio del nivel dos, de luz plana y sin sombra útil.",
+    "Panel de emergencia del pasillo de acceso, desde el que se arma la purga al vacío.",
+    "Equipo de soldadura con el que Solé cierra registros de conducto desde el lado seguro.",
+    "Aislante térmico de los conductos de servicio, blando y marcable.",
+    "Manual de protocolos de la compañía con las diecinueve fases del procedimiento de contacto."
+  ],
+  "linea_de_tiempo": [
+    "Días 1 a 3: travesía de rutina por el tramo muerto, con los cinco tripulantes repartidos en guardias.",
+    "Noche del día 4: la esclusa de carga se abre sola once segundos; lo que entra mata a Duna Oyarzo en el pasillo del nivel dos y los cuatro supervivientes sellan el nivel entero.",
+    "Días 5 a 10: sellado por secciones dirigido por Ibarra, con los cuatro replegándose hasta compartir un solo compartimento.",
+    "Día 11: apertura de todos los mamparos, purga del pasillo de acceso y llegada a puerto."
+  ],
+  "locaciones": {
+    "Vereda Sur - pasillo del nivel dos": "Pasillo de servicio estrecho del segundo nivel del remolcador, iluminado por lámparas planas sin sombra, con bocas de registro de conducto de mantenimiento en el techo y mamparos seccionadores en ambos extremos. Comunica con la esclusa de carga.",
+    "Vereda Sur - compartimento comun": "Compartimento de uso común del remolcador, con cocina, literas y el conducto de servicio pasando por encima del fogón. Al estrecharse el volumen sellado, los cuatro supervivientes acaban durmiendo, comiendo y trabajando aquí dentro.",
+    "Vereda Sur - puente": "Puesto de mando del remolcador, en el extremo opuesto a la bodega tres, con los paneles de mamparos, el registro de esclusa y la consola de navegación. Es el único volumen de la nave que la presencia no ha recorrido, y hacia él se han replegado los supervivientes."
+  }
+}

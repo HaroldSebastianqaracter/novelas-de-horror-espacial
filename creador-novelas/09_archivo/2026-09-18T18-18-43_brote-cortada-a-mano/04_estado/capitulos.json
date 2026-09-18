@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "Bordes demasiado limpios",
+    "objetivo_narrativo": "Presentar a los cinco tripulantes en el tramo muerto de la ruta y convertir una anomalía médica en un encierro: Irune sella la enfermería con Bruno y Ovidio dentro antes de consultarlo con Tamar, y Josu desmonta la ilusión de seguridad al recordar que el circuito de atmósfera es único.",
+    "personajes": [
+      "Tamar Ruiz",
+      "Josu Adame",
+      "Irune Castel",
+      "Bruno Sarmiento",
+      "Ovidio Lekue"
+    ],
+    "locacion": "Vesania - modulo de enfermeria",
+    "informacion_nueva": "Bruno y Ovidio tienen masas tibias de bordes limpios que crecen y se desplazan en catorce horas y se contraen bajo la lampara; no hay fiebre ni agente identificable ni protocolo. Irune declara el aislamiento por su cuenta. Los recicladores del Vesania son un circuito unico, asi que la escotilla no separa el aire: el socorro esta a once semanas.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "La liturgia de las raciones",
+    "objetivo_narrativo": "Asentar la rutina del encierro -raciones por la esclusa, dos comunicaciones diarias, mediciones a traves del visor- mientras Ovidio negocia con deudas viejas y Bruno colabora; y romperla con el hallazgo de Josu en los filtros, que invierte la direccion del contagio y pone la aritmetica de los trajes sobre la mesa.",
+    "personajes": [
+      "Josu Adame",
+      "Irune Castel",
+      "Tamar Ruiz",
+      "Bruno Sarmiento",
+      "Ovidio Lekue"
+    ],
+    "locacion": "Vesania - sala de recicladores",
+    "informacion_nueva": "En las bandejas del reciclador hay colonias finas adheridas, anteriores a las lesiones de Bruno y Ovidio: el crecimiento no paso de los cuerpos al aire sino del aire a los cuerpos, eligiendo a quienes duermen junto al conducto de retorno. Los tres de fuera llevan semanas incubando lo mismo, mas despacio. El purgado total exige nueve horas de modulos vacios y a bordo solo hay tres trajes.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "Contar en voz alta",
+    "objetivo_narrativo": "Forzar y ejecutar la decision: Ovidio abre el visor y muestra lo que respira en fase con el reciclador, Bruno pide que lo cuenten bien, Tamar ordena el purgado y Josu se niega a preparar los trajes hasta saber quien lleva el tercero; Irune resuelve la aritmetica quedandose dentro, y el regreso a la nave presurizada desmiente la victoria.",
+    "personajes": [
+      "Ovidio Lekue",
+      "Bruno Sarmiento",
+      "Tamar Ruiz",
+      "Josu Adame",
+      "Irune Castel"
+    ],
+    "locacion": "Vesania - modulo de enfermeria",
+    "informacion_nueva": "El costado de Ovidio se abre y se cierra a un ritmo ajeno, en fase con el zumbido del reciclador. Las lecturas de Irune muestran su pulmon derecho mas adelantado que el de Bruno, asi que se queda con ellos y anota hasta el final. Tras el purgado las bandejas bajan pero no a cero: el circuito quedo podado, no limpio. Tamar registra la emergencia como contenida y Josu calla el bulto bajo su clavicula, con setenta y siete dias de travesia y dos trajes sin usar.",
+    "tension": 5
+  }
+]

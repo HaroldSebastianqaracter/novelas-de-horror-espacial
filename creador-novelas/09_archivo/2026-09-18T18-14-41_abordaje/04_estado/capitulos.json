@@ -1,0 +1,48 @@
+[
+  {
+    "num": 1,
+    "titulo": "Once segundos de esclusa",
+    "objetivo_narrativo": "Presentar el Vereda Sur en el tramo muerto de la ruta y a sus cinco tripulantes en la rutina del cuarto día, y romperla cuando la esclusa de carga se abre sola y lo que entra mata a Duna Oyarzo delante de los otros cuatro mientras Marrec recita el protocolo de contacto; cerrar con los supervivientes sellando el nivel dos entero, convencidos de que han empezado a acorralarla.",
+    "personajes": [
+      "Ibarra",
+      "Sole",
+      "Keth",
+      "Marrec",
+      "Duna Oyarzo",
+      "la presencia"
+    ],
+    "locacion": "Vereda Sur - pasillo del nivel dos",
+    "informacion_nueva": "Faltan once dias hasta puerto y ninguna nave a distancia de rescate; la esclusa de carga se abrio sola durante once segundos sin fallo ni orden registrada; la cosa es demasiado grande para el pasillo y aun asi desaparece por una boca de conducto que Sole jura demasiado angosta; ningun protocolo de contacto la detiene.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "Once mamparos de cuenta",
+    "objetivo_narrativo": "Seguir seis dias de sellado por secciones que parece funcionar mientras estrecha a los cuatro hasta un solo compartimento, y voltear el plan cuando Keth cruza su cuenta con los registros de apertura: la cosa no cede terreno, recorre en orden cada seccion sellada y sale antes de que baje el mamparo; Sole encuentra el mapa marcado en el aislante y Marrec, la ventana ciega del escaner; el unico volumen sin registrar es el puente, hacia donde ellos mismos se han replegado.",
+    "personajes": [
+      "Ibarra",
+      "Sole",
+      "Keth",
+      "Marrec",
+      "la presencia"
+    ],
+    "locacion": "Vereda Sur - compartimento comun",
+    "informacion_nueva": "La cosa no huye: recorre la nave seccion por seccion, una por dia, y sale de cada una antes del cierre; las marcas agrupadas en el aislante de los conductos son un mapa comprobado, no aranazos; los once segundos de apertura de la esclusa coincidieron al segundo con la ventana ciega del escaner de proximidad del tren de contenedores; el puente es lo unico que le falta registrar.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "Once horas de puerto",
+    "objetivo_narrativo": "Llevar el dia once al clima: Ibarra ordena lo contrario de todo lo hecho, abrir cada mamparo y ofrecer el puente como cebo mientras Sole arma la purga; la cosa recorre la nave liberada en cuarenta minutos y entra antes de tiempo, y Marrec muere sosteniendo a mano el circuito del mamparo para que la purga se complete; cerrar en puerto con tres muertos en el parte y la tableta de Keth mostrando que la esclusa volvio a abrirse once segundos durante la maniobra, con el tren de contenedores ciego otra vez.",
+    "personajes": [
+      "Ibarra",
+      "Sole",
+      "Keth",
+      "Marrec",
+      "la presencia"
+    ],
+    "locacion": "Vereda Sur - puente",
+    "informacion_nueva": "La purga del pasillo de acceso exige mantener el circuito cerrado a mano desde el lado equivocado del mamparo; Marrec paga ese precio y la cosa se va al vacio con el; en puerto quedan tres supervivientes y un remolcador con todos los mamparos internos abiertos; la esclusa se abrio once segundos durante la purga y el tren de contenedores, que nadie sello ni recorrio, estuvo ciego en esa misma ventana.",
+    "tension": 5
+  }
+]

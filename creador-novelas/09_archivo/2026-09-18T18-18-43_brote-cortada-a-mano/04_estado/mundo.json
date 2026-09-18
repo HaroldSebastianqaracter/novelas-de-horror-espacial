@@ -1,0 +1,29 @@
+{
+  "reglas": [
+    "Los planos de atmosfera del Vesania recogen un unico circuito de recicladores para todos los modulos habitables: sellar una escotilla separa los cuerpos, no el aire.",
+    "El manual de emergencias fija nueve horas de modulos vacios para completar un purgado total de la atmosfera.",
+    "El inventario de a bordo registra tres trajes de vacio operativos para cinco tripulantes.",
+    "Las cartas de ruta situan el socorro mas proximo a once semanas de viaje desde el tramo muerto.",
+    "La documentacion de carga va sellada y ningun tripulante tiene autorizacion registrada para inventariarla.",
+    "El protocolo medico de a bordo cubre traumatismos, descompresion y cuadros infecciosos con agente identificable; no recoge procedimiento para masas de crecimiento rapido sin fiebre.",
+    "La disciplina de guardias obliga a dos comunicaciones diarias por intercomunicador con cualquier modulo aislado y al paso de raciones por esclusa."
+  ],
+  "objetos": [
+    "Lampara de exploracion de la enfermeria, de luz intensa y calor apreciable a corta distancia.",
+    "Cuaderno clinico de Irune Castel, anotado a mano por travesias.",
+    "Bandejas de filtrado del reciclador, extraibles, con registro de mantenimiento por guardia.",
+    "Tres trajes de vacio en el armario de esclusa.",
+    "Visor de la escotilla de enfermeria, con cierre manual por ambos lados.",
+    "Diario de a bordo del Vesania, donde la capitana asienta lo que oficialmente ocurre.",
+    "Conducto de retorno de atmosfera que pasa junto a la litera compartida de la guardia baja."
+  ],
+  "linea_de_tiempo": [
+    "Travesia anterior: Josu Adame tapa una averia de Ovidio Lekue sin anotarla; Irune Castel cierra su segunda travesia sin pacientes graves.",
+    "Dia 1 de travesia: el Vesania sale con carga sellada y ciento veinte dias de ruta previstos.",
+    "Dia 41: la nave esta en el tramo muerto de la ruta, con el socorro a once semanas; empieza la guardia tercera."
+  ],
+  "locaciones": {
+    "Vesania - modulo de enfermeria": "Compartimento estrecho con dos camastros abatibles, la lampara de exploracion sobre riel y el instrumental menor en cajones magneticos. La escotilla puede sellarse desde dentro y lleva un visor con cierre manual. Su toma de aire es la del circuito comun de la nave.",
+    "Vesania - sala de recicladores": "Nicho tecnico detras del pasillo de servicio, ocupado por la columna de recicladores y sus bandejas de filtrado extraibles. Zumba de forma constante y a ritmo regular; huele a humedad caliente. Es el unico punto desde donde se ve el estado real del aire que respira toda la tripulacion."
+  }
+}

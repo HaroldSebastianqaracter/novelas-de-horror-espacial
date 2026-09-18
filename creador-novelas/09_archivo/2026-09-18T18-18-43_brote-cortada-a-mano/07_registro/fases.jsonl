@@ -1,0 +1,3 @@
+{"ts": "2026-09-18T18:15:21.489+02:00", "fase": "generar-premisa", "coste_usd": 0.3925285, "turnos": 6, "segundos": 40.0, "tokens": 291071}
+{"ts": "2026-09-18T18:16:15.535+02:00", "fase": "generar-sinopsis", "coste_usd": 0.344505, "turnos": 3, "segundos": 54.0, "tokens": 149921}
+{"ts": "2026-09-18T18:17:03.581+02:00", "fase": "generar-escaleta", "coste_usd": 0.43693849999999995, "turnos": 5, "segundos": 48.0, "tokens": 262344}

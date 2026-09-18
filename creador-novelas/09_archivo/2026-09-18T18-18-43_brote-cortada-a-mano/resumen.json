@@ -1,0 +1,72 @@
+{
+  "version_specs": "v1.12",
+  "config": {
+    "novela.json": {
+      "total_capitulos": 3,
+      "palabras_por_capitulo": 400,
+      "idioma": "es-ES",
+      "persona_narrativa": "tercera_limitada",
+      "tiempo_verbal": "pasado",
+      "ventana_resumen_rodante": 2,
+      "cadencia_qa": 1,
+      "max_tokens_contexto_escritor": 12000,
+      "max_hechos_por_capitulo": 4
+    },
+    "ejecucion.json": {
+      "capitulos_por_tanda": 3,
+      "max_llamadas_por_tanda": 30,
+      "registrar_uso": true,
+      "exportar_trazas": true
+    }
+  },
+  "capitulos": {
+    "cerrados": 0,
+    "esperados": 3,
+    "estado": "en_progreso",
+    "palabras": []
+  },
+  "reloj": {
+    "preludio_s": 142.0,
+    "por_fase_s": {
+      "generar-premisa": 40.0,
+      "generar-sinopsis": 54.0,
+      "generar-escaleta": 48.0
+    },
+    "tandas": [],
+    "tandas_s": null,
+    "total_s": 142.0
+  },
+  "agentes": {
+    "orquestador": {
+      "invocaciones": 3,
+      "segundos": 142.0,
+      "tokens_salida": 2900,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    }
+  },
+  "calidad": {
+    "contradicciones": 0,
+    "cortes_qa": 0,
+    "reintentos_de_escritor": 0,
+    "borradores_descartados": 0,
+    "tandas_abortadas": 0,
+    "motivos_de_aborto": [],
+    "pausado_al_archivar": false
+  },
+  "coste": {
+    "moneda": "USD",
+    "total": 1.5321,
+    "tokens": 999124,
+    "por_rol": {
+      "preludio": 1.174,
+      "orquestador": 0.3581
+    },
+    "modelos_sin_precio": [],
+    "carpetas_con_uso": 1
+  },
+  "nombre": "2026-09-18T18-18-43_brote-cortada-a-mano",
+  "titulo": "El aire que compartimos",
+  "archivado": "2026-09-18T18:18:43+02:00"
+}
