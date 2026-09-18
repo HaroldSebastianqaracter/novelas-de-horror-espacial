@@ -96,3 +96,60 @@ def test_guardar_continuidad_acepta_el_mismo_hecho_dicho_sobre_el_plano(proyecto
     args = parser.parse_args(["guardar", "continuidad", "--desde", str(borrador)])
     assert args.fn(args, proyecto) == 0
     assert "planos" in rutas.continuidad.read_text(encoding="utf-8")
+
+
+# ---------- personajes en dos sitios a la vez ----------
+
+def _guardar_continuidad(raiz, tmp_path, hechos):
+    Rutas(raiz).continuidad.unlink(missing_ok=True)
+    borrador = tmp_path / "continuidad.json"
+    borrador.write_text(json.dumps(hechos), encoding="utf-8")
+    args = cli.construir_parser().parse_args(["guardar", "continuidad", "--desde", str(borrador)])
+    return args.fn(args, raiz)
+
+
+def test_un_hecho_no_puede_situar_a_un_personaje_lejos_de_su_capitulo(proyecto, tmp_path):
+    # El proyecto de pruebas pone a Kovacs en el capítulo 1, que transcurre en el Puente.
+    with pytest.raises(EstadoInvalidoError) as e:
+        _guardar_continuidad(proyecto, tmp_path, [
+            {"sujeto": "Kovacs", "categoria": "personaje", "cap_origen": 0,
+             "hecho": "Kovacs tiene asignada la guardia de la Bodega 4 durante toda la travesía."},
+        ])
+
+    # El escritor no puede preguntar ni leer capítulos anteriores: el salto que nadie narra lo
+    # rellena él a ciegas, y con 400 palabras lo cuenta a saltos y se contradice.
+    assert "dos sitios a la vez" in str(e.value)
+    assert "Bodega 4" in str(e.value) and "Puente" in str(e.value)
+    assert "narrar el paso" in str(e.value)
+
+
+def test_el_mismo_hecho_vale_si_narra_el_paso(proyecto, tmp_path):
+    assert _guardar_continuidad(proyecto, tmp_path, [
+        {"sujeto": "Kovacs", "categoria": "personaje", "cap_origen": 0,
+         "hecho": "Kovacs tiene asignada la guardia de la Bodega 4 y sube al Puente al empezar su turno."},
+    ]) == 0
+
+
+def test_no_se_marca_un_hecho_que_no_nombra_ninguna_locacion(proyecto, tmp_path):
+    assert _guardar_continuidad(proyecto, tmp_path, [
+        {"sujeto": "Kovacs", "categoria": "personaje", "cap_origen": 0,
+         "hecho": "Kovacs lleva catorce meses a bordo y conoce el ruido de cada mamparo."},
+    ]) == 0
+
+
+def test_el_caso_real_de_abordaje_se_detecta():
+    from app.schemas import Outline
+    from app.state import continuidad as cont
+    outline = Outline.model_validate([
+        {"num": 1, "titulo": "La esclusa", "objetivo_narrativo": "Presentar y romper la rutina.",
+         "personajes": ["Duna Oyarzo", "Ibarra"], "locacion": "Vereda Sur - pasillo del nivel dos",
+         "informacion_nueva": "Algo entra.", "tension": 4},
+    ])
+    log = LogContinuidad.model_validate([
+        {"sujeto": "Duna Oyarzo", "categoria": "personaje", "cap_origen": 0,
+         "hecho": "Duna Oyarzo tiene asignada la guardia del puente en la noche del cuarto día."},
+    ])
+    # Las locaciones se llaman «Vereda Sur - puente» y el hecho dice «la guardia del puente»: la
+    # comparación tiene que mirar también la cola del nombre, que es como la nombra la prosa.
+    r = cont.personajes_en_dos_sitios(log, outline, ["Vereda Sur - puente", "Vereda Sur - pasillo del nivel dos"])
+    assert r == [("Duna Oyarzo", "Vereda Sur - puente", "Vereda Sur - pasillo del nivel dos", 1)]

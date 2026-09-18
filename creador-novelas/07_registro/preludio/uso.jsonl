@@ -1,0 +1,2 @@
+{"rol": "orquestador", "capitulo": null, "fase": "generar-premisa", "modelo": "claude-opus-5", "tokens_entrada": 8, "tokens_salida": 1078, "tokens_cache_lectura": 171166, "tokens_cache_creacion": 18894, "turnos": 4, "agent_id": "orq-generar-premisa-1789751882", "stop_reason": "success"}
+{"rol": "orquestador", "capitulo": null, "fase": "generar-sinopsis", "modelo": "claude-opus-5", "tokens_entrada": 0, "tokens_salida": 1422, "tokens_cache_lectura": 0, "tokens_cache_creacion": 1752, "turnos": 3, "agent_id": "orq-generar-sinopsis-1789751918", "stop_reason": "success"}

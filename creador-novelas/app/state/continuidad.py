@@ -94,7 +94,8 @@ def por_capitulo(log: LogContinuidad, cap_origen: int) -> list[HechoContinuidad]
 # sobre la realidad que el capítulo 2 tiene que negar para que haya novela. Un hecho inicial puede
 # decir lo que un registro recoge, lo que alguien sabe o lo que se ha medido; no lo que el mundo es
 # para siempre.
-import re  # noqa: E402  (queda junto a lo que usa, que es lo único que lo necesita)
+import re  # noqa: E402
+import unicodedata  # noqa: E402  (queda junto a lo que usa, que es lo único que lo necesita)
 
 _ABSOLUTOS = (
     (re.compile(r"\bno\s+(hay|existe[n]?|queda[n]?|tiene[n]?)\s+(ning[úu]n|ninguna|nada)\b", re.I),
@@ -142,5 +143,55 @@ def absolutos_que_la_trama_desmentira(log: LogContinuidad) -> list[tuple[str, st
             motivo = next((m for patron, m in _ABSOLUTOS if patron.search(oracion)), None)
             if motivo:
                 encontrados.append((h.hecho, motivo))
+                break
+    return encontrados
+
+
+# ---------- personajes puestos en dos sitios a la vez ----------
+#
+# El escritor no puede preguntar ni leer capítulos anteriores, así que todo hueco de la escaleta lo
+# rellena él a ciegas. En «abordaje» el hecho decía que Oyarzo tenía la guardia del puente y el
+# capítulo 1 la mataba en el pasillo del nivel dos: las dos cosas pueden ser ciertas --baja y ya
+# está--, pero alguien tiene que narrar la bajada, y en 400 palabras no cupo. El escritor escribió
+# «bajaron los cinco» y tres párrafos después «Oyarzo venía del puente», y QA paró la novela.
+#
+# No se trata de prohibir que un personaje se mueva, sino de que el salto no quede implícito. Hay
+# dos arreglos y los dos valen: narrar el paso («baja al nivel dos al oír la alarma») o evitarlo
+# (que la escena ocurra donde ya estaba).
+
+def _plano(texto: str) -> str:
+    return unicodedata.normalize("NFKD", texto or "").encode("ascii", "ignore").decode("ascii").lower()
+
+
+def _terminos_de_locacion(nombre: str) -> list[str]:
+    """Las locaciones se llaman «Vereda Sur - puente», pero los hechos dicen «la guardia del puente».
+
+    Así que se busca por el nombre entero y también por su cola distintiva, la parte que va después
+    del último guion, que es como la nombra la prosa.
+    """
+    entero = _plano(nombre).strip()
+    cola = entero.rsplit(" - ", 1)[-1].strip()
+    return [t for t in dict.fromkeys([entero, cola]) if len(t) >= 4]
+
+
+def personajes_en_dos_sitios(log: LogContinuidad, outline, locaciones: list[str]) -> list[tuple[str, str, str, int]]:
+    """Hechos iniciales que sitúan a un personaje lejos del capítulo en el que aparece.
+
+    Devuelve `(sujeto, locación del hecho, locación del capítulo, número de capítulo)`.
+    """
+    encontrados = []
+    for h in log.root:
+        if h.cap_origen != 0 or h.categoria != "personaje":
+            continue
+        texto = _plano(h.hecho)
+        entrada = next((e for e in outline.root if h.sujeto in e.personajes), None)
+        if entrada is None:
+            continue
+        propia = _terminos_de_locacion(entrada.locacion)
+        for nombre in locaciones:
+            if nombre == entrada.locacion:
+                continue
+            if any(t in texto for t in _terminos_de_locacion(nombre)) and not any(t in texto for t in propia):
+                encontrados.append((h.sujeto, nombre, entrada.locacion, entrada.num))
                 break
     return encontrados

@@ -283,6 +283,19 @@ def cmd_guardar(args, raiz: Path) -> int:
                 "entre la bodega y la sala de máquinas» cierra la puerta al capítulo que lo "
                 "encuentra; «los planos de a bordo no recogen ningún pasillo entre la bodega y la "
                 "sala de máquinas» es cierto para siempre y no cierra ninguna.")
+        outline_actual = repo.leer_outline(raiz)
+        mundo_actual = repo.leer_mundo(raiz)
+        if outline_actual is not None and mundo_actual is not None:
+            dobles = cont.personajes_en_dos_sitios(log, outline_actual, sorted(mundo_actual.locaciones))
+            if dobles:
+                detalle = "; ".join(f"{s}: el hecho lo sitúa en «{a}» y el capítulo {n} transcurre en «{b}»"
+                                    for s, a, b, n in dobles)
+                raise EstadoInvalidoError(
+                    f"RF-04.3: hay personajes puestos en dos sitios a la vez: {detalle}. El escritor no "
+                    "puede preguntar ni leer capítulos anteriores, así que el salto que no narres lo "
+                    "rellena él a ciegas y acaba contradiciéndose. Hay dos arreglos y los dos valen: "
+                    "narrar el paso en el hecho («tiene la guardia del puente y baja al nivel dos al oír "
+                    "la alarma») o dejar al personaje donde el capítulo lo necesita.")
         hechos = [cont.validar_sujeto(h, registro) for h in log.root]
         repo.escribir_continuidad(raiz, LogContinuidad(hechos))
         destino = rutas.continuidad

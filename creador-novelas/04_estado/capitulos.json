@@ -1,0 +1,48 @@
+[
+  {
+    "num": 1,
+    "titulo": "Vigilia 037",
+    "objetivo_narrativo": "Presentar la Vereda a once días de puerto y a una tripulación que solo se habla por turno, y romperla: la esclusa de carga se abre sin orden y el tripulante de guardia muere a la vista de los otros cuatro, que no llegan a tiempo al mamparo. Cerrar con Orrio decidiendo sellar la nave sección a sección.",
+    "personajes": [
+      "Sabel Orrio",
+      "Ivo Renn",
+      "Nadia Kell",
+      "Tomás Bru",
+      "Petrel Aguas",
+      "la presencia"
+    ],
+    "locacion": "Pasillo de bodegas de la Vereda",
+    "informacion_nueva": "La esclusa de carga se abrió sin orden y sin que el registro guarde quién la mandó abrir; lo que entró no responde a ninguna banda ni a ningún protocolo de contacto. No hay socorro posible en once días de ruta.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "El plano que nadie actualizó",
+    "objetivo_narrativo": "Hacer fracasar el plan de sellado: la presencia aparece del lado limpio del perímetro porque usa conductos que no figuran en ningún plano, y cada sección cerrada resta agua, reciclado y aire. Acorralada en la bodega tres, Kell abre por fin los contenedores que firmó sin mirar y confiesa delante de los otros que le pagaron por no preguntar.",
+    "personajes": [
+      "Sabel Orrio",
+      "Ivo Renn",
+      "Nadia Kell",
+      "Tomás Bru",
+      "la presencia"
+    ],
+    "locacion": "Bodega tres de la Vereda",
+    "informacion_nueva": "La Vereda fue reformada dos veces antes de su matrícula actual y media nave es un mapa que solo Renn lleva en la cabeza. En la bodega tres no hay carga: hay cámaras de contención precintadas por una compañía ausente del manifiesto, y una está abierta desde dentro. La cosa llevaba meses a bordo; no entró por la esclusa, salió por ella.",
+    "tension": 4
+  },
+  {
+    "num": 3,
+    "titulo": "Once segundos",
+    "objetivo_narrativo": "Reducir la nave a un pasillo recto y pagar el precio: Orrio baja al conducto a forzar la apertura manual, Renn la guía y no vuelve, Orrio se suelta del mamparo con la presencia agarrada a él. Kell y Bru quedan en el puente con aire para seis días y siete de ruta, y Bru desconecta su propio suministro mientras Kell duerme. La Vereda atraca sola y en orden el día once.",
+    "personajes": [
+      "Sabel Orrio",
+      "Ivo Renn",
+      "Nadia Kell",
+      "Tomás Bru",
+      "la presencia"
+    ],
+    "locacion": "Puente de la Vereda",
+    "informacion_nueva": "El control ambiental está muerto, así que la apertura de proa a popa solo puede forzarse a mano desde el lado malo del mamparo. El aire del puente sellado da para seis días y faltan siete. En el diario de Bru está apuntado, hora a hora, cuánto costó cada sección.",
+    "tension": 5
+  }
+]

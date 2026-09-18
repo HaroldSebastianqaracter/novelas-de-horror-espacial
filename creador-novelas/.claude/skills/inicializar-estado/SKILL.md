@@ -30,6 +30,12 @@ Pasos, en este orden (cada `guardar` valida contra la anterior):
    bodega y la sala de máquinas» es cierto para siempre y no le cierra la puerta a ningún capítulo.
    Antes de escribir un hecho, mirá el outline: si algún capítulo lo desmiente, está mal escrito.
    `guardar continuidad` rechaza los que detecta.
+   **Un personaje no puede estar en dos sitios a la vez.** Si un hecho sitúa a alguien en una
+   locación y el capítulo en el que aparece transcurre en otra, el escritor tiene que inventarse el
+   viaje, y con 400 palabras lo cuenta a saltos y se contradice. Pasó con «tiene asignada la guardia
+   del puente» y un capítulo 1 que ocurría en el pasillo del nivel dos. Narrá el paso dentro del
+   hecho («y baja al nivel dos al oír la alarma») o dejá al personaje donde el capítulo lo necesita.
+   `guardar continuidad` también rechaza esto.
    Write en `.tanda/borradores/continuidad.json` → `guardar continuidad --desde ...`
 4. Si algún `guardar` falla, corregí exactamente lo que dice y repetí ese paso.
 
