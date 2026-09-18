@@ -97,6 +97,16 @@
   .preludio li[data-estado="pendiente"]{color:var(--texto-bajo)}
   .preludio li[data-estado="ahora"]{color:var(--texto)}
   .preludio small{grid-column:2/-1;color:var(--texto-bajo);font-size:12.5px}
+  /* El paso que se está ejecutando, en su propia fila: es donde se mira después de pulsar. */
+  .preludio li[data-estado="corriendo"]{color:var(--texto);background:rgba(123,227,178,.07);
+    box-shadow:inset 2px 0 0 var(--verde)}
+  .preludio li[data-estado="corriendo"] .marca{color:var(--verde)}
+  .preludio .corriendo{display:flex;align-items:center;gap:8px;color:var(--verde);
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+  .preludio .corriendo i{width:7px;height:7px;border-radius:50%;background:var(--verde);
+    box-shadow:0 0 9px var(--verde);animation:parpadeo-trabajo 1.2s ease-in-out infinite}
+  .preludio li[data-estado="corriendo"] small{color:var(--verde);opacity:.85}
+  @media (prefers-reduced-motion:reduce){.preludio .corriendo i{animation:none}}
   /* El diseño reservó 44px para «14:52»; el registro real anota «12:04:11» y se pegaba al texto. */
   .pie .registro li{grid-template-columns:64px 1fr}
   /* El registro crecía sin fondo: cuarenta entradas son 1.200 px y la página entera se estiraba
@@ -567,17 +577,28 @@ function pintarPreludio(){
   var a = estado.artefactos || {};
   var pendientes = pasosPendientes();
   var caja = $("preludio");
-  if (!a.idea || !pendientes.length || estado.estado === "en_progreso") { caja.hidden = true; return; }
+  // Mientras una fase corre, la lista se queda: es donde se está viendo su avance.
+  if (!a.idea || (!pendientes.length && !estado.fase_en_curso) || estado.estado === "en_progreso") {
+    caja.hidden = true; return;
+  }
   var siguiente = pendientes[0];
   caja.innerHTML = PRELUDIO.map(function(p){
     var saltado = p.fase === "destilar-estilo" && !estado.tiene_referencias;
     var hecho = !!a[p.clave] || saltado;
     var ahora = p.fase === siguiente.fase;
-    return '<li data-estado="' + (hecho ? "hecho" : ahora ? "ahora" : "pendiente") + '">' +
-      '<span class="marca">' + (hecho ? "\u2713" : "\u00b7") + "</span>" +
-      "<span>" + esc(p.nombre) + "</span>" +
-      (ahora ? boton(p.fase, "Lanzar") : "<span>" + (saltado ? "sin referencias" : hecho ? "" : "en espera") + "</span>") +
-      "<small>" + esc(p.nota) + "</small></li>";
+    // El paso que se está ejecutando se cuenta en su propia fila: el reloj y lo último que tocó,
+    // justo donde se acaba de pulsar. Decirlo solo en la cabecera dejaba el aviso lejos del botón.
+    var corriendo = p.fase === estado.fase_en_curso;
+    var marca = corriendo ? "\u203a" : hecho ? "\u2713" : "\u00b7";
+    var derecha = corriendo
+      ? '<span class="corriendo"><i aria-hidden="true"></i>' + esc(duracionCorta(estado.fase_segundos)) + "</span>"
+      : ahora ? boton(p.fase, "Lanzar")
+      : "<span>" + (saltado ? "sin referencias" : hecho ? "" : "en espera") + "</span>";
+    var nota = corriendo && estado.fase_paso ? "trabajando \u00b7 " + estado.fase_paso : p.nota;
+    return '<li data-estado="' + (corriendo ? "corriendo" : hecho ? "hecho" : ahora ? "ahora" : "pendiente") + '">' +
+      '<span class="marca">' + marca + "</span>" +
+      "<span>" + esc(p.nombre) + "</span>" + derecha +
+      "<small>" + esc(nota) + "</small></li>";
   }).join("");
   caja.hidden = false;
 }
