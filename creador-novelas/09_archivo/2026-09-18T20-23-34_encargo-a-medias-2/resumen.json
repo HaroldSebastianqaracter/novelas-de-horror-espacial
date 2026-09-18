@@ -1,0 +1,80 @@
+{
+  "version_specs": "v1.12",
+  "config": {
+    "novela.json": {
+      "total_capitulos": 3,
+      "palabras_por_capitulo": 400,
+      "idioma": "es-ES",
+      "persona_narrativa": "tercera_limitada",
+      "tiempo_verbal": "pasado",
+      "ventana_resumen_rodante": 2,
+      "cadencia_qa": 1,
+      "max_tokens_contexto_escritor": 12000,
+      "max_hechos_por_capitulo": 4
+    },
+    "ejecucion.json": {
+      "capitulos_por_tanda": 3,
+      "max_llamadas_por_tanda": 30,
+      "registrar_uso": true,
+      "exportar_trazas": true
+    }
+  },
+  "capitulos": {
+    "cerrados": 0,
+    "esperados": 3,
+    "estado": "en_progreso",
+    "palabras": []
+  },
+  "reloj": {
+    "preludio_s": 224.0,
+    "por_fase_s": {
+      "generar-premisa": 32.0,
+      "generar-sinopsis": 46.0,
+      "generar-escaleta": 36.0,
+      "inicializar-estado": 110.0
+    },
+    "tandas": [
+      {
+        "tanda": "tanda_2026-09-18T20-08-09",
+        "inicio": "2026-09-18T20:08:09.478+02:00",
+        "fin": "2026-09-18T20:09:22.881+02:00",
+        "segundos": 73.4
+      }
+    ],
+    "tandas_s": 73.4,
+    "total_s": 297.4
+  },
+  "agentes": {
+    "orquestador": {
+      "invocaciones": 4,
+      "segundos": 224.0,
+      "tokens_salida": 6385,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    }
+  },
+  "calidad": {
+    "contradicciones": 0,
+    "cortes_qa": 0,
+    "reintentos_de_escritor": 0,
+    "borradores_descartados": 0,
+    "tandas_abortadas": 0,
+    "motivos_de_aborto": [],
+    "pausado_al_archivar": false
+  },
+  "coste": {
+    "moneda": "USD",
+    "total": 2.2722,
+    "tokens": 1590389,
+    "por_rol": {
+      "preludio": 1.7032,
+      "orquestador": 0.5691
+    },
+    "modelos_sin_precio": [],
+    "carpetas_con_uso": 1
+  },
+  "nombre": "2026-09-18T20-23-34_encargo-a-medias-2",
+  "titulo": "Once días hasta puerto",
+  "archivado": "2026-09-18T20:23:34+02:00"
+}

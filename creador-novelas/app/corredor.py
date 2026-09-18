@@ -361,6 +361,27 @@ def informe(filas: list[dict[str, Any]]) -> str:
     return "\n".join(lineas)
 
 
+def aplicar_overrides(encargos: list[dict[str, Any]], overrides: dict[str, Any]) -> list[dict[str, Any]]:
+    """Cambia la config de todos los encargos, para no tener que tocar el archivo de premisas.
+
+    Cada vuelta del loop mueve una variable. Editar el archivo por cada vuelta sería diez ocasiones
+    de dejarse un cambio puesto, y el archivo dejaría de describir el experimento entero.
+    """
+    for e in encargos:
+        e["config"] = {**(e.get("config") or {}), **overrides}
+    return encargos
+
+
+def _valor(texto: str) -> Any:
+    bajo = texto.strip().lower()
+    if bajo in ("true", "false"):
+        return bajo == "true"
+    try:
+        return int(texto)
+    except ValueError:
+        return texto
+
+
 def cargar_encargos(ruta: Path) -> list[dict[str, Any]]:
     datos = json.loads(ruta.read_text(encoding="utf-8"))
     encargos = datos["novelas"] if isinstance(datos, dict) else datos
@@ -387,6 +408,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--variante", default="base",
                    help="etiqueta de la vuelta (base, extractor-effort-low, cadencia-qa-3...); es la "
                         "columna por la que se agrupa en el análisis")
+    p.add_argument("--config", action="append", default=[], metavar="CLAVE=VALOR",
+                   help="cambia un ajuste en las diez novelas de esta corrida (p. ej. "
+                        "escritor_emite_delta=true); se puede repetir")
     p.add_argument("--listar", action="store_true", help="enseña las novelas y no escribe nada")
     p.add_argument("--rehacer-csv", action="store_true",
                    help="rehace corridas.csv desde corridas.jsonl y no escribe ninguna novela")
@@ -398,6 +422,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"reescrito {destino}")
         return 0
     encargos = cargar_encargos(Path(args.encargos))[args.desde - 1:args.hasta]
+    overrides = {c.split("=", 1)[0].strip(): _valor(c.split("=", 1)[1]) for c in args.config if "=" in c}
+    if overrides:
+        encargos = aplicar_overrides(encargos, overrides)
+        print(f"config de esta corrida: {overrides}")
     if args.listar:
         for i, e in enumerate(encargos, args.desde):
             print(f"{i:2}. {e.get('nombre')}: {e['idea'].splitlines()[0][:90]}")

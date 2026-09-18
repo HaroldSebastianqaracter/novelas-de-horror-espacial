@@ -335,3 +335,11 @@ def test_si_la_reextraccion_queda_a_medias_se_reintenta_la_fase(vacio):
     assert doble.intentos_resolver == 2
     assert fila["completa"] is True
     assert fila["correcciones"] == 1
+
+
+def test_una_vuelta_puede_cambiar_un_ajuste_sin_tocar_el_archivo_de_premisas():
+    encargos = [{"nombre": "a", "idea": "una", "config": {"cadencia_qa": 1}}]
+    # Cada vuelta mueve una variable; editar el archivo por cada vuelta serían diez ocasiones de
+    # dejarse un cambio puesto, y el archivo dejaría de describir el experimento entero.
+    r = corredor.aplicar_overrides(encargos, {"escritor_emite_delta": True})
+    assert r[0]["config"] == {"cadencia_qa": 1, "escritor_emite_delta": True}
