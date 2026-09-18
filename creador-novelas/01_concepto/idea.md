@@ -1,1 +1,1 @@
-Una cuadrilla de reparacion llega a una estacion minera que dejo de responder hace once dias y encuentra los turnos anotados al dia, la comida caliente y a nadie dentro.
+Un grupo de navegación perdido en un planeta por una falla en su nave» describe la situación, pero no dice qué hay ahí que no debería estar, que es lo que convierte un accidente en terror

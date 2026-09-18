@@ -1,60 +1,69 @@
 {
-  "Ilaria Vensa": {
-    "estado_fisico": "Sin cambios aparentes. Se mueve silenciosa entre las consolas.",
-    "estado_psicologico": "Calmada y deliberada, investigadora. Termina enfrentando la realidad de que sus datos fueron manipulados.",
+  "Idoia Ferrán": {
+    "estado_fisico": "Con un brazo lesionado (el brazo bueno es el que usa para escribir), capaz de actuar.",
+    "estado_psicologico": "Determinada y resignada. Ha pronunciado la frase que guardaba desde hace años. Actúa rápidamente, antes de que otros terminen de hablar.",
     "secretos_que_conoce": [
-      "Que en las tres estaciones muertas anteriores siempre hubo cuerpos, y que la ausencia de cuerpos no figura en ningún protocolo que haya leído.",
-      "Sabe que la herramienta estaba caliente hace minutos y que alguien la acaba de soltar.",
-      "Sabe que no hay registros de salida de la estación en 4 meses pero hay tráfico de radio interno.",
-      "Las comidas están al punto, servidas hace poco. Las herramientas del taller están calientes. Marga Sudo firmó el relevo en el momento exacto del acoplamiento del Cabo Tenue.",
-      "La antena transmite a potencia nominal desde 11 días pero no recibe respuesta del exterior.",
-      "El tráfico interno contiene 11 días de actividad registrada que no coincide con la observación real de la tripulación.",
-      "Sus datos, junto a los de Ndeye, Bruno y Teo, fueron registrados en el sistema sin consentimiento."
+      "En un accidente anterior dejó atrás a un tripulante y pronunció una frase concreta al hacerlo; nunca se lo ha contado a Vlach ni a Ospina.",
+      "Sabe que la baliza de la Quilla de Ámbar no llegó a emitir y que nadie los está buscando.",
+      "Su nombre está escrito en el libro de guardias para una fecha en la que aún estaba en órbita.",
+      "Descubre que alguien predijo su llegada y los turnos de su tripulación.",
+      "El registro de personal marca cuatro ocupantes cuando físicamente hay tres; al pasar uno por uno sube de tres a cuatro, luego a cinco.",
+      "Sabe que el libro de guardias controla la colonia.",
+      "Sabe que firmar en el libro permite escapar pero cede su turno.",
+      "Sabe que la caligrafía del libro puede ser la suya propia."
     ],
-    "ultima_aparicion": 3
+    "ultima_aparicion": 3,
+    "posicion": ""
   },
-  "Bruno Achaval": {
-    "estado_fisico": "Brazos cruzados al inicio, después descruzados en tensión. Se pasa la palma por la boca en gesto de angustia.",
-    "estado_psicologico": "Silencioso y pesaroso. Progresa hacia urgencia casi suplicante al descubrir que su registro fue modificado.",
+  "Casimiro Vlach": {
+    "estado_fisico": "Con las manos quemadas.",
+    "estado_psicologico": "De la protesta inicial a la aceptación de la realidad. Subió al módulo de escape sin terminar su frase.",
     "secretos_que_conoce": [
-      "Sabe que la herramienta estaba caliente de mano.",
-      "Las raciones están a sesenta grados, al punto, no recalentadas. Once herramientas están calientes, lo que sugiere once personas trabajando recientemente.",
-      "Hay voces activas en los niveles bajos que vienen del tráfico interno registrado, no del exterior.",
-      "Sus datos fueron registrados sin consentimiento en el registro laboral de Vigía-9.",
-      "El sistema rechaza intentos de borrar esos registros y los reescribe automáticamente."
+      "Es el único que entiende lo suficiente del transmisor como para saber cuán improbable es rehacerlo, y no lo dice en voz alta.",
+      "Guarda un tic heredado de su madre muerta que nadie a bordo llegó a ver.",
+      "Su nombre está escrito en el libro de guardias para fechas futuras.",
+      "Alguien con caligrafía perfecta ha predicho su llegada a la colonia hace once años.",
+      "Alguien escribió su nombre y firma en el registro de personal sin que él lo notara; la mano es cuidadosa, distinta a la suya.",
+      "Comprende la aritmética del sistema: un nombre por noche.",
+      "Sabe que la colonia exige sacrificios.",
+      "Sabe que solo hay espacio para dos en el módulo de proa."
     ],
-    "ultima_aparicion": 3
+    "ultima_aparicion": 3,
+    "posicion": ""
   },
-  "Ndeye Kamara": {
-    "estado_fisico": "Quitada la ropa de aproximación; viste ropa de trabajo en el cuarto de comunicaciones. Al final, retira las manos del teclado como si quemaran.",
-    "estado_psicologico": "Progresa de la tranquilidad técnica al horror visceral conforme descubre anomalías cada vez mayores en el registro y el tráfico.",
+  "Nieve Ospina": {
+    "estado_fisico": "Sin lesiones aparentes, pero atrapado.",
+    "estado_psicologico": "Ha comprendido que es el siguiente en el turno. Entiende que 'un muerto no cubre un turno'.",
     "secretos_que_conoce": [
-      "Que la baliza de Vigía-9 dejó de acusar hace once días sin emitir ninguna señal de avería previa.",
-      "Sabe que hay transmisiones de radio internas (partes de turno) pero la antena sale y la señal regresa desde dentro de la estación.",
-      "Sabe que el último registro de atraque fue hace 4 meses: un carguero de mineral con salida registrada.",
-      "La antena de Vigía-9 transmite a potencia nominal desde 11 días pero no recibe respuesta del exterior.",
-      "El tráfico interno contiene historiales de 11 días de actividad rutinaria con 109 personas cada día, pero nadie se ha movido en los niveles bajos.",
-      "Las voces del tráfico se repiten pero no idénticamente; la misma persona recita lo mismo dos veces de forma ligeramente distinta.",
-      "Ella misma, junto a Ilaria, Bruno y Teo, fue registrada como dada de alta sin consentimiento.",
-      "El registro se reescribe a sí mismo automáticamente cuando alguien intenta borrarlo."
+      "Sabe que el contrato de la travesía la obligaba a cartografiar Vireo b sin declararla en ninguna carta comercial.",
+      "El libro contiene once años de registros sin un error ni tachadura.",
+      "Sus nombres están predichos en las páginas futuras del libro.",
+      "Los túneles de extracción fueron descubiertos, no excavados; bajaban girando sobre sí mismos hasta una cavidad del fondo sin marcas de barreno. Teodora Marchesi encontró al turno de noche durmiendo mientras alguien relevaba sus rondas firmando con sus nombres en el puesto de control, no los imitaba.",
+      "La aritmética de la colonia: once noches, un nombre por noche.",
+      "La colonia está pasando lista; por eso no los mata.",
+      "El módulo de proa solo tiene espacio para dos."
     ],
-    "ultima_aparicion": 3
+    "ultima_aparicion": 3,
+    "posicion": ""
   },
-  "Teo Riffel": {
-    "estado_fisico": "En el comedor y taller de Vigía-9, llevando el casco bajo el brazo.",
-    "estado_psicologico": "Perturbado por las evidencias. Preocupado y pensativo, nota detalles humanos como la servilleta con nudo. Finalmente aterrado al darse cuenta de que hay alguien en la estación.",
+  "Teodora Marchesi": {
+    "estado_fisico": "Sin cuerpo presente: jefa de turno de la colonia desde antes de la evacuación, hace once años. De ella solo quedan los registros personales y una caligrafía que sigue escribiendo.",
+    "estado_psicologico": "Disciplina de turno sostenida más allá de la persona: llevar la cuenta de los vivos es lo único que sabe hacer y lo único que le queda por hacer.",
     "secretos_que_conoce": [
-      "La servilleta con nudo es seña de alguien que iba a volver. Ha visto la firma reciente de Marga Sudo."
+      "Escribió las últimas entradas anteriores a la evacuación describiendo a sus compañeros durmiendo mientras alguien más hacía sus guardias.",
+      "Sabe qué destapó la mina en la cavidad del fondo y que nunca se marchó."
     ],
-    "ultima_aparicion": 2
+    "ultima_aparicion": 0,
+    "posicion": ""
   },
-  "Marga Sudo": {
-    "estado_fisico": "Capataz de la dotación de Vigía-9; no está a bordo en ningún sentido comprobable, pero su turno figura activo y sus planillas siguen firmándose al día.",
-    "estado_psicologico": "Lo que queda de ella es voluntad administrativa: la insistencia de que el relevo continúe y de que ningún turno quede sin cerrar.",
+  "la letra del libro de guardias": {
+    "estado_fisico": "No tiene cuerpo: existe como trazo cuidadoso y sin temblor sobre el papel real del atril del pasillo central, y como la puntualidad con que la colonia cumple lo escrito.",
+    "estado_psicologico": "Contabilidad pura, sin crueldad ni intención declarada: cada noche exige un nombre y cada turno exige a alguien que lo cubra. No imita a los vivos desde fuera, los cubre.",
     "secretos_que_conoce": [
-      "Cómo se disolvió su dotación turno a turno sin que el trabajo se interrumpiera nunca.",
-      "Que un relevo solo se confirma cuando alguien se presenta a trabajar."
+      "Los nombres de Ferrán, Vlach y Ospina asignados a las once noches siguientes, escritos antes de que cayeran.",
+      "Que el libro no puede cerrarse mientras haya un turno sin cubrir."
     ],
-    "ultima_aparicion": 0
+    "ultima_aparicion": 0,
+    "posicion": ""
   }
 }

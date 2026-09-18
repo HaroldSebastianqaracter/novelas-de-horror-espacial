@@ -1,102 +1,96 @@
 [
   {
-    "recurso": "chasquido de atraque como sonido de una estación sana",
+    "recurso": "luz amarilla de emergencia sin proyectar sombras nítidas",
     "apariciones": {
       "1": 1
     }
   },
   {
-    "recurso": "aire sin olor de desastre sino de comida y funcionamiento normal",
-    "apariciones": {
-      "1": 2
-    }
-  },
-  {
-    "recurso": "herramienta caliente enfriándose entre los dedos como evidencia de recencia",
-    "apariciones": {
-      "1": 2
-    }
-  },
-  {
-    "recurso": "estaciones apagadas previas contrastadas con luz completa de Vigía-9",
-    "apariciones": {
-      "1": 2
-    }
-  },
-  {
-    "recurso": "la cuenta silenciosa: ciento nueve personas, dotación entera",
+    "recurso": "caligrafía menuda y regular sin un solo trazo dudoso",
     "apariciones": {
       "1": 1
     }
   },
   {
-    "recurso": "Teo con alivio limpio y alegría joven ante la promesa de trabajo",
+    "recurso": "nombres propios leídos en fechas futuras (inversión de lo esperado)",
+    "apariciones": {
+      "1": 3
+    }
+  },
+  {
+    "recurso": "chasquido educado de los mamparos cerrándose",
     "apariciones": {
       "1": 1
     }
   },
   {
-    "recurso": "zumbido de los extractores como sonido ambiente de normalidad inquietante",
+    "recurso": "Ferrán sujetándose el antebrazo como gesto de contención",
+    "apariciones": {
+      "1": 1
+    }
+  },
+  {
+    "recurso": "racionalización mediante lógica técnica ante lo sobrenatural",
+    "apariciones": {
+      "1": 1
+    }
+  },
+  {
+    "recurso": "Ruidos del edificio como marcadores horarios (suspiro hidráulico a las 04:40, ventilación a las 06:15)",
     "apariciones": {
       "2": 2
     }
   },
   {
-    "recurso": "búsqueda táctil de calor en objetos (palma en el banco, dedos en el mango)",
+    "recurso": "Dígito verde del panel contando ocupantes de forma exacta y serena",
+    "apariciones": {
+      "2": 3
+    }
+  },
+  {
+    "recurso": "La mano cuidadosa que escribe y firma por otros sin notarse",
+    "apariciones": {
+      "2": 3
+    }
+  },
+  {
+    "recurso": "Gesto de doblar y desdoblar como anomalía psicológica, herencia maternal",
     "apariciones": {
       "2": 2
     }
   },
   {
-    "recurso": "estructura negativa-afirmativa: 'No era X. Era Y.'",
+    "recurso": "«Relevar» versus «imitar» como distinción crucial de intención",
     "apariciones": {
-      "2": 1
+      "2": 2
     }
   },
   {
-    "recurso": "firma repetida idéntica como prueba de continuidad inquietante",
+    "recurso": "Túneles estrechándose en espiral sobre sí mismos hacia lo desconocido",
     "apariciones": {
-      "2": 1
+      "2": 2
     }
   },
   {
-    "recurso": "tinta fresca y arrastre húmedo en el trazo como evidencia de acción reciente",
-    "apariciones": {
-      "2": 1
-    }
-  },
-  {
-    "recurso": "El silencio como peso o presencia perturbadora entre los personajes",
+    "recurso": "la pluma escribiendo sola, anotando la hora exacta",
     "apariciones": {
       "3": 2
     }
   },
   {
-    "recurso": "Retirar las manos del teclado como gesto de repulsión o miedo visceral",
-    "apariciones": {
-      "3": 2
-    }
-  },
-  {
-    "recurso": "Estructura contrastiva: «No era X. Era Y.» para revelar la verdad aterradora",
-    "apariciones": {
-      "3": 1
-    }
-  },
-  {
-    "recurso": "Voces monótonas recitando partes rutinarios con precisión ritual",
+    "recurso": "el descenso en espiral hacia lo desconocido, pasillos que bajan",
     "apariciones": {
       "3": 3
     }
   },
   {
-    "recurso": "Números precisos (11 días, 41 minutos, 109 personas) como evidencia de anomalía sistémica",
+    "recurso": "los nombres como moneda de sacrificio, un nombre por noche",
     "apariciones": {
-      "3": 5
+      "3": 2
     }
   },
   {
-    "recurso": "El cursor parpadeando obediente como objeto de tensión técnica",
+    "recurso": "la caligrafía de Ferrán apareciendo de forma autónoma en el libro",
     "apariciones": {
       "3": 1
     }

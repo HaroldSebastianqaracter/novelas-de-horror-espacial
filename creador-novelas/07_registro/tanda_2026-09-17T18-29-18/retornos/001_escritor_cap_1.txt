@@ -1,1 +1,0 @@
-cap_1.md · NO VALIDADO · Write bloqueado: File has not been read yet. Read it first before writing to it. — 05_manuscrito/cap_1.md ya existe y el rol escritor no tiene herramienta Read (INV-01/H-06), por lo que no puedo sobrescribirlo ni editarlo; el capítulo no se escribió ni se validó.

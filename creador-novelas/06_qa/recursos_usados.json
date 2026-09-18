@@ -1,11 +1,67 @@
 [
-  { "recurso": "calor residual de lo humano comprobado con la mano (herramienta, asiento, mango) como prueba de presencia reciente", "veces": 4, "caps": [1, 2, 3] },
-  { "recurso": "tic de dialogo 'Entonces hay alguien' / 'Entonces hay gente' para deducir presencia humana", "veces": 3, "caps": [1, 2, 3] },
-  { "recurso": "el silencio como respuesta: 'no contesto' / 'nadie le contesto' / 'no respondio'", "veces": 6, "caps": [1, 2, 3] },
-  { "recurso": "los extractores tirando del vapor como cierre de ambiente", "veces": 3, "caps": [1, 2] },
-  { "recurso": "estructura correctiva 'no era X: era Y' / 'no estaban X: estaban Y, que es distinto'", "veces": 3, "caps": [1, 2] },
-  { "recurso": "verificar algo 'dos veces' ante la incredulidad", "veces": 5, "caps": [1, 2, 3] },
-  { "recurso": "el verde tranquilo o estable del indicador como normalidad inquietante", "veces": 2, "caps": [1] },
-  { "recurso": "el ciclo diurno al ochenta por ciento y la luz amarilla del pasillo", "veces": 2, "caps": [1] },
-  { "recurso": "la firma o la planilla tratada como sujeto que actua por si solo", "veces": 2, "caps": [2, 3] }
+  {
+    "recurso": "personificacion cortes o domestica de lo mecanico ('habitacion ocupada', 'chasquido educado', 'mano tranquila')",
+    "veces": 10,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "estructura de negacion 'sin + sustantivo' para describir perfeccion o ausencia",
+    "veces": 10,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "repeticion lexica dentro de la misma frase como remate ('entro primero, porque le tocaba entrar primero')",
+    "veces": 5,
+    "caps": [
+      1,
+      3
+    ]
+  },
+  {
+    "recurso": "enumeracion triple por negacion ('ni una casilla vacia, ni una tachadura, ni un cambio de pulso')",
+    "veces": 1,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "la caligrafia descrita por su pulso o firmeza como indicio de lo inhumano",
+    "veces": 7,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "frase corta aislada en parrafo propio como golpe de suspense",
+    "veces": 4,
+    "caps": [
+      1,
+      3
+    ]
+  },
+  {
+    "recurso": "remate por negacion seguida de afirmacion correctiva en frases cortas ('No decia que la cosa los imitara. Decia que los relevaba')",
+    "veces": 6,
+    "caps": [
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "el horror enunciado en lexico administrativo o de turnos ('correccion silenciosa y administrativa', 'nos esta pasando lista', 'un turno sin cubrir')",
+    "veces": 3,
+    "caps": [
+      3
+    ]
+  }
 ]

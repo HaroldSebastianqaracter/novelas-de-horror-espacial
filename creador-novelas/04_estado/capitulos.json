@@ -1,87 +1,44 @@
 [
   {
     "num": 1,
-    "titulo": "Once días sin acuse",
-    "objetivo_narrativo": "Presentar a la cuadrilla del Cabo Tenue y su atraque en Vigía-9: una estación que lleva once días muda pero que recibe a los cuatro con las luces en ciclo, el aire limpio y ningún cuerpo.",
+    "titulo": "El libro del pasillo central",
+    "objetivo_narrativo": "Tras la caída de la Quilla de Ámbar, los tres supervivientes alcanzan la colonia sellada y encuentran el libro de guardias: el alivio del refugio se convierte en la certeza de que alguien los esperaba. Ferrán impone el transmisor como única prioridad; la colonia responde cerrando sola las puertas a la hora escrita.",
     "personajes": [
-      "Ilaria Vensa",
-      "Bruno Achaval",
-      "Ndeye Kamara",
-      "Teo Riffel"
+      "Idoia Ferrán",
+      "Casimiro Vlach",
+      "Nieve Ospina",
+      "la letra del libro de guardias"
     ],
-    "locacion": "Vigía-9 — muelle de atraque",
-    "informacion_nueva": "La estación no sufrió despresurización ni violencia: los ciento nueve trabajadores faltan sin dejar rastro, y el sistema sigue funcionando con normalidad.",
+    "locacion": "Colonia minera de Vireo b",
+    "informacion_nueva": "Once años de turnos anotados sin un solo hueco, con la fecha de hoy en la última página y los nombres de los tres asignados a las once noches siguientes, escritos antes de que cayeran.",
     "tension": 2
   },
   {
     "num": 2,
-    "titulo": "Bandejas que todavía humean",
-    "objetivo_narrativo": "Recorrer el comedor y el taller mientras la evidencia se vuelve insoportablemente doméstica, y cerrar con el hallazgo de la planilla firmada hasta la hora del atraque.",
+    "titulo": "Cuatro presencias en el panel",
+    "objetivo_narrativo": "La colonia cumple su horario con puntualidad imposible mientras Vlach rehace el transmisor y Ospina levanta el plano de los niveles. El panel de personal marca cuatro, los túneles descienden en espiral hacia una cavidad destapada, y Vlach amanece descansado tras dos jornadas en vela con su propio turno ya anotado de una letra que no es la suya.",
     "personajes": [
-      "Ilaria Vensa",
-      "Bruno Achaval",
-      "Teo Riffel",
-      "Marga Sudo"
+      "Idoia Ferrán",
+      "Casimiro Vlach",
+      "Nieve Ospina",
+      "Teodora Marchesi"
     ],
-    "locacion": "Vigía-9 — comedor",
-    "informacion_nueva": "Las planillas de relevo de la capataz Marga Sudo están firmadas al día, incluida la hora exacta en que la cuadrilla atracó, y las herramientas del taller conservan calor de manos.",
-    "tension": 3
+    "locacion": "Colonia minera de Vireo b",
+    "informacion_nueva": "Los registros de Teodora Marchesi, jefa de turno, revelan su caligrafía idéntica a la del libro y describen a los colonos durmiendo mientras otro hacía sus guardias: lo que ocupa el turno vacío no imita a los vivos, los cubre.",
+    "tension": 4
   },
   {
     "num": 3,
-    "titulo": "Tráfico interno",
-    "objetivo_narrativo": "Ndeye intenta devolverle la voz a la estación y descubre que la antena transmite pero solo devuelve conversación de la dotación ausente; Ilaria encuentra el asiento nuevo con los cuatro nombres.",
+    "titulo": "Un nombre por noche",
+    "objetivo_narrativo": "Ferrán intenta quemar el libro y la colonia deja de fingir que es un edificio: los pasillos se reordenan según la espiral y arrastran a los tres hacia la cavidad del fondo. En la undécima noche, con el módulo de proa listo para dos, Ferrán firma el turno y se queda para que la contabilidad cuadre y las puertas se abran.",
     "personajes": [
-      "Ndeye Kamara",
-      "Ilaria Vensa",
-      "Bruno Achaval"
+      "Idoia Ferrán",
+      "Casimiro Vlach",
+      "Nieve Ospina",
+      "Teodora Marchesi"
     ],
-    "locacion": "Vigía-9 — cuarto de comunicaciones",
-    "informacion_nueva": "No hay señal al exterior, solo partes de turno de los últimos once días; en el registro laboral aparece una entrada posterior a su llegada que asigna a los cuatro al turno de noche.",
-    "tension": 4
-  },
-  {
-    "num": 4,
-    "titulo": "La escarcha reescribe los rótulos",
-    "objetivo_narrativo": "Bajar el pulso a una vigilia de observación en la que la estación demuestra que ya les lleva la contabilidad, y permitir que Ilaria lea el archivo de Sudo.",
-    "personajes": [
-      "Teo Riffel",
-      "Ndeye Kamara",
-      "Ilaria Vensa",
-      "Bruno Achaval",
-      "Marga Sudo"
-    ],
-    "locacion": "Vigía-9 — puente",
-    "informacion_nueva": "La dotación anterior no desapareció de golpe: se disolvió turno a turno, cada firma relevando a alguien que ya solo existía en la planilla, sin que el trabajo se interrumpiera nunca.",
-    "tension": 2
-  },
-  {
-    "num": 5,
-    "titulo": "Turno sin cerrar",
-    "objetivo_narrativo": "Bruno decide desatracar y descubre que no puede soltar la llave de torsión; se lo llevan al oficio delante de los demás y la cuadrilla entiende de qué está hecha la cosa que habita Vigía-9.",
-    "personajes": [
-      "Bruno Achaval",
-      "Ilaria Vensa",
-      "Ndeye Kamara",
-      "Teo Riffel"
-    ],
-    "locacion": "Vigía-9 — galería de perforación",
-    "informacion_nueva": "Nada retiene físicamente a la cuadrilla: lo que atrapa es el turno abierto, y cada uno ya ha aceptado un relevo tres veces.",
-    "tension": 4
-  },
-  {
-    "num": 6,
-    "titulo": "Las dos plazas vacantes",
-    "objetivo_narrativo": "Sostener la última vigilia negándose a trabajar, perder a Teo ante una alarma que nadie más oye y desatracar incompletas sin dejar constancia de la misión.",
-    "personajes": [
-      "Ilaria Vensa",
-      "Ndeye Kamara",
-      "Teo Riffel",
-      "Bruno Achaval",
-      "Marga Sudo"
-    ],
-    "locacion": "Vigía-9 — cuarto de comunicaciones",
-    "informacion_nueva": "El relevo solo se confirma cuando alguien se presenta a trabajar; declarar la misión sería registrarla, así que Ndeye borra el parte y Vigía-9 queda esperando a la próxima cuadrilla con dos plazas libres.",
+    "locacion": "Colonia minera de Vireo b",
+    "informacion_nueva": "El libro no puede cerrarse mientras haya un turno sin cubrir: importa poco si la cosa llegó del vacío o es en lo que se volvió la colonia, porque ambas respuestas piden un nombre por noche. En la última página, el de Nieve Ospina encabeza las once siguientes con la caligrafía de Ferrán.",
     "tension": 5
   }
 ]

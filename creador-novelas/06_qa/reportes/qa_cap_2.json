@@ -1,0 +1,26 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personificacion cortes o domestica de lo mecanico: en el cap. 2 el nivel dos 'se abria con un suspiro hidraulico', 'el papel era lo unico que la colonia no le discutia', el digito 'verde, sereno'. Acumulado 6 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion 'sin + sustantivo' para describir perfeccion o ausencia: en el cap. 2 'Sin fallos', 'los ojos sin la irritacion de cuarenta horas', 'sin que el lo notara'. Acumulado 6 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La caligrafia descrita por su pulso, trazo o firmeza como indicio de lo inhumano: en el cap. 2 'trazo por trazo, la del atril' y 'la otra, la cuidadosa'. Acumulado 4 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Remate por negacion seguida de afirmacion correctiva en frases cortas: en el cap. 2 'Nadie habia excavado aquello. Lo habian descubierto', 'No decia que la cosa los imitara. Decia que los relevaba', 'no era la propia. Era la otra'. Acumulado 3 apariciones, capitulo 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

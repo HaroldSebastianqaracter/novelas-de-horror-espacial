@@ -1,13 +1,13 @@
 {
   "ultimo_capitulo_cerrado": 3,
   "ultimo_qa_ejecutado": 3,
-  "total_capitulos_esperado": 6,
+  "total_capitulos_esperado": 3,
   "estado": "en_progreso",
   "reporte_qa_pendiente": null,
   "intentos_por_capitulo": {},
   "prompts_hash": {
-    "escritor": "9b036acf225b22f4",
-    "extractor": "4812a4623694c738",
+    "escritor": "80be4da62b6a53d7",
+    "extractor": "6b29d86e3fe72643",
     "qa": "b640f22352c321e8"
   },
   "reextraccion_pendiente": [],

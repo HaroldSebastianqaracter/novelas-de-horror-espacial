@@ -1,1 +1,0 @@
-EX-10: el escritor no consiguió validar su salida del capítulo 1: sin herramienta de terminal disponible

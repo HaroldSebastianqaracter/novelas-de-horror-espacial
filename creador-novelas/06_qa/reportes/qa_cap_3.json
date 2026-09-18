@@ -2,35 +2,45 @@
   "cap_corte": 3,
   "hallazgos": [
     {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 narra que Ospina asciende en el modulo de proa ('Vlach subio con las manos quemadas; Ospina, con los mapas'), pero el hecho vigente del log establece que Ospina quedo en la cavidad del fondo y su nombre comenzo a ser escrito en el siguiente turno de sacrificios; el propio cierre del capitulo lo confirma abajo.",
+      "cap_origen": 3
+    },
+    {
       "tipo": "repeticion",
-      "descripcion": "Calor residual de lo humano comprobado con la mano como prueba de presencia reciente: la llave de vaso 'caliente de mano' (cap. 1), el asiento del comedor con temperatura de cuerpo y los mangos de las once herramientas del taller (cap. 2), y 'como se retiran de algo que todavia esta caliente' (cap. 3). 4 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "descripcion": "Personificacion cortes o domestica de lo mecanico: 10 apariciones acumuladas (caps 1, 2, 3). En el cap. 3: la colonia que deja de fingir que era un edificio, el papel que prendio sin resistirse, la pluma que trabaja sola, las puertas con una obediencia inmediata.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "Tic de dialogo: un personaje deduce presencia humana con la formula 'Entonces hay alguien' / 'Entonces hay gente' (Teo en caps. 1 y 2, Bruno en cap. 3). 3 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "descripcion": "Estructura de negacion 'sin + sustantivo' para describir perfeccion o ausencia: 10 apariciones acumuladas (caps 1, 2, 3). En el cap. 3: 'sin resistirse', 'piedra abierta sin barreno', 'sin recibir ninguna despedida', 'un turno sin cubrir'.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "El silencio como respuesta con la misma construccion: 'Ilaria no contesto', 'Nadie le contesto' (cap. 1), 'Ilaria no contesto enseguida', 'Nadie le contesto', 'Ilaria no respondio' (cap. 2), 'nadie le contestaba' (cap. 3). 6 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "descripcion": "Repeticion lexica dentro de la misma frase como remate: 5 apariciones acumuladas (caps 1, 3). En el cap. 3: 'bajaba un poco y giraba un poco, siempre en el mismo sentido, siempre el angulo'; 'Marchesi no estaba. Marchesi seguia trabajando'.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "Los extractores tirando del vapor como cierre de ambiente: 'los extractores tiraban' (cap. 1), el vaho atrapado por los extractores y el zumbido final 'tirando del vapor de las bandejas' (cap. 2). 3 apariciones acumuladas en los capitulos 1 y 2.",
+      "descripcion": "La caligrafia descrita por su pulso, su tinta o su firmeza como indicio de lo inhumano: 7 apariciones acumuladas (caps 1, 2, 3). En el cap. 3: 'la tinta todavia brillaba', la letra 'familiar como la propia', 'trazado con la caligrafia de Idoia Ferran'.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "Estructura correctiva 'no era X: era Y' / 'no estaban X: estaban Y, que es distinto': el ruido del comedor y las herramientas del banco (cap. 2), 'no era miedo sino la irritacion' (cap. 1). 3 apariciones acumuladas en los capitulos 1 y 2.",
+      "descripcion": "Frase corta aislada en parrafo propio como golpe de suspense: 4 apariciones acumuladas (caps 1, 3). En el cap. 3: 'Entonces la colonia dejo de fingir que era un edificio' y 'En la undecima noche el modulo de proa esperaba con sitio para dos'.",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "Verificar algo 'dos veces' ante la incredulidad: Teo da las gracias dos veces y Ndeye recorre la lista dos veces (cap. 1), Ilaria lee la hora dos veces (cap. 2), Ndeye comprueba dos veces la hora del asiento (cap. 3). 5 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "descripcion": "Remate por negacion seguida de afirmacion correctiva en frases cortas: 6 apariciones acumuladas (caps 2, 3). En el cap. 3: 'No hubo estruendo. Fue una correccion'; 'Por eso no nos mata. Un muerto no cubre un turno'; 'Marchesi no estaba. Marchesi seguia trabajando'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El horror enunciado en lexico administrativo o de turnos: 3 apariciones acumuladas, todas en el cap. 3: 'una correccion, silenciosa y administrativa', 'Nos esta pasando lista', 'un turno sin cubrir'.",
       "cap_origen": null
     }
   ],
-  "tiene_contradicciones": false
+  "tiene_contradicciones": true
 }

@@ -1,0 +1,4 @@
+{"rol": "escritor", "capitulo": 1, "modelo": "claude-opus-5", "tokens_entrada": 6, "tokens_salida": 1409, "tokens_cache_lectura": 48386, "tokens_cache_creacion": 25791, "turnos": 3, "agent_id": "a45af15495dd6a5be", "stop_reason": null}
+{"rol": "extractor", "capitulo": 1, "modelo": "claude-haiku-4-5-20251001", "tokens_entrada": 33, "tokens_salida": 7170, "tokens_cache_lectura": 62931, "tokens_cache_creacion": 26342, "turnos": 4, "agent_id": "afa4b105795c898a5", "stop_reason": null}
+{"rol": "qa", "capitulo": 1, "modelo": "claude-opus-5", "tokens_entrada": 12, "tokens_salida": 4101, "tokens_cache_lectura": 129351, "tokens_cache_creacion": 28647, "turnos": 6, "agent_id": "a3e9058280d588a22", "stop_reason": null}
+{"rol": "escritor", "capitulo": 2, "modelo": "claude-opus-5", "tokens_entrada": 6, "tokens_salida": 1301, "tokens_cache_lectura": 57723, "tokens_cache_creacion": 18017, "turnos": 3, "agent_id": "a96ea67f805578719", "stop_reason": null}
