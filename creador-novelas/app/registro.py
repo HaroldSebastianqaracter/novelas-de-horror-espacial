@@ -17,6 +17,7 @@ Lo escriben los scripts y los hooks, nunca el modelo. No es estado de la novela:
 from __future__ import annotations
 
 import json
+import uuid
 import re
 import shutil
 import traceback
@@ -38,6 +39,28 @@ def ahora() -> str:
 
 def _puntero(raiz: Path) -> Path:
     return Rutas(raiz).tanda / "registro_actual"
+
+
+def id_novela(raiz: Path) -> str:
+    """Identidad del libro que se está escribiendo. Se crea la primera vez que alguien la pide.
+
+    Hace falta porque la carpeta del preludio se llama siempre `preludio`, y los identificadores de
+    Langfuse se derivan del nombre de la carpeta: sin esto, el preludio de la novela diez sobrescribe
+    el de la primera y las diez acaban siendo una. Vive en `07_registro/`, así que se archiva con el
+    libro y la novela siguiente nace con otra.
+    """
+    ruta = Rutas(raiz).registro / "novela.json"
+    if ruta.is_file():
+        try:
+            valor = json.loads(ruta.read_text(encoding="utf-8")).get("id")
+            if valor:
+                return str(valor)
+        except json.JSONDecodeError:
+            pass  # un archivo roto no puede dejar sin traza a la novela entera: se rehace
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    nuevo = {"id": uuid.uuid4().hex, "creada": ahora()}
+    ruta.write_text(json.dumps(nuevo, ensure_ascii=False, indent=2) + chr(10), encoding="utf-8")
+    return nuevo["id"]
 
 
 def carpetas_tanda(raiz: Path) -> list[Path]:
