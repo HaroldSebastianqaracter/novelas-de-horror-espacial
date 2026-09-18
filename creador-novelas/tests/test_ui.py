@@ -538,7 +538,9 @@ def test_la_traza_se_publica_sola_al_cerrar_la_fase_y_se_puede_apagar(monkeypatc
     monkeypatch.setattr(obs, "ClienteHTTP", _ClienteFalso)
     monkeypatch.setattr(obs, "credenciales_desde_entorno", lambda *a, **k: object())
     monkeypatch.setattr(obs, "exportar", _exportar)
-    monkeypatch.setattr(obs, "resolver_tanda", lambda raiz, cual: Rutas(raiz).registro / "preludio")
+    # No se toca `resolver_tanda`: publicar «la última tanda» dejaba fuera el preludio, porque
+    # durante las cuatro fases de preparación todavía no existe ninguna carpeta `tanda_*` y el
+    # exportador fallaba en silencio. Se publica la carpeta de registro en uso, sea cual sea.
 
     hilo_real = web.threading.Thread
 
@@ -600,6 +602,11 @@ def test_el_consumo_del_orquestador_se_anota_y_llega_a_la_traza(proyecto, config
 
     filas = [u for u in reg.leer_uso(carpeta) if u["rol"] == "orquestador"]
     assert len(filas) == 1, "el orquestador tiene que quedar anotado como una invocación más"
+    # Con el alias «opus» el consumo salía a 0,00 $ en el informe, porque config/precios.json y
+    # Langfuse se llevan por el identificador completo. Parecer gratis es peor que no contarlo.
+    precios = json.loads((Path(__file__).resolve().parents[1] / "config" / "precios.json")
+                         .read_text(encoding="utf-8"))["por_millon"]
+    assert filas[0]["modelo"] in precios, "el modelo anotado tiene que tener precio conocido"
     # Lo suyo es el total menos lo que ya contó H-10: si no se restara, se contaría dos veces.
     assert filas[0]["tokens_salida"] == 5_000 - 1_000
     assert filas[0]["tokens_cache_lectura"] == 200_000 - 50_000

@@ -60,6 +60,10 @@ FASES_DINAMICAS = ("reanudar",)
 # RESULTADO y despacha subagentes (INV-08). Cada subagente declara el suyo en `.claude/agents/`,
 # de modo que este valor no influye en con qué modelo se escribe la novela.
 MODELO_ORQUESTADOR = "opus"
+# El mismo modelo con su identificador completo. `--model` acepta el alias, pero `config/precios.json`
+# y Langfuse se llevan por el nombre canónico: anotar «opus» en `uso.jsonl` dejaba el consumo del
+# orquestador a 0,00 $ en el informe, que es peor que no contarlo, porque parece gratis.
+MODELO_ORQUESTADOR_ID = "claude-opus-5"
 
 # Una tanda lanzada desde la terminal no deja proceso hijo aquí; se la reconoce porque su registro
 # sigue creciendo. Por debajo de este margen se considera viva.
@@ -270,10 +274,10 @@ def _anotar_coste_de_fase(raiz: Path | None, fase: str | None, log: str | None,
             registro.evento(raiz, "agente_inicio", rol="orquestador", capitulo=None,
                             agent_id=agent_id, fase=fase, ts=inicio)
         registro.evento(raiz, "agente_fin", rol="orquestador", capitulo=None, agent_id=agent_id,
-                        fase=fase, turnos=datos.get("num_turns"), modelo=MODELO_ORQUESTADOR)
+                        fase=fase, turnos=datos.get("num_turns"), modelo=MODELO_ORQUESTADOR_ID)
         with registro.ruta_uso(raiz).open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"rol": "orquestador", "capitulo": None, "fase": fase,
-                                 "modelo": MODELO_ORQUESTADOR, **propio,
+                                 "modelo": MODELO_ORQUESTADOR_ID, **propio,
                                  "turnos": datos.get("num_turns"), "agent_id": agent_id,
                                  "stop_reason": datos.get("subtype")}, ensure_ascii=False) + "\n")
     except Exception as e:  # noqa: BLE001
@@ -344,7 +348,7 @@ def _publicar_traza(raiz: Path | None) -> None:
             if not cargar_config(raiz).exportar_trazas:
                 return
             cliente = obs.ClienteHTTP(obs.credenciales_desde_entorno())
-            carpeta = obs.resolver_tanda(raiz, "ultima")
+            carpeta = registro.dir_actual(raiz)  # preludio o tanda en curso, lo que toque
             r = obs.exportar(raiz, carpeta, cliente, con_cuerpos=False)
             _ULTIMA_EXPORTACION.update({"tanda": r.traza.tanda, "trace_id": r.traza.id,
                                         "objetos": r.aceptados, "error": None})
