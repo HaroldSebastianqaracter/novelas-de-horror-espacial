@@ -1,0 +1,46 @@
+{
+  "Irune Sabás": {
+    "estado_fisico": "Sin marcas; sin dormir tras la guardia del sellado.",
+    "estado_psicologico": "Firmó una orden que nadie ejecutó; manda una nave donde su firma ya no decide nada.",
+    "secretos_que_conoce": [
+      "Sabe que el aire solo alcanza para tres personas hasta puerto.",
+      "Sabe que Tere Almaraz tiene un bulto en el antebrazo izquierdo."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Tere Almaraz": {
+    "estado_fisico": "Bulto en el antebrazo izquierdo, ya a la vista.",
+    "estado_psicologico": "Sin secreto que sostener; sigue sin diagnóstico y ha dejado de buscarlo.",
+    "secretos_que_conoce": [
+      "Oculta que tiene un bulto en su propio antebrazo izquierdo.",
+      "Sabe que el aire solo alcanza para tres personas hasta puerto."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Bruno Yáñez": {
+    "estado_fisico": "Sin marcas; agotado.",
+    "estado_psicologico": "Resuelto tras negarse a sellar; asume el reparto de aire como única tarea posible.",
+    "secretos_que_conoce": [
+      "Sabe que el aire solo alcanza para tres personas hasta puerto.",
+      "Sabe que Tere Almaraz tiene un bulto en el antebrazo izquierdo."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Nadia Coll": {
+    "estado_fisico": "El bulto sigue avanzando; sin dolor.",
+    "estado_psicologico": "Serena; pidió la apertura por Simón, no por sí misma.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Simón Reix": {
+    "estado_fisico": "Inmóvil en su litera; algo se desplaza bajo la piel del cuello.",
+    "estado_psicologico": "No responde a ningún estímulo.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

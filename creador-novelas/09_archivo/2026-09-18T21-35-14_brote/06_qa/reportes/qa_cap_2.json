@@ -1,0 +1,21 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio o la omision de habla como cierre de escena: en el capitulo 2 reaparece tres veces (Bruno que no levanta la vista, la pausa larga de Nadia en el intercomunicador, el 'nadie dijo nada' seguido del silencio de Irune). Capitulos: 1, 2. Acumulado: 6 apariciones.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La medicion exacta (cifra o precision) como sustituto del miedo: en el capitulo 2 vuelve en el 'cuatro y medio otra vez', en el treinta y uno por ciento de consumo y en el reparto de tres frente a cinco. Capitulos: 1, 2. Acumulado: 7 apariciones.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El gesto de la manga o la tela sobre el antebrazo como marca de quien lleva la lesion: en el capitulo 2 se traslada a Tere Almaraz, que se aprieta el antebrazo izquierdo y palpa el bulto bajo la tela. Capitulos: 1, 2. Acumulado: 3 apariciones.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

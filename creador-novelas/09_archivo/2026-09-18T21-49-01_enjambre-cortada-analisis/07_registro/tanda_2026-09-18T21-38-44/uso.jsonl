@@ -1,0 +1,5 @@
+{"rol": "escritor", "capitulo": 1, "modelo": "claude-opus-5", "tokens_entrada": 6, "tokens_salida": 4702, "tokens_cache_lectura": 54080, "tokens_cache_creacion": 29441, "turnos": 3, "agent_id": "ac87a19f4c769527a", "stop_reason": null}
+{"rol": "qa", "capitulo": 1, "modelo": "claude-opus-5", "tokens_entrada": 8, "tokens_salida": 2909, "tokens_cache_lectura": 72519, "tokens_cache_creacion": 27124, "turnos": 4, "agent_id": "a775caf55d4bdcddb", "stop_reason": null}
+{"rol": "escritor", "capitulo": 2, "modelo": "claude-opus-5", "tokens_entrada": 6, "tokens_salida": 3893, "tokens_cache_lectura": 63785, "tokens_cache_creacion": 21870, "turnos": 3, "agent_id": "aa0346a2e160cdc34", "stop_reason": null}
+{"rol": "qa", "capitulo": 2, "modelo": "claude-opus-5", "tokens_entrada": 8, "tokens_salida": 4244, "tokens_cache_lectura": 86632, "tokens_cache_creacion": 19522, "turnos": 4, "agent_id": "a2d390838d01bfa59", "stop_reason": null}
+{"rol": "escritor", "capitulo": 3, "modelo": "claude-opus-5", "tokens_entrada": 10, "tokens_salida": 3441, "tokens_cache_lectura": 127257, "tokens_cache_creacion": 23132, "turnos": 5, "agent_id": "acba2f95b784194d9", "stop_reason": null}

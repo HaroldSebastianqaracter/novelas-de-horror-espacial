@@ -16,7 +16,11 @@ Condición de entrada: el manifiesto muestra `reextraccion_pendiente` no vacío 
 
 1. `.venv/Scripts/python.exe -m app preparar-correccion K` → `RESULTADO: correccion_lista prompt=04_estado/prompts/escritor_cap_K.md`. Leélo con Read.
 2. `Agent(subagent_type="escritor", prompt=<contenido>)`. Reescribe `05_manuscrito/cap_K.md` con el hallazgo de la revisión delante y lo valida él mismo (`validar-capitulo K`, RF-08.4). Guardá su línea; si dice `NO VALIDADO`, detenete y reportalo. **No llames a `registrar-escritor`**: ese verbo cierra un capítulo nuevo y K ya está cerrado, así que el capítulo parecería rechazado y acabarías en `descartar-borrador`, que INV-07 prohíbe sobre un capítulo cerrado. Aquí no se cierra nada, solo se reemplaza el texto.
-3. `.venv/Scripts/python.exe -m app preparar-extractor K` → `RESULTADO: extractor_listo prompt=04_estado/prompts/extractor_cap_K.md`. Leélo con Read.
+3. Mirá `delta_del_escritor` en la línea `RESULTADO: correccion_lista` del paso 1.
+   **Si es `true`, no invoques al extractor**: el escritor ya reescribió también
+   `04_estado/deltas/delta_cap_K.json` junto al capítulo. Saltá al paso 5 y aplicalo sin
+   `--retorno`, porque no hay línea de extractor que pasar. Si es `false`, seguí aquí:
+   `.venv/Scripts/python.exe -m app preparar-extractor K` → `RESULTADO: extractor_listo prompt=04_estado/prompts/extractor_cap_K.md`. Leélo con Read.
 4. `Agent(subagent_type="extractor", prompt=<contenido>)`. Escribe `04_estado/deltas/delta_cap_K.json`, lo valida (`validar-delta K`) y devuelve `delta_cap_K.json · N hechos · P personajes · validado`. El JSON no pasa por vos. Guardá su línea.
 5. `.venv/Scripts/python.exe -m app aplicar-delta K --reextraccion --retorno "<línea del extractor>"`
    - `RESULTADO: reextraido pendientes=[...]` → si quedan, volvé al paso 1 con el siguiente; si está vacío, terminaste.

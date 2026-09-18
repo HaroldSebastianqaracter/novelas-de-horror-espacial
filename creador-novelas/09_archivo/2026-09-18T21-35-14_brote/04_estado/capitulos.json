@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "La hora exacta del amarre",
+    "objetivo_narrativo": "Presentar la Vereda Larga y a sus cinco tripulantes en la segunda guardia después del amarre al pecio, y cerrar con el aislamiento del módulo de popa decretado por Tere Almaraz y la hora del amarre anotada en el diario de a bordo por orden de Irune Sabás.",
+    "personajes": [
+      "Irune Sabás",
+      "Tere Almaraz",
+      "Bruno Yáñez",
+      "Nadia Coll",
+      "Simón Reix"
+    ],
+    "locacion": "Vereda Larga — enfermería de proa",
+    "informacion_nueva": "Nadia Coll y Simón Reix tienen bultos tibios de bordes demasiado limpios que se han desplazado varios centímetros bajo la piel entre una guardia y la siguiente; ninguna base de datos médica los reconoce, el reciclador único mezcla el aire de toda la nave cada cuarenta minutos y Bruno Yáñez no puede aislar el circuito de popa sin dejar a popa sin aire.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "La cuenta de los filtros",
+    "objetivo_narrativo": "Llevar el problema de lo médico a lo aritmético: Tere documenta el avance de las lesiones y escucha a Nadia describir la ocupación mientras Simón calla, y Bruno presenta a Irune y a Tere la cuenta del aire que convierte el sellado del mamparo en una operación de supervivencia.",
+    "personajes": [
+      "Bruno Yáñez",
+      "Irune Sabás",
+      "Tere Almaraz",
+      "Nadia Coll",
+      "Simón Reix"
+    ],
+    "locacion": "Vereda Larga — sala del reciclador de atmósfera",
+    "informacion_nueva": "Los bultos se mueven siempre hacia la línea media del cuerpo, no al azar; las cargas de filtro se consumen a un ritmo anómalo desde el día del amarre; el aire da para tres personas hasta puerto, no para cinco; y Tere descubre un bulto tibio en su propio antebrazo y se lo calla.",
+    "tension": 4
+  },
+  {
+    "num": 3,
+    "titulo": "Lo que nadie se atrevió a dejar fuera",
+    "objetivo_narrativo": "Resolver la decisión ante el mamparo de popa: Nadia pide que abran por Simón, Irune convoca el sellado, Tere descubre su antebrazo y rompe la aritmética, y el forcejeo deja el mamparo abierto el tiempo suficiente para borrar la distinción entre dentro y fuera.",
+    "personajes": [
+      "Irune Sabás",
+      "Bruno Yáñez",
+      "Tere Almaraz",
+      "Nadia Coll",
+      "Simón Reix"
+    ],
+    "locacion": "Vereda Larga — mamparo de popa",
+    "informacion_nueva": "Sellar popa ya no salva a nadie, solo elige quién muere primero; Irune firma igual la orden y Bruno se niega a accionarla, y los cuatro que aún hablan reparten turnos de filtro para una travesía que ya no da para cuatro, con la nave manteniendo rumbo a puerto.",
+    "tension": 5
+  }
+]

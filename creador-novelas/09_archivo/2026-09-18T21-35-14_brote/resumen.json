@@ -1,0 +1,105 @@
+{
+  "version_specs": "v1.12",
+  "config": {
+    "novela.json": {
+      "total_capitulos": 3,
+      "palabras_por_capitulo": 400,
+      "idioma": "es-ES",
+      "persona_narrativa": "tercera_limitada",
+      "tiempo_verbal": "pasado",
+      "ventana_resumen_rodante": 2,
+      "cadencia_qa": 1,
+      "max_tokens_contexto_escritor": 12000,
+      "max_hechos_por_capitulo": 4
+    },
+    "ejecucion.json": {
+      "capitulos_por_tanda": 3,
+      "max_llamadas_por_tanda": 30,
+      "registrar_uso": true,
+      "exportar_trazas": true,
+      "escritor_emite_delta": true
+    }
+  },
+  "capitulos": {
+    "cerrados": 3,
+    "esperados": 3,
+    "estado": "pausado_por_qa",
+    "palabras": [
+      458,
+      469,
+      434
+    ]
+  },
+  "reloj": {
+    "preludio_s": 194.0,
+    "por_fase_s": {
+      "generar-premisa": 26.0,
+      "generar-sinopsis": 42.0,
+      "generar-escaleta": 42.0,
+      "inicializar-estado": 84.0
+    },
+    "tandas": [
+      {
+        "tanda": "tanda_2026-09-18T20-52-46",
+        "inicio": "2026-09-18T20:52:46.139+02:00",
+        "fin": "2026-09-18T21:35:12.519+02:00",
+        "segundos": 2546.4
+      }
+    ],
+    "tandas_s": 2546.4,
+    "total_s": 2740.4
+  },
+  "agentes": {
+    "orquestador": {
+      "invocaciones": 5,
+      "segundos": 2180.0,
+      "tokens_salida": 24744,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "escritor": {
+      "invocaciones": 5,
+      "segundos": 2166.0,
+      "tokens_salida": 26029,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "qa": {
+      "invocaciones": 3,
+      "segundos": 1617.9,
+      "tokens_salida": 13774,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    }
+  },
+  "calidad": {
+    "contradicciones": 1,
+    "cortes_qa": 3,
+    "reintentos_de_escritor": 0,
+    "borradores_descartados": 0,
+    "tandas_abortadas": 1,
+    "motivos_de_aborto": [
+      "PausadoPorQAError: RF-07.6: quedan capítulos por reextraer: [3]"
+    ],
+    "pausado_al_archivar": true
+  },
+  "coste": {
+    "moneda": "USD",
+    "total": 6.7048,
+    "tokens": 5040223,
+    "por_rol": {
+      "orquestador": 2.1413,
+      "escritor": 1.8071,
+      "preludio": 1.7732,
+      "qa": 0.9833
+    },
+    "modelos_sin_precio": [],
+    "carpetas_con_uso": 2
+  },
+  "nombre": "2026-09-18T21-35-14_brote",
+  "titulo": "El aire que compartimos",
+  "archivado": "2026-09-18T21:35:14+02:00"
+}

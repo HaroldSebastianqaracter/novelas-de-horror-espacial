@@ -390,6 +390,7 @@ def cmd_preparar_correccion(args, raiz: Path) -> int:
           f"{rutas.capitulo(args.n).relative_to(raiz).as_posix()}")
     _resultado("correccion_lista", n=args.n,
                prompt=rutas.prompt_escritor(args.n).relative_to(raiz).as_posix(),
+               delta_del_escritor=config.escritor_emite_delta,
                tokens=contexto.tokens_estimados)
     return 0
 

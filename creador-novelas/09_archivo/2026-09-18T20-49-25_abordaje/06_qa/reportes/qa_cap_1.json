@@ -1,0 +1,21 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Insistencia en el numeral 'dos' como unidad de medida de casi toda accion: 'dos en el panel de trim', 'dos vueltas de llave', 'la habia soldado dos veces', 'dos segundos antes del sello', 'soldado dos veces' (capitulo 1, 5 apariciones).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Definicion por negacion como forma de describir: 'no dijo lo que llevaba semanas sin decir', 'No emitia', 'no se movia como se mueve un cuerpo', 'No esta dentro' (capitulo 1, 4 apariciones).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Anafora con verbo de reporte repetido en serie: 'Anuncio presion nominal. Anuncio el ciclo de la esclusa de carga. Despues anuncio una lectura de masa...' (capitulo 1, 3 apariciones en el mismo parrafo).",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

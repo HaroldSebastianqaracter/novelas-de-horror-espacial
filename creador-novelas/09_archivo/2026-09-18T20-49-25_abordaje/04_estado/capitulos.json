@@ -1,0 +1,48 @@
+[
+  {
+    "num": 1,
+    "titulo": "Lo que no figuraba en el manifiesto",
+    "objetivo_narrativo": "Presentar a la tripulación de la Sirga a once días de puerto y romper la rutina con el trasvase: la esclusa de carga se abre a algo que no estaba en el manifiesto, Tomé muere ante las cámaras y la orden de sellado de Adela llega tarde por segundos.",
+    "personajes": [
+      "Adela Varo",
+      "Renzo Pardal",
+      "Oksana Belén",
+      "Tomé Iriarte",
+      "Marek Suñé",
+      "la presencia"
+    ],
+    "locacion": "Bodega de carga de la Sirga",
+    "informacion_nueva": "La cosa entró por la esclusa durante el trasvase, no emite ni responde a ningún protocolo de contacto, y los segundos perdidos en la orden de sellado le bastaron para meterse en los conductos de servicio.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "Lo que cuesta cada mamparo",
+    "objetivo_narrativo": "Sostener el cerco por secciones hasta que se vuelve contra ellos: Renzo descubre que la presencia no retrocede sino que elige rumbo al puente, Oksana pone el número del aire encima de la mesa y Marek confiesa que puerto lleva mudo desde antes del trasvase.",
+    "personajes": [
+      "Adela Varo",
+      "Renzo Pardal",
+      "Oksana Belén",
+      "Marek Suñé",
+      "la presencia"
+    ],
+    "locacion": "Conductos de servicio de la Sirga",
+    "informacion_nueva": "Cada sección sellada es una sección perdida de aire y de rutas, han gastado media nave en seis días, y la última respuesta de puerto llegó antes del trasvase: la baliza transmite hacia un lugar del que nadie contesta.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "Once días hasta puerto",
+    "objetivo_narrativo": "Cerrar el cerco con el precio puesto: Renzo bloquea a Adela en el puente, baja a hacer de cebo y abre la esclusa de proa al vacío con la presencia dentro, y la Sirga atraca en un puerto encendido y vacío donde el indicador vuelve a moverse.",
+    "personajes": [
+      "Adela Varo",
+      "Renzo Pardal",
+      "Oksana Belén",
+      "Marek Suñé",
+      "la presencia"
+    ],
+    "locacion": "Pasillo de proa de la Sirga",
+    "informacion_nueva": "Renzo había cableado el ciclo de mamparos para accionarlo a mano desde dentro del conducto; el cierre funciona y mata a Renzo y a Marek, pero el sello de proa queda marcado desde el otro lado y el puerto que los esperaba está tan mudo como la cosa.",
+    "tension": 5
+  }
+]

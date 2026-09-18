@@ -1,0 +1,31 @@
+{
+  "reglas": [
+    "La Sirga es un remolcador de carga viejo: los sistemas responden tarde y muchos mandos hay que forzarlos a mano.",
+    "El casco se compartimenta por secciones; sellar un mamparo aísla la sección y la deja fuera del circuito de aire y de las rutas de paso.",
+    "El soporte vital recicla aire por circuitos repartidos entre las secciones: cuanta menos nave queda abierta, menos horas de margen quedan.",
+    "Las cámaras interiores dan imagen pobre y con retardo, y quien mira el puente ve lo que pasó unos segundos antes.",
+    "La baliza de la Sirga transmite hacia puerto de forma continua; recibir respuesta depende del otro extremo de la ruta.",
+    "Las esclusas exteriores pueden abrirse al vacío desde el ciclo de mamparos, y el ciclo admite accionarse desde el puente o, si alguien lo cablea, desde dentro de los conductos.",
+    "Fuera del casco hay vacío y la ruta de vuelta está medida en días de travesía: no hay a dónde salir ni a quién llamar de cerca."
+  ],
+  "objetos": [
+    "Manifiesto de carga: el registro de lo que la Sirga transporta; lo lee entero Oksana Belén.",
+    "Ciclo de mamparos: el mando que abre y cierra los sellos de sección y las esclusas de carga y de proa.",
+    "Baliza de comunicaciones: el equipo con el que Marek Suñé llama a puerto.",
+    "Indicador del sello de proa: la luz que marca en verde cuando el sello está firme.",
+    "Lámparas de mano: el alumbrado con el que se recorren los conductos de servicio."
+  ],
+  "linea_de_tiempo": [
+    "La Sirga lleva cuatro meses fuera de puerto cuando empieza la historia.",
+    "La última respuesta de puerto se recibe antes de la maniobra de trasvase.",
+    "Día uno: maniobra de trasvase en la bodega de carga, con Tomé Iriarte de guardia.",
+    "Quedan once días de travesía hasta puerto desde el día del trasvase."
+  ],
+  "locaciones": {
+    "Bodega de carga de la Sirga": "El volumen más grande de la nave, con la esclusa de carga al exterior y el puesto de guardia bajo cámara; huele a metal frío y a grasa de trasvase.",
+    "Conductos de servicio de la Sirga": "La red estrecha de pasos técnicos que atraviesa el casco entre secciones; Renzo Pardal los ha soldado todos dos veces y se recorren a rastras y con lámpara.",
+    "Pasillo de proa de la Sirga": "El tramo que une el puente con la esclusa de proa; angosto, con el indicador del sello a la vista y el mamparo al fondo.",
+    "Puente de la Sirga": "El puesto de mando desde donde se dan las órdenes de sellado y se ven las cámaras interiores con retardo.",
+    "Puerto": "El destino al final de la ruta, con luces de atraque que funcionan solas y frecuencias de control que no contestan."
+  }
+}

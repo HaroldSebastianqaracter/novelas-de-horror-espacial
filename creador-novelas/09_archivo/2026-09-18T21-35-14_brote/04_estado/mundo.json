@@ -1,0 +1,34 @@
+{
+  "reglas": [
+    "El carguero Vereda Larga cubre una travesía de nueve meses entre estaciones y lleva cuatro cumplidos; la ruta trazada no contempla ningún puerto intermedio.",
+    "Un único reciclador de atmósfera sirve a toda la nave y mezcla el aire de todos los módulos cada cuarenta minutos.",
+    "Los planos de a bordo no recogen ningún circuito de aire independiente para el módulo de popa: aislar popa del reciclador equivale, según el manual de la nave, a dejar popa sin aire.",
+    "La tripulación reglamentaria de la Vereda Larga es de cinco personas y no hay relevo posible durante la travesía.",
+    "La médica de a bordo es la única autoridad sanitaria a doce semanas de cualquier otra, y sus decisiones de aislamiento se aplican sin consulta externa.",
+    "Las órdenes de la capitana se ejecutan cuando quedan firmadas y anotadas en el diario de a bordo.",
+    "El consumo de las cargas de filtro queda registrado automáticamente por el reciclador y puede consultarse guardia a guardia.",
+    "Las bases de datos médicas de a bordo son las últimas cargadas en puerto y no admiten actualización durante la travesía."
+  ],
+  "objetos": [
+    "Reciclador de atmósfera: sistema único de soporte vital, con sala propia y registro automático de consumo de filtros.",
+    "Cargas de filtro: repuestos contados y numerados, embarcados en puerto para cubrir la travesía completa.",
+    "Diario de a bordo: registro oficial donde la capitana anota horas, órdenes y firmas.",
+    "Mamparo de popa: cierre estanco entre el módulo de popa y el resto de la nave, accionable con herramienta de sellado.",
+    "Herramienta de sellado del mamparo: la maneja el ingeniero de atmósfera.",
+    "Intercomunicador del módulo de popa: único canal de voz entre los aislados y el resto de la tripulación.",
+    "Pecio a la deriva: nave abandonada abordada en la maniobra de amarre de la guardia anterior.",
+    "Instrumental de la enfermería: medición, fotografía y comparación de lesiones; sin capacidad de análisis de laboratorio."
+  ],
+  "linea_de_tiempo": [
+    "Hace nueve meses: la Vereda Larga zarpa de la estación de origen con cinco tripulantes y las cargas de filtro contadas para la travesía.",
+    "Cuatro meses de travesía: la nave alcanza el tramo medio de la ruta, sin puerto alternativo por delante ni por detrás.",
+    "Guardia del amarre: Nadia Coll y Simón Reix bajan al pecio a la deriva durante la maniobra de amarre.",
+    "Primera guardia después del amarre: la tripulación vuelve a la rutina y el consumo de filtro empieza a registrarse por encima de lo previsto.",
+    "Segunda guardia después del amarre: momento en el que arranca el capítulo 1."
+  ],
+  "locaciones": {
+    "Vereda Larga — enfermería de proa": "Compartimento estrecho en el extremo de proa, con camilla abatible, instrumental de medición y fotografía y la consola de las bases de datos médicas. Es el puesto de Tere Almaraz y el único espacio de la nave con luz fija y blanca.",
+    "Vereda Larga — sala del reciclador de atmósfera": "Sala central ocupada por el reciclador único, con los bancos de filtros a la vista, la consola de registro de consumo y el ruido constante que Bruno Yáñez conoce filtro por filtro. Todo el aire de la nave pasa por aquí.",
+    "Vereda Larga — mamparo de popa": "Cierre estanco al final del pasillo longitudinal, con el intercomunicador del módulo de popa a un lado y el anclaje para la herramienta de sellado al otro. Es la línea que separa a los aislados del resto de la nave."
+  }
+}

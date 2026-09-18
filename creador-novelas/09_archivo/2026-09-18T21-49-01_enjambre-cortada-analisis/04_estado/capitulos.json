@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "Grava en los conductos",
+    "objetivo_narrativo": "Presentar la estación como único punto de calor en un mundo a doscientos grados bajo cero y a los cinco operarios del turno treinta y dos; convertir un ruido en los conductos térmicos en la primera prueba física de que algo vivo comparte el calor con ellos.",
+    "personajes": [
+      "Irune Balda",
+      "Tomás Requejo",
+      "Nadia Oyarce",
+      "Elvio Santamarta",
+      "Khalil Domenge"
+    ],
+    "locacion": "Estación Nictálope",
+    "informacion_nueva": "Nadia oye un rumor como de grava cayendo en los conductos térmicos; al amanecer artificial aparece una rejilla del pasillo de servicio doblada hacia fuera y un cuerpo blando sin ojos, del tamaño de una mano, aplastado y todavía tibio contra el radiador. El relevo no llega hasta dentro de seis días.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "Aritmética del calor",
+    "objetivo_narrativo": "Transformar el asedio en un cálculo imposible: el frío las expulsa pero mata a la tripulación en cuatro horas, y el repliegue por compartimentos solo acelera lo que sube desde abajo.",
+    "personajes": [
+      "Irune Balda",
+      "Tomás Requejo",
+      "Nadia Oyarce",
+      "Elvio Santamarta",
+      "Khalil Domenge"
+    ],
+    "locacion": "Estación Nictálope",
+    "informacion_nueva": "Khalil pierde dos dedos cerrando una rejilla con la mano desnuda y apagar la calefacción de un módulo las expulsa en minutos, pero la estación entera sin calor son cuatro horas de vida. Tomás descubre que no vienen de fuera sino de abajo: el intercambiador geotérmico atraviesa una bolsa donde viven desde antes de la estación. Elvio confiesa que estuvo en el turno treinta y uno, que ya lo sabía y firmó el silencio, y que existe un procedimiento de purga que nunca se ejecutó.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "Lo que se entrega al frío",
+    "objetivo_narrativo": "Llevar el repliegue hasta el núcleo y ejecutar la purga a mano en el pozo, donde el precio deja de ser la estación y pasa a ser un hombre; cerrar con cuatro supervivientes, un informe firmado y la amenaza intacta bajo el suelo.",
+    "personajes": [
+      "Irune Balda",
+      "Tomás Requejo",
+      "Nadia Oyarce",
+      "Elvio Santamarta",
+      "Khalil Domenge"
+    ],
+    "locacion": "Pozo del intercambiador",
+    "informacion_nueva": "La purga exige dos personas en el pozo: una que corte y otra que sostenga desde dentro la compuerta, que se cierra sola con el frío. Elvio sostiene y no sube; el calor de la bolsa se desfonda y lo que subía huye hacia abajo. El relevo del sexto día encuentra cuatro supervivientes, la estación apagada y un informe de Irune que nombra la bolsa, la compañía y a Elvio, mientras abajo algo tibio vuelve a moverse.",
+    "tension": 5
+  }
+]

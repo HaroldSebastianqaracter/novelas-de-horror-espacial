@@ -1,0 +1,21 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "El ciclo de cuarenta minutos del reciclador como marca del aire compartido: 3 apariciones en el capitulo 1 (apertura, replica de Bruno Yanez, ciclo que arranca otra mezcla). Capitulos: 1.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio o la omision de habla como cierre de escena: 3 apariciones en el capitulo 1 ('sin decir nada', 'Nadie dijo nada', 'cerro el diario sin comentar'). Capitulos: 1.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La medicion exacta como sustituto del miedo: 4 apariciones en el capitulo 1 ('cuatro centimetros y medio', 'la hora exacta del amarre', 'una precision que le resulto obscena', 'seria contabilidad'). Capitulos: 1.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

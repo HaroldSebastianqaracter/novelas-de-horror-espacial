@@ -1,0 +1,21 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de contraste por negacion y correccion: 'No arrancada: doblada' (cap. 1) y 'Nadia tardo en entenderlo. Irune no.' / 'Irune no le pregunto a Elvio por que; le pregunto donde estaba el documento' (cap. 2). 4 apariciones acumuladas en los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Percepcion del entorno por temperatura al tacto: 'quemaba de frio' y 'esta tibio' (cap. 1), 'menos metros tibios' (cap. 2). 3 apariciones acumuladas en los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Medicion de la tension por cifras cronometradas: 'once minutos', 'a los seis minutos', 'a los nueve', 'cuatro horas', 'ciento cuarenta y cuatro' (cap. 2). 4 apariciones acumuladas en el capitulo 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

@@ -1,0 +1,31 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 afirma que el indicador del sello de proa paso a verde 'por primera vez en once dias' en el momento del venteo, y a continuacion situa el atraque en puerto 'el dia once'. Los once dias son los que separaban la maniobra de trasvase de puerto, y el venteo ocurre hacia el septimo dia segun los seis dias de sellados fijados en el capitulo 2: la cuenta no puede estar cerrada antes del atraque.",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Definicion por negacion para describir a la presencia y su entorno ('sin pasos que lo acompanaran', 'ninguna frecuencia de control contesto'). 8 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Insistencia en el numeral 'dos' como unidad de medida de la accion tecnica ('habia soldado cada paso de servicio dos veces'). 6 apariciones acumuladas en los capitulos 1 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion litanica y descendente de secciones o mamparos ('contando mamparos en voz baja, seis, cinco, cuatro'). 3 apariciones acumuladas en los capitulos 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio del canal presentado como eco de otro silencio ('el silencio tenia la misma textura que el de la cosa'). 3 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

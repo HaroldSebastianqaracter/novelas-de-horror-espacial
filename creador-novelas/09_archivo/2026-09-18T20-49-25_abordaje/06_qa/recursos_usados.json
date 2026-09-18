@@ -1,0 +1,79 @@
+[
+  {
+    "recurso": "insistencia en el numeral 'dos' como unidad de medida de la accion tecnica",
+    "veces": 6,
+    "caps": [
+      1,
+      3
+    ]
+  },
+  {
+    "recurso": "definicion por negacion ('No emitia', 'no se movia como se mueve un cuerpo')",
+    "veces": 8,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "anafora con verbo de reporte repetido en serie ('Anuncio X. Anuncio Y.')",
+    "veces": 3,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "formula de rutina 'lo de siempre / lo que tardaban siempre'",
+    "veces": 2,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "conversacion de la tripulacion que se reanuda en vez de terminar",
+    "veces": 2,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "silencio del canal como eco del silencio de la ruta",
+    "veces": 3,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "gesto de comprobacion repetida como marca de fiabilidad ('comprobo otra vez', 'la cuenta tres veces', 'Comprobe el equipo')",
+    "veces": 3,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "enumeracion litanica de las secciones selladas",
+    "veces": 3,
+    "caps": [
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "repeticion inmediata del verbo para reforzar ('emite, emite bien')",
+    "veces": 1,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "indicador de color (ambar/verde) como termometro emocional de la escena",
+    "veces": 2,
+    "caps": [
+      3
+    ]
+  }
+]

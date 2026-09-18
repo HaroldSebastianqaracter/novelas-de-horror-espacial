@@ -1,0 +1,46 @@
+{
+  "Adela Varo": {
+    "estado_fisico": "Entera, con la mano dolorida de golpear el panel.",
+    "estado_psicologico": "Sin órdenes que dar: sobrevivió al cerco que ella misma sostuvo y abre puerto sin esperar respuesta.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Renzo Pardal": {
+    "estado_fisico": "Muerto: expulsado al vacío por la esclusa de proa junto con la presencia.",
+    "estado_psicologico": "Sin estado: accionó el ciclo a mano sabiendo que quedaba del lado equivocado.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Oksana Belén": {
+    "estado_fisico": "Sana, agotada.",
+    "estado_psicologico": "Sin margen que contar; vigila el indicador de proa en vez de mirar el puerto.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Tomé Iriarte": {
+    "estado_fisico": "Muerto en la bodega de carga durante su guardia; su cuerpo no se ha recuperado.",
+    "estado_psicologico": "Sin estado: murió antes de entender lo que entró por la esclusa.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Marek Suñé": {
+    "estado_fisico": "Desaparecido: bajó tras Renzo al pasillo de proa y no volvió a registrarse en ninguna cámara.",
+    "estado_psicologico": "Sin estado registrado.",
+    "secretos_que_conoce": [
+      "La última respuesta de puerto llegó antes del trasvase y desde entonces la baliza transmite sin que nadie conteste."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "la presencia": {
+    "estado_fisico": "Expulsada al vacío por la esclusa de proa; algo empujó el sello desde fuera después.",
+    "estado_psicologico": "Intención ilegible hasta el final.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

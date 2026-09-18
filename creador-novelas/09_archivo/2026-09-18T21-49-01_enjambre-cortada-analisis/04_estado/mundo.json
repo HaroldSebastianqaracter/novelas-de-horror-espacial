@@ -1,0 +1,28 @@
+{
+  "reglas": [
+    "La temperatura exterior del mundo sin nombre propio ronda los doscientos grados bajo cero en la cara nocturna, donde la estación está clavada.",
+    "Todo el calor de la estación procede de un intercambiador geotérmico que sube desde un pozo bajo el suelo del núcleo.",
+    "Los registros de la compañía cifran en unas cuatro horas la supervivencia de la dotación si la estación entera queda sin calefacción.",
+    "Enfriar un módulo lo vuelve inhabitable en minutos: el frío entra por las paredes en cuanto se corta la calefacción.",
+    "Los relevos se hacen por turnos de mantenimiento numerados; el treinta y dos lo cubren cinco operarios y el siguiente relevo está previsto para dentro de seis días.",
+    "Las comunicaciones con la compañía tienen un retardo tal que ningún socorro pedido desde la estación puede llegar dentro del turno.",
+    "Los planos de a bordo describen los conductos térmicos como un circuito cerrado de servicio, sin registrar qué atraviesa el intercambiador bajo el pozo."
+  ],
+  "objetos": [
+    "Rejillas de los conductos térmicos en pasillos y módulos, atornilladas desde dentro y manipulables a mano desde el pasillo de servicio.",
+    "Radiadores de módulo, la superficie más caliente y accesible de cada compartimento.",
+    "Archivo de mantenimiento de la estación, donde se firman los informes de cada turno y donde consta el procedimiento de purga.",
+    "Consola de comunicaciones desde la que Khalil confirma cada mañana la fecha del relevo.",
+    "Pared de la litera de Irune, donde lleva marcados los días del turno.",
+    "Compuerta del pozo del intercambiador, que se cierra sola cuando el metal se enfría."
+  ],
+  "linea_de_tiempo": [
+    "Hace once años: se instala la estación Nictálope sobre la cara nocturna y se perfora el intercambiador geotérmico.",
+    "Turno treinta y uno: el equipo anterior documenta la bolsa bajo el intercambiador, la compañía sella el informe y sus miembros firman el silencio.",
+    "Día uno del turno treinta y dos: los cinco operarios entran de servicio con el relevo previsto a seis días vista."
+  ],
+  "locaciones": {
+    "Estación Nictálope": "Pulmón de calor de doscientos metros cuadrados clavado en la cara nocturna de un mundo sin nombre propio: módulos comunicados por pasillos estrechos, un pasillo de servicio con rejillas de conductos térmicos, literas, enfermería, consola de comunicaciones y una sala de reactor en el núcleo. Todo lo que no está sellado y caliente mata en minutos.",
+    "Pozo del intercambiador": "Cavidad estrecha bajo el suelo del núcleo por la que baja el intercambiador geotérmico hasta la roca caliente. Se accede por una escala vertical y una compuerta que el frío cierra sola; abajo el aire es húmedo y tibio y el ruido de la piedra suena como grava que se mueve."
+  }
+}

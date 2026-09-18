@@ -1,0 +1,31 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 afirma por boca del narrador que el recuento ya no era de tres sanos contra dos enfermos sino de 'dos y dos', un total de cuatro personas que deja fuera a un tripulante; el log establece que a bordo van cinco (Irune Sabas, Tere Almaraz, Bruno Yanez, Nadia Coll y Simon Reix) y, con Tere marcada, el reparto seria de dos sanos frente a tres afectados.",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La medicion exacta (cifra o precision) como sustituto del miedo: reaparece en el capitulo 3 (hora cero cuatro, once minutos para la mezcla, tres guardias, un palmo y medio metro, veinte anos, dos horas de turno, cinco meses a puerto). Acumulado 12 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio o la omision de habla como cierre de escena: en el capitulo 3 ('Simon ya no contesta', 'los cuatro que aun hablaban', el cierre mudo del mamparo). Acumulado 8 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El gesto de la manga subida o bajada como marca de la lesion: en el capitulo 3 Tere se remanga el brazo izquierdo hasta el codo para mostrar su marca. Acumulado 4 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El ciclo de cuarenta minutos del reciclador como marca del aire compartido: en el capitulo 3 vuelve como los once minutos que faltan para la siguiente mezcla de atmosfera. Acumulado 4 apariciones en los capitulos 1 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

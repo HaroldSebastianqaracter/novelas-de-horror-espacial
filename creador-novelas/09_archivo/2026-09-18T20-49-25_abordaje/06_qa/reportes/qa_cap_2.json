@@ -1,0 +1,16 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Definicion por negacion, estructura 'No era X. Era Y.': en el cap. 2, 'El trazado no describia una huida. Describia una eleccion.' y 'no hay nadie al otro lado'. Acumula 6 apariciones entre los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Gesto de comprobacion repetida como marca de fiabilidad: 'comprobo otra vez la secuencia en la libreta', 'Habia hecho la cuenta tres veces, y las tres le habia dado igual', 'Pense que era el equipo. Comprobe el equipo.'. Tres apariciones en el capitulo 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

@@ -1,0 +1,43 @@
+{
+  "Irune Balda": {
+    "estado_fisico": "Sana, con principios de hipotermia tras cuatro días al mínimo térmico.",
+    "estado_psicologico": "Firmó la orden que mandó a Elvio al pozo y dejó por escrito el informe que nombra a la compañía.",
+    "secretos_que_conoce": [
+      "Sabe que Elvio firmó el silencio del turno treinta y uno y que existe un procedimiento de purga sin ejecutar.",
+      "Sabe que el relevo leyó su informe y que la compañía intentará sellarlo otra vez."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Tomás Requejo": {
+    "estado_fisico": "Manos quemadas por el metal helado; Nadia le amputó dos falanges congeladas.",
+    "estado_psicologico": "Incapaz de mirar a los demás desde que subió solo del pozo.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Nadia Oyarce": {
+    "estado_fisico": "Agotada y con congelaciones leves.",
+    "estado_psicologico": "Operó sin ayuda en una estación apagada; sostiene al grupo por función, no por convicción.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Elvio Santamarta": {
+    "estado_fisico": "Muerto en el pozo del intercambiador, bajo la compuerta que sostuvo hasta que se cerró.",
+    "estado_psicologico": "Bajó por voluntad propia, como pago de su silencio.",
+    "secretos_que_conoce": [
+      "Estuvo en el turno treinta y uno y firmó el silencio de la compañía sobre lo que hay bajo el intercambiador geotérmico.",
+      "En el archivo de mantenimiento existe un procedimiento de purga que nunca se ejecutó."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Khalil Domenge": {
+    "estado_fisico": "Mano derecha mutilada; resto de congelaciones menores.",
+    "estado_psicologico": "Silencioso; mantuvo la transmisión hasta la llegada del relevo.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

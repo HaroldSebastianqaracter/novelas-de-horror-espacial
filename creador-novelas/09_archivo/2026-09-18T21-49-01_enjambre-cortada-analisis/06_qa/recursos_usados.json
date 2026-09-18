@@ -1,0 +1,62 @@
+[
+  {
+    "recurso": "estructura de contraste por negacion y correccion ('No arrancada: doblada', 'No chascaba. Corria.')",
+    "veces": 4,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "percepcion por temperatura al tacto ('quemaba de frio', 'esta tibio')",
+    "veces": 3,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "series de frases nominales de una sola palabra ('Blando. Palido.')",
+    "veces": 1,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "el ruido descrito como material granulado vertido despacio (gravilla)",
+    "veces": 1,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "figura de repeticion lexica del verbo ('repitio lo que repetia')",
+    "veces": 2,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "cierre de escena con lo que los personajes callan ('ninguno dijo lo otro')",
+    "veces": 2,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "medicion de la tension por cifras cronometradas ('once minutos', 'a los seis minutos', 'ciento cuarenta y cuatro')",
+    "veces": 4,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "cierre de gesto con simil 'como si' ('como si el problema fuera de otro', 'como si midiera cuanto habia hasta abajo')",
+    "veces": 2,
+    "caps": [
+      2
+    ]
+  }
+]
