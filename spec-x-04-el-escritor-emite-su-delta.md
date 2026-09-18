@@ -91,3 +91,29 @@ la primera vez que H-11 iba a aceptar más de una cosa, y esa puerta no se cierr
 hoy el extractor. Agotados los tres, se invoca al extractor para ese capítulo y la novela sigue: ese
 capítulo pierde la ventaja de velocidad, pero dieciocho minutos de trabajo no se tiran por un JSON
 mal cerrado. La caída queda anotada, para saber cada cuánto ocurre.
+
+
+## Resultado medido (2026-09-18, dos novelas)
+
+**No ahorra nada.** Los tokens de salida totales son los mismos:
+
+| | escritor | extractor | qa | total |
+|---|---|---|---|---|
+| base, tres agentes (criogenia) | 4.952 | 18.130 | 15.308 | **38.390** |
+| dos agentes (abordaje) | 24.628 | 0 | 13.594 | **38.222** |
+| dos agentes (brote) | 26.029 | 0 | 13.774 | **39.803** |
+
+El escritor absorbió exactamente la deliberación del extractor. El coste nunca fue la invocación de
+agente: era **decidir cuáles son los hechos**, y ese trabajo se hace igual viva donde viva. Mover
+una tarea de sitio no la abarata.
+
+El reloj empeoró --25,7 y 45,8 minutos frente a 18,4--, pero esa noche el servicio iba lento (25
+minutos entre lanzar la primera fase y su primera acción), así que la cifra de reloj no es limpia.
+La de tokens sí, porque no depende de la latencia, y dice que no hay ahorro.
+
+**Lo que sí sale bien:** el delta que escribe el escritor es de la misma calidad --nombres canónicos,
+cuatro hechos concretos, cinco recursos, resumen-- y del mismo tamaño que el del extractor. La
+mecánica funciona; lo que no funciona es la economía.
+
+**Qué hacer:** dejar el interruptor apagado y atacar la deliberación en vez de moverla. El candidato
+vuelve a ser  en el extractor, que reduce el razonamiento en vez de cambiarlo de dueño.
