@@ -1,0 +1,226 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Todo el aire respirable de la Vespertina pasa por un único reciclador, y los cinco tripulantes lo respiran en común esté sellado o no un compartimento.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La carta de ruta sitúa el puerto más cercano a once semanas de trayecto y registra el tramo actual como zona sin tráfico a distancia de rescate; la tripulación lo da por sabido.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La vida a bordo se ordena en tres guardias rotativas, y cada guardia se cierra anotando en el registro la hora, el estado de los sistemas y el estado de la tripulación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La Vespertina lleva cuatro meses fuera de puerto con un cargamento rutinario precintado en bodega.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La atención médica de a bordo se reduce a lo que la médica pueda hacer con el botiquín y a lo que el enlace con puerto pueda responder, y a esta distancia una consulta tarda más que el propio trayecto.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El módulo de literas puede sellarse desde el pasillo y el sello puede revertirse desde el mando de la esclusa; separar el circuito común de aire de ese módulo es una operación manual aparte, en el cuadro de sistemas.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irina Valdés",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Irina Valdés es la capitana de la Vespertina y sostiene la rutina de guardias como el sistema que mantiene la nave en pie; deja constancia escrita de sus decisiones en el registro.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sela Nourani",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Sela Nourani es la médica de a bordo, la única con formación clínica entre los cinco, y documenta lo que examina fotografiándolo y midiéndolo para poder compararlo horas después.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Otto Brenner",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Otto Brenner es el maquinista de la Vespertina y está acostumbrado a acabar las guardias con golpes y rozaduras cuyo origen no recuerda.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Yeva Costas",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Yeva Costas es la navegante de la Vespertina y conoce de memoria la distancia exacta que separa a la nave del puerto.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Marek Duhalde",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Marek Duhalde es el técnico de sistemas y el único a bordo que sabe consultar los registros del reciclador y operar el circuito común de aire.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Carguero Vespertina",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El ruido de fondo del reciclador se oye desde cualquier punto del carguero, y la tripulación lo usa como señal de que los sistemas siguen en marcha.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Carguero Vespertina",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El módulo de literas fue sellado por orden de Irina Valdés tras detectar síntomas desconocidos en dos tripulantes.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Otto Brenner",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Otto Brenner tiene una marca pálida, tibia y móvil bajo presión en el antebrazo que no se causó a sí mismo, y cambió de forma y posición en ocho horas.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Yeva Costas",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Yeva Costas tiene una marca idéntica a la de Otto Brenner bajo la clavícula, de origen desconocido.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La nave tiene un único reciclador de aire que sirve a toda la tripulación de cinco personas, haciendo sistémica cualquier contaminación atmosférica.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Yeva Costas",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "La lesión de espalda de Yeva contiene tejido liso, pálido, dispuesto en capas con lógica de construcción, que sangra pero se cicatriza sin sutura en segundos.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Otto Brenner",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Otto tiene una condición idéntica a la de Yeva en el antebrazo y la oculta bajo las mangas.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Carguero Vespertina",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El circuito de filtración muestra una desviación térmica constante de 0,5 grados en la misma etapa, registrada por lo menos desde tres semanas antes de que Otto revisar su antebrazo.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El sello de la nave divide la tripulación por turno de trabajo, no por grupos, implicando que ambos turnos están expuestos a la misma fuente de anomalía.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Marek Duhalde",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Marek abrió el compartimento sellado de las literas desde el cuadro de sistemas, revirtiendo el sello impuesto en el plazo de contención.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Sela Nourani",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Sela descubrió un nuevo abultamiento sin color en su antebrazo, tibio como agua templada, que no existía cuatro horas antes.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Otto Brenner",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Otto no respondió a los llamados de Marek desde dentro del compartimento; solo se escuchó respiración regular y un roce contra el metal.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Yeva Costas",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Yeva permaneció consciente en el compartimento sellado y pidió la apertura en la hora catorce del plazo de dieciocho horas.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Sela Nourani",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Sela está infectada: bajo la piel de su antebrazo izquierdo crece algo claro sin borde definido, que no existía hace cuatro horas.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Marek Duhalde",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Marek deliberadamente cerró la derivación de aire general y abrió el pestillo de la escotilla de la litera, saboteando la cuarentena.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Otto Brenner",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Otto está en estado catatónico, no responde cuando lo llaman y mira la pared con paciencia anómala.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Carguero Vespertina",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La derivación de aire del pasillo fue cerrada y la escotilla de la litera fue abierta, dividiendo los sistemas de soporte vital.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

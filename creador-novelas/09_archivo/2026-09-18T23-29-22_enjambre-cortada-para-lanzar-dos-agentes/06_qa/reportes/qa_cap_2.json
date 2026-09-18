@@ -1,0 +1,36 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion y correccion 'No es X. Es Y.', reaparece en el cap. 2 ('No es una averia. Es masa.'; 'No van a lo caliente. Van a lo mas caliente'; 'una calma que era trabajo y no serenidad'). Acumulado 7 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El calor como senuelo que la criatura persigue: vertebra toda la maniobra del cap. 2 (subir el circuito del modulo este, llenarlo, sellarlo, dejarlo enfriar). Acumulado 6 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Gesto seguido de glosa explicativa del propio gesto en clausula subordinada; en el cap. 2 'la letra pequena que usaba para los informes', 'apretando la gasa con una calma que era trabajo y no serenidad', 'miraba la pizarra como si las cifras fueran una herramienta que no sabia sostener'. Acumulado 6 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personaje que calla lo que ha visto o ha oido; en el cap. 2 Marta Quiroga cuelga el auricular y no repite a nadie lo que oyo. Acumulado 3 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Ruido descrito por su ritmo o su insistencia; en el cap. 2 'el chasquido de siempre' del circuito termico en la pared. Acumulado 3 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La cuenta numerica como marcador de tension (cuatro horas, seis dias, quince dias, 'conto cuatro'), recurso nuevo que ya cruza el umbral dentro del propio cap. 2. Acumulado 4 apariciones, capitulo 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

@@ -1,0 +1,137 @@
+# Capítulo 1: «El ciclo que nadie ordenó»
+
+Sos el agente escritor de una novela de terror espacial. Este prompt contiene TODO lo que podés saber de la novela: no tenés acceso a ningún capítulo anterior ni a otros archivos, y no lo necesitás.
+
+## Voz narrativa (inamovible)
+- Idioma: **es-ES**. Todo el texto, incluidos diálogos y nombres comunes, va en este idioma.
+- Persona narrativa: **tercera_limitada**.
+- Tiempo verbal: **pasado**.
+Cualquier desvío de estos tres puntos es un hallazgo de QA.
+
+## Guía de estilo del subgénero (fase 0)
+(sin guía de estilo)
+
+## Sinopsis en tres actos (fase 2): dónde encaja este capítulo en el arco completo
+# Once días hasta puerto — sinopsis en tres actos
+
+## Gancho inicial
+
+El remolcador de carga *Amanecer Tardío* lleva cuatro días de una ruta de once hasta puerto, con cinco tripulantes y una bodega que nadie ha abierto desde la salida. La capitana **Vinter** administra un turno rutinario: **Sadhu** en máquinas, **Kerr** en mantenimiento, **Ilesanmi** en comunicaciones y **Bakó** de guardia en la esclusa de carga. La primera anomalía no es un ruido sino una lectura: la esclusa registra un ciclo de presión que nadie ha ordenado. Cuando Vinter, Sadhu, Kerr e Ilesanmi llegan al pasillo de carga, la compuerta exterior está abierta contra todo protocolo y algo grande ya está dentro, quieto, sin emitir calor ni señal. Ilesanmi prueba las tres bandas de emergencia que memorizó en la academia y no obtiene nada: ni respuesta, ni eco, ni rechazo. La cosa mata a Bakó delante de los cuatro —rápido, sin advertencia, sin nada que se parezca a un motivo— y se retira por los conductos de servicio que atraviesan la nave como un sistema circulatorio.
+
+Los cuatro que quedan hacen lo único que su oficio les enseñó a hacer: sellar. Vinter ordena bajar mamparos y dividir el casco en secciones, reduciendo el volumen por el que el intruso puede moverse y empujándolo hacia un compartimento sin salida. Kerr traza el mapa de conductos sobre el plano de cubiertas; Sadhu advierte que cada mamparo cerrado reparte peor el aire y la energía de lo que el sistema promete. Nadie lo dice en voz alta todavía, pero el acto de encerrar a la cosa los está encerrando a ellos, y aún faltan siete días de vacío.
+
+## Punto medio (giro)
+
+La estrategia funciona a medias durante tres cubiertas y luego deja de funcionar de una manera que no admite explicación cómoda: los golpes en los conductos empiezan a llegar desde secciones ya selladas, por detrás de la línea que los cuatro creen haber ganado. Kerr insiste en que el mapa está bien; Sadhu demuestra que el consumo de aire de la nave es el de cinco cuerpos respirando, no cuatro. El giro llega cuando Ilesanmi, revisando el registro de la esclusa para reconstruir el ciclo no ordenado, encuentra que la apertura no vino de fuera: alguien introdujo el código de servicio desde dentro, horas antes, y la única consola que lo aceptó fue la de la guardia de Bakó. La cosa no forzó la nave. La dejaron entrar, o la llamaron, y el muerto ya no puede explicar cuál de las dos.
+
+Peor: el patrón de los ataques deja de parecer azar. El intruso no ha matado a nadie más desde Bakó, aunque ha tenido ocasión dos veces. Ha ido ocupando, sección tras sección, exactamente el volumen que los cuatro le fueron dejando, y siempre en dirección al puente. Vinter entiende que no están acorralando a un animal: están siendo conducidos. El silencio en todas las frecuencias deja de leerse como incapacidad de responder y empieza a leerse como una elección, y quien elige callar tiene algo que quiere. Con el aire ya racionado y cuatro días hasta puerto, Vinter suspende la doctrina de sellado —cada mamparo que bajan es un metro más que le regalan— y Kerr propone lo contrario: abrirlo todo, quitarle el embudo, obligarlo a moverse en un espacio que no controla.
+
+## Clímax / final
+
+El plan final se juega en el puente, el único compartimento que no pueden perder. Vinter, Sadhu, Kerr e Ilesanmi invierten la lógica de los once días anteriores: en vez de reducir el volumen, lo abren de golpe, despresurizando las cubiertas intermedias desde la consola de máquinas para que la única ruta con presión sea la que ellos eligen. Sadhu se queda abajo para sostener la secuencia de energía y no vuelve; su último informe por el intercomunicador confirma lo que Ilesanmi había deducido del registro: la apertura de la esclusa se ordenó con la clave de Bakó, pero desde un terminal que Bakó no estaba usando. La cosa sabía cómo pedir permiso. Alguien, o algo, en esa nave le respondió.
+
+En el puente, Kerr sella la última compuerta con el intruso dentro del corredor previsto y, por primera vez, la cosa se detiene y no ataca. Ilesanmi vuelve a abrir las tres bandas de emergencia y esta vez el silencio se rompe: no con voz, sino con la repetición exacta del código de servicio de la esclusa, devuelto en la misma frecuencia. No venía a matar; venía a que la dejaran salir del mismo modo en que la dejaron entrar. Vinter tiene que decidir en el último día de trayecto si concede ese paso —abrir la esclusa de carga y devolverla al vacío, a metros del puente y sin ninguna garantía— o si la retiene hasta puerto y entrega a las autoridades una nave con tres supervivientes, dos muertos y una cosa viva que ya sabe hablar su idioma. Vinter abre la esclusa. La *Amanecer Tardío* atraca al undécimo día con Vinter, Kerr e Ilesanmi a bordo, la bodega vacía y un registro de comunicaciones que nadie en puerto acepta escuchar completo.
+
+## Entrada de escaleta de este capítulo (fase 3)
+- Título: El ciclo que nadie ordenó
+- Objetivo narrativo: Romper la rutina del cuarto día de once: la esclusa de carga registra un ciclo de presión no ordenado, la tripulación baja al pasillo de carga y la presencia mata a Bakó delante de los cuatro antes de retirarse por los conductos de servicio.
+- Personajes en escena: Vinter, Sadhu, Kerr, Ilesanmi, Bakó, la presencia
+- Locación: Pasillo de carga del Amanecer Tardío
+- Información nueva que el lector debe obtener aquí: La compuerta exterior se abrió contra todo protocolo; la presencia no emite calor ni responde a ninguna de las tres bandas de emergencia, y se mueve por los conductos de servicio que atraviesan la nave entera.
+- **Nivel de tensión objetivo: 3 sobre 5.** Es un objetivo, no un dato: aplicá el vocabulario de ritmo de tensión/alivio de la guía de estilo para que el capítulo termine en ese nivel. Un 1-2 es respiro y cimentación; un 3 es presión sostenida; un 4-5 es amenaza directa o revelación que no da tregua.
+
+## Lo que ya quedó establecido y no podés contradecir
+Hechos de continuidad seleccionados por el harness para este capítulo (los de mundo entran siempre):
+- [mundo · mundo · cap. 0] El Amanecer Tardío es un remolcador de carga con cinco tripulantes en una ruta de once días hasta puerto; la acción empieza en el cuarto día de trayecto.
+- [mundo · mundo · cap. 0] El casco se divide en secciones que pueden aislarse bajando mamparos desde la consola de máquinas; con cada mamparo cerrado el soporte vital reparte peor el aire y la energía de lo que anuncia el sistema.
+- [mundo · mundo · cap. 0] El soporte vital registra el consumo total de aire, de modo que la tripulación puede deducir de la cifra cuántos cuerpos respiran a bordo.
+- [mundo · mundo · cap. 0] El protocolo de la compañía prohíbe ciclar la esclusa de carga en tránsito, y el registro de la esclusa anota cada ciclo con la hora, la clave empleada y la consola desde la que se introdujo.
+- [mundo · mundo · cap. 0] El equipo de comunicaciones dispone de tres bandas de emergencia, y el plan de ruta sitúa el próximo puerto a siete días de distancia de respuesta.
+- [mundo · mundo · cap. 0] El manual de a bordo cuenta esta ruta como travesía sin escalas y no recoge ningún procedimiento de abandono de nave en tránsito; los sensores exteriores leen vacío en todas las bandas.
+- [mundo · mundo · cap. 0] Conductos de servicio recorren la nave de la bodega al puente y comunican todas las cubiertas; el plano de a bordo los recoge como paso de instalaciones, no como ruta prevista para un tripulante.
+- [personaje · Vinter · cap. 0] Vinter manda el Amanecer Tardío y administra la travesía como un turno rutinario más; sus órdenes se acatan sin discusión a bordo.
+- [personaje · Sadhu · cap. 0] Sadhu es la maquinista de la nave y la que lee de corrido los consumos de aire y energía en la consola de máquinas.
+- [personaje · Kerr · cap. 0] Kerr lleva el mantenimiento del casco y maneja el plano de cubiertas y el trazado de los conductos de servicio.
+- [personaje · Ilesanmi · cap. 0] Ilesanmi atiende las comunicaciones, memorizó en la academia las tres bandas de emergencia y es quien consulta los registros de a bordo cuando algo no cuadra.
+- [personaje · Bakó · cap. 0] Bakó es el tripulante más nuevo y cubre los turnos de guardia de la zona de carga, con una consola propia que acepta el código de servicio de la esclusa.
+- [personaje · la presencia · cap. 0] La presencia es grande, ocupa el volumen que se le deja y los sensores de a bordo la leen sin emisión de calor.
+- [locacion · Pasillo de carga del Amanecer Tardío · cap. 0] El pasillo de carga une la compuerta interior de la esclusa con el resto de la nave y tiene bocas de conducto de servicio a la altura del techo.
+
+## Dónde quedó la escena (resumen rodante de los últimos capítulos)
+(este es el primer capítulo: no hay escena previa)
+
+## Fichas de los personajes que podés usar
+Incluye a todos los personajes permitidos, no solo a los de la escaleta de este capítulo: si movés una escena y aparece uno, acá tenés su estado y dónde quedó. «Dónde quedó» es su posición al final de su última aparición; respetala salvo que este capítulo la cambie.
+### Vinter
+- Estado físico: Sana, en el cuarto día de una ruta de once; descansada dentro de lo que permite un turno de mando continuo.
+- Estado psicológico: Capitana metódica, confiada en el protocolo y en la rutina; administra la travesía como un trámite más y no espera nada del viaje salvo llegar a puerto.
+- Secretos que conoce: ninguno registrado
+- Dónde quedó: sin registrar
+- Última aparición: todavía no apareció
+
+### Sadhu
+- Estado físico: Sana, con el cansancio habitual de los turnos largos en la cubierta de máquinas.
+- Estado psicológico: Pragmática y literal con las cifras; desconfía de lo que el sistema promete y prefiere leer el consumo real antes que el informe.
+- Secretos que conoce: ninguno registrado
+- Dónde quedó: sin registrar
+- Última aparición: todavía no apareció
+
+### Kerr
+- Estado físico: Sano, con las manos castigadas por el mantenimiento diario del casco.
+- Estado psicológico: Se apoya en los planos y en el mapa de conductos como en una verdad firme; tranquilo mientras la nave se comporte como el plano dice.
+- Secretos que conoce: ninguno registrado
+- Dónde quedó: sin registrar
+- Última aparición: todavía no apareció
+
+### Ilesanmi
+- Estado físico: Sano, con el oído gastado de las guardias de escucha.
+- Estado psicológico: Joven en el oficio y todavía fiel a lo aprendido en la academia; cree que toda señal tiene respuesta si se prueba la banda correcta.
+- Secretos que conoce: ninguno registrado
+- Dónde quedó: sin registrar
+- Última aparición: todavía no apareció
+
+### Bakó
+- Estado físico: Sano, de guardia en la zona de carga.
+- Estado psicológico: Callado y cumplidor; el tripulante más nuevo a bordo, poco dado a explicar lo que hace en su turno.
+- Secretos que conoce: ninguno registrado
+- Dónde quedó: sin registrar
+- Última aparición: todavía no apareció
+
+### la presencia
+- Estado físico: Grande, silenciosa, sin emisión de calor; se mueve por espacios estrechos sin ruido propio.
+- Estado psicológico: Insondable para la tripulación: no responde, no amenaza y no se explica.
+- Secretos que conoce: ninguno registrado
+- Dónde quedó: sin registrar
+- Última aparición: todavía no apareció
+
+## Hacia dónde sigue la novela
+El capítulo siguiente (2) transcurre en: Cubierta de máquinas del Amanecer Tardío. Dejá esta escena de modo que la acción pueda continuar allí (los personajes que sigan en juego, en camino o ya en esa locación), sin narrar lo que ocurrirá en él ni adelantar su información nueva.
+
+## Recursos narrativos ya agotados (RF-05.5)
+Imágenes, gestos, muletillas y giros que los capítulos anteriores ya usaron, con cuántas veces y dónde. No están prohibidos: una imagen que vuelve puede ser deliberada. Lo que no puede pasar es repetirla por inercia: si volvés a uno de estos, que sea a sabiendas y con otra función; lo normal es buscar otro recurso.
+(todavía no hay recursos registrados: este es el primer capítulo con extracción)
+
+## Reglas de producción
+1. Longitud objetivo: **400 palabras**, tolerancia ±20 % (entre 320 y 480). Contá antes de entregar.
+2. **Prohibido introducir personajes** que no estén en esta lista: Vinter, Sadhu, Kerr, Ilesanmi, Bakó, la presencia. Si la escena pide una voz nueva, usá figuras sin nombre y sin peso narrativo (una voz por el intercomunicador, una silueta) que no vuelvan a aparecer. Un personaje nuevo con nombre obliga a regenerar el capítulo.
+3. Cubrí el objetivo narrativo y entregá la información nueva; no adelantes giros que la sinopsis reserva para más adelante.
+4. Sin título ni encabezados dentro del archivo: solo la prosa del capítulo. El título lo antepone el harness al ensamblar.
+5. Desvío del intento anterior (si lo hubo): (primer intento: sin desvío previo)
+6. Contradicciones que la revisión encontró en tu versión anterior de este capítulo, si las hubo: (no hay revisión previa de este capítulo)
+   Si hay alguna, corregirla es lo primero: el resto del capítulo puede cambiar, pero eso no. No discutas el hallazgo ni lo expliques dentro de la prosa; reescribí la escena de modo que el hecho vigente y lo que narrás digan lo mismo.
+7. **Nada literal de capítulos anteriores** (RF-05.5): ninguna secuencia de cuatro o más palabras con contenido puede coincidir palabra por palabra con un capítulo ya escrito. No podés leerlos y no hace falta: el validador compara por vos y, si encuentra un pasaje repetido, te devuelve la frase y el capítulo de origen; reescribí ese pasaje con otras palabras y volvé a validar. Nombrar personajes y locaciones no cuenta como repetición.
+
+## El delta de extracción
+
+(en esta corrida no escribís delta: de eso se encarga otro agente)
+
+## Qué hacer
+1. Escribí el capítulo completo con la herramienta Write en **C:/Users/harold.rodriguez/Desktop/Nueva carpeta/velocidad/creador-novelas/05_manuscrito/cap_1.md** (esa ruta exacta y ninguna otra).
+2. Validalo (RF-08.4): ejecutá con tu herramienta de terminal **exactamente** este comando, sin agregar ni cambiar nada:
+   `.venv/Scripts/python.exe -m app validar-capitulo 1`
+   Es el único comando que el hook H-11 te deja ejecutar. Si devuelve errores, corregí y volvé a ejecutar el mismo comando, hasta tres veces en total. **Corregí con Edit, no reescribiendo el archivo**: los errores de RF-05.5 te dan la frase exacta y su capítulo de origen, así que son un Edit por frase, cambiando solo esas palabras. Reservá Write para los errores que afectan al archivo entero: longitud fuera de tolerancia o encabezados. Reescribir 1.400 palabras para cambiar cuatro es tirar la tanda.
+3. Terminá con **una sola línea**, sin prosa, sin resumen, sin comentarios, con esta forma exacta:
+
+`cap_1.md · <número de palabras> palabras · personajes: <nombres separados por coma> · validado`
+
+Si tras tres intentos el validador sigue fallando (EX-10), terminá en cambio con: `cap_1.md · NO VALIDADO · <último error textual del validador>`.

@@ -1,0 +1,21 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura 'no fue X, fue Y' / 'no X, sino Y': tres apariciones en el capitulo 3 (replica de Brune sobre la paciencia, conclusion sobre el origen de la infeccion en el pasillo de babor, cierre sobre extenderse). Acumula 6 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de escena con una medicion anotada: el capitulo 3 vuelve a terminar con Otte anotando la medicion del dia en su diario clinico. Acumula 4 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Anafora de negacion encadenada: el parrafo del venteo apila negaciones sucesivas (no habia empezado en la nave, ninguno habia hecho nada, no mintio ni una vez). Acumula 3 apariciones en los capitulos 1 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

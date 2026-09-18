@@ -1,0 +1,60 @@
+[
+  {
+    "recurso": "enumeracion negativa encadenada ('ni X, ni Y, ni Z' / 'No fue X. No hubo Y')",
+    "veces": 6,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "sustantivo + oracion de relativo en negacion para marcar lo anomalo ('una soldadura que no recordaba haber visto')",
+    "veces": 11,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "Kovac contando en voz alta los dias que faltan para puerto",
+    "veces": 4,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "el silencio de la nave como cierre de escena",
+    "veces": 2,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "la violencia descrita como tarea rutinaria y sin apuro",
+    "veces": 2,
+    "caps": [
+      1,
+      3
+    ]
+  },
+  {
+    "recurso": "simil de oficio introducido por 'como quien' / 'como si' para glosar un gesto",
+    "veces": 4,
+    "caps": [
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "la nave descrita como cuerpo que grita o pierde partes de si misma",
+    "veces": 2,
+    "caps": [
+      3
+    ]
+  }
+]

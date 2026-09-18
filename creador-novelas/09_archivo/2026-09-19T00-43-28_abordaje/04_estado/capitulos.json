@@ -1,0 +1,48 @@
+[
+  {
+    "num": 1,
+    "titulo": "El ciclo que nadie ordenó",
+    "objetivo_narrativo": "Romper la rutina del cuarto día de once: la esclusa de carga registra un ciclo de presión no ordenado, la tripulación baja al pasillo de carga y la presencia mata a Bakó delante de los cuatro antes de retirarse por los conductos de servicio.",
+    "personajes": [
+      "Vinter",
+      "Sadhu",
+      "Kerr",
+      "Ilesanmi",
+      "Bakó",
+      "la presencia"
+    ],
+    "locacion": "Pasillo de carga del Amanecer Tardío",
+    "informacion_nueva": "La compuerta exterior se abrió contra todo protocolo; la presencia no emite calor ni responde a ninguna de las tres bandas de emergencia, y se mueve por los conductos de servicio que atraviesan la nave entera.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "Cada mamparo que bajamos",
+    "objetivo_narrativo": "Aplicar la doctrina de sellado y verla fallar: los golpes llegan desde secciones ya cerradas, el consumo de aire es el de cinco cuerpos y el registro de la esclusa revela que el código de servicio se introdujo desde dentro, con la clave de Bakó.",
+    "personajes": [
+      "Vinter",
+      "Sadhu",
+      "Kerr",
+      "Ilesanmi",
+      "la presencia"
+    ],
+    "locacion": "Cubierta de máquinas del Amanecer Tardío",
+    "informacion_nueva": "A la presencia la dejaron entrar desde dentro; no ha vuelto a matar pese a tener ocasión y ocupa exactamente el volumen que le ceden, siempre en dirección al puente: no la acorralan, los conduce.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "Once días hasta puerto",
+    "objetivo_narrativo": "Invertir la lógica del sellado despresurizando las cubiertas intermedias, perder a Sadhu abajo y descubrir en el puente que la presencia devuelve el código de la esclusa por la banda de emergencia; Vinter decide abrir y devolverla al vacío.",
+    "personajes": [
+      "Vinter",
+      "Sadhu",
+      "Kerr",
+      "Ilesanmi",
+      "la presencia"
+    ],
+    "locacion": "Puente del Amanecer Tardío",
+    "informacion_nueva": "El silencio era elección: la presencia repite el código de servicio en la misma frecuencia porque pide salir como pidió entrar; la orden partió de un terminal que Bakó no estaba usando, y la nave atraca al undécimo día con tres supervivientes.",
+    "tension": 5
+  }
+]

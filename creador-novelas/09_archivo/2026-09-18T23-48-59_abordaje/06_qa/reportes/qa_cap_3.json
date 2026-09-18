@@ -1,0 +1,36 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 narra que Serrat abre todos los mamparos hasta dejar el remolcador 'convertido en un solo volumen frio', y despues ventea el ramal de popa y llega a puerto 'con atmosfera en un unico sector' sin que nadie vuelva a cerrar ninguna compuerta. Contradice el hecho vigente de que las compuertas estancas son el unico recurso para compartimentar la nave y que el volumen de aire aprovechable se calcula sobre las secciones abiertas.",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 abre con cuarenta y ocho horas de travesia y treinta y una de reserva de aire, y cierra con la llegada a puerto 'tres dias despues'. Contradice el hecho vigente que situa al Sagita al quinto dia con el fin del aire respirable dos dias antes de la llegada a puerto: ni el margen de aire ni la fecha de llegada encajan con ese computo.",
+      "cap_origen": 2
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion negativa encadenada ('no quedaban cadaveres, ni carga, ni mas prueba que...') en el capitulo 3; 6 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Sustantivo mas oracion de relativo en negacion para marcar lo anomalo ('corrientes que nadie habia disenado', 'una manera que no era estructural', 'un viraje que ningun piloto habia intentado', 'un cuaderno que no coincidia con ningun plano aprobado', 'uniones que ninguna mano de a bordo habia hecho'): cinco apariciones solo en el capitulo 3, 11 acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El motivo de Kovac contando en voz alta los dias que faltan para puerto reaparece en el capitulo 3 en forma negada ('Kovac no conto nada en voz alta'); 4 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil de oficio introducido por 'como quien' / 'como si' para glosar un gesto ('como quien pide perdon a una tuberia') en el capitulo 3; 4 apariciones acumuladas en los capitulos 2 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

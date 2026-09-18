@@ -1,0 +1,36 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "En el capitulo 2 Sela entra al modulo de literas y opera a Yeva dentro, y despues Irina sigue mirando 'la puerta sellada': nadie revierte el sello desde el mando de la esclusa ni se explica el acceso. Contradice el hecho vigente de que el modulo de literas fue sellado por orden de Irina Valdes con Otto y Yeva dentro.",
+      "cap_origen": 1
+    },
+    {
+      "tipo": "contradiccion",
+      "descripcion": "En el capitulo 3 Marek solo separa el circuito comun de aire desde el cuadro de sistemas y el sello sigue cerrado despues ('Desde el otro lado del sello, Yeva dejo de pedir'), mientras el hecho vigente afirma que Marek abrio el compartimento sellado de las literas revirtiendo el sello. Ambas cosas no pueden ser ciertas a la vez.",
+      "cap_origen": 3
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El sonido del reciclador como telon de fondo omnipresente y cierre de escena: 4 apariciones (caps. 1 x2, 2, 3).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil caracterizador con la formula 'como quien / de quien / como se ...': 5 apariciones (caps. 1 x3, 3 x2).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de escena con 'Nadie' + verbo de respuesta para marcar el silencio colectivo: 3 apariciones (caps. 1, 2, 3).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Definicion por negacion encadenada antes de dar el dato ('no habia pus, ni necrosis, ni nada'; 'lo que no era suyo era la certeza'; 'ni suplica ni amenaza'): 3 apariciones (caps. 2 x2, 3).",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

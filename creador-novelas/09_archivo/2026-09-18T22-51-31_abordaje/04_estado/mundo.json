@@ -1,0 +1,36 @@
+{
+  "reglas": [
+    "La Bitácora Seca es un remolcador de carga con cinco tripulantes y arrastra un módulo minero amarrado a popa.",
+    "El tramo muerto de la ruta a puerto queda fuera del alcance de cualquier estación: las señales que se emiten aquí no llegan a nadie.",
+    "Quedan once días de travesía hasta puerto cuando empieza la novela.",
+    "El soporte vital recicla el aire de toda la nave; el reciclador trabaja cerca de su margen y cada sección que se cierra reparte peor el aire que queda.",
+    "Los mamparos se sellan sección por sección desde el panel, y una sección sellada deja de ser transitable para la tripulación.",
+    "Bregón calcula que pueden aislarse hasta nueve secciones sin perder la propulsión.",
+    "El panel del puente declara el estado del casco (sellado, presión) a partir de las lecturas del sistema, no de lo que ve la tripulación.",
+    "Los conductos de servicio recorren la nave entera y comunican la cubierta de carga con el resto de secciones.",
+    "Una purga manual abre la bodega y el módulo al vacío desde la propia bodega, sin cámaras ni panel.",
+    "Hay trajes de vacío a bordo y ponérselos lleva tiempo medido en segundos."
+  ],
+  "objetos": [
+    "Esclusa de carga: única entrada grande de la nave, con una secuencia de ciclo completa que el panel registra paso a paso.",
+    "Baliza de emergencia: se dispara desde el puente y en este tramo no alcanza ningún receptor.",
+    "Reciclador de aire: máquina vieja que Bregón lleva seis travesías sin terminar de arreglar.",
+    "Panel del casco del puente: muestra sellados y presiones de cada sección.",
+    "Línea interna: canal de voz que comunica el puente con bodega y máquinas sin cámaras.",
+    "Módulo minero: carga remolcada a popa, con bodega propia.",
+    "Silla del puente: puesto de pilotaje desde el que se gobierna la nave."
+  ],
+  "linea_de_tiempo": [
+    "Día 0: la Bitácora Seca lleva cuarenta horas en el tramo muerto; quedan once días hasta puerto.",
+    "Día 0, noche: guardia de Ibáñez en la cubierta de carga.",
+    "Días 1 a 5: plan de sellado de mamparos sección por sección.",
+    "Día 5: quedan seis días hasta puerto.",
+    "Día 6: purga manual y despresurización.",
+    "Día 11: aproximación a puerto."
+  ],
+  "locaciones": {
+    "cubierta de carga de la Bitácora Seca": "Nave de estiba de techo alto, con la esclusa de carga en el mamparo de popa, cámaras en los ángulos y doce metros de suelo despejado entre el puesto de guardia y la esclusa. Huele a metal frío y a grasa de amarres.",
+    "corredor de mamparos sellados": "Pasillo troncal del nivel de servicio jalonado de mamparos, unos soldados por Bregón y otros todavía respondiendo al panel. Luz de emergencia, aire que sabe a reciclado y el eco de las puertas cerradas a ambos lados.",
+    "puente de la Bitácora Seca": "Cabina estrecha con la silla de pilotaje al centro, el panel del casco a la izquierda y el disparador de la baliza a mano. Desde aquí se gobierna la nave y se canta por la línea interna al resto del barco."
+  }
+}

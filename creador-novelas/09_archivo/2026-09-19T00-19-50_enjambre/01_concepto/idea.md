@@ -1,0 +1,1 @@
+Cinco operarios de una estación de superficie ven entrar por los conductos térmicos unas criaturas del tamaño de una mano que huyen del frío exterior. Son muchas y muerden. El calor de la estación las atrae y apagarlo significa morir congelados en cuatro horas. El relevo tarda todavía seis días.

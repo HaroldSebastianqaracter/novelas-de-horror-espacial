@@ -1,0 +1,46 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "Voz narrativa fuera de la configurada (es-ES): el dialogo de los capitulos 1 y 3 usa imperativos voseantes rioplatenses ('Confirma tu puesto' con voseo en cap. 1; 'Sostenela', 'sali por el pozo' en cap. 3), mezclados con formas peninsulares en el mismo intercambio. La tercera limitada y el pasado si se respetan.",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 2 da a Bako por muerto en la narracion ('Eran cuatro de pie y uno abajo que ya no respiraba de esa manera') y la cuenta de aire de cinco cuerpos solo cuadra si no respira; el capitulo 3 cierra con 'dos muertos'. El hecho vigente del log dice que Bako quedo incapacitado tras el ataque, no muerto, y ningun hecho registra el cambio de estado.",
+      "cap_origen": 1
+    },
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 narra que Sadhu muere sosteniendo a mano la secuencia de despresurizacion por orden de Vinter y que la linea se corta sola, y que Ilesanmi ABRE las tres bandas despues de esa muerte. El hecho vigente establece que Sadhu muere sellada en la cubierta de maquinas cuando Ilesanmi CIERRA las bandas de comunicacion tras descubrir que el tecleaba la esclusa; ademas el texto trata a Sadhu como mujer y atribuye el tecleo de la esclusa solo a una afirmacion de personaje.",
+      "cap_origen": 3
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion/correccion 'No X. (Sino) Y.': 4 apariciones en los capitulos 2 y 3 ('no llego de proa. Llego de popa'; 'No con voz. Con una cadena de tonos'; 'No habian acorralado a un animal. Habian escoltado a un huesped'; 'con un chasquido seco, no con un grito').",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Atenuacion por 'sin + infinitivo' para describir gestos y ordenes: 6 apariciones en los capitulos 1, 2 y 3 ('sin leerlo entero', 'sin dramatismo', 'sin subir la voz', 'sin levantar la voz', 'sin prisa').",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil hipotetico con 'como si' / 'como quien': 3 apariciones en los capitulos 1, 2 y 3 ('como si lo hubiera medido antes'; 'como quien lee una averia'; 'como si algo enorme se hubiera desprendido sin prisa').",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de escena con sentencia breve del narrador que glosa lo anterior: 3 apariciones en los capitulos 1, 2 y 3 ('Kerr lo sabia mejor que ninguno'; 'Solo ocupaba lo que ellos le iban dejando'; 'Eso fue lo peor: que no hiciera nada').",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Triada asindetica de sustantivos tecnicos como golpe de ritmo: 3 apariciones en los capitulos 1, 2 y 3 ('Hora, clave, consola'; 'su hora, su clave y su origen'; 'bombas, pozo central, puente').",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

@@ -1,0 +1,16 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion negativa encadenada como recurso de suspense ('ni masa aproximandose, ni contacto, ni sombra'; 'Ni una vibracion de vuelta, ni un desplazamiento en las lecturas'; 'No fue rapido. No hubo la brusquedad de un animal que ataca'): 3 apariciones acumuladas, capitulos [1].",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Sustantivo seguido de oracion de relativo en negacion para marcar lo anomalo ('una soldadura que no recordaba haber visto'; 'un volumen que antes no estaba'; 'conductos que nunca habia recorrido enteros'; 'lo que a nadie le apetecia calcular'): 4 apariciones acumuladas, capitulos [1].",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

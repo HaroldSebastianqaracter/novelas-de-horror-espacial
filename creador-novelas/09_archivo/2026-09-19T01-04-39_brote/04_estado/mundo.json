@@ -1,0 +1,29 @@
+{
+  "reglas": [
+    "El aire de toda la nave pasa por un único reciclador; cualquier compartimento sellado sigue conectado al mismo circuito mientras ese circuito no se corte a mano.",
+    "El registro de a bordo se lleva por guardias: cada turno anota hora, estado del sistema y estado de la tripulación.",
+    "La ruta exterior en la que navega la Vespertina está registrada como tramo muerto: la carta de ruta no señala ningún tráfico a distancia de rescate.",
+    "La consulta médica remota depende del enlace con puerto, y a esta distancia una respuesta tarda más que el trayecto entero.",
+    "El sellado de un módulo se acciona desde el pasillo y se puede revertir desde el mando de la esclusa.",
+    "Cortar el circuito común de un módulo es una operación manual del cuadro de sistemas y deja a ese módulo con el aire que ya contiene."
+  ],
+  "objetos": [
+    "Reciclador de aire: unidad única, con registro de filtrado y firmas térmicas consultables por el técnico de sistemas.",
+    "Cargamento rutinario en bodega, precintado desde el puerto de origen.",
+    "Botiquín de a bordo: instrumental clínico mínimo, bisturí, material de sutura, cámara de registro y atlas de lesiones de referencia.",
+    "Carta de ruta con la distancia al puerto más cercano en semanas de trayecto.",
+    "Mando de la esclusa del módulo de literas, en el pasillo.",
+    "Cuadro de sistemas desde el que se opera el circuito común de aire.",
+    "Registro de guardias, donde queda constancia de cada decisión de mando."
+  ],
+  "linea_de_tiempo": [
+    "Salida de puerto con un cargamento rutinario hacia la ruta exterior.",
+    "Se establece el ciclo de tres guardias rotativas que ordena la vida a bordo.",
+    "Semanas de trayecto sin incidencias registradas en el cuaderno de guardias.",
+    "Cuarto mes de trayecto: la Vespertina entra en el tramo muerto de la ruta, a once semanas del puerto más cercano.",
+    "Comienzo del capítulo 1: cambio de guardia en el cuarto mes."
+  ],
+  "locaciones": {
+    "Carguero Vespertina": "Carguero de trayecto largo con cinco tripulantes, cuatro meses fuera de puerto y once semanas por delante. Pasillos estrechos entre bodega, sala de máquinas, puente y módulo de literas; el ruido de fondo del reciclador único se oye desde cualquier punto de la nave. La enfermería es un rincón del módulo común con el botiquín de a bordo. Todo lo que ocurre ocurre dentro de este casco: el exterior es vacío sin nada a distancia de rescate."
+  }
+}

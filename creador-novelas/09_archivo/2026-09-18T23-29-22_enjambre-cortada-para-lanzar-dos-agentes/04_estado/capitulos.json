@@ -1,0 +1,46 @@
+[
+  {
+    "num": 1,
+    "titulo": "El raspado detrás de la pared",
+    "objetivo_narrativo": "Presentar Vereda 9, su rutina de once meses y a los cinco operarios, y convertir un ruido atribuible a la dilatación del metal en una amenaza física cuando Bruno abre un conducto obstruido y algo vivo se le pega al guante térmico y muerde hasta el hueso.",
+    "personajes": [
+      "Idris Nahuel",
+      "Vera Solís",
+      "Bruno Arce",
+      "Kenji Odal",
+      "Marta Quiroga"
+    ],
+    "locacion": "Estación Vereda 9",
+    "informacion_nueva": "Hay criaturas del tamaño de una mano dentro de los conductos térmicos; no cazan, buscan calor, y por la noche aparecen diecisiete más en las rejillas. Kenji lleva semanas informando de una interferencia que nadie más oye.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "La aritmética del frío",
+    "objetivo_narrativo": "Cerrar la salida obvia y abrir la cruel: Vera demuestra que cortar la calefacción los mata en cuatro horas y que la marea sigue el gradiente térmico, de modo que la estación debe volverse desigual; Idris sella el primer mamparo con Bruno del otro lado.",
+    "personajes": [
+      "Idris Nahuel",
+      "Vera Solís",
+      "Bruno Arce",
+      "Kenji Odal",
+      "Marta Quiroga"
+    ],
+    "locacion": "Estación Vereda 9",
+    "informacion_nueva": "Sin calefacción mueren en cuatro horas y el relevo tarda seis días; la interferencia de Kenji es el ruido de millones de cuerpos bajo la corteza absorbiendo la señal de larga distancia: nadie sabe que están en problemas. Sobrecalentar un módulo como cebo compra tiempo, y el precio es Bruno. Marta escucha por el intercomunicador lo último que dice Bruno y no se lo repite a nadie.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "Once horas de piedra",
+    "objetivo_narrativo": "Llevar la estrategia del cebo a su extremo: purgar el calor de la sala de máquinas hacia toda la estación, encerrarse los cuatro en el compartimento de repuestos con los trajes al mínimo y compartir calor por contacto durante once horas que los trajes no cubren, hasta que el relevo abre una Vereda 9 muerta y helada.",
+    "personajes": [
+      "Idris Nahuel",
+      "Vera Solís",
+      "Kenji Odal",
+      "Marta Quiroga"
+    ],
+    "locacion": "Estación Vereda 9",
+    "informacion_nueva": "Los trajes dan nueve horas y hacen falta once; Marta reparte el déficit bajando los cuatro trajes por debajo del umbral individual y turnando al que queda en el borde. Idris va primero al borde y no despierta. Salen tres: Vera, Kenji y Marta, y Vera se niega a subir a la nave hasta que vuelvan a encender los calefactores del módulo este.",
+    "tension": 5
+  }
+]

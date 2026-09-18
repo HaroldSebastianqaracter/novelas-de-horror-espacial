@@ -1,0 +1,65 @@
+{
+  "Marena": {
+    "estado_fisico": "En la estación, transitando entre control de turno y baterías, preparándose para descender a la nave de relevo.",
+    "estado_psicologico": "Decidida bajo presión extrema. Toma decisiones rápidas para administrar recursos escasos. Debe bajar a enfrentar explicaciones difíciles.",
+    "secretos_que_conoce": [
+      "Fue testigo del ataque de la criatura a Sila.",
+      "Sabe que el plan de desalojo amontonalas criaturas en sectores adyacentes en lugar de expulsarlas.",
+      "El conducto maestro está tapado y alguien —no ella— firma los desalojos",
+      "Solo quedan dos horas de calefacción, no cuatro, porque el núcleo perdió masa",
+      "Una colonia desconocida ha prosperado en la enfermería",
+      "Sospecha que lo que trajeron en la nave es una amenaza existencial",
+      "Sabe que una masa anómala se mueve desde el núcleo hacia el calor de la enfermería.",
+      "Sabe que tienen solo 2 horas antes de agotarse los recursos térmicos."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Oquendo": {
+    "estado_fisico": "Acaba de completar la tarea de desatasco del maestro. Se presume sigue en el área de conductos tras la reparación.",
+    "estado_psicologico": "Técnico y directo. Ejecuta la tarea crítica sin debate.",
+    "secretos_que_conoce": [
+      "Fue testigo directo del ataque de la criatura y reconoce que su explicación de 'dilatación' fue errónea.",
+      "Sabe que hay una capa viva de criaturas de dos palmos de espesor bajo el mamparo, en continuo crecimiento; contó once cuerpos el lunes.",
+      "Sabe abrir el conducto maestro y recuperar el mando manual",
+      "Sabe que el maestro estaba bloqueado a la altura del núcleo y cómo acceder a él desde el panel de inspección."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Sila": {
+    "estado_fisico": "En el módulo de baterías con termómetro de mano, realizando mediciones.",
+    "estado_psicologico": "Observador sin inflexión. Registra datos duros sin mediación emocional pero transmite la gravedad de la situación.",
+    "secretos_que_conoce": [
+      "Fue atacada por la criatura y entiende que no era un intento de depredación sino algo más anómalo.",
+      "Sabe que las criaturas diseccionadas son hembras en reproducción; hay doce crías pálidas en el abdomen, dos aún en movimiento tras la muerte de la madre; el crecimiento depende de la temperatura: a veintiuno grados crece, a cuarenta desconoce el comportamiento.",
+      "Midió que quedan dos horas de calefacción útil, no cuatro",
+      "Los muertos de los conductos ya no aíslan",
+      "Detectó que los cuerpos muertos en los conductos ya no actúan como aislamiento térmico.",
+      "Midió que la pérdida de calor es el doble de lo proyectado: 2 horas, no 4."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Bregman": {
+    "estado_fisico": "Se quedó atrás, del lado malo de una compuerta que acaba de sellar.",
+    "estado_psicologico": "Ejecutor de órdenes en contexto de contención.",
+    "secretos_que_conoce": [
+      "Descubrió que la rejilla estaba doblada desde el interior.",
+      "Sabe que hay una grieta en la placa de hielo a ochocientos metros que echaba vapor ayer y hoy echa menos; se está cerrando lentamente.",
+      "Entiende la dinámica de masa del núcleo y cómo proteger a los otros mediante sellado selectivo"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Toure": {
+    "estado_fisico": "En una ventana observando la nave de relevo que aterrizó.",
+    "estado_psicologico": "Silencioso, testigo sin intervención verbal.",
+    "secretos_que_conoce": [
+      "Fue el primero en oír los arañazos rítmicos en el conducto del módulo de sueño.",
+      "Posee datos de resistencia al frío que no comunica al grupo"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

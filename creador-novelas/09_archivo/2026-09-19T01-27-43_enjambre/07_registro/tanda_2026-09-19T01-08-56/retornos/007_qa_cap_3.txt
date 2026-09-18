@@ -1,0 +1,4 @@
+tiene_contradicciones: true
+contradicciones: 4 · repeticiones: 4
+reporte: C:/Users/harold.rodriguez/Desktop/Nueva carpeta/velocidad/creador-novelas/06_qa/reportes/qa_cap_3.md
+validado

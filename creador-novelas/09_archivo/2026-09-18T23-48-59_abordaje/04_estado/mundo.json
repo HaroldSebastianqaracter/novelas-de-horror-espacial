@@ -1,0 +1,28 @@
+{
+  "reglas": [
+    "El remolcador se compartimenta en secciones aisladas por compuertas estancas que pueden sellarse desde el puente o accionarse a mano en cada mamparo.",
+    "El aire respirable es finito y se reparte por secciones: cada sección sellada reduce el volumen disponible para quienes quedan dentro.",
+    "Una señal emitida desde este tramo de la ruta tarda cinco días en llegar a oídos humanos, de modo que no existe conversación posible con nadie de fuera.",
+    "Desviarse del rumbo previsto añade semanas de travesía, porque el convoy remolcado solo admite maniobras lentas.",
+    "El protocolo de contacto de a bordo consta de tres estímulos en orden: radio en las tres frecuencias, señal luminosa y golpeo de mamparo.",
+    "Los sensores de proximidad vigilan el exterior del casco y el plano de secciones en pantalla marca en el puente qué compartimentos conservan señal."
+  ],
+  "objetos": [
+    "Convoy de carga remolcado, acoplado a popa y desacoplable desde el puente.",
+    "Esclusa de carga de la bodega, con accionamiento desde el interior y desde el exterior.",
+    "Cámaras de bodega, cuya imagen se ve desde el puente.",
+    "Plano oficial de conductos de aire y de servicio, archivado a bordo.",
+    "Cuaderno de cartografía a mano que Oyelaran empieza a levantar de los conductos.",
+    "Depósitos de reserva de aire, purgables y concentrables por sectores.",
+    "Trajes y herramienta de corte del pañol de servicio."
+  ],
+  "linea_de_tiempo": [
+    "Serrat lleva catorce años cubriendo esta misma travesía.",
+    "Miralles se embarca por primera vez en esta ruta en el viaje actual.",
+    "La nave entra en un tramo muerto de la ruta, a once días de puerto y a cinco de que cualquier señal llegue a oídos humanos.",
+    "Dubois toma el turno de guardia con el que arranca la historia."
+  ],
+  "locaciones": {
+    "Remolcador Sagita": "Remolcador de carga de tripulación mínima que arrastra un convoy por rutas largas: puente a proa, pasillos y camarotes en el cuerpo central, bodega con esclusa de carga, sala de máquinas y ramal de popa, todo enhebrado por tubos de servicio y retornos de aire estrechos que casi nadie recorre. Metal viejo, luz amarilla, olor a aire reciclado; Serrat lo conoce como una casa vieja."
+  }
+}

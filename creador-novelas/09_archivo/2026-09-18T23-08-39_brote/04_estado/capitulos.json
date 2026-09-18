@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "Marcas que nadie recuerda",
+    "objetivo_narrativo": "Presentar a los cinco tripulantes de la Vesania en el tramo muerto de la ruta y llevar al lector desde la primera marca pálida en el antebrazo de Ivo hasta el sellado de la enfermería: Otte descubre en la segunda guardia que las marcas han crecido, que la piel se ha vuelto translúcida y que debajo algo se desplaza con lentitud deliberada.",
+    "personajes": [
+      "Harel",
+      "Otte",
+      "Brune",
+      "Ivo",
+      "Siem"
+    ],
+    "locacion": "Enfermería de la Vesania",
+    "informacion_nueva": "Dos tripulantes tienen lesiones que crecen y se mueven bajo la piel; ningún patógeno registrado avanza así; Otte declara el aislamiento y empieza a medir el avance en centímetros por guardia.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "La aritmética del aire",
+    "objetivo_narrativo": "Ejecutar la separación del circuito de aire de la enfermería —propuesta por Brune, autorizada por Harel, no firmada por Otte, que queda encerrada con los enfermos— y girar la historia cuando Otte compara sus propias placas con las de Ivo y Siem y Brune revisa los registros del reciclador.",
+    "personajes": [
+      "Harel",
+      "Otte",
+      "Brune",
+      "Ivo",
+      "Siem"
+    ],
+    "locacion": "Enfermería de la Vesania",
+    "informacion_nueva": "Lo que crece tiene la misma antigüedad tisular que el último permiso en puerto y está en los cinco; el reciclador lleva días ajustando solo la mezcla de gases para unas condiciones que no son las óptimas para la tripulación; el aislamiento no protegió a nadie.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "Venteo a medias",
+    "objetivo_narrativo": "Llevar el venteo total ordenado por Harel hasta su ejecución parcial contra el encierro de Brune en máquinas, cerrar con la muerte de Ivo y Siem, la supervivencia marcada de Otte y el encuentro de Harel y Brune en el pasillo con aire nuevo que no cambia nada, y terminar en la anotación final del diario médico.",
+    "personajes": [
+      "Harel",
+      "Brune",
+      "Otte",
+      "Ivo",
+      "Siem"
+    ],
+    "locacion": "Sala de máquinas de la Vesania",
+    "informacion_nueva": "Cortar la mezcla provoca la respuesta que el reciclador venía evitando; la enfermedad nunca decidía si extenderse sino cuándo; la Vesania sigue rumbo a puerto con tres vivos y un circuito de aire que se regula solo.",
+    "tension": 5
+  }
+]

@@ -130,3 +130,18 @@ def test_el_delta_que_valida_el_escritor_se_anota_como_suyo(proyecto, capsys):
     # El rol lo fija el verbo y no quien lo ejecuta: sin corregirlo, el registro anotaba un
     # extractor que en esta corrida no existe.
     assert (chr(114)+chr(111)+chr(108)+chr(61)+chr(34)+chr(101)+chr(115)+chr(99)+chr(114)+chr(105)+chr(116)+chr(111)+chr(114)+chr(34)) in capsys.readouterr().out
+
+
+def test_el_modelo_del_orquestador_se_puede_fijar_por_entorno(monkeypatch):
+    import importlib
+    from app import web
+    # El loop prueba una vuelta con otro modelo de orquestación sin tocar el código, y el id
+    # canónico tiene que seguirlo: anotarlo como alias dejaba su coste a cero en el informe.
+    monkeypatch.setenv("HARNESS_MODELO_ORQUESTADOR", "sonnet")
+    recargado = importlib.reload(web)
+    try:
+        assert recargado.MODELO_ORQUESTADOR == "sonnet"
+        assert recargado.MODELO_ORQUESTADOR_ID == "claude-sonnet-5"
+    finally:
+        monkeypatch.delenv("HARNESS_MODELO_ORQUESTADOR")
+        importlib.reload(web)

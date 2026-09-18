@@ -1,0 +1,26 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion negativa encadenada ('No son fugas...', 'No la hemos empujado. Se ha dejado.'): 5 apariciones acumuladas, caps 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Sustantivo + oracion de relativo en negacion para marcar lo anomalo ('un reparto de descanso que nadie llamaba turno'; 'cordon de soldadura nuevo... nadie de a bordo ha soldado nada'): 6 apariciones acumuladas, caps 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Kovac midiendo en voz alta el tiempo de travesia ('Llevamos cinco dias empujandola hacia popa'): 3 apariciones acumuladas, caps 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil de oficio introducido por 'como quien' / 'como si' para glosar un gesto ('como quien compara dos versiones de una misma firma'; 'de quien lleva rato sumando en silencio'; 'como si ordenara herramientas'): 3 apariciones, todas en el cap 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

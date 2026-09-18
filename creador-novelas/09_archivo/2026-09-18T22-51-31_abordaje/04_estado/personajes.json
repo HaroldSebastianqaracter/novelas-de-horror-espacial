@@ -1,0 +1,75 @@
+{
+  "Irene Solar": {
+    "estado_fisico": "Absorbida por el vacío al pilotar la apertura de la bodega y el módulo.",
+    "estado_psicologico": "Comprende su rol como piloto rehén; toma la decisión deliberada de pilotar la nave y orquestar la apertura de la bodega.",
+    "secretos_que_conoce": [
+      "Sabe que la baliza de emergencia no alcanza a nadie en este tramo y la dispararía igual, por costumbre.",
+      "La esclusa se abrió sin código de autorización",
+      "Una entidad desconocida y grande entró a la nave",
+      "Hay un cadáver diseccionado en la enfermería",
+      "El panel de control miente sobre el estado de las secciones",
+      "Alguien interfiere activamente desde la bodega baja",
+      "Sabe que fue colocada como piloto necesario para abrir el corredor de aproximación.",
+      "Sabe que el destino espera un módulo minero para ochenta mil personas dormidas bajo una cúpula."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Tomás Bregón": {
+    "estado_fisico": "Incapacitado o muerto tras un ruido no identificado en máquinas.",
+    "estado_psicologico": "Su última acción fue separar el sistema del casco del panel del puente para impedir que la presencia escribiera más instrucciones falsas.",
+    "secretos_que_conoce": [
+      "Sabe que el reciclador de aire trabaja al límite de su margen y no se lo ha dicho a la capitana con todas las letras.",
+      "La esclusa se abrió sin autorización",
+      "Una presencia entró a la nave",
+      "Ha soldado la puerta 14",
+      "El panel miente; sus datos no son confiables",
+      "Alguien interfiere activamente con el control de las secciones"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Nadia Cheng": {
+    "estado_fisico": "Posiblemente arrastrada por el vacío al abrirse la cubierta de carga.",
+    "estado_psicologico": "Actuó sin dudas al bajar hacia la bodega, siguiendo las instrucciones de Solar.",
+    "secretos_que_conoce": [
+      "Lo que observó en el cuerpo de Marcos Ibáñez",
+      "Los cortes no son obra del hambre sino de estudio metódico",
+      "El atacante conoce anatomía humana y tuvo paciencia quirúrgica"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Elías Prado": {
+    "estado_fisico": "Vivo, en un remolcador rajado, aproximándose a destino.",
+    "estado_psicologico": "Reportó desde la válvula con euforia momentánea; cinco días después, abrumado por la pérdida de carga.",
+    "secretos_que_conoce": [
+      "La esclusa se abrió sin que nadie ordenara el ciclo",
+      "Una entidad desconocida entró a la nave",
+      "La puerta 14 fue soldada",
+      "Algo prueba las puertas dos veces por noche",
+      "Las defensas pasivas son insuficientes",
+      "Sabe que el módulo minero fue perdido en la aproximación a la válvula."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Marcos Ibáñez": {
+    "estado_fisico": "Desaparecido o muerto; fue visto levantando la mano en gesto de identificación antes de que la imagen dejara de tener sentido.",
+    "estado_psicologico": "No aplica (desaparecido).",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "la presencia": {
+    "estado_fisico": "Arrastrada al vacío al abrirse la cubierta de carga.",
+    "estado_psicologico": "Esperaba con conocimiento íntimo de la nave; fue absorbida.",
+    "secretos_que_conoce": [
+      "Conoce la secuencia completa de apertura de la esclusa de carga.",
+      "Quiere la nave y el módulo minero en puerto, con alguien vivo en la silla del puente.",
+      "Cómo abrir la esclusa sin código de autorización"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

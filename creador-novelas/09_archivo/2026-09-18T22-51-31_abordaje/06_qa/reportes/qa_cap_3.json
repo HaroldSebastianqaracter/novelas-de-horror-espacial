@@ -1,0 +1,21 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Verbo de decir o saber en negativo para retener informacion ante el lector: en el capitulo 3, 'un ruido que Solar no supo nombrar', 'lo que no habia sabido leer', 'no fue una orden de sellar'. Acumula 7 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La nada o el vacio del otro lado como respuesta: en el capitulo 3, 'la linea de maquinas se quedo plana. Nadie pregunto nada' y el cierre con el gancho vacio y el remolcador 'arrastrando nada'. Acumula 5 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personificacion del panel y del sistema del casco como algo que escribe o dice mentiras: en el capitulo 3, 'para que lo que estuviera escribiendo mentiras no tuviera papel donde escribirlas'. Acumula 3 apariciones en los capitulos 2 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

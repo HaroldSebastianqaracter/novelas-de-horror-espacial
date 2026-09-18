@@ -1,0 +1,26 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion correctiva o en serie para descartar hipotesis; en cap. 2 'regulan caudal, no lo cortan' y 'no describian un contagio... Describian cinco relojes'. Acumulado 7 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion triadica asindetica o con ultimo miembro coordinado; en cap. 2 'Veintiuna parciales, once minutos cada una, un consumo que...' y 'una elevacion pequena, tibia, del tamano de una lenteja'. Acumulado 5 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Frase breve y seca cerrando parrafo como golpe; en cap. 2 'Llevaba veinte anos sabiendo cuando callar.' y 'Nadie hablo.'. Acumulado 4 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El acto de asentar por escrito o firmar como cierre de escena; en cap. 2 'Hay que dejar constancia mientras seamos los que la escribimos.'. Acumulado 3 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

@@ -1,0 +1,112 @@
+{
+  "version_specs": "v1.12",
+  "config": {
+    "novela.json": {
+      "total_capitulos": 3,
+      "palabras_por_capitulo": 400,
+      "idioma": "es-ES",
+      "persona_narrativa": "tercera_limitada",
+      "tiempo_verbal": "pasado",
+      "ventana_resumen_rodante": 2,
+      "cadencia_qa": 3,
+      "max_tokens_contexto_escritor": 12000,
+      "max_hechos_por_capitulo": 4
+    },
+    "ejecucion.json": {
+      "capitulos_por_tanda": 3,
+      "max_llamadas_por_tanda": 30,
+      "registrar_uso": true,
+      "exportar_trazas": true,
+      "escritor_emite_delta": false
+    }
+  },
+  "capitulos": {
+    "cerrados": 3,
+    "esperados": 3,
+    "estado": "en_progreso",
+    "palabras": [
+      425,
+      451,
+      444
+    ]
+  },
+  "reloj": {
+    "preludio_s": 230.0,
+    "por_fase_s": {
+      "generar-premisa": 26.0,
+      "generar-sinopsis": 48.0,
+      "generar-escaleta": 34.0,
+      "inicializar-estado": 122.0
+    },
+    "tandas": [
+      {
+        "tanda": "tanda_2026-09-19T00-24-07",
+        "inicio": "2026-09-19T00:24:07.550+02:00",
+        "fin": "2026-09-19T00:43:26.568+02:00",
+        "segundos": 1159.0
+      }
+    ],
+    "tandas_s": 1159.0,
+    "total_s": 1389.0
+  },
+  "agentes": {
+    "orquestador": {
+      "invocaciones": 5,
+      "segundos": 1068.3,
+      "tokens_salida": 10304,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "extractor": {
+      "invocaciones": 4,
+      "segundos": 739.4,
+      "tokens_salida": 33460,
+      "modelos": [
+        "claude-haiku-4-5-20251001"
+      ]
+    },
+    "escritor": {
+      "invocaciones": 4,
+      "segundos": 520.5,
+      "tokens_salida": 9918,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "qa": {
+      "invocaciones": 1,
+      "segundos": 177.8,
+      "tokens_salida": 9767,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    }
+  },
+  "calidad": {
+    "contradicciones": 3,
+    "cortes_qa": 1,
+    "reintentos_de_escritor": 0,
+    "borradores_descartados": 0,
+    "tandas_abortadas": 0,
+    "motivos_de_aborto": [],
+    "pausado_al_archivar": false
+  },
+  "coste": {
+    "moneda": "USD",
+    "total": 5.5179,
+    "tokens": 4884854,
+    "por_rol": {
+      "preludio": 1.8292,
+      "orquestador": 1.6857,
+      "escritor": 1.1607,
+      "qa": 0.5244,
+      "extractor": 0.3178
+    },
+    "modelos_sin_precio": [],
+    "carpetas_con_uso": 2
+  },
+  "nombre": "2026-09-19T00-43-28_abordaje",
+  "titulo": "Once días hasta puerto",
+  "archivado": "2026-09-19T00:43:28+02:00"
+}

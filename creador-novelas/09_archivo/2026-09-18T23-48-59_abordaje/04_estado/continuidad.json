@@ -1,0 +1,234 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El remolcador Sagita arrastra su convoy por un tramo muerto de la ruta: la derrota registrada lo sitúa a once días de puerto y a cinco días de que cualquier señal suya llegue a oídos humanos.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El rol de a bordo recoge cinco tripulantes y ningún pasajero: Serrat al mando, Kováč al pilotaje, Oyelaran en conductos, Dubois de segundo de máquinas y Miralles como médica.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El aire respirable de a bordo está tasado y se reparte por secciones: el cómputo de Miralles baja cada vez que una compuerta se sella, porque el volumen aprovechable se calcula sobre las secciones abiertas.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La nave se compartimenta con compuertas estancas que pueden sellarse desde el puente o accionarse a mano en cada mamparo; es el único recurso de a bordo para separarse de algo que se mueva por dentro.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El manual de a bordo fija un protocolo de contacto en tres estímulos y por ese orden: radio en las tres frecuencias, señal luminosa y golpeo de mamparo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Desviarse del rumbo o soltar el convoy encarece la travesía en semanas, de modo que toda decisión sobre el rumbo se mide contra los días que faltan para puerto.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Remolcador Sagita",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El plano oficial de conductos de aire y de servicio archivado a bordo documenta un trazado cerrado, sin más uniones ni aperturas que las que él mismo recoge; es el único mapa aprobado con el que cuenta la tripulación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Remolcador Sagita",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La bodega se abre al exterior por una esclusa de carga accionable desde dentro y desde fuera, y las cámaras de bodega vuelcan su imagen en las pantallas del puente.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Serrat",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Serrat lleva catorce años repitiendo esta misma travesía y se guía por un conocimiento práctico de la nave adquirido en el uso, no en los planos.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Oyelaran",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Oyelaran es el único de los cinco que ha reptado por los tubos de servicio, y ya antes de esta travesía había visto tramos de metal que no le encajaban con lo que recordaba del plano.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kováč",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Kováč cuenta en voz alta los días que faltan para puerto porque el silencio de la nave le resulta insoportable, y sus compañeros lo usan ya como reloj de a bordo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Miralles",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Miralles se ha embarcado por primera vez en esta ruta y lleva ella misma el cómputo del aire, con la costumbre de decir en voz alta las cifras que los demás preferirían no oír.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dubois",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dubois, segundo de máquinas, cubre el turno de guardia con el que arranca la travesía y aplica los protocolos al pie de la letra.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dubois",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dubois murió en la bodega a manos de la presencia después de agotar los tres estímulos del protocolo de contacto.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la presencia",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "La presencia entró en la bodega del Sagita por la esclusa de carga abierta desde fuera, sin acoplamiento ni registro alguno en los sensores de proximidad.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Remolcador Sagita",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El indicador de la bodega se apagó en el plano del puente inmediatamente después de la muerte de Dubois.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Serrat ordenó sellar la nave por secciones y empujar a la presencia hacia popa para ventearla por el módulo de carga, manteniendo el rumbo a puerto.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Remolcador Sagita",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Los conductos del Sagita no coinciden con el plano oficial: hay soldaduras nuevas que nadie de a bordo hizo y aperturas donde el plano documenta metal macizo.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la presencia",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "La presencia abre y cierra sus propios pasos por el interior del casco, lo que explica los ruidos en secciones ya selladas.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Al quinto día el Sagita ha quedado reducido a tres secciones habitables con turnos de sueño desiguales, y el cómputo de Miralles sitúa el fin del aire respirable dos días antes de la llegada a puerto.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Serrat",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Serrat renunció a la caza por compuertas y ordenó empezar a desmontar la nave para quitarle a la presencia los pasos que usa.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la presencia",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "La presencia fue venteada al vacío desde el ramal de popa por orden de Oyelaran y por mano de Serrat.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Kováč",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Kováč murió en el puente tras desacoplar el convoy y ejecutar el viraje que lanzó a la presencia contra popa.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Remolcador Sagita",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La revisión de casco en puerto halló la esclusa de carga soldada desde fuera y uniones nuevas que ninguna mano de a bordo hizo.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El cómputo final de Miralles arroja un sobrante de horas de aire que ningún cálculo de a bordo explica.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Kováč",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Kováč murió en el puente al ejecutar el viraje con que lanzó a la presencia contra popa después de soltar el convoy.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la presencia",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "La presencia fue venteada al vacío por la esclusa del ramal de popa, por orden de Oyelaran y maniobra de Serrat.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Remolcador Sagita",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El Sagita llegó a puerto sin convoy, con atmósfera solo en el anillo central cerrado a mano por Miralles y vacío en el resto del casco.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La reserva de aire computada en treinta y una horas alcanzó para cuarenta y ocho, un margen que el equipo de puerto no quiso examinar.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

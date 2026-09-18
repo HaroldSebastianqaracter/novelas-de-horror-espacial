@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "Ronda del ciclo doscientos cuarenta y uno",
+    "objetivo_narrativo": "Instalar la rutina de la travesía y romperla con el primer hallazgo clínico: Sabat encuentra en el antebrazo de Rey una marca que no encaja en ninguna de sus tablas, y doce horas después Corvo aparece con dos lesiones idénticas en la clavícula. Almeida confirma que no hay rescate posible y Sabat sella el módulo de enfermería con los dos dentro.",
+    "personajes": [
+      "Irene Sabat",
+      "Tomás Rey",
+      "Nadia Corvo",
+      "Ruth Almeida",
+      "Elías Barros"
+    ],
+    "locacion": "Módulo de enfermería",
+    "informacion_nueva": "Las lesiones no son quemadura, ni infección conocida, ni daño por radiación; los cultivos no crecen y las imágenes muestran una densidad subdérmica que se ha desplazado un centímetro entre dos tomas. No hay nave a distancia de rescate en cinco meses. Barros no encuentra brecha, anomalía ni contenedor comprometido: nada entró en la nave.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "Un solo aire",
+    "objetivo_narrativo": "Sostener tres semanas de encierro administrado —purgas parciales, turnos separados, las voces de siempre pidiendo salir por el intercomunicador— y derribar la ficción de las dos mitades: Barros descubre que el ciclo común lleva intercambiando volumen con el módulo desde el día uno, y se destapa la marca que él mismo lleva tres días ocultando bajo un parche.",
+    "personajes": [
+      "Elías Barros",
+      "Irene Sabat",
+      "Ruth Almeida",
+      "Tomás Rey",
+      "Nadia Corvo"
+    ],
+    "locacion": "Sala de máquinas",
+    "informacion_nueva": "El aislamiento nunca funcionó y el diseño de la nave no admite separar los circuitos sin apagar el soporte vital de media nave. Los análisis retrospectivos apuntan a una exposición simultánea para los cinco: lo único que varía es la velocidad. Purgar el módulo ya no salvaría a nadie; la cuarentena era en realidad un orden de llegada.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "Órbita muerta",
+    "objetivo_narrativo": "Llevar la aritmética hasta el final: Rey deja de responder y empieza a hablar con su voz pidiendo que abran, Corvo pide por escrito que la purguen mientras pueda pedirlo, y los tres que aún deciden eligen no llegar. Nueve horas de maniobra a dos operadores, el turno cumplido de Corvo, Barros bloqueando máquinas desde dentro, Almeida dejando el aviso en bucle y Sabat sola con su propia mano.",
+    "personajes": [
+      "Ruth Almeida",
+      "Irene Sabat",
+      "Elías Barros",
+      "Nadia Corvo",
+      "Tomás Rey"
+    ],
+    "locacion": "Puente de mando",
+    "informacion_nueva": "La estación de destino tiene doce mil personas y la nave llegará con o sin tripulación consciente. La maniobra de desvío a una órbita muerta y señalizada exige dos operadores conscientes durante nueve horas, más de las que le quedan a Barros. Sabat descubre, al escribir la última entrada del diario clínico, que algo se desplaza bajo la piel de su mano izquierda.",
+    "tension": 5
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "Irene Sabat": {
+    "estado_fisico": "Lesión incipiente bajo la piel del dorso de la mano izquierda, con desplazamiento visible.",
+    "estado_psicologico": "Serena y resignada; asume que será la última en quedar y lo asienta por escrito.",
+    "secretos_que_conoce": [
+      "Sabe que ella también está afectada y lo consigna en la última entrada del diario clínico."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Tomás Rey": {
+    "estado_fisico": "Lesiones extendidas; se mueve libremente por los pasillos.",
+    "estado_psicologico": "Cortés y ajeno: no impide la maniobra y repite frases idénticas sin variación.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Nadia Corvo": {
+    "estado_fisico": "Muerta tras la purga que solicitó por escrito.",
+    "estado_psicologico": "Lúcida hasta el final; cumplió primero el turno y después su petición.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Ruth Almeida": {
+    "estado_fisico": "Rigidez articular; movimientos económicos.",
+    "estado_psicologico": "Cerrada en el trámite: archiva la petición de Corvo y deja el aviso emitiendo sin comentario.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Elías Barros": {
+    "estado_fisico": "Mano izquierda inservible, sin cierre completo de los dedos.",
+    "estado_psicologico": "Decidido a no dejar que su deterioro comprometa la nave.",
+    "secretos_que_conoce": [
+      "Sabe que el aislamiento del módulo nunca separó los circuitos de aire."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

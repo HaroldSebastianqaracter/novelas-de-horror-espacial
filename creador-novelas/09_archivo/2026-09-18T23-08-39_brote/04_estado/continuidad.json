@@ -1,0 +1,194 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La Vesania es un carguero de mineral tripulado por cinco personas —Harel, Otte, Brune, Ivo y Siem— y lleva once días en el tramo muerto de la ruta, sin baliza ni tráfico, a seis semanas del puerto de destino.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Un único circuito de aire recorre toda la nave: lo que se respira en un compartimento acaba pasando por los pulmones de los cinco.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El reciclador de atmósfera ajusta la mezcla de gases de forma continua y deja constancia de cada ajuste en sus registros, consultables desde la sala de máquinas.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Ayuda exterior y evacuación quedan fuera de plazo útil: cualquier decisión se toma y se ejecuta con lo que hay a bordo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Harel",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Harel es el capitán de la Vesania y lleva la contabilidad del viaje —horas, consumos, plazos— como si fuera una penitencia.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Otte",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Otte es la médica de a bordo y la única autoridad sanitaria de la nave: puede declarar un aislamiento por su cuenta y anota cada medición en el diario médico.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Brune",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Brune es la ingeniera de la Vesania y conoce el reciclador mejor que nadie a bordo; el mantenimiento del circuito de aire depende de ella.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ivo",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ivo es tripulante de carga y bajó a tierra con Siem en el último permiso en puerto, del que ambos volvieron juntos.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Siem",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Siem es tripulante de carga y hace sus guardias emparejado con Ivo desde antes del último permiso en puerto.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Enfermería de la Vesania",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La enfermería de la Vesania tiene un mamparo estanco que permite sellarla, y un intercomunicador que la comunica con el resto de la nave cuando está cerrada.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sala de máquinas de la Vesania",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "En la sala de máquinas de la Vesania están el reciclador, sus consolas de registro y los mandos del venteo, y el compartimento puede cerrarse desde dentro.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El vademécum y las bases clínicas de a bordo recogen los patógenos conocidos junto con su curso y su velocidad de avance.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Enfermería de la Vesania",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La Enfermería de la Vesania fue sellada con mamparo estanco tras descubrirse anomalía en dos tripulantes.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ivo",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ivo presenta una herida pálida e indolora en el antebrazo que crece visiblemente en 24 horas con movimiento anómalo bajo piel translúcida.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Siem",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Siem presenta una herida pálida e indolora bajo la clavícula cuyo comportamiento replica el de Ivo, duplicando su tamaño en 24 horas.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El comportamiento de las heridas no coincide con ningún patógeno o quemadura registrados en el vademécum de la nave.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Enfermería de la Vesania",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La enfermería queda sellada por un nuevo mamparo que completará su ciclo en 86 horas.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La atmósfera de la nave ha sido deliberadamente modificada y está siendo ajustada por alguien desde hace 4 días antes del día 11.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Otte",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Otte tiene un tejido anómalo que data del último permiso en puerto, similar al de Ivo y Siem.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ivo",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ivo tiene un tejido anómalo que data del último permiso en puerto.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ivo",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ivo muere asfixiado en la enfermería cuando Harel fuerza el venteo total desde el panel auxiliar del pasillo.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Siem",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Siem muere asfixiado en la enfermería durante el venteo total forzado por Harel.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Enfermería de la Vesania",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La enfermería fue despresurizad al realizar el venteo de los sectores de proa, quedando expuesta al vacío.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La infección que transforma la atmósfera viajaba a bordo dentro de los tripulantes desde el último permiso, no como un agente externo, y ha estado esperando el momento correcto para actuar.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

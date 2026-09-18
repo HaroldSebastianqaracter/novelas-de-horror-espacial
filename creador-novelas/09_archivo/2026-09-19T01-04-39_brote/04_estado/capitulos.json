@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "Lo que nadie recuerda haberse hecho",
+    "objetivo_narrativo": "Establecer la rutina de guardias de la Vespertina y la distancia insalvable al puerto, y romperla con la aparición de dos marcas que nadie sabe explicar; cerrar con un aislamiento que todos entienden como un gesto vacío.",
+    "personajes": [
+      "Irina Valdés",
+      "Sela Nourani",
+      "Otto Brenner",
+      "Yeva Costas",
+      "Marek Duhalde"
+    ],
+    "locacion": "Carguero Vespertina",
+    "informacion_nueva": "Las lesiones cambian de forma y de lugar en ocho horas, no figuran en ningún atlas, y algo bajo la piel de Otto se retira cuando Sela la presiona; el módulo de literas queda sellado, pero el reciclador de aire es uno solo para los cinco.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "Lo que el bisturí encuentra debajo",
+    "objetivo_narrativo": "Llevar la enfermedad de síntoma a voluntad: los infectados empiezan a defender lo que llevan dentro, y el hallazgo de Marek en el reciclador borra la línea entre sanos y enfermos sobre la que se sostenía el sello.",
+    "personajes": [
+      "Sela Nourani",
+      "Yeva Costas",
+      "Otto Brenner",
+      "Marek Duhalde",
+      "Irina Valdés"
+    ],
+    "locacion": "Carguero Vespertina",
+    "informacion_nueva": "Bajo la lesión de Yeva hay tejido nuevo y organizado que se cierra solo; Yeva detiene la operación con una calma que no le pertenece y Otto miente sobre su extensión; la firma térmica del filtrado prueba que el organismo lleva semanas en los conductos, desde antes de los dos primeros casos.",
+    "tension": 4
+  },
+  {
+    "num": 3,
+    "titulo": "Dieciocho horas de guardia",
+    "objetivo_narrativo": "Consumar el plazo y demostrar que era una condena sin nombrar: el circuito se corta antes de la orden, Yeva pide desde el otro lado que abran, y la marca de Sela deja a los tres del mismo lado del sello que los dos que encerraron.",
+    "personajes": [
+      "Irina Valdés",
+      "Marek Duhalde",
+      "Sela Nourani",
+      "Yeva Costas",
+      "Otto Brenner"
+    ],
+    "locacion": "Carguero Vespertina",
+    "informacion_nueva": "En la hora catorce Yeva sale del módulo pidiendo con calma que abran y Otto ya no responde a su nombre; Marek corta el circuito común antes de la orden de Irina, y Sela se descubre un engrosamiento pálido que no estaba cuatro horas atrás.",
+    "tension": 5
+  }
+]

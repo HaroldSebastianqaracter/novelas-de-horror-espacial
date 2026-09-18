@@ -1,0 +1,10 @@
+[
+  { "recurso": "estructura de negacion/correccion 'No X. (Sino) Y.'", "veces": 4, "caps": [2, 3] },
+  { "recurso": "atenuacion por 'sin + infinitivo' aplicada a gestos y ordenes", "veces": 6, "caps": [1, 2, 3] },
+  { "recurso": "simil hipotetico con 'como si' / 'como quien'", "veces": 3, "caps": [1, 2, 3] },
+  { "recurso": "cierre de escena con sentencia breve del narrador que glosa lo anterior", "veces": 3, "caps": [1, 2, 3] },
+  { "recurso": "triada asindetica de sustantivos tecnicos como golpe de ritmo", "veces": 3, "caps": [1, 2, 3] },
+  { "recurso": "el silencio que pesa mas que el ruido", "veces": 2, "caps": [1, 3] },
+  { "recurso": "sensores que 'no leen calor' o 'leen vacio en todas las bandas'", "veces": 2, "caps": [1, 3] },
+  { "recurso": "apertura ritual de las tres bandas de emergencia 'por academia'", "veces": 2, "caps": [1, 3] }
+]

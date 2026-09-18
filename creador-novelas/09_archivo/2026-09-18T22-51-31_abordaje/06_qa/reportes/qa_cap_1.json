@@ -1,0 +1,11 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Tic lexico: verbo de decir o saber en negativo para retener informacion ante el lector (\"No dijo cuanto\", \"no supo decir si habia gritado\", \"no dijo en voz alta lo que estaba viendo\"). 3 apariciones acumuladas, capitulos: [1].",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

@@ -1,0 +1,50 @@
+{
+  "personajes": {
+    "Serrat": {
+      "estado_fisico": "Viva, exhausta tras abrir a mano todas las compuertas del remolcador.",
+      "estado_psicologico": "Contenida y rota; firma el parte oficial y decide no entregarlo.",
+      "secretos_que_conoce": ["Sabe que venteó el ramal de popa con Oyelaran dentro, por orden de él."],
+      "posicion": "Puerto, a bordo del Sagita, con el parte firmado sin entregar",
+      "ultima_aparicion": 3
+    },
+    "Oyelaran": {
+      "estado_fisico": "Muerto, venteado al vacío en el ramal de popa.",
+      "estado_psicologico": "Sereno al dar él mismo la orden de ventear.",
+      "secretos_que_conoce": ["Su cartografía a mano no coincide con el plano oficial: hay soldaduras y aperturas nuevas."],
+      "posicion": "Ramal de popa del Sagita, venteado al vacío",
+      "ultima_aparicion": 3
+    },
+    "Kováč": {
+      "estado_fisico": "Muerto en el puente durante el viraje que ejecutó tras soltar el convoy.",
+      "estado_psicologico": "Callado por primera vez: no contó los días, solo pilotó.",
+      "posicion": "Puente del Sagita, muerto a los mandos",
+      "ultima_aparicion": 3
+    },
+    "Miralles": {
+      "estado_fisico": "Viva, superviviente en el único sector con atmósfera.",
+      "estado_psicologico": "Lúcida e inquieta: el descuadre de las horas de aire no la deja cerrar el caso.",
+      "secretos_que_conoce": ["Las horas de aire no cuadran por un margen que solo se explica si algo quiso que llegaran."],
+      "posicion": "Puerto, a bordo del Sagita",
+      "ultima_aparicion": 3
+    },
+    "la presencia": {
+      "estado_fisico": "Venteada al vacío desde el ramal de popa.",
+      "estado_psicologico": "Reaccionó por primera vez al perder sus pasos propios y subió hacia el puente.",
+      "posicion": "Expulsada al vacío desde el ramal de popa",
+      "ultima_aparicion": 3
+    }
+  },
+  "hechos_nuevos": [
+    { "sujeto": "la presencia", "categoria": "personaje", "hecho": "La presencia fue venteada al vacío desde el ramal de popa por orden de Oyelaran y por mano de Serrat.", "cap_origen": 3 },
+    { "sujeto": "Kováč", "categoria": "personaje", "hecho": "Kováč murió en el puente tras desacoplar el convoy y ejecutar el viraje que lanzó a la presencia contra popa.", "cap_origen": 3 },
+    { "sujeto": "Remolcador Sagita", "categoria": "locacion", "hecho": "La revisión de casco en puerto halló la esclusa de carga soldada desde fuera y uniones nuevas que ninguna mano de a bordo hizo.", "cap_origen": 3 },
+    { "sujeto": "mundo", "categoria": "mundo", "hecho": "El cómputo final de Miralles arroja un sobrante de horas de aire que ningún cálculo de a bordo explica.", "cap_origen": 3 }
+  ],
+  "resumen_corto": "Con treinta y una horas de aire y cuarenta y ocho hasta puerto, Serrat reparte los últimos papeles y desmonta la nave.\nMiralles concentra la reserva en el sector central, Serrat abre a mano las compuertas y Oyelaran corta las uniones nuevas desde los conductos.\nLa presencia reacciona y sube hacia el puente; Kováč suelta el convoy y muere en un viraje que la lanza a popa.\nOyelaran, atrapado del lado de dentro, ordena ventear y Serrat cumple.\nTres días después el Sagita llega a puerto con dos supervivientes, un parte firmado sin entregar y un margen de aire que nadie sabe explicar.",
+  "recursos_narrativos": [
+    { "recurso": "las luces de servicio apagándose en secuencia como rastro de la presencia", "veces": 1 },
+    { "recurso": "el metal frío contra la piel como gesto de despedida", "veces": 1 },
+    { "recurso": "la nave convertida en un único volumen sin fronteras", "veces": 1 },
+    { "recurso": "las uniones nuevas descritas como limpias e impecables", "veces": 2 }
+  ]
+}

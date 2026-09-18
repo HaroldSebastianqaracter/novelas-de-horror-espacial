@@ -1,0 +1,16 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Parrafo de una sola frase corta aislada como golpe de tension: 3 apariciones acumuladas (capitulos 1 y 2); en el capitulo 2, en el corte 'Funciono dos dias. Eso fue lo peor: que funcionara.'",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio de los demas como respuesta significativa: 3 apariciones acumuladas (capitulos 1 y 2); en el capitulo 2, cuando Ivet espera que alguien lo niegue y nadie lo hace.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

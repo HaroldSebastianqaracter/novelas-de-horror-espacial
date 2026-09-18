@@ -1,0 +1,21 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de escena con una medicion o una hora anotada en un registro: en el cap. 2 el capitulo remata con 'Otte apunto la hora en el diario medico, debajo de la ultima medicion'. Acumula 3 apariciones (caps. 1, 2).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de correccion por negacion del tipo 'no X. Y': en el cap. 2 aparece dos veces ('No el mismo tamano: la suya era una sombra de nada...' y 'no habia entrado despues. Solo habia empezado antes'). Acumula 3 apariciones (caps. 1, 2).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil que asimila el cuerpo o la herida a materia inerte o a una naderia: en el cap. 2, la marca propia descrita como 'una sombra de nada, un hilo bajo el tejido del dorso'. Acumula 3 apariciones (caps. 1, 2).",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

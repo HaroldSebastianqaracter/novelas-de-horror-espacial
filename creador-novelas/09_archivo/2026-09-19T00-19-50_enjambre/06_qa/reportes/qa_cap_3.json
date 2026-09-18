@@ -1,0 +1,26 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio o la omision de un personaje como respuesta significativa: en el capitulo 3, Ivet que dice 'Registro de turno' y no escribe, Renke que no contesta a la tercera llamada y Tobi que no dice cuantos dias han pasado. 6 apariciones acumuladas, capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Parrafo de una sola frase corta aislada como golpe de tension: en el capitulo 3, 'Entonces la temperatura del hangar empezo a bajar por el suelo.' y el cierre con Tobi junto a la escotilla. 5 apariciones acumuladas, capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El arrastre de las criaturas en los conductos comparado con grava: reaparece en el cierre del capitulo 3 ('habia vuelto a sonar la grava'). 3 apariciones acumuladas, capitulos 1 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion y correccion del tipo 'No fue X. Fue Y.': en el capitulo 3, 'No hacia los motores: hacia lo que respiraba entre ellos.' 3 apariciones acumuladas, capitulos 1, 2 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

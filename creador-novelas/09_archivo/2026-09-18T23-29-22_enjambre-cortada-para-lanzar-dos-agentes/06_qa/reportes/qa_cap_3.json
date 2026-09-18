@@ -1,0 +1,36 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 establece como cierto que Idris muere de hipotermia durante el descenso de temperatura y que del compartimento de repuestos salieron tres supervivientes; esto niega el hecho vigente del log segun el cual Vera, Marta, Kenji e Idris sobrevivieron al descenso repartiendo el calor entre cuatro.",
+      "cap_origen": 3
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El calor como senuelo que la criatura persigue: 7 apariciones acumuladas en los capitulos 1, 2 y 3; en el capitulo 3, los miles de cuerpos suben a los pasillos recien entibiados por la purga.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Gesto seguido de glosa explicativa del propio gesto en clausula subordinada: 7 apariciones acumuladas en los capitulos 1, 2 y 3; en el capitulo 3, la explicacion de Marta glosada con 'porque era la unica forma de que aceptaran lo que iba a pedirles'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La cuenta numerica como marcador de tension: 8 apariciones acumuladas en los capitulos 2 y 3; el capitulo 3 encadena minutos de purga, horas de traje, horas hasta el relevo, horas transcurridas y grados del indicador.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personaje que calla lo que ha visto o sentido: 4 apariciones acumuladas en los capitulos 1, 2 y 3; en el capitulo 3, Marta comprueba la muerte de Idris y no lo dice durante cinco horas.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Ruido descrito por su ritmo o su insistencia: 4 apariciones acumuladas en los capitulos 1, 2 y 3; en el capitulo 3, el rumor creciente sobre el techo por el que Vera sigue el avance modulo a modulo.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

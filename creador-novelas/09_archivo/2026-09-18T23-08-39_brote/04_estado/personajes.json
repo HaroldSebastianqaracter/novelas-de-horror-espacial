@@ -1,0 +1,55 @@
+{
+  "Harel": {
+    "estado_fisico": "Pulmones llenos de gas limpio de botella; intacto tras el venteo.",
+    "estado_psicologico": "Entiende junto a Brune lo que ha sucedido sin necesidad de palabras; la aritmética ha dejado de ser su refugio mental.",
+    "secretos_que_conoce": [
+      "Sabe que lo que transformaba la atmósfera no llegó con el aire, sino que subió a bordo dentro de los tripulantes en el último permiso, esperando."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Otte": {
+    "estado_fisico": "De pie tras el venteo; presenta dos líneas pálidas visibles en el dorso de ambas manos, síntoma de la infección.",
+    "estado_psicologico": "Testigo que acompaña a otros en su muerte sin mentir ni una sola vez; ha abandonado los guantes y acepta la verdad de su condición.",
+    "secretos_que_conoce": [
+      "Sabe que Ivo y Siem tienen heridas anómalas cuyo comportamiento no coincide con patógenos registrados.",
+      "Sabe que hay algo que se mueve bajo la piel de ambos tripulantes.",
+      "La atmósfera ha sido modificada deliberadamente desde hace 4 días antes del día 11",
+      "Ella misma tiene un tejido anómalo que data del último permiso en puerto, como Ivo y Siem",
+      "Ha visto en las placas la antigüedad del tejido, el puerto, la fecha; sabe que lo que viaja a bordo no comenzó en la nave y no es culpa de Ivo ni de Siem."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Brune": {
+    "estado_fisico": "Pulmones llenos de gas limpio de botella; intacto tras el venteo.",
+    "estado_psicologico": "Decidido y perspicaz; ha comprendido que la amenaza aún no ha hecho su máximo daño, que lleva cuatro días esperando.",
+    "secretos_que_conoce": [
+      "La atmósfera de la nave no es la estándar: ha sido modificada y alguien la está manteniendo para otra cosa",
+      "Una deriva en el reciclador comenzó 4 días antes de que Ivo viera su marca",
+      "Sabe que algo lleva cuatro días transformando la atmósfera de la nave; ha comprendido que el proceso no ha llegado a su punto crítico."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Ivo": {
+    "estado_fisico": "Muerto; asfixiado durante el venteo forzado.",
+    "estado_psicologico": "N/A",
+    "secretos_que_conoce": [
+      "No recuerda cuándo ni cómo se hizo la herida.",
+      "Tiene un tejido anómalo que data del último permiso en puerto"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Siem": {
+    "estado_fisico": "Muerto; asfixiado durante el venteo forzado.",
+    "estado_psicologico": "N/A",
+    "secretos_que_conoce": [
+      "No recuerda la causa de su herida.",
+      "Tiene un tejido anómalo que data del último permiso en puerto"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

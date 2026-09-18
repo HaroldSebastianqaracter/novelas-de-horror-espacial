@@ -1,0 +1,47 @@
+{
+  "Idris Nahuel": {
+    "estado_fisico": "Muerto. Su cuerpo se enfrió contra la espalda de Marta durante las últimas cinco horas del descenso de temperatura.",
+    "estado_psicologico": "Fallecido.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Vera Solís": {
+    "estado_fisico": "Extremadamente debilitada por hipotermia tras diez horas en descenso de temperatura. Viva cuando sube a la nave de relevo.",
+    "estado_psicologico": "Agotada mentalmente. Ha tomado la decisión de abrir la válvula de purga sabiendo las consecuencias. Cerró los ojos durante la invasión y guardó silencio sobre Idris.",
+    "secretos_que_conoce": [
+      "Sabe que hay un movimiento sistemático en las juntas que viaja hacia la sala de máquinas, buscando calor.",
+      "Sabe que la criatura que salió del conducto no era una amenaza inmediata: venía por el calor, no por atacar.",
+      "Descubrió que las criaturas buscan la zona más caliente disponible en la estación.",
+      "Sabe que Idris murió pero no lo reveló cuando salieron."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Bruno Arce": {
+    "estado_fisico": "Atrapado dentro del módulo este, sellado con las criaturas; su destino inmediato es incierto.",
+    "estado_psicologico": "En pánico o intentando cumplir órdenes bajo presión extrema.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Kenji Odal": {
+    "estado_fisico": "Extremadamente debilitado por hipotermia tras diez horas en descenso de temperatura. Vivo cuando sale del compartimento.",
+    "estado_psicologico": "Ha experimentado el plan de supervivencia más extremo hasta ahora.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Marta Quiroga": {
+    "estado_fisico": "Extremadamente debilitada por hipotermia tras diez horas en descenso de temperatura. Viva cuando sale del compartimento.",
+    "estado_psicologico": "Bajo carga emocional extrema. Detectó la muerte de Idris y mantuvo el silencio durante cinco horas más sin revelarlo.",
+    "secretos_que_conoce": [
+      "Sabe que hay polvo fino oscuro bajo la rejilla del techo que reaparece después de barrerlo.",
+      "Conoce la gravedad de la herida de Bruno (llegó al hueso).",
+      "Oyó algo en el auricular después de que Idris cerrara el mamparo, algo que decidió no repetir a nadie.",
+      "Sabe exactamente cuándo murió Idris (a la sexta hora, cuando no respondió al rotar)."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "Serrat": {
+    "estado_fisico": "Viva, agotada tras abrir a mano las compuertas de proa a popa.",
+    "estado_psicologico": "Contenida y rota; firma el parte y se lo guarda sin entregarlo.",
+    "secretos_que_conoce": [
+      "Sabe que venteó el ramal de popa con Oyelaran dentro, por orden de él.",
+      "Venteó el ramal de popa con Oyelaran dentro, por orden del propio Oyelaran."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Dubois": {
+    "estado_fisico": "Muerto en la bodega, ante las cámaras; el cuerpo quedó al otro lado de las compuertas selladas.",
+    "estado_psicologico": "Sin cambio posible: cumplió el protocolo entero antes de morir.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Oyelaran": {
+    "estado_fisico": "Muerto, venteado al vacío en el ramal de popa.",
+    "estado_psicologico": "Sereno al dar él mismo la orden de ventear.",
+    "secretos_que_conoce": [
+      "Ha reptado por tramos de los tubos de servicio que nadie más de a bordo ha recorrido.",
+      "Ha tocado una soldadura en un mamparo de servicio que no recuerda haber visto antes.",
+      "Su cartografía a mano no coincide con el plano oficial: hay soldaduras y aperturas nuevas.",
+      "Las uniones nuevas del casco se cierran solas mientras se las corta."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Kováč": {
+    "estado_fisico": "Muerto en el puente durante el viraje que ejecutó tras soltar el convoy.",
+    "estado_psicologico": "Callado: dejó de contar los días y solo pilotó.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Miralles": {
+    "estado_fisico": "Viva, superviviente en el anillo central presurizado.",
+    "estado_psicologico": "Lúcida e inquieta: el descuadre del aire no la deja cerrar el caso.",
+    "secretos_que_conoce": [
+      "Las horas de aire no cuadran por un margen que solo se explica si algo quiso que llegaran.",
+      "Treinta y una horas de aire duraron cuarenta y ocho sin explicación posible."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "la presencia": {
+    "estado_fisico": "Venteada al vacío desde el ramal de popa.",
+    "estado_psicologico": "Reaccionó por primera vez al perder sus pasos propios y subió hacia el puente.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

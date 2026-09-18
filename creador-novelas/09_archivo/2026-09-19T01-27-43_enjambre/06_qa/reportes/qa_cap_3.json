@@ -1,0 +1,46 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "Capitulo 1: el narrador dice que las laminas de la rejilla del pasillo dos estaban 'dobladas por una fuerza que venia del lado de ellos', es decir empujadas desde el pasillo hacia dentro del conducto. Contradice el hecho vigente de que la rejilla estaba doblada hacia el interior como evidencia de una fuerza que provenia desde dentro de los conductos.",
+      "cap_origen": 1
+    },
+    {
+      "tipo": "contradiccion",
+      "descripcion": "Capitulo 3, cierre: el narrador establece que el relevo acababa de traer al planeta la colonia. Contradice lo establecido en el capitulo 2, donde las criaturas entran a la estacion desde debajo del hielo por la grieta de la placa que se esta cerrando, de modo que son previas a cualquier nave y no pudieron ser traidas al planeta.",
+      "cap_origen": 2
+    },
+    {
+      "tipo": "contradiccion",
+      "descripcion": "Capitulo 3, final: los tres supervivientes esperan tres dias en la estacion helada con la calefaccion al minimo. Contradice el hecho vigente de que con calefaccion minima el margen de supervivencia se redujo a dos horas en lugar de cuatro; el texto no aporta ninguna fuente de calor adicional, ya que la enfermeria se enciende como senuelo en el extremo opuesto.",
+      "cap_origen": 3
+    },
+    {
+      "tipo": "contradiccion",
+      "descripcion": "Capitulo 3: Marena mira la columna de cifras que llevaba cuarenta y seis dias escribiendo a mano. Contradice el hecho vigente de un turno de cuarenta y seis dias con seis dias de espera al empezar el capitulo 1 (cuarenta jornadas anotadas alli); sumados los tres dias del barrido del capitulo 2, la columna no puede pasar de unas cuarenta y tres o cuarenta y cuatro jornadas y el relevo aun no ha llegado.",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura correctiva 'No era X. Era Y.': 'No era el crujido del metal que se dilata' y 'No hacia el pasillo... hacia dentro' (cap. 1), 'Vertice-9 no era el sitio del que huian. Era el unico sitio al que se podia huir' (cap. 2), 'No era un plan; era un desalojo que alguien mas firmaba' (cap. 3). Cuatro apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil con 'como si' para glosar un gesto o una imagen: 'como si algo hubiera empujado desde dentro', 'como si la pierna fuera una puerta que hubiera que abrir', 'como si fuera a repetirlo', 'como si nada' (cap. 1) y 'Como se barre el agua' (cap. 2). Cinco apariciones acumuladas en los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Tic lexico de contar como medida del animo: 'llevaba la cuenta en voz alta' y 'Ciento cuarenta y cuatro horas' (cap. 1), 'dejo de contar en voz alta' y 'Los conte. Ahora no se pueden contar' (cap. 2), 'Toure no dijo ningun numero' y 'un aire contado' (cap. 3). Seis apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La cifra veintiuno como estribillo del termostato: 'veintiuno coma cero' y 'de veintiuno a veinticuatro' (cap. 1), 'A veintiuno crecen' y 'el termostato del pasillo: veintiuno, constante, obediente' (cap. 2). Cuatro apariciones acumuladas en los capitulos 1 y 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

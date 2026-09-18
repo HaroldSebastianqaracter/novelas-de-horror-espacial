@@ -1,0 +1,16 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion en serie para descartar hipotesis, 5 apariciones en el capitulo 1: 'No tenia el borde vidriado', 'No tenia el halo caliente', 'No seguia ningun patron dosimetrico', 'Ninguna brecha en el casco', 'Ninguna anomalia en el agua ni en el aire'. Capitulos: [1].",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion triadica asindetica o con ultimo miembro coordinado, 3 apariciones en el capitulo 1: 'tension, saturacion, la anemia de Elias Barros'; 'lo anoto, lo fotografio y lo midio'; 'casco, agua, aire y contenedores'. Capitulos: [1].",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

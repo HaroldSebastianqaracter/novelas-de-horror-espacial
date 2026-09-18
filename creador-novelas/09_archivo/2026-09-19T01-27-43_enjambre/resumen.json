@@ -1,0 +1,112 @@
+{
+  "version_specs": "v1.12",
+  "config": {
+    "novela.json": {
+      "total_capitulos": 3,
+      "palabras_por_capitulo": 400,
+      "idioma": "es-ES",
+      "persona_narrativa": "tercera_limitada",
+      "tiempo_verbal": "pasado",
+      "ventana_resumen_rodante": 2,
+      "cadencia_qa": 3,
+      "max_tokens_contexto_escritor": 12000,
+      "max_hechos_por_capitulo": 4
+    },
+    "ejecucion.json": {
+      "capitulos_por_tanda": 3,
+      "max_llamadas_por_tanda": 30,
+      "registrar_uso": true,
+      "exportar_trazas": true,
+      "escritor_emite_delta": false
+    }
+  },
+  "capitulos": {
+    "cerrados": 3,
+    "esperados": 3,
+    "estado": "en_progreso",
+    "palabras": [
+      479,
+      406,
+      411
+    ]
+  },
+  "reloj": {
+    "preludio_s": 252.0,
+    "por_fase_s": {
+      "generar-premisa": 24.0,
+      "generar-sinopsis": 104.0,
+      "generar-escaleta": 28.0,
+      "inicializar-estado": 96.0
+    },
+    "tandas": [
+      {
+        "tanda": "tanda_2026-09-19T01-08-56",
+        "inicio": "2026-09-19T01:08:56.886+02:00",
+        "fin": "2026-09-19T01:27:41.877+02:00",
+        "segundos": 1125.0
+      }
+    ],
+    "tandas_s": 1125.0,
+    "total_s": 1377.0
+  },
+  "agentes": {
+    "orquestador": {
+      "invocaciones": 4,
+      "segundos": 1074.3,
+      "tokens_salida": 11460,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "extractor": {
+      "invocaciones": 4,
+      "segundos": 697.1,
+      "tokens_salida": 25127,
+      "modelos": [
+        "claude-haiku-4-5-20251001"
+      ]
+    },
+    "escritor": {
+      "invocaciones": 4,
+      "segundos": 528.2,
+      "tokens_salida": 7997,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "qa": {
+      "invocaciones": 1,
+      "segundos": 193.5,
+      "tokens_salida": 10750,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    }
+  },
+  "calidad": {
+    "contradicciones": 4,
+    "cortes_qa": 1,
+    "reintentos_de_escritor": 0,
+    "borradores_descartados": 0,
+    "tandas_abortadas": 0,
+    "motivos_de_aborto": [],
+    "pausado_al_archivar": false
+  },
+  "coste": {
+    "moneda": "USD",
+    "total": 5.6308,
+    "tokens": 5125410,
+    "por_rol": {
+      "preludio": 1.9465,
+      "orquestador": 1.807,
+      "escritor": 1.0581,
+      "qa": 0.5521,
+      "extractor": 0.2671
+    },
+    "modelos_sin_precio": [],
+    "carpetas_con_uso": 2
+  },
+  "nombre": "2026-09-19T01-27-43_enjambre",
+  "titulo": "Lo que huye del frío",
+  "archivado": "2026-09-19T01:27:43+02:00"
+}

@@ -1,0 +1,64 @@
+{
+  "Irina Valdés": {
+    "estado_fisico": "Sin cambios aparentes.",
+    "estado_psicologico": "Pasó de tener control mediante un plazo de cuarentena a ser sobrepasada cuando Marek abre la escotilla deliberadamente. Midió interiormente el tiempo entre higiene y condena aplazada.",
+    "secretos_que_conoce": [
+      "Otto y Yeva tienen marcas idénticas de origen desconocido.",
+      "El reciclador de aire es único y toda la tripulación respira el mismo aire.",
+      "Comprende que ambos turnos están afectados por algo relacionado con el reciclador.",
+      "Firmó el plazo de dieciocho horas para sellar el compartimento",
+      "Sela rechazó firmar argumentando que sellar es elegir un orden de muertes",
+      "Sabe que Marek sabía cómo cerrar y abrir la escotilla",
+      "Sabe que la infección se ha propagado fuera de la litera"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Sela Nourani": {
+    "estado_fisico": "Infectada: tiene un crecimiento claro sin borde definido bajo la piel del antebrazo izquierdo, templado al tacto, que no existía hace cuatro horas.",
+    "estado_psicologico": "Se negó a firmar la orden de cuarentena. Reveló deliberadamente su infección como acto de ruptura.",
+    "secretos_que_conoce": [
+      "Las marcas en Otto y Yeva son idénticas, pálidas, tibias, móviles bajo presión y sin precedente conocido.",
+      "La marca de Otto cambió de forma y posición en ocho horas.",
+      "Observó tejido que se autocicatriza sin punto ni sutura en la espalda de Yeva.",
+      "Descubrió síntomas de contagio en sí misma",
+      "Ha documentado fotográficamente el progreso de la infección",
+      "Sabe que está infectada desde hace al menos cuatro horas"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Otto Brenner": {
+    "estado_fisico": "Catatónico, sin responder a estímulos externos.",
+    "estado_psicologico": "Catatónico, mira la pared con paciencia que no es suya. No responde cuando lo llaman por su nombre.",
+    "secretos_que_conoce": [
+      "La marca no se la causó a sí mismo.",
+      "Sabe que tiene la misma condición que Yeva en su antebrazo."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Yeva Costas": {
+    "estado_fisico": "Lo suficientemente recuperada para sostenerse de pie y comunicarse desde el otro lado de la escotilla",
+    "estado_psicologico": "Tranquila, educada; deja de pedir inmediatamente cuando se abre la escotilla, sugiriendo que logró su objetivo",
+    "secretos_que_conoce": [
+      "Sabe que el tejido de su lesión no es pus ni necrosis ni enfermedad conocida.",
+      "Sabe que dieciocho horas no eran necesarias"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Marek Duhalde": {
+    "estado_fisico": "Uñas manchadas de grasa del trabajo en sistemas.",
+    "estado_psicologico": "Actuó deliberadamente para sabotear la cuarentena. Pasó de ofrecer cerrar a liberar la escotilla de par en par.",
+    "secretos_que_conoce": [
+      "El reciclador de aire es uno solo y toda la tripulación lo comparte independientemente del aislamiento.",
+      "Detectó una desviación térmica constante de medio grado en el filtrado, en la misma etapa, que persiste desde hace al menos tres semanas.",
+      "Abrió el sello desde el cuadro de sistemas sin esperar autorización",
+      "Algo en la respiración o reacción de Otto dentro lo motivó a actuar",
+      "Sabe exactamente cómo manipular la derivación de aire y el pestillo de la escotilla"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

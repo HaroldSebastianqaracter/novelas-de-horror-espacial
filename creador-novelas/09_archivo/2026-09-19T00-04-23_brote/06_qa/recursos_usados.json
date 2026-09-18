@@ -1,0 +1,74 @@
+[
+  {
+    "recurso": "estructura de negacion en serie para descartar hipotesis ('No tenia X. No tenia Y.' / 'Ninguna brecha. Ninguna anomalia.' / 'regulan caudal, no lo cortan')",
+    "veces": 7,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "enumeracion triadica asindetica o con ultimo miembro coordinado",
+    "veces": 7,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "frase breve y seca cerrando parrafo como golpe ('Lo exacto era peor.', 'No lo era.', 'Nadie hablo.')",
+    "veces": 6,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "verbo 'firmar' o acto de asentar por escrito como cierre de escena",
+    "veces": 6,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "lesion cutanea descrita por comparacion de tamano con objeto cotidiano ('del tamano de una moneda', 'del tamano de una lenteja')",
+    "veces": 2,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "metafora de relojes o cronometros para el avance de la afeccion",
+    "veces": 1,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "gesto unico y economico de Almeida como marca de caracter",
+    "veces": 2,
+    "caps": [
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "repeticion literal de una frase con entonacion identica como senal de despersonalizacion",
+    "veces": 1,
+    "caps": [
+      3
+    ]
+  },
+  {
+    "recurso": "cierre con imagen de continuidad indiferente tras la desaparicion de la tripulacion (el bucle que sigue hablando, el vacio que no deja bajarse a nadie)",
+    "veces": 1,
+    "caps": [
+      3
+    ]
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Acto de firmar, fechar o asentar por escrito usado como cierre de escena: 6 apariciones acumuladas (caps. 1, 2, 3); en el capitulo 3 la peticion firmada de Corvo, el archivado fechado de Almeida y el cierre 'Termino la frase. Firmo.'",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Frase breve y seca como golpe al abrir o cerrar parrafo: 6 apariciones acumuladas (caps. 1, 2, 3); en el capitulo 3 'La maniobra salio.' y 'Termino la frase. Firmo.'",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion triadica asindetica: 7 apariciones acumuladas (caps. 1, 2, 3); en el capitulo 3 'Escribio la hora, el ciclo, los nombres.' y 'despacio, sin prisa, como si dispusiera de todo el trayecto por delante'",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

@@ -1,0 +1,29 @@
+{
+  "reglas": [
+    "La Vesania es un carguero de mineral con cinco tripulantes y un único circuito de aire compartido por toda la nave.",
+    "El reciclador de atmósfera regula la mezcla de gases de forma continua y deja registro de cada ajuste.",
+    "El tramo muerto de la ruta carece de baliza y de tráfico; el puerto de destino queda a seis semanas de viaje.",
+    "Los mamparos permiten sellar compartimentos y separar su circuito de aire del resto de la nave.",
+    "La autoridad sanitaria a bordo recae en una sola persona: la médica declara aislamientos y firma los partes.",
+    "Las reservas de emergencia bastan para reponer la atmósfera de la nave entera una sola vez tras un venteo."
+  ],
+  "objetos": [
+    "Diario médico de a bordo, donde se anotan las mediciones de cada guardia.",
+    "Registros de ajuste del reciclador, consultables desde la sala de máquinas.",
+    "Intercomunicador interno que conecta la enfermería con el resto de la nave.",
+    "Manifiesto de carga de la bodega de mineral.",
+    "Reservas de atmósfera de emergencia para el venteo total."
+  ],
+  "linea_de_tiempo": [
+    "Último permiso en puerto: Ivo y Siem bajan juntos y regresan juntos.",
+    "Salida de puerto con la bodega cargada de mineral, rumbo al puerto de destino a seis semanas.",
+    "Días antes de la primera marca: el reciclador empieza a ajustar la mezcla de gases sin que nadie lo haya programado.",
+    "Día once de viaje, en el tramo muerto de la ruta: Ivo se descubre la marca en el antebrazo."
+  ],
+  "locaciones": {
+    "Enfermería de la Vesania": "Compartimento estanco con camastros, lámpara de exploración, el diario médico y un mamparo sellable que permite aislar su circuito de aire; el intercomunicador es la única voz que entra y sale cuando está cerrada.",
+    "Sala de máquinas de la Vesania": "Corazón mecánico de la nave: el reciclador de atmósfera, sus consolas de registro y los mandos del venteo, en un espacio angosto de tuberías calientes que puede cerrarse desde dentro.",
+    "Puente de la Vesania": "Puesto de mando desde el que Harel lleva la contabilidad del viaje y la derrota hacia el puerto de destino.",
+    "Bodega de mineral": "Espacio de carga donde Ivo y Siem hacen sus guardias entre contenedores de mineral asegurados."
+  }
+}

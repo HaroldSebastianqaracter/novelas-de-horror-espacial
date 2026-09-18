@@ -1,0 +1,234 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Vértice-9 es el único punto tibio conocido de la llanura: dentro se mantienen veintiún grados constantes gracias a la red de conductos térmicos, y afuera el hielo está muy por debajo del punto de congelación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El registro térmico de la estación calcula cuatro horas desde el apagado total de la calefacción hasta que el interior cruza el punto letal para alguien sin traje.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La dotación es de cinco operarios en un turno de cuarenta y seis días, y el calendario del relevo marca seis días de espera al empezar el capítulo 1.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El inventario de la estación registra dos trajes de exterior para los cinco operarios.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La calefacción se puede gobernar por sectores desde el control de turno, y el sistema apaga por seguridad cualquier tramo que se sobrecaliente.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Estación Vértice-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La red de calefacción corre por el hueco entre mamparos y desemboca en rejillas que dan a pasillos y camarotes; las literas del módulo de sueño quedan justo debajo de un conducto.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Estación Vértice-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La esclusa del pasillo dos es la salida a superficie por la que Bregman sale cada mañana a picar hielo de las antenas.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Estación Vértice-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El módulo de baterías está sellado y figura en los planos como el único recinto que retiene calor sin consumirlo, con aire para tres personas.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Marena",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Marena es jefa de turno por antigüedad y lleva a mano el registro térmico de la estación, donde anota cada lectura por sector.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Oquendo",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Oquendo es el técnico de conductos y el único de la dotación que conoce de memoria el trazado de la red de calefacción.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sila",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Sila es la médica de estación y en cuarenta días de turno solo ha tenido que atender molestias menores de sus cuatro compañeros.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Bregman",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Bregman es el operario de superficie y sale cada mañana a despejar el hielo de las antenas, de modo que es quien mejor conoce el exterior inmediato de la estación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Toure",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Toure es el más joven de la dotación, duerme en la litera que queda bajo el conducto térmico y lleva la cuenta en voz alta de los días que faltan para el relevo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Una criatura desconocida, pálida, pequeña (tamaño de una mano abierta), sin ojos y articulada en demasiados lugares, emerge de los conductos de la estación.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sila",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Sila fue mordida en el tobillo por la criatura que emergió del conducto.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Estación Vértice-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Un tramo del conducto que corre sobre el módulo de sueño fue cerrado por orden de Marena después del ataque.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Estación Vértice-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La rejilla del conducto en el pasillo dos estaba doblada hacia el interior, evidencia de una fuerza que provenía desde dentro de los conductos.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Estación Vértice-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La grieta en la placa de hielo bajo la Estación Vértice-9 se está cerrando lentamente, reduciendo vapor cada día.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las criaturas encontradas en la estación son hembras que se reproducen; el crecimiento de las crías depende de la temperatura ambiental, específicamente de veintiuno grados.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Existe una acumulación masiva de criaturas vivas bajo el mamparo del núcleo de entre dos palmos de espesor que respira en ritmo de marea y continúa creciendo.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El plan de barrido de Marena para desalojar a las criaturas no las expulsa sino que las apila en sectores adyacentes, agravando la acumulación.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Bregman",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Bregman se quedó aislado del lado malo de la compuerta exterior y la selló para que la nave no siguiera enfriándose.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Estación Vértice-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El conducto maestro de la estación quedó obstruido; Oquendo tuvo que abrirlo a mano para recuperar el control manual.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El núcleo perdió masa; el tiempo de supervivencia con calefacción mínima se redujo a dos horas en lugar de cuatro.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Una colonia desconocida prosperó en la enfermería de la estación y fue traída al planeta por la nave de relevo.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Oquendo",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Oquendo desatascó el maestro desde el panel de inspección y la válvula se liberó automáticamente.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Una masa anómala se mueve desde el núcleo hacia la enfermería siguiendo el calor.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Bregman",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Bregman selló la compuerta desde el lado malo del segundo pasillo.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La tripulación tiene 2 horas antes de agotar los recursos térmicos porque los cuerpos en los conductos ya no aislan.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

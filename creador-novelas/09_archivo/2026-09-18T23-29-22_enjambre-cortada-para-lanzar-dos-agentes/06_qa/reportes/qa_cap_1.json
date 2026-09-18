@@ -1,0 +1,21 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "El calor como señuelo que la criatura persigue, tres veces en el cap 1: 'siempre hacia el calor', la criatura que va 'derecha al guante termico... lo mas tibio del pasillo' y 'venia a por el calor'. Acumuladas: 3 (caps: 1).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion y correccion inmediata 'No es X. Es Y.', cuatro veces en el cap 1: 'La dilatacion no se mueve. Esto se mueve', 'No es estatica. Tiene ritmo', 'no era torpeza sino metodo' y 'No venia a por ti... Venia a por el calor'. Acumuladas: 4 (caps: 1).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Gesto seguido de glosa explicativa en clausula subordinada, tres veces en el cap 1: 'como si contarlos los acortara', 'que era su manera de cerrar una conversacion sin discutirla' y 'lo hizo despacio porque despacio se pensaba mejor'. Acumuladas: 3 (caps: 1).",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

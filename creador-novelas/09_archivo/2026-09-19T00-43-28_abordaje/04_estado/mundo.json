@@ -1,0 +1,28 @@
+{
+  "reglas": [
+    "El Amanecer Tardío es un remolcador de carga con cinco tripulantes en una ruta de once días hasta puerto; la historia empieza en el cuarto día.",
+    "El casco se divide en secciones aislables con mamparos; al bajarlos, el soporte vital reparte peor el aire y la energía de lo que anuncia el sistema.",
+    "El soporte vital mide el consumo total de aire y permite deducir cuántos cuerpos respiran a bordo.",
+    "El protocolo de la compañía prohíbe ciclar la esclusa de carga en tránsito; cada ciclo queda anotado en el registro con la clave usada y la consola desde la que se introdujo.",
+    "Las comunicaciones disponen de tres bandas de emergencia; a esta distancia de puerto ningún interlocutor externo está a alcance de respuesta útil.",
+    "Fuera del casco solo hay vacío: nadie abandona la nave y sobrevive hasta atracar."
+  ],
+  "objetos": [
+    "Registro de la esclusa de carga: anota cada ciclo de presión con hora, clave y consola de origen.",
+    "Código de servicio de la esclusa de carga, que abre la compuerta exterior desde una consola de a bordo.",
+    "Plano de cubiertas y mapa de conductos de servicio que maneja Kerr.",
+    "Consola de máquinas desde la que se gobiernan mamparos, presión y reparto de energía.",
+    "Intercomunicador interno entre cubiertas.",
+    "Bodega cargada y cerrada, cuyo registro no anota ninguna apertura desde la salida."
+  ],
+  "linea_de_tiempo": [
+    "Día 0: el Amanecer Tardío zarpa con cinco tripulantes y la bodega cerrada, rumbo a puerto en una ruta de once días.",
+    "Días 1 a 3: travesía rutinaria; turnos repartidos entre mando, máquinas, mantenimiento, comunicaciones y guardia de carga.",
+    "Día 4: la esclusa de carga registra un ciclo de presión que nadie ha ordenado."
+  ],
+  "locaciones": {
+    "Pasillo de carga del Amanecer Tardío": "Corredor que une la esclusa de carga con el resto de la nave: mamparo de sección en un extremo, compuerta interior de la esclusa en el otro y bocas de conducto de servicio a la altura del techo. Suelo metálico, luz de trabajo fría y el eco largo de un espacio con poco que amortigüe el sonido.",
+    "Cubierta de máquinas del Amanecer Tardío": "Nivel bajo de la nave, caliente y ruidoso, con la consola desde la que se gobiernan mamparos, presión y reparto de energía. Aquí se leen los consumos reales del soporte vital y aquí baja Sadhu sus turnos.",
+    "Puente del Amanecer Tardío": "Compartimento de mando en la proa, el único que la tripulación no puede permitirse perder: puestos de mando y de comunicaciones, acceso a las tres bandas de emergencia y una compuerta estanca como última línea."
+  }
+}

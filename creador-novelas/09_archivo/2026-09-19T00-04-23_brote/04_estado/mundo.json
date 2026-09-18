@@ -1,0 +1,33 @@
+{
+  "reglas": [
+    "El carguero Vela Austral cubre una travesía de dieciocho meses entre la estación de origen y la estación de destino, y lleva ocho cumplidos al abrirse la novela.",
+    "La tripulación completa es de cinco personas y la nave está dimensionada para que dos operadores conscientes basten para cualquier maniobra mayor.",
+    "El soporte vital recicla un único volumen de aire para toda la nave; los esquemas de a bordo lo describen como un ciclo común con derivaciones, no como circuitos independientes.",
+    "La vida a bordo se organiza en ciclos numerados; el ciclo doscientos cuarenta y uno incluye la ronda sanitaria periódica que firma la médica.",
+    "Las comunicaciones con las estaciones viajan en diferido: los mensajes se graban, se transmiten y se contestan con horas o días de retraso.",
+    "Toda incidencia médica, técnica o de mando queda asentada por escrito y firmada; el diario clínico y el registro de incidencias son la memoria oficial de la nave.",
+    "El registro de rescate consultable a bordo no lista ninguna nave a distancia de intercepción en los próximos cinco meses.",
+    "La estación de destino aloja a doce mil personas y la aproximación de la Vela Austral está programada para completarse aunque nadie la gobierne."
+  ],
+  "objetos": [
+    "Diario clínico de a bordo, donde Sabat asienta cada exploración con fecha y ciclo.",
+    "Equipo de imagen dérmica y de cultivos del módulo de enfermería.",
+    "Intercomunicador interno, que permite hablar entre compartimentos sellados.",
+    "Registros térmicos y de consumo del soporte vital, archivados ciclo a ciclo.",
+    "Esquemas de a bordo del ciclo de aire y de los filtros comunes.",
+    "Parches dérmicos del botiquín estándar.",
+    "Escotilla estanca del módulo de enfermería, con cierre y purga al vacío.",
+    "Escotilla estanca de la sala de máquinas, con bloqueo operable desde dentro.",
+    "Transmisor de avisos de cuarentena con función de emisión en bucle."
+  ],
+  "linea_de_tiempo": [
+    "Ciclo 1: la Vela Austral parte de la estación de origen con cinco tripulantes y carga sellada.",
+    "Ciclos 1 a 240: ocho meses de travesía sin incidencias reseñables; guardias, revisiones de reciclado y turnos de vídeo en diferido.",
+    "Ciclo 241: ronda sanitaria periódica a cargo de la médica de a bordo."
+  ],
+  "locaciones": {
+    "Módulo de enfermería": "Compartimento estanco de la cubierta media, con dos literas de exploración, el equipo de imagen y cultivos, el armario de fármacos y el terminal del diario clínico. Su escotilla puede sellarse y purgarse al vacío desde el exterior; hay un intercomunicador junto a la puerta y una mirilla estrecha. Luz blanca fija, olor a desinfectante y el zumbido permanente del extractor.",
+    "Sala de máquinas": "Corazón técnico de la nave, dos niveles de pasarela metálica alrededor de los reactores de ciclo y de la batería de filtros del soporte vital. Consolas de registro térmico, mamparas calientes al tacto, ruido constante que obliga a levantar la voz. Su escotilla estanca puede bloquearse desde dentro.",
+    "Puente de mando": "Cabina estrecha en proa con cuatro puestos y un ventanal largo, consolas de navegación y el transmisor de avisos. Desde aquí se firma cada incidencia y se ordena la aproximación al destino; la iluminación es ámbar en guardia de noche."
+  }
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "Grava en los conductos",
+    "objetivo_narrativo": "Presentar a los cinco operarios en el turno rutinario de Kerlan-9 y romper la rutina con el primer ataque: el ruido en los conductos del módulo C, la mordedura en el guante de Renke y la cabeza que sigue apretando después de cortada.",
+    "personajes": [
+      "Ivet Karam",
+      "Domas Feller",
+      "Renke",
+      "Sol Abadie",
+      "Tobi Wren"
+    ],
+    "locacion": "Kerlan-9 - módulo C",
+    "informacion_nueva": "Las criaturas no atacan a las personas: atacan al calor. Vienen del exterior huyendo del frío y siguen los gradientes térmicos. Domas hace la cuenta: cortar la calefacción las expulsa, pero congela la estación en cuatro horas, y el relevo tarda seis días.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "Negociar con el termostato",
+    "objetivo_narrativo": "Sostener dos días la estrategia de sellar y ceder —módulo C abandonado, pasillos al mínimo, calor concentrado en el núcleo— hasta que Tobi, de guardia, descubre el ovillo y Domas entiende sobre qué está apoyado.",
+    "personajes": [
+      "Ivet Karam",
+      "Domas Feller",
+      "Renke",
+      "Sol Abadie",
+      "Tobi Wren"
+    ],
+    "locacion": "Kerlan-9 - núcleo habitable",
+    "informacion_nueva": "Las criaturas no solo siguen el calor: lo fabrican apilándose en ovillo, y ese ovillo sobrevive en el módulo C a temperatura exterior, justo encima del colector principal. Sellar no las expulsaba, las concentraba.",
+    "tension": 4
+  },
+  {
+    "num": 3,
+    "titulo": "El punto más caliente",
+    "objetivo_narrativo": "Ejecutar la purga —hangar como señuelo térmico, módulo C abierto a mano— al precio de Renke y Domas, y cerrar con el relevo encontrando a tres supervivientes y una estación que volvió a calentarse sola.",
+    "personajes": [
+      "Ivet Karam",
+      "Domas Feller",
+      "Renke",
+      "Sol Abadie",
+      "Tobi Wren"
+    ],
+    "locacion": "Kerlan-9 - hangar",
+    "informacion_nueva": "La purga vacía el módulo C pero no el resto de la estación: quien sostiene el señuelo se convierte en el blanco. Al sexto día, los conductos vacíos vuelven a sonar a grava: algo aprendió a esperar a que alguien encienda el calor.",
+    "tension": 5
+  }
+]

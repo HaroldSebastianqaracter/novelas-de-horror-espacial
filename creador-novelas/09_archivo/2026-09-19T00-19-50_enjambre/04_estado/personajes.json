@@ -1,0 +1,37 @@
+{
+  "Ivet Karam": {
+    "estado_fisico": "Hipotérmica tras setenta y una horas a seis grados; manos agarrotadas.",
+    "estado_psicologico": "Asumió haber dejado morir a Domas para sostener la purga; volvió al registro solo al final.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Domas Feller": {
+    "estado_fisico": "Muerto en el hangar durante la purga.",
+    "estado_psicologico": "Comprendió al final que su propio cuerpo era el señuelo y pidió que no abrieran.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Renke": {
+    "estado_fisico": "Muerto en el módulo C al abrir el sello a mano.",
+    "estado_psicologico": "Se ofreció sin discutirlo y no respondió a las llamadas tras abrir.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Sol Abadie": {
+    "estado_fisico": "Hipotérmica.",
+    "estado_psicologico": "Es quien entiende y enuncia que las criaturas esperan a que alguien encienda el calor.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Tobi Wren": {
+    "estado_fisico": "Hipotérmico.",
+    "estado_psicologico": "Dejó definitivamente de contar los días.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

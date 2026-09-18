@@ -1,0 +1,70 @@
+{
+  "Vinter": {
+    "estado_fisico": "Íntegro.",
+    "estado_psicologico": "Comprende que no acorralaron nada sino escoltaron a un pasajero buscando su puerta.",
+    "secretos_que_conoce": [
+      "Existe una amenaza desconocida en la esclusa de carga que los sensores no registran.",
+      "Sabe que Bakó abrió la compuerta desde la consola de carga",
+      "Sabe que la presencia consume aire como un cuerpo entero",
+      "Sabe que cada mamparo que sella cede territorio a la presencia",
+      "Alguien en máquinas tecleó manualmente la esclusa sin autorización",
+      "La presencia se comunica mediante código de servicio."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Sadhu": {
+    "estado_fisico": "Sellado dentro de la cubierta de máquinas.",
+    "estado_psicologico": "Descubre anomalía en el ciclado, pero queda incomunicado tras ser sellado.",
+    "secretos_que_conoce": [
+      "El consumo de aire a bordo no ha variado, lo que descarta un escape; la amenaza entró desde fuera.",
+      "Sabe que el consumo de aire equivale al de cinco cuerpos",
+      "El terminal de la esclusa fue tecleado desde máquinas, a dos metros del suyo",
+      "El terminal del ciclado fue tecleado desde la cubierta de máquinas, a dos metros de su puesto."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Kerr": {
+    "estado_fisico": "Íntegro.",
+    "estado_psicologico": "En tensión, espera al otro lado del acero con anticipación de peligro que no llega.",
+    "secretos_que_conoce": [
+      "Los conductos de servicio van de la bodega al puente y comunican todas las cubiertas.",
+      "La presencia entiende los protocolos de acceso y busca permiso para partir",
+      "La presencia utiliza el código de servicio de la compuerta para comunicarse."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Ilesanmi": {
+    "estado_fisico": "Íntegro.",
+    "estado_psicologico": "Mandíbula rígida; toma la decisión dura de sellar máquinas reconociendo que Sadhu está dentro.",
+    "secretos_que_conoce": [
+      "Alguien abrió la esclusa de carga 11 minutos antes del turno sin registro de autorización. Las bandas de emergencia de radio están silenciosas (no hay interferencia, hay ausencia completa).",
+      "Sabe que el registro del ciclo de presión lleva la clave de Bakó",
+      "Sabe que se tecleó desde la consola de carga, no desde la compuerta exterior",
+      "La presencia emitió la clave exacta de la esclusa de carga devolviéndola en la misma frecuencia",
+      "La presencia pidió permiso mediante código de servicio idéntico al de hace cuatro días."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Bakó": {
+    "estado_fisico": "Inconsciente en litera de enfermería.",
+    "estado_psicologico": "Desconocido.",
+    "secretos_que_conoce": [
+      "Su clave de acceso fue utilizada para teclear el ciclado de máquinas."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "la presencia": {
+    "estado_fisico": "Expulsada de la nave al vacío.",
+    "estado_psicologico": "Comunica intención mediante protocolo; es ordenada y metódica.",
+    "secretos_que_conoce": [
+      "Conoce y domina el código de servicio de la compuerta de carga."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Verbo de decir o saber en negativo para retener informacion ante el lector; 4 apariciones acumuladas en los capitulos 1 y 2, en el cap. 2 con 'no encontro que contestar que no empeorara la noche'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "'La nada' del otro lado como respuesta; 3 apariciones acumuladas en los capitulos 1 y 2, en el cap. 2 con la puerta 14 que 'nada volvio a intentarla'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personaje que repite una tarea innecesaria para calmarse; 4 apariciones acumuladas en los capitulos 1 y 2, en el cap. 2 el trapo que ya no limpiaba nada y la ronda por los mismos tres pasillos en el mismo orden.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

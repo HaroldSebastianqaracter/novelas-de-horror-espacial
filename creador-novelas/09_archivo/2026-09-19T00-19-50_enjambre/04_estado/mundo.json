@@ -1,0 +1,30 @@
+{
+  "reglas": [
+    "Kerlan-9 es una estación de mantenimiento en la superficie de un mundo sin nombre, con dotación de cinco operarios y relevos programados con semanas de separación.",
+    "La noche del planeta dura semanas; durante ella la superficie exterior se mide por debajo de los ciento ochenta grados bajo cero.",
+    "La planta de calor de la estación se alimenta de un colector principal situado bajo el módulo C; el calor se reparte desde ahí al resto de los módulos por conductos térmicos.",
+    "Los partes de la estación registran que, sin aporte de calefacción, la temperatura interior de Kerlan-9 alcanza la exterior en unas cuatro horas.",
+    "Las criaturas que entran del exterior orientan su desplazamiento por gradientes térmicos: se mueven hacia el foco de calor más intenso que detectan, sea un radiador, un motor o un cuerpo humano.",
+    "El cuerpo de estas criaturas conserva actividad muscular después de ser seccionado: una mandíbula cortada sigue apretando.",
+    "El trabajo de turno es de mantenimiento rutinario: purgar filtros, calibrar sensores y firmar partes al cierre de cada jornada.",
+    "Toda incidencia se anota en el registro de turno, que firma la jefa de turno."
+  ],
+  "objetos": [
+    "Registro de turno: el cuaderno de incidencias y partes firmados que lleva Ivet Karam.",
+    "Alicate de mantenimiento: herramienta del kit de conductos, el único filo disponible a mano en una inspección.",
+    "Trajes y guantes térmicos de exterior, reglamentarios para cualquier trabajo fuera del núcleo habitable.",
+    "Rejillas de inspección de los conductos térmicos, abribles desde dentro de los módulos.",
+    "Termostato central: el mando desde el que se reparte el calor módulo a módulo.",
+    "Intercomunicador interno que enlaza los módulos con el núcleo habitable."
+  ],
+  "linea_de_tiempo": [
+    "Día 0: comienza la noche cerrada sobre Kerlan-9.",
+    "Día 11: la dotación cumple un turno de mantenimiento rutinario; faltan seis días para el relevo.",
+    "El relevo tiene fecha prevista de aterrizaje al sexto día contado desde el día 11."
+  ],
+  "locaciones": {
+    "Kerlan-9 - módulo C": "Módulo de servicio de la estación, el más alejado del núcleo habitable. Bajo su suelo pasa el colector principal de la planta de calor, y por sus paredes corren los conductos térmicos de mayor sección, con rejillas de inspección repartidas a lo largo del pasillo. Es frío, ruidoso y poco transitado salvo en rondas de mantenimiento.",
+    "Kerlan-9 - núcleo habitable": "Los dos compartimentos donde vive la dotación: literas, sala común, enfermería y puesto de comunicaciones, más el termostato central desde el que se reparte el calor. Es la zona más caliente de la estación y la única pensada para permanecer en ella sin traje.",
+    "Kerlan-9 - hangar": "Nave amplia de techo alto en el extremo opuesto al módulo C, con la esclusa grande de superficie, los vehículos de exterior y sus motores. Mal aislado y lleno de maquinaria capaz de disipar mucho calor si se la hace trabajar a la vez."
+  }
+}

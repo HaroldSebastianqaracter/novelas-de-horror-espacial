@@ -1,0 +1,48 @@
+[
+  {
+    "num": 1,
+    "titulo": "Once días de vacío",
+    "objetivo_narrativo": "Presentar a los cinco tripulantes del remolcador en un tramo muerto de la ruta y romper la rutina cuando la esclusa de carga se abre desde fuera y algo entra en la bodega; Dubois agota el protocolo de contacto y muere delante de las cámaras que los otros cuatro miran desde el puente. Serrat ordena sellar por secciones y empujar a la cosa hacia popa.",
+    "personajes": [
+      "Serrat",
+      "Dubois",
+      "Oyelaran",
+      "Kováč",
+      "Miralles",
+      "la presencia"
+    ],
+    "locacion": "Remolcador Sagita",
+    "informacion_nueva": "La nave está a once días de puerto y a cinco de que cualquier señal llegue a oídos humanos; la presencia no responde a radio, luz ni golpeo de mamparo, y mata sin prisa aparente. La única estrategia posible es cerrar compuertas hacia popa, aunque cada sección sellada reduce el aire respirable de los cuatro.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "Cinco días de compuertas",
+    "objetivo_narrativo": "Estrechar la caza hasta tres secciones habitables y turnos de sueño desiguales, con la cosa siempre un mamparo por detrás de donde la esperan; Oyelaran compara su cartografía a mano con el plano oficial y Kováč nombra en voz alta el giro: la presencia se ha dejado empujar y ha reordenado la nave en torno al puente. Serrat cambia el objetivo y deciden desmontar la nave en lugar de cazar.",
+    "personajes": [
+      "Serrat",
+      "Oyelaran",
+      "Kováč",
+      "Miralles",
+      "la presencia"
+    ],
+    "locacion": "Remolcador Sagita",
+    "informacion_nueva": "Los conductos no coinciden con el plano: hay tramos soldados, aperturas donde debería haber metal macizo y uniones nuevas que ninguna mano de a bordo hizo. Los ruidos en secciones selladas son la presencia abriendo y cerrando sus propios pasos. La respirabilidad se agota dos días antes de llegar a puerto.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "Lo que llegó a puerto",
+    "objetivo_narrativo": "Con treinta y una horas de aire y cuarenta y ocho hasta puerto, repartir los últimos papeles: Kováč sostiene el puente y desacopla el convoy en un viraje que le cuesta la vida, Oyelaran corta desde dentro las uniones nuevas y queda del lado equivocado de la esclusa, Miralles concentra el aire y Serrat abre a mano todas las compuertas que ordenó cerrar, hasta ventear a la presencia por orden del propio Oyelaran. Cerrar con la llegada a puerto de dos supervivientes y un informe que no se sostiene.",
+    "personajes": [
+      "Serrat",
+      "Oyelaran",
+      "Kováč",
+      "Miralles",
+      "la presencia"
+    ],
+    "locacion": "Remolcador Sagita",
+    "informacion_nueva": "Quitarle la nave a la cosa funciona: al perder sus pasos propios reacciona por primera vez y sube al puente. En la revisión de casco aparece la esclusa de carga soldada desde fuera y uniones nuevas que nadie de a bordo hizo; las horas de aire no cuadran por un margen que solo se explica si algo quiso que llegaran.",
+    "tension": 5
+  }
+]

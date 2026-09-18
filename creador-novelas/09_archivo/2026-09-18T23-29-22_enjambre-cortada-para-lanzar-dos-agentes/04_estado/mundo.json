@@ -1,0 +1,29 @@
+{
+  "reglas": [
+    "Kalpa-b no tiene atmósfera respirable: el exterior mata a un cuerpo sin traje en menos de tres minutos.",
+    "La noche de Kalpa-b dura cinco semanas y durante ella la superficie se enfría muy por debajo de lo que soporta cualquier equipo sin calefacción activa.",
+    "Vereda 9 se mantiene habitable con un circuito de conductos térmicos que reparte calor desde la sala de máquinas a cada módulo.",
+    "Los registros térmicos de la estación marcan que, sin calefacción, la temperatura interior baja del límite de supervivencia de los trajes en unas cuatro horas.",
+    "Los trajes presurizados tienen autonomía térmica limitada y su nivel de potencia se puede bajar a cambio de horas, con riesgo para el cuerpo.",
+    "El calendario de operaciones fija el relevo de tripulación cada doce meses; el actual llega el día seis contado desde el inicio de la crisis.",
+    "El canal de larga distancia es el único enlace con el exterior y su señal se emite atravesando la corteza del planeta.",
+    "La fauna registrada hasta ahora en la zona sigue el gradiente térmico: se desplaza siempre hacia el punto más caliente disponible."
+  ],
+  "objetos": [
+    "Guantes y trajes térmicos de superficie, con sensores de temperatura y aviso de autonomía.",
+    "Mamparos estancos con cierre manual entre módulos, pensados para aislar una descompresión.",
+    "Rejillas y conductos térmicos secundarios que recorren todas las paredes de la estación.",
+    "Intercomunicador interno que enlaza los módulos con el puesto de comunicaciones.",
+    "Equipo de larga distancia del puesto de Kenji, con registro continuo de interferencia.",
+    "Consola térmica desde la que Vera lee y reparte el calor por zonas."
+  ],
+  "linea_de_tiempo": [
+    "Hace once meses: la tripulación de cinco toma posesión de Vereda 9 y arranca la rutina de turnos.",
+    "Hace dos semanas: el canal de larga distancia empieza a emitir contra una interferencia constante y Kenji la informa sin que nadie más la oiga.",
+    "Días previos al capítulo 1: se oye un raspado intermitente detrás de las paredes del módulo de descanso y se atribuye a la dilatación del metal.",
+    "Día seis desde el inicio de la crisis: está previsto que llegue la nave de relevo."
+  ],
+  "locaciones": {
+    "Estación Vereda 9": "Puesto de superficie aferrado a la corteza de Kalpa-b, con módulo de descanso, sala de máquinas, puesto de comunicaciones, enfermería-cocina, ala este y compartimento de repuestos, todos unidos por pasillos con mamparos estancos y recorridos por el laberinto de conductos térmicos que la mantiene tibia."
+  }
+}

@@ -1,0 +1,48 @@
+[
+  {
+    "num": 1,
+    "titulo": "El ciclo corre limpio",
+    "objetivo_narrativo": "Presentar a los cinco tripulantes en el tramo muerto de la ruta y romper la rutina cuando la esclusa de carga se abre desde fuera y la presencia mata a Marcos Ibáñez delante de los otros cuatro.",
+    "personajes": [
+      "Irene Solar",
+      "Tomás Bregón",
+      "Nadia Cheng",
+      "Elías Prado",
+      "Marcos Ibáñez",
+      "la presencia"
+    ],
+    "locacion": "cubierta de carga de la Bitácora Seca",
+    "informacion_nueva": "La esclusa se abrió con la secuencia completa y correcta, como si algo tuviera la llave; quedan once días hasta puerto y ninguna señal alcanza a nadie.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "Nueve secciones menos",
+    "objetivo_narrativo": "Seguir el plan de sellar mamparos sección por sección durante cinco días y mostrar cómo cada cierre les quita nave a ellos mientras la presencia aprende qué puertas responden.",
+    "personajes": [
+      "Irene Solar",
+      "Tomás Bregón",
+      "Nadia Cheng",
+      "Elías Prado",
+      "la presencia"
+    ],
+    "locacion": "corredor de mamparos sellados",
+    "informacion_nueva": "Las heridas de Ibáñez son de estudio y no de caza, y el panel del casco declara estados que no coinciden con lo que ven los ojos: algo escribe en el sistema.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "La silla del puente",
+    "objetivo_narrativo": "Cerrar la novela con Solar dejando de sellar, el corte del casco que cuesta la vida a Bregón y la purga manual que vacía la nave, hasta el único superviviente contestando a puerto.",
+    "personajes": [
+      "Irene Solar",
+      "Tomás Bregón",
+      "Nadia Cheng",
+      "Elías Prado",
+      "la presencia"
+    ],
+    "locacion": "puente de la Bitácora Seca",
+    "informacion_nueva": "El cerco era un embudo hacia el puente: la presencia no quiere presas sino una piloto viva que entregue la nave y el módulo en un puerto de ochenta mil personas.",
+    "tension": 5
+  }
+]

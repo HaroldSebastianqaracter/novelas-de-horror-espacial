@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "Lo que raspa sobre la litera",
+    "objetivo_narrativo": "Presentar Vértice-9 y a los cinco operarios a seis días del relevo, y convertir un ruido menudo en los conductos en la primera herida: algo pálido y ciego sale de una rejilla y muerde a Sila.",
+    "personajes": [
+      "Marena",
+      "Oquendo",
+      "Sila",
+      "Bregman",
+      "Toure"
+    ],
+    "locacion": "Estación Vértice-9",
+    "informacion_nueva": "Las criaturas entran por los conductos térmicos, son ciegas y muerden con urgencia y no con hambre; la rejilla del pasillo dos está doblada hacia dentro, no hacia fuera.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "Lo que se reparte por tramos",
+    "objetivo_narrativo": "Marena instaura el reparto de calor por sectores y el remedio se revela peor que el mal: Oquendo descubre que las está concentrando, Bregman trae el origen bajo el hielo y Sila abre una hembra preñada sobre la mesa de la enfermería.",
+    "personajes": [
+      "Marena",
+      "Oquendo",
+      "Bregman",
+      "Sila",
+      "Toure"
+    ],
+    "locacion": "Estación Vértice-9",
+    "informacion_nueva": "No huyen del frío de la estación sino del exterior: una fisura térmica se está cerrando a ochocientos metros y las crías se desarrollan con el calor, de modo que el reparto por turnos les ha construido una incubadora con calendario.",
+    "tension": 4
+  },
+  {
+    "num": 3,
+    "titulo": "Lo que se paga con cuerpos",
+    "objetivo_narrativo": "La calefacción se apaga sola sector a sector, Oquendo entra al hueco de mamparos y no vuelve, Bregman sella la esclusa desde el lado equivocado, y Marena gasta su última decisión encendiendo un señuelo tibio en la enfermería para salvar a tres y condenar lo que venga después.",
+    "personajes": [
+      "Marena",
+      "Oquendo",
+      "Bregman",
+      "Sila",
+      "Toure"
+    ],
+    "locacion": "Estación Vértice-9",
+    "informacion_nueva": "El enfriamiento va más rápido de lo calculado porque los cuerpos muertos ya no aíslan los conductos: quedan dos horas y no cuatro, y la nave del relevo, caliente y enorme, será el próximo punto tibio del planeta.",
+    "tension": 5
+  }
+]

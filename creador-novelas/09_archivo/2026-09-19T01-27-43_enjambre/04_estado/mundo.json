@@ -1,0 +1,27 @@
+{
+  "reglas": [
+    "El interior de Vértice-9 se mantiene a veintiún grados constantes mediante una red de conductos térmicos que recorre el hueco entre mamparos de todos los módulos.",
+    "Los registros de la estación dan cuatro horas desde el apagado total de la calefacción hasta que la temperatura interior cruza el punto letal para una persona sin traje.",
+    "La dotación de superficie cuenta con dos trajes de exterior para cinco operarios, y el protocolo obliga a salir siempre de a pares.",
+    "La llanura exterior está muy por debajo del punto de congelación del agua, y las cartas de la región solo recogen hielo en mil kilómetros a la redonda: ningún otro asentamiento figura al alcance de una marcha a pie.",
+    "El relevo llega por nave, con fecha fijada y sin margen de adelanto: a partir del capítulo 1 faltan seis días.",
+    "El sistema de calefacción se apaga solo, por sector y por seguridad, cuando un tramo de conducto se sobrecalienta por obstrucción del flujo.",
+    "El módulo de baterías es el único recinto sellado que retiene calor sin consumirlo, y su volumen de aire da para tres personas respirando, no para cinco."
+  ],
+  "objetos": [
+    "Registro térmico de turno: planilla donde Marena anota cada lectura de temperatura por sector.",
+    "Paneles de inspección de mamparo: tapas atornilladas que abren al hueco caliente donde corren las tuberías de agua caliente.",
+    "Rejillas de conducto: las bocas de la red térmica que dan a pasillos y camarotes, incluida la del pasillo dos.",
+    "Trajes de exterior: dos equipos presurizados y calefactados, guardados junto a la esclusa del pasillo dos.",
+    "Instrumental de enfermería: mesa, luz cenital y material de disección que Sila casi nunca usa.",
+    "Intercomunicador de estación: línea abierta entre módulos y huecos de servicio, con alcance hasta el interior de los mamparos."
+  ],
+  "linea_de_tiempo": [
+    "Día 1 del turno: la dotación de cinco toma posesión de Vértice-9 para cuarenta y seis días.",
+    "Semanas previas al capítulo 1: bajo la placa de hielo, a ochocientos metros de la estación, una fisura térmica lleva tiempo cerrándose.",
+    "Día 40: quedan seis días para el relevo y Toure oye por primera vez el raspar en el conducto sobre su litera."
+  ],
+  "locaciones": {
+    "Estación Vértice-9": "Caja de calor atornillada sobre mil kilómetros de llanura blanca: módulos unidos por pasillos estrechos —camarotes con literas bajo los conductos, enfermería, sala de máquinas, módulo de baterías sellado y la esclusa del pasillo dos que da a superficie—, todos recorridos por la red de calefacción que corre en el hueco entre mamparos."
+  }
+}
