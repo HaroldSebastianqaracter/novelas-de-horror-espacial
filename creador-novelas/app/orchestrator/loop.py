@@ -209,6 +209,11 @@ def preparar_extractor(raiz: Path, config: HarnessConfig, n: int) -> Path:
     texto = extractor.preparar_prompt_extractor(n, config, raiz)
     rutas.prompt_extractor(n).write_text(texto, encoding="utf-8")
     registro.guardar_prompt(raiz, "extractor", n, texto)
+    if config.escritor_emite_delta:
+        # X-04: el prompt se deja preparado por si hay que caer al extractor, pero anunciar su
+        # arranque dejaba un agente abierto que no cerraba nunca: el plano de la nave enseñaba
+        # extractores fantasma y el resumen contaba invocaciones que no ocurrieron.
+        return rutas.prompt_extractor(n)
     registro.evento(raiz, "agente_inicio", rol="extractor", capitulo=n, agent_id=None,
                     reextraccion=n in m.reextraccion_pendiente)
     return rutas.prompt_extractor(n)

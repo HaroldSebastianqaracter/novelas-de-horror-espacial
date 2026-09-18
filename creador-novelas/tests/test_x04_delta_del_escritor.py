@@ -98,3 +98,35 @@ def test_validar_capitulo_con_delta_valida_las_dos_cosas(proyecto, tmp_path, cap
     args = cli.construir_parser().parse_args(["validar-capitulo", "1", "--con-delta"])
     assert args.fn(args, proyecto) == 1  # el capítulo puede valer, pero el delta no está
     assert "delta" in capsys.readouterr().out.lower()
+
+
+def test_no_se_anuncia_un_extractor_que_no_va_a_correr(proyecto):
+    from app import registro
+    from app.orchestrator import loop
+    config = _con_delta(proyecto, True)
+    registro.iniciar_tanda(proyecto, {})
+    loop.preparar_extractor(proyecto, config, 1)
+
+    # El prompt se deja listo por si hay que caer al extractor, pero anunciar su arranque dejaba un
+    # agente abierto para siempre: el plano enseñaba fantasmas y el resumen contaba invocaciones
+    # que no ocurrieron.
+    ev = registro.leer_eventos(registro.dir_actual(proyecto))
+    assert [e for e in ev if e.get("rol") == "extractor"] == []
+    assert Rutas(proyecto).prompt_extractor(1).is_file()
+
+
+def test_el_delta_que_valida_el_escritor_se_anota_como_suyo(proyecto, capsys):
+    import json as _json
+    from app.state import repository as repo
+    config = _con_delta(proyecto, True)
+    repo.escribir_texto(Rutas(proyecto).capitulo(1), "Palabra " * config.palabras_por_capitulo)
+    Rutas(proyecto).deltas_trabajo.mkdir(parents=True, exist_ok=True)
+    Rutas(proyecto).delta(1).write_text(_json.dumps({
+        "personajes": {}, "hechos_nuevos": [], "resumen_corto": "Pasó algo.", "recursos_narrativos": [],
+    }), encoding="utf-8")
+
+    args = cli.construir_parser().parse_args(["validar-capitulo", "1", "--con-delta"])
+    args.fn(args, proyecto)
+    # El rol lo fija el verbo y no quien lo ejecuta: sin corregirlo, el registro anotaba un
+    # extractor que en esta corrida no existe.
+    assert (chr(114)+chr(111)+chr(108)+chr(61)+chr(34)+chr(101)+chr(115)+chr(99)+chr(114)+chr(105)+chr(116)+chr(111)+chr(114)+chr(34)) in capsys.readouterr().out

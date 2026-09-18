@@ -13,6 +13,7 @@ decida el paso siguiente sin interpretar prosa. Errores: `ERROR <Tipo>: motivo` 
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import re
 import sys
@@ -543,7 +544,9 @@ def cmd_validar_capitulo(args, raiz: Path) -> int:
     config = _config(raiz)
     r = validacion.validar_capitulo(raiz, config, args.n)
     if getattr(args, "con_delta", False) and r.valido:
-        r = validacion.validar_delta(raiz, config, args.n)
+        # El rol lo fija el verbo, no quien lo ejecuta, así que sin esto el registro anotaba un
+        # extractor que en esta corrida no ha existido, y Langfuse enseñaba una invocación fantasma.
+        r = dataclasses.replace(validacion.validar_delta(raiz, config, args.n), rol="escritor")
     return _imprimir_validacion(r, raiz, args.n)
 
 
