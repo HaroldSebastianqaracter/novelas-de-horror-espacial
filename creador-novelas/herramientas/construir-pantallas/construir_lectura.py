@@ -9,6 +9,30 @@ src, cabeza = leer_maqueta("direccion-3-luz-de-emergencia.html", """
   /* overflow:hidden convierte la escena en contenedor de desplazamiento y la cabecera pegajosa
      deja de pegarse al hacer scroll; clip recorta igual sin ese efecto secundario. */
   .escena{overflow:clip}
+
+  /* La página crecía con el capítulo: 400 palabras daban 2.200 px y 1.500 pasaban de 6.500, así que
+     leer era arrastrar una barra kilométrica y el margen del Extractor quedaba a media altura, lejos
+     del párrafo del que hablaba. Ahora la lectura ocupa exactamente una pantalla: el texto y el
+     margen tienen cada uno su propia rueda, y su contenido se apaga arriba y abajo como una
+     proyección, en vez de cortarse a ras. */
+  .pagina{height:calc(100vh - 150px);padding-bottom:0;align-items:stretch}
+  .texto,.margen{overflow-y:auto;overscroll-behavior:contain;min-height:0;padding-bottom:64px}
+  .texto{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 34px,#000 92%,transparent 100%);
+                 mask-image:linear-gradient(to bottom,transparent 0,#000 34px,#000 92%,transparent 100%)}
+  .margen{-webkit-mask-image:linear-gradient(to bottom,#000 0,#000 93%,transparent 100%);
+                  mask-image:linear-gradient(to bottom,#000 0,#000 93%,transparent 100%)}
+  .texto::-webkit-scrollbar,.margen::-webkit-scrollbar{width:10px}
+  .texto::-webkit-scrollbar-track,.margen::-webkit-scrollbar-track{background:transparent}
+  .texto::-webkit-scrollbar-thumb,.margen::-webkit-scrollbar-thumb{
+    background:var(--hilo-fuerte);border-radius:5px;border:3px solid transparent;background-clip:content-box}
+  .texto::-webkit-scrollbar-thumb:hover,.margen::-webkit-scrollbar-thumb:hover{background:var(--halogeno);background-clip:content-box}
+  .texto,.margen{scrollbar-width:thin;scrollbar-color:var(--hilo-fuerte) transparent}
+  /* El costillar ya era pegajoso dentro de una página larga; dentro de una pantalla fija sobra. */
+  .costillar{position:static;height:auto}
+  /* El conflicto que discute el Revisor, una sola vez y antes de los hechos. */
+  .margen .discute{margin:0 0 20px;padding:10px 12px;border-left:2px solid var(--emergencia);
+    background:rgba(179,38,30,.10);color:#E0685C;font-size:13px;line-height:1.45}
+  @media (max-width:1280px){ .pagina{height:calc(100vh - 140px)} }
 """)
 cabeza = cabeza.replace("<title>", "<title>Lectura · ", 1) if "<title>" in cabeza else cabeza
 
@@ -50,6 +74,7 @@ CUERPO = r'''<body>
         <h3 id="margen-t">Lo que el Extractor fijó en este capítulo</h3>
         <span id="t-resumen-hechos"></span>
       </div>
+      <p class="discute" id="discute" hidden></p>
       <dl id="hechos"></dl>
 
       <div class="accion" id="caja-accion" hidden>
@@ -105,7 +130,10 @@ function marcarCitas(html, citas){
 function pintarCostillar(){
   $("costillar").innerHTML = indice.capitulos.map(function(c){
     var clase = c.num === actual.num ? "actual" : (c.escrito ? "leido" : "sellado");
-    var visible = (c.num % 5 === 0 || c.num === 1 || c.num === actual.num);
+    // En una novela larga el costillar solo numera de cinco en cinco para no amontonarse; en una
+    // corta caben todos, y esconder el «2» de un libro de tres capítulos no ahorra nada.
+    var visible = (indice.capitulos.length <= 12
+                   || c.num % 5 === 0 || c.num === 1 || c.num === actual.num);
     var txt = c.num === actual.num ? c.num + ", estás aquí" : (visible ? c.num : "");
     var tit = "Capítulo " + c.num + (c.titulo ? ": " + esc(c.titulo) : "");
     var celda = c.escrito
@@ -133,10 +161,15 @@ function pintarHechos(){
     ? (hs.length === 1 ? "Un hecho. " : hs.length + " hechos. ") +
       "A partir de aquí el Escritor no puede contradecirlos sin que el Revisor lo vea."
     : "El Extractor no fijó ningún hecho nuevo en este capítulo.";
+  // La contradicción es del capítulo, no de un hecho concreto: QA no dice cuál la provoca. Antes se
+  // repetía bajo cada uno, así que un capítulo con cuatro hechos enseñaba cuatro veces el mismo
+  // párrafo rojo y el margen se estiraba sin decir nada nuevo.
+  var d = $("discute");
+  if (actual.conflicto) { d.textContent = "El Revisor discute: " + actual.conflicto; d.hidden = false; }
+  else d.hidden = true;
   $("hechos").innerHTML = hs.map(function(h){
     var s = "<dt>" + esc(h.sujeto || h.categoria || "Sin sujeto") + "</dt><dd>" + esc(h.hecho) + "</dd>";
     if (h.superado_por) s += '<dd class="conflicto">Superado por un hecho posterior.</dd>';
-    if (h.conflicto) s += '<dd class="conflicto">' + esc(h.conflicto) + "</dd>";
     return s;
   }).join("");
 }

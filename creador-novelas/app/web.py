@@ -280,6 +280,44 @@ def _anotar_coste_de_fase(raiz: Path | None, fase: str | None, log: str | None,
         print(f"[registro] no se pudo anotar el coste de {fase}: {e}")
 
 
+NOMBRE_DE_FASE = {
+    "destilar-estilo": "Destilando el estilo", "generar-premisa": "Generando la premisa",
+    "generar-sinopsis": "Generando la sinopsis", "generar-escaleta": "Generando la escaleta",
+    "inicializar-estado": "Inicializando el estado", "escribir-tanda": "Escribiendo la tanda",
+    "ensamblar": "Montando el manuscrito", "reanudar": "Reanudando", "cerrar-resolucion": "Cerrando la resolución",
+}
+
+
+def _ultimo_paso(raiz: Path) -> str | None:
+    """Lo último que tocó la fase en marcha, para que se vea que avanza.
+
+    Las fases del preludio no despachan subagentes, así que el plano no tenía nada que encender y la
+    pantalla se quedaba muda. Pero sí dejan rastro: cada herramienta que usan pasa por un hook, y de
+    ahí sale una línea legible sin leer una sola palabra de la novela.
+    """
+    carpeta = registro.dir_actual(raiz)
+    for ev in reversed(_lineas_jsonl(carpeta / "eventos.jsonl", limite=60)):
+        if ev.get("tipo") == "hook" and ev.get("accion"):
+            return _corto(ev["accion"], tope=48)
+        if ev.get("tipo") == "verbo" and ev.get("verbo"):
+            return str(ev["verbo"])
+    return None
+
+
+def _fase_en_curso(raiz: Path) -> dict[str, Any]:
+    """La fase que lanzó esta pantalla, si sigue viva: nombre, segundos y último paso."""
+    proc = _EN_CURSO.get("proc")
+    fase = _EN_CURSO.get("fase")
+    if proc is None or fase is None or proc.poll() is not None:
+        return {"fase_en_curso": None, "fase_nombre": None, "fase_segundos": None, "fase_paso": None}
+    return {
+        "fase_en_curso": fase,
+        "fase_nombre": NOMBRE_DE_FASE.get(fase, fase),
+        "fase_segundos": int(time.time() - float(_EN_CURSO.get("desde") or time.time())),
+        "fase_paso": _ultimo_paso(raiz),
+    }
+
+
 _ULTIMA_EXPORTACION: dict[str, Any] = {}
 
 
@@ -503,6 +541,10 @@ def estado(raiz: Path) -> dict[str, Any]:
         # Desde que el corte de QA se solapa con el capítulo siguiente puede haber más de uno.
         "agentes_activos": [a[0] for a in activos] if en_marcha else [],
         "agente_desde": desde if en_marcha else None,
+        # Qué fase lanzó la pantalla y desde cuándo. Sin esto, pulsar «Generar la premisa» dejaba la
+        # consola idéntica durante dos minutos y solo se sabía que había terminado por el visto: las
+        # fases del preludio no tienen subagentes, así que no encendían nada del plano.
+        **_fase_en_curso(raiz),
         "capitulos_con_hallazgos": _capitulos_con_hallazgos(rutas),
         "tiene_referencias": bool(_referencias(rutas)),
         "origen_estilo": ejecucion.get("origen_estilo", "referencias"),
@@ -683,14 +725,6 @@ def _hechos_de(raiz: Path, n: int) -> list[dict[str, Any]]:
     hechos = crudo.get("root") if isinstance(crudo, dict) else crudo
     hechos = hechos if isinstance(hechos, list) else []
 
-    en_conflicto: dict[int, str] = {}
-    if rutas.reportes_qa.is_dir():
-        for informe in sorted(rutas.reportes_qa.glob("*.json")):
-            datos = _json(informe)
-            for h in datos.get("hallazgos") or []:
-                if h.get("tipo") == "contradiccion" and isinstance(h.get("cap_origen"), int):
-                    en_conflicto.setdefault(h["cap_origen"], h.get("descripcion") or "")
-
     salida = []
     for h in hechos:
         if not isinstance(h, dict) or h.get("cap_origen") != n:
@@ -700,9 +734,25 @@ def _hechos_de(raiz: Path, n: int) -> list[dict[str, Any]]:
             "categoria": h.get("categoria"),
             "hecho": h.get("hecho"),
             "superado_por": h.get("superado_por"),
-            "conflicto": en_conflicto.get(n),
         })
     return salida
+
+
+def _conflicto_de(raiz: Path, n: int) -> str | None:
+    """Lo que QA discute del capítulo N, una sola vez.
+
+    Antes se estampaba el mismo texto en cada hecho del capítulo, así que un capítulo con cuatro
+    hechos repetía cuatro veces el mismo párrafo rojo y la pantalla de lectura crecía sin motivo. La
+    contradicción es del capítulo, no de un hecho: QA no dice cuál de ellos la provoca.
+    """
+    rutas = Rutas(raiz)
+    if not rutas.reportes_qa.is_dir():
+        return None
+    for informe in sorted(rutas.reportes_qa.glob("*.json")):
+        for h in _json(informe).get("hallazgos") or []:
+            if h.get("tipo") == "contradiccion" and h.get("cap_origen") == n:
+                return h.get("descripcion") or None
+    return None
 
 
 def capitulo(raiz: Path, n: int) -> dict[str, Any] | None:
@@ -723,6 +773,8 @@ def capitulo(raiz: Path, n: int) -> dict[str, Any] | None:
         "palabras": escritor.contar_palabras(texto),
         "texto": texto,
         "hechos": _hechos_de(raiz, n),
+        # El conflicto es del capítulo y va una sola vez, no repetido bajo cada hecho.
+        "conflicto": _conflicto_de(raiz, n),
     }
 
 

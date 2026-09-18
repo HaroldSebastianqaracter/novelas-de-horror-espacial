@@ -36,6 +36,19 @@ NUEVAS = """  body[data-vista="pausado_por_qa"] .plano .relleno[data-agente="rev
   .preludio small{grid-column:2/-1;color:var(--texto-bajo);font-size:12.5px}
   /* El diseño reservó 44px para «14:52»; el registro real anota «12:04:11» y se pegaba al texto. */
   .pie .registro li{grid-template-columns:64px 1fr}
+  /* El registro crecía sin fondo: cuarenta entradas son 1.200 px y la página entera se estiraba
+     detrás de ellas. Ahora es una ventana de alto fijo con su propia rueda, y el texto se apaga por
+     abajo como una proyección en vez de cortarse con una raya. */
+  .pie .registro ol{max-height:260px;overflow-y:auto;overscroll-behavior:contain;padding-right:10px;
+    -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 78%,rgba(0,0,0,.35) 92%,transparent 100%);
+            mask-image:linear-gradient(to bottom,#000 0,#000 78%,rgba(0,0,0,.35) 92%,transparent 100%)}
+  .pie .registro ol::-webkit-scrollbar{width:10px}
+  .pie .registro ol::-webkit-scrollbar-track{background:linear-gradient(90deg,transparent 4px,var(--linea-tenue) 4px,var(--linea-tenue) 6px,transparent 6px)}
+  .pie .registro ol::-webkit-scrollbar-thumb{background:var(--linea);border-radius:5px;
+    border:3px solid var(--fondo);box-shadow:0 0 8px rgba(147,166,185,.6)}
+  .pie .registro ol::-webkit-scrollbar-thumb:hover{background:var(--verde)}
+  .pie .registro ol{scrollbar-width:thin;scrollbar-color:var(--linea) transparent}
+  .pie .registro{display:flex;flex-direction:column;min-height:0}
   /* La barra de navegación es la primera fila de la pantalla y va de borde a borde. */
   .pantalla{grid-template-rows:auto auto 1fr auto auto}
   .pantalla > .ir{margin:-36px -56px 0}
@@ -180,15 +193,27 @@ function pintarCabecera(){
   // decisión; en reposo o con error no hay nada que esperar y se quitan.
   var palabra = {en_progreso:"Escribiendo", pausado_por_qa:"Detenido",
                  error:"Con un error", inactivo:"En reposo"}[e.estado] || e.estado;
-  $("estado-palabra").textContent = palabra;
-  $("puntos").hidden = !(e.estado === "en_progreso" || e.estado === "pausado_por_qa");
   // Puede haber más de un agente a la vez: desde que el corte de QA se solapa con el capítulo
   // siguiente, el revisor y el escritor trabajan en paralelo y las dos cubiertas deben encenderse.
   var activos = e.agentes_activos && e.agentes_activos.length ? e.agentes_activos
               : (e.agente_activo ? [e.agente_activo] : []);
-  $("t-agente").textContent = activos.length
+  // El puente se enciende siempre que haya una fase en marcha: aunque no despache subagentes, la
+  // sesión que orquesta está trabajando, y era lo que faltaba por reflejar en el plano. Durante el
+  // preludio es lo único encendido, y es la verdad.
+  if (e.fase_en_curso && activos.indexOf("orquestador") === -1) activos = activos.concat(["orquestador"]);
+  var detalle = activos.length
     ? activos.map(function(a){ return NOMBRE_AGENTE[a] || a; }).join(" y ")
     : (e.estado === "pausado_por_qa" ? "Revisor de calidad" : "");
+  // Una fase en marcha manda sobre el estado del manifiesto: durante el preludio el manifiesto dice
+  // «en reposo» y no es cierto, hay una sesión trabajando. El aviso va en la cabecera y no al pie
+  // porque es lo que se mira mientras se espera, y al pie quedaba por debajo del borde.
+  if (e.fase_en_curso) {
+    palabra = e.fase_nombre || e.fase_en_curso;
+    detalle = "lleva " + duracionCorta(e.fase_segundos) + (e.fase_paso ? " · " + e.fase_paso : "");
+  }
+  $("estado-palabra").textContent = palabra;
+  $("puntos").hidden = !(e.fase_en_curso || e.estado === "en_progreso" || e.estado === "pausado_por_qa");
+  $("t-agente").textContent = detalle;
   document.body.setAttribute("data-vista", e.estado);
   // Lista separada por espacios: el CSS la lee con [data-activo~="rol"].
   if (activos.length) document.body.setAttribute("data-activo", activos.join(" "));
@@ -200,6 +225,13 @@ function pintarCabecera(){
   for (var i = 1; i <= total; i++)
     t.push("<i class='" + (cortes[i] ? "stop" : i <= cerrados ? "on" : "") + "'></i>");
   $("ticks").innerHTML = t.join("");
+}
+
+function duracionCorta(seg){
+  if (seg == null) return "";
+  if (seg < 60) return seg + " s";
+  var m = Math.floor(seg/60);
+  return m + " min " + (seg % 60) + " s";
 }
 
 function pintarRotulos(){
@@ -382,6 +414,7 @@ function refrescar(){
     estado = xs[0]; coste = xs[2]; qa = xs[3];
     pintarCabecera(); pintarRotulos(); pintarIndicadores(); pintarVeredicto();
     pintarPreludio(); pintarRegistro(xs[1]);
+    acompasar();
   }).catch(function(e){
     $("veredicto-t").textContent = "No se puede hablar con el harness";
     $("veredicto-p").textContent = e.message;
@@ -408,8 +441,21 @@ function alPulsar(ev){
 $("acciones").addEventListener("click", alPulsar);
 $("preludio").addEventListener("click", alPulsar);
 
+// El estado se lee del disco, así que consultar es barato. Mientras algo trabaja se mira cada dos
+// segundos, para que el reloj de la fase y su último paso se vean avanzar; en reposo, cada diez:
+// una pantalla quieta no necesita que la interroguen.
+var temporizador = null, cadencia = 0;
+function acompasar(){
+  var vivo = !!(estado && (estado.fase_en_curso || estado.estado === "en_progreso"));
+  var quiero = vivo ? 2000 : 10000;
+  if (quiero === cadencia) return;
+  cadencia = quiero;
+  if (temporizador) clearInterval(temporizador);
+  temporizador = setInterval(refrescar, cadencia);
+}
+
 refrescar();
-setInterval(refrescar, 5000);  // el estado se lee del disco; 5 s es suficiente y no castiga a nadie
+acompasar();
 })();
 </script>
 </body>
