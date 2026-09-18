@@ -41,6 +41,7 @@ DEFAULTS: dict[str, Any] = {
     "capitulos_por_tanda": 3,
     "max_llamadas_por_tanda": 30,
     "registrar_uso": True,
+    "exportar_trazas": True,
 }
 
 OPCIONES = {
@@ -166,6 +167,9 @@ def _ejecucion_desde_formulario(campos: dict[str, str]) -> dict[str, Any]:
         "capitulos_por_tanda": _valor_o_nulo(campos, "capitulos_por_tanda"),
         "max_llamadas_por_tanda": _valor_o_nulo(campos, "max_llamadas_por_tanda"),
         "registrar_uso": campos.get("registrar_uso", "").strip().lower() in ("on", "true", "1", "si", "sí"),
+        # RF-09: publicar la traza al cerrar cada fase. La casilla desmarcada llega ausente,
+        # que es justo lo que hace falta para poder apagarlo desde la pantalla.
+        "exportar_trazas": campos.get("exportar_trazas", "").strip().lower() in ("on", "true", "1", "si", "sí"),
     }
 
 

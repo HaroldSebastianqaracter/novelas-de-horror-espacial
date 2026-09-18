@@ -23,6 +23,7 @@ import os
 import shutil
 import subprocess
 import time
+import threading
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -30,7 +31,7 @@ from typing import Any
 from app import registro
 from app.agents import escritor
 from app.state import repository as repo
-from app.config import CAMPOS_EJECUCION, CAMPOS_NOVELA
+from app.config import CAMPOS_EJECUCION, CAMPOS_NOVELA, cargar_config
 from app.orchestrator import checkpoint
 from app.rutas import Rutas
 
@@ -203,6 +204,7 @@ def _cerrar_proceso() -> dict[str, Any] | None:
     fin = {"fase": _EN_CURSO.get("fase"), "codigo": proc.returncode, "log": _EN_CURSO.get("log")}
     _anotar_coste_de_fase(_EN_CURSO.get("raiz"), fin["fase"], _EN_CURSO.get("log"),
                           _EN_CURSO.get("desde"))
+    _publicar_traza(_EN_CURSO.get("raiz"))
     _EN_CURSO.clear()
     _EN_CURSO["ultimo"] = fin
     return fin
@@ -276,6 +278,44 @@ def _anotar_coste_de_fase(raiz: Path | None, fase: str | None, log: str | None,
                                  "stop_reason": datos.get("subtype")}, ensure_ascii=False) + "\n")
     except Exception as e:  # noqa: BLE001
         print(f"[registro] no se pudo anotar el coste de {fase}: {e}")
+
+
+_ULTIMA_EXPORTACION: dict[str, Any] = {}
+
+
+def _publicar_traza(raiz: Path | None) -> None:
+    """Publica en Langfuse el registro de la fase recién terminada, si se puede y si se quiere (RF-09).
+
+    Era un paso manual y por eso no había nada que mirar salvo que alguien se acordara. Se hace aquí,
+    al cerrar la fase y nunca dentro de ella (§16): la tanda ya terminó, así que publicar no compite
+    con nada. Tres condiciones, y si alguna falta simplemente no se publica:
+
+    - `exportar_trazas` en `config/ejecucion.json`. La traza sale de la máquina, así que se apaga.
+    - Credenciales en el entorno (§16.7). Sin ellas ni se intenta.
+    - Nunca con cuerpos: viajan métricas y códigos de regla, jamás la prosa de la novela (§16.6).
+
+    Corre en un hilo aparte y se traga cualquier fallo: la observabilidad no puede tumbar el cierre de
+    una fase ni dejar la pantalla esperando a que responda un servicio ajeno.
+    """
+    if raiz is None:
+        return
+
+    def _trabajo() -> None:
+        try:
+            from app import observabilidad as obs
+            if not cargar_config(raiz).exportar_trazas:
+                return
+            cliente = obs.ClienteHTTP(obs.credenciales_desde_entorno())
+            carpeta = obs.resolver_tanda(raiz, "ultima")
+            r = obs.exportar(raiz, carpeta, cliente, con_cuerpos=False)
+            _ULTIMA_EXPORTACION.update({"tanda": r.traza.tanda, "trace_id": r.traza.id,
+                                        "objetos": r.aceptados, "error": None})
+            print(f"[langfuse] {r.traza.tanda} -> {r.traza.id} ({r.aceptados} objetos)")
+        except Exception as e:  # noqa: BLE001
+            _ULTIMA_EXPORTACION.update({"error": str(e)[:200]})
+            print(f"[langfuse] no se publicó la traza: {str(e)[:200]}")
+
+    threading.Thread(target=_trabajo, daemon=True, name="publicar-traza").start()
 
 
 def lanzar_fase(raiz: Path, fase: str) -> dict[str, Any]:

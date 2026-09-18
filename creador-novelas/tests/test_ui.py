@@ -24,6 +24,7 @@ FORM_OK = {
     "total_capitulos": "30", "palabras_por_capitulo": "1500", "ventana_resumen_rodante": "2", "cadencia_qa": "3",
     "max_tokens_contexto_escritor": "12000", "max_hechos_por_capitulo": "4",
     "capitulos_por_tanda": "3", "max_llamadas_por_tanda": "30", "registrar_uso": "on",
+    "exportar_trazas": "on",
     "referencias": "",
 }
 
@@ -67,7 +68,8 @@ def test_guardado_valido_escribe_los_tres_archivos_y_validan(tmp_path, monkeypat
     ejecucion = json.loads(rutas.ejecucion_json.read_text(encoding="utf-8"))
     assert set(novela) == {"total_capitulos", "palabras_por_capitulo", "idioma", "persona_narrativa", "tiempo_verbal",
                            "ventana_resumen_rodante", "cadencia_qa", "max_tokens_contexto_escritor", "max_hechos_por_capitulo"}
-    assert ejecucion == {"capitulos_por_tanda": 3, "max_llamadas_por_tanda": 30, "registrar_uso": True}
+    assert ejecucion == {"capitulos_por_tanda": 3, "max_llamadas_por_tanda": 30, "registrar_uso": True,
+                         "exportar_trazas": True}
     assert resultado.comando_siguiente == "/generar-premisa"  # 00_referencias/ vacía
 
 
@@ -512,6 +514,59 @@ def test_sin_git_bash_la_fase_de_agentes_no_se_lanza(monkeypatch, proyecto, conf
     web._EN_CURSO.clear()
     with pytest.raises(RuntimeError, match="Git Bash"):
         web.lanzar_fase(proyecto, "escribir-tanda")
+
+
+def test_la_traza_se_publica_sola_al_cerrar_la_fase_y_se_puede_apagar(monkeypatch, proyecto, config):
+    """Publicar era manual, así que no había nada que mirar salvo que alguien se acordara.
+
+    Tres condiciones, y si falta una no se publica y no se molesta: el interruptor de `ejecucion.json`,
+    credenciales en el entorno (§16.7) y nunca con cuerpos (§16.6).
+    """
+    from app import observabilidad as obs
+    llamadas = []
+
+    class _ClienteFalso:
+        def __init__(self, *a, **k): pass
+
+    def _exportar(raiz, carpeta, cliente, *, con_cuerpos=False, volcar=None):
+        llamadas.append({"carpeta": carpeta.name, "con_cuerpos": con_cuerpos})
+        class _R:
+            class traza: tanda, id = "t", "abc"
+            aceptados = 3
+        return _R()
+
+    monkeypatch.setattr(obs, "ClienteHTTP", _ClienteFalso)
+    monkeypatch.setattr(obs, "credenciales_desde_entorno", lambda *a, **k: object())
+    monkeypatch.setattr(obs, "exportar", _exportar)
+    monkeypatch.setattr(obs, "resolver_tanda", lambda raiz, cual: Rutas(raiz).registro / "preludio")
+
+    hilo_real = web.threading.Thread
+
+    def _sincrono(target=None, **k):  # el hilo se ejecuta en el sitio para poder afirmar sobre él
+        class _H:
+            def start(self_): target()
+        return _H()
+
+    monkeypatch.setattr(web.threading, "Thread", _sincrono)
+    web._publicar_traza(proyecto)
+    assert llamadas == [{"carpeta": "preludio", "con_cuerpos": False}], "publica sin prosa de la novela"
+
+    # Con el interruptor apagado no sale nada de la máquina.
+    llamadas.clear()
+    rutas = Rutas(proyecto)
+    ejecucion = json.loads(rutas.ejecucion_json.read_text(encoding="utf-8"))
+    rutas.ejecucion_json.write_text(json.dumps(ejecucion | {"exportar_trazas": False}), encoding="utf-8")
+    web._publicar_traza(proyecto)
+    assert llamadas == []
+
+    # Sin credenciales tampoco, y sin romper el cierre de la fase.
+    rutas.ejecucion_json.write_text(json.dumps(ejecucion | {"exportar_trazas": True}), encoding="utf-8")
+    def _falta(*a, **k):
+        raise ConfiguracionInvalidaError("faltan LANGFUSE_PUBLIC_KEY")
+    monkeypatch.setattr(obs, "credenciales_desde_entorno", _falta)
+    web._publicar_traza(proyecto)  # no lanza
+    assert llamadas == []
+    monkeypatch.setattr(web.threading, "Thread", hilo_real)
 
 
 def test_el_consumo_del_orquestador_se_anota_y_llega_a_la_traza(proyecto, config):

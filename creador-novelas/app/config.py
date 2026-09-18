@@ -28,7 +28,7 @@ CAMPOS_NOVELA = (
     "total_capitulos", "palabras_por_capitulo", "idioma", "persona_narrativa", "tiempo_verbal",
     "ventana_resumen_rodante", "cadencia_qa", "max_tokens_contexto_escritor", "max_hechos_por_capitulo",
 )
-CAMPOS_EJECUCION = ("capitulos_por_tanda", "max_llamadas_por_tanda", "registrar_uso")
+CAMPOS_EJECUCION = ("capitulos_por_tanda", "max_llamadas_por_tanda", "registrar_uso", "exportar_trazas")
 
 
 class HarnessConfig(BaseModel):
@@ -40,6 +40,9 @@ class HarnessConfig(BaseModel):
     capitulos_por_tanda: int | None = Field(default=None, ge=1)  # RF-CFG-02; None = sin tope
     max_llamadas_por_tanda: int | None = Field(default=None, ge=1)  # RF-CFG-06
     registrar_uso: bool = True  # RF-CFG-06
+    # La traza sale de la máquina hacia un servicio externo, así que se puede apagar. Con `False` el
+    # registro se sigue escribiendo en disco: lo único que no ocurre es la publicación.
+    exportar_trazas: bool = True  # RF-09
     palabras_por_capitulo: int = Field(gt=0)  # RF-CFG-01
     idioma: str = Field(min_length=2)  # RF-CFG-05
     persona_narrativa: Literal["primera", "tercera_limitada", "tercera_omnisciente"]

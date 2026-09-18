@@ -74,6 +74,9 @@ CUERPO = '''<body>
       <div class="condiciones">
         <label><input type="checkbox" name="registrar_uso" id="registrar_uso"> Registrar el uso de tokens</label>
         <p>Sin esto no hay forma de saber lo que cuesta cada capítulo.</p>
+        <label><input type="checkbox" name="exportar_trazas" id="exportar_trazas"> Publicar la traza en Langfuse</label>
+        <p>Al terminar cada fase se envía el registro de ejecución: tiempos, tokens, coste y códigos
+          de regla. Nunca la prosa de la novela. Si no hay credenciales en el entorno, no se intenta.</p>
         <p><strong>Condiciones.</strong> Se factura por capítulo cerrado, aunque el revisor lo rechace
           después. Si el revisor detiene la producción, usted decide si reanuda bajo su responsabilidad;
           lo escrito hasta entonces se conserva y se cobra.</p>
@@ -211,6 +214,7 @@ fetch("/api/formulario").then(function(r){ return r.json(); }).then(function(d){
   $("cotas-caps").textContent = (lc.min != null && lc.max != null)
     ? " El harness admite entre " + lc.min + " y " + lc.max + "." : "";
   $("registrar_uso").checked = d.valores.registrar_uso !== false;
+  $("exportar_trazas").checked = d.valores.exportar_trazas !== false;
   pintarAjustes();
   recalcular();
 
