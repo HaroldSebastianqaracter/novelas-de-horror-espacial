@@ -130,7 +130,7 @@ def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3
     resumen = r["resumen"]
     reloj = resumen["reloj"]
     fila = {
-        "variante": variante,
+        "variante": variante, "premisas": encargo.get("premisas"),
         "nombre": nombre, "carpeta": r["carpeta"], "completa": bool(completa and fallo is None),
         "fallo": fallo, "cuando": datetime.now().astimezone().isoformat(timespec="seconds"),
         "reloj_corredor_s": round(time.monotonic() - inicio, 1),
@@ -166,6 +166,10 @@ def fila_csv(fila: dict[str, Any]) -> dict[str, Any]:
     palabras = [p for p in (fila.get("palabras") or []) if p]
     plano: dict[str, Any] = {
         "variante": fila.get("variante"),
+        # El juego de premisas es parte del diseño del experimento: el juego 1 fallaba en dos de
+        # cada tres novelas por una contradicción del clímax, así que mezclar sus filas con las del
+        # juego 2 en la misma media sería comparar dos poblaciones distintas.
+        "premisas": fila.get("premisas"),
         "novela": fila.get("nombre"),
         "cuando": fila.get("cuando"),
         "completa": int(bool(fila.get("completa"))),
@@ -304,6 +308,10 @@ def informe(filas: list[dict[str, Any]]) -> str:
 def cargar_encargos(ruta: Path) -> list[dict[str, Any]]:
     datos = json.loads(ruta.read_text(encoding="utf-8"))
     encargos = datos["novelas"] if isinstance(datos, dict) else datos
+    version = datos.get("version") if isinstance(datos, dict) else None
+    if version is not None:
+        for e in encargos:
+            e.setdefault("premisas", version)
     base = datos.get("config") if isinstance(datos, dict) else None
     if base:
         # La config común va una sola vez en el archivo: que las diez compartan tamaño de novela es

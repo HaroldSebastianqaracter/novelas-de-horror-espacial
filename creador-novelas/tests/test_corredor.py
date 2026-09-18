@@ -164,6 +164,16 @@ def test_las_diez_premisas_del_repositorio_son_comparables():
         assert 150 < len(e["idea"]) < 500
 
 
+def test_el_juego_de_premisas_viaja_con_cada_novela(tmp_path):
+    ruta = tmp_path / "premisas.json"
+    ruta.write_text(json.dumps({"version": 2, "config": {"total_capitulos": 3},
+                                "novelas": [{"nombre": "a", "idea": "una"}]}), encoding="utf-8")
+    encargos = corredor.cargar_encargos(ruta)
+    # El juego 1 fallaba en dos de cada tres novelas por una contradicción del clímax; promediar sus
+    # tiempos con los del juego 2 sería mezclar dos poblaciones distintas en la misma columna.
+    assert encargos[0]["premisas"] == 2
+
+
 def test_el_informe_resume_la_corrida():
     filas = [{"nombre": "capsula", "completa": True, "reloj_corredor_s": 1032.0, "capitulos": 3,
               "calidad": {"contradicciones": 0}, "coste_usd": 5.8},
@@ -219,7 +229,7 @@ def test_el_csv_se_puede_rehacer_desde_el_registro_que_manda(vacio):
     # CSV no existía aún, o porque se añadió una columna-- se recupera sin repetir la novela.
     corredor.reconstruir_csv(vacio, variante="base")
     filas = csv_.read_text(encoding="utf-8").splitlines()
-    assert len(filas) == 2 and filas[1].startswith("base,capsula,")
+    assert len(filas) == 2 and filas[1].split(",")[0] == "base" and "capsula" in filas[1]
 
 
 def test_una_novela_abortada_por_un_hook_se_cuenta_en_la_tabla(vacio):

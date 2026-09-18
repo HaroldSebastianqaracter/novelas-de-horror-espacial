@@ -1,11 +1,18 @@
 {
+  "version": 2,
   "_comentario": [
-    "Las diez entradas de la corrida de velocidad. Son fijas a propósito: si cada novela se",
-    "inventara la suya, no compararíamos sistemas sino argumentos, y un capítulo con seis personajes",
-    "en tres escenarios no cuesta lo que uno con dos hablando en un pasillo.",
-    "Por eso las diez comparten forma: tripulación de cinco, un escenario cerrado, una sola anomalía",
-    "y ningún salto temporal. Lo que cambia es el color del terror, no el trabajo que dan.",
-    "La config va aquí una vez y no se toca entre novelas: tamaño de libro igual para las diez."
+    "Juego 2. El juego 1 falló en dos de tres novelas de base, y siempre por lo mismo: cada anomalía",
+    "estaba formulada como una regla absoluta («nunca pregunta nada», «el conteo lleva seis desde el",
+    "principio»). La escaleta convierte esa regla en un hecho vigente del log de continuidad, y el",
+    "clímax tiene que tocarla para resolver la historia: el narrador la niega, QA lo caza y la novela",
+    "para. Criogenia, la única cuyo misterio era un estado y no una ley, salió limpia.",
+    "",
+    "Regla del juego 2: la anomalía es algo que OCURRE o que ALGUIEN ES, nunca algo que siempre pasa",
+    "o que nunca pasa. Sin «nunca», «siempre», «ninguno», «desde el principio» ni cifras declaradas",
+    "permanentes.",
+    "",
+    "Lo demás se mantiene, porque es lo que hace comparables las diez: tripulación de cinco, un",
+    "escenario cerrado, una anomalía, sin saltos temporales, y una config común que no se toca."
   ],
   "config": {
     "total_capitulos": 3,
@@ -25,11 +32,11 @@
   "novelas": [
     {
       "nombre": "capsula",
-      "idea": "Un remolcador de salvamento con cinco tripulantes recoge una cápsula de escape a la deriva. Dentro hay una persona viva, tranquila y educada, que no figura en el registro de ninguna nave perdida en este sector ni en los diez años anteriores. Dice que lleva esperando el tiempo justo. El remolcador está a once días del puerto más cercano."
+      "idea": "Un remolcador de salvamento con cinco tripulantes recoge una cápsula de escape a la deriva. Dentro hay una persona viva y tranquila que dice llevar esperando. Lo que cuenta del naufragio coincide con un informe que el remolcador recibió cifrado y que nadie de la tripulación ha abierto todavía. El puerto más cercano está a once días."
     },
     {
       "nombre": "repostaje",
-      "idea": "Cinco operarios cierran turno en una estación de repostaje sobre una luna helada. El relevo no llega y tampoco llega la explicación. El protocolo les prohíbe abandonar la estación sin entrega de guardia, así que se quedan. A la segunda noche el registro de accesos empieza a anotar entradas que nadie ha hecho, siempre desde el exterior."
+      "idea": "Cinco operarios cierran turno en una estación de repostaje sobre una luna helada. El relevo no llega y tampoco llega la explicación, y el protocolo les prohíbe abandonar la estación sin entrega de guardia. La segunda noche, el operario de guardia encuentra el parte del día siguiente ya redactado, con su letra y con hechos que aún no han ocurrido."
     },
     {
       "nombre": "criogenia",
@@ -37,31 +44,31 @@
     },
     {
       "nombre": "cavidad",
-      "idea": "Una cuadrilla de cinco perfora un asteroide de níquel siguiendo una veta que no debería estar ahí. A cuatrocientos metros la broca entra en una cavidad con aire respirable, presión estable y temperatura de habitación. Los sensores dicen que lleva así mucho más tiempo del que tiene la humanidad. La cuadrilla tiene dos semanas de contrato por delante."
+      "idea": "Una cuadrilla de cinco perfora un asteroide de níquel siguiendo una veta que no figuraba en el sondeo. A cuatrocientos metros la broca entra en una cavidad con aire respirable y temperatura de habitación. El geólogo de la cuadrilla data la roca del techo y obtiene una antigüedad que no sabe cómo justificar. Quedan dos semanas de contrato."
     },
     {
       "nombre": "rumbo",
-      "idea": "Un carguero de cinco tripulantes descubre que su piloto automático lleva días corrigiendo el rumbo hacia unas coordenadas que no están en ninguna carta. Cada corrección es mínima y está firmada con el código de autorización de la capitana, que no ha tocado la consola. Desviarse a mano consume combustible que no tienen para llegar a ningún otro sitio."
+      "idea": "Un carguero de cinco tripulantes descubre que su piloto automático lleva días corrigiendo el rumbo hacia unas coordenadas que no están en la carta. Cada corrección es mínima y va firmada con el código de autorización de la capitana, que no recuerda haber autorizado ninguna. Volver al rumbo bueno consume un combustible que no les sobra."
     },
     {
       "nombre": "faro",
-      "idea": "Tres personas mantienen un faro orbital sobre un planeta muerto y esperan relevo dentro de seis meses. El relevo llega esta semana: dos personas con la documentación en regla, el saludo correcto y una versión del calendario en la que ya han pasado los seis meses. Traen el correo atrasado, y en él hay cartas que los del faro aún no han escrito."
+      "idea": "Tres personas mantienen un faro orbital sobre un planeta muerto y esperan su relevo dentro de seis meses. El relevo se presenta esta semana: dos personas con la documentación en regla, el saludo correcto y el correo atrasado. Uno de los recién llegados menciona averías del faro que ocurrieron y que nunca se comunicaron a nadie."
     },
     {
       "nombre": "colonia",
-      "idea": "Cinco colonos despiertan al llegar a un mundo que llevan cuatro años entrenándose para habitar. La superficie coincide con las simulaciones de entrenamiento hasta el último detalle: las mismas rocas, el mismo horizonte, los mismos fallos del terreno que el simulador nunca llegó a corregir. Incluido el edificio de prácticas que solo existía en el simulador."
+      "idea": "Cinco colonos despiertan al llegar a un mundo que llevan cuatro años entrenándose para habitar. La superficie se parece a las simulaciones de entrenamiento más de lo que nadie esperaba: las mismas rocas, el mismo horizonte, los mismos fallos del terreno. En el valle hay un edificio de prácticas que los cinco recuerdan del simulador y que nadie construyó."
     },
     {
       "nombre": "desguace",
-      "idea": "Una nave de reciclaje con cinco operarios desguaza cascos abandonados en un cementerio orbital. El tercer casco de la semana tiene la misma disposición que su propia nave, las mismas reparaciones mal hechas y, en las taquillas de la tripulación, sus cinco nombres escritos con su propia letra. Quedan cuatro cascos por abrir y el contrato se cobra al terminar."
+      "idea": "Una nave de reciclaje con cinco operarios desguaza cascos abandonados en un cementerio orbital. El tercer casco de la semana repite la disposición de su propia nave y sus reparaciones mal hechas, y en las taquillas de la tripulación aparecen sus cinco nombres con su letra. Quedan cuatro cascos por abrir y el contrato se cobra al terminar."
     },
     {
       "nombre": "socorro",
-      "idea": "Una sonda de rescate de cinco tripulantes responde a una llamada de socorro y descubre que la señal sale de su propia antena, con la voz de su capitana, que está viva y al mando y no ha grabado nada. La señal describe lo que va a pasar a bordo en las próximas horas y hasta ahora no se ha equivocado en nada."
+      "idea": "Una sonda de rescate de cinco tripulantes responde a una llamada de socorro y descubre que la señal sale de su propia antena, con la voz de su capitana, que está viva y al mando y no ha grabado nada. La señal describe averías a bordo, y dos de ellas se han producido después de emitirse el mensaje."
     },
     {
       "nombre": "cuarentena",
-      "idea": "Una estación de cuarentena en el borde del sistema recibe a cinco viajeros que entran juntos en la cámara de descontaminación. El ciclo dura cuarenta minutos y la cámara se abre con seis. Los seis se reconocen entre sí, comparten los mismos recuerdos del viaje y ninguno sobra según el registro biométrico, que lleva seis desde el principio."
+      "idea": "Una estación de cuarentena en el borde del sistema recibe a cinco viajeros que entran juntos en la cámara de descontaminación. El ciclo dura cuarenta minutos y la cámara se abre con seis. Los seis se reconocen entre sí, comparten los mismos recuerdos del viaje y ninguno admite ser el que sobra."
     }
   ]
 }
