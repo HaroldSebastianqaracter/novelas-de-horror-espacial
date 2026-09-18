@@ -1,0 +1,1 @@
+Una nave hospital despierta a cinco pacientes de un sueño de dos años para una revisión rutinaria. Cuatro recuerdan el viaje de ida. El quinto recuerda con detalle un viaje distinto, con otra tripulación y otro destino, y describe pasillos de esta misma nave que fueron sellados antes de zarpar. Sus constantes son las mejores de los cinco.

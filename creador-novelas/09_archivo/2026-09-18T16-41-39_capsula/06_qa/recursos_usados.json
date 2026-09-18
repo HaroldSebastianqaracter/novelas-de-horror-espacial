@@ -1,0 +1,10 @@
+[
+  { "recurso": "estructura de negacion anaforica en oracion corta ('No pidio X. No pregunto Y.')", "veces": 7, "caps": [1, 2] },
+  { "recurso": "enumeracion ternaria asindetica como cierre descriptivo ('respirable, templado, reciente')", "veces": 5, "caps": [1, 2] },
+  { "recurso": "simil introducido por 'como quien' / 'como si'", "veces": 3, "caps": [1, 2] },
+  { "recurso": "cierre de escena con frase corta lapidaria de silencio ('Ninguno dijo nada.')", "veces": 4, "caps": [1, 2] },
+  { "recurso": "el registro o archivo de la nave invocado como unica prueba", "veces": 5, "caps": [1, 2] },
+  { "recurso": "dialogo breve sin acotacion que invierte una afirmacion ('Los filtros mienten' / 'Los filtros son lo unico que no miente')", "veces": 1, "caps": [2] },
+  { "recurso": "recorrido enumerativo de los cinco tripulantes uno por uno en un mismo parrafo", "veces": 1, "caps": [2] },
+  { "recurso": "objeto tecnico de la nave usado como reloj o medida del tiempo (filtros, combustible)", "veces": 2, "caps": [2] }
+]

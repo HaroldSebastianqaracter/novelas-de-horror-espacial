@@ -1,0 +1,26 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion ternaria asindetica como cierre de frase o parrafo; 6 apariciones acumuladas (caps. 1, 2). En el cap. 2: 'doce nombres, tachaduras, una baja medica anotada al margen' y 'turnos asignados, firmas, horas de relevo'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio formulado en negativa ('no dijo nada', 'no contesto'); 4 apariciones acumuladas (caps. 1, 2). En el cap. 2: 'Okonjo no dijo nada durante un rato largo'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Negacion absoluta anaforica en frases cortas encadenadas con 'Nadie'/'Ninguno'; 3 apariciones acumuladas, todas en el cap. 2: 'Nadie a bordo habia caminado nunca por alli', 'Ninguno figuraba en la lista de embarque', 'Ninguno habia subido nunca a la Vigilia'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Datos y objetos inanimados como sujetos que hablan, opinan, explican o devuelven; 4 apariciones acumuladas, todas en el cap. 2: el desgaste que 'decia otra cosa' y 'no opinaba', el registro que 'los devolvio a todos', la fiebre que 'ningun cultivo explicaba'.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

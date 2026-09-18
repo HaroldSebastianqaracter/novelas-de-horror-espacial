@@ -1,0 +1,69 @@
+{
+  "Irene Sadek": {
+    "estado_fisico": "Sana, en el puente.",
+    "estado_psicologico": "Tomando decisiones sobre el rumbo de la nave; actúa con dominio durante la crisis de Renn.",
+    "secretos_que_conoce": [
+      "El cuerpo de Mateo Renn no ha estado dos años en gel, sino curandose desde antes del viaje.",
+      "Existen pasillos cerrados que figuraban en planos de astillero pero fueron borrados del esquema oficial.",
+      "El archivo clínico de Renn está fechado catorce meses antes de la botadura de la Vigilia.",
+      "Renn conoce nombres de personas que figuran en registros de turnos pero nunca subieron a bordo.",
+      "Sabe que Renn murió sin recordar su punto de embarque.",
+      "Sabe que hay un nuevo rumbo ya registrado con firma futura."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Tobías Grell": {
+    "estado_fisico": "Desaparecido. No regresó al puente tras describir las cápsulas.",
+    "estado_psicologico": "Desconocido.",
+    "secretos_que_conoce": [
+      "Existe un pasillo iluminado no documentado en los planos vigentes de la Vigilia.",
+      "Una lista manuscrita de turnos con doce nombres figura en el registro oficial pero ninguno consta en la lista de embarque.",
+      "Sabe que hay cinco cápsulas criogénicas selladas con fechas anteriores al casco de la Vigilia."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Okonjo": {
+    "estado_fisico": "Sano, en el puente.",
+    "estado_psicologico": "Alerta. Lee el rumbo futuro sin comentar.",
+    "secretos_que_conoce": [
+      "Doce personas constan en el registro oficial de turnos pero no en la lista de embarque ni en ningún documento anterior a la botadura.",
+      "El pasillo sellado existe, está abierto, y muestra signos de antiguo uso intenso.",
+      "Sabe que el rumbo ha sido modificado y ya está registrado con firma de un turno que aún no ocurre."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Mateo Renn": {
+    "estado_fisico": "Muerto. Envejeció aceleradamente durante dos horas en el puente, revirtiendo los cambios ganados, y falleció sin encontrar la información sobre dónde había embarcado.",
+    "estado_psicologico": "Desorientado en sus últimos momentos, buscando un dato que no podía recuperar.",
+    "secretos_que_conoce": [
+      "La ubicación exacta de pasillos cerrados en tramo de babor, compartimentos y sistemas de servicio.",
+      "Reparó una junta mal soldada en el cuarto panel durante el turno largo, antes de Halvard."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Elsa Varga": {
+    "estado_fisico": "En la enfermería. Respira a diez por minuto. Presenta cicatriz nueva bajo la clavícula.",
+    "estado_psicologico": "Estable pero bajo observación médica.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Piotr Amund": {
+    "estado_fisico": "En la enfermería.",
+    "estado_psicologico": "Responde a un apellido ajeno con docilidad, como si su identidad fuera ajena.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Neve Okonjo": {
+    "estado_fisico": "En la enfermería.",
+    "estado_psicologico": "Alucinando o experimentando una presencia: llama papá a un hombre que no está.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

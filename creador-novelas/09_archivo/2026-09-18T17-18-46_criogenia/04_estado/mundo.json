@@ -1,0 +1,32 @@
+{
+  "reglas": [
+    "La Vigilia es una nave hospital en tránsito: transporta cinco durmientes en gel criogénico con una tripulación mínima de guardia.",
+    "El despertar programado es anual y reglado: constantes, preguntas de orientación y retorno al gel en la misma jornada.",
+    "La tripulación identifica a los durmientes por número de cápsula antes que por nombre; el trato personal está desaconsejado por protocolo.",
+    "Fuera del casco no hay nada consultable: ni puerto, ni tráfico, ni carta que corresponda al tramo que atraviesan.",
+    "El registro de a bordo es la única autoridad sobre lo ocurrido en la nave: turnos, firmas y bajas se dan por ciertos si figuran en él.",
+    "El plano de la nave es un documento cerrado desde antes de zarpar; los tramos soldados no figuran en él.",
+    "El tiempo fuera del gel se paga: cada hora de vigilia deja marca medible en el cuerpo de un durmiente.",
+    "La consola de puente puede purgar y retrazar el rumbo, pero toda maniobra queda anotada en el registro."
+  ],
+  "objetos": [
+    "Cápsulas de gel criogénico, cinco ocupadas, numeradas de uno a cinco.",
+    "Archivo clínico de a bordo, con la fecha de sellado de cada cápsula.",
+    "Planos antiguos de la Vigilia, anteriores al sellado de los tramos.",
+    "Registro de a bordo: turnos, firmas y bajas médicas.",
+    "Consola de rumbo del puente, con las coordenadas de destino.",
+    "Lista de tripulación manuscrita, guardada en una taquilla del pasillo sellado.",
+    "Mamparos de separación, algunos soldados y borrados del plano antes de zarpar."
+  ],
+  "linea_de_tiempo": [
+    "Fecha anterior a la botadura de la Vigilia: se sellan cinco cápsulas cuyo registro nadie ha vuelto a leer.",
+    "Botadura de la Vigilia y embarque de los cinco durmientes actuales.",
+    "Catorce despertares programados sin incidentes, atendidos por Sadek con asistencia de Grell.",
+    "Dos años de travesía cumplidos: la nave llega al despertar anual en el que arranca la novela."
+  ],
+  "locaciones": {
+    "Sala de cápsulas de la Vigilia": "Compartimento central de la nave hospital: cinco cápsulas de gel en batería, luz fría constante, el zumbido de los compresores y el olor dulzón del criogénico. Es donde se ejecuta el despertar anual y donde la tripulación pasa la mayor parte de la guardia.",
+    "Pasillo sellado de la Vigilia": "Tramo que el plano no reconoce, tras un mamparo soldado antes de zarpar. Al otro lado el suelo antideslizante está gastado por años de pisadas, hay taquillas en uso y el aire tiene la temperatura de una sección habitada.",
+    "Puente de la Vigilia": "Cabina de mando estrecha, dominada por la consola de rumbo y el registro de a bordo. Desde aquí Okonjo administra la nave y desde aquí se puede purgar el trazado del viaje."
+  }
+}

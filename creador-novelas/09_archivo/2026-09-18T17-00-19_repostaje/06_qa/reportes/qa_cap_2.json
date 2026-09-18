@@ -1,0 +1,16 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Tic de negacion de reaccion como cierre de escena: en el capitulo 2, 'Teodor Malek no dijo nada en ese momento' y 'Nadie hablo durante un rato largo'. Acumula 6 apariciones en los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Metonimia del papel y la casilla como unica autoridad: en el capitulo 2, 'La anoto en el parte y se quedo con el boligrafo en el aire', 'Se consigna y se sigue' y 'Firmo la incidencia, la fecho y guardo el parte en su sitio'. Acumula 7 apariciones en los capitulos 1 y 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

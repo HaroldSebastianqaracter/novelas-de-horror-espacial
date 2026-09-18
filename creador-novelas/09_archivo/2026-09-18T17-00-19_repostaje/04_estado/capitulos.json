@@ -1,0 +1,49 @@
+[
+  {
+    "num": 1,
+    "titulo": "El relevo no aparece en la ventana prevista",
+    "objetivo_narrativo": "Instalar la rutina de los cinco operarios y el peso del protocolo, y quebrarla con el relevo que no llega y la primera línea imposible del registro de accesos, que Sabel decide tratar como un asiento administrativo.",
+    "personajes": [
+      "Sabel Oyarzun",
+      "Nieves Cabrera",
+      "Teodor Malek",
+      "Irune Salas",
+      "Domingo Arrieta"
+    ],
+    "locacion": "Kerguelen-9",
+    "informacion_nueva": "El relevo no llega en la ventana prevista, el enlace con la compañía solo devuelve acuses automáticos y el registro anota un ciclo completo de esclusa exterior sin identificador que nadie ha hecho.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "El conteo por calor corporal da seis",
+    "objetivo_narrativo": "Convertir la anomalía administrativa en amenaza física: las líneas se repiten cada turno, el conteo por calor da un ocupante de más y el archivo de la compañía revela que la nave de relevo consta atracada y descargada desde antes de la primera línea.",
+    "personajes": [
+      "Teodor Malek",
+      "Irune Salas",
+      "Nieves Cabrera",
+      "Domingo Arrieta",
+      "Sabel Oyarzun",
+      "el ocupante de más"
+    ],
+    "locacion": "Kerguelen-9",
+    "informacion_nueva": "El relevo llegó y entró la noche anterior a la primera línea del registro; la sexta litera lleva días deshecha y el conteo por calor devuelve seis fuentes para cinco cuerpos.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "Entrega de guardia, firma por firma",
+    "objetivo_narrativo": "Llevar el interrogatorio de la entrega de guardia hasta el fondo: las entradas sin identificador son salidas de algo que vuelve con una parte más de ellos, Irune descubre los acuses firmados con su código, Teodor se encuentra a sí mismo como la sexta fuente, Sabel firma y Domingo abre la esclusa.",
+    "personajes": [
+      "Sabel Oyarzun",
+      "Nieves Cabrera",
+      "Teodor Malek",
+      "Irune Salas",
+      "Domingo Arrieta",
+      "el relevo"
+    ],
+    "locacion": "Kerguelen-9",
+    "informacion_nueva": "Lo que entra por la esclusa es lo que sale cada turno a cobrarse la entrega de guardia; el puesto queda con cinco firmas asentadas, el conteo estable en cinco y una última salida sin identificador que nunca tuvo entrada previa.",
+    "tension": 5
+  }
+]

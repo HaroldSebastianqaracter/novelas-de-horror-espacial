@@ -1,0 +1,3 @@
+{"cap_corte": 1, "caps_muestra": [1], "entropia_bigramas": 8.5612, "hechos_vigentes": 20, "contradicciones": 0, "tasa_conflicto": 0.0}
+{"cap_corte": 2, "caps_muestra": [2], "entropia_bigramas": 8.583, "hechos_vigentes": 24, "contradicciones": 0, "tasa_conflicto": 0.0}
+{"cap_corte": 3, "caps_muestra": [3], "entropia_bigramas": 8.658, "hechos_vigentes": 28, "contradicciones": 1, "tasa_conflicto": 0.0357}

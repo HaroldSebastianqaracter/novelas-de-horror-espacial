@@ -1,0 +1,36 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capítulo 2 cierra con el narrador afirmando que la pregunta de Adalid en la cocina ('¿Quién quiere volver a casa?') era la primera pregunta que hacía, cuando el mismo narrador ya había establecido párrafos antes, en este capítulo, que Adalid le preguntó a Vidal si su hermano seguía escribiendo. Contradice el hecho vigente 'El pasajero contesta con exactitud a todo lo que se le pregunta y nunca pregunta nada'.",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negación anafórica en oración corta ('Nadie recordaba... Nadie las echaba de menos'; 'No había soporte vital. No había raciones...'): 3 apariciones en el capítulo 2, 7 acumuladas en los capítulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeración ternaria asindética como cierre descriptivo ('pisadas, consumos, puertas'; 'ni bulto, ni huella, ni rastro'): 2 apariciones en el capítulo 2, 5 acumuladas en los capítulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Símil introducido por 'como quien' / 'como si' ('marcaban como si hubieran respirado dieciocho'): 1 aparición en el capítulo 2, 3 acumuladas en los capítulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de escena con frase corta lapidaria ('que era lo peor'; 'Era la primera pregunta que hacía'): 2 apariciones en el capítulo 2, 4 acumuladas en los capítulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El registro o archivo de la nave invocado como única prueba (registro de presencia, huecos del registro de a bordo, barridos antiguos): 3 apariciones en el capítulo 2, 5 acumuladas en los capítulos 1 y 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

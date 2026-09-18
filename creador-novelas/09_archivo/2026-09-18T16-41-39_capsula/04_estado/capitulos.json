@@ -1,0 +1,50 @@
+[
+  {
+    "num": 1,
+    "titulo": "Un salvamento sin reclamante",
+    "objetivo_narrativo": "Enganchar la cápsula imposible y abrirla: presentar a los cinco tripulantes en faena, el encierro de once días sin ruta alternativa, y sembrar la primera grieta cuando el casco cruje en un horario que no le corresponde.",
+    "personajes": [
+      "Irene Bosch",
+      "Tomás Vidal",
+      "Naima Okonkwo",
+      "Ruslan Eyer",
+      "Cosme Arriaga",
+      "el pasajero"
+    ],
+    "locacion": "Remolcador Caldera",
+    "informacion_nueva": "La cápsula no tiene baliza, matrícula ni nave madre en diez años de registros, y no figura en ningún barrido previo del Caldera; dentro viaja una persona viva, serena, que agradece el rescate y dice haber esperado exactamente el tiempo justo. Bosch la aloja en la bodega de carga hasta puerto.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "Las horas que nadie vivió",
+    "objetivo_narrativo": "Desfasar la nave de su tripulación: huecos en el registro, desgaste imposible en los filtros, entradas ajenas en el diario médico, y una frase exacta de Adalid a cada uno sobre lo que nunca contó a nadie.",
+    "personajes": [
+      "Naima Okonkwo",
+      "Tomás Vidal",
+      "Cosme Arriaga",
+      "Ruslan Eyer",
+      "Irene Bosch",
+      "Adalid"
+    ],
+    "locacion": "Remolcador Caldera",
+    "informacion_nueva": "La trayectoria de la cápsula estaba calculada desde hacía años para cruzarse con este viaje y esta tripulación, y el casco interior no tiene soporte vital ni asiento: solo acolchado por dentro y marcas de sellado desde fuera. No era una cápsula de escape, era un envase. Cuando Bosch ordena devolverlo al vacío, la bodega está vacía y Adalid sirve café en la cocina.",
+    "tension": 4
+  },
+  {
+    "num": 3,
+    "titulo": "El margen entero",
+    "objetivo_narrativo": "Gastar la tripulación y el combustible en el mismo movimiento: las muertes de Eyer y Vidal, la corrección que aparta al Caldera de toda ruta, el sello de Okonkwo desde dentro y la última hora de Bosch a solas.",
+    "personajes": [
+      "Irene Bosch",
+      "Naima Okonkwo",
+      "Cosme Arriaga",
+      "Ruslan Eyer",
+      "Tomás Vidal",
+      "Adalid"
+    ],
+    "locacion": "Remolcador Caldera",
+    "informacion_nueva": "Adalid no altera la nave sino el tiempo que la tripulación habita, y gasta esos tramos como raciones; los once días de combustible y los once de ruta no dejan margen para desviarse, solo para no llegar. Bosch quema el margen entero hacia una órbita sin repostaje, Arriaga muere desmontando la baliza, Okonkwo se sella dentro con él, y la grabación del parte sigue once días después de que la voz de Bosch se interrumpa.",
+    "tension": 5
+  }
+]

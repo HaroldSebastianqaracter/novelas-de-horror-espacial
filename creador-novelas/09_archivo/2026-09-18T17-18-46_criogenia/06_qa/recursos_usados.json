@@ -1,0 +1,57 @@
+[
+  {
+    "recurso": "enumeracion ternaria asindetica como cierre de frase o parrafo",
+    "veces": 7,
+    "caps": [1, 2, 3]
+  },
+  {
+    "recurso": "el silencio formulado en negativa ('no dijo nada', 'no contesto')",
+    "veces": 6,
+    "caps": [1, 2, 3]
+  },
+  {
+    "recurso": "estructura 'no X, sino Y'",
+    "veces": 1,
+    "caps": [1]
+  },
+  {
+    "recurso": "comparar un procedimiento con el propio cuerpo ('como conocia su propio pulso')",
+    "veces": 1,
+    "caps": [1]
+  },
+  {
+    "recurso": "el cuerpo como moneda de pago del tiempo despierto ('se pagaba en tejido')",
+    "veces": 3,
+    "caps": [1, 2, 3]
+  },
+  {
+    "recurso": "negacion absoluta anaforica en frases cortas encadenadas ('Nadie...', 'Ninguno...')",
+    "veces": 5,
+    "caps": [2, 3]
+  },
+  {
+    "recurso": "datos y objetos inanimados como sujetos que hablan, opinan o explican",
+    "veces": 7,
+    "caps": [2, 3]
+  },
+  {
+    "recurso": "contraste aritmetico en dos frases minimas ('Cuatro bajaban. Una subia.')",
+    "veces": 1,
+    "caps": [2]
+  },
+  {
+    "recurso": "repeticion distributiva 'X por X' ('decima por decima, hora por hora')",
+    "veces": 1,
+    "caps": [2]
+  },
+  {
+    "recurso": "cifras clinicas y tiempos exactos como marcador del horror ('diez por minuto', 'en cuarenta minutos')",
+    "veces": 2,
+    "caps": [3]
+  },
+  {
+    "recurso": "el sonido o el dato que llega con retardo o desde mas lejos de lo que deberia",
+    "veces": 1,
+    "caps": [3]
+  }
+]

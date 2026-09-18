@@ -1,0 +1,16 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion anaforica en oracion corta ('No traia la piel agrietada...', 'No pidio agua.', 'No pidio a la medica...', 'No pregunto que nave era aquella...'): 4 apariciones en el capitulo 1, tres consecutivas en el mismo bloque.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion ternaria asindetica como cierre descriptivo ('sin baliza, sin matricula, sin nave madre'; 'respirable, templado, reciente'; 'fria, limpia, sin picaduras de polvo'): 3 apariciones en el capitulo 1.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

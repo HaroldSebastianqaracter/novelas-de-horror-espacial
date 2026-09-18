@@ -176,16 +176,23 @@ def _calidad(raiz: Path) -> dict[str, Any]:
     contradicciones = sum(int(m.get("contradicciones") or 0) for m in metricas)
 
     reintentos = descartes = 0
+    abortadas: list[str] = []
     for carpeta in registro.carpetas_tanda(raiz):
         for ev in registro.leer_eventos(carpeta):
             if ev.get("tipo") == "agente_inicio" and int(ev.get("intento") or 1) > 1:
                 reintentos += 1
             if ev.get("tipo") == "verbo" and ev.get("verbo") == "descartar-borrador":
                 descartes += 1
+            if ev.get("tipo") == "error":
+                # Una tanda abortada obliga a relanzar, y relanzar es una sesión de orquestador
+                # entera: vuelve a leer todo el contexto desde cero. Cuesta minutos y dinero, así
+                # que la cuenta va en la medida y no solo en el registro.
+                abortadas.append(f"{ev.get('excepcion')}: {str(ev.get('mensaje'))[:120]}")
 
     m = checkpoint.leer_manifest(raiz)
     return {"contradicciones": contradicciones, "cortes_qa": len(metricas),
             "reintentos_de_escritor": reintentos, "borradores_descartados": descartes,
+            "tandas_abortadas": len(abortadas), "motivos_de_aborto": abortadas,
             "pausado_al_archivar": bool(m is not None and m.estado == "pausado_por_qa")}
 
 

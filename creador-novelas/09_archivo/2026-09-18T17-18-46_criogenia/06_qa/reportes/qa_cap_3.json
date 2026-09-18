@@ -1,0 +1,31 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion ternaria asindetica como cierre de frase o parrafo: 7 apariciones acumuladas (caps 1, 2, 3); en el cap 3, la enumeracion de rostros de las capsulas y la cadena de acciones finales de Sadek.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio formulado en negativa ('no pregunto nada', 'no dijo nada'): 6 apariciones acumuladas (caps 1, 2, 3); en el cap 3, dos veces con Okonjo como sujeto.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Negacion absoluta ('nadie la sintio en los pies', 'ninguna carta reclamaba'): 5 apariciones acumuladas (caps 2, 3).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Datos y objetos inanimados como sujetos que actuan o informan (la consola devolvio, el registro anoto, la nave obedecio): 7 apariciones acumuladas (caps 2, 3).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El cuerpo como moneda de pago del tiempo despierto ('devolvia dos anos a la velocidad exacta con que los habia ganado'): 3 apariciones acumuladas (caps 1, 2, 3).",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

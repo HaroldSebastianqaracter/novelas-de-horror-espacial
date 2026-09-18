@@ -1,0 +1,1 @@
+Un remolcador de salvamento con cinco tripulantes recoge una cápsula de escape a la deriva. Dentro hay una persona viva, tranquila y educada, que no figura en el registro de ninguna nave perdida en este sector ni en los diez años anteriores. Dice que lleva esperando el tiempo justo. El remolcador está a once días del puerto más cercano.

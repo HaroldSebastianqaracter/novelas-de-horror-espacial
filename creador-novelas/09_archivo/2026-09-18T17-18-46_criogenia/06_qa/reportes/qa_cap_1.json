@@ -1,0 +1,16 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion ternaria asindetica como cierre de frase o parrafo, cuatro apariciones en el capitulo 1: 'anoto constantes, marco casillas, midio tiempos'; 'lo sabia, lo administraba, no lo pensaba'; 'dibujados, soldados y borrados'; 'con fechas, con numeros, con una precision'. Acumulado 4, caps [1].",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio formulado en negativa ('no decia nada', 'no contesto', 'no dijo nada') como reaccion de los personajes; tres apariciones en el capitulo 1: Okonjo, Sadek y Grell. Acumulado 3, caps [1].",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

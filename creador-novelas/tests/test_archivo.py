@@ -92,7 +92,8 @@ def test_el_resumen_guarda_reloj_agentes_y_guardarrailes(proyecto):
     assert resumen["agentes"]["escritor"]["invocaciones"] == 3
 
     assert resumen["calidad"] == {"contradicciones": 0, "cortes_qa": 3, "reintentos_de_escritor": 0,
-                                  "borradores_descartados": 0, "pausado_al_archivar": False}
+                                  "borradores_descartados": 0, "tandas_abortadas": 0,
+                                  "motivos_de_aborto": [], "pausado_al_archivar": False}
     # La configuración viaja con el libro: sin ella, dos novelas con distinta cadencia de QA no son
     # comparables y nadie sabría por qué una tardó menos.
     assert resumen["config"]["novela.json"]["cadencia_qa"] == 3

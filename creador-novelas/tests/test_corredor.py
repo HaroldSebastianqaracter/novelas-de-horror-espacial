@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from app import corredor
+from app import corredor, registro
 from app.orchestrator import checkpoint
 from app.rutas import Rutas
 from app.state import repository as repo
@@ -172,3 +172,70 @@ def test_el_informe_resume_la_corrida():
     assert "capsula" in texto and "17.2" in texto
     assert "QA dejó el manuscrito pausado" in texto
     assert "1 de 2 completas" in texto
+
+
+# ---------- la tabla para el análisis ----------
+
+def test_cada_novela_deja_una_fila_plana_con_su_variante(vacio):
+    corredor.correr_novela(vacio, ENCARGO, ejecutar=FaseDoble(vacio), aviso=lambda _: None,
+                           variante="extractor-effort-low")
+
+    import csv
+    with (vacio / "09_archivo" / corredor.CORRIDAS_CSV).open(encoding="utf-8", newline="") as fh:
+        filas = list(csv.DictReader(fh))
+
+    assert len(filas) == 1
+    fila = filas[0]
+    # `variante` es la columna que manda: sin ella no se puede agrupar por vuelta y el resto de los
+    # números no dicen gran cosa.
+    assert fila["variante"] == "extractor-effort-low"
+    assert fila["novela"] == "capsula" and fila["completa"] == "1"
+    assert fila["capitulos"] == "3"
+    # La configuración con la que se escribió viaja en la misma fila: es la variable independiente.
+    assert fila["cadencia_qa"] == "1" and fila["palabras_por_capitulo"] == "400"
+    assert "extractor_tokens_salida" in fila and "extractor_segundos" in fila
+
+
+def test_las_columnas_no_cambian_aunque_falte_un_rol(vacio):
+    corredor.correr_novela(vacio, dict(ENCARGO, nombre="una"), ejecutar=FaseDoble(vacio), aviso=lambda _: None)
+    primera = (vacio / "09_archivo" / corredor.CORRIDAS_CSV).read_text(encoding="utf-8").splitlines()[0]
+
+    corredor.correr_novela(vacio, dict(ENCARGO, nombre="otra"), ejecutar=FaseDoble(vacio), aviso=lambda _: None)
+    lineas = (vacio / "09_archivo" / corredor.CORRIDAS_CSV).read_text(encoding="utf-8").splitlines()
+
+    # Una tabla cuyas columnas cambian según lo que salió en cada corrida no se lee con pandas sin
+    # pelearse con ella. Cabecera una sola vez y siempre la misma.
+    assert lineas[0] == primera
+    assert len([l for l in lineas if l.startswith("variante,")]) == 1
+    assert len(lineas) == 3
+
+
+def test_el_csv_se_puede_rehacer_desde_el_registro_que_manda(vacio):
+    corredor.correr_novela(vacio, ENCARGO, ejecutar=FaseDoble(vacio), aviso=lambda _: None)
+    csv_ = vacio / "09_archivo" / corredor.CORRIDAS_CSV
+    csv_.unlink()
+
+    # El JSONL es el registro; el CSV es una vista. Una corrida que se quedó sin fila --porque el
+    # CSV no existía aún, o porque se añadió una columna-- se recupera sin repetir la novela.
+    corredor.reconstruir_csv(vacio, variante="base")
+    filas = csv_.read_text(encoding="utf-8").splitlines()
+    assert len(filas) == 2 and filas[1].startswith("base,capsula,")
+
+
+def test_una_novela_abortada_por_un_hook_se_cuenta_en_la_tabla(vacio):
+    doble = FaseDoble(vacio)
+
+    def con_aborto(raiz, fase, **kwargs):
+        if fase == "escribir-tanda":
+            registro.iniciar_tanda(raiz, {"total_capitulos": 3})
+        r = doble(raiz, fase, **kwargs)
+        if fase == "escribir-tanda":
+            registro.evento(raiz, "error", excepcion="EX-01",
+                            mensaje="via H-02: delta_cap_2.json no es JSON válido", capitulo=2)
+        return r
+
+    fila = corredor.correr_novela(vacio, ENCARGO, ejecutar=con_aborto, aviso=lambda _: None)
+    # Cada aborto obliga a relanzar, y relanzar es una sesión de orquestador entera releyendo todo:
+    # es tiempo y dinero que hay que poder ver en la tabla junto al resto.
+    assert fila["calidad"]["tandas_abortadas"] == 1
+    assert corredor.fila_csv(fila)["tandas_abortadas"] == 1

@@ -1,0 +1,53 @@
+[
+  {
+    "num": 1,
+    "titulo": "Protocolo de despertar",
+    "objetivo_narrativo": "Establecer la rutina anual del despertar programado a bordo de la Vigilia y romperla con el testimonio del quinto paciente, que describe un viaje que nadie registró.",
+    "personajes": [
+      "Irene Sadek",
+      "Tobías Grell",
+      "Okonjo",
+      "Mateo Renn",
+      "Elsa Varga",
+      "Piotr Amund",
+      "Neve Okonjo"
+    ],
+    "locacion": "Sala de cápsulas de la Vigilia",
+    "informacion_nueva": "Renn nombra tramos de pasillo soldados y borrados del plano antes de zarpar, y los planos antiguos confirman que existieron; sus análisis son mejores que el día que ingresó.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "Inventario de los que no embarcaron",
+    "objetivo_narrativo": "Convertir la anomalía clínica en certeza: Sadek cruza el deterioro de los cuatro con la mejoría de Renn mientras Grell abre el mamparo que el plano no reconoce.",
+    "personajes": [
+      "Irene Sadek",
+      "Tobías Grell",
+      "Okonjo",
+      "Mateo Renn",
+      "Elsa Varga",
+      "Piotr Amund",
+      "Neve Okonjo"
+    ],
+    "locacion": "Pasillo sellado de la Vigilia",
+    "informacion_nueva": "Tras el mamparo hay pasillo gastado por años de uso y una lista de tripulación manuscrita con los nombres que Renn ya había pronunciado; el registro de a bordo los devuelve con turnos y firmas, y la cápsula de Renn fue sellada antes de la botadura de la nave.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "Rumbo hacia ninguna parte",
+    "objetivo_narrativo": "Llevar el circuito a su punto de ruptura: Sadek y Okonjo purgan el rumbo para que la Vigilia no llegue a las coordenadas del viaje anterior, y pagan el precio.",
+    "personajes": [
+      "Irene Sadek",
+      "Tobías Grell",
+      "Okonjo",
+      "Mateo Renn",
+      "Neve Okonjo",
+      "Elsa Varga",
+      "Piotr Amund"
+    ],
+    "locacion": "Puente de la Vigilia",
+    "informacion_nueva": "En el último tramo sellado hay cinco cápsulas originales con los rostros de los pacientes y el de la propia Sadek; desviada la nave, Renn se deteriora a la velocidad con que sanaba y muere, y el rumbo nuevo ya figura en el registro firmado por un turno que aún no ha ocurrido.",
+    "tension": 5
+  }
+]

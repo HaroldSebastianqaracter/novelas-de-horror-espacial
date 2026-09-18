@@ -1,0 +1,77 @@
+{
+  "Sabel Oyarzun": {
+    "estado_fisico": "Presente, controlando la situación.",
+    "estado_psicologico": "Contiene emociones; el gesto no sostuvo nada ante lo descubierto.",
+    "secretos_que_conoce": [
+      "Los acuses de la compañía llevan semanas sin contenido real y ella ha decidido no consignarlo como incidencia.",
+      "Hay una sexta litera que no debería estar ocupada.",
+      "Alguien más vive en Kerguelen-9."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Nieves Cabrera": {
+    "estado_fisico": "Alerta, activa revisando sistemas y registros.",
+    "estado_psicologico": "Inquieta, percibe anomalías en los datos de esclusa.",
+    "secretos_que_conoce": [
+      "El inventario de raciones cuadra peor de lo que ha declarado en el parte.",
+      "Sabe que alguien o algo accionó la esclusa exterior sin identificación registrada.",
+      "Hay una sexta litera recientemente ocupada en el dormitorio.",
+      "La litera está tibia: alguien durmió en ella hace poco."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Teodor Malek": {
+    "estado_fisico": "Espalda enfriada contra un mamparo que da al vacío; baja a la sala de máquinas y luego sube sin decir nada.",
+    "estado_psicologico": "Aterrado y silenciado por el protocolo. Ha presenciado algo que no puede nombrar: un punto de movimiento que replica sus gestos exactamente, observándolo desde dentro del sistema.",
+    "secretos_que_conoce": [
+      "Lleva semanas oyendo en el hielo un ritmo que le parece de pasos y no lo ha dicho por no quedar como el que se quiebra primero.",
+      "El panel de conteo registra seis fuentes de temperatura durante nueve turnos seguidos.",
+      "Hay algo viviente acomodándose en el hielo bajo los pilotes.",
+      "Hay algo dentro del sistema de monitoreo que lo ve en tiempo real sin retardo."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Irune Salas": {
+    "estado_fisico": "En su consola, mano sobre el interruptor mantenida presionada más tiempo del necesario.",
+    "estado_psicologico": "Conmocionada y paralizada. Descubrió que su identidad de operadora fue usurpada: sus códigos firman respuestas desde fuera del casco en horas en que ella dormía.",
+    "secretos_que_conoce": [
+      "Los acuses que llegan de la compañía son automáticos desde hace semanas y ninguno responde a lo que ella envió.",
+      "La nave de relevo llegó a Kerguelen-9 la noche anterior al primer registro anónimo.",
+      "El archivo de tránsitos en bruto confirma el atraque y descarga.",
+      "Su código de operadora fue utilizado desde el exterior del casco a las tres y cuatro de la madrugada mientras ella dormía, respondiendo acuses."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Domingo Arrieta": {
+    "estado_fisico": "Afuera de la estación, en el exterior del casco, tras ciclar la esclusa.",
+    "estado_psicologico": "Rebelde y actuante. Se niega a entregar el puesto donde otros solo guardan silencio, comprende lo que ocurre y actúa.",
+    "secretos_que_conoce": [
+      "Cinco sillas en el comedor, cinco cabezas: no hay sexta persona.",
+      "Ha comprendido que algo cicla y suplanta; se va porque no puede permanecer."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "el ocupante de más": {
+    "estado_fisico": "Sin cuerpo visible: existe solo como una fuente de calor que el conteo de la estación suma y que nadie ha visto sentada a la mesa.",
+    "estado_psicologico": "Desconocido; actúa con la regularidad de un turno, siempre a la misma hora y siempre desde fuera.",
+    "secretos_que_conoce": [
+      "Qué ocurrió con la nave de relevo la noche anterior a la primera línea del registro."
+    ],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "el relevo": {
+    "estado_fisico": "Consta en el archivo de la compañía como tripulación atracada y descargada; ningún miembro del puesto lo ha visto llegar.",
+    "estado_psicologico": "Desconocido; solo se manifiesta como asiento administrativo, litera deshecha y ciclos de esclusa.",
+    "secretos_que_conoce": [
+      "La entrega de guardia que viene a cobrarse cada turno."
+    ],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  }
+}

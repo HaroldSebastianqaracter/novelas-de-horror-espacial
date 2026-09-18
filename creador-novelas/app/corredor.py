@@ -19,6 +19,7 @@ no diría la verdad.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import sys
 import time
@@ -39,6 +40,11 @@ PRELUDIO = ("generar-premisa", "generar-sinopsis", "generar-escaleta", "iniciali
 MAX_TANDAS = 12
 
 CORRIDAS = "corridas.jsonl"
+CORRIDAS_CSV = "corridas.csv"
+
+# Los roles con columna propia en el CSV. Fijos a propósito: una tabla cuyas columnas cambian según
+# lo que salió en cada corrida no se puede leer con pandas sin pelearse con ella.
+ROLES = ("escritor", "extractor", "qa", "orquestador")
 
 
 def campos_de_encargo(encargo: dict[str, Any]) -> dict[str, str]:
@@ -62,7 +68,7 @@ def _pausada(raiz: Path) -> bool:
 
 
 def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3600,
-                  aviso: Callable[[str], None] = print,
+                  variante: str = "base", aviso: Callable[[str], None] = print,
                   ejecutar: Callable[..., dict] = web.ejecutar_fase) -> dict[str, Any]:
     """Escribe una novela de punta a punta y la archiva. Devuelve cómo fue."""
     from app import ui  # import tardío: `ui` arrastra el formulario y aquí no hace falta antes
@@ -122,11 +128,14 @@ def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3
 
     r = archivo.archivar(raiz, nombre=nombre, forzar=True)
     resumen = r["resumen"]
+    reloj = resumen["reloj"]
     fila = {
+        "variante": variante,
         "nombre": nombre, "carpeta": r["carpeta"], "completa": bool(completa and fallo is None),
         "fallo": fallo, "cuando": datetime.now().astimezone().isoformat(timespec="seconds"),
         "reloj_corredor_s": round(time.monotonic() - inicio, 1),
-        "reloj_s": resumen["reloj"]["total_s"], "fases": fases,
+        "reloj_s": reloj["total_s"], "preludio_s": reloj["preludio_s"],
+        "tandas_s": reloj["tandas_s"], "n_tandas": len(reloj["tandas"]), "fases": fases,
         "capitulos": resumen["capitulos"]["cerrados"], "palabras": resumen["capitulos"]["palabras"],
         "agentes": resumen["agentes"], "calidad": resumen["calidad"],
         "coste_usd": (resumen.get("coste") or {}).get("total"),
@@ -137,22 +146,139 @@ def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3
     with destino.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(fila, ensure_ascii=False) + "\n")
 
+    escribir_csv(raiz, fila)
+
     estado = "completa" if fila["completa"] else f"FALLÓ ({fallo})"
     aviso(f"  {estado} · {(fila['reloj_corredor_s'] or 0) / 60:.1f} min · {r['carpeta']}")
     return fila
 
 
+def fila_csv(fila: dict[str, Any]) -> dict[str, Any]:
+    """Aplana una corrida a una fila de tabla: una novela, una línea, columnas siempre iguales.
+
+    El JSONL guarda todo, incluida la lista de motivos de aborto y el desglose por fase. Esto es lo
+    otro: lo que se abre con pandas sin desanidar nada. La columna que manda es `variante`, porque
+    sin ella no se puede agrupar por vuelta y el resto de números no significan gran cosa.
+    """
+    agentes = fila.get("agentes") or {}
+    calidad = fila.get("calidad") or {}
+    config = fila.get("config") or {}
+    palabras = [p for p in (fila.get("palabras") or []) if p]
+    plano: dict[str, Any] = {
+        "variante": fila.get("variante"),
+        "novela": fila.get("nombre"),
+        "cuando": fila.get("cuando"),
+        "completa": int(bool(fila.get("completa"))),
+        "fallo": fila.get("fallo") or "",
+        "minutos": round((fila.get("reloj_corredor_s") or 0) / 60, 2),
+        "reloj_corredor_s": fila.get("reloj_corredor_s"),
+        "reloj_registro_s": fila.get("reloj_s"),
+        "preludio_s": fila.get("preludio_s"),
+        "tandas_s": fila.get("tandas_s"),
+        "n_tandas": fila.get("n_tandas"),
+        "capitulos": fila.get("capitulos"),
+        "palabras_total": sum(palabras) or None,
+        "palabras_media": round(sum(palabras) / len(palabras), 1) if palabras else None,
+        "coste_usd": fila.get("coste_usd"),
+    }
+    for rol in ROLES:
+        datos = agentes.get(rol) or {}
+        plano[f"{rol}_invocaciones"] = datos.get("invocaciones") or 0
+        plano[f"{rol}_segundos"] = datos.get("segundos") or 0
+        plano[f"{rol}_tokens_salida"] = datos.get("tokens_salida") or 0
+        plano[f"{rol}_modelo"] = (datos.get("modelos") or [None])[0]
+    for clave in ("contradicciones", "cortes_qa", "reintentos_de_escritor",
+                  "borradores_descartados", "tandas_abortadas"):
+        plano[clave] = calidad.get(clave)
+    for clave in ("total_capitulos", "palabras_por_capitulo", "cadencia_qa",
+                  "ventana_resumen_rodante", "max_tokens_contexto_escritor",
+                  "max_hechos_por_capitulo"):
+        plano[clave] = config.get(clave)
+    plano["modelo_orquestador"] = web.MODELO_ORQUESTADOR_ID
+    plano["carpeta"] = fila.get("carpeta")
+    return plano
+
+
+def escribir_csv(raiz: Path, fila: dict[str, Any]) -> Path:
+    """Añade la corrida al CSV, con cabecera si es la primera."""
+    destino = raiz / archivo.ARCHIVO / CORRIDAS_CSV
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    plano = fila_csv(fila)
+    nuevo = not destino.exists()
+    with destino.open("a", encoding="utf-8", newline="") as fh:
+        escritor = csv.DictWriter(fh, fieldnames=list(plano), extrasaction="ignore")
+        if nuevo:
+            escritor.writeheader()
+        escritor.writerow(plano)
+    return destino
+
+
+def _completar_desde_el_archivo(raiz: Path, fila: dict[str, Any]) -> dict[str, Any]:
+    """Rellena lo que la fila no traiga leyendo el `resumen.json` de la novela archivada.
+
+    Una columna que se añade hoy no existe en las corridas de ayer, pero el dato sí: está en el
+    archivo de cada novela, que es lo que nunca se pisa. Así una tabla nueva no obliga a repetir
+    novelas que costaron veinte minutos cada una.
+    """
+    if fila.get("n_tandas") is not None and (fila.get("calidad") or {}).get("tandas_abortadas") is not None:
+        return fila
+    resumen_json = raiz / str(fila.get("carpeta") or "") / "resumen.json"
+    if not fila.get("carpeta") or not resumen_json.is_file():
+        return fila
+    try:
+        resumen = json.loads(resumen_json.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return fila
+    reloj = resumen.get("reloj") or {}
+    completa = dict(fila)
+    completa.setdefault("preludio_s", reloj.get("preludio_s"))
+    completa.setdefault("tandas_s", reloj.get("tandas_s"))
+    completa.setdefault("n_tandas", len(reloj.get("tandas") or []))
+    completa["calidad"] = {**(resumen.get("calidad") or {}), **(fila.get("calidad") or {})}
+    completa.setdefault("agentes", resumen.get("agentes") or {})
+    return completa
+
+
+def reconstruir_csv(raiz: Path, *, variante: str | None = None) -> Path:
+    """Rehace el CSV entero desde `corridas.jsonl`, que es el registro que manda.
+
+    El CSV es una vista: si se añade una columna, o una corrida vieja se quedó sin fila porque el
+    CSV no existía todavía, se rehace desde el JSONL y no se pierde nada.
+    """
+    origen = raiz / archivo.ARCHIVO / CORRIDAS
+    destino = raiz / archivo.ARCHIVO / CORRIDAS_CSV
+    filas = []
+    if origen.is_file():
+        for linea in origen.read_text(encoding="utf-8").splitlines():
+            if linea.strip():
+                fila = json.loads(linea)
+                if variante and not fila.get("variante"):
+                    fila["variante"] = variante
+                filas.append(fila_csv(_completar_desde_el_archivo(raiz, fila)))
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    if not filas:
+        destino.write_text("", encoding="utf-8")
+        return destino
+    with destino.open("w", encoding="utf-8", newline="") as fh:
+        escritor = csv.DictWriter(fh, fieldnames=list(filas[0]), extrasaction="ignore")
+        escritor.writeheader()
+        escritor.writerows(filas)
+    return destino
+
+
 def correr(raiz: Path, encargos: list[dict[str, Any]], *, tope_fase_s: float = 3600,
-           aviso: Callable[[str], None] = print, **kwargs) -> list[dict[str, Any]]:
+           variante: str = "base", aviso: Callable[[str], None] = print,
+           **kwargs) -> list[dict[str, Any]]:
     """Encadena varias novelas. Una que falla no detiene a las siguientes."""
     filas = []
     for i, encargo in enumerate(encargos, 1):
         aviso(f"[{i}/{len(encargos)}] {encargo.get('nombre')}")
         try:
-            filas.append(correr_novela(raiz, encargo, tope_fase_s=tope_fase_s, aviso=aviso, **kwargs))
+            filas.append(correr_novela(raiz, encargo, tope_fase_s=tope_fase_s, variante=variante,
+                                       aviso=aviso, **kwargs))
         except Exception as e:
             aviso(f"  ABORTADA: {type(e).__name__}: {e}")
-            filas.append({"nombre": encargo.get("nombre"), "completa": False,
+            filas.append({"variante": variante, "nombre": encargo.get("nombre"), "completa": False,
                           "fallo": f"{type(e).__name__}: {e}"})
     return filas
 
@@ -194,18 +320,27 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--desde", type=int, default=1, help="primera novela de la lista (1 es la primera)")
     p.add_argument("--hasta", type=int, help="última novela de la lista")
     p.add_argument("--tope-fase", type=float, default=60, help="minutos máximos por fase antes de cortarla")
+    p.add_argument("--variante", default="base",
+                   help="etiqueta de la vuelta (base, extractor-effort-low, cadencia-qa-3...); es la "
+                        "columna por la que se agrupa en el análisis")
     p.add_argument("--listar", action="store_true", help="enseña las novelas y no escribe nada")
+    p.add_argument("--rehacer-csv", action="store_true",
+                   help="rehace corridas.csv desde corridas.jsonl y no escribe ninguna novela")
     args = p.parse_args(argv)
 
     raiz = raiz_desde_entorno()
+    if args.rehacer_csv:
+        destino = reconstruir_csv(raiz, variante=args.variante)
+        print(f"reescrito {destino}")
+        return 0
     encargos = cargar_encargos(Path(args.encargos))[args.desde - 1:args.hasta]
     if args.listar:
         for i, e in enumerate(encargos, args.desde):
             print(f"{i:2}. {e.get('nombre')}: {e['idea'].splitlines()[0][:90]}")
         return 0
 
-    print(f"{len(encargos)} novelas, tope de {args.tope_fase:.0f} min por fase")
-    filas = correr(raiz, encargos, tope_fase_s=args.tope_fase * 60)
+    print(f"{len(encargos)} novelas, variante «{args.variante}», tope de {args.tope_fase:.0f} min por fase")
+    filas = correr(raiz, encargos, tope_fase_s=args.tope_fase * 60, variante=args.variante)
     print("\n" + informe(filas))
     return 0 if all(f.get("completa") for f in filas) else 1
 

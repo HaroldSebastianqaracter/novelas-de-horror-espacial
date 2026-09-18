@@ -1,0 +1,226 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Kerguelen-9 es un depósito de combustible anclado con pilotes al hielo de una luna sin nombre propio; fuera del casco no se sobrevive sin traje.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El puesto lo sostienen cinco operarios que llevan catorce meses repitiendo el mismo turno.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El protocolo de la compañía prohíbe abandonar el puesto sin entrega de guardia firmada, y el manual es lo único que todavía funciona.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El registro de accesos anota cada ciclo de esclusa exterior con identificador de operario y no admite borrados ni correcciones.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La estación cuenta ocupantes por calor corporal de forma continua, sin intervención humana.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El enlace con la compañía solo devuelve acuses automáticos desde hace semanas; nadie ha hablado con una persona al otro lado.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El suministro está calculado para cinco personas hasta la fecha de relevo, y el relevo no ha llegado.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El hielo cruje bajo los pilotes de noche con un ritmo que la tripulación ha aprendido a no comentar.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kerguelen-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El puesto tiene seis literas para cinco operarios; la sexta se usa como depósito de material.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kerguelen-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La única vía de entrada y salida es la esclusa exterior, cuyo ciclado queda siempre asentado en el registro de accesos.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sabel Oyarzun",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Manda el puesto y firma el parte diario; su autoridad se apoya entera en el protocolo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nieves Cabrera",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Lleva el bombeo y el inventario, y revisa los registros por rutina.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Teodor Malek",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Mantiene la planta térmica, donde está el conteo de ocupantes por calor corporal, y odia el ruido que hace el hielo de noche.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irune Salas",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Opera el enlace con la compañía bajo su propio código de operadora y sabe, sin decirlo, que los acuses son automáticos desde hace semanas.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Domingo Arrieta",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el más joven del puesto y el único que todavía cuenta los días que faltan para el relevo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "el relevo",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "En el archivo de la compañía, la nave de relevo consta atracada y descargada desde antes de que empiece el capítulo 1, aunque nadie en el puesto lo sabe todavía.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "el ocupante de más",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Existe dentro del puesto desde antes del capítulo 1 y solo se manifiesta como una fuente de calor de más en el conteo y como ciclos de esclusa sin identificador.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kerguelen-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La esclusa exterior de Kerguelen-9 fue accionada a las veintitrés horas sin código de identificación registrado, dejando una línea anónima e irrevocable en el registro de accesos.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kerguelen-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El relevo programado no llegó a Kerguelen-9 en la ventana de las cero seis cuarenta, incumpliendo la entrega después de catorce meses de ciclo.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irune Salas",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Irune Salas envió una consulta de horario firmada con su código y la compañía respondió con acuse de recibido sin asignar número de expediente.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El panel de conteo de ocupantes de Kerguelen-9 registra seis fuentes de temperatura durante nueve turnos seguidos, mientras que en la estación hay cinco personas vivas.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kerguelen-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La sexta litera del dormitorio ha sido ocupada recientemente: su manta está tibia y revuelta por el peso de quien durmió allí.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "el relevo",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "La nave de relevo llegó a Kerguelen-9 y fue descargada la noche anterior al primer registro anónimo en el sistema de esclusa.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Algo viviente se acomoda en el hielo bajo los pilotes de Kerguelen-9 con paciencia de turno cumplido.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Algo cicla regularmente entre la esclusa interior y el exterior, saliendo al hielo al final de cada guardia y regresando con nuevas discrepancias en inventario, partes de trabajo y memoria de la tripulación.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irune Salas",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Su código de operadora fue utilizado desde fuera del casco a las tres y cuatro de la madrugada para responder acuses del sistema, en horas en que ella dormía.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Teodor Malek",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Teodor detectó un punto de movimiento en la sala de máquinas que replica sus movimientos exactamente, sin retardo ni sombra, sugiriendo una vigilancia desde dentro del sistema.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Domingo Arrieta",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Domingo Arrieta rechazó la entrega de guardia, se equipó con el traje de EVA, cicló la esclusa y salió de Kerguelen-9.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

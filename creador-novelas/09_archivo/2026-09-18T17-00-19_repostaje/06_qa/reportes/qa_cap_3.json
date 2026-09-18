@@ -1,0 +1,41 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El cierre del capitulo 3 afirma que el conteo de ocupantes se mantenia en cinco desde la primera jornada del turno, sin un solo corte. Contradice el hecho vigente de que el panel de conteo registro seis fuentes de temperatura durante nueve turnos seguidos, en un sistema automatico y continuo sin intervencion humana.",
+      "cap_origen": 2
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Tic de negacion de reaccion como cierre de escena ('no dijo nada porque no habia nada que el protocolo permitiera decir', 'Nadie fue detras'): 8 apariciones acumuladas en los capitulos 1, 2 y 3, dos de ellas en el capitulo 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Metonimia del papel y la casilla como unica autoridad (el impreso, el manual que no contemplaba, lo que el protocolo permitiera, el parte impecable, las firmas correctamente asentadas): 11 apariciones acumuladas en los capitulos 1, 2 y 3, cuatro en el capitulo 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La letra de la escritura como marca de rutina ('la letra pequena y obediente de catorce meses'): 3 apariciones acumuladas en los capitulos 1 y 3, una en el capitulo 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Repeticion martilleada de la cifra como prueba ('Cinco firmas...', 'el conteo se mantenia en cinco'): 3 apariciones acumuladas en los capitulos 2 y 3, una en el capitulo 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Accion hecha o evitada por lo que admitiria ('porque alguien tenia que verificar el panel una vez mas', 'porque no habia nada que el protocolo permitiera decir'): 4 apariciones acumuladas en los capitulos 2 y 3, dos en el capitulo 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El frio o el hielo como presencia que sube o se acomoda sobre el cuerpo ('como se le enfriaba la espalda contra un mamparo que daba al vacio'): 3 apariciones acumuladas en los capitulos 2 y 3, una en el capitulo 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

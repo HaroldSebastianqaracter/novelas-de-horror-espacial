@@ -1,0 +1,32 @@
+{
+  "reglas": [
+    "El Caldera es un remolcador de salvamento con cinco tripulantes y catorce meses de viaje a las espaldas: todos conocen de memoria el sonido de cada mamparo y el horario en que el casco se contrae.",
+    "El combustible del Caldera alcanza para exactamente once días de ruta, y a Cintra le faltan exactamente once: no hay margen para desviarse, solo para llegar o para no llegar.",
+    "Un salvamento sin reclamante es dinero limpio: la ley de puerto premia enganchar lo que nadie reclama, y por eso nadie discute el enganche.",
+    "El soporte vital recicla el mismo aire desde hace catorce meses; los filtros se desgastan a un ritmo conocido y medible, y ese desgaste es un reloj.",
+    "Todo lo que ocurre a bordo queda en el registro de la nave: sensores de presencia, diario médico, vídeo del parte. El registro es la única memoria que la tripulación acepta como prueba.",
+    "Afuera solo hay vacío, sin tráfico, sin auxilio posible dentro del alcance del combustible: quien salga del casco depende del traje y de quien lo selle.",
+    "Los sellos de esclusa y de bodega se revierten desde fuera; nadie puede abrirse a sí mismo desde dentro.",
+    "El tiempo a bordo se cuenta en turnos, no en días de puerto, y ese cómputo es lo único que ordena la convivencia."
+  ],
+  "objetos": [
+    "La cápsula: sin baliza, sin matrícula, sin nave madre en este sector ni en los diez años anteriores. No aparece en ningún barrido previo del Caldera.",
+    "El casco interior de la cápsula: revestimiento acolchado por dentro y marcas de sellado desde fuera; ni soporte vital, ni raciones, ni asiento.",
+    "El registro de a bordo: tramos horarios, lecturas de sensores y desgaste de sistemas; lo consulta Arriaga por costumbre.",
+    "El diario médico de Okonkwo, escrito de su puño y usado para lo que no cabe en el parte oficial.",
+    "La cámara del parte con la que Eyer filma los procedimientos de salvamento.",
+    "La baliza de socorro del Caldera, montada en el casco exterior.",
+    "La bodega de carga, medio vacía a la salida y convertida en alojamiento improvisado.",
+    "La grabación del parte de salvamento de la capitana Bosch."
+  ],
+  "linea_de_tiempo": [
+    "Hace más de diez años: ningún registro de sector consigna nave madre alguna para la cápsula.",
+    "Años antes del viaje: la trayectoria de la cápsula ya está en curso, calculada para cruzarse con esta nave y esta tripulación.",
+    "Catorce meses antes del capítulo 1: los cinco embarcan en el Caldera y empieza el viaje.",
+    "Capítulo 1, día 11 antes de puerto de Cintra: el Caldera engancha la cápsula y la abre.",
+    "Por delante: once días de ruta hasta Cintra, sin destino alternativo dentro del alcance del combustible."
+  ],
+  "locaciones": {
+    "Remolcador Caldera": "Remolcador de salvamento de tripulación mínima, con puente, cocina, enfermería, sala de máquinas, esclusa exterior y una bodega de carga medio vacía. Aire reciclado desde hace catorce meses, pasillos estrechos y ruidos conocidos; el casco se contrae y cruje a horas fijas que la tripulación reconoce sin pensarlo. Va camino de puerto de Cintra, a once días, con el combustible contado."
+  }
+}

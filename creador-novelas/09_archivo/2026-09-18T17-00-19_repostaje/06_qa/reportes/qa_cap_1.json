@@ -1,0 +1,16 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Tic de negacion de reaccion como cierre de escena ('nadie le discutia', 'no dijo nada', 'Nadie discutio', 'no lo comento'): 4 apariciones en el capitulo 1.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Metonimia del papel y la casilla como unica autoridad ('la casilla que correspondia', 'lo unico que el papel permitia', 'el papel era lo ultimo que alli funcionaba', 'mientras una cosa cupiera en una casilla'): 4 apariciones en el capitulo 1.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

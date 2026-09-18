@@ -1,0 +1,77 @@
+{
+  "Irene Bosch": {
+    "estado_fisico": "Íntegro; ha bajado a la bodega para verificar el hallazgo.",
+    "estado_psicologico": "Alarmada y decidida. Toma decisiones drásticas de seguridad.",
+    "secretos_que_conoce": [
+      "Una orden que dio en un mando anterior costó la vida de una tripulación entera, y nunca lo contó a bordo.",
+      "Conoce que la cápsula es un envase vacío sin suporte vital, solo acolchado blando, sellado desde fuera para ser entregado."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Tomás Vidal": {
+    "estado_fisico": "Íntegro.",
+    "estado_psicologico": "Inquieto. Ha descubierto una anomalía temporal en los filtros.",
+    "secretos_que_conoce": [
+      "Dejó atrás a un hermano al embarcarse y no ha vuelto a responder sus mensajes.",
+      "Los filtros muestran saturación de 18 meses cuando solo han durado 14 en el aire."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Naima Okonkwo": {
+    "estado_fisico": "Íntegro; ha descendido a la bodega para inspeccionar la cápsula.",
+    "estado_psicologico": "Profundamente conmocionada. Descubrió falsificaciones en su diario médico personal.",
+    "secretos_que_conoce": [
+      "Firmó algo en su destino anterior que la dejó sin poder volver a ejercer en puertos del interior.",
+      "El aire dentro de la nave objeto es respirable, templado y reciente.",
+      "Alguien falsificó tres entradas en su diario usando su letra y abreviaturas, registrando una revisión a las 04:10 cuando ella dormía. El envase no tiene suporte vital ni equipo, solo acolchado blando y una costura de cierre practicada desde fuera."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Ruslan Eyer": {
+    "estado_fisico": "Íntegro.",
+    "estado_psicologico": "Inquieto. Ha escuchado una frase con carga implícita de amenaza.",
+    "secretos_que_conoce": [
+      "Embarcó huyendo de una deuda que sigue creciendo mientras él está fuera de alcance.",
+      "Adalid le comentó que los intereses no dejan de correr cuando uno se aleja lo bastante."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Cosme Arriaga": {
+    "estado_fisico": "Íntegro.",
+    "estado_psicologico": "Consternado por el descubrimiento de que la cápsula fue lanzada deliberadamente.",
+    "secretos_que_conoce": [
+      "Hay un nombre que no pronuncia desde hace años y que no figura en ningún papel suyo a bordo.",
+      "El objeto no figura en ningún barrido anterior del Caldera ni en diez años de archivo.",
+      "Hay cuatro huecos en el registro de a bordo desde el enganche: de 2, 5, 7 y 11 horas sin anotaciones, aunque los sensores registran actividad. La trayectoria de la cápsula, proyectada hacia atrás, describe una curva de años que termina exactamente aquí, en este viaje, con estos cinco a bordo. Alguien la lanzó sabiendo dónde estaría el Caldera."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "el pasajero": {
+    "estado_fisico": "Sale por su propio pie de una cápsula sin soporte vital, sin deshidratación, sin hambre, sin marca alguna de encierro. Su cuerpo no muestra el tiempo que dice haber esperado.",
+    "estado_psicologico": "Calma absoluta y modales impecables. No pide nada y no pregunta nada; contesta con exactitud a todo. Se presenta como Adalid.",
+    "secretos_que_conoce": [
+      "Sabe de cada tripulante aquello que ninguno ha contado a nadie a bordo.",
+      "Sabe que esperó exactamente el tiempo justo para ser recogido por esta nave y esta tripulación."
+    ],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "Adalid": {
+    "estado_fisico": "Íntegro; está en la cocina con cinco tazas de café servido y humeando.",
+    "estado_psicologico": "Misterioso y controlador. Posee conocimiento perturbador de secretos personales de cada tripulante.",
+    "secretos_que_conoce": [
+      "La trayectoria de la cápsula estaba calculada desde hacía años para cruzarse con el Caldera en este viaje concreto.",
+      "La cápsula no era de escape: era un envase sellado desde fuera.",
+      "Lo que consume no es la nave sino el tiempo que la tripulación habita, y lo gasta por tramos.",
+      "Dice llevar esperando 'el tiempo justo', sin explicar para qué.",
+      "Conoce sobre los intereses de Eyer, un nombre que desestabiliza a Arriaga, información sobre el hermano de Vidal, un documento y fecha relevante a Okonkwo, y detalles sobre órdenes de Bosch que enterraron gente."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  }
+}

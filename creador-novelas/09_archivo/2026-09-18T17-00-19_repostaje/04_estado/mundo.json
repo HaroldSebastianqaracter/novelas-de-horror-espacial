@@ -1,0 +1,30 @@
+{
+  "reglas": [
+    "El protocolo de la compañía prohíbe abandonar el puesto sin entrega de guardia firmada; el manual es la única autoridad que sigue operando.",
+    "El parte diario debe firmarse cada jornada por quien manda el puesto, y un asiento administrativo tiene más peso que un testimonio.",
+    "El registro de accesos anota cada ciclo de esclusa con identificador de operario; no admite correcciones ni borrados.",
+    "La estación cuenta ocupantes por calor corporal, de forma continua y sin intervención humana.",
+    "El enlace con la compañía tiene retardo largo: lo que vuelve son acuses, no respuestas.",
+    "Fuera del casco no se sobrevive: hielo, vacío de aire respirable y frío que mata en minutos.",
+    "El suministro es finito y se calcula para cinco personas hasta la fecha de relevo."
+  ],
+  "objetos": [
+    "Registro de accesos de la esclusa exterior",
+    "Parte diario y libro de firmas de entrega de guardia",
+    "Consola de enlace con la compañía, con el código de operadora de Irune Salas",
+    "Conteo de ocupantes por calor corporal de la planta térmica",
+    "Sexta litera, usada como depósito de material",
+    "Pilotes anclados al hielo bajo el casco",
+    "Bombas e inventario de combustible"
+  ],
+  "linea_de_tiempo": [
+    "Los cinco llevan catorce meses de turno continuo en Kerguelen-9.",
+    "Semanas antes del relevo, los acuses de la compañía empiezan a llegar automáticos.",
+    "La nave de relevo consta en el archivo como atracada y descargada la noche anterior a la primera línea sin identificador.",
+    "El relevo no aparece en la ventana prevista, ni a las doce ni a las treinta horas.",
+    "La segunda noche aparece en el registro la primera esclusa exterior sin identificador."
+  ],
+  "locaciones": {
+    "Kerguelen-9": "Depósito de combustible anclado con pilotes al hielo de una luna sin nombre propio. Un casco bajo y alargado con esclusa exterior, planta térmica, sala de bombeo, consola de enlace, comedor común y seis literas para cinco operarios. Afuera, hielo en todas las direcciones y un crujido constante bajo los pilotes."
+  }
+}
