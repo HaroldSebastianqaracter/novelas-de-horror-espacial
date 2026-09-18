@@ -1,0 +1,50 @@
+[
+  {
+    "num": 1,
+    "titulo": "Lo que flotaba sin transpondedor",
+    "objetivo_narrativo": "Presentar el Arrecife, su tripulación gastada y el tramo de vacío sin auxilio posible; enganchar la cápsula sin registro y encontrar viva dentro a una superviviente que saluda a todos por su nombre. Cerrar con Oyarzún sola en el puente, cotejando el relato del naufragio con el resumen de cabecera del informe cifrado y descubriendo que coincide palabra por palabra.",
+    "personajes": [
+      "Renata Oyarzún",
+      "Tomás Beas",
+      "Iselda Mkhari",
+      "Aurelio Fenn",
+      "Kiril Vantu",
+      "Sabel Ríos"
+    ],
+    "locacion": "Remolcador Arrecife",
+    "informacion_nueva": "La cápsula no tiene transpondedor ni firma térmica de naufragio reciente; Sabel Ríos está limpia, sin hambre ni frío, y relata el siniestro con un detalle que coincide literalmente con el informe cifrado que sigue sellado en la consola de la capitana. Quedan once días hasta Ostrahalla.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "Lo que el casco empezó a repetir",
+    "objetivo_narrativo": "Partir a la tripulación entre abrir el archivo, expulsar la cápsula o esperar, mientras la nave cumple una a una las cosas que Sabel ya había contado. Terminar con el hallazgo de Kiril en el cuaderno de sensores: la cápsula no venía a la deriva, venía siguiendo el rumbo del Arrecife.",
+    "personajes": [
+      "Renata Oyarzún",
+      "Tomás Beas",
+      "Iselda Mkhari",
+      "Aurelio Fenn",
+      "Kiril Vantu",
+      "Sabel Ríos"
+    ],
+    "locacion": "Remolcador Arrecife",
+    "informacion_nueva": "Aparece un pasillo de servicio que no figura en ningún plano, falla el circuito secundario de refrigeración en el minuto narrado y una voz ajena lee por el canal interno un parte de bajas con los cinco nombres. La purga de esclusa se registra como ejecutada y la cápsula sigue acoplada. El rumbo de la cápsula fue corregido tres veces: no la rescataron, la recibieron.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "El atestado se firma solo",
+    "objetivo_narrativo": "Cumplir el parte de bajas hasta el final: Beas abre el informe cifrado y descubre que es el atestado del propio Arrecife firmado por Sabel Ríos como única superviviente. Oyarzún entiende que el naufragio viaja en el relato, desengancha el módulo de mando con Kiril dentro y la memoria borrada, y se queda con el casco virando al vacío abierto. Cerrar con otro remolcador enganchando una cápsula sin transpondedor.",
+    "personajes": [
+      "Renata Oyarzún",
+      "Tomás Beas",
+      "Kiril Vantu",
+      "Sabel Ríos",
+      "Iselda Mkhari",
+      "Aurelio Fenn"
+    ],
+    "locacion": "Remolcador Arrecife",
+    "informacion_nueva": "El informe cifrado es el atestado del siniestro del Arrecife, con la lista de bajas completándose a medida que ocurre y la firma de Sabel Ríos como única declarante. Abrir el informe fija su contenido; la cápsula es el vehículo que entrega el relato al siguiente casco que se detenga a recogerla.",
+    "tension": 5
+  }
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "El relevo que no llega",
+    "objetivo_narrativo": "Encerrar a los cinco operarios en Vereda 9 por su propio reglamento y romper la normalidad con el primer parte adelantado, que se cumple puntual en el colector tres y en el comedor.",
+    "personajes": [
+      "Nadia Sotelo",
+      "Ferrán Olascoaga",
+      "Idoya Mero",
+      "Cavero",
+      "Bruno Halac"
+    ],
+    "locacion": "Vereda 9",
+    "informacion_nueva": "El relevo no aparece y el enlace con la compañía solo devuelve acuses automáticos con el mismo sello horario; el reglamento prohíbe abandonar la estación sin entrega de guardia formal. Nadia encuentra en el cuaderno de turno el parte del día siguiente ya escrito con su caligrafía y su firma, con tres incidencias que aún no han ocurrido: una fuga en el colector tres, una discusión en el comedor y un nombre tachado en la lista de la tripulación. Las tres se cumplen en el orden escrito.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "El renglón bajo el hielo",
+    "objetivo_narrativo": "Agotar todos los intentos de custodiar o destruir el cuaderno y revelar que bajo la estación no hay una criatura sino un archivo que lleva el registro por delante de ellos.",
+    "personajes": [
+      "Idoya Mero",
+      "Cavero",
+      "Ferrán Olascoaga",
+      "Bruno Halac",
+      "Nadia Sotelo"
+    ],
+    "locacion": "Nivel de anclaje",
+    "informacion_nueva": "Los partes se adelantan días y cambian de letra: Bruno encuentra uno con su caligrafía que fecha la baja médica de un compañero que aún desayuna enfrente. El cuaderno aparece redactado dentro del armario cerrado y, quemado por Cavero, reaparece idéntico con la quema anotada como incidencia menor y la corrección 'el operario insiste'. Idoya desvía un sensor de fondo y lee lo que hay bajo el hielo: kilómetros de partes de guardia helados de todos los turnos que pasaron por Vereda 9, incluidos los que la compañía nunca registró. El archivo no predice: lleva el registro, y para él la guardia ya terminó. El parte de la semana próxima dice que la entrega se cerró en regla, con cinco firmas y cuatro nombres.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "Cinco firmas, cuatro nombres",
+    "objetivo_narrativo": "Llevar al límite el intento de romper el renglón, cobrarse a Cavero y cerrar la entrega de guardia desdoblándola: uno se queda de turno indefinido para que el resto quede relevado.",
+    "personajes": [
+      "Ferrán Olascoaga",
+      "Idoya Mero",
+      "Nadia Sotelo",
+      "Bruno Halac",
+      "Cavero"
+    ],
+    "locacion": "Vereda 9",
+    "informacion_nueva": "Romper la rutina funciona a medias y degrada la estación; las incidencias esquivadas reaparecen con otra firma y otro nombre tachado. Cavero muere al salir al hielo sin autorización hacia la marca de anclaje, y su muerte estaba escrita en la página del día anterior que nadie leyó, porque la abstinencia de leer también estaba escrita. Olascoaga lee el reglamento entero y encuentra la trampa: la guardia solo se cierra contra un relevo, y sin relevo lo constituyen los propios operarios. El nombre tachado nunca fue el de un muerto, sino el del que se queda. Olascoaga firma y releva a los otros tres. Desde el módulo de superficie, Nadia abre su cuaderno personal y encuentra el parte de mañana con su letra: la llegada del relevo, cinco nombres nuevos y una incidencia sin resolver en el colector tres.",
+    "tension": 5
+  }
+]

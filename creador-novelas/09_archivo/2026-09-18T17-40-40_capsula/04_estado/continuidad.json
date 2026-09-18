@@ -1,0 +1,178 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El Arrecife lleva nueve meses fuera de puerto y cruza un tramo de vacío sin balizas ni tráfico: no hay auxilio posible desde fuera y una llamada de socorro tardaría semanas en encontrar oído.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La tripulación son cinco personas gastadas por la rutina: Oyarzún al mando, Beas de primer oficial, Mkhari en propulsión, Fenn en enfermería y Vantu en sensores. No hay relevos.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El soporte vital y la propulsión dependen de una planta que debería haberse jubilado hace dos ciclos; el circuito secundario de refrigeración es su punto frágil y Mkhari la mantiene viva con reparaciones improvisadas.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La víspera de zarpar una lanzadera entregó a la capitana un informe cifrado que el contrato le prohíbe abrir antes de llegar a Ostrahalla; sigue sellado en la consola del puente y nadie a bordo conoce su contenido.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El salvamento se cobra por lo que se engancha, de modo que recoger lo que flota siempre tiene un incentivo económico a bordo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Todo lo que ocurre a bordo queda asentado en registros automáticos de maniobras, esclusas y sensores; la tripulación confía en esos registros como prueba de lo sucedido.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Remolcador Arrecife",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El casco es viejo, estrecho y ruidoso: bodega con esclusa, sala de máquinas, enfermería, puente con la consola sellada y el puesto de sensores, y un módulo de mando que puede desengancharse y navegar por su cuenta.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Remolcador Arrecife",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Entre la bodega y la sala de máquinas no hay ningún pasillo de servicio: los planos de a bordo no registran ninguno.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Renata Oyarzún",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es la capitana del Arrecife y la única con acceso a la consola donde está sellado el informe cifrado; ha decidido no abrirlo antes de puerto.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tomás Beas",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el primer oficial y lleva la cuenta de lo que pagará cada salvamento; quiere enganchar cualquier cosa que flote.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Iselda Mkhari",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es la ingeniera de propulsión y la única capaz de sostener la planta; resuelve los problemas desprendiéndose de lo que amenaza la nave.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Aurelio Fenn",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el médico de a bordo, contratado barato y con licencia provisional; sus medios en enfermería son limitados.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kiril Vantu",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el operador de sensores y el más joven de la tripulación; escucha las bandas muertas por gusto y anota lo que oye en un cuaderno propio, aparte del registro oficial.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sabel Ríos",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Viaja dentro de una cápsula de escape sin transpondedor, sin registro y sin firma térmica de naufragio reciente, en el rumbo del Arrecife; nadie a bordo la conoce ni sabe aún que está ahí.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Remolcador Arrecife",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Una cápsula de escape sin transpondedor, de ocho metros, con firma térmica anómala fue encontrada a la deriva a once días de Ostrahalla.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sabel Ríos",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Sabel Ríos fue hallada viva en la cápsula sin signos de deshidratación, hambre, sed, frío o fatiga tras semanas en encierro.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sabel Ríos",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Sabel Ríos conoce a toda la tripulación del Remolcador Arrecife por sus nombres exactos sin presentación previa.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El informe cifrado sobre un siniestro anterior coincide palabra por palabra con lo que Sabel Ríos relató sin acceso a dicho informe.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Remolcador Arrecife",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La nave contiene un pasillo de servicio de dos metros y medio sin documentación en los planos, ubicado entre la bodega y la sala de máquinas, con juntas idénticas a las de otros compartimentos.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Una voz anónima transmitió por el canal interno un parte de bajas nombrando cinco miembros de la tripulación: tres muertos con causa y compartimento, dos ausentes.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sabel Ríos",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Sabel Ríos predice eventos futuros con exactitud, incluyendo fallos técnicos en el minuto exacto y del modo exacto especificado.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sabel Ríos",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "La cápsula de Sabel Ríos no fue expulsada y permanece acoplada al costado de la nave con el sello intacto, lo que transforma el evento de una expulsión en una recepción.",
+    "cap_origen": 2,
+    "superado_por": null
+  }
+]

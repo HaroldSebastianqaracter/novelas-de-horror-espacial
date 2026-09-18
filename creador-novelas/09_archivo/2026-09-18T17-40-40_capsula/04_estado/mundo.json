@@ -1,0 +1,29 @@
+{
+  "reglas": [
+    "El Arrecife es un remolcador de salvamento con tripulación de cinco: toda pérdida de personal es irreemplazable hasta puerto.",
+    "El tramo que atraviesan no tiene balizas ni tráfico: una llamada de socorro tardaría semanas en encontrar oído, y no hay auxilio posible desde fuera.",
+    "El soporte vital depende de una planta de propulsión que debería haberse jubilado hace dos ciclos y se sostiene con reparaciones improvisadas; el circuito secundario de refrigeración es su punto frágil.",
+    "El contrato de la capitana prohíbe abrir el informe cifrado antes de llegar a Ostrahalla, y el sello de la consola deja constancia de cualquier apertura.",
+    "El valor de un salvamento se cobra por lo enganchado: el incentivo económico empuja siempre a recoger lo que flota.",
+    "Todo lo que ocurre a bordo queda asentado en registros automáticos —maniobras, esclusas, sensores—, y esos registros pueden asentar una maniobra que no tuvo efecto.",
+    "El módulo de mando puede desengancharse del casco y navegar por su cuenta, con rumbo fijado y memoria de sensores borrable."
+  ],
+  "objetos": [
+    "Informe cifrado sellado en la consola de la capitana, recibido por lanzadera la víspera de zarpar",
+    "Cápsula de escape sin transpondedor, sin registro y sin firma térmica de naufragio reciente",
+    "Cuaderno de sensores de Kiril Vantu, anotado a mano aparte del registro oficial",
+    "Llave inglesa de Iselda Mkhari",
+    "Canal interno de audio del Arrecife",
+    "Esclusa y mamparas de la bodega donde queda acoplada la cápsula",
+    "Módulo de mando desenganchable del Arrecife"
+  ],
+  "linea_de_tiempo": [
+    "Víspera de zarpar: una lanzadera entrega a Oyarzún el informe cifrado con la cláusula de no abrirlo antes de puerto.",
+    "Nueve meses de travesía sin tocar puerto, hasta entrar en el tramo de vacío sin balizas.",
+    "Día uno del tramo: Kiril detecta la cápsula a la deriva y el Arrecife la engancha. Quedan once días hasta Ostrahalla.",
+    "Día once: llegada prevista a Ostrahalla."
+  ],
+  "locaciones": {
+    "Remolcador Arrecife": "Remolcador de salvamento viejo, estrecho y ruidoso, nueve meses fuera de puerto. Bodega con esclusa donde queda acoplada la cápsula, sala de máquinas con una planta de propulsión jubilable, enfermería mal surtida, puente con la consola sellada de la capitana y el puesto de sensores, y un módulo de mando desenganchable. Entre la bodega y la sala de máquinas aparecerá un pasillo de servicio que no figura en ningún plano."
+  }
+}

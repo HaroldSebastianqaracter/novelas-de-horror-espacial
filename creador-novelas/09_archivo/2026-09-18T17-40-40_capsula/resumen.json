@@ -1,0 +1,110 @@
+{
+  "version_specs": "v1.12",
+  "config": {
+    "novela.json": {
+      "total_capitulos": 3,
+      "palabras_por_capitulo": 400,
+      "idioma": "es-ES",
+      "persona_narrativa": "tercera_limitada",
+      "tiempo_verbal": "pasado",
+      "ventana_resumen_rodante": 2,
+      "cadencia_qa": 1,
+      "max_tokens_contexto_escritor": 12000,
+      "max_hechos_por_capitulo": 4
+    },
+    "ejecucion.json": {
+      "capitulos_por_tanda": 3,
+      "max_llamadas_por_tanda": 30,
+      "registrar_uso": true,
+      "exportar_trazas": true
+    }
+  },
+  "capitulos": {
+    "cerrados": 2,
+    "esperados": 3,
+    "estado": "pausado_por_qa",
+    "palabras": [
+      412,
+      394
+    ]
+  },
+  "reloj": {
+    "preludio_s": 208.0,
+    "por_fase_s": {
+      "generar-premisa": 26.0,
+      "generar-sinopsis": 60.0,
+      "generar-escaleta": 30.0,
+      "inicializar-estado": 92.0
+    },
+    "tandas": [
+      {
+        "tanda": "tanda_2026-09-18T17-29-19",
+        "inicio": "2026-09-18T17:29:19.193+02:00",
+        "fin": "2026-09-18T17:40:40.743+02:00",
+        "segundos": 681.5
+      }
+    ],
+    "tandas_s": 681.5,
+    "total_s": 889.5
+  },
+  "agentes": {
+    "orquestador": {
+      "invocaciones": 5,
+      "segundos": 896.2,
+      "tokens_salida": 20230,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "escritor": {
+      "invocaciones": 3,
+      "segundos": 456.4,
+      "tokens_salida": 4357,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "extractor": {
+      "invocaciones": 2,
+      "segundos": 454.6,
+      "tokens_salida": 14855,
+      "modelos": [
+        "claude-haiku-4-5-20251001"
+      ]
+    },
+    "qa": {
+      "invocaciones": 2,
+      "segundos": 231.8,
+      "tokens_salida": 8503,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    }
+  },
+  "calidad": {
+    "contradicciones": 1,
+    "cortes_qa": 2,
+    "reintentos_de_escritor": 0,
+    "borradores_descartados": 1,
+    "tandas_abortadas": 0,
+    "motivos_de_aborto": [],
+    "pausado_al_archivar": true
+  },
+  "coste": {
+    "moneda": "USD",
+    "total": 4.652,
+    "tokens": 3726491,
+    "por_rol": {
+      "orquestador": 1.757,
+      "preludio": 1.5552,
+      "escritor": 0.6113,
+      "qa": 0.5867,
+      "extractor": 0.1419
+    },
+    "modelos_sin_precio": [],
+    "carpetas_con_uso": 2
+  },
+  "nombre": "2026-09-18T17-40-40_capsula",
+  "titulo": "Once días de silencio",
+  "archivado": "2026-09-18T17:40:40+02:00"
+}

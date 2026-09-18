@@ -273,6 +273,16 @@ def cmd_guardar(args, raiz: Path) -> int:
         malos = [h for h in log.root if h.cap_origen != 0]
         if malos:
             raise EstadoInvalidoError("RF-04.3: los hechos iniciales llevan cap_origen = 0 (derivados de la premisa, previos al capítulo 1)")
+        absolutos = cont.absolutos_que_la_trama_desmentira(log)
+        if absolutos:
+            detalle = "; ".join(f"«{h[:90]}» ({motivo})" for h, motivo in absolutos)
+            raise EstadoInvalidoError(
+                "RF-04.3: hay hechos iniciales escritos como ley del mundo, y son los que la novela "
+                f"tiene que desmentir para tener giro: {detalle}. Reformulalos como lo que un "
+                "registro recoge, lo que alguien sabe o lo que se ha medido. «No hay ningún pasillo "
+                "entre la bodega y la sala de máquinas» cierra la puerta al capítulo que lo "
+                "encuentra; «los planos de a bordo no recogen ningún pasillo entre la bodega y la "
+                "sala de máquinas» es cierto para siempre y no cierra ninguna.")
         hechos = [cont.validar_sujeto(h, registro) for h in log.root]
         repo.escribir_continuidad(raiz, LogContinuidad(hechos))
         destino = rutas.continuidad

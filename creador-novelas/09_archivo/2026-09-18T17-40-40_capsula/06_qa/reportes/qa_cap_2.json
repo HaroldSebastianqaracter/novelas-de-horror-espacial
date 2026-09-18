@@ -1,0 +1,26 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capítulo 2 afirma por narrador que Mkhari encuentra entre la bodega y la sala de máquinas un tramo de pasillo de servicio de dos metros y medio con juntas idénticas a las suyas. Contradice el hecho vigente que establece que entre la bodega y la sala de máquinas no hay ningún pasillo de servicio y que los planos de a bordo no registran ninguno.",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Definición por acumulación de negaciones y ausencias ('No era X', 'sin A, sin B, sin C'): 8 apariciones acumuladas en los capítulos 1 y 2; en la muestra, 'sin convicción', 'una voz sin dueño', 'sin incidencias', 'con el sello intacto y sin una marca nueva en el casco' y el cierre 'No la habían rescatado. La habían recibido.'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Párrafo de una sola frase breve, aislado, como pivote o remate de escena: 4 apariciones acumuladas en el capítulo 2 ('Sacar la cápsula.', 'Y sucedían.', 'Cinco nombres, los suyos.', 'No la habían rescatado. La habían recibido.').",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Dato técnico de precisión exacta como vehículo del horror: 4 apariciones acumuladas en el capítulo 2 ('dos metros y medio', 'en el minuto exacto... y del modo exacto', 'once minutos cerrado', 'tres veces en cuarenta horas').",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

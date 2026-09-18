@@ -1,0 +1,1 @@
+Un remolcador de salvamento con cinco tripulantes recoge una cápsula de escape a la deriva. Dentro hay una persona viva y tranquila que dice llevar esperando. Lo que cuenta del naufragio coincide con un informe que el remolcador recibió cifrado y que nadie de la tripulación ha abierto todavía. El puerto más cercano está a once días.

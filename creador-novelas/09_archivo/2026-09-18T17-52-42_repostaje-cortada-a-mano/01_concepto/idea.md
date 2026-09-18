@@ -1,0 +1,1 @@
+Cinco operarios cierran turno en una estación de repostaje sobre una luna helada. El relevo no llega y tampoco llega la explicación, y el protocolo les prohíbe abandonar la estación sin entrega de guardia. La segunda noche, el operario de guardia encuentra el parte del día siguiente ya redactado, con su letra y con hechos que aún no han ocurrido.

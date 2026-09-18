@@ -1,0 +1,34 @@
+{
+  "reglas": [
+    "El reglamento de la compañía prohíbe abandonar la estación sin entrega de guardia formal: la guardia solo se cierra contra un relevo, con firmas de las dos partes en el cuaderno de turno.",
+    "La ruta comercial más cercana está a diecinueve días: no hay rescate posible ni salida rápida; cualquier viaje de vuelta empieza por esperar.",
+    "El enlace con la compañía solo devuelve acuses automáticos, siempre con el mismo sello horario: se puede emitir, pero nadie responde.",
+    "Salir al hielo exige traje presurizado y autorización registrada en el parte; el exterior mata por frío en minutos.",
+    "El parte de turno se redacta a mano en el cuaderno de la mesa de turno, firmado por quien vela esa noche; es el único registro oficial de lo que ocurre en Vereda 9.",
+    "Lo que el cuaderno anota por adelantado se cumple porque lo cumplen ellos: el registro describe lo que cinco personas asustadas, en este orden y con estos rencores, harán de todos modos.",
+    "El archivo bajo el hielo no predice: lleva el registro, y para él la guardia de este turno ya terminó.",
+    "El soporte vital, el calor y los colectores dependen de la rutina de mantenimiento diaria: sin rutina, la estación se degrada.",
+    "La lista de la tripulación la mantiene el enfermero y es el censo oficial de quién está de servicio en la estación."
+  ],
+  "objetos": [
+    "Cuaderno de turno: libro de partes de la mesa de turno; reaparece redactado aunque se guarde bajo llave o se queme.",
+    "Armario de custodia con llave de la mesa de turno.",
+    "Lista de la tripulación que lleva Bruno Halac, con una línea por operario.",
+    "Cuaderno personal de Nadia Sotelo, separado del oficial.",
+    "Colector tres: el más viejo de los colectores de repostaje, con historial de fugas.",
+    "Sensor de fondo del nivel de anclaje, pensado para medir el espesor del hielo bajo la quilla.",
+    "Marca de anclaje en el exterior, donde la estación se sujeta a la luna.",
+    "Trajes presurizados del muelle, con registro de salidas."
+  ],
+  "linea_de_tiempo": [
+    "Hace cuarenta años: Vereda 9 se ancla al hielo de una luna sin nombre propio como estación de repostaje.",
+    "Durante esas cuatro décadas pasan por la estación turnos sucesivos, algunos de los cuales la compañía nunca registró porque nunca salieron.",
+    "Meses antes: los cinco del turno saliente firman el reglamento y toman posesión de la guardia.",
+    "Día señalado del relevo: la nave de relevo no llega; el enlace solo devuelve acuses automáticos.",
+    "Día siguiente: el relevo tampoco llega y el turno queda formalmente sin cerrar."
+  ],
+  "locaciones": {
+    "Vereda 9": "Estación de repostaje anclada al hielo de una luna sin nombre propio, a diecinueve días de la ruta comercial más cercana. Pasillos estrechos de chapa sudada, comedor único, mesa de turno con el cuaderno y el armario de custodia, muelle, camarotes y el ramal de colectores. Cuarenta años de remiendos: todo cruje, todo huele a refrigerante y a comida recalentada.",
+    "Nivel de anclaje": "El fondo de la estación, bajo la planta de colectores: cámara fría donde la quilla se sujeta al hielo. Sin calefacción, iluminada a tramos, ruidosa de crujidos térmicos. En el hielo bajo la quilla hay marcas regulares, dispuestas en líneas, como renglones."
+  }
+}

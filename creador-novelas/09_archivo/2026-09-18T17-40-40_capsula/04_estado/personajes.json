@@ -1,0 +1,71 @@
+{
+  "Renata Oyarzún": {
+    "estado_fisico": "Sin daños.",
+    "estado_psicologico": "Aprehensiva; descubre que el evento que creía era rescate fue en realidad una recepción.",
+    "secretos_que_conoce": [
+      "Guarda sellado en su consola un informe cifrado recibido por lanzadera la víspera de zarpar, que las cláusulas del contrato le prohíben abrir antes de llegar a Ostrahalla",
+      "Conoce parcialmente el contenido del informe cifrado que coincide exactamente con lo que Sabel Ríos relató sin acceso a él.",
+      "Sabel Ríos predice el futuro exactamente",
+      "La cápsula no fue expulsada, sigue acoplada al costado",
+      "Los cinco nombres transmitidos eran de la tripulación"
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Tomás Beas": {
+    "estado_fisico": "De pie, cerca de Vantu.",
+    "estado_psicologico": "Oportunista, calculador.",
+    "secretos_que_conoce": [
+      "Sabe que la cápsula de escape intacta puede pagarse el viaje de nueve meses."
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Iselda Mkhari": {
+    "estado_fisico": "Activa, reparando sistemas.",
+    "estado_psicologico": "Aterrada; descubre la exactitud de las predicciones de Sabel y actúa sin esperar a que amanezca.",
+    "secretos_que_conoce": [
+      "La planta de propulsión del Arrecife debería haberse jubilado hace dos ciclos y se mantiene viva con reparaciones improvisadas",
+      "Existe un pasillo de servicio no documentado entre la bodega y la sala de máquinas",
+      "Sabel Ríos predice eventos que suceden exactamente",
+      "Una voz transmitió los nombres de muertos y ausentes"
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Aurelio Fenn": {
+    "estado_fisico": "En enfermería con equipo médico preparado.",
+    "estado_psicologico": "Desconcertado por hallazgos anómalos.",
+    "secretos_que_conoce": [
+      "Ejerce con una licencia médica provisional y fue contratado por debajo de la tarifa habitual",
+      "Sabel Ríos no presenta signos de deshidratación, hambre, sed, frío o fatiga tras semanas en encierro."
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Kiril Vantu": {
+    "estado_fisico": "Mano temblando.",
+    "estado_psicologico": "Analítico pero aterrado; presenta evidencia con su mano temblándole muy poco, que es peor.",
+    "secretos_que_conoce": [
+      "Escucha las bandas muertas fuera de servicio, por gusto, y lleva un cuaderno propio de sensores además del registro oficial",
+      "Detectó una cápsula de escape de ocho metros sin transpondedor y con firma térmica anómala derivando ordenadamente.",
+      "Ha estado escuchando a Sabel hablar en la mampara de la bodega",
+      "La cápsula corrigió rumbo tres veces hacia la nave en cuarenta horas"
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Sabel Ríos": {
+    "estado_fisico": "Dentro de la cápsula acoplada.",
+    "estado_psicologico": "Serena, predice sin pedir nada.",
+    "secretos_que_conoce": [
+      "Conoce el nombre de cada tripulante del Arrecife sin que nadie se lo haya dicho",
+      "Sabe de antemano el orden, el minuto y el compartimento de los fallos que aún no han ocurrido a bordo",
+      "Conoce los nombres de toda la tripulación del Remolcador Arrecife sin presentación previa.",
+      "Posee información detallada sobre el siniestro anterior incluyendo orden de fallos, muertes y compartimentos.",
+      "Predice el futuro"
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  }
+}

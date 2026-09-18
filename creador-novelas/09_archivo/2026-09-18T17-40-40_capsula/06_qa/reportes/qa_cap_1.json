@@ -1,0 +1,16 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Definicion por acumulacion de negaciones y ausencias: 'No era ruido', el tramo sin balizas ni trafico ni nadie, la doble negacion de lo que la superviviente no pregunta y el examen medico que enumera lo que no encuentra. 4 apariciones acumuladas. Capitulos: 1.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil con formula 'como/de quien + oracion' para cerrar descripcion: la capitana en el asiento de mando, la mirada de la recien hallada, el cuerpo que describe el medico y el tono del relato del siniestro. 4 apariciones acumuladas. Capitulos: 1.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

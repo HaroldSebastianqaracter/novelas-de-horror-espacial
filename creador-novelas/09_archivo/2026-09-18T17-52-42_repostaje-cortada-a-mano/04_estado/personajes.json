@@ -1,0 +1,46 @@
+{
+  "Nadia Sotelo": {
+    "estado_fisico": "Íntegra.",
+    "estado_psicologico": "Desconcertada y cautelosa; examina minuciosamente lo que ve.",
+    "secretos_que_conoce": [
+      "Descubrió una nota datada para mañana, escrita con su letra y firma, que predice la fuga del colector tres y una discusión en el comedor, ambas sucedidas.",
+      "En el relevo de la próxima semana figuran cinco firmas pero solo cuatro nombres."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Ferrán Olascoaga": {
+    "estado_fisico": "Temblor en la mano izquierda que administra contra el muslo.",
+    "estado_psicologico": "Alarmado, ha pasado la noche en tensión; controla el pánico con procedimientos formales.",
+    "secretos_que_conoce": [
+      "Sabe que Cavero falsificó el cuaderno de guardia y la quema de registros."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Idoya Mero": {
+    "estado_fisico": "Íntegra, mano abierta sobre la carcasa del sensor modificado.",
+    "estado_psicologico": "Angustiada; percibe una amenaza histórica, habla con fatiga existencial.",
+    "secretos_que_conoce": [
+      "Bajo la nave hay capas de escritura estratificada en el hielo: registros de tripulaciones anteriores desaparecidas sin documentación oficial."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Cavero": {
+    "estado_fisico": "Aparentemente íntegro; ha comido hace cuarenta minutos.",
+    "estado_psicologico": "Aterrado; permanece en silencio durante una hora como forma ruidosa de miedo.",
+    "secretos_que_conoce": [
+      "Ha quemado el cuaderno original en el incinerador y falsificado la entrada de incidencias de las 03:10."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Bruno Halac": {
+    "estado_fisico": "Cocinero y enfermero de la estación; el único que ve a todos cada día, porque todos pasan por el comedor.",
+    "estado_psicologico": "Conciliador, lleva la lista de la tripulación con una pulcritud casi supersticiosa. Prefiere que las cosas se firmen y se acaben antes que entenderlas.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  }
+}
