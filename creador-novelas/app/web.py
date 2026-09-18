@@ -258,6 +258,9 @@ def _anotar_coste_de_fase(raiz: Path | None, fase: str | None, log: str | None,
             fila = {"ts": datetime.now().astimezone().isoformat(timespec="milliseconds"),
                     "fase": fase, "coste_usd": float(datos.get("total_cost_usd") or 0),
                     "turnos": datos.get("num_turns"),
+                    # El reloj de pared de la fase. Sin él, `fases.jsonl` solo decía cuándo terminó
+                    # cada una, y la duración de la primera no se podía deducir de nada.
+                    "segundos": round(time.time() - desde, 1) if desde else None,
                     "tokens": sum(int(uso.get(k) or 0) for k in _CAMPOS_USO.values())}
             destino = Rutas(raiz).registro / "fases.jsonl"
             destino.parent.mkdir(parents=True, exist_ok=True)

@@ -1,6 +1,6 @@
 """Interfaz de línea de comandos (spec técnica §8.2).
 
-Capa externa: status · resolver · ensamblar · guardar · ui · exportar-traza (RF-09, después de la tanda).
+Capa externa: status · resolver · ensamblar · archivar · guardar · ui · exportar-traza (RF-09, después de la tanda).
 Capa interna (la usa la skill /escribir-tanda, un tramo del loop por verbo): tanda · preparar-capitulo ·
 registrar-escritor · aplicar-delta · descartar-borrador · preparar-qa · cerrar-qa.
 Capa de validación (la ejecuta cada agente sobre su propio artefacto, RF-08.4): validar-capitulo ·
@@ -21,7 +21,7 @@ from pathlib import Path
 
 import time
 
-from app import registro, validacion
+from app import archivo, registro, validacion
 from app.agents import extractor as ag_extractor, qa as ag_qa
 from app.config import HarnessConfig, cargar_config, cargar_proveedores
 from app.errores import ConfiguracionInvalidaError, EstadoInvalidoError, HarnessError, PausadoPorQAError
@@ -109,6 +109,30 @@ def cmd_ensamblar(args, raiz: Path) -> int:
     salida.write_text("\n".join(partes) + ("\n" if partes else ""), encoding="utf-8")
     print(f"{m.ultimo_capitulo_cerrado} capítulos ensamblados en {salida}")
     _resultado("ensamblado", capitulos=m.ultimo_capitulo_cerrado, salida=str(salida))
+    return 0
+
+
+def cmd_archivar(args, raiz: Path) -> int:
+    """Guarda la novela terminada en 09_archivo/ y deja el árbol listo para la siguiente.
+
+    No borra nada: mueve. Por eso no exige que git tenga el trabajo confirmado, al contrario que el
+    botón de borrar de la pantalla.
+    """
+    r = archivo.archivar(raiz, nombre=args.nombre, forzar=args.forzar)
+    resumen = r["resumen"]
+    reloj, calidad = resumen["reloj"], resumen["calidad"]
+    print(f"archivada en {r['carpeta']} ({r['entradas']} entradas movidas)")
+    print(f"- {resumen['capitulos']['cerrados']} capítulos cerrados, palabras {resumen['capitulos']['palabras']}")
+    if reloj["total_s"] is not None:
+        print(f"- reloj: {reloj['total_s'] / 60:.1f} min "
+              f"(preludio {(reloj['preludio_s'] or 0) / 60:.1f}, tandas {(reloj['tandas_s'] or 0) / 60:.1f})")
+    for rol, fila in resumen["agentes"].items():
+        print(f"  · {rol}: {fila['invocaciones']} invocaciones, {fila['segundos'] / 60:.1f} min, "
+              f"{fila['tokens_salida']} tokens de salida")
+    print(f"- calidad: {calidad['contradicciones']} contradicciones en {calidad['cortes_qa']} cortes, "
+          f"{calidad['reintentos_de_escritor']} reintentos de escritor")
+    _resultado("archivado", carpeta=r["carpeta"], capitulos=resumen["capitulos"]["cerrados"],
+               segundos=reloj["total_s"], contradicciones=calidad["contradicciones"])
     return 0
 
 
@@ -494,6 +518,11 @@ def construir_parser() -> argparse.ArgumentParser:
     e = sub.add_parser("ensamblar", help="concatena los capítulos cerrados con su título")
     e.add_argument("--salida", required=True)
     e.set_defaults(fn=cmd_ensamblar)
+
+    a = sub.add_parser("archivar", help="cierra la novela: la mueve a 09_archivo/ con su resumen y vacía el árbol")
+    a.add_argument("--nombre", help="nombre de la carpeta; por defecto sale del título de la premisa")
+    a.add_argument("--forzar", action="store_true", help="archiva aunque haya una tanda en curso o QA pausado")
+    a.set_defaults(fn=cmd_archivar)
 
     g = sub.add_parser("guardar", help="fases 0-4: persiste con validación un artefacto generado por la skill")
     g.add_argument("artefacto", choices=ARTEFACTOS)
