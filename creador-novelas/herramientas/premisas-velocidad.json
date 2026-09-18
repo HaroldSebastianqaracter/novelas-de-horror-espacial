@@ -1,0 +1,67 @@
+{
+  "_comentario": [
+    "Las diez entradas de la corrida de velocidad. Son fijas a propósito: si cada novela se",
+    "inventara la suya, no compararíamos sistemas sino argumentos, y un capítulo con seis personajes",
+    "en tres escenarios no cuesta lo que uno con dos hablando en un pasillo.",
+    "Por eso las diez comparten forma: tripulación de cinco, un escenario cerrado, una sola anomalía",
+    "y ningún salto temporal. Lo que cambia es el color del terror, no el trabajo que dan.",
+    "La config va aquí una vez y no se toca entre novelas: tamaño de libro igual para las diez."
+  ],
+  "config": {
+    "total_capitulos": 3,
+    "palabras_por_capitulo": 400,
+    "idioma": "es-ES",
+    "persona_narrativa": "tercera_limitada",
+    "tiempo_verbal": "pasado",
+    "ventana_resumen_rodante": 2,
+    "cadencia_qa": 1,
+    "max_tokens_contexto_escritor": 12000,
+    "max_hechos_por_capitulo": 4,
+    "capitulos_por_tanda": 3,
+    "max_llamadas_por_tanda": 30,
+    "registrar_uso": true,
+    "exportar_trazas": true
+  },
+  "novelas": [
+    {
+      "nombre": "capsula",
+      "idea": "Un remolcador de salvamento con cinco tripulantes recoge una cápsula de escape a la deriva. Dentro hay una persona viva, tranquila y educada, que no figura en el registro de ninguna nave perdida en este sector ni en los diez años anteriores. Dice que lleva esperando el tiempo justo. El remolcador está a once días del puerto más cercano."
+    },
+    {
+      "nombre": "repostaje",
+      "idea": "Cinco operarios cierran turno en una estación de repostaje sobre una luna helada. El relevo no llega y tampoco llega la explicación. El protocolo les prohíbe abandonar la estación sin entrega de guardia, así que se quedan. A la segunda noche el registro de accesos empieza a anotar entradas que nadie ha hecho, siempre desde el exterior."
+    },
+    {
+      "nombre": "criogenia",
+      "idea": "Una nave hospital despierta a cinco pacientes de un sueño de dos años para una revisión rutinaria. Cuatro recuerdan el viaje de ida. El quinto recuerda con detalle un viaje distinto, con otra tripulación y otro destino, y describe pasillos de esta misma nave que fueron sellados antes de zarpar. Sus constantes son las mejores de los cinco."
+    },
+    {
+      "nombre": "cavidad",
+      "idea": "Una cuadrilla de cinco perfora un asteroide de níquel siguiendo una veta que no debería estar ahí. A cuatrocientos metros la broca entra en una cavidad con aire respirable, presión estable y temperatura de habitación. Los sensores dicen que lleva así mucho más tiempo del que tiene la humanidad. La cuadrilla tiene dos semanas de contrato por delante."
+    },
+    {
+      "nombre": "rumbo",
+      "idea": "Un carguero de cinco tripulantes descubre que su piloto automático lleva días corrigiendo el rumbo hacia unas coordenadas que no están en ninguna carta. Cada corrección es mínima y está firmada con el código de autorización de la capitana, que no ha tocado la consola. Desviarse a mano consume combustible que no tienen para llegar a ningún otro sitio."
+    },
+    {
+      "nombre": "faro",
+      "idea": "Tres personas mantienen un faro orbital sobre un planeta muerto y esperan relevo dentro de seis meses. El relevo llega esta semana: dos personas con la documentación en regla, el saludo correcto y una versión del calendario en la que ya han pasado los seis meses. Traen el correo atrasado, y en él hay cartas que los del faro aún no han escrito."
+    },
+    {
+      "nombre": "colonia",
+      "idea": "Cinco colonos despiertan al llegar a un mundo que llevan cuatro años entrenándose para habitar. La superficie coincide con las simulaciones de entrenamiento hasta el último detalle: las mismas rocas, el mismo horizonte, los mismos fallos del terreno que el simulador nunca llegó a corregir. Incluido el edificio de prácticas que solo existía en el simulador."
+    },
+    {
+      "nombre": "desguace",
+      "idea": "Una nave de reciclaje con cinco operarios desguaza cascos abandonados en un cementerio orbital. El tercer casco de la semana tiene la misma disposición que su propia nave, las mismas reparaciones mal hechas y, en las taquillas de la tripulación, sus cinco nombres escritos con su propia letra. Quedan cuatro cascos por abrir y el contrato se cobra al terminar."
+    },
+    {
+      "nombre": "socorro",
+      "idea": "Una sonda de rescate de cinco tripulantes responde a una llamada de socorro y descubre que la señal sale de su propia antena, con la voz de su capitana, que está viva y al mando y no ha grabado nada. La señal describe lo que va a pasar a bordo en las próximas horas y hasta ahora no se ha equivocado en nada."
+    },
+    {
+      "nombre": "cuarentena",
+      "idea": "Una estación de cuarentena en el borde del sistema recibe a cinco viajeros que entran juntos en la cámara de descontaminación. El ciclo dura cuarenta minutos y la cámara se abre con seis. Los seis se reconocen entre sí, comparten los mismos recuerdos del viaje y ninguno sobra según el registro biométrico, que lleva seis desde el principio."
+    }
+  ]
+}

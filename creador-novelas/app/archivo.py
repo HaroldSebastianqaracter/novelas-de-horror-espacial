@@ -267,6 +267,27 @@ def _mover_contenido(origen: Path, destino: Path, *, excluir: set[str]) -> int:
     return movidos
 
 
+def _excluidos_de(carpeta: str) -> set[str]:
+    return {t.split("/", 1)[1] for t in TRANSITORIOS if t.startswith(carpeta + "/")}
+
+
+def _hay_algo_que_archivar(raiz: Path) -> bool:
+    """Cualquier rastro de novela cuenta, no solo un libro terminado.
+
+    Una novela que se cayó en el preludio no tiene manifiesto ni capítulos, pero sí dejó la idea y la
+    premisa en `01_concepto/` y su registro en `07_registro/`. Si archivar se negara por no encontrar
+    manifiesto, esos restos se quedarían en el árbol y la novela siguiente arrancaría encima de ellos.
+    """
+    # Cuentan los archivos, no las carpetas: `crear_carpetas` deja el esqueleto vacío en pie
+    # (`04_estado/prompts`, `06_qa/reportes`...) y con ese criterio un árbol recién archivado
+    # parecería tener novela.
+    for nombre in CARPETAS_DE_NOVELA:
+        carpeta = raiz / nombre
+        if carpeta.is_dir() and any(h.is_file() and h.name != ".gitkeep" for h in carpeta.rglob("*")):
+            return True
+    return False
+
+
 def archivar(raiz: Path, *, nombre: str | None = None, forzar: bool = False) -> dict[str, Any]:
     """Mueve la novela a `09_archivo/` con su resumen y deja el árbol en blanco.
 
@@ -276,8 +297,8 @@ def archivar(raiz: Path, *, nombre: str | None = None, forzar: bool = False) -> 
     """
     rutas = Rutas(raiz)
     m = checkpoint.leer_manifest(raiz)
-    if m is None and not rutas.capitulo(1).is_file():
-        raise EstadoInvalidoError("no hay novela que archivar: no existe manifest.json ni el capítulo 1")
+    if not _hay_algo_que_archivar(raiz):
+        raise EstadoInvalidoError("no hay novela que archivar: el árbol ya está vacío")
     if not forzar:
         if cur.leer(raiz) is not None:
             raise EstadoInvalidoError("hay una tanda en curso; ciérrala o archiva con forzar")
@@ -299,7 +320,7 @@ def archivar(raiz: Path, *, nombre: str | None = None, forzar: bool = False) -> 
 
     movidos = 0
     for nombre_carpeta in CARPETAS_DE_NOVELA:
-        excluir = {t.split("/", 1)[1] for t in TRANSITORIOS if t.startswith(nombre_carpeta + "/")}
+        excluir = _excluidos_de(nombre_carpeta)
         movidos += _mover_contenido(raiz / nombre_carpeta, carpeta / nombre_carpeta, excluir=excluir)
     for transitorio in TRANSITORIOS:
         if "/" not in transitorio:

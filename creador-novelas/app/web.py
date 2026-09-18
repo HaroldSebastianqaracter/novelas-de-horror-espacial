@@ -420,6 +420,30 @@ def lanzar_fase(raiz: Path, fase: str) -> dict[str, Any]:
     return {"lanzada": fase, "pid": proc.pid, "log": str(log)}
 
 
+def ejecutar_fase(raiz: Path, fase: str, *, tope_s: float = 3600, latido: float = 2.0) -> dict[str, Any]:
+    """Lanza una fase y espera a que termine. La versión de un paso de lo que la pantalla hace en dos.
+
+    La pantalla lanza y vuelve enseguida, porque tiene a alguien mirando que pregunta por el estado.
+    Una corrida encadenada no tiene a nadie, así que necesita esperar aquí mismo --y por el mismo
+    camino, no por uno paralelo: si la corrida midiera un lanzamiento distinto del que usa el usuario,
+    estaría midiendo otra cosa.
+
+    `tope_s` es el seguro: una fase colgada se lleva por delante la noche entera si nadie la corta.
+    """
+    inicio = time.monotonic()
+    lanzada = lanzar_fase(raiz, fase)
+    while proceso_vivo():
+        if time.monotonic() - inicio > tope_s:
+            proc = _EN_CURSO.get("proc")
+            if proc is not None:
+                proc.kill()
+            _cerrar_proceso()
+            raise TimeoutError(f"la fase {fase} pasó de {tope_s / 60:.0f} min sin terminar y se cortó")
+        time.sleep(latido)
+    fin = _cerrar_proceso() or {}
+    return {**lanzada, **fin, "segundos": round(time.monotonic() - inicio, 1)}
+
+
 def _python(raiz: Path) -> str:
     venv = raiz / ".venv" / "Scripts" / "python.exe"
     if venv.exists():

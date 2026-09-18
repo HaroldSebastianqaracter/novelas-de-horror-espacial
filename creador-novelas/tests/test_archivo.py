@@ -141,11 +141,21 @@ def test_se_niega_con_el_manuscrito_pausado_por_qa(proyecto):
         archivo.archivar(proyecto)
 
 
-def test_se_niega_cuando_no_hay_novela(proyecto):
-    for ruta in (Rutas(proyecto).manifest,):
-        ruta.unlink(missing_ok=True)
-    with pytest.raises(EstadoInvalidoError, match="no hay novela que archivar"):
+def test_se_niega_solo_cuando_el_arbol_esta_de_verdad_vacio(proyecto):
+    archivo.archivar(proyecto, forzar=True)  # se lleva el estado inicial del proyecto de pruebas
+    with pytest.raises(EstadoInvalidoError, match="ya está vacío"):
         archivo.archivar(proyecto)
+
+
+def test_una_novela_caida_en_el_preludio_tambien_se_archiva(proyecto):
+    # Sin manifiesto ni capítulos, pero con la idea y la premisa en disco: si archivar se negara,
+    # esos restos se quedarían en el árbol y la novela siguiente arrancaría encima de ellos.
+    Rutas(proyecto).manifest.unlink(missing_ok=True)
+
+    r = archivo.archivar(proyecto, nombre="caida")
+    assert (proyecto / r["carpeta"] / "01_concepto" / "premisa.md").is_file()
+    assert r["resumen"]["capitulos"]["cerrados"] == 0
+    assert not Rutas(proyecto).premisa.is_file()
 
 
 def test_dos_novelas_seguidas_no_se_pisan(proyecto):
