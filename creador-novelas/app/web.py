@@ -302,19 +302,38 @@ def _python(raiz: Path) -> str:
 
 # ------------------------------------------------------------------------------------- estado
 
-def _agente_activo(eventos: list[dict[str, Any]]) -> tuple[str | None, str | None, int | None]:
-    """El último `agente_inicio` sin su `agente_fin`. Es lo que la consola pinta encendido."""
+def _agentes_activos(eventos: list[dict[str, Any]]) -> list[tuple[str, str | None, int | None]]:
+    """Los agentes que están trabajando **ahora**, para encender su cubierta en el plano.
+
+    Un `agente_inicio` abierto no basta por dos razones, las dos medidas en la tanda del 18/09:
+
+    - `preparar-capitulo` deja listos los prompts del escritor y del extractor de una vez, así que
+      ambos abren en el mismo segundo aunque el extractor no arranque hasta dos minutos después. La
+      cubierta del extractor se encendía mientras escribía el escritor.
+    - Desde que el corte de QA se solapa con el capítulo siguiente hay **dos** agentes a la vez, y
+      devolver uno solo dejaba la otra cubierta apagada.
+
+    Lo que desempata es el orden del propio bucle: el extractor de un capítulo no puede empezar hasta
+    que el escritor de ESE capítulo termina, porque lee lo que el escritor acaba de escribir (INV-02).
+    Así que un extractor abierto cuyo escritor sigue abierto no está trabajando: solo tiene el prompt
+    esperándolo. La actividad de hooks no sirve para esto, porque el escritor pasa casi todo su turno
+    redactando y no toca una herramienta hasta el final.
+    """
     abierto: dict[tuple[str, Any], dict[str, Any]] = {}
     for ev in eventos:
-        rol, cap = ev.get("rol"), ev.get("capitulo")
-        if ev.get("tipo") == "agente_inicio" and rol:
+        tipo, rol, cap = ev.get("tipo"), ev.get("rol"), ev.get("capitulo")
+        if tipo == "agente_inicio" and rol:
             abierto[(rol, cap)] = ev
-        elif ev.get("tipo") == "agente_fin" and rol:
+        elif tipo == "agente_fin" and rol:
             abierto.pop((rol, cap), None)
-    if not abierto:
-        return None, None, None
-    ultimo = list(abierto.values())[-1]
-    return ultimo.get("rol"), ultimo.get("ts"), ultimo.get("capitulo")
+
+    activos = []
+    for (rol, cap), ev in abierto.items():
+        if rol == "extractor" and ("escritor", cap) in abierto:
+            continue  # su capítulo todavía se está escribiendo
+        activos.append((rol, ev.get("ts"), cap))
+    activos.sort(key=lambda a: a[1] or "")
+    return activos
 
 
 def _capitulos_con_hallazgos(rutas: Rutas) -> list[int]:
@@ -343,7 +362,9 @@ def estado(raiz: Path) -> dict[str, Any]:
     tanda = tanda_actual(raiz)
     meta = _json(tanda / "tanda.json") if tanda else {}
     eventos_crudos = _lineas_jsonl(tanda / "eventos.jsonl", limite=400) if tanda else []
-    rol, desde, cap_agente = _agente_activo(eventos_crudos)
+    activos = _agentes_activos(eventos_crudos)
+    # El primero es el que lleva más tiempo trabajando: es el que da el rótulo y el reloj.
+    rol, desde, cap_agente = activos[0] if activos else (None, None, None)
 
     fin = _cerrar_proceso()
     ultimo_ts = eventos_crudos[-1].get("ts") if eventos_crudos else None
@@ -396,6 +417,8 @@ def estado(raiz: Path) -> dict[str, Any]:
         # No hay `palabras_actual`: el capítulo no existe en disco hasta que el escritor termina de
         # escribirlo entero, así que cualquier porcentaje sería inventado. La consola enseña el reloj.
         "agente_activo": rol if en_marcha else None,
+        # Desde que el corte de QA se solapa con el capítulo siguiente puede haber más de uno.
+        "agentes_activos": [a[0] for a in activos] if en_marcha else [],
         "agente_desde": desde if en_marcha else None,
         "capitulos_con_hallazgos": _capitulos_con_hallazgos(rutas),
         "tiene_referencias": bool(_referencias(rutas)),

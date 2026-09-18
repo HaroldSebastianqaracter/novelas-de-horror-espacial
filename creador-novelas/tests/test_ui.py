@@ -514,6 +514,35 @@ def test_sin_git_bash_la_fase_de_agentes_no_se_lanza(monkeypatch, proyecto, conf
         web.lanzar_fase(proyecto, "escribir-tanda")
 
 
+def test_el_plano_enciende_a_los_agentes_que_de_verdad_trabajan():
+    """Reconstruido de la tanda del 18/09, donde el plano encendía una cubierta y la equivocada.
+
+    Dos fallos a la vez: `preparar-capitulo` abre al escritor y al extractor en el mismo segundo
+    -deja los dos prompts listos- y la pantalla encendía solo el último abierto, así que la bodega
+    de hechos se iluminaba mientras redactaba el escritor. Y desde que el corte de QA se solapa con
+    el capítulo siguiente hay dos agentes a la vez, y uno se quedaba a oscuras.
+    """
+    ev = lambda ts, tipo, rol, cap: {"ts": f"2026-09-18T{ts}+02:00", "tipo": tipo, "rol": rol, "capitulo": cap}
+    linea = [
+        ev("10:30:36", "agente_inicio", "escritor", 1),
+        ev("10:30:36", "agente_inicio", "extractor", 1),   # solo se preparó su prompt
+    ]
+    assert [a[0] for a in web._agentes_activos(linea)] == ["escritor"]
+
+    linea.append(ev("10:32:29", "agente_fin", "escritor", 1))
+    assert [a[0] for a in web._agentes_activos(linea)] == ["extractor"]  # ahora sí le toca
+
+    linea += [ev("10:34:32", "agente_fin", "extractor", 1),
+              ev("10:34:44", "agente_inicio", "qa", 1),
+              ev("10:34:56", "agente_inicio", "escritor", 2),
+              ev("10:34:56", "agente_inicio", "extractor", 2)]
+    # El corte del capítulo 1 y la escritura del 2, en paralelo: las dos cubiertas encendidas.
+    assert [a[0] for a in web._agentes_activos(linea)] == ["qa", "escritor"]
+
+    linea.append(ev("10:36:58", "agente_fin", "qa", 1))
+    assert [a[0] for a in web._agentes_activos(linea)] == ["escritor"]
+
+
 def test_el_orquestador_corre_con_un_modelo_fijado(monkeypatch, proyecto, config):
     """El orquestador no redacta: llama verbos y despacha subagentes, y heredaba el modelo de la cuenta.
 

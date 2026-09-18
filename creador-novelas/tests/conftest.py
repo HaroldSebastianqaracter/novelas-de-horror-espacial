@@ -55,9 +55,26 @@ def construir_proyecto(raiz: Path, *, con_estado: bool = True, total: int = 30) 
         origen = RAIZ_REAL / ".claude" / "skills" / skill
         if origen.exists():
             shutil.copytree(origen, rutas.skills / skill, dirs_exist_ok=True)
+    # Los ajustes de la novela se fijan aquí y no se heredan de `config/`, que pertenece al libro que
+    # el usuario tenga cargado. Se descubrió al bajar una novela real a 400 palabras y auditoría cada
+    # capítulo: 25 pruebas se cayeron sin que nadie hubiera tocado el código, porque daban por hecho
+    # 1500 palabras y un corte cada 3. Una suite no puede depender de qué se esté escribiendo.
     novela = json.loads(rutas.novela_json.read_text(encoding="utf-8"))
-    novela["total_capitulos"] = total
+    novela.update({
+        "total_capitulos": total,
+        "palabras_por_capitulo": 1500,
+        "cadencia_qa": 3,
+        "ventana_resumen_rodante": 2,
+        "max_tokens_contexto_escritor": 12000,
+        "max_hechos_por_capitulo": 4,
+        "idioma": "es-ES",
+        "persona_narrativa": "tercera_limitada",
+        "tiempo_verbal": "pasado",
+    })
     rutas.novela_json.write_text(json.dumps(novela, indent=2), encoding="utf-8")
+    ejecucion = json.loads(rutas.ejecucion_json.read_text(encoding="utf-8"))
+    ejecucion.update({"capitulos_por_tanda": 3, "max_llamadas_por_tanda": 30, "registrar_uso": True})
+    rutas.ejecucion_json.write_text(json.dumps(ejecucion, indent=2), encoding="utf-8")
     if not con_estado:
         return raiz
     repo.escribir_texto(rutas.idea, "Una estación minera en el cinturón pierde contacto con la Tierra.\n")

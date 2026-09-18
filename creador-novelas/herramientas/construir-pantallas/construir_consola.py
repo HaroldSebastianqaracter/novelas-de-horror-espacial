@@ -15,10 +15,10 @@ VIEJAS = """  .plano .relleno[data-agente="revisor"]{opacity:.85}
   body.en-marcha .plano .relleno[data-agente="escritor"]{opacity:.8;transition-delay:600ms}
   body.en-marcha .plano .relleno[data-agente="extractor"]{opacity:.55;transition-delay:1000ms}"""
 NUEVAS = """  body[data-vista="pausado_por_qa"] .plano .relleno[data-agente="revisor"]{opacity:.85}
-  body[data-activo="qa"] .plano .relleno[data-agente="revisor"]{opacity:.85}
-  body[data-activo="orquestador"] .plano .relleno[data-agente="orquestador"]{opacity:.8}
-  body[data-activo="escritor"] .plano .relleno[data-agente="escritor"]{opacity:.8}
-  body[data-activo="extractor"] .plano .relleno[data-agente="extractor"]{opacity:.55}
+  body[data-activo~="qa"] .plano .relleno[data-agente="revisor"]{opacity:.85}
+  body[data-activo~="orquestador"] .plano .relleno[data-agente="orquestador"]{opacity:.8}
+  body[data-activo~="escritor"] .plano .relleno[data-agente="escritor"]{opacity:.8}
+  body[data-activo~="extractor"] .plano .relleno[data-agente="extractor"]{opacity:.55}
   /* En marcha sin saber aún quién trabaja: el puente queda tenue para que no parezca apagada. */
   body[data-vista="en_progreso"]:not([data-activo]) .plano .relleno[data-agente="orquestador"]{opacity:.35}
   .pie .acciones button[disabled]{opacity:.4;cursor:not-allowed}
@@ -59,10 +59,10 @@ PARPADEO_VIEJO = """  .plano .relleno[data-agente="revisor"]{animation:parpadeo-
   body.en-marcha .plano .relleno[data-agente="extractor"]{animation:parpadeo-trabajo-bajo 3s ease-in-out 1s infinite}"""
 PARPADEO_NUEVO = """  body[data-vista="pausado_por_qa"] .plano .relleno[data-agente="revisor"]{animation:parpadeo-emergencia 1.6s steps(1,end) infinite}
   body[data-vista="pausado_por_qa"] .cargando .ticks i.stop{animation:parpadeo-emergencia 1.6s steps(1,end) infinite}
-  body[data-activo="qa"] .plano .relleno[data-agente="revisor"]{animation:parpadeo-trabajo 1.8s ease-in-out infinite}
-  body[data-activo="orquestador"] .plano .relleno[data-agente="orquestador"]{animation:parpadeo-trabajo 2.4s ease-in-out .2s infinite}
-  body[data-activo="escritor"] .plano .relleno[data-agente="escritor"]{animation:parpadeo-trabajo 1.4s ease-in-out .6s infinite}
-  body[data-activo="extractor"] .plano .relleno[data-agente="extractor"]{animation:parpadeo-trabajo-bajo 3s ease-in-out 1s infinite}"""
+  body[data-activo~="qa"] .plano .relleno[data-agente="revisor"]{animation:parpadeo-trabajo 1.8s ease-in-out infinite}
+  body[data-activo~="orquestador"] .plano .relleno[data-agente="orquestador"]{animation:parpadeo-trabajo 2.4s ease-in-out .2s infinite}
+  body[data-activo~="escritor"] .plano .relleno[data-agente="escritor"]{animation:parpadeo-trabajo 1.4s ease-in-out .6s infinite}
+  body[data-activo~="extractor"] .plano .relleno[data-agente="extractor"]{animation:parpadeo-trabajo-bajo 3s ease-in-out 1s infinite}"""
 assert PARPADEO_VIEJO in cabeza, "las reglas de parpadeo no están donde se esperaba"
 cabeza = cabeza.replace(PARPADEO_VIEJO, PARPADEO_NUEVO)
 
@@ -182,10 +182,16 @@ function pintarCabecera(){
                  error:"Con un error", inactivo:"En reposo"}[e.estado] || e.estado;
   $("estado-palabra").textContent = palabra;
   $("puntos").hidden = !(e.estado === "en_progreso" || e.estado === "pausado_por_qa");
-  $("t-agente").textContent = e.agente_activo ? NOMBRE_AGENTE[e.agente_activo] || e.agente_activo
-                                              : (e.estado === "pausado_por_qa" ? "Revisor de calidad" : "");
+  // Puede haber más de un agente a la vez: desde que el corte de QA se solapa con el capítulo
+  // siguiente, el revisor y el escritor trabajan en paralelo y las dos cubiertas deben encenderse.
+  var activos = e.agentes_activos && e.agentes_activos.length ? e.agentes_activos
+              : (e.agente_activo ? [e.agente_activo] : []);
+  $("t-agente").textContent = activos.length
+    ? activos.map(function(a){ return NOMBRE_AGENTE[a] || a; }).join(" y ")
+    : (e.estado === "pausado_por_qa" ? "Revisor de calidad" : "");
   document.body.setAttribute("data-vista", e.estado);
-  if (e.agente_activo) document.body.setAttribute("data-activo", e.agente_activo);
+  // Lista separada por espacios: el CSS la lee con [data-activo~="rol"].
+  if (activos.length) document.body.setAttribute("data-activo", activos.join(" "));
   else document.body.removeAttribute("data-activo");
 
   var total = e.total_capitulos || 0, cerrados = e.capitulos_cerrados || 0;
@@ -198,15 +204,18 @@ function pintarCabecera(){
 
 function pintarRotulos(){
   var e = estado;
+  var lista = e.agentes_activos && e.agentes_activos.length ? e.agentes_activos
+            : (e.agente_activo ? [e.agente_activo] : []);
+  var activo = function(rol){ return lista.indexOf(rol) !== -1; };
   var r = function(id, txt){ var n = $(id); if (n) n.textContent = txt; };
-  r("r-escritor", e.agente_activo === "escritor"
+  r("r-escritor", activo("escritor")
       ? "Escritor, escribiendo el capítulo " + e.capitulo_actual
       : "Escritor, capítulo " + (e.capitulo_actual || "-") + " en espera");
-  r("r-extractor", e.agente_activo === "extractor"
+  r("r-extractor", activo("extractor")
       ? "Extractor, leyendo el capítulo " + e.capitulo_actual : "Extractor de hechos");
   r("r-revisor", e.estado === "pausado_por_qa"
-      ? "Revisor, ha detenido la nave" : e.agente_activo === "qa" ? "Revisor, auditando" : "Revisor, en espera");
-  r("r-orquestador", e.agente_activo === "orquestador" ? "Orquestador, repartiendo" : "Orquestador, espera");
+      ? "Revisor, ha detenido la nave" : activo("qa") ? "Revisor, auditando" : "Revisor, en espera");
+  r("r-orquestador", activo("orquestador") ? "Orquestador, repartiendo" : "Orquestador, espera");
 }
 
 function pintarIndicadores(){
