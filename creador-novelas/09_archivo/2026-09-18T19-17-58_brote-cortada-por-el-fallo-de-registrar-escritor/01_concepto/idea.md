@@ -1,0 +1,1 @@
+En una nave de transporte con cinco tripulantes, dos presentan lesiones que la médica no reconoce y que avanzan visiblemente de una guardia a la siguiente. Lo que crece bajo la piel se mueve. La médica declara aislamiento y el resto tiene que decidir cuánto tiempo darles antes de que el aire común deje de ser seguro.

@@ -1,0 +1,31 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capítulo 3 afirma que Vart habla por un canal que llevaba doce días sin respuesta. El log vigente fija que la novela empieza con cuatro días de travesía, un plan de vuelo de once días hasta puerto y cuatro días de transmisiones sin respuesta; el propio capítulo 3 sitúa puerto a siete días, lo que confirma la travesía de once. Doce días de silencio exceden el viaje completo y niegan el punto de partida.",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Descripción por negación: la escena se define por lo que no ocurre ('una voz que no admitía consulta', 'No fue hacia Vart de inmediato', 'Vart no levantó la vista', 'aquello se hacía una vez o ninguna', 'Sorel no llegó al registro', 'después dejó de decir nada'). 13 apariciones acumuladas en los capítulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Símil que domestica lo monstruoso con un término cotidiano o humano: en el capítulo 3, la atención de la presencia tiene 'algo insoportablemente parecido a un aprendizaje'. 4 apariciones acumuladas en los capítulos 1 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura del secreto callado ('no dijo / no lo compartió'): en el capítulo 3, Calvo 'hizo la cuenta y no la compartió con Bregan'. 5 apariciones acumuladas en los capítulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de frase con oración de relativo negativa: en el capítulo 3, 'una voz que no admitía consulta' y 'un canal que llevaba doce días sin devolverle nada'. 4 apariciones acumuladas en los capítulos 1, 2 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

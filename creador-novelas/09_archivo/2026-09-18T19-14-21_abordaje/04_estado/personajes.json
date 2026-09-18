@@ -1,0 +1,74 @@
+{
+  "Irene Calvo": {
+    "estado_fisico": "Sin daño físico aparente.",
+    "estado_psicologico": "Controlada, enfocada en el plan ejecutado. Consciente del sacrificio de Sorel.",
+    "secretos_que_conoce": [
+      "No leyó el manifiesto del casco de salvamento antes de firmar el contrato de remolque.",
+      "Aceptó el encargo por el doble de tarifa y no se lo ha explicado a la tripulación.",
+      "Vio en el monitor cómo la presencia abrió la esclusa desde fuera sin alarma",
+      "Presencia de una entidad exterior que mató al Cabo Illán en la cubierta de carga",
+      "El casco remolcado es un contenedor clasificado con destino a una estación de cuarentena vacía hace años.",
+      "Las horas de oxígeno respirable siguen bajando.",
+      "Conoce que quedan 18 horas de oxígeno para dos personas y el puerto está a siete días.",
+      "Sabe que el sacrificio de Sorel y Vart fue intencional para expulsar la presencia."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Tomás Bregan": {
+    "estado_fisico": "Sin daño físico aparente.",
+    "estado_psicologico": "Cómplice silencioso del plan. Ya había hecho la misma cuenta de oxígeno que Calvo.",
+    "secretos_que_conoce": [
+      "Los motores están fuera de su vida útil y un tirón de emergencia a plena potencia no se podría repetir dos veces.",
+      "La presencia está ahora en los conductos de servicio",
+      "El soplete y los anclajes no son defensa suficiente contra algo que puede cruzar toda la nave por conductos",
+      "El registro del fondo estaba abierto antes de llegar.",
+      "Quedan ocho cartuchos de soplete.",
+      "Conoce que la maniobra solo se hace una vez o ninguna.",
+      "Sabe que Sorel fue sacrificada como parte del plan para expulsar la presencia."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Nadia Sorel": {
+    "estado_fisico": "Muerta, atrapada en la sección de popa cuando se selló.",
+    "estado_psicologico": "No aplica.",
+    "secretos_que_conoce": [
+      "Dentro del casco remolcado vio compartimentos que tomó por bodegas de mineral y anclajes cuyo destrozo no sabe explicar.",
+      "Vio en el monitor la muerte del Cabo Illán",
+      "La criatura se movía con lentitud atenta, casi cortés",
+      "Las bodegas tienen sujeciones en las paredes con amarres reventados y metal doblado hacia fuera."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Emilio Vart": {
+    "estado_fisico": "Muerto, atacado por la presencia después de introducir el destino.",
+    "estado_psicologico": "No aplica.",
+    "secretos_que_conoce": [
+      "Puerto lleva cuatro días sin responder a ninguna de sus transmisiones y no se lo ha dicho a nadie a bordo.",
+      "El manifiesto de remolque registra como destino una estación de cuarentena y clasifica el casco de salvamento como contenedor.",
+      "La consola no registró el evento de apertura de la esclusa",
+      "Vio el ataque a través de las cámaras de la cubierta de carga"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Cabo Illán": {
+    "estado_fisico": "Muerto. Cuerpo dejado en la cubierta de carga por la presencia sin arrastrarlo.",
+    "estado_psicologico": "N/A",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "la presencia": {
+    "estado_fisico": "Viva, separada del Cinturón de Hierro en el remolque.",
+    "estado_psicologico": "Activa, en aprendizaje observando el comportamiento humano. Fue atraída al remolque como se planeó.",
+    "secretos_que_conoce": [
+      "Llegó a bordo dentro del casco de salvamento remolcado.",
+      "Ha pasado cuatro días aprendiendo la disposición de la nave antes de abrir la esclusa de carga."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

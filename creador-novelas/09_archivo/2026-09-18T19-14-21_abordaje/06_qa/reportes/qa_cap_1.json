@@ -1,0 +1,16 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Descripcion por negacion: la escena se define por lo que no ocurre ('No sono ninguna alarma. No hubo caida de presion, ni baliza, ni peticion de contacto', 'no devolvia el brillo como debia devolverlo el metal', 'La cosa no corrio', 'Duro poco y no fue rapido'). 4 apariciones acumuladas, capitulos: 1.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil que domestica lo monstruoso con un gesto cotidiano y calmo ('con la soltura de una puerta que alguien abre cada dia en su propia casa', 'lo tomo como se toma un instrumento que se quiere comprender por dentro', 'Lo abrio con la misma calma con que habia abierto la esclusa'). 3 apariciones acumuladas, capitulos: 1.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

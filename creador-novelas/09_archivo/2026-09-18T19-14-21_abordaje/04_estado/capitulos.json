@@ -1,0 +1,48 @@
+[
+  {
+    "num": 1,
+    "titulo": "La esclusa se abre desde fuera",
+    "objetivo_narrativo": "Presentar el remolcador, la rutina de la travesía y a los cinco tripulantes; romperla cuando la esclusa de carga cede sin alarma y la presencia mata a Illán delante de los demás, que lo ven por el monitor del puente. Calvo ordena sellar la cubierta de carga y la nave empieza a convertirse en trampa.",
+    "personajes": [
+      "Irene Calvo",
+      "Tomás Bregan",
+      "Nadia Sorel",
+      "Emilio Vart",
+      "Cabo Illán",
+      "la presencia"
+    ],
+    "locacion": "Cubierta de carga del Cinturón de Hierro",
+    "informacion_nueva": "Algo entró por la esclusa sin baliza ni protocolo, mata sin prisa y se mueve por los conductos de servicio; la tripulación queda reducida a cuatro y la cubierta de carga queda sellada.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "Siete mamparos hacia el puente",
+    "objetivo_narrativo": "Mostrar el desgaste del sellado sección a sección, el aire racionado y la desconfianza entre los cuatro; Bregan rastrea a la presencia por la temperatura de los conductos y descubre que cada ramal ciego aparece ya abierto. Vart confiesa que puerto no responde y Sorel recuerda las cámaras de sujeción del casco remolcado.",
+    "personajes": [
+      "Irene Calvo",
+      "Tomás Bregan",
+      "Nadia Sorel",
+      "Emilio Vart",
+      "la presencia"
+    ],
+    "locacion": "Conductos de servicio del Cinturón de Hierro",
+    "informacion_nueva": "La presencia no huye: los conduce hacia el puente. El destino real del remolque es una estación de cuarentena vacía, el casco figura como contenedor y lo que entró venía en la carga que ellos mismos amarraron.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "Un rumbo que nadie seguirá",
+    "objetivo_narrativo": "Cerrar la novela con la trampa invertida: desellan el corredor al puente, Vart hace de cebo en la consola, Sorel corta los anclajes y Calvo gira la nave contra su propio remolque. Vart y Sorel mueren; Calvo y Bregan quedan con dieciocho horas de aire, transmiten la advertencia en abierto y oyen un golpe en el conducto.",
+    "personajes": [
+      "Irene Calvo",
+      "Tomás Bregan",
+      "Nadia Sorel",
+      "Emilio Vart",
+      "la presencia"
+    ],
+    "locacion": "Puente de mando del Cinturón de Hierro",
+    "informacion_nueva": "La presencia vuelve a lo que conoce y se va con el casco de salvamento hacia el vacío; los dos supervivientes no llegarán a puerto y la advertencia que emiten es también un señuelo para quien la escuche.",
+    "tension": 5
+  }
+]

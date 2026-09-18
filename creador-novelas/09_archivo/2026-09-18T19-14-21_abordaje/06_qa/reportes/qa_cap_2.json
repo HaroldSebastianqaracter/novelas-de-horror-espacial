@@ -1,0 +1,16 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Descripcion por negacion: la escena se define por lo que no ocurre ('No la empujamos', 'No era una retirada: era un embudo', 'Calvo no grito' en el capitulo 2). Acumulado 7 apariciones en los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura del secreto callado ('nadie contesto... ninguno queria ser el primero en nombrarlo', 'Nadie lo explico' en el capitulo 2). Acumulado 4 apariciones en los capitulos 1 y 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

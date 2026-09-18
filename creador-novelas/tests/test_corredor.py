@@ -107,12 +107,22 @@ def test_una_pausa_de_qa_se_corrige_sola_rehaciendo_el_capitulo(vacio):
     assert corredor.fila_csv(fila)["correcciones"] == 1
 
 
-def test_si_la_correccion_no_sale_se_acepta_el_veredicto_y_la_novela_sigue(vacio):
-    doble = PausaQueSeArregla(vacio, fase_que_arregla="reanudar", rompe=("resolver-qa",))
+def test_si_el_escritor_no_rehace_el_capitulo_se_cierra_la_resolucion_igual(vacio):
+    doble = PausaQueSeArregla(vacio, fase_que_arregla="cerrar-resolucion", rompe=("resolver-qa",))
     fila = corredor.correr_novela(vacio, ENCARGO, ejecutar=doble, aviso=lambda _: None)
 
-    # Una corrección que no sale no puede costar la novela entera: se acepta el veredicto, la novela
-    # termina, y la tabla enseña que esa resolución no vino con corrección.
+    # Una corrección que no sale no puede costar la novela entera. Y el repliegue no puede ser
+    # `reanudar`: con la resolución ya abierta, `--sin-cambios` se niega. Lo único que queda es
+    # cerrarla, y la tabla enseña que esa resolución no vino con corrección.
+    assert "cerrar-resolucion" in doble.llamadas
+    assert fila["completa"] is True
+    assert (fila["resoluciones"], fila["correcciones"]) == (1, 0)
+
+
+def test_si_no_se_puede_ni_marcar_el_capitulo_se_acepta_el_veredicto(vacio):
+    doble = PausaQueSeArregla(vacio, fase_que_arregla="reanudar", rompe=("corregir",))
+    fila = corredor.correr_novela(vacio, ENCARGO, ejecutar=doble, aviso=lambda _: None)
+
     assert "reanudar" in doble.llamadas
     assert fila["completa"] is True
     assert (fila["resoluciones"], fila["correcciones"]) == (1, 0)

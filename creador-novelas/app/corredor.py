@@ -137,8 +137,15 @@ def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3
                 # rehacerlo con el hallazgo delante y lo reextrae, y `cerrar-resolucion` levanta la
                 # pausa. Si algo de eso falla se acepta el veredicto con `reanudar` y la novela sigue:
                 # una corrección que no sale no puede costar la novela entera.
-                if all(paso(f) for f in ("corregir", "resolver-qa", "cerrar-resolucion")):
-                    correcciones += 1
+                # `corregir` marca el capítulo y abre la resolución. A partir de ahí `reanudar` ya
+                # no vale --`--sin-cambios` se niega con una resolución en curso--, así que el único
+                # repliegue posible es cerrarla.
+                if paso("corregir"):
+                    rehecho = paso("resolver-qa")
+                    if not paso("cerrar-resolucion"):
+                        fallo = f"no se pudo cerrar la resolución: {fases[-1].get('error')}"
+                        break
+                    correcciones += 1 if rehecho else 0
                 elif not paso("reanudar"):
                     fallo = f"no se pudo resolver la pausa de QA: {fases[-1].get('error')}"
                     break

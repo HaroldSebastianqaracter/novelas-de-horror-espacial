@@ -1,1 +1,1 @@
-{"ts": "2026-09-18T18:45:39.396+02:00", "tipo": "verbo", "verbo": "archivar", "args": ["--nombre", "abordaje-contaminada-plantilla-a-media-corrida", "--forzar"], "resultado": "ok", "ms": 59, "capitulo": null}
+{"ts": "2026-09-18T19:17:58.681+02:00", "tipo": "verbo", "verbo": "archivar", "args": ["--nombre", "brote-cortada-por-el-fallo-de-registrar-escritor", "--forzar"], "resultado": "ok", "ms": 89, "capitulo": null}

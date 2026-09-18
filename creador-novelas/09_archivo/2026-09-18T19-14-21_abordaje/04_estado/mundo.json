@@ -1,0 +1,33 @@
+{
+  "reglas": [
+    "El Cinturón de Hierro es un remolcador de aguas profundas de tripulación mínima: cinco personas cubren guardias rotativas de seis horas y ninguna sección queda atendida de forma permanente salvo el puente.",
+    "El soporte vital se administra por secciones: cada mamparo estanco aísla su propio circuito de aire, y el reciclador reparte reservas según las secciones que figuren habitadas en la consola del puente.",
+    "Sellar una sección con soplete y herramientas de anclaje es una operación irreversible con el equipo de a bordo: reabrirla exige cortar el mamparo.",
+    "Los conductos de servicio recorren la nave entera y conectan todas las cubiertas; están dimensionados para mantenimiento y sus registros se abren con herramienta manual desde ambos lados.",
+    "Las cámaras y monitores del puente cubren cubierta de carga, pasillos principales y esclusas, pero la imagen es de baja definición y sin audio.",
+    "Las transmisiones a puerto viajan con retraso creciente conforme la nave se aleja; una respuesta puede tardar horas, y la ausencia de respuesta no se distingue de una avería de recepción.",
+    "Los motores del remolcador están fuera de su vida útil nominal y admiten un único tirón de emergencia a plena potencia antes de comprometer el casco.",
+    "El casco de salvamento remolcado va sujeto por anclajes que solo pueden cortarse desde el exterior del remolcador o desde el conducto que baja a la línea de amarre.",
+    "El vacío exterior es letal en segundos sin traje; a bordo hay trajes contados y su autonomía se mide en horas."
+  ],
+  "objetos": [
+    "Casco de salvamento sin identificar, remolcado, con baliza apagada y registrado en el manifiesto como contenedor.",
+    "Manifiesto de remolque, archivado en el puente, con el destino y la clasificación de la carga.",
+    "Linternas de mano, sopletes y herramientas de anclaje del pañol de carga, el único equipo con que la tripulación puede sellar mamparos.",
+    "Consola de navegación del puente, desde la que se introduce y ejecuta el rumbo.",
+    "Consola de comunicaciones de Vart, con el registro de todas las transmisiones enviadas y recibidas.",
+    "Sensores de temperatura de los conductos de servicio, que Bregan consulta desde máquinas.",
+    "Mapa de sellado que la tripulación va anotando sección a sección."
+  ],
+  "linea_de_tiempo": [
+    "Día 0: el Cinturón de Hierro amarra el casco de salvamento y Sorel baja a colocar los anclajes; Calvo firma el contrato sin leer el manifiesto.",
+    "Día 1: se inicia la travesía de quince días; puerto deja de responder a las transmisiones de Vart, que no lo comunica.",
+    "Días 1 a 4: rutina de guardias y travesía sin incidentes registrados; quedan once días hasta puerto.",
+    "Día 4, guardia nocturna: la esclusa de carga se abre desde fuera (capítulo 1)."
+  ],
+  "locaciones": {
+    "Cubierta de carga del Cinturón de Hierro": "La bodega del remolcador: un espacio alto y frío de mamparos desnudos, con la esclusa de carga al fondo, grúas de amarre plegadas contra el techo y registros de conducto a la altura del suelo. Iluminación de servicio escasa fuera de los turnos de trabajo; es la sección más cercana a la línea de amarre del casco remolcado y la que cubre el monitor principal del puente.",
+    "Conductos de servicio del Cinturón de Hierro": "La red de pasos técnicos que atraviesa la nave de proa a popa y de cubierta a cubierta: tramos que obligan a avanzar a cuatro patas, ramales ciegos de mantenimiento, cableado y tubería de recirculación. El aire se mueve ahí con un zumbido constante y la temperatura varía lo bastante como para leerse desde máquinas.",
+    "Puente de mando del Cinturón de Hierro": "La sección más pequeña y mejor protegida de la nave: consolas de navegación y comunicaciones, la pared de monitores de las cámaras interiores, el ventanal de proa y una única puerta de mamparo hacia el corredor principal. Es el punto desde el que se gobierna el rumbo y se administran las reservas de aire."
+  }
+}
