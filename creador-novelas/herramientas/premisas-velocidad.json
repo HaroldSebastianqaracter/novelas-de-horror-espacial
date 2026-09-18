@@ -1,18 +1,17 @@
 {
-  "version": 2,
+  "version": 3,
   "_comentario": [
-    "Juego 2. El juego 1 falló en dos de tres novelas de base, y siempre por lo mismo: cada anomalía",
-    "estaba formulada como una regla absoluta («nunca pregunta nada», «el conteo lleva seis desde el",
-    "principio»). La escaleta convierte esa regla en un hecho vigente del log de continuidad, y el",
-    "clímax tiene que tocarla para resolver la historia: el narrador la niega, QA lo caza y la novela",
-    "para. Criogenia, la única cuyo misterio era un estado y no una ley, salió limpia.",
+    "Juego 3: amenaza presente. Las diez tienen el peligro a la vista desde el capítulo 1.",
     "",
-    "Regla del juego 2: la anomalía es algo que OCURRE o que ALGUIEN ES, nunca algo que siempre pasa",
-    "o que nunca pasa. Sin «nunca», «siempre», «ninguno», «desde el principio» ni cifras declaradas",
-    "permanentes.",
+    "El juego 1 y el juego 2 eran de misterio, y ahí el harness se contradice por construcción: el",
+    "preludio anota lo que se cree («no hay ningún pasillo», «el pasajero nunca pregunta»), el clímax",
+    "existe para revelar que era falso, y revelar el misterio y contradecir el log son la misma",
+    "acción. Con una amenaza presente no hay nada que revelar: la escaleta escribe hechos en positivo",
+    "--hay algo a bordo, entró por aquí, mata así-- y la novela avanza sumando, no desmintiendo.",
+    "Es la estructura con la que el harness nunca había fallado.",
     "",
-    "Lo demás se mantiene, porque es lo que hace comparables las diez: tripulación de cinco, un",
-    "escenario cerrado, una anomalía, sin saltos temporales, y una config común que no se toca."
+    "Se mantiene lo que las hace comparables: tripulación de cinco, un escenario cerrado, una sola",
+    "amenaza, sin saltos temporales, y una config común que no se toca."
   ],
   "config": {
     "total_capitulos": 3,
@@ -31,44 +30,44 @@
   },
   "novelas": [
     {
-      "nombre": "capsula",
-      "idea": "Un remolcador de salvamento con cinco tripulantes recoge una cápsula de escape a la deriva. Dentro hay una persona viva y tranquila que dice llevar esperando. Lo que cuenta del naufragio coincide con un informe que el remolcador recibió cifrado y que nadie de la tripulación ha abierto todavía. El puerto más cercano está a once días."
+      "nombre": "abordaje",
+      "idea": "Algo entró por la esclusa de carga de un remolcador con cinco tripulantes y mató al de guardia delante de los demás. Es grande, se mueve por los conductos y no responde a ningún protocolo de contacto. La tripulación sella los mamparos por secciones e intenta acorralarlo antes de que llegue al puente. Quedan once días hasta puerto."
     },
     {
-      "nombre": "repostaje",
-      "idea": "Cinco operarios cierran turno en una estación de repostaje sobre una luna helada. El relevo no llega y tampoco llega la explicación, y el protocolo les prohíbe abandonar la estación sin entrega de guardia. La segunda noche, el operario de guardia encuentra el parte del día siguiente ya redactado, con su letra y con hechos que aún no han ocurrido."
+      "nombre": "brote",
+      "idea": "En una nave de transporte con cinco tripulantes, dos presentan lesiones que la médica no reconoce y que avanzan visiblemente de una guardia a la siguiente. Lo que crece bajo la piel se mueve. La médica declara aislamiento y el resto tiene que decidir cuánto tiempo darles antes de que el aire común deje de ser seguro."
     },
     {
-      "nombre": "criogenia",
-      "idea": "Una nave hospital despierta a cinco pacientes de un sueño de dos años para una revisión rutinaria. Cuatro recuerdan el viaje de ida. El quinto recuerda con detalle un viaje distinto, con otra tripulación y otro destino, y describe pasillos de esta misma nave que fueron sellados antes de zarpar. Sus constantes son las mejores de los cinco."
+      "nombre": "enjambre",
+      "idea": "Cinco operarios de una estación de superficie ven entrar por los conductos térmicos unas criaturas del tamaño de una mano que huyen del frío exterior. Son muchas y muerden. El calor de la estación las atrae y apagarlo significa morir congelados en cuatro horas. El relevo tarda todavía seis días."
     },
     {
-      "nombre": "cavidad",
-      "idea": "Una cuadrilla de cinco perfora un asteroide de níquel siguiendo una veta que no figuraba en el sondeo. A cuatrocientos metros la broca entra en una cavidad con aire respirable y temperatura de habitación. El geólogo de la cuadrilla data la roca del techo y obtiene una antigüedad que no sabe cómo justificar. Quedan dos semanas de contrato."
+      "nombre": "nido",
+      "idea": "La cuadrilla de cinco de una nave cisterna encuentra el tanque de agua principal lleno de vainas adheridas a las paredes, y varias están abiertas. Lo que salió de ellas ya está en los conductos de ventilación y crece rápido. El agua limpia que queda a bordo alcanza para tres días."
     },
     {
-      "nombre": "rumbo",
-      "idea": "Un carguero de cinco tripulantes descubre que su piloto automático lleva días corrigiendo el rumbo hacia unas coordenadas que no están en la carta. Cada corrección es mínima y va firmada con el código de autorización de la capitana, que no recuerda haber autorizado ninguna. Volver al rumbo bueno consume un combustible que no les sobra."
+      "nombre": "carga",
+      "idea": "Un carguero de cinco tripulantes transporta contenedores sellados que no debían abrirse. Uno ha reventado desde dentro durante la maniobra y en la bodega hay algo vivo del tamaño de un hombre, cubierto del sellante de la carga. La bodega comunica con el resto de la nave por dos escotillas y solo una cierra bien."
     },
     {
-      "nombre": "faro",
-      "idea": "Tres personas mantienen un faro orbital sobre un planeta muerto y esperan su relevo dentro de seis meses. El relevo se presenta esta semana: dos personas con la documentación en regla, el saludo correcto y el correo atrasado. Uno de los recién llegados menciona averías del faro que ocurrieron y que nunca se comunicaron a nadie."
+      "nombre": "sombra",
+      "idea": "En una estación minera con cinco trabajadores, algo caza en los tramos sin luz: se ha llevado a uno y han visto cómo lo hacía. El reactor está perdiendo potencia por sectores y cada apagón amplía el territorio de la cosa. Los generadores de reserva están en el nivel inferior, que ya está a oscuras."
     },
     {
-      "nombre": "colonia",
-      "idea": "Cinco colonos despiertan al llegar a un mundo que llevan cuatro años entrenándose para habitar. La superficie se parece a las simulaciones de entrenamiento más de lo que nadie esperaba: las mismas rocas, el mismo horizonte, los mismos fallos del terreno. En el valle hay un edificio de prácticas que los cinco recuerdan del simulador y que nadie construyó."
+      "nombre": "sonda",
+      "idea": "La sonda que cinco tripulantes recuperaron de la superficie volvió con algo adherido al casco que se soltó dentro del hangar. Mide medio metro, se pega a las superficies calientes y ha dejado a un tripulante con el brazo inservible. El hangar no se puede despresurizar sin perder también el aire del pasillo central."
     },
     {
-      "nombre": "desguace",
-      "idea": "Una nave de reciclaje con cinco operarios desguaza cascos abandonados en un cementerio orbital. El tercer casco de la semana repite la disposición de su propia nave y sus reparaciones mal hechas, y en las taquillas de la tripulación aparecen sus cinco nombres con su letra. Quedan cuatro cascos por abrir y el contrato se cobra al terminar."
+      "nombre": "raices",
+      "idea": "Un hongo avanza por los mamparos de una estación con cinco ocupantes, extendiéndose desde la bodega de muestras a un ritmo que se puede medir hora a hora. Ha atrapado a uno contra una pared y sigue creciendo sobre él. Quemarlo funciona, pero el sistema contra incendios solo tiene tres descargas."
     },
     {
-      "nombre": "socorro",
-      "idea": "Una sonda de rescate de cinco tripulantes responde a una llamada de socorro y descubre que la señal sale de su propia antena, con la voz de su capitana, que está viva y al mando y no ha grabado nada. La señal describe averías a bordo, y dos de ellas se han producido después de emitirse el mensaje."
+      "nombre": "injerto",
+      "idea": "Cinco tripulantes de una nave de vigilancia ven que uno de ellos lleva prendido en la nuca un organismo del tamaño de una mano que llegó con la última carga. Se mueve cuando él habla. Arrancarlo lo mataría, y en la bodega quedan más contenedores de aquel envío sin abrir."
     },
     {
-      "nombre": "cuarentena",
-      "idea": "Una estación de cuarentena en el borde del sistema recibe a cinco viajeros que entran juntos en la cámara de descontaminación. El ciclo dura cuarenta minutos y la cámara se abre con seis. Los seis se reconocen entre sí, comparten los mismos recuerdos del viaje y ninguno admite ser el que sobra."
+      "nombre": "jaula",
+      "idea": "Cinco científicos de una estación de estudio tienen en observación una criatura capturada en la superficie. Esta mañana la jaula está abierta desde dentro y hay sangre en el laboratorio. La criatura conoce la estación mejor que ellos porque llevan seis semanas dejándola mirar, y el transporte de salida tarda cuatro días."
     }
   ]
 }
