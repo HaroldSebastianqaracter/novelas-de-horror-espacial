@@ -93,7 +93,7 @@ def _formatear_fichas(fichas: dict) -> str:
 
 
 def ensamblar_contexto(n: int, config: HarnessConfig, raiz: Path, *, feedback_longitud: str | None = None,
-                       resumen_minimo: bool = False) -> Contexto:
+                       feedback_qa: str | None = None, resumen_minimo: bool = False) -> Contexto:
     """RF-05.1: construye el prompt del escritor desde el estado persistente, sin el manuscrito."""
     rutas = Rutas(raiz)
     entrada = repo.leer_outline_entry(raiz, n)
@@ -147,6 +147,7 @@ def ensamblar_contexto(n: int, config: HarnessConfig, raiz: Path, *, feedback_lo
         "PALABRAS_MAX": str(maximo),
         "PERSONAJES_PERMITIDOS": ", ".join(permitidos) if permitidos else "(ninguno)",
         "FEEDBACK_LONGITUD": feedback_longitud or "(primer intento: sin desvío previo)",
+        "FEEDBACK_QA": feedback_qa or "(no hay revisión previa de este capítulo)",
         "COMANDO_VALIDACION": comando_validador("escritor", n),
         "RECURSOS_AGOTADOS": rec.formatear_agotados(recursos),
     }

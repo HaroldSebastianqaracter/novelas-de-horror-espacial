@@ -1,0 +1,63 @@
+[
+  {
+    "recurso": "estructura de negación seguida de afirmación ('No A, no B: C' / 'no hubo A, ni B. Hubo C')",
+    "veces": 6,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "'nada' como sustantivo del vacío exterior o como respuesta, en cierre de párrafo",
+    "veces": 4,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "enumeración en tríada como recurso rítmico",
+    "veces": 6,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "el gesto cotidiano u oficio como comparación de la violencia ('la forma en que un operario hace lo que hace todos los días')",
+    "veces": 2,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "objeto doméstico sostenido o dejado con cuidado como marca de shock (el café de Bilbao)",
+    "veces": 3,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "el monitor o la cámara en gris como distancia emocional de la muerte",
+    "veces": 2,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "el espacio que se estrecha sobre la tripulación (embudo, pasillo cada vez más angosto)",
+    "veces": 2,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "el mapa o retícula de compartimentos tachados como cuenta atrás visible",
+    "veces": 1,
+    "caps": [
+      2
+    ]
+  }
+]

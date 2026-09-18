@@ -46,7 +46,9 @@ Imágenes, gestos, muletillas y giros que los capítulos anteriores ya usaron, c
 3. Cubrí el objetivo narrativo y entregá la información nueva; no adelantes giros que la sinopsis reserva para más adelante.
 4. Sin título ni encabezados dentro del archivo: solo la prosa del capítulo. El título lo antepone el harness al ensamblar.
 5. Desvío del intento anterior (si lo hubo): {{FEEDBACK_LONGITUD}}
-6. **Nada literal de capítulos anteriores** (RF-05.5): ninguna secuencia de cuatro o más palabras con contenido puede coincidir palabra por palabra con un capítulo ya escrito. No podés leerlos y no hace falta: el validador compara por vos y, si encuentra un pasaje repetido, te devuelve la frase y el capítulo de origen; reescribí ese pasaje con otras palabras y volvé a validar. Nombrar personajes y locaciones no cuenta como repetición.
+6. Contradicciones que la revisión encontró en tu versión anterior de este capítulo, si las hubo: {{FEEDBACK_QA}}
+   Si hay alguna, corregirla es lo primero: el resto del capítulo puede cambiar, pero eso no. No discutas el hallazgo ni lo expliques dentro de la prosa; reescribí la escena de modo que el hecho vigente y lo que narrás digan lo mismo.
+7. **Nada literal de capítulos anteriores** (RF-05.5): ninguna secuencia de cuatro o más palabras con contenido puede coincidir palabra por palabra con un capítulo ya escrito. No podés leerlos y no hace falta: el validador compara por vos y, si encuentra un pasaje repetido, te devuelve la frase y el capítulo de origen; reescribí ese pasaje con otras palabras y volvé a validar. Nombrar personajes y locaciones no cuenta como repetición.
 
 ## Qué hacer
 1. Escribí el capítulo completo con la herramienta Write en **{{RUTA_CAPITULO}}** (esa ruta exacta y ninguna otra).

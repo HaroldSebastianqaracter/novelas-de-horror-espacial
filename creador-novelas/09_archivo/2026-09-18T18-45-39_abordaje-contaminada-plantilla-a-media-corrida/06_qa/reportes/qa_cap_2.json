@@ -1,0 +1,31 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El narrador del capitulo 2 establece que la presencia sigue dentro de la nave y avanza por el anillo hacia el puente (las caidas de presion trazan un vector limpio que termina en el puente), mientras el hecho vigente del capitulo 1 afirma que la presencia entro por la bodega, mato a Sundh y abandono la nave. No hay reingreso narrado ni explicacion, y no se trata de la opinion de un personaje.",
+      "cap_origen": 1
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion seguida de afirmacion ('No A, no B: C'): 6 apariciones acumuladas en los capitulos 1 y 2; en el 2, 'no una trampa, un embudo', 'ya no parecia una red...: parecia un pasillo cada vez mas angosto' y 'No va a viveres. No va a la bodega.'",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion en triada como recurso ritmico: 6 apariciones acumuladas en los capitulos 1 y 2; en el 2, 'rectangulos, una reticula torpe, cada compartimento un cuadrado', 'Popa, tachada. Talleres, tachados. El ramal de estribor...' y 'ni puerto, ni nave, ni nada a lo que nadar'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "'Nada' como sustantivo del vacio exterior: 4 apariciones acumuladas en los capitulos 1 y 2; en el 2, 'fuera del casco no habia puerto, ni nave, ni nada a lo que nadar'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Objeto cotidiano sostenido o recogido con cuidado inutil como marca de shock: 3 apariciones acumuladas en los capitulos 1 y 2; en el 2, 'Kes recogio el rotulador, como si todavia sirviera de algo'.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

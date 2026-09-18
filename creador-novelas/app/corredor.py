@@ -86,6 +86,7 @@ def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3
     fases: list[dict[str, Any]] = []
     fallo: str | None = None
     resoluciones = 0
+    correcciones = 0
 
     def paso(fase: str) -> bool:
         aviso(f"  · {fase}")
@@ -132,11 +133,17 @@ def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3
                     fallo = f"QA pausó más de {MAX_RESOLUCIONES} veces"
                     break
                 resoluciones += 1
-                if not paso("reanudar"):
-                    fallo = f"no se pudo reanudar: {fases[-1].get('error')}"
+                # Corregir de verdad: `corregir` marca el capítulo, `/resolver-qa` manda al escritor a
+                # rehacerlo con el hallazgo delante y lo reextrae, y `cerrar-resolucion` levanta la
+                # pausa. Si algo de eso falla se acepta el veredicto con `reanudar` y la novela sigue:
+                # una corrección que no sale no puede costar la novela entera.
+                if all(paso(f) for f in ("corregir", "resolver-qa", "cerrar-resolucion")):
+                    correcciones += 1
+                elif not paso("reanudar"):
+                    fallo = f"no se pudo resolver la pausa de QA: {fases[-1].get('error')}"
                     break
                 if _pausada(raiz):
-                    fallo = "la pausa de QA seguía abierta después de reanudar"
+                    fallo = "la pausa de QA seguía abierta después de resolverla"
                     break
                 continue
             despues = checkpoint.leer_manifest(raiz)
@@ -161,7 +168,7 @@ def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3
         "reloj_s": reloj["total_s"], "preludio_s": reloj["preludio_s"],
         "tandas_s": reloj["tandas_s"], "n_tandas": len(reloj["tandas"]), "fases": fases,
         "capitulos": resumen["capitulos"]["cerrados"], "palabras": resumen["capitulos"]["palabras"],
-        "resoluciones": resoluciones,
+        "resoluciones": resoluciones, "correcciones": correcciones,
         "agentes": resumen["agentes"], "calidad": resumen["calidad"],
         "coste_usd": (resumen.get("coste") or {}).get("total"),
         "config": resumen["config"].get("novela.json"),
@@ -222,6 +229,9 @@ def fila_csv(fila: dict[str, Any]) -> dict[str, Any]:
     # Cuántas veces hubo que aceptar un veredicto de QA para que la novela siguiera. Es el precio en
     # calidad de haber desbloqueado la medición, y tiene que verse al lado del reloj.
     plano["resoluciones"] = fila.get("resoluciones")
+    # De esas resoluciones, cuántas acabaron con el capítulo rehecho en vez de con el
+    # veredicto aceptado tal cual. Es la diferencia entre arreglar y mirar para otro lado.
+    plano["correcciones"] = fila.get("correcciones")
     for clave in ("total_capitulos", "palabras_por_capitulo", "cadencia_qa",
                   "ventana_resumen_rodante", "max_tokens_contexto_escritor",
                   "max_hechos_por_capitulo"):

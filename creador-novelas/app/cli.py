@@ -358,6 +358,26 @@ def cmd_preparar_capitulo(args, raiz: Path) -> int:
     return 0
 
 
+def cmd_preparar_correccion(args, raiz: Path) -> int:
+    """Prompt para que el escritor rehaga un capítulo que el revisor tumbó (RF-07.6, paso 2).
+
+    Hasta ahora una contradicción solo tenía dos salidas: aceptarla y dejarla escrita, o que una
+    persona corrigiera la prosa a mano. El escritor ya sabe corregir --lo hace con los desvíos de
+    longitud y con las repeticiones-- y lo único que le faltaba era que alguien le contase el
+    hallazgo.
+    """
+    config = _config(raiz)
+    contexto = loop.preparar_correccion(raiz, config, args.n)
+    rutas = Rutas(raiz)
+    print(f"corrección del capítulo {args.n}: {contexto.tokens_estimados} tokens estimados de {contexto.limite}")
+    print(f"prompt en {rutas.prompt_escritor(args.n).relative_to(raiz).as_posix()}; el escritor reescribe "
+          f"{rutas.capitulo(args.n).relative_to(raiz).as_posix()}")
+    _resultado("correccion_lista", n=args.n,
+               prompt=rutas.prompt_escritor(args.n).relative_to(raiz).as_posix(),
+               tokens=contexto.tokens_estimados)
+    return 0
+
+
 def cmd_preparar_extractor(args, raiz: Path) -> int:
     config = _config(raiz)
     path = loop.preparar_extractor(raiz, config, args.n)
@@ -560,6 +580,11 @@ def construir_parser() -> argparse.ArgumentParser:
     pc.add_argument("n", type=int)
     pc.add_argument("--feedback", help="desvío de longitud del intento anterior (EX-07)")
     pc.set_defaults(fn=cmd_preparar_capitulo)
+
+    pk = sub.add_parser("preparar-correccion",
+                        help="RF-07.6: prompt para que el escritor rehaga un capítulo con contradicciones")
+    pk.add_argument("n", type=int)
+    pk.set_defaults(fn=cmd_preparar_correccion)
 
     pe = sub.add_parser("preparar-extractor", help="prompt del extractor para el capítulo en curso o uno en reextracción")
     pe.add_argument("n", type=int)

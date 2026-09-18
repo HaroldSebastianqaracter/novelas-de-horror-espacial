@@ -1,0 +1,48 @@
+[
+  {
+    "num": 1,
+    "titulo": "La esclusa se abre desde fuera",
+    "objetivo_narrativo": "Presentar el remolcador en rutina y romperla: el ciclo de apertura corre entero sin que nadie lo pida, algo entra por la bodega y mata a Sundh delante de los otros cuatro, que lo ven por el monitor del puente y no pueden hacer nada.",
+    "personajes": [
+      "Iremar Sossa",
+      "Dovan Kes",
+      "Noé Bilbao",
+      "Teo Arens",
+      "Marek Sundh",
+      "la presencia"
+    ],
+    "locacion": "Puente del Ceniza de Vela",
+    "informacion_nueva": "La esclusa de carga no se forzó: se abrió con el ciclo completo y en orden. La presencia no responde a ninguno de los tres protocolos de contacto y se retira por los conductos de ventilación antes de la primera alarma. Quedan siete días de trayecto y ningún sitio adonde huir.",
+    "tension": 4
+  },
+  {
+    "num": 2,
+    "titulo": "Un cuadrado menos en el mapa",
+    "objetivo_narrativo": "Seguir tres días de caza metódica sección a sección hasta que el plan de Kes se da vuelta: cada mamparo sellado también les quita una salida, y las grabaciones revelan que la presencia no huye sino que aprende y avanza hacia el puente.",
+    "personajes": [
+      "Iremar Sossa",
+      "Dovan Kes",
+      "Noé Bilbao",
+      "Teo Arens",
+      "la presencia"
+    ],
+    "locacion": "Anillo de habitáculos y comedor",
+    "informacion_nueva": "La secuencia de apertura tenía la cadencia de una mano entrenada y la presencia la repitió dos veces en compuertas interiores, cada vez más rápido. Los registros de presión muestran que su línea de avance apunta al puente, no a las bodegas: acorralarla les ha estado despejando el camino.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "De qué tamaño quieren el último cuarto",
+    "objetivo_narrativo": "Enfrentar las dos salidas posibles —encerrarse en el puente o abrir la nave entera— y ejecutar la de Sossa: despresurizar el anillo, empujar a la presencia al casco muerto y soltar el amarre, al precio de Bilbao.",
+    "personajes": [
+      "Iremar Sossa",
+      "Dovan Kes",
+      "Noé Bilbao",
+      "Teo Arens",
+      "la presencia"
+    ],
+    "locacion": "Sala de máquinas",
+    "informacion_nueva": "El casco muerto que arrastran sirve de rincón sin salida. Bilbao conoce de memoria el orden de las válvulas y no vuelve a subir; Arens sube con la mano rota. La nave llega a puerto el día once con tres vivos, y el informe de Sossa deja por escrito que la esclusa se abrió con una secuencia de la compañía que nadie en el muelle le pregunta de dónde salió.",
+    "tension": 5
+  }
+]

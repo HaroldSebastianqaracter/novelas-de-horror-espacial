@@ -1,0 +1,26 @@
+{
+  "reglas": [
+    "El Ceniza de Vela es un remolcador de cinco plazas que arrastra un casco muerto de treinta mil toneladas; el trayecto entre el punto de enganche y el puerto de destino dura once días.",
+    "La compañía imprime tres protocolos de contacto en la cara interior de cada mamparo: radio, secuencia de luces y un saludo grabado.",
+    "El amarre del remolque puede soltarse desde el puente y también a mano desde la sala de máquinas.",
+    "Sellar un mamparo reduce el volumen habitable de la nave: acorralar algo dentro del casco es a la vez estrecharse uno mismo.",
+    "Los conductos de ventilación recorren la nave entera y funcionan como un segundo casco por el que se puede circular.",
+    "La nave registra los ciclos de esclusa, las lecturas de presión y las cámaras de bodega, y esas grabaciones se pueden revisar a bordo."
+  ],
+  "objetos": [
+    "El casco muerto remolcado, treinta mil toneladas de chatarra que nadie reclamó",
+    "El monitor del puente, por el que se ven las cámaras de la bodega",
+    "El mapa de la nave que Kes dibuja sobre la mesa del comedor",
+    "El canal de voz interno entre el puente y la sala de máquinas",
+    "Las válvulas de la nave vieja en la sala de máquinas"
+  ],
+  "linea_de_tiempo": [
+    "Día 0: enganche del casco muerto; empiezan los once días de trayecto a puerto.",
+    "Día 4, noche: guardia de Marek Sundh; punto en el que arranca el capítulo 1."
+  ],
+  "locaciones": {
+    "Puente del Ceniza de Vela": "Compartimento de gobierno de la nave: desde aquí se lleva el rumbo, se corta el remolque y se ven las cámaras de bodega en el monitor. Una sola puerta que vigilar.",
+    "Anillo de habitáculos y comedor": "Corona de camarotes y el comedor donde la tripulación come y se reúne; sobre la mesa se extiende el mapa de Kes. Comunicado con los conductos de ventilación.",
+    "Sala de máquinas": "Los bajos de la nave vieja: propulsión, presión y las válvulas que se operan a mano. Fuera del puente y comunicada con él por el canal de voz."
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "Iremar Sossa": {
+    "estado_fisico": "De pie, descendiendo hacia máquinas.",
+    "estado_psicologico": "Ha comprendido que el cierre seccional gradual que ordenó crea un embudo que canaliza a la presencia hacia el puente; mantiene el mando pero reacciona inmediatamente.",
+    "secretos_que_conoce": [
+      "Fue testigo de la muerte de Sundh sin poder intervenir.",
+      "La apertura de la bodega no fue solicitada desde el puente.",
+      "La presencia avanza hacia el puente; cada cierre los estrechó más."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Dovan Kes": {
+    "estado_fisico": "De pie, descendiendo hacia máquinas con el rotulador en la mano.",
+    "estado_psicologico": "Entiende que la nave es una trampa de su propia hechura; busca lecturas alternas en los datos pero no las encuentra.",
+    "secretos_que_conoce": [
+      "Fue el primero en deducir que la bodega fue abierta desde adentro.",
+      "Sabe que cuatro días nadie más ha abierto nada en la nave.",
+      "El vector de avance de la presencia va directamente al puente, no a víveres ni bodega."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Noé Bilbao": {
+    "estado_fisico": "De pie, descendiendo hacia máquinas para ocuparse de las válvulas.",
+    "estado_psicologico": "Ha contado las puertas que quedan; percibe el estrechamiento del espacio.",
+    "secretos_que_conoce": [
+      "Fue ella quien solicitó el ciclo de carga de la bodega.",
+      "Vio cómo muere Sundh en el monitor.",
+      "Quedan solo dos vías al puente desde el comedor; ayer eran cuatro."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Teo Arens": {
+    "estado_fisico": "De pie, descendiendo hacia máquinas.",
+    "estado_psicologico": "Ha descubierto que la presencia no es aleatoria: aprende, mejora, practica; baja la voz al comunicar esto, consciente del horror.",
+    "secretos_que_conoce": [
+      "No hay respuesta en ningún canal de radio ni en los balizamientos del casco.",
+      "La apertura de esclusas sigue una cadencia regular y repetible; la segunda apertura fue once segundos más rápida que la primera."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Marek Sundh": {
+    "estado_fisico": "Muerto.",
+    "estado_psicologico": "N/A",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "la presencia": {
+    "estado_fisico": "Grande y silenciosa; se desplaza por los conductos de ventilación sin daño aparente.",
+    "estado_psicologico": "Opaca: actúa con economía de movimientos que no parece hambre ni furia, sino procedimiento.",
+    "secretos_que_conoce": [
+      "La secuencia completa de apertura de la esclusa de carga del Ceniza de Vela"
+    ],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  }
+}

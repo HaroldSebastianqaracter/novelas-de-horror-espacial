@@ -43,6 +43,7 @@ SKILLS: dict[str, str] = {
     "generar-escaleta": "/generar-escaleta",
     "inicializar-estado": "/inicializar-estado",
     "escribir-tanda": "/escribir-tanda",
+    "resolver-qa": "/resolver-qa",
 }
 # `--salida` va explícito aunque §8.2 diga que tiene valor por defecto: el CLI todavía lo exige.
 # Pasarlo aquí funciona con las dos versiones del verbo, así que no hay que esperar a nadie.
@@ -54,7 +55,7 @@ VERBOS: dict[str, list[str]] = {"ensamblar": ["ensamblar", "--salida", "08_entre
 # reporte pendiente y ese lo dice el manifiesto. Es `resolver --sin-cambios`, es decir: acepto el
 # veredicto tal como esta y sigo. No existe una variante desde la web que afirme haber corregido
 # capitulos, porque el harness no puede comprobarlo y seria una mentira anotada en el registro.
-FASES_DINAMICAS = ("reanudar",)
+FASES_DINAMICAS = ("reanudar", "corregir")
 
 # Modelo del orquestador de las fases con agentes. No redacta: ejecuta verbos, lee la línea
 # RESULTADO y despacha subagentes (INV-08). Cada subagente declara el suyo en `.claude/agents/`,
@@ -214,7 +215,9 @@ def _cerrar_proceso() -> dict[str, Any] | None:
     return fin
 
 
-SIN_SUBAGENTES = tuple(f for f in SKILLS if f != "escribir-tanda")
+# Las que no despachan subagentes: su coste entero es de la sesión y va a `fases.jsonl`.
+CON_SUBAGENTES = ("escribir-tanda", "resolver-qa")
+SIN_SUBAGENTES = tuple(f for f in SKILLS if f not in CON_SUBAGENTES)
 
 # Qué campo del resumen de `claude -p` corresponde a cada columna de `uso.jsonl`.
 _CAMPOS_USO = {"tokens_entrada": "input_tokens", "tokens_salida": "output_tokens",
@@ -250,6 +253,10 @@ def _anotar_coste_de_fase(raiz: Path | None, fase: str | None, log: str | None,
     preludio entero no existía en Langfuse y cada tanda declaraba una cuarta parte de su coste.
     """
     if not raiz or not fase or not log:
+        return
+    if fase in VERBOS or fase in FASES_DINAMICAS:
+        # Un verbo del CLI no deja el resumen JSON de `claude -p`: su log es texto. Intentar leerlo
+        # como JSON solo servía para escupir «no se pudo anotar el coste de reanudar» en cada pausa.
         return
     try:
         datos = json.loads(Path(log).read_text(encoding="utf-8"))
@@ -378,6 +385,16 @@ def lanzar_fase(raiz: Path, fase: str) -> dict[str, Any]:
         if getattr(m, "estado", None) != "pausado_por_qa" or not pendiente:
             raise RuntimeError("No hay ninguna pausa por QA que reanudar.")
         cmd = [_python(raiz), "-m", "app", "resolver", "--reporte", pendiente, "--sin-cambios"]
+    elif fase == "corregir":
+        # La otra salida de una pausa de QA, y la única que arregla algo: marca el capítulo del corte
+        # para rehacerlo. Después va `/resolver-qa`, que ahora manda al escritor a reescribirlo con el
+        # hallazgo delante, y al final `resolver --cerrar`.
+        m = checkpoint.leer_manifest(raiz)
+        pendiente = getattr(m, "reporte_qa_pendiente", None) if m else None
+        if getattr(m, "estado", None) != "pausado_por_qa" or not pendiente:
+            raise RuntimeError("No hay ninguna pausa por QA que corregir.")
+        cmd = [_python(raiz), "-m", "app", "resolver", "--reporte", pendiente,
+               "--capitulos", pendiente.rsplit("_", 1)[-1]]
     elif fase in VERBOS:
         cmd = [_python(raiz), "-m", "app", *VERBOS[fase]]
     else:

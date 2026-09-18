@@ -127,6 +127,46 @@ def tanda_siguiente(raiz: Path, config: HarnessConfig) -> ResultadoTanda:
     return resultado
 
 
+def feedback_de_qa(raiz: Path, n: int) -> str:
+    """Las contradicciones que el revisor encontró en el capítulo n, tal como se las damos al escritor.
+
+    Solo las contradicciones. Las repeticiones ya las ataja el validador con su propia realimentación,
+    y meterlas aquí distraería del único fallo que obliga a rehacer el capítulo.
+    """
+    ruta = Rutas(raiz).reporte_qa_json(n)
+    if not ruta.is_file():
+        raise EstadoInvalidoError(f"no existe {ruta.as_posix()}: no hay revisión de la que corregir")
+    reporte = ReporteQA.model_validate_json(ruta.read_text(encoding="utf-8"))
+    contradicciones = [h for h in reporte.hallazgos if h.tipo == "contradiccion"]
+    if not contradicciones:
+        raise EstadoInvalidoError(f"qa_cap_{n} no tiene contradicciones: no hay nada que corregir")
+    lineas = [f"- {h.descripcion.strip()} (el hecho contradicho viene del capítulo {h.cap_origen})"
+              for h in contradicciones]
+    return chr(10).join(lineas)
+
+
+def preparar_correccion(raiz: Path, config: HarnessConfig, n: int) -> Contexto:
+    """Contexto para rehacer un capítulo que el revisor tumbó (RF-07.6, paso 2).
+
+    El escritor no recibe el texto del capítulo --INV-01 vale también aquí-- y no le hace falta: lo
+    reescribe desde el mismo estado con el que lo escribió la primera vez, más el hallazgo de QA.
+    Es la misma mecánica con la que ya corrige un desvío de longitud, aplicada a la contradicción,
+    que hasta ahora era el único fallo que nadie le contaba nunca.
+    """
+    m = checkpoint.exigir_manifest(raiz)
+    if n not in (m.reextraccion_pendiente or []):
+        raise EstadoInvalidoError(
+            f"el capítulo {n} no está pendiente de corrección; pendientes: {m.reextraccion_pendiente}")
+    contexto = escritor.ensamblar_contexto(n, config, raiz, feedback_qa=feedback_de_qa(raiz, n))
+    if contexto.excede_limite():
+        contexto = escritor.recortar_resumen_rodante(contexto)
+    escritor.persistir_contexto(contexto, raiz)
+    registro.guardar_prompt(raiz, "escritor", n, contexto.texto)
+    registro.evento(raiz, "agente_inicio", rol="escritor", capitulo=n, agent_id=None,
+                    intento=1, tokens=contexto.tokens_estimados, motivo="correccion_qa")
+    return contexto
+
+
 def preparar_capitulo(raiz: Path, config: HarnessConfig, n: int, feedback_longitud: str | None = None) -> Contexto:
     """RF-05.1 con EX-03 y EX-04. Deja el prompt en 04_estado/prompts/ y anota el capítulo en curso."""
     m = checkpoint.exigir_manifest(raiz)

@@ -1,1 +1,1 @@
-{"ts": "2026-09-18T18:18:43.829+02:00", "tipo": "verbo", "verbo": "archivar", "args": ["--nombre", "brote-cortada-a-mano", "--forzar"], "resultado": "ok", "ms": 27, "capitulo": null}
+{"ts": "2026-09-18T18:45:39.396+02:00", "tipo": "verbo", "verbo": "archivar", "args": ["--nombre", "abordaje-contaminada-plantilla-a-media-corrida", "--forzar"], "resultado": "ok", "ms": 59, "capitulo": null}

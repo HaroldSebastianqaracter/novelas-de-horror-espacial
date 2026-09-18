@@ -1,0 +1,122 @@
+{
+  "version_specs": "v1.12",
+  "config": {
+    "novela.json": {
+      "total_capitulos": 3,
+      "palabras_por_capitulo": 400,
+      "idioma": "es-ES",
+      "persona_narrativa": "tercera_limitada",
+      "tiempo_verbal": "pasado",
+      "ventana_resumen_rodante": 2,
+      "cadencia_qa": 1,
+      "max_tokens_contexto_escritor": 12000,
+      "max_hechos_por_capitulo": 4
+    },
+    "ejecucion.json": {
+      "capitulos_por_tanda": 3,
+      "max_llamadas_por_tanda": 30,
+      "registrar_uso": true,
+      "exportar_trazas": true
+    }
+  },
+  "capitulos": {
+    "cerrados": 2,
+    "esperados": 3,
+    "estado": "en_progreso",
+    "palabras": [
+      410,
+      411
+    ]
+  },
+  "reloj": {
+    "preludio_s": 230.0,
+    "por_fase_s": {
+      "generar-premisa": 28.0,
+      "generar-sinopsis": 96.0,
+      "generar-escaleta": 46.0,
+      "inicializar-estado": 60.0
+    },
+    "tandas": [
+      {
+        "tanda": "tanda_2026-09-18T18-28-33",
+        "inicio": "2026-09-18T18:28:33.641+02:00",
+        "fin": "2026-09-18T18:35:07.277+02:00",
+        "segundos": 393.6
+      },
+      {
+        "tanda": "tanda_2026-09-18T18-35-08",
+        "inicio": "2026-09-18T18:35:08.549+02:00",
+        "fin": "2026-09-18T18:41:10.393+02:00",
+        "segundos": 361.8
+      },
+      {
+        "tanda": "tanda_2026-09-18T18-41-11",
+        "inicio": "2026-09-18T18:41:11.721+02:00",
+        "fin": "2026-09-18T18:45:27.596+02:00",
+        "segundos": 255.9
+      }
+    ],
+    "tandas_s": 1011.3,
+    "total_s": 1241.3
+  },
+  "agentes": {
+    "orquestador": {
+      "invocaciones": 6,
+      "segundos": 984.2,
+      "tokens_salida": 23889,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "escritor": {
+      "invocaciones": 4,
+      "segundos": 518.1,
+      "tokens_salida": 6548,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "extractor": {
+      "invocaciones": 2,
+      "segundos": 374.4,
+      "tokens_salida": 8170,
+      "modelos": [
+        "claude-haiku-4-5-20251001"
+      ]
+    },
+    "qa": {
+      "invocaciones": 2,
+      "segundos": 252.1,
+      "tokens_salida": 10048,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    }
+  },
+  "calidad": {
+    "contradicciones": 2,
+    "cortes_qa": 2,
+    "reintentos_de_escritor": 0,
+    "borradores_descartados": 1,
+    "tandas_abortadas": 0,
+    "motivos_de_aborto": [],
+    "pausado_al_archivar": false
+  },
+  "coste": {
+    "moneda": "USD",
+    "total": 5.2101,
+    "tokens": 3919323,
+    "por_rol": {
+      "orquestador": 1.7353,
+      "preludio": 1.7338,
+      "escritor": 0.9081,
+      "qa": 0.7236,
+      "extractor": 0.1093
+    },
+    "modelos_sin_precio": [],
+    "carpetas_con_uso": 4
+  },
+  "nombre": "2026-09-18T18-45-39_abordaje-contaminada-plantilla-a-media-corrida",
+  "titulo": "Once días hasta puerto",
+  "archivado": "2026-09-18T18:45:39+02:00"
+}

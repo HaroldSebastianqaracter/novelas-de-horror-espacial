@@ -1,0 +1,14 @@
+{
+  "inicio": 2,
+  "tope": 3,
+  "max_llamadas": 30,
+  "cerrados": 1,
+  "llamadas": 3,
+  "capitulo_en_curso": 3,
+  "intentos_longitud": 0,
+  "intentos_personaje": 0,
+  "avisos": [],
+  "registro": "07_registro/tanda_2026-09-18T18-35-08",
+  "motivo_salida": "pausado_por_qa",
+  "ts_fin": "2026-09-18T18:40:45.200+02:00"
+}

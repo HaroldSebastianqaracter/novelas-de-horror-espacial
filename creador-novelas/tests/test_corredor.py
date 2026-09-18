@@ -74,27 +74,48 @@ def test_una_novela_entera_se_encadena_y_se_archiva(vacio):
     assert json.loads(corridas[0])["nombre"] == "capsula"
 
 
-def test_una_pausa_de_qa_se_resuelve_sola_y_la_novela_sigue(vacio):
-    class PausaYReanuda(FaseDoble):
-        def __call__(self, raiz, fase, **kwargs):
-            if fase == "reanudar":
-                self.llamadas.append(fase)
-                checkpoint.limpiar_error(raiz)
-                checkpoint._actualizar(raiz, estado="en_progreso", reporte_qa_pendiente=None)
-                self.pausar = False  # el revisor ya dio su veredicto y se aceptó
-                return {"fase": fase, "codigo": 0, "segundos": 2.0}
-            return super().__call__(raiz, fase, **kwargs)
+class PausaQueSeArregla(FaseDoble):
+    """Deja de estar pausada cuando la fase `fase_que_arregla` corre."""
 
-    doble = PausaYReanuda(vacio, pausar=True)
+    def __init__(self, raiz, *, fase_que_arregla: str, rompe: tuple = (), **kw):
+        super().__init__(raiz, pausar=True, **kw)
+        self.fase_que_arregla, self.rompe = fase_que_arregla, rompe
+
+    def __call__(self, raiz, fase, **kwargs):
+        if fase in ("corregir", "resolver-qa", "cerrar-resolucion", "reanudar"):
+            self.llamadas.append(fase)
+            if fase in self.rompe:
+                return {"fase": fase, "codigo": 1, "segundos": 1.0}
+            if fase == self.fase_que_arregla:
+                checkpoint._actualizar(raiz, estado="en_progreso", reporte_qa_pendiente=None)
+                self.pausar = False
+            return {"fase": fase, "codigo": 0, "segundos": 2.0}
+        return super().__call__(raiz, fase, **kwargs)
+
+
+def test_una_pausa_de_qa_se_corrige_sola_rehaciendo_el_capitulo(vacio):
+    doble = PausaQueSeArregla(vacio, fase_que_arregla="cerrar-resolucion")
     fila = corredor.correr_novela(vacio, ENCARGO, ejecutar=doble, aviso=lambda _: None)
 
-    # `reanudar` es lo que hace el botón de la pantalla: aceptar el veredicto y seguir. Contarlo como
-    # fallo dejaba casi todas las novelas sin terminar --hay una contradicción cada dos cortes-- y
-    # sin novelas completas no hay velocidad que medir. La calidad no se pierde: se anota.
+    # El camino que arregla algo: marcar el capítulo, que el escritor lo rehaga con el hallazgo
+    # delante, reextraer y cerrar. Antes una contradicción solo tenía dos salidas, dejarla escrita o
+    # que una persona corrigiera la prosa a mano.
+    secuencia = [f for f in doble.llamadas if f in ("corregir", "resolver-qa", "cerrar-resolucion")]
+    assert secuencia == ["corregir", "resolver-qa", "cerrar-resolucion"]
+    assert fila["completa"] is True
+    assert (fila["resoluciones"], fila["correcciones"]) == (1, 1)
+    assert corredor.fila_csv(fila)["correcciones"] == 1
+
+
+def test_si_la_correccion_no_sale_se_acepta_el_veredicto_y_la_novela_sigue(vacio):
+    doble = PausaQueSeArregla(vacio, fase_que_arregla="reanudar", rompe=("resolver-qa",))
+    fila = corredor.correr_novela(vacio, ENCARGO, ejecutar=doble, aviso=lambda _: None)
+
+    # Una corrección que no sale no puede costar la novela entera: se acepta el veredicto, la novela
+    # termina, y la tabla enseña que esa resolución no vino con corrección.
     assert "reanudar" in doble.llamadas
     assert fila["completa"] is True
-    assert fila["resoluciones"] == 1
-    assert corredor.fila_csv(fila)["resoluciones"] == 1
+    assert (fila["resoluciones"], fila["correcciones"]) == (1, 0)
 
 
 def test_una_pausa_que_no_se_deja_resolver_no_deja_al_corredor_dando_vueltas(vacio):

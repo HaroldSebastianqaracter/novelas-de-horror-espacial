@@ -1,6 +1,6 @@
 ---
 name: resolver-qa
-description: RF-07.6 paso 2. Tras `resolver --reporte X --capitulos a,b`, reextrae cada capítulo corregido invocando al extractor y aplica cada delta con `aplicar-delta --reextraccion`. El cierre (paso 3) lo hace el usuario con `resolver --cerrar`.
+description: RF-07.6 paso 2. Tras `resolver --reporte X --capitulos a,b`, hace que el escritor rehaga cada capítulo con el hallazgo de QA delante, lo reextrae y aplica cada delta con `aplicar-delta --reextraccion`. El cierre (paso 3) lo hace el usuario con `resolver --cerrar`.
 allowed-tools: Read, Write, Agent, Bash(.venv/Scripts/python.exe -m app:*)
 disable-model-invocation: true
 ---
@@ -13,6 +13,8 @@ Estado:
 Condición de entrada: el manifiesto muestra `reextraccion_pendiente` no vacío (el usuario ya corrió `resolver --reporte qa_cap_N --capitulos a,b`). Si la lista está vacía, no hay nada que hacer: indicá `python -m app resolver --cerrar`.
 
 Para cada capítulo K de la lista, en orden (el CLI mantiene `capitulo_activo = K` para que H-05 deje al extractor leerlo):
+
+0. **Primero se corrige la prosa, y la corrige el escritor.** `.venv/Scripts/python.exe -m app preparar-correccion K` → `RESULTADO: correccion_lista prompt=04_estado/prompts/escritor_cap_K.md`. Leé ese archivo con Read y pasáselo a `Agent(subagent_type="escritor", prompt=<contenido>)`. El escritor reescribe `05_manuscrito/cap_K.md` con el hallazgo de la revisión delante, lo valida él mismo y devuelve su línea. Registrala con `.venv/Scripts/python.exe -m app registrar-escritor K --retorno "<su línea>"`. Si la línea dice NO VALIDADO, detenete y reportalo. Sin este paso el capítulo se reextrae con la contradicción dentro y no se arregla nada.
 1. `.venv/Scripts/python.exe -m app preparar-extractor K` → `RESULTADO: extractor_listo prompt=04_estado/prompts/extractor_cap_K.md`. Leé ese archivo con Read.
 2. `Agent(subagent_type="extractor", prompt=<contenido>)`. El extractor escribe él mismo `04_estado/deltas/delta_cap_K.json`, lo valida (`validar-delta K`, RF-08.4) y devuelve una línea `delta_cap_K.json · K hechos · P personajes · validado`. El JSON no pasa por vos. Guardá su línea.
 3. `.venv/Scripts/python.exe -m app aplicar-delta K --reextraccion --retorno "<línea del extractor>"`

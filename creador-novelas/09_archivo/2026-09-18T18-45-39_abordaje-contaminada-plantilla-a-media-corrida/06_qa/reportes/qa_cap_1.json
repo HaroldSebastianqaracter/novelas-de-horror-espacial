@@ -1,0 +1,26 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capítulo 1 establece que Marek Sundh muere en la bodega (se lo ve por la cámara de bodega comprobando eslingas y la presencia lo mata allí antes de que la bodega quede vacía), pero el log registra como vigente que fue asesinado en la Sala de máquinas.",
+      "cap_origen": 1
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negación seguida de afirmación ('No A, no B: C' / 'tuvo tiempo de X, no de Y' / 'no hubo A, ni B. Hubo C'): 3 apariciones acumuladas, capítulo 1.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "'Nada' como sustantivo del vacío o como respuesta, cerrando párrafo: 3 apariciones acumuladas, capítulo 1.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeración en tríada como recurso rítmico (ciclo de esclusa, plano del monitor, adjetivos de la alarma): 3 apariciones acumuladas, capítulo 1.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

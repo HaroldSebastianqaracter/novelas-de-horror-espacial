@@ -1,0 +1,4 @@
+tiene_contradicciones: true
+contradicciones: 1 · repeticiones: 4
+reporte: 06_qa/reportes/qa_cap_2.md
+validado
