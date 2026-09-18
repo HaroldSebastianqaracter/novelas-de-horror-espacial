@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "Once días de ruta muerta",
+    "objetivo_narrativo": "Establecer la rutina del remolcador y romperla: durante una maniobra de aseguramiento algo cruza la esclusa abierta y mata al tripulante de guardia a la vista de los cuatro restantes, que ordenan el primer sellado por secciones.",
+    "personajes": [
+      "Idoia Ferrán",
+      "Teo Márgenes",
+      "Nuriel Kovacs",
+      "Aitana Bruch",
+      "Delio Sarmiento",
+      "la presencia"
+    ],
+    "locacion": "esclusa de carga de la Sirga",
+    "informacion_nueva": "Hay cinco personas a bordo, once días hasta puerto y ninguna nave a distancia de socorro; la presencia no responde a ningún protocolo de contacto conocido y el sellado por secciones sí la contiene, al precio de aire y rutas.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "El mapa que se encoge",
+    "objetivo_narrativo": "Kovacs cruza los registros de apertura de mamparos con los ruidos en los conductos y descubre que la presencia no deambula: avanza hacia el puente por donde el propio protocolo de contención le va abriendo camino, mientras Sarmiento intenta purgar el nivel de carga y no vuelve.",
+    "personajes": [
+      "Idoia Ferrán",
+      "Nuriel Kovacs",
+      "Aitana Bruch",
+      "Delio Sarmiento",
+      "la presencia"
+    ],
+    "locacion": "conductos de servicio y nivel de carga",
+    "informacion_nueva": "La criatura sigue un patrón dirigido al puente y usa el sellado como guía; quedan tres supervivientes y cinco días de ruta, y ya no se la puede acorralar, solo retrasar.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "Devolverla al vacío",
+    "objetivo_narrativo": "Reducidos al puente y su pasillo, los tres montan el ciclo de esclusa que devuelve a la criatura al vacío; Kovacs se ofrece como rastro y queda del lado equivocado del mamparo, y Ferrán ejecuta el ciclo sabiendo a quién purga antes de llegar a puerto con dos vivas.",
+    "personajes": [
+      "Idoia Ferrán",
+      "Nuriel Kovacs",
+      "Aitana Bruch",
+      "la presencia"
+    ],
+    "locacion": "puente de la Sirga",
+    "informacion_nueva": "La criatura sigue el aire, y por eso puede ser atraída a la esclusa por la que entró; lo que llega a puerto el día once es media nave sin presión, dos supervivientes y un registro que nadie sabe cómo clasificar.",
+    "tension": 5
+  }
+]

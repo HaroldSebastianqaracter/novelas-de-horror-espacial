@@ -1,0 +1,44 @@
+{
+  "Idoia Ferrán": {
+    "estado_fisico": "Sana, en turno de mando, con el cansancio acumulado de diez días de ruta muerta.",
+    "estado_psicologico": "Capitana metódica: sostiene a su gente con turnos y listas de comprobación, y confía en que el procedimiento alcanza para todo.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "Teo Márgenes": {
+    "estado_fisico": "Sano, con el traje de faena puesto para la maniobra de aseguramiento.",
+    "estado_psicologico": "Tranquilo y rutinario; trata la maniobra como una más de la travesía.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "Nuriel Kovacs": {
+    "estado_fisico": "Sano, con las manos marcadas por el trabajo en los conductos de servicio.",
+    "estado_psicologico": "Ingeniero observador y callado; piensa la nave como una red de rutas antes que como un lugar.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "Aitana Bruch": {
+    "estado_fisico": "Sana, sin lesiones, con el registro médico de a bordo al día.",
+    "estado_psicologico": "Médica; necesita dejar constancia escrita de lo que ve, y esa necesidad la sostiene.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "Delio Sarmiento": {
+    "estado_fisico": "Sano, impaciente, acostumbrado a las maniobras de purga y presión.",
+    "estado_psicologico": "Segundo de a bordo; cree que cualquier problema se resuelve cerrando y purgando rápido.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "la presencia": {
+    "estado_fisico": "Intacta, grande y silenciosa; se mueve sin ruido propio.",
+    "estado_psicologico": "Sin intención legible para la tripulación; no responde a ningún protocolo de contacto que ellos conozcan.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  }
+}

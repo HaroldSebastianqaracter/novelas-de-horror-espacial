@@ -21,14 +21,22 @@ INTERPRETE = ".venv/Scripts/python.exe"  # solo el intérprete del entorno virtu
 VERBO_POR_ROL = {"escritor": "validar-capitulo", "extractor": "validar-delta", "qa": "validar-reporte"}
 
 
-def comando_validador(rol: str, n: int) -> str:
-    return f"{INTERPRETE} -m app {VERBO_POR_ROL[rol]} {n}"
+def comando_validador(rol: str, n: int, *, con_delta: bool = False) -> str:
+    """El único comando de terminal que H-11 le deja a cada rol.
+
+    `con_delta` es para el escritor que además emite su propio delta (X-04): en vez de abrirle la
+    valla a dos comandos --que es una puerta que luego no se cierra sola-- se le cambia el suyo por
+    uno que valida las dos cosas de una vez.
+    """
+    sufijo = " --con-delta" if con_delta and rol == "escritor" else ""
+    return f"{INTERPRETE} -m app {VERBO_POR_ROL[rol]} {n}{sufijo}"
 
 CAMPOS_NOVELA = (
     "total_capitulos", "palabras_por_capitulo", "idioma", "persona_narrativa", "tiempo_verbal",
     "ventana_resumen_rodante", "cadencia_qa", "max_tokens_contexto_escritor", "max_hechos_por_capitulo",
 )
-CAMPOS_EJECUCION = ("capitulos_por_tanda", "max_llamadas_por_tanda", "registrar_uso", "exportar_trazas")
+CAMPOS_EJECUCION = ("capitulos_por_tanda", "max_llamadas_por_tanda", "registrar_uso", "exportar_trazas",
+                    "escritor_emite_delta")
 
 
 class HarnessConfig(BaseModel):
@@ -43,6 +51,11 @@ class HarnessConfig(BaseModel):
     # La traza sale de la máquina hacia un servicio externo, así que se puede apagar. Con `False` el
     # registro se sigue escribiendo en disco: lo único que no ocurre es la publicación.
     exportar_trazas: bool = True  # RF-09
+    # X-04: el escritor entrega el capítulo y su delta en la misma invocación, y el extractor no se
+    # llama. Ahorra la invocación de agente más cara del sistema --12 de los 18 minutos de una
+    # novela-- a cambio de que el delta describa lo que el escritor quiso escribir en vez de lo que
+    # escribió. Por eso va detrás de un interruptor y se mide contra la base.
+    escritor_emite_delta: bool = False
     palabras_por_capitulo: int = Field(gt=0)  # RF-CFG-01
     idioma: str = Field(min_length=2)  # RF-CFG-05
     persona_narrativa: Literal["primera", "tercera_limitada", "tercera_omnisciente"]

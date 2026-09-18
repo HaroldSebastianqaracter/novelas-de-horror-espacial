@@ -1,0 +1,122 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La Sirga es un remolcador de carga que atraviesa un tramo muerto de ruta con cinco personas a bordo y once días de travesía por delante hasta puerto.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El plan de vuelo y el registro de tráfico de la zona no recogen ninguna nave a distancia de socorro durante la travesía: la tripulación cuenta con lo que hay a bordo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El protocolo de contención de a bordo se ejecuta sellando por secciones, y cada mamparo cerrado le quita a la tripulación aire disponible y rutas de paso.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El soporte vital reparte el aire por secciones y los sistemas registran cada apertura y cierre de mamparo, de modo que el recorrido de los sellados queda anotado y se puede consultar después.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Afuera del casco está el vacío, y la esclusa de carga es el punto por el que la nave se abre a él: un ciclo de esclusa completo expulsa al vacío lo que quede dentro del compartimento.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La tripulación conoce y sabe recitar de memoria los protocolos de contacto aprendidos en formación, y los aplica antes de improvisar cualquier otra cosa.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Idoia Ferrán",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Idoia Ferrán es la capitana de la Sirga y lleva la travesía por turnos y listas de comprobación; las órdenes de sellado salen de ella.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Teo Márgenes",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Teo Márgenes es el tripulante al que le toca la guardia durante la maniobra de aseguramiento en la esclusa de carga.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nuriel Kovacs",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Nuriel Kovacs es el ingeniero de la Sirga y conoce los conductos de servicio mejor que nadie a bordo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Aitana Bruch",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Aitana Bruch es la médica de la Sirga y lleva el registro de a bordo: anota lo que ve para que alguien en puerto pueda leerlo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Delio Sarmiento",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Delio Sarmiento es el segundo de a bordo y prefiere resolver por velocidad y presión: cerrar, purgar, ganar horas.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la presencia",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "La presencia es grande y silenciosa, y ninguno de los protocolos de contacto que la tripulación conoce describe algo semejante.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "esclusa de carga de la Sirga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La esclusa de carga queda abierta al exterior durante la maniobra de aseguramiento, y una cámara interna graba el umbral mientras dura.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "conductos de servicio y nivel de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Los conductos de servicio comunican secciones de la nave por rutas que los planos de a bordo detallan solo en parte, y el ingeniero es el único que los tiene recorridos enteros.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "puente de la Sirga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El puente concentra los mandos de navegación y de contención, y el registro de secciones se consulta desde allí.",
+    "cap_origen": 0,
+    "superado_por": null
+  }
+]

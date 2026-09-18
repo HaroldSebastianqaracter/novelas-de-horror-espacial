@@ -50,6 +50,10 @@ Imágenes, gestos, muletillas y giros que los capítulos anteriores ya usaron, c
    Si hay alguna, corregirla es lo primero: el resto del capítulo puede cambiar, pero eso no. No discutas el hallazgo ni lo expliques dentro de la prosa; reescribí la escena de modo que el hecho vigente y lo que narrás digan lo mismo.
 7. **Nada literal de capítulos anteriores** (RF-05.5): ninguna secuencia de cuatro o más palabras con contenido puede coincidir palabra por palabra con un capítulo ya escrito. No podés leerlos y no hace falta: el validador compara por vos y, si encuentra un pasaje repetido, te devuelve la frase y el capítulo de origen; reescribí ese pasaje con otras palabras y volvé a validar. Nombrar personajes y locaciones no cuenta como repetición.
 
+## El delta de extracción
+
+{{ENCARGO_DELTA}}
+
 ## Qué hacer
 1. Escribí el capítulo completo con la herramienta Write en **{{RUTA_CAPITULO}}** (esa ruta exacta y ninguna otra).
 2. Validalo (RF-08.4): ejecutá con tu herramienta de terminal **exactamente** este comando, sin agregar ni cambiar nada:

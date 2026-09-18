@@ -1,0 +1,29 @@
+{
+  "reglas": [
+    "La Sirga es un remolcador de carga en un tramo muerto de ruta: el protocolo de a bordo se organiza en turnos, listas de comprobación y maniobras de aseguramiento.",
+    "El protocolo de contención se ejecuta sellando por secciones: cada mamparo cerrado aísla un volumen y reduce el aire y las rutas disponibles para quien queda dentro.",
+    "El soporte vital reparte aire por secciones; al sellar, el flujo se redistribuye y una sección purgada queda sin presión hasta que se reabre el ciclo.",
+    "Afuera está el vacío: cualquier apertura de esclusa sin traje es mortal, y un ciclo de esclusa completo expulsa al vacío lo que haya en el compartimento.",
+    "La tripulación tiene protocolos de contacto aprendidos de memoria para cualquier encuentro registrado; los recita y los aplica antes de improvisar.",
+    "No hay ninguna nave a distancia de socorro durante la travesía: lo que ocurra a bordo se resuelve con lo que hay a bordo.",
+    "Los sistemas de la nave registran cada apertura y cierre de mamparo, y esos registros se pueden consultar y cruzar."
+  ],
+  "objetos": [
+    "Listas de comprobación de turno y de maniobra de aseguramiento.",
+    "Cámara interna de la esclusa de carga, que graba lo que ocurre en el umbral.",
+    "Registro de a bordo que lleva la médica: notas, observaciones y nombres.",
+    "Registros de apertura de mamparos del sistema de contención.",
+    "Mamparos estancos y controles de sellado por secciones.",
+    "Consola de ciclo de esclusa, que abre y purga la esclusa de carga."
+  ],
+  "linea_de_tiempo": [
+    "Día 0: la Sirga entra en el tramo muerto de ruta con cinco personas a bordo y once días hasta puerto.",
+    "Día 1 al 10: rutina de travesía, turnos y maniobras de aseguramiento.",
+    "Día 11: llegada prevista a puerto."
+  ],
+  "locaciones": {
+    "esclusa de carga de la Sirga": "Compartimento estanco por el que entra y sale la carga: umbral ancho, compuerta exterior, cámara interna que graba el paso y consola de ciclo en el pasillo contiguo. Es el único punto de la nave abierto al vacío durante una maniobra de aseguramiento.",
+    "conductos de servicio y nivel de carga": "Red estrecha de conductos que recorre el casco y comunica secciones por encima y por debajo de los pasillos, más la cubierta de carga a la que dan: espacio frío, mal iluminado, con accesos que el ingeniero conoce de memoria y el resto de la tripulación no.",
+    "puente de la Sirga": "Cabina de mando en lo alto de la nave: consolas de navegación y de contención, ventanal al tramo muerto y un solo pasillo que lo alimenta de aire y de acceso. Desde aquí se ordenan los sellados y se ve el estado de cada sección."
+  }
+}

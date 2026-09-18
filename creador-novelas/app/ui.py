@@ -170,6 +170,9 @@ def _ejecucion_desde_formulario(campos: dict[str, str]) -> dict[str, Any]:
         # RF-09: publicar la traza al cerrar cada fase. La casilla desmarcada llega ausente,
         # que es justo lo que hace falta para poder apagarlo desde la pantalla.
         "exportar_trazas": campos.get("exportar_trazas", "").strip().lower() in ("on", "true", "1", "si", "sí"),
+        # X-04: el escritor entrega también su delta y el extractor no se llama. Viaja por aquí
+        # porque el corredor encarga las novelas por este mismo camino, que es el del formulario.
+        "escritor_emite_delta": campos.get("escritor_emite_delta", "").strip().lower() in ("on", "true", "1", "si", "sí"),
     }
 
 

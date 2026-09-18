@@ -365,8 +365,11 @@ def cmd_preparar_capitulo(args, raiz: Path) -> int:
     print(f"prompt en {rutas.prompt_escritor(args.n).relative_to(raiz).as_posix()}; el escritor debe escribir "
           f"{rutas.capitulo(args.n).relative_to(raiz).as_posix()}; prompt del extractor en "
           f"{rutas.prompt_extractor(args.n).relative_to(raiz).as_posix()}")
+    # X-04: quien orquesta no tiene por qué leer la config; la línea RESULTADO le dice si el delta
+    # llega con el capítulo o si hay que despachar al extractor.
     _resultado("contexto_listo", n=args.n, prompt=rutas.prompt_escritor(args.n).relative_to(raiz).as_posix(),
                prompt_extractor=rutas.prompt_extractor(args.n).relative_to(raiz).as_posix(),
+               delta_del_escritor=config.escritor_emite_delta,
                tokens=contexto.tokens_estimados, hechos=len(contexto.hechos_inyectados))
     return 0
 
@@ -531,7 +534,16 @@ def _imprimir_validacion(r: validacion.ResultadoValidacion, raiz: Path, n: int) 
 
 
 def cmd_validar_capitulo(args, raiz: Path) -> int:
-    return _imprimir_validacion(validacion.validar_capitulo(raiz, _config(raiz), args.n), raiz, args.n)
+    """Con `--con-delta` valida también el delta que el escritor acaba de escribir (X-04).
+
+    Un solo comando en vez de dos porque H-11 le deja al escritor exactamente uno. Abrirle la valla
+    a dos comandos era la alternativa, y esa puerta luego no se cierra sola.
+    """
+    config = _config(raiz)
+    r = validacion.validar_capitulo(raiz, config, args.n)
+    if getattr(args, "con_delta", False) and r.valido:
+        r = validacion.validar_delta(raiz, config, args.n)
+    return _imprimir_validacion(r, raiz, args.n)
 
 
 def cmd_validar_delta(args, raiz: Path) -> int:
@@ -633,6 +645,9 @@ def construir_parser() -> argparse.ArgumentParser:
                              ("validar-reporte", cmd_validar_reporte, "qa: esquema de ReporteQA y recursos_usados.json")):
         v = sub.add_parser(verbo, help=f"RF-08.4, solo lectura; {ayuda}")
         v.add_argument("n", type=int)
+        if verbo == "validar-capitulo":
+            v.add_argument("--con-delta", action="store_true",
+                           help="X-04: valida además delta_cap_N.json, cuando el delta lo escribe el escritor")
         v.set_defaults(fn=fn)
     return p
 
