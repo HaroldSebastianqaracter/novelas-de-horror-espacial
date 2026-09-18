@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "Once minutos de esclusa abierta",
+    "objetivo_narrativo": "Presentar el remolcador Cabria, su travesía sin auxilio posible y a los cinco tripulantes; durante el reasiento de carga la esclusa de babor queda abierta once minutos, la presencia sube a bordo y mata a Kovac mientras los otros cuatro lo oyen entero por el intercomunicador. Ledesma ordena sellar la nave por secciones y empujarla hacia popa.",
+    "personajes": [
+      "Ledesma",
+      "Ourão",
+      "Nisa",
+      "Beltrán",
+      "Kovac",
+      "la presencia"
+    ],
+    "locacion": "Cabria, cámara de carga de babor",
+    "informacion_nueva": "La esclusa de babor estuvo abierta once minutos durante la maniobra; lo que subió no responde a radio, luz ni voz, es demasiado grande para los pasillos y ya no está donde lo dejaron. Quedan once días hasta Tesela y nadie en rango.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "El trazado que ella misma abrió",
+    "objetivo_narrativo": "Cuatro días de cierres metódicos que parecen funcionar hasta que Ourão revisa su propio esquema y descubre que cada sellado dejó abierto un único camino, el que va hacia proa; la hoja de aire de Nisa demuestra que sellar y ahogarse son la misma maniobra. Beltrán baja solo a reabrir mamparos y lo que se oye de él se parece demasiado a lo de Kovac.",
+    "personajes": [
+      "Ourão",
+      "Nisa",
+      "Ledesma",
+      "Beltrán",
+      "la presencia"
+    ],
+    "locacion": "Cabria, conductos de servicio de cubierta dos",
+    "informacion_nueva": "La presencia no huye del cerco: lo usa, y lleva cuatro días siendo conducida hacia el puente por sus perseguidores. Con medio casco sellado el reciclado no alcanza para siete días con cuatro personas respirando.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "Cuarenta metros por delante",
+    "objetivo_narrativo": "Ourão convierte su error en plan y rehace el trazado al revés para conducir a la presencia hasta la cámara de carga de babor, con Nisa manejando el aire como cebo y Ledesma sosteniendo el rumbo en el puente; cuando la criatura elige el ramal del puente, Ourão entra al conducto por delante y la arrastra los últimos cuarenta metros. Nisa cierra un segundo antes y purga la bodega. Llegan tres a Tesela.",
+    "personajes": [
+      "Ourão",
+      "Nisa",
+      "Ledesma",
+      "la presencia"
+    ],
+    "locacion": "Cabria, cámara de carga de babor",
+    "informacion_nueva": "El camino abierto puede usarse como arma: la única sección despresurizable sin perder el reciclado es la bodega de babor. Ourão pierde el brazo al cerrar la escotilla y la presencia no da señales de entender lo que le ocurre mientras el vacío se la lleva.",
+    "tension": 5
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "recurso": "remangarse para revelar o examinar la lesión anómala",
+    "apariciones": {
+      "1": 2
+    }
+  },
+  {
+    "recurso": "la lesión descrita como relieve oscuro, tibio al tacto",
+    "apariciones": {
+      "1": 3
+    }
+  },
+  {
+    "recurso": "estructura de negación diagnóstica (No era X, no era Y)",
+    "apariciones": {
+      "1": 1
+    }
+  },
+  {
+    "recurso": "la palanca que hace un ruido corto y definitivo al sellar",
+    "apariciones": {
+      "1": 1
+    }
+  },
+  {
+    "recurso": "el contraste limpio vs. contaminado, dentro vs. fuera, aislamiento ilusorio",
+    "apariciones": {
+      "1": 3
+    }
+  }
+]

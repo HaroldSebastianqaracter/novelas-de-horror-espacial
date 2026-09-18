@@ -1,0 +1,26 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cifra exacta de tiempo como marcador de tension: 'Al cuarto dia', 'cuatro dias dibujando sin verla', 'Siete dias de travesia' (cap 2). Tres apariciones nuevas sobre seis registradas: nueve acumuladas, caps 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Eco tautologico, la frase se cierra con la misma palabra o raiz con que abre: 'se abre todo'/'Se abre nada', 'duro poco y termino peor que si hubiera durado', 'una palabra que no llego a terminar de decir' (cap 2). Tres apariciones nuevas sobre tres registradas: seis acumuladas, caps 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion y relevo 'no X, sino Y': 'no un cerco que se estrechaba hacia popa, sino un embudo', 'No la estamos empujando. La estamos llevando' (cap 2). Dos apariciones nuevas sobre una registrada: tres acumuladas, caps 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de escena con frase corta sobre la ausencia o el silencio: 'Nada que corregir' cerrando el descenso de Ourao (cap 2). Una aparicion nueva sobre dos registradas: tres acumuladas, caps 1 y 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

@@ -67,6 +67,11 @@ def _completa(raiz: Path) -> bool:
     return bool(m and m.ultimo_capitulo_cerrado >= m.total_capitulos_esperado)
 
 
+def _reextraccion_pendiente(raiz: Path) -> bool:
+    m = checkpoint.leer_manifest(raiz)
+    return bool(m and m.reextraccion_pendiente)
+
+
 def _pausada(raiz: Path) -> bool:
     m = checkpoint.leer_manifest(raiz)
     return bool(m and m.estado == "pausado_por_qa")
@@ -141,7 +146,13 @@ def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3
                 # no vale --`--sin-cambios` se niega con una resolución en curso--, así que el único
                 # repliegue posible es cerrarla.
                 if paso("corregir"):
-                    rehecho = paso("resolver-qa")
+                    # Un segundo intento: la primera vez que esto corrió, el orquestador rehizo el
+                    # capítulo y se paró sin reextraer, dejando la resolución abierta. Volver a
+                    # lanzar la fase la retoma donde se quedó, porque `reextraccion_pendiente` sigue
+                    # en el manifiesto y la skill arranca justo de ahí.
+                    rehecho = paso("resolver-qa") and not _reextraccion_pendiente(raiz)
+                    if not rehecho and _reextraccion_pendiente(raiz):
+                        rehecho = paso("resolver-qa") and not _reextraccion_pendiente(raiz)
                     if not paso("cerrar-resolucion"):
                         fallo = f"no se pudo cerrar la resolución: {fases[-1].get('error')}"
                         break

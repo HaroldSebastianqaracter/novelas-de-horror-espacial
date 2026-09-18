@@ -1,0 +1,49 @@
+{
+  "Irene Sabán": {
+    "estado_fisico": "Sin cambios aparentes.",
+    "estado_psicologico": "Transita de rutina administrativa a acción contundente; toma una decisión de aislamiento basada en protocolo, aunque los manuales no cataloguen la lesión.",
+    "secretos_que_conoce": [
+      "No existe catalogación de la lesión anómala en los manuales de a bordo.",
+      "Tres tripulantes presentan la misma lesión inexplicada y móvil."
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Tobías Rueda": {
+    "estado_fisico": "Presenta una lesión anómala en el antebrazo: relieve oscuro, tibio al tacto, que se desplazó entre guardias consecutivas.",
+    "estado_psicologico": "Colaborador; trae el problema a la atención de Irene proactivamente.",
+    "secretos_que_conoce": [
+      "Su lesión se movió bajo la piel entre guardias."
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Camila Ferrán": {
+    "estado_fisico": "Presenta la misma lesión anómala en la nuca, donde no puede verse en los espejos.",
+    "estado_psicologico": "Preocupada; pregunta cuántos días faltan para su maniobra (110 días).",
+    "secretos_que_conoce": [
+      "Tiene la lesión anómala."
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Noé Vidal-Arriaga": {
+    "estado_fisico": "Presenta la lesión anómala en los antebrazos.",
+    "estado_psicologico": "Calmado; prefiere hablar del asunto con calma.",
+    "secretos_que_conoce": [
+      "Tiene la lesión anómala como los otros."
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Sira Delmonte": {
+    "estado_fisico": "Sin cambios.",
+    "estado_psicologico": "Analítica, entiende inmediatamente las implicaciones técnicas del aislamiento fallido.",
+    "secretos_que_conoce": [
+      "El sistema de ventilación es un único circuito.",
+      "Los filtros de carbono en el nivel inferior del reciclador son el punto de convergencia."
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  }
+}

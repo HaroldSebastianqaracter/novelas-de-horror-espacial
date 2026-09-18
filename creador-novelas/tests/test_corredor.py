@@ -300,3 +300,38 @@ def test_una_novela_abortada_por_un_hook_se_cuenta_en_la_tabla(vacio):
     # es tiempo y dinero que hay que poder ver en la tabla junto al resto.
     assert fila["calidad"]["tandas_abortadas"] == 1
     assert corredor.fila_csv(fila)["tandas_abortadas"] == 1
+
+
+def test_si_la_reextraccion_queda_a_medias_se_reintenta_la_fase(vacio):
+    """La primera corrección real rehizo el capítulo y se paró sin reextraer.
+
+    La fase salió con código 0, así que nada avisaba; lo que quedó fue el manifiesto con
+    `reextraccion_pendiente` y un `resolver --cerrar` negándose. Relanzar la fase la retoma donde se
+    quedó, porque la skill arranca de esa misma lista.
+    """
+    class SeParaAMedias(FaseDoble):
+        def __init__(self, raiz):
+            super().__init__(raiz, pausar=True)
+            self.intentos_resolver = 0
+
+        def __call__(self, raiz, fase, **kwargs):
+            if fase in ("corregir", "resolver-qa", "cerrar-resolucion", "reanudar"):
+                self.llamadas.append(fase)
+                if fase == "corregir":
+                    checkpoint._actualizar(raiz, reextraccion_pendiente=[3])
+                if fase == "resolver-qa":
+                    self.intentos_resolver += 1
+                    if self.intentos_resolver >= 2:  # a la segunda sí termina el trabajo
+                        checkpoint._actualizar(raiz, reextraccion_pendiente=[])
+                if fase == "cerrar-resolucion":
+                    checkpoint._actualizar(raiz, estado="en_progreso", reporte_qa_pendiente=None)
+                    self.pausar = False
+                return {"fase": fase, "codigo": 0, "segundos": 2.0}
+            return super().__call__(raiz, fase, **kwargs)
+
+    doble = SeParaAMedias(vacio)
+    fila = corredor.correr_novela(vacio, ENCARGO, ejecutar=doble, aviso=lambda _: None)
+
+    assert doble.intentos_resolver == 2
+    assert fila["completa"] is True
+    assert fila["correcciones"] == 1

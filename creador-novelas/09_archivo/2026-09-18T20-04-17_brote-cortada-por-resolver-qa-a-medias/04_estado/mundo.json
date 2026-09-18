@@ -1,0 +1,31 @@
+{
+  "reglas": [
+    "La Hesperia es un carguero de tripulación mínima: cinco personas y tres guardias rotativas que se relevan sin solapamiento.",
+    "El soporte vital funciona con un circuito único de aire: todo el volumen habitable se recicla por los mismos filtros de carbono del nivel inferior.",
+    "Las reservas de emergencia son aire embotellado independiente del reciclador, suficiente para cuarenta días de consumo con la tripulación completa.",
+    "El trayecto pendiente hasta destino es de ciento diez días; la nave lleva doscientos setenta de travesía.",
+    "Las juntas del conducto del reciclador no cierran con guantes: cualquier purga o sustitución de filtros exige dos personas trabajando sin escafandra en el nivel inferior.",
+    "El nivel inferior y el módulo de enfermería tienen mamparos que se cierran con llave desde un solo lado, el de fuera.",
+    "En el cambio de guardia el pasillo principal queda vacío durante once minutos.",
+    "El registro sanitario y el registro de mantenimiento se firman a bordo por quien inspecciona, y una firma no se revisa después."
+  ],
+  "objetos": [
+    "Registro sanitario de a bordo, llevado a mano por la médica, con una entrada por guardia.",
+    "Registro de mantenimiento del reciclador, con la última inspección de los filtros de carbono firmada hace cuarenta días.",
+    "Planos del reciclador, desplegables sobre la mesa del comedor.",
+    "Filtros de carbono del nivel inferior, en cartuchos apilados.",
+    "Contador de reservas de aire embotellado, visible en el puente.",
+    "Escafandras de trabajo, inútiles para las juntas del conducto.",
+    "Catres del módulo de enfermería, separados y sin línea de visión entre ellos."
+  ],
+  "linea_de_tiempo": [
+    "Día 0: la Hesperia zarpa con cinco tripulantes y trayecto previsto de trescientos ochenta días.",
+    "Día 230: Sira Delmonte inspecciona los filtros de carbono y firma la revisión como limpia.",
+    "Día 270, mañana: Tobías Rueda enseña a Irene Sabán una mancha en el antebrazo que la noche anterior estaba dos dedos más arriba.",
+    "Día 270, doce horas después: Camila Ferrán presenta el mismo relieve en la nuca."
+  ],
+  "locaciones": {
+    "Hesperia — módulo de enfermería": "Compartimento estanco con dos catres separados y sin línea de visión entre ellos, una escotilla con ventanillo y un mamparo que se sella desde el pasillo. Comparte el aire con el resto de la nave a través del mismo circuito.",
+    "Hesperia — nivel del reciclador": "Nivel inferior, estrecho y ruidoso, donde el conducto principal reparte el aire de toda la nave. Los cartuchos de filtro de carbono se cambian a brazo desnudo por juntas que no cierran con guantes; se aísla con un mamparo que se cierra con llave desde arriba."
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Tic de cifra exacta como marcador de tension: 'doce horas', 'once dias', 'once minutos', 'al minuto doce', 'un minuto entero', 'cuatro segundos'. Seis apariciones en el capitulo 1; acumulado 6 (caps 1).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Eco tautologico que repite la misma palabra dentro de la frase para cerrarla: 'No hubo alarma porque no habia nada que una alarma pudiera medir', 'separados mas de lo que separaba el pasillo', 'Nada devolvio nada'. Tres apariciones en el capitulo 1; acumulado 3 (caps 1).",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

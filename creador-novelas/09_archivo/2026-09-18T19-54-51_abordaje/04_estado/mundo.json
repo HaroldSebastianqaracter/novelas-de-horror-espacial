@@ -1,0 +1,31 @@
+{
+  "reglas": [
+    "El remolcador Cabria navega con cinco tripulantes y arrastra un bloque de mineral sin refinar hasta el puerto de Tesela; quedan once días de travesía al comenzar la novela.",
+    "El reciclado de aire reparte peor cuanto más casco se sella: cada sección clausurada resta margen respirable al resto de la nave.",
+    "Los mamparos se sellan a mano, sección por sección, con barras de sellado que hay que cargar hasta el punto de cierre.",
+    "La comunicación interna se hace por intercomunicador abierto: lo que ocurre en una sección se oye entero en las demás.",
+    "El registro de a bordo solo anota presión, avería y maniobra; un cuerpo que sube sin perder presión no genera alarma.",
+    "Los conductos de servicio conectan cubiertas y secciones por vías estrechas que no todos los tripulantes saben recorrer."
+  ],
+  "objetos": [
+    "Bloque de mineral sin refinar remolcado a popa de la Cabria.",
+    "Barras de sellado para clausurar mamparos a mano.",
+    "Esquema de cubiertas y trazado de conductos de servicio que maneja Ourão.",
+    "Hoja de cálculo del aire y el inventario que lleva Nisa.",
+    "Intercomunicador de a bordo.",
+    "Luz de señales para protocolo de contacto.",
+    "Escotilla de carga de la bodega de babor, con visor."
+  ],
+  "linea_de_tiempo": [
+    "Día 0: acoplamiento y maniobra de reasiento de la carga; la esclusa de babor queda abierta once minutos.",
+    "Día 0: Kovac muere en la cámara de carga durante su guardia de esclusa.",
+    "Días 1 a 4: cierres metódicos de secciones según el trazado de Ourão.",
+    "Día 4: Ourão descubre que los cierres han dejado abierto un único camino hacia proa; Nisa calcula que el aire no llega a Tesela con medio casco sellado.",
+    "Días 5 y 6: conducción inversa de la presencia hasta la cámara de carga de babor y purga de la bodega.",
+    "Día 11: atraque en Tesela con tres supervivientes."
+  ],
+  "locaciones": {
+    "Cabria, cámara de carga de babor": "Bodega de babor junto a la esclusa por la que se reasienta la carga. Espacio alto y despejado frente a los pasillos del resto de la nave, con mamparo, escotilla de carga con visor y puesto de guardia de esclusa. Es la única sección que puede despresurizarse sin llevarse el reciclado entero.",
+    "Cabria, conductos de servicio de cubierta dos": "Red estrecha de conductos de mantenimiento que enlaza las secciones de la cubierta dos con proa y con la bodega. Se recorre a gatas, con iluminación de servicio y tramos que se bifurcan; Ourão los conoce mejor que los planos y Beltrán los usa para alcanzar mamparos ya sellados."
+  }
+}

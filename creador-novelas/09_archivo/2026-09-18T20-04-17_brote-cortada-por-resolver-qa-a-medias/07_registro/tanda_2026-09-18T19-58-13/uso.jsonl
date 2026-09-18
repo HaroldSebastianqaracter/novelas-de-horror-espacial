@@ -1,0 +1,2 @@
+{"rol": "escritor", "capitulo": 1, "modelo": "claude-opus-5", "tokens_entrada": 6, "tokens_salida": 1311, "tokens_cache_lectura": 46489, "tokens_cache_creacion": 24824, "turnos": 3, "agent_id": "adf2b09bfe31befde", "stop_reason": null}
+{"rol": "extractor", "capitulo": 1, "modelo": "claude-haiku-4-5-20251001", "tokens_entrada": 33, "tokens_salida": 10081, "tokens_cache_lectura": 64756, "tokens_cache_creacion": 28972, "turnos": 4, "agent_id": "a77c5e734f5ae110a", "stop_reason": null}

@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "Doscientos setenta días de aire",
+    "objetivo_narrativo": "Presentar la rutina de la Hesperia y romperla: Irene descubre la marca en el antebrazo de Tobías y, doce horas después, la misma marca en la nuca de Camila; sella el módulo de enfermería con los dos dentro y se queda del lado limpio, convertida en carcelera de sus amigos.",
+    "personajes": [
+      "Irene Sabán",
+      "Tobías Rueda",
+      "Camila Ferrán",
+      "Noé Vidal-Arriaga",
+      "Sira Delmonte"
+    ],
+    "locacion": "Hesperia — módulo de enfermería",
+    "informacion_nueva": "Las lesiones no figuran en ningún manual, se desplazan bajo la piel entre guardia y guardia, y el aislamiento es un gesto: la nave tiene un único circuito de aire, como dice Sira con los planos del reciclador sobre la mesa.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "Once minutos de pasillo vacío",
+    "objetivo_narrativo": "Convertir la pregunta médica en una pregunta aritmética: Irene registra que los relieves de Tobías y Camila adoptan la misma forma en el cambio de guardia, Sira encuentra el reciclador colonizado desde hace semanas y Noé empieza a contar plazos que no puede deshacer.",
+    "personajes": [
+      "Sira Delmonte",
+      "Irene Sabán",
+      "Noé Vidal-Arriaga",
+      "Tobías Rueda",
+      "Camila Ferrán"
+    ],
+    "locacion": "Hesperia — nivel del reciclador",
+    "informacion_nueva": "El tejido lleva meses en los filtros de carbono, firmados como limpios por la propia Sira hace cuarenta días: los aislados no son el origen sino los primeros en los que salió a la superficie. Purgar el módulo no limpia nada; purgar el reciclador deja cuarenta días de aire embotellado para ciento diez de viaje. Esa noche Irene se encuentra la primera línea oscura en el muslo y calla.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "El lado equivocado del mamparo",
+    "objetivo_narrativo": "Ejecutar la purga del reciclador con Irene y Sira sin escafandra en el nivel inferior, dejar que Sira vea la marca en el muslo de Irene y la encierre abajo, y cerrar en la última guardia de Noé con el gesto de Sira mirándose el dorso de la mano sin girarla hacia la luz.",
+    "personajes": [
+      "Irene Sabán",
+      "Sira Delmonte",
+      "Noé Vidal-Arriaga",
+      "Tobías Rueda",
+      "Camila Ferrán"
+    ],
+    "locacion": "Hesperia — nivel del reciclador",
+    "informacion_nueva": "Irene llevaba tres días votando como sana estando enferma; Sira termina la purga con ella y después cierra el nivel inferior con la llave de su lado. Irene abre el mamparo de enfermería y se sienta a esperar con Tobías y Camila. Arriba quedan dos personas, cuarenta días de aire limpio, ciento diez de trayecto, y una marca nueva que nadie nombra.",
+    "tension": 5
+  }
+]

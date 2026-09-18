@@ -1,0 +1,75 @@
+[
+  {
+    "recurso": "cifra exacta de tiempo como marcador de tension (doce horas, once dias, once minutos, minuto doce, cuatro segundos, un minuto entero, dos horas, cinco dias)",
+    "veces": 12,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "eco tautologico: la frase se cierra repitiendo la misma palabra que la abre (alarma/alarma, separados/separaba, nada/nada, seguir/seguia, contenerlo/contenia)",
+    "veces": 8,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "estructura de negacion y relevo 'No fueron X. Fue Y.'",
+    "veces": 5,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "anafora de verbo en serie ('Probo la radio. Probo la luz. Probo la voz.')",
+    "veces": 1,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "comparacion de un objeto de la nave con una parte del cuerpo ('como una muela arrancada', 'contaba las planchas como quien cuenta latidos ajenos')",
+    "veces": 2,
+    "caps": [
+      1,
+      3
+    ]
+  },
+  {
+    "recurso": "cierre de escena con frase corta sobre el silencio o la ausencia de pregunta",
+    "veces": 4,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "anafora de sintagma en serie ('Hacia proa. Hacia el puente.', 'Despues una segunda barra... Despues Beltran', 'primero... despues... por ultimo', 'como cambiaba... como el peso')",
+    "veces": 4,
+    "caps": [
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "el casco o la nave que se encoge o se estrecha alrededor del problema",
+    "veces": 1,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "una sensacion fisica convertida en instrumento de medida del tiempo ('ese frio era el unico reloj que le quedaba')",
+    "veces": 1,
+    "caps": [
+      3
+    ]
+  }
+]

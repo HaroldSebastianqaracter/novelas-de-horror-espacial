@@ -1,0 +1,59 @@
+{
+  "Ledesma": {
+    "estado_fisico": "Sin cambios.",
+    "estado_psicologico": "Consciente de que el puente fue el objetivo principal de la presencia; oculta información.",
+    "secretos_que_conoce": [
+      "Sabe que el radio de a bordo no responde a protocolos de contacto abandonados hace veinte años.",
+      "El plan de contención es mutuamente letal con el plan de supervivencia",
+      "El puente había sido siempre lo que la presencia quería.",
+      "Oculta los detalles de los once minutos no registrados."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Ourão": {
+    "estado_fisico": "Amputación de brazo izquierdo en la escotilla de carga; sangrado severo.",
+    "estado_psicologico": "Determinado y enfocado; no mira atrás durante la operación en el conducto.",
+    "secretos_que_conoce": [
+      "Reconoce que los surcos están separados más de lo que separa el pasillo por el que llegaron, indicando una entidad de tamaño anómalo.",
+      "Cada cierre deja un ramal abierto orientado hacia proa",
+      "La presencia no está siendo contenida, sino guiada hacia el puente",
+      "Puede rastrear la presencia mediante los sonidos del metal en los conductos."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Nisa": {
+    "estado_fisico": "Arriba, con su hoja de cálculos de reciclado.",
+    "estado_psicologico": "De observador silencioso a portador de una verdad aritmética que ninguno puede refutar.",
+    "secretos_que_conoce": [
+      "Con media nave clausurada, el aire disponible solo dura siete días",
+      "La travesía a Tesela toma siete días"
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Beltrán": {
+    "estado_fisico": "En conductos de servicio de cubierta dos, en el lugar donde intenta abrir una barra.",
+    "estado_psicologico": "Actuó por frustración bajando sin permiso; ahora enfrenta una resistencia física inesperada.",
+    "secretos_que_conoce": [
+      "Halló una barra de sellado que no cede al intento de apertura"
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Kovac": {
+    "estado_fisico": "Muerto, tendido contra el mamparo del fondo de la cámara de carga.",
+    "estado_psicologico": "Desconocido; su último sonido fue un grito que empezó como pregunta.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "la presencia": {
+    "estado_fisico": "Grande (según Ourão). Ha dejado surcos de arrastre en la plancha de la cámara de carga. Está siendo sellada en las secciones posteriores rumbo a la bodega.",
+    "estado_psicologico": "Desconocido.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  }
+}

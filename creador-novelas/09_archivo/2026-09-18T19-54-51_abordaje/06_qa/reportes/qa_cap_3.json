@@ -1,0 +1,36 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 establece que Nisa purga la bodega ('Nisa purgo la bodega') y que la nave conserva aire respirable hasta Tesela ('el aire contado hasta la ultima hora'), pero el log fija que la camara de carga de babor es la unica seccion que puede despresurizarse sin llevarse el reciclado entero.",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cifra exacta de tiempo como marcador de tension: 12 apariciones acumuladas (caps 1, 2, 3). En el capitulo 3: 'Durante dos horas', 'cinco dias despues', 'los once minutos'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Eco tautologico, la frase se cierra repitiendo la palabra que la abre: 8 acumuladas (caps 1, 2, 3). En el capitulo 3: 'un rastro que la cosa podia seguir sin entender que lo seguia', 'un hueco que no podia contenerlo y lo contenia igual'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion y relevo 'No fue X. Fue Y.': 5 acumuladas (caps 1, 2, 3). En el capitulo 3: 'Ourao no oyo el hueso: oyo el sellado encajar' y 'el aire ya no bastaba de cebo. La cosa habia elegido el ramal de proa'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de escena con frase corta sobre el silencio o la ausencia: 4 acumuladas (caps 1, 2, 3). En el capitulo 3, el cierre del capitulo: 'No escribio los once minutos'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Anafora de sintagma en serie: 4 acumuladas (caps 2, 3). En el capitulo 3: 'primero la escotilla de babor, despues los tramos..., y por ultimo los ramales' y 'como cambiaba de ramal detras de ella, como el peso enorme se plegaba'.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

@@ -1,0 +1,138 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La Hesperia es un carguero con cinco tripulantes y tres guardias rotativas, y lleva doscientos setenta días de travesía con ciento diez por delante hasta destino.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Todo el volumen habitable de la nave se ventila por un circuito único: el aire que sale de cualquier compartimento vuelve a los filtros de carbono del nivel inferior y de allí a todos los pulmones de a bordo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El contador del puente da cuarenta días de aire embotellado en las reservas de emergencia para la tripulación completa, frente a los ciento diez días que faltan de trayecto.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las juntas del conducto del reciclador no cierran con guantes, así que toda purga o cambio de filtros exige a dos personas trabajando sin escafandra en el nivel inferior.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "En cada cambio de guardia el pasillo principal queda vacío durante once minutos exactos, y ese hueco figura así en el cuadro de relevos.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los manuales médicos de a bordo no recogen ninguna lesión que se desplace bajo la piel entre guardia y guardia, y el protocolo sanitario solo ofrece una medida ante un cuadro desconocido: sellar el módulo de enfermería con los afectados dentro.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Hesperia — nivel del reciclador",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El registro de mantenimiento recoge que la última inspección de los filtros de carbono se firmó como limpia hace cuarenta días.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Hesperia — módulo de enfermería",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El módulo de enfermería tiene dos catres separados sin línea de visión entre ellos y un mamparo que solo se sella y se abre desde el pasillo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irene Sabán",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Irene Sabán es la médica de la Hesperia y lleva a mano el registro sanitario, con una entrada por guardia, por disciplina y no por miedo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tobías Rueda",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Tobías Rueda es el mecánico de casco y trata lo que le pasa en el cuerpo como trataría una avería: enseñándoselo a alguien para mirarlo entre dos.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Camila Ferrán",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Camila Ferrán es la piloto de aproximación y mide el viaje en maniobras pendientes; la suya queda a ciento diez días.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Noé Vidal-Arriaga",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Noé Vidal-Arriaga es el capitán y hasta ahora ha evitado toda decisión que no pudiera deshacerse después.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sira Delmonte",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Sira Delmonte es la ingeniera de soporte vital, la única a bordo que sabe leer los planos del reciclador, y firmó ella misma la última inspección de los filtros hace cuarenta días.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tobías Rueda",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Tobías Rueda presenta una lesión anómala en el antebrazo que se desplaza bajo la piel entre guardias consecutivas.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Camila Ferrán",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Camila Ferrán presenta la misma lesión anómala en la nuca.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Hesperia — módulo de enfermería",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Irene Sabán selló el mamparo de la enfermería desde el pasillo, aislando a Tobías y Camila dentro.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El sistema de ventilación de la Hesperia es un circuito único que no aísla la enfermería del resto de la nave.",
+    "cap_origen": 1,
+    "superado_por": null
+  }
+]
