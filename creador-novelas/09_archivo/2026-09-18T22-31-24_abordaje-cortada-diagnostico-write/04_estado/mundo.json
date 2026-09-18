@@ -1,0 +1,33 @@
+{
+  "reglas": [
+    "El remolcador Vereda Larga arrastra un casco muerto por una ruta de tránsito que ninguna otra nave cruza; el puerto más cercano está a once días de motor.",
+    "El soporte vital reparte aire y energía por secciones: cada mamparo que se cierra obliga a redistribuir el reparto, y el margen de la maniobra se mide en días.",
+    "La esclusa de carga registra cada operación con hora y firma de quien la ejecuta, y su ciclo de presurización puede desactivarse a mano desde un terminal interno.",
+    "Los conductos de servicio recorren el casco de popa a proa y suben por el eje central hasta el puente; su trazado completo lo conoce de memoria Bruno Oyarce.",
+    "El cable de arrastre permite desacoplar el casco muerto en marcha; con la esclusa de carga abierta y el remolcador en giro, la descompresión barre el eje central de popa a proa.",
+    "La banda de comunicaciones que se escucha en esta ruta lleva toda la travesía sin tráfico, y a esta distancia una llamada de auxilio no alcanza a nadie que pueda llegar a tiempo.",
+    "La nave emite una señal automática con los nombres de la tripulación embarcada mientras nadie la cancele."
+  ],
+  "objetos": [
+    "Cable de arrastre que une el remolcador al casco muerto.",
+    "Terminal interno de la esclusa de carga, desde el que se ejecuta la secuencia de apertura manual.",
+    "Terminal secundario del puente, desde el que se confirma el desacople.",
+    "Cuaderno de Teo Almendra, donde anota los sonidos y las incidencias de la travesía.",
+    "Sensores térmicos de los conductos de servicio.",
+    "Registro de operaciones de la esclusa de carga, con horas y firmas."
+  ],
+  "linea_de_tiempo": [
+    "Dos semanas antes de zarpar: en el registro de la esclusa de carga consta una prueba de apertura manual con las firmas de Bruno Oyarce y Halim Duarte.",
+    "Día 0: la Vereda Larga engancha el casco muerto y entra en la ruta de tránsito, a once días de puerto.",
+    "Día 0 (guardia de Halim Duarte): el ciclo de presurización de la esclusa de carga queda desactivado a mano.",
+    "Día 0: durante una corrección del cable de arrastre la esclusa de carga se abre sin secuencia; algo entra en la nave.",
+    "Días 1 a 6: sellado de la nave sección por sección.",
+    "Día 9: quedan cinco días de aire según el cálculo de Mirta Kovačić.",
+    "Día 11: llegada a puerto."
+  ],
+  "locaciones": {
+    "Vereda Larga - cubierta de carga": "Bodega de proa con la esclusa de carga y su terminal interno, el torno del cable de arrastre y las bocas de los conductos de servicio a media altura; suelo de rejilla, luz de trabajo amarilla y ruido constante del arrastre.",
+    "Vereda Larga - eje central": "Espina vertical de la nave: escalerilla, tendidos de energía y aire, mamparos seccionables y la red de conductos de servicio que sube de popa a proa hasta el puente. Estrecho, mal iluminado, con el metal arañado allí donde algo ha pasado.",
+    "Vereda Larga - puente": "Cabina de mando en lo alto del eje central, con el terminal secundario, el puesto de comunicaciones de Mirta y los indicadores de aire y energía por sección; ventanal estrecho a una ruta sin tráfico."
+  }
+}

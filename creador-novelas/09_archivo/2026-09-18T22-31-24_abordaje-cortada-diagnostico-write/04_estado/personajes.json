@@ -1,0 +1,57 @@
+{
+  "Irene Sacchi": {
+    "estado_fisico": "Sin cambios aparentes.",
+    "estado_psicologico": "Descubre que no están ganando terreno sino abriendo camino a la presencia hacia el puente. Pasa del optimismo colectivo al horror de comprender una amenaza interna. Toma la decisión de continuar.",
+    "secretos_que_conoce": [
+      "Entiende que la esclusa fue abierta desde el exterior, no desde dentro de la nave.",
+      "La puerta de la esclusa fue abierta desde dentro: por Halim o por alguien que sabía su guardia."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Bruno Oyarce": {
+    "estado_fisico": "Frío en las manos tras el descubrimiento.",
+    "estado_psicologico": "Descubre que ha estado colaborando en abrir el camino de la presencia hacia el puente. Pasa de marcar puntos de sellado a comprender una estrategia invertida.",
+    "secretos_que_conoce": [
+      "Dos semanas antes de la travesía probó por rutina una secuencia de apertura manual de la esclusa de carga y no lo ha mencionado a nadie.",
+      "La secuencia de apertura de la esclusa salió del terminal interno con ciclo de presurización anulado a mano, firmada por Halim Duarte. Los ruidos de Teo forman una línea recta hacia el mamparo del puente."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Mirta Kovačić": {
+    "estado_fisico": "En el puente, sin cambios.",
+    "estado_psicologico": "Articula la implicación más profunda: traición interna. Sigue con voz plana, pero ahora nombrando lo peor.",
+    "secretos_que_conoce": [
+      "Sabe que la entidad no responde a protocolos de contacto estándar.",
+      "Quedan cinco días de aire. La puerta fue abierta desde dentro o Halim la abrió o alguien sabía su guardia."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Teo Almendra": {
+    "estado_fisico": "Sin cambios.",
+    "estado_psicologico": "Sus anotaciones dispersas se revelan como evidencia de un patrón mortal. El optimismo de 'vamos ganando' se desmorona.",
+    "secretos_que_conoce": [
+      "Sus registros de ruidos corresponden a un movimiento lineal de la presencia hacia el puente."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Halim Duarte": {
+    "estado_fisico": "Gravemente herido. Aplastado contra el mamparo de la cubierta de carga por la entidad.",
+    "estado_psicologico": "Desconocido tras el impacto.",
+    "secretos_que_conoce": [
+      "En su guardia el ciclo de presurización de la esclusa de carga quedó desactivado a mano."
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "la presencia": {
+    "estado_fisico": "Desconocido. Indescriptible en color, forma y modo de sostenerse.",
+    "estado_psicologico": "Desconocido.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  }
+}

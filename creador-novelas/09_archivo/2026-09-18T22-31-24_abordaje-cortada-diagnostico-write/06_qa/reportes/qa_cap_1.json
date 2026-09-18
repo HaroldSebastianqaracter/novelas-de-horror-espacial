@@ -1,0 +1,11 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion por negacion encadenada ('Ni una nave', 'ni un puerto antes', 'No hubo aviso previo. No hubo ciclo de presurizacion, ni la cuenta larga, ni una firma', 'ni de que color era, ni cuantas partes tenia, ni como se sostenia', 'ni un chasquido de vuelta'): 4 apariciones acumuladas, capitulos [1].",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

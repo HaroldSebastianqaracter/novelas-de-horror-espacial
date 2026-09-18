@@ -1,0 +1,25 @@
+# Once días hasta puerto — sinopsis en tres actos
+
+## Gancho inicial
+
+El remolcador *Vereda Larga* arrastra un casco muerto por una ruta de tránsito que nadie cruza, a once días de motor del puerto más cercano. A bordo van cinco: Irene Sacchi, que manda la nave sin más autoridad que la costumbre; Bruno Oyarce, mecánico, el único que conoce de memoria el trazado de los conductos de servicio; Mirta Kovačić, operadora de comunicaciones, encargada de escuchar una banda donde nunca hay nada; Teo Almendra, el más joven, contratado para la maniobra de remolque; y Halim Duarte, que esa guardia toca a la esclusa de carga.
+
+Durante una corrección rutinaria del cable de arrastre, la esclusa de carga se abre desde fuera. No hay aviso, no hay secuencia de presurización, no hay nadie que pudiera haberla operado. Algo grande entra en la nave. No habla, no responde a ninguna frecuencia que Mirta le lanza ni a ningún protocolo de contacto, y mata a Halim delante de los otros cuatro —con una economía de movimiento que a Irene le parecerá después lo más insoportable del recuerdo— antes de desaparecer por los conductos de servicio. Cuando el eco se apaga, los cuatro que quedan entienden dos cosas a la vez: que están encerrados con ello, y que la única puerta que se abrió en once días la abrió ello.
+
+Bruno propone lo único que se puede hacer sin armas: sellar la nave sección por sección, empujarla hacia la popa, quitarle metros. Irene ordena el sellado. Mirta calcula lo que cuesta: cada mamparo cerrado obliga a redistribuir aire y energía, y el margen de la maniobra es de días, no de semanas.
+
+## Punto medio (giro)
+
+El sellado funciona. Durante seis días la tripulación lo empuja hacia atrás mamparo a mamparo, aprendiendo a leer el rastro que deja: arañazos largos en el metal de los conductos, sensores térmicos que fallan en un orden que Bruno empieza a anticipar, un sonido que se acerca y se aleja en la estructura como si midiera el casco por dentro. Teo lleva la cuenta en un cuaderno. Irene empieza a creer que llegarán a puerto con la cosa acorralada en una bodega y una historia que contar.
+
+El giro llega cuando Bruno, revisando los registros de la esclusa para entender cómo se abrió desde fuera, encuentra que no se abrió desde fuera: la secuencia se ejecutó desde un terminal interno, en el turno de Halim, con el ciclo de presurización desactivado a mano. Y el trazado de los sellados —el suyo, el que él mismo diseñó— no ha estado empujando a la criatura hacia la popa. La ha estado empujando hacia el eje central, hacia los conductos que suben al puente. La cosa no huye del acorralamiento: lo usa. Los sonidos que Teo anotó como dispersos, puestos en orden, dibujan una línea recta hacia arriba.
+
+Mirta plantea lo que nadie quiere oír: si la esclusa se abrió desde dentro, o Halim la abrió, o alguien la abrió sabiendo que a Halim le tocaba la guardia. Los cuatro dejan de ser una tripulación sitiada y pasan a ser cuatro personas que se vigilan mientras el aire baja. Quedan cinco días. Irene decide seguir sellando de todos modos, porque abrir ahora sería regalarle la nave entera.
+
+## Clímax / final
+
+A dos días de puerto, la criatura llega al mamparo del puente y el trazado de Bruno se cierra sobre ellos: los cuatro quedan en el mismo volumen que ella, con el aire de la maniobra agotándose y sin una sola sección más que ceder. Irene toma la única decisión que le queda: usar el cable de arrastre. Si desacoplan el casco muerto con la esclusa de carga abierta y el remolcador en giro, la descompresión barrerá el eje central de popa a proa. Alguien tiene que mantener abierta la esclusa desde el terminal interno mientras dura el barrido, y ese alguien no vuelve.
+
+Bruno se ofrece, y Mirta entiende por qué: es su trazado el que las llevó hasta ahí, y es su firma la que aparece junto a la de Halim en el registro de la esclusa del primer día —no como culpable, sino como el hombre que probó una secuencia de apertura manual dos semanas antes, por rutina, y dejó abierta la puerta que algo aprendió a empujar. Bruno baja al eje. Teo, que no ha tocado un mando en toda la travesía, se queda en el terminal secundario para confirmar el desacople. La maniobra funciona a medias: el barrido arranca a la criatura del eje y la lanza al vacío junto con el casco muerto y con Bruno, pero rompe el sellado del puente y Teo queda del lado equivocado del mamparo.
+
+Irene y Mirta entran en puerto al undécimo día, en una nave sin carga, sin remolque y con dos cuerpos que no están a bordo y uno que sí. Nadie las espera en la esclusa: el remolcador llega en silencio y con la señal automática que Mirta no llegó a cancelar, repitiendo cinco nombres. En el registro de la esclusa de carga queda una última entrada que ninguna de las dos ejecutó, con hora posterior al desacople. Irene la borra antes de atracar. Mirta la ve borrarla y no dice nada, y las dos bajan a puerto sabiendo que lo que subió a bordo no necesitó once días para aprender la nave: le bastó con que ellas le enseñaran dónde estaban todas las puertas.

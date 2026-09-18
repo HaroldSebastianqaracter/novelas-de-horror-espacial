@@ -1,0 +1,21 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capítulo 2 establece como cierto que la secuencia de apertura de la esclusa no llegaba de fuera, sino del terminal interno de la cubierta de carga con el ciclo de presurización anulado a mano. Contradice el hecho vigente del log: 'La esclusa de la cubierta de carga se abrió desde el exterior sin ciclo de presurización ni protocolo conocido'.",
+      "cap_origen": 1
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negación correctiva 'No X. Es/Era Y.': tres apariciones en el capítulo 2 ('La secuencia no llegaba de fuera. Había salido del terminal interno', 'no era el de la presencia empujada hacia la popa / Era una línea', 'No la estamos arrinconando. Le estamos abriendo el camino'). 3 apariciones acumuladas, capítulos [2].",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Repetición literal inmediata de una palabra o frase como énfasis: 'Once días… Once días' en el capítulo 1 y 'Seis mamparos cerrados, seis veces la misma liturgia' en el capítulo 2. 3 apariciones acumuladas, capítulos [1, 2].",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

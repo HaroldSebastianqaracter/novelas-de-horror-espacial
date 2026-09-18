@@ -1,0 +1,53 @@
+[
+  {
+    "recurso": "enumeracion por negacion encadenada ('ni X, ni Y, ni Z' / 'No hubo... No hubo...')",
+    "veces": 4,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "repeticion literal inmediata de una frase como enfasis ('Once dias... Once dias')",
+    "veces": 3,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "prolepsis del narrador desde un futuro posterior ('no consiguio despues decir', 'mucho mas tarde')",
+    "veces": 2,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "la estructura de la nave como cuerpo que devora ('el metal se la trago', 'antes de que el sellado mordiera')",
+    "veces": 2,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "par preposicional simetrico ('sin prisa y sin esfuerzo')",
+    "veces": 1,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "negacion correctiva 'No X. Es/Era Y.' para introducir una revelacion",
+    "veces": 3,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "la cuenta de dias restantes como amenaza suspendida ('cinco dias contados sobre sus cabezas')",
+    "veces": 2,
+    "caps": [
+      2
+    ]
+  }
+]

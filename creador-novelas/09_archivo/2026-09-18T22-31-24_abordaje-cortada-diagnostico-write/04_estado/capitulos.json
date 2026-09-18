@@ -1,0 +1,48 @@
+[
+  {
+    "num": 1,
+    "titulo": "La puerta que se abrió sola",
+    "objetivo_narrativo": "Presentar a los cinco tripulantes del remolcador en la rutina del arrastre y romperla: la esclusa de carga se abre sin secuencia, algo entra en la nave y mata a Halim Duarte delante de los otros cuatro antes de perderse por los conductos de servicio.",
+    "personajes": [
+      "Irene Sacchi",
+      "Bruno Oyarce",
+      "Mirta Kovačić",
+      "Teo Almendra",
+      "Halim Duarte",
+      "la presencia"
+    ],
+    "locacion": "Vereda Larga - cubierta de carga",
+    "informacion_nueva": "Faltan once días hasta puerto, no hay ayuda posible a esa distancia y la única puerta que se abrió en toda la travesía la abrió lo que subió a bordo; Bruno propone sellar la nave sección por sección y Mirta calcula que el aire y la energía del sellado dan días, no semanas.",
+    "tension": 4
+  },
+  {
+    "num": 2,
+    "titulo": "El trazado de los mamparos",
+    "objetivo_narrativo": "Mostrar seis días de sellado que parecen funcionar y volcarlos: Bruno descubre que la esclusa se ejecutó desde un terminal interno y que su propio trazado no empuja a la presencia hacia la popa, sino hacia el eje que sube al puente.",
+    "personajes": [
+      "Irene Sacchi",
+      "Bruno Oyarce",
+      "Mirta Kovačić",
+      "Teo Almendra",
+      "la presencia"
+    ],
+    "locacion": "Vereda Larga - eje central",
+    "informacion_nueva": "La secuencia de apertura salió de dentro, con el ciclo de presurización desactivado a mano en la guardia de Halim; los sonidos que Teo anotó dibujan una línea recta hacia el puente y los cuatro pasan de tripulación sitiada a cuatro personas que se vigilan con cinco días de aire por delante.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "Todas las puertas de la nave",
+    "objetivo_narrativo": "Cerrar el sitio sobre los cuatro y resolverlo con el desacople del casco muerto: Bruno mantiene la esclusa abierta desde el terminal interno, el barrido arranca la presencia del eje y se lleva también a Bruno y a Teo, e Irene y Mirta entran en puerto al undécimo día.",
+    "personajes": [
+      "Irene Sacchi",
+      "Bruno Oyarce",
+      "Mirta Kovačić",
+      "Teo Almendra",
+      "la presencia"
+    ],
+    "locacion": "Vereda Larga - puente",
+    "informacion_nueva": "La firma de Bruno figuraba junto a la de Halim en una prueba de apertura manual hecha dos semanas antes; tras el desacople queda en el registro de la esclusa una entrada con hora posterior que ninguna de las dos supervivientes ejecutó, e Irene la borra delante de Mirta antes de atracar.",
+    "tension": 5
+  }
+]

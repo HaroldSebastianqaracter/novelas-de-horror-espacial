@@ -157,6 +157,20 @@ def preparar_correccion(raiz: Path, config: HarnessConfig, n: int) -> Contexto:
     if n not in (m.reextraccion_pendiente or []):
         raise EstadoInvalidoError(
             f"el capítulo {n} no está pendiente de corrección; pendientes: {m.reextraccion_pendiente}")
+    # Dejar libres las rutas que el escritor va a escribir. El cliente exige haber leído un archivo
+    # antes de sobrescribirlo, y el escritor no tiene Read por diseño (INV-01): con el capítulo en su
+    # sitio, su Write se rechaza con «File has not been read yet», devuelve NO VALIDADO y la
+    # corrección no ocurre nunca. Peor todavía, su `validar-capitulo N` daba «válido» sobre el
+    # archivo viejo e intacto, así que una corrección fallida se colaba como buena.
+    # Se mueven a `descartados/` del registro, que es donde ya viven los borradores que no valen:
+    # no se pierde nada y la ruta queda libre para un Write limpio.
+    rutas = Rutas(raiz)
+    registro.descartar(raiz, "escritor", n, rutas.capitulo(n), "corrección de QA: se rehace el capítulo")
+    rutas.capitulo(n).unlink(missing_ok=True)
+    if config.escritor_emite_delta and rutas.delta(n).is_file():
+        registro.descartar(raiz, "extractor", n, rutas.delta(n), "corrección de QA: se rehace el delta")
+        rutas.delta(n).unlink(missing_ok=True)
+
     contexto = escritor.ensamblar_contexto(n, config, raiz, feedback_qa=feedback_de_qa(raiz, n))
     if contexto.excede_limite():
         contexto = escritor.recortar_resumen_rodante(contexto)

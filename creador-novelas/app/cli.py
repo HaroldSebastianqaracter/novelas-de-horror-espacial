@@ -644,7 +644,7 @@ def construir_parser() -> argparse.ArgumentParser:
     cq.add_argument("--retorno", help="mensaje final de QA, hasta cinco líneas (RF-08.1); se valida antes de cerrar")
     cq.set_defaults(fn=cmd_cerrar_qa)
 
-    for verbo, fn, ayuda in (("validar-capitulo", cmd_validar_capitulo, "escritor: longitud ±20 %, solo prosa, personajes en escena"),
+    for verbo, fn, ayuda in (("validar-capitulo", cmd_validar_capitulo, "escritor: longitud ±20 %%, solo prosa, personajes en escena"),
                              ("validar-delta", cmd_validar_delta, "extractor: esquema, sujetos, tope de hechos"),
                              ("validar-reporte", cmd_validar_reporte, "qa: esquema de ReporteQA y recursos_usados.json")):
         v = sub.add_parser(verbo, help=f"RF-08.4, solo lectura; {ayuda}")

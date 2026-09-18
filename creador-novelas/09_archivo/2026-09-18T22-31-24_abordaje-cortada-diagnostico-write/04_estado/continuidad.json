@@ -1,0 +1,178 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El remolcador Vereda Larga arrastra un casco muerto por una ruta de tránsito sin tráfico; la carta de navegación da once días de motor hasta el puerto más cercano y ninguna nave registrada a distancia de socorro.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El soporte vital reparte aire y energía sección por sección: los indicadores del puente muestran que cada mamparo cerrado obliga a redistribuir el reparto, y el margen que queda se cuenta en días.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La tripulación embarcada son cinco: Irene Sacchi al mando, Bruno Oyarce de mecánico, Mirta Kovačić en comunicaciones, Teo Almendra contratado para la maniobra de remolque y Halim Duarte de guardia en la esclusa de carga.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "A bordo no hay armas de dotación: el inventario de la nave solo recoge herramienta de remolque y de mantenimiento.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El registro de la esclusa de carga anota cada operación con hora y firma, y su ciclo de presurización puede desactivarse a mano desde el terminal interno de la cubierta de carga.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vereda Larga - eje central",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Los conductos de servicio recorren el casco de popa a proa y suben por el eje central hasta el mamparo del puente; los planos de a bordo los dibujan como una sola red continua.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vereda Larga - cubierta de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La cubierta de carga reúne la esclusa de carga, su terminal interno y el torno del cable de arrastre, y es el único punto de la nave desde el que se trabaja el remolque a mano.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vereda Larga - puente",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El puente está en lo alto del eje central y concentra el terminal secundario, el puesto de comunicaciones y los indicadores de aire y energía por sección.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Bruno Oyarce",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Bruno Oyarce es el único de a bordo que conoce de memoria el trazado completo de los conductos de servicio, y en el registro de la esclusa de carga figura su firma junto a la de Halim Duarte en una prueba de apertura manual hecha dos semanas antes de zarpar.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irene Sacchi",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Irene Sacchi manda la Vereda Larga por costumbre y no por rango, y la tripulación le obedece por eso mismo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Mirta Kovačić",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Mirta Kovačić lleva toda la travesía escuchando una banda en la que no ha entrado tráfico, y es quien calcula los márgenes de aire y energía de la nave.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Teo Almendra",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Teo Almendra es el más joven, viaja contratado solo para la maniobra de remolque y anota en un cuaderno lo que oye y lo que ocurre a bordo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Halim Duarte",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "A Halim Duarte le toca la guardia de la esclusa de carga cuando la Vereda Larga corrige el cable de arrastre.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La Vereda Larga emite una señal automática que repite los cinco nombres de la tripulación embarcada mientras nadie la cancele desde el puesto de comunicaciones.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Halim Duarte",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Halim Duarte fue aplastado contra el mamparo de la cubierta de carga por una entidad desconocida.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vereda Larga - cubierta de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La esclusa de la cubierta de carga se abrió desde el exterior sin ciclo de presurización ni protocolo conocido.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la presencia",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Una entidad desconocida irrumpió en la nave a través de la esclusa de la cubierta de carga.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irene Sacchi",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Irene Sacchi ordena sellar la nave sección por sección a partir del eje central para contener la amenaza.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vereda Larga - cubierta de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La secuencia de apertura de la esclusa se originó en el terminal interno con ciclo de presurización anulado a mano, firmada en la guardia de Halim Duarte.",
+    "cap_origen": 2,
+    "superado_por": 2
+  },
+  {
+    "sujeto": "la presencia",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Los ruidos registrados forman una línea recta hacia el mamparo del puente, indicando movimiento ascendente, no acorralamiento hacia la popa.",
+    "cap_origen": 2,
+    "superado_por": 2
+  },
+  {
+    "sujeto": "Irene Sacchi",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Irene Sacchi decide continuar sellando mamparos en dirección al puente.",
+    "cap_origen": 2,
+    "superado_por": 2
+  },
+  {
+    "sujeto": "Halim Duarte",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "La firma de Halim Duarte aparece en el registro de apertura de la esclusa de carga.",
+    "cap_origen": 2,
+    "superado_por": 2
+  }
+]

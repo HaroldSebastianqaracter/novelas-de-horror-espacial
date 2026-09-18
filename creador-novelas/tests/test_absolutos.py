@@ -153,3 +153,40 @@ def test_el_caso_real_de_abordaje_se_detecta():
     # comparación tiene que mirar también la cola del nombre, que es como la nombra la prosa.
     r = cont.personajes_en_dos_sitios(log, outline, ["Vereda Sur - puente", "Vereda Sur - pasillo del nivel dos"])
     assert r == [("Duna Oyarzo", "Vereda Sur - puente", "Vereda Sur - pasillo del nivel dos", 1)]
+
+
+# ---------- la corrección tiene que poder escribir ----------
+
+def test_preparar_correccion_deja_libre_la_ruta_del_capitulo(proyecto):
+    """El escritor no puede pisar un archivo que no ha leído, y no tiene Read por diseño.
+
+    Con el capítulo en su sitio, su Write se rechazaba con «File has not been read yet», devolvía
+    NO VALIDADO y la corrección no ocurría nunca. Y su `validar-capitulo N` daba «válido» sobre el
+    archivo viejo e intacto, así que el fallo se colaba como éxito: tres novelas seguidas dieron la
+    corrección por buena sin haber cambiado una coma.
+    """
+    import json as _json
+    from app import registro
+    from app.config import cargar_config
+    from app.orchestrator import checkpoint, loop
+    from app.state import repository as repo
+
+    rutas = Rutas(proyecto)
+    config = cargar_config(proyecto)
+    registro.iniciar_tanda(proyecto, {})
+    repo.escribir_texto(rutas.capitulo(1), "El capítulo viejo. " + " ".join(f"p{i}" for i in range(40)))
+    checkpoint.marcar_capitulo_cerrado(proyecto, 1)
+    rutas.reportes_qa.mkdir(parents=True, exist_ok=True)
+    rutas.reporte_qa_json(1).write_text(_json.dumps({
+        "cap_corte": 1, "tiene_contradicciones": True,
+        "hallazgos": [{"tipo": "contradiccion", "descripcion": "Dice que bajaron los cinco y que uno venía del puente.", "cap_origen": 0}],
+    }), encoding="utf-8")
+    checkpoint.iniciar_resolucion(proyecto, "qa_cap_1", [1])
+
+    loop.preparar_correccion(proyecto, config, 1)
+
+    assert not rutas.capitulo(1).exists()  # la ruta queda libre para un Write limpio
+    # Y el texto viejo no se pierde: va a `descartados/`, que es donde ya viven los borradores
+    # que no valen.
+    descartados = list((registro.dir_actual(proyecto) / "descartados").glob("*cap_1*"))
+    assert descartados and "capítulo viejo" in descartados[0].read_text(encoding="utf-8")
