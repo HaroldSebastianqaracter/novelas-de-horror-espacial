@@ -1,0 +1,11 @@
+{
+  "total_capitulos": 6,
+  "palabras_por_capitulo": 1500,
+  "idioma": "es-ES",
+  "persona_narrativa": "tercera_limitada",
+  "tiempo_verbal": "pasado",
+  "ventana_resumen_rodante": 2,
+  "cadencia_qa": 3,
+  "max_tokens_contexto_escritor": 12000,
+  "max_hechos_por_capitulo": 4
+}
