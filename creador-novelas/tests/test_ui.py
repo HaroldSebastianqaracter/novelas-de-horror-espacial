@@ -514,6 +514,28 @@ def test_sin_git_bash_la_fase_de_agentes_no_se_lanza(monkeypatch, proyecto, conf
         web.lanzar_fase(proyecto, "escribir-tanda")
 
 
+def test_el_registro_solo_anuncia_los_hooks_que_de_verdad_frenaron_algo():
+    """La bitácora decía «H-02 bloqueó» siete veces en una tanda donde no se bloqueó nada.
+
+    Un hook deja cuatro decisiones: permitido/bloqueado en PreToolUse y verificado/falla en
+    PostToolUse. El filtro era «distinto de permitido», así que cada verificación correcta se
+    anunciaba como un bloqueo y la pantalla parecía estar frenando al harness sin parar.
+    """
+    ruta = r"C:\Users\quien\Desktop\Nueva carpeta\novelas\creador-novelas\06_qa\qa_cap_2.json"
+    hook = lambda d: {"tipo": "hook", "id": "H-02", "decision": d, "accion": "Write " + ruta}
+    assert web._frase(hook("permitido")) is None
+    assert web._frase(hook("verificado")) is None          # verificado NO es un bloqueo
+    assert web._frase(hook("bloqueado")).startswith("H-02 bloqueó")
+    assert web._frase(hook("falla")).startswith("H-02 rechazó")
+
+    # La ruta se reduce a su nombre de archivo, y no vale partir por espacios: esta novela vive
+    # bajo «Nueva carpeta», y así el registro enseñaba «Nueva qa_cap_2.json».
+    assert web._corto("Write " + ruta) == "Write qa_cap_2.json"
+    # Una ruta relativa dentro de una frase se deja como está: es corta y dice dónde fue el intento.
+    motivo = "[H-06] el escritor solo escribe 05_manuscrito/cap_2.md; intentó 06_qa/intruso.md"
+    assert "05_manuscrito/cap_2.md" in web._corto(motivo, tope=200)
+
+
 def test_el_plano_enciende_a_los_agentes_que_de_verdad_trabajan():
     """Reconstruido de la tanda del 18/09, donde el plano encendía una cubierta y la equivocada.
 

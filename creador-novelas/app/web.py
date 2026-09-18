@@ -479,16 +479,26 @@ def _frase(ev: dict[str, Any]) -> str | None:
         return f"{pref}{ev.get('verbo')}" + (f", {res}" if res and res != "ok" else "")
     if tipo == "error":
         return f"{pref}error: {ev.get('mensaje') or ev.get('error') or 'sin mensaje'}"
-    if tipo == "hook" and ev.get("decision") != "permitido":
-        return f"{ev.get('id', 'hook')} bloqueó {_corto(ev.get('motivo') or ev.get('accion', ''))}"
-    return None  # hooks permitidos: son la mayoría del registro y no dicen nada al usuario
+    # Un hook deja cuatro decisiones: `permitido`/`bloqueado` en PreToolUse y `verificado`/`falla`
+    # en PostToolUse. Solo las dos malas son noticia. Filtrar por «distinto de permitido» metía en la
+    # bitácora cada verificación correcta anunciada como bloqueo: en la tanda del 18/09 la pantalla
+    # enseñaba siete «H-02 bloqueó» sin que se hubiera bloqueado nada.
+    if tipo == "hook" and ev.get("decision") in ("bloqueado", "falla"):
+        verbo = "bloqueó" if ev.get("decision") == "bloqueado" else "rechazó"
+        return f"{ev.get('id', 'hook')} {verbo} {_corto(ev.get('motivo') or ev.get('accion', ''))}"
+    return None  # hooks en orden: son la mayoría del registro y no dicen nada al usuario
 
 
 def _corto(texto: Any, tope: int = 64) -> str:
     """La bitácora es una columna estrecha: una ruta absoluta la llena entera y no dice nada."""
     limpio = " ".join(str(texto).split())
-    if "\\" in limpio or "/" in limpio:
-        limpio = " ".join(p.rsplit("\\", 1)[-1].rsplit("/", 1)[-1] for p in limpio.split(" "))
+    # Una ruta absoluta se reduce a su nombre de archivo. No vale partir por espacios: esta misma
+    # novela vive bajo «Nueva carpeta», y así «...\Desktop\Nueva carpeta\...\qa_cap_2.json» salía en
+    # pantalla como «Nueva qa_cap_2.json». Se toma la ruta entera, espacios incluidos, hasta el final.
+    m = re.search(r"(?:[A-Za-z]:[\\/]|\\\\)\S.*$", limpio)
+    if m:
+        base = m.group(0).replace("\\", "/").rstrip("/").rsplit("/", 1)[-1]
+        limpio = (limpio[: m.start()] + base).strip()
     return limpio if len(limpio) <= tope else limpio[: tope - 1] + "…"
 
 
