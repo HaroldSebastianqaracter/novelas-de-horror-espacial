@@ -480,3 +480,13 @@ def test_el_preludio_y_sus_tandas_se_agrupan_por_novela(proyecto, config):
     # en vez de una lista de trazas sueltas que no se sabe de qué libro son.
     assert preludio.id != tanda.id
     assert sesion(preludio) == sesion(tanda) == registro.id_novela(proyecto)
+
+
+def test_el_traductor_otlp_conserva_la_sesion_de_la_novela(proyecto, config):
+    """b87775d agrupa preludio y tandas de un mismo libro con `sessionId`. Si el traductor no lo emite,
+    ese agrupamiento se pierde en la publicación sin que nada falle: la traza llega, la sesión no."""
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    traza = observabilidad.construir_traza(proyecto, carpeta)
+    payload = observabilidad.lote_a_otlp([e for e in traza.lote if e["type"] != "score-create"])
+    raiz = _spans(payload)[0]
+    assert _attrs(raiz)["langfuse.trace.session_id"] == registro.id_novela(proyecto)

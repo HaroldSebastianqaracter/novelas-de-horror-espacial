@@ -774,6 +774,9 @@ def lote_a_otlp(lote: list[dict]) -> dict:
         ("langfuse.observation.type", "span"),
         ("langfuse.trace.name", raiz.get("name")),
         ("langfuse.trace.tags", raiz.get("tags")),
+        # La sesión agrupa el preludio y las tandas de un mismo libro (b87775d). Si no se tradujera, la
+        # traza llegaría igual y nadie notaría la pérdida hasta intentar mirar una novela entera.
+        ("langfuse.trace.session_id", raiz.get("sessionId")),
     ], raiz.get("metadata"), "langfuse.trace.metadata.")
     spans.insert(0, {"traceId": trace_id, "spanId": id_raiz, "name": raiz.get("name") or "tanda", "kind": 1,
                      "startTimeUnixNano": inicio_raiz,
