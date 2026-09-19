@@ -36,7 +36,8 @@ CAMPOS_NOVELA = (
     "ventana_resumen_rodante", "cadencia_qa", "max_tokens_contexto_escritor", "max_hechos_por_capitulo",
 )
 CAMPOS_EJECUCION = ("capitulos_por_tanda", "max_llamadas_por_tanda", "registrar_uso", "exportar_trazas",
-                    "exportar_para_juez", "escritor_emite_delta", "aristas_en_continuidad")
+                    "exportar_para_juez", "escritor_emite_delta", "aristas_en_continuidad",
+                    "variante_prompt_escritor")
 
 
 class HarnessConfig(BaseModel):
@@ -67,6 +68,10 @@ class HarnessConfig(BaseModel):
     # control. Con 3 capítulos los dos dan lo mismo, porque todo cabe; la diferencia aparece a
     # partir del capítulo 10, que es donde hay que medirlo.
     aristas_en_continuidad: bool = False
+    # X-06: qué variante de la plantilla del escritor se usa. Vacío es `escritor.md`, la de siempre.
+    # El loop de prompts mide contra ella, así que el control tiene que seguir existiendo intacto:
+    # una variante es un archivo nuevo al lado, nunca una edición de la original.
+    variante_prompt_escritor: str = ""
     palabras_por_capitulo: int = Field(gt=0)  # RF-CFG-01
     idioma: str = Field(min_length=2)  # RF-CFG-05
     persona_narrativa: Literal["primera", "tercera_limitada", "tercera_omnisciente"]

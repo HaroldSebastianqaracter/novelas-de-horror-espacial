@@ -158,7 +158,7 @@ def ensamblar_contexto(n: int, config: HarnessConfig, raiz: Path, *, feedback_lo
         "ENCARGO_DELTA": _encargo_delta(n, config, raiz),
         "RECURSOS_AGOTADOS": rec.formatear_agotados(recursos),
     }
-    plantilla = plantillas.cargar_plantilla(raiz, "escritor")
+    plantilla = plantillas.cargar_plantilla(raiz, "escritor", config.variante_prompt_escritor)
     if config.aristas_en_continuidad:
         # X-05: el presupuesto de los hechos no es un número inventado, es lo que sobra. Se mide el
         # prompt sin ellos y se les da el resto menos un margen, así el recorte solo actúa cuando de

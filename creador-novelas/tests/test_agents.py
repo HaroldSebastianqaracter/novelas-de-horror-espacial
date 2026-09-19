@@ -193,3 +193,19 @@ def test_qa_muestra_prompt_y_parser(proyecto, config):
     with pytest.raises(ContratoRetornoError, match="tiene_contradicciones"):
         qa.parsear_retorno_qa("todo bien")
     assert qa.entropia_bigramas("a b a b a b") < qa.entropia_bigramas("a b c d e f g")
+
+
+def test_la_variante_del_prompt_del_escritor_carga_y_pasa_el_checklist(proyecto):
+    """X-06: una variante convive con la original en vez de sustituirla, para poder comparar."""
+    from app.agents.plantillas import cargar_plantilla
+    from app.errores import ConfiguracionInvalidaError
+
+    control = cargar_plantilla(proyecto, "escritor")
+    v2 = cargar_plantilla(proyecto, "escritor", "v2")
+    assert "{{HECHOS}}" in v2 and "{{HECHOS}}" in control
+    # La diferencia que se mide: en v2 los hechos van al final, pegados al encargo.
+    assert v2.index("{{HECHOS}}") > v2.index("{{RESUMEN_RODANTE}}")
+    assert control.index("{{HECHOS}}") < control.index("{{RESUMEN_RODANTE}}")
+
+    with pytest.raises(ConfiguracionInvalidaError, match="falta la plantilla"):
+        cargar_plantilla(proyecto, "escritor", "no-existe")

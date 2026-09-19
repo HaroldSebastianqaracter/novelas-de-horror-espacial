@@ -176,17 +176,33 @@ VERDADERO = ("on", "true", "1", "si", "sí")
 # desmarcada llega ausente y ausente vale False, el interruptor se apagaba en silencio. El corredor
 # encarga las novelas por este mismo camino, de modo que una vuelta entera del loop habría corrido
 # como su propio control sin que nada avisara, y la conclusión habría sido «no hay diferencia».
-NUMERICOS_EJECUCION = ("capitulos_por_tanda", "max_llamadas_por_tanda")
+def _es_bool(clave: str) -> bool:
+    campo = HarnessConfig.model_fields.get(clave)
+    return campo is not None and campo.annotation is bool
+
+
+def _es_texto(clave: str) -> bool:
+    campo = HarnessConfig.model_fields.get(clave)
+    return campo is not None and campo.annotation is str
 
 
 def _ejecucion_desde_formulario(campos: dict[str, str]) -> dict[str, Any]:
-    salida: dict[str, Any] = {c: _valor_o_nulo(campos, c) for c in NUMERICOS_EJECUCION}
+    """Cada campo de ejecución se lee según su tipo en el modelo, no según una lista escrita a mano.
+
+    Tratar todo lo que no fuera numérico como interruptor habría convertido el primer campo de texto
+    --`variante_prompt_escritor`-- en un `False`, que es el mismo fallo silencioso de un campo que se
+    pierde, solo que disfrazado de valor válido.
+    """
+    salida: dict[str, Any] = {}
     for clave in CAMPOS_EJECUCION:
-        if clave in NUMERICOS_EJECUCION:
-            continue
-        # La casilla desmarcada llega ausente, que es justo lo que hace falta para poder apagar
-        # cualquiera de estos desde la pantalla (RF-09 y los interruptores de X-04 y X-05).
-        salida[clave] = campos.get(clave, "").strip().lower() in VERDADERO
+        if _es_bool(clave):
+            # La casilla desmarcada llega ausente, que es justo lo que hace falta para poder apagar
+            # cualquiera de estos desde la pantalla (RF-09 y los interruptores de X-04 y X-05).
+            salida[clave] = campos.get(clave, "").strip().lower() in VERDADERO
+        elif _es_texto(clave):
+            salida[clave] = campos.get(clave, "").strip()
+        else:
+            salida[clave] = _valor_o_nulo(campos, clave)
     return salida
 
 
@@ -322,8 +338,7 @@ def render_formulario(estado: EstadoFormulario, error: str | None = None) -> str
     voz = "".join(_campo(c, e, a, v.get(c)) for c, e, a in CAMPOS_VOZ)
     dimension = "".join(_campo(c, e, a, v.get(c)) for c, e, a in CAMPOS_DIMENSION)
     ejecucion = "".join(_campo(c, e, a, v.get(c), requerido=False) for c, e, a in CAMPOS_EJEC)
-    interruptores = "".join(_interruptor(c, v.get(c)) for c in CAMPOS_EJECUCION
-                            if isinstance(DEFAULTS.get(c), bool) or isinstance(v.get(c), bool))
+    interruptores = "".join(_interruptor(c, v.get(c)) for c in CAMPOS_EJECUCION if _es_bool(c))
     cuerpo = f"""
 {aviso}{err}
 <form method='post' action='/guardar'>
