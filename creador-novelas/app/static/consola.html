@@ -338,9 +338,12 @@
         <path d="M1040 172 H 1110 L 1170 194 M1040 248 H 1110 L 1170 226 M1060 158 V 262 M1100 158 V 262" stroke="#3B4652" stroke-width="1" fill="none"/>
         <path d="M1130 186 L 1180 202 M1130 234 L 1180 218" stroke="#93A6B9" stroke-width="1" fill="none"/>
       </g>
-      <!-- Bodega de hechos (Extractor), bajo la espina -->
+      <!-- Bodega de hechos, bajo la espina. La llena el Extractor, o el propio Escritor desde X-04:
+           `pintarPlano` le cambia el `data-agente` según el modo, para que la cubierta se encienda
+           con quien de verdad está fijando los hechos. La bodega se queda en el plano en los dos
+           casos porque los hechos siguen existiendo; lo que cambia es quién los mete. -->
       <g>
-        <rect class="relleno" data-agente="extractor" x="640" y="238" width="160" height="58" fill="#E39BC4" filter="url(#brillo)"/>
+        <rect class="relleno" id="zona-hechos" data-agente="extractor" x="640" y="238" width="160" height="58" fill="#E39BC4" filter="url(#brillo)"/>
         <rect class="cubierta" x="640" y="238" width="160" height="58"/>
         <g stroke="#93A6B9" stroke-width="1" fill="none">
           <rect x="650" y="248" width="26" height="16"/><rect x="682" y="248" width="26" height="16"/><rect x="714" y="248" width="26" height="16"/><rect x="746" y="248" width="26" height="16"/>
@@ -364,7 +367,7 @@
       <text x="576" y="96">//Cubierta de redacción</text>
       <text x="576" y="112" class="bajo" id="r-escritor">Escritor, capítulo 7 en espera</text>
       <text x="726" y="345">//Bodega de hechos</text>
-      <text x="726" y="361" class="bajo" id="r-extractor">Extractor, 41 hechos fijados</text>
+      <text x="726" y="361" class="bajo" id="r-extractor">Bodega de hechos</text>
       <text x="886" y="90" fill="#E0483C">//Ramal seis, inspección</text>
       <text x="886" y="106" class="bajo" id="r-revisor">Revisor, ha detenido la nave</text>
       <text x="1080" y="124">//Puente</text>
@@ -500,8 +503,15 @@ function pintarRotulos(){
   r("r-escritor", activo("escritor")
       ? "Escritor, escribiendo el capítulo " + e.capitulo_actual
       : "Escritor, capítulo " + (e.capitulo_actual || "-") + " en espera");
-  r("r-extractor", activo("extractor")
-      ? "Extractor, leyendo el capítulo " + e.capitulo_actual : "Extractor de hechos");
+  // X-04: con el escritor emitiendo su propio delta no hay extractor que encender. La bodega pasa a
+  // ser suya --es quien fija los hechos-- y lo dice el rótulo, porque una bodega apagada sin
+  // explicación se lee como una avería y no como una configuración distinta.
+  var zona = $("zona-hechos");
+  if (zona) zona.setAttribute("data-agente", e.escritor_emite_delta ? "escritor" : "extractor");
+  r("r-extractor", e.escritor_emite_delta
+      ? (activo("escritor") ? "Hechos, los fija el Escritor" : "Bodega de hechos, sin extractor")
+      : (activo("extractor") ? "Extractor, leyendo el capítulo " + e.capitulo_actual
+                             : "Extractor de hechos, en espera"));
   r("r-revisor", e.estado === "pausado_por_qa"
       ? "Revisor, ha detenido la nave" : activo("qa") ? "Revisor, auditando" : "Revisor, en espera");
   r("r-orquestador", activo("orquestador") ? "Orquestador, repartiendo" : "Orquestador, espera");

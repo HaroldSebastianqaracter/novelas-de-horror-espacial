@@ -68,8 +68,15 @@ def campos_de_encargo(encargo: dict[str, Any]) -> dict[str, str]:
     campos: dict[str, str] = {"idea": encargo["idea"]}
     for clave, valor in (encargo.get("config") or {}).items():
         campos[clave] = "on" if valor is True else ("" if valor is False else str(valor))
-    campos.setdefault("registrar_uso", "on")
-    campos.setdefault("exportar_trazas", "on")
+    # Lo que el encargo no diga se toma del valor por defecto del harness, no del vacío. Un campo
+    # ausente llega al formulario como casilla desmarcada, y desmarcada es «apagado»: por esa vía el
+    # defecto del modelo no se respetaba nunca. Estaban puestos a mano `registrar_uso` y
+    # `exportar_trazas`, y los interruptores añadidos después se quedaron fuera, así que las novelas
+    # de esta tarde corrieron con tres agentes mientras el harness daba por hecho que eran dos.
+    from app import ui
+    for clave, valor in ui.DEFAULTS.items():
+        if valor is True:
+            campos.setdefault(clave, "on")
     return campos
 
 

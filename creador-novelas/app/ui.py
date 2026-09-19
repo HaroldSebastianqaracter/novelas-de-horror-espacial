@@ -42,6 +42,12 @@ DEFAULTS: dict[str, Any] = {
     "max_llamadas_por_tanda": 30,
     "registrar_uso": True,
     "exportar_trazas": True,
+    # Los mismos valores que trae `HarnessConfig`, y por la misma razón: dos agentes está medido
+    # (19/09, la mitad de reloj y ninguna contradicción sobre las mismas premisas) y las aristas
+    # todavía no. Si estos dos no estuvieran aquí, una novela encargada desde la pantalla saldría
+    # con tres agentes mientras el resto del harness da por hecho que son dos.
+    "escritor_emite_delta": True,
+    "aristas_en_continuidad": False,
 }
 
 OPCIONES = {
@@ -162,18 +168,26 @@ def _novela_desde_formulario(campos: dict[str, str]) -> dict[str, Any]:
     return novela
 
 
+VERDADERO = ("on", "true", "1", "si", "sí")
+
+# Los únicos campos de ejecución que no son interruptores. El resto sale de CAMPOS_EJECUCION en vez
+# de enumerarse aquí, y esa enumeración a mano era un fallo con consecuencias: `aristas_en_continuidad`
+# se añadió a CAMPOS_EJECUCION y no a esta función, así que se perdía al guardar. Como una casilla
+# desmarcada llega ausente y ausente vale False, el interruptor se apagaba en silencio. El corredor
+# encarga las novelas por este mismo camino, de modo que una vuelta entera del loop habría corrido
+# como su propio control sin que nada avisara, y la conclusión habría sido «no hay diferencia».
+NUMERICOS_EJECUCION = ("capitulos_por_tanda", "max_llamadas_por_tanda")
+
+
 def _ejecucion_desde_formulario(campos: dict[str, str]) -> dict[str, Any]:
-    return {
-        "capitulos_por_tanda": _valor_o_nulo(campos, "capitulos_por_tanda"),
-        "max_llamadas_por_tanda": _valor_o_nulo(campos, "max_llamadas_por_tanda"),
-        "registrar_uso": campos.get("registrar_uso", "").strip().lower() in ("on", "true", "1", "si", "sí"),
-        # RF-09: publicar la traza al cerrar cada fase. La casilla desmarcada llega ausente,
-        # que es justo lo que hace falta para poder apagarlo desde la pantalla.
-        "exportar_trazas": campos.get("exportar_trazas", "").strip().lower() in ("on", "true", "1", "si", "sí"),
-        # X-04: el escritor entrega también su delta y el extractor no se llama. Viaja por aquí
-        # porque el corredor encarga las novelas por este mismo camino, que es el del formulario.
-        "escritor_emite_delta": campos.get("escritor_emite_delta", "").strip().lower() in ("on", "true", "1", "si", "sí"),
-    }
+    salida: dict[str, Any] = {c: _valor_o_nulo(campos, c) for c in NUMERICOS_EJECUCION}
+    for clave in CAMPOS_EJECUCION:
+        if clave in NUMERICOS_EJECUCION:
+            continue
+        # La casilla desmarcada llega ausente, que es justo lo que hace falta para poder apagar
+        # cualquiera de estos desde la pantalla (RF-09 y los interruptores de X-04 y X-05).
+        salida[clave] = campos.get(clave, "").strip().lower() in VERDADERO
+    return salida
 
 
 def _rutas_referencia(campos: dict[str, str]) -> list[Path]:

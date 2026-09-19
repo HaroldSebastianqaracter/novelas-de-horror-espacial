@@ -310,6 +310,17 @@
 
     <div class="pie">
       <div class="condiciones">
+        <!-- Estos dos tienen que estar en el formulario, no solo en el archivo de configuración: una
+             casilla ausente se guarda como apagada, así que sin ellos cualquier guardado desde la
+             pantalla devolvía la tripulación a tres agentes sin decir nada. -->
+        <label><input type="checkbox" name="escritor_emite_delta" id="escritor_emite_delta"> El escritor fija sus propios hechos</label>
+        <p>Dos agentes en vez de tres: el escritor entrega el capítulo y los hechos que establece, y
+          no se llama al extractor. Medido el 19/09 sobre las mismas premisas, la mitad de reloj y
+          ninguna contradicción. Apagarlo devuelve al extractor.</p>
+        <label><input type="checkbox" name="aristas_en_continuidad" id="aristas_en_continuidad"> Hechos relacionados entre personajes</label>
+        <p>Un hecho sobre quien no está en la escena llega igual si toca a quien sí está: lo que
+          Volkov hace a la esclusa aparece en el capítulo de Ruiz. En novelas cortas no cambia nada;
+          se nota a partir del capítulo diez.</p>
         <label><input type="checkbox" name="registrar_uso" id="registrar_uso"> Registrar el uso de tokens</label>
         <p>Sin esto no hay forma de saber lo que cuesta cada capítulo.</p>
         <label><input type="checkbox" name="exportar_trazas" id="exportar_trazas"> Publicar la traza en Langfuse</label>
@@ -360,7 +371,7 @@ var ETIQUETAS = {
   capitulos_por_tanda: ["Capítulos por tanda", "Cuántos se escriben de una sentada."],
   max_llamadas_por_tanda: ["Llamadas máximas por tanda", "Tope de seguridad: si se pasa, para."],
   ventana_resumen_rodante: ["Resúmenes que ve el escritor", "Cuántos capítulos atrás recuerda."],
-  max_hechos_por_capitulo: ["Hechos nuevos por capítulo", "Cuántos puede fijar el extractor."],
+  max_hechos_por_capitulo: ["Hechos nuevos por capítulo", "Cuántos hechos puede fijar cada capítulo."],
   max_tokens_contexto_escritor: ["Contexto del escritor", "Tope de tokens de su prompt."],
   idioma: ["Idioma", ""],
   persona_narrativa: ["Persona narrativa", ""],
@@ -453,6 +464,10 @@ fetch("/api/formulario").then(function(r){ return r.json(); }).then(function(d){
     ? " El harness admite entre " + lc.min + " y " + lc.max + "." : "";
   $("registrar_uso").checked = d.valores.registrar_uso !== false;
   $("exportar_trazas").checked = d.valores.exportar_trazas !== false;
+  // Estos dos vienen apagados de fábrica en el modelo, así que aquí se compara contra `true` y no
+  // contra `false`: un proyecto sin configurar no debe aparecer con ellos marcados.
+  $("escritor_emite_delta").checked = d.valores.escritor_emite_delta === true;
+  $("aristas_en_continuidad").checked = d.valores.aristas_en_continuidad === true;
   pintarAjustes();
   recalcular();
 
