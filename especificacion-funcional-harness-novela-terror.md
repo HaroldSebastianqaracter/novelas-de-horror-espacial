@@ -1,6 +1,6 @@
 # Especificación Funcional — Harness Generador de Novelas de Terror
 
-**Versión:** 1.4 — historial de cambios en `git log` sobre este archivo.
+**Versión:** 1.11 — historial de cambios en `git log` sobre este archivo. La v1.11 aplica Spec-X 02 (qué estado llega al escritor): al escritor viajan las fichas y los hechos de continuidad de **todos** los personajes permitidos, no solo los de la escaleta (X-02.1, amplía RF-05.1); cada ficha lleva la **posición** del personaje al cierre de su última aparición, que fija el extractor (X-02.2, amplía RF-06.2); el resumen rodante conserva **todos** los capítulos y la ventana solo recorta lo que se entrega —los últimos completos, los anteriores en una línea— (X-02.3, redefine RF-06.4); y el escritor recibe la **locación del capítulo siguiente** con el encargo de dejar la escena para que continúe allí, nunca su información nueva (X-02.4b, amplía RF-05.1). La escaleta no nombra un personaje cuyo nombre es un giro antes del capítulo del giro (X-02.4a, amplía RF-03.1). Detalle y evidencia en `spec-x-02-estado-que-llega-al-escritor.md`.
 **Esquemas de los artefactos:** spec técnica §4, única fuente. (El documento `harness-novela-terror.md` que citaban versiones anteriores nunca existió en el repositorio.) Este documento formaliza el comportamiento requerido; no repite decisiones de implementación.
 **Lector previsto:** un agente de código que implementará el harness a partir de este documento. Donde este documento sea ambiguo, el agente debe detenerse y pedir aclaración en vez de asumir.
 
@@ -32,9 +32,10 @@ Vocabulario cerrado — el agente implementador debe usar estos términos de for
 | **Agente QA** | Corre de forma periódica (no por capítulo) y detecta contradicciones o repetición estilística. |
 | **Corte de QA** | Cada ejecución de la fase 7, disparada por `cadencia_qa`. |
 | **Orquestador** | La sesión principal de Claude Code. Ejecuta las skills de fase, invoca a los tres agentes como subagentes y llama a los scripts deterministas. No escribe prosa ni toca el estado a mano. |
-| **Scripts deterministas** | Código Python sin llamadas a modelo y sin servidor: valida, filtra, persiste, lleva el manifiesto y ejecuta los hooks. Se prueba con `pytest` sin gastar tokens. |
+| **Scripts deterministas** | El paquete `app/`: código Python sin llamadas a modelo y sin servidor: valida, filtra, persiste, lleva el manifiesto y ejecuta los hooks. Se prueba con `pytest` sin gastar tokens. |
 | **Hook** | Comando determinista que Claude Code ejecuta solo ante un evento (antes o después de una herramienta, al terminar un subagente, al abrir la sesión). El agente no lo invoca ni sabe que existe. Es el mecanismo de cumplimiento de los invariantes. |
 | **Contrato de retorno** | Lo que un subagente devuelve al orquestador en su mensaje final. Fijado por RF-08.1. |
+| **Registro de ejecución** | Lo que una tanda deja escrito sobre sí misma: eventos, prompts entregados, retornos, descartados y consumo. Lo escriben los scripts y los hooks, nunca el modelo (RF-08.5). |
 
 ## 4. Actores
 
@@ -52,7 +53,7 @@ Vocabulario cerrado — el agente implementador debe usar estos términos de for
 
 Formato fijo por requisito: descripción, entradas, salidas, reglas, criterio de aceptación (dado/cuando/entonces).
 
-Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, sino que parametrizan la ejecución completa. Los **RF-UI-xx** especifican el frontend con el que el usuario escribe esa configuración. El resto sigue la numeración por fase (RF-00 a RF-07). Los **RF-08-xx** rigen la orquestación: qué devuelve cada agente al orquestador y cómo se hacen cumplir las reglas de la sección 6.
+Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, sino que parametrizan la ejecución completa. Los **RF-UI-xx** especifican el frontend: con él se escribe esa configuración y se lanzan las fases. El resto sigue la numeración por fase (RF-00 a RF-07). Los **RF-08-xx** rigen la orquestación: qué devuelve cada agente al orquestador y cómo se hacen cumplir las reglas de la sección 6.
 
 ### Configuración de ejecución
 
@@ -60,7 +61,7 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 - Descripción: el usuario debe poder fijar el tamaño de la obra antes de iniciar una tanda, sin tocar código.
 - Entradas: `config/novela.json` (spec técnica §11.2).
 - Parámetros:
-  - `total_capitulos` — cuántos capítulos tiene la novela completa. Entero, rango 30–50 (acotado por RF-03.1, que exige que el outline tenga entre 30 y 50 entradas).
+  - `total_capitulos` — cuántos capítulos tiene la obra completa. Entero, de 1 a 200. El mínimo de 30 que fijaba la versión anterior no respondía a ninguna limitación del harness: era la decisión de que esto generaba novelas. Quien quiera un relato de seis capítulos obtiene el mismo tratamiento —escaleta, hechos de continuidad, auditorías— sobre una obra más corta. **El máximo sí tiene motivo, y no es estético:** a unos 0,55 $ por capítulo cerrado, teclear 300 donde iban 30 cuesta unos 165 $. Es un seguro contra el error de dedo.
   - `palabras_por_capitulo` — longitud objetivo de cada capítulo. Entero positivo. La tolerancia de ±20% la fija RF-05.2.
 - Reglas:
   - `total_capitulos` determina cuántas entradas genera la fase 3 y es el criterio de fin de la generación.
@@ -119,7 +120,7 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 - Entradas: lo que el usuario teclea; opcionalmente, rutas locales a los ejemplos de referencia de la fase 0.
 - Salidas: `01_concepto/idea.md`, `config/novela.json`, `config/ejecucion.json`; si se indicaron ejemplos, copia de estos a `00_referencias/`.
 - Reglas:
-  - El frontend **no invoca ningún modelo ni lee el manuscrito**: su única función es producir entradas válidas. Se lanza con `python -m harness ui` y escucha solo en la máquina local (spec técnica §15).
+  - El frontend **no invoca ningún modelo ni lee el manuscrito**. Escribir los requisitos es su primera función; lanzar las fases (RF-UI-03) es la segunda, y para eso arranca una sesión de Claude Code en vez de hablar con un modelo. Se lanza con `python -m app ui` y escucha solo en la máquina local (spec técnica §15).
   - Valida con el mismo esquema de configuración que usa el harness antes de escribir. Una configuración fuera de rango se rechaza en pantalla con el motivo; nunca llega al disco.
 - Criterio de aceptación: dado un formulario completado, cuando el usuario guarda, entonces los tres archivos existen, `config/novela.json` y `config/ejecucion.json` validan contra el esquema (EX-05 no puede dispararse con archivos escritos por el frontend), e `idea.md` contiene exactamente el texto escrito.
 
@@ -127,12 +128,38 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 - Descripción: con capítulos ya cerrados, el formulario impide cambiar los parámetros protegidos por INV-04, igual que RF-CFG-03 lo impide por línea de comandos.
 - Criterio de aceptación: dado un manifiesto con `ultimo_capitulo_cerrado > 0`, cuando se abre el formulario, entonces los campos que escriben en `config/novela.json` aparecen deshabilitados mostrando el motivo, y la idea y los campos de `config/ejecucion.json` siguen editables.
 
+**RF-UI-03 — Lanzar las fases desde la pantalla**
+- Descripción: cada fase del pipeline se puede disparar con un botón, sin teclear el comando en una terminal.
+- Entradas: el estado de la novela (manifiesto y artefactos existentes), que decide qué botones están activos.
+- Salidas: los mismos artefactos que produce esa fase lanzada a mano. Ninguno distinto.
+- Reglas:
+  - El frontend **no orquesta ni invoca modelos**. Lanza una sesión de Claude Code en modo no interactivo dentro de la carpeta del proyecto y le pasa el nombre de la skill. El orquestador sigue siendo Claude Code, con sus subagentes, sus skills y sus hooks: pulsar un botón equivale exactamente a que el usuario teclee esa orden.
+  - La línea de comandos sigue funcionando igual. La pantalla es una entrada alternativa, nunca un reemplazo: todo lo que se puede hacer con un botón se puede hacer tecleando, y ninguna operación existe solo en la pantalla.
+  - Un botón cuya condición de entrada no se cumple aparece **deshabilitado con el motivo**, no oculto. El usuario tiene que poder ver qué falta.
+  - El botón de la tanda pide confirmación explícita, indicando cuántos capítulos va a escribir y el tope de llamadas. Es la única acción cara e irreversible de la pantalla.
+  - **Una ejecución a la vez.** Con una fase en marcha, los demás botones quedan deshabilitados. Dos ejecuciones simultáneas sobre el mismo estado lo corromperían.
+  - Ninguna fase lanzada así puede quedar esperando una respuesta humana a mitad: en modo no interactivo nadie puede contestar. Toda decisión que antes se preguntaba durante la ejecución pasa a ser un campo del formulario, resuelto antes de lanzar.
+- Criterio de aceptación: dado un proyecto sin escaleta, cuando se abre la pantalla, entonces el botón de la tanda está deshabilitado indicando que falta la escaleta; y dado un botón pulsado, cuando la fase termina, entonces los artefactos en disco son indistinguibles de los que deja la misma fase lanzada desde la terminal.
+
+**RF-UI-04 — Progreso, pausa y error**
+- Descripción: mientras una fase corre, la pantalla muestra en qué punto está, y al terminar muestra cómo terminó.
+- Entradas: el manifiesto y el registro de ejecución de la tanda en curso (RF-08.5).
+- Reglas:
+  - El progreso se lee del estado en disco, no de la salida del modelo. La pantalla no interpreta prosa: muestra capítulo actual, capítulos cerrados y los últimos eventos registrados.
+  - Ante una pausa de QA, la pantalla muestra el reporte y se detiene ahí. **No ofrece resolverlo.** Resolver exige declarar qué capítulos se corrigieron, y esa declaración solo tiene sentido después de editarlos a mano; un botón invitaría a cerrar el reporte sin haber corregido nada, que es justo lo que RF-07.4 impide.
+  - Ante un error, muestra el texto literal del error y la ruta del registro donde está la traza. No lo reformula ni lo oculta.
+- Criterio de aceptación: dada una tanda que pausa por contradicción, cuando termina, entonces la pantalla muestra el reporte, indica que la novela está pausada y no ofrece ninguna acción que cambie el manifiesto; y dada una tanda que falla, entonces la pantalla muestra el error textual y dónde auditarlo.
+
 ### Fase 0 — Destilado de estilo
 
 **RF-00.1 — Extracción de guía de estilo**
 - Descripción: el sistema debe producir una guía de estilo a partir de ejemplos de referencia del subgénero de terror espacial.
 - Entradas: uno o más textos de ejemplo de terror espacial (naves, estaciones, colonias aisladas — no terror genérico de otro subgénero).
 - Salidas: `style_guide.md` (tropos recurrentes del terror espacial —p. ej. aislamiento, fallas de soporte vital, criaturas o presencias que se confunden con el entorno de la nave—, ritmo de tensión/alivio, vocabulario sensorial, longitud de frase típica).
+- Reglas:
+  - El origen de la guía lo fija `origen_estilo` (`referencias` o `descripcion`), decidido **antes** de lanzar la fase. Con `referencias` y `00_referencias/` vacía, la fase falla indicando el motivo; con `descripcion`, la guía se deriva de la idea de la novela y de la descripción del subgénero, sin ejemplos.
+  - La fase **nunca pregunta**. En modo no interactivo (RF-UI-03) nadie puede contestar, y una fase que espera una respuesta que no va a llegar se queda colgada consumiendo una sesión.
+  - Una guía derivada de la descripción deja constancia de ello en su propia cabecera. Sin esa marca, meses después nadie puede explicar por qué la prosa salió genérica.
 - Criterio de aceptación: dado un conjunto de ejemplos, cuando se ejecuta la fase, entonces `style_guide.md` no contiene ninguna oración copiada literalmente de los ejemplos de entrada.
 
 **RF-00.2 — Prohibición de embebido de texto crudo**
@@ -165,7 +192,7 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 ### Fase 3 — Escaleta de capítulos
 
 **RF-03.1 — Generación de outline**
-- Descripción: generar entre 30 y 50 entradas de outline a partir de la sinopsis.
+- Descripción: generar exactamente `total_capitulos` entradas de outline a partir de la sinopsis. Por debajo de tres capítulos la sinopsis en tres actos y la cadencia de QA dejan de significar gran cosa, pero nada se rompe: el harness hace lo mismo a menor escala.
 - Entradas: `tres_actos.md`, `premisa.md`.
 - Salidas: `capitulos.json`, array de objetos con los campos: `num`, `titulo`, `objetivo_narrativo`, `personajes`, `locacion`, `informacion_nueva`, `tension` (entero 1–5).
 - Regla: los títulos se generan **aquí, no en el escritor**. La fase 3 ve los 40 capítulos a la vez y puede darles un estilo consistente y evitar repeticiones; cada instancia del escritor, en cambio, inventaría el suyo sin saber cómo son los otros 39 — el mismo problema que todo el harness existe para evitar.
@@ -225,6 +252,16 @@ Los requisitos **RF-CFG-xx** son transversales: no pertenecen a ninguna fase, si
 - Criterio de aceptación: dado un borrador generado, cuando termina RF-05.2, entonces existe el archivo `05_manuscrito/cap_{N}.md` antes de que se invoque RF-06.1.
 
 ### Fase 6 — Extracción post-capítulo
+
+**RF-05.5 — Prosa no repetitiva entre capítulos**
+- Descripción: el sistema impide que el escritor reutilice sin darse cuenta las mismas frases, imágenes y giros capítulo tras capítulo.
+- Entradas: los capítulos ya cerrados (para la comprobación determinista) y la lista de recursos narrativos acumulados (para el aviso al escritor).
+- Salidas: un capítulo que no repite literalmente pasajes anteriores, y una lista de recursos agotados que crece con la novela.
+- Reglas:
+  - El escritor **sigue sin leer el manuscrito** (INV-01). La repetición se combate con lo que otros ya leyeron, no dándole acceso: el código determinista puede leerlo todo, y el extractor ya lo lee por su cuenta.
+  - Una coincidencia literal de cuatro o más palabras con contenido léxico respecto a cualquier capítulo anterior invalida el borrador y obliga a reescribir.
+  - Los recursos recurrentes que no son literales se le presentan al escritor como **agotados**, no como prohibidos: una imagen que vuelve puede ser deliberada, y lo que hace falta es que sepa que está volviendo.
+- Criterio de aceptación: dado un capítulo que reutiliza literalmente una frase de cuatro palabras con contenido de un capítulo anterior, cuando se valida, entonces se rechaza indicando la frase y el capítulo de origen; y dada una novela de tres capítulos, cuando se prepara el cuarto, entonces su prompt contiene la lista de recursos ya usados con su conteo.
 
 **RF-06.1 — Extracción de cambios de estado**
 - Descripción: un agente separado lee únicamente `cap_{N}.md` y produce los deltas de estado.
@@ -295,9 +332,9 @@ Los requisitos RF-08 no pertenecen a una fase: fijan cómo el orquestador habla 
 **RF-08.1 — Contrato de retorno de cada subagente**
 - Descripción: cada subagente termina con un mensaje final que vuelve al orquestador. Ese mensaje es el único canal de vuelta. Los artefactos van a disco, no al mensaje.
 - Reglas:
-  - **Agente escritor**: devuelve una sola línea con la ruta escrita, el conteo de palabras y los personajes que aparecieron. **Nunca devuelve prosa.** Si la prosa viajara en el mensaje, el orquestador acumularía el manuscrito en su propio contexto capítulo tras capítulo — exactamente lo que INV-01 y el diseño entero evitan.
-  - **Agente extractor**: devuelve el `DeltaExtraccion` completo en JSON, y nada más. Validarlo y aplicarlo (RF-06.2 a RF-06.4) es tarea de los scripts, no del extractor.
-  - **Agente QA**: escribe el reporte y `recursos_usados.json` en disco (RF-07.2, RF-07.5) y devuelve un resumen de hasta cinco líneas con `tiene_contradicciones` y el conteo de hallazgos por tipo.
+  - **Agente escritor**: escribe `cap_N.md`, lo valida (RF-08.4) y devuelve una sola línea con la ruta escrita, el conteo de palabras y los personajes que aparecieron. **Nunca devuelve prosa.** Si la prosa viajara en el mensaje, el orquestador acumularía el manuscrito en su propio contexto capítulo tras capítulo — exactamente lo que INV-01 y el diseño entero evitan.
+  - **Agente extractor**: escribe el `DeltaExtraccion` en el archivo de trabajo del capítulo, lo valida (RF-08.4) y devuelve una línea confirmando la validación y el recuento de hechos y personajes. El JSON **no** viaja en el mensaje: aplicarlo (RF-06.2 a RF-06.4) es tarea de los scripts, que lo leen del archivo ya validado.
+  - **Agente QA**: escribe el reporte y `recursos_usados.json` en disco (RF-07.2, RF-07.5), los valida (RF-08.4) y devuelve un resumen de hasta cinco líneas con `tiene_contradicciones` y el conteo de hallazgos por tipo.
   - Ningún agente sabe que existen los otros: no reciben el retorno de otro agente ni referencias a él. El único que encadena es el orquestador.
 - Criterio de aceptación: dado un capítulo cerrado, cuando termina el subagente escritor, entonces su mensaje final tiene una sola línea y no contiene ningún párrafo del capítulo; y dado un corte de QA, cuando termina, entonces el mensaje final cabe en cinco líneas y el detalle está en `06_qa/reportes/`.
 
@@ -315,6 +352,40 @@ Los requisitos RF-08 no pertenecen a una fase: fijan cómo el orquestador habla 
 - Entradas: `manifest.json`.
 - Salidas: el equivalente a `status` (spec técnica §8.2) inyectado en el contexto de la sesión al arrancar.
 - Criterio de aceptación: dada una novela con `ultimo_capitulo_cerrado = 12` y estado `pausado_por_qa`, cuando se abre una sesión nueva, entonces el orquestador puede citar ambos datos en su primer mensaje sin haber leído ningún archivo por su cuenta.
+
+**RF-08.4 — Autovalidación dentro del bucle del agente**
+- Descripción: cada agente valida su propia salida con el validador determinista que le corresponde **antes** de terminar, y corrige si falla. La validación deja de ocurrir solo alrededor del agente y pasa a ocurrir también dentro de su bucle.
+- Entradas: el artefacto que el agente acaba de escribir en disco.
+- Salidas: el artefacto ya validado, y un mensaje final que confirma la validación (RF-08.1).
+- Reglas:
+  - El escritor valida longitud y personajes del borrador; el extractor valida su delta contra el esquema y el registro de sujetos; QA valida su reporte contra el esquema. Cada agente dispone **solo** de su validador: no puede ejecutar ningún otro comando, y esa restricción la impone un hook, no el prompt (RF-08.2).
+  - El validador es el mismo código que ejecutan los scripts y los hooks. Un agente no puede "aprobarse" con un criterio distinto del que aplicará después el harness.
+  - Si la validación falla, el agente corrige y vuelve a validar, hasta el tope de intentos de su configuración. Agotado el tope, el agente termina informando el error; no entrega como válido algo que no validó.
+  - Ningún artefacto viaja en el mensaje final: el agente escribe en disco y devuelve una confirmación. Así el contexto del orquestador no acumula ni prosa, ni JSON, ni reportes.
+- Criterio de aceptación: dado un extractor que produce un delta con un sujeto fuera del registro, cuando ejecuta su validador, entonces recibe el error y corrige antes de terminar, y el orquestador nunca ve el delta inválido; y dado un agente que intenta ejecutar un comando distinto de su validador, entonces la ejecución se bloquea y el motivo vuelve al agente.
+
+**RF-08.5 — Registro de ejecución auditable**
+- Descripción: cada tanda deja en disco un registro completo de lo que ocurrió, suficiente para auditarla meses después sin la conversación del orquestador.
+- Entradas: los eventos que producen los verbos del harness y los hooks durante la tanda.
+- Salidas: una carpeta por tanda con, al menos: una línea con marca de tiempo por cada verbo ejecutado, invocación de agente iniciada y terminada, hook disparado (cuál, sobre qué agente, si bloqueó y por qué) y error con su traza; el contexto exacto entregado a cada agente; el mensaje final textual que devolvió cada uno; los borradores y deltas descartados con el error que los rechazó; y el consumo por invocación.
+- Reglas:
+  - Lo escriben los scripts y los hooks, nunca el modelo. El orquestador no anota nada a mano: si un evento no lo registró el código, no ocurrió a efectos de auditoría.
+  - El registro es **append-only** dentro de la tanda y no se borra al terminarla. Es la diferencia con el cursor transitorio, que solo sirve mientras la tanda corre.
+  - El registro no forma parte del estado de la novela: borrarlo no cambia ni el manuscrito ni los artefactos, solo impide auditar. Por eso vive fuera de `04_estado/`.
+  - La operación de estado (`status`) lee el registro de la última tanda, no solo el manifiesto.
+- Criterio de aceptación: dada una tanda que se detuvo por un error, cuando se abre su registro, entonces se puede reconstruir en orden qué verbos corrieron, qué recibió y devolvió cada agente, qué hooks dispararon y cuál fue el error textual que la detuvo, sin consultar la conversación en la que se ejecutó.
+
+**RF-09 — Observabilidad de la ejecución**
+- Descripción: cada tanda puede publicarse en un servicio de trazas para poder comparar corridas entre sí y responder si un cambio mejoró el resultado.
+- Entradas: el registro de ejecución de esa tanda (RF-08.5).
+- Salidas: una traza por tanda, con una observación por invocación de agente, sus métricas de consumo y las puntuaciones del corte de QA.
+- Reglas:
+  - La publicación **nunca ocurre dentro de la tanda**. Se exporta después, desde el registro. Una tanda no puede fallar, frenarse ni encarecerse por culpa de su propia observabilidad.
+  - El registro en disco sigue siendo la fuente de verdad. La traza es una vista: si el servicio desaparece, no se pierde nada auditable.
+  - Reexportar una tanda ya exportada **no duplica nada**.
+  - Por defecto no sale de la máquina ni una línea de prosa ni un prompt completo: solo estructura, consumo y métricas. Incluirlos es una decisión explícita en cada invocación, porque los prompts contienen la guía destilada de los ejemplos de referencia (RF-00.2).
+  - Las métricas de cada corte de QA se publican como puntuaciones numéricas, no como texto. Un reporte escrito no se puede comparar entre tandas; un número sí.
+- Criterio de aceptación: dada una tanda registrada, cuando se exporta dos veces seguidas, entonces el servicio muestra una sola traza y no dos; y dada una exportación con los valores por defecto, cuando se inspecciona lo enviado, entonces no aparece ninguna subcadena de más de 30 caracteres del manuscrito ni de ningún prompt.
 
 ## 6. Reglas globales / invariantes
 
@@ -340,11 +411,12 @@ Comportamiento a nivel funcional — no se especifica mecanismo de implementaci�
 | **EX-02** | El corte de QA reporta al menos una contradicción (RF-07.4). | El harness pausa el avance y espera resolución humana; no reintenta ni omite el hallazgo automáticamente. |
 | **EX-03** | Falta la entrada de outline para el capítulo N, o está incompleta. | El harness no invoca al agente escritor para ese capítulo; reporta el faltante antes de gastar una generación. |
 | **EX-04** | El contexto ensamblado (RF-05.1) excede `max_tokens_contexto_escritor`. | El harness recorta primero `resumen_rodante.md`; nunca recorta `continuidad.json` ni `personajes.json`. Si tras recortar el resumen rodante a su mínimo aún excede el límite, se detiene y reporta el problema — no trunca el log de continuidad. |
-| **EX-05** | Un parámetro de RF-CFG-01 o RF-CFG-02 está fuera de rango (`total_capitulos` fuera de 30–50, `palabras_por_capitulo` ≤ 0, `capitulos_por_tanda` ≤ 0). | El harness no inicia la ejecución y reporta qué parámetro es inválido. La validación ocurre antes de cualquier llamada al modelo, para no gastar generaciones con una configuración que igual va a fallar. |
+| **EX-05** | Un parámetro de RF-CFG-01 o RF-CFG-02 está fuera de rango (`total_capitulos` fuera de 1–200, `palabras_por_capitulo` ≤ 0, `capitulos_por_tanda` ≤ 0). | El harness no inicia la ejecución y reporta qué parámetro es inválido. La validación ocurre antes de cualquier llamada al modelo, para no gastar generaciones con una configuración que igual va a fallar. |
 | **EX-06** | `total_capitulos` cambió respecto del valor con el que se generó la escaleta, y ya hay capítulos cerrados. | El harness no reanuda y reporta la discrepancia. Cambiar el tamaño de la obra a mitad de camino invalida la escaleta (INV-04); resolverlo es decisión del usuario, no del harness. |
 | **EX-07** | El borrador del capítulo N queda fuera de `palabras_por_capitulo` ±20% (RF-05.2). | Un reintento con el desvío como feedback. Si el segundo también falla, se acepta con aviso en el manifiesto y la tanda continúa. Defecto de forma: no amerita detener nada. |
 | **EX-08** | La extracción del capítulo N devuelve en `delta.personajes` una clave ausente del registro de sujetos — el borrador introdujo un personaje no previsto (RF-05.2, RF-06.1). | Se descarta el borrador y se regenera el capítulo. Si el segundo intento repite el fallo, el harness se detiene y reporta la entrada de outline como sospechosa: dos fallos seguidos señalan un plan mal planteado, y seguir generando sobre él contradice el principio de EX-03. |
 | **EX-09** | Un hook bloquea una acción de un agente o del orquestador (RF-08.2): lectura de un capítulo no permitido, escritura fuera de su carpeta, intento de lanzar un subagente. | La acción no ocurre y el motivo vuelve a quien la intentó. Si el mismo agente choca dos veces con el mismo hook en la misma invocación, el harness detiene la tanda y registra el intento en el manifiesto: un agente que insiste en salirse de su carril señala un prompt mal planteado, no un accidente. |
+| **EX-10** | Un agente agota sus intentos de autovalidación (RF-08.4) sin conseguir una salida válida. | El agente termina informando el último error de validación. El harness no aplica el artefacto: lo mueve a los descartados del registro (RF-08.5) y trata el caso como el fallo que corresponda a ese rol — EX-01 para un delta, EX-07 o EX-08 para un borrador. Un agente que no logra validarse nunca deja estado a medias. |
 
 ## 8. Definición de "hecho" (Definition of Done) de esta especificación
 

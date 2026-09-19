@@ -5,7 +5,7 @@
   },
   "permissions": {
     "allow": [
-      "Bash(.venv/Scripts/python.exe -m harness:*)",
+      "Bash(.venv/Scripts/python.exe -m app:*)",
       "Bash(.venv/Scripts/python.exe -m pytest:*)"
     ]
   },
@@ -22,7 +22,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Read|Grep|Glob|Agent",
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Read|Grep|Glob|Agent|Bash|PowerShell",
         "hooks": [
           {
             "type": "command",

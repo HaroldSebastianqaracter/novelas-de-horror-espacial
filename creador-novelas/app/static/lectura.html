@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lectura · Lo que quedó despierto — Capítulo 4, El casco frío del Falcon</title>
+<style>
+  :root{
+    --abismo:#06070A;        /* negro casi absoluto, frío */
+    --acero:#0E1116;         /* superficies */
+    --acero-alto:#161B22;    /* superficies iluminadas */
+    --hilo:rgba(214,218,216,.14);   /* líneas finas */
+    --hilo-fuerte:rgba(214,218,216,.32);
+    --niebla:#D6DAD8;        /* texto principal */
+    --niebla-baja:#8A9399;   /* texto secundario */
+    --halogeno:#E8D9B5;      /* luz cálida de foco */
+    --emergencia:#B3261E;    /* luz roja de emergencia */
+    --emergencia-luz:rgba(179,38,30,.55);
+    --fosforo:#A8D8C8;       /* lo que la máquina fija: verde-gris apagado */
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{background:var(--abismo);color:var(--niebla)}
+  a,button,input,textarea{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--halogeno);outline-offset:3px}
+
+  .atm{position:absolute;inset:0;pointer-events:none}
+  .atm-luz{
+    background:
+      radial-gradient(ellipse 58% 42% at 28% -8%,rgba(232,217,181,.17),transparent 62%),
+      radial-gradient(ellipse 34% 60% at 104% 58%,var(--emergencia-luz),transparent 62%),
+      radial-gradient(ellipse 50% 30% at 60% 110%,rgba(179,38,30,.16),transparent 70%);
+  }
+  .atm-vineta{background:radial-gradient(ellipse 70% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.62) 100%)}
+  .atm-grano{background:#7a7a7a;filter:url(#grano);opacity:.10;mix-blend-mode:overlay}
+  .atm-polvo{
+    opacity:.35;
+    background:
+      radial-gradient(circle at 18% 22%,rgba(232,217,181,.35) 0 .8px,transparent 1.6px),
+      radial-gradient(circle at 63% 11%,rgba(232,217,181,.25) 0 .7px,transparent 1.5px),
+      radial-gradient(circle at 41% 37%,rgba(232,217,181,.28) 0 .6px,transparent 1.4px),
+      radial-gradient(circle at 77% 44%,rgba(232,217,181,.22) 0 .9px,transparent 1.8px),
+      radial-gradient(circle at 12% 61%,rgba(232,217,181,.2) 0 .6px,transparent 1.3px),
+      radial-gradient(circle at 88% 80%,rgba(214,218,216,.18) 0 .7px,transparent 1.5px);
+    background-size:900px 700px,1100px 800px,700px 900px,1300px 600px,800px 1000px,1000px 900px;
+  }
+  .escena > *{position:relative;z-index:1}
+  .escena > .atm,.escena > .focos{position:absolute;inset:0;pointer-events:none;z-index:0}
+  .escena > .atm-grano,.escena > .atm-vineta{z-index:2}
+  .escena{position:relative;overflow:hidden;background:var(--abismo)}
+
+  /* Panel de vidrio ahumado: la interfaz flota sobre la oscuridad */
+  .vidrio{
+    background:linear-gradient(180deg,rgba(22,27,34,.72),rgba(14,17,22,.78));
+    border:1px solid var(--hilo);
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.9),inset 0 1px 0 rgba(232,217,181,.08);
+    backdrop-filter:blur(6px);
+  }
+  .hairline{border-top:1px solid var(--hilo)}
+  /* Sangre: la luz roja del fondo fluye despacio, como un líquido que baja por el mamparo */
+  .escena > .atm-sangre{left:auto;right:-8%;width:56%;top:-10%;bottom:-10%;opacity:.85;filter:url(#sangre) blur(2px);mix-blend-mode:screen;
+    background:
+      radial-gradient(ellipse 34% 46% at 78% 26%,rgba(179,38,30,.55),rgba(120,16,14,.25) 45%,transparent 70%),
+      radial-gradient(ellipse 28% 60% at 92% 62%,rgba(150,22,20,.6),rgba(90,10,10,.2) 50%,transparent 72%),
+      radial-gradient(ellipse 40% 30% at 62% 96%,rgba(140,20,18,.5),transparent 70%);
+    background-size:100% 100%;background-repeat:no-repeat;
+    animation:fluir 32s ease-in-out infinite alternate;transform-origin:100% 50%}
+  @keyframes fluir{
+    0%{background-position:0 0,0 0,0 0;transform:translateY(-2%) scale(1)}
+    50%{background-position:-6% 8%,3% -6%,-4% 4%;transform:translateY(1.5%) scale(1.04)}
+    100%{background-position:4% 14%,-5% 6%,6% -3%;transform:translateY(4%) scale(1.02)}
+  }
+  @media (prefers-reduced-motion:reduce){.escena > .atm-sangre{animation:none}}
+
+  /* Haz de luz volumétrico desde el foco, y filo rojo de emergencia en el borde derecho */
+  .atm-haz{background:conic-gradient(from 152deg at 20% -12%,transparent 0deg,transparent 16deg,rgba(232,217,181,.085) 24deg,rgba(232,217,181,.035) 34deg,transparent 46deg)}
+  .atm-filo{background:linear-gradient(270deg,rgba(179,38,30,.55),rgba(179,38,30,.12) 3px,transparent 70px)}
+  .atm-filo::after{content:"";position:absolute;right:0;top:0;bottom:0;width:2px;background:var(--emergencia);box-shadow:0 0 24px 4px rgba(179,38,30,.7)}
+  .escena > .atm-filo{z-index:2}
+  /* Estructura del mamparo: costillas verticales en perspectiva, muy tenues */
+  .atm-mamparo{opacity:.9;
+    background:
+      repeating-linear-gradient(90deg,transparent 0 118px,rgba(214,218,216,.035) 118px 119px,transparent 119px 120px),
+      linear-gradient(180deg,rgba(214,218,216,.05),transparent 18%,transparent 82%,rgba(0,0,0,.6))}
+  /* Texto fantasma: enorme, casi invisible, en serif itálica */
+  .fantasma{position:absolute;pointer-events:none;z-index:0;font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;
+    color:transparent;-webkit-text-stroke:1px rgba(232,217,181,.10);letter-spacing:-.04em;line-height:.8;user-select:none;white-space:nowrap}
+  .escena > .fantasma{position:absolute;z-index:0}
+  /* Botones: vidrio con filo iluminado */
+  .btn-luz{position:relative;overflow:hidden}
+  .btn-luz::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.08),transparent 55%);pointer-events:none}
+  /* Regla ornamental: hilo con un punto rojo al final, como un piloto */
+  .regla-piloto{position:relative;height:1px;background:linear-gradient(90deg,var(--hilo-fuerte),var(--hilo) 70%,transparent)}
+  .regla-piloto::after{content:"";position:absolute;right:0;top:-3px;width:7px;height:7px;border-radius:50%;background:var(--emergencia);box-shadow:0 0 12px 2px rgba(179,38,30,.8)}
+
+  .cabecera h1 small{font-size:30px}
+  .texto h2{font-size:56px;letter-spacing:-.02em;margin-top:6px}
+  .texto header{position:relative;border-bottom:0;padding-bottom:22px}
+  .texto header .regla-piloto{margin-top:22px}
+  .texto .fantasma{left:-40px;top:-70px;font-size:300px;-webkit-text-stroke:1px rgba(232,217,181,.09)}
+  .texto p:first-of-type::first-letter{float:left;font-size:4.2em;line-height:.78;padding:8px 12px 0 0;color:var(--halogeno);font-style:italic;text-shadow:0 0 24px rgba(232,217,181,.35)}
+  .texto p{color:#D3D8D6;text-shadow:0 1px 1px rgba(0,0,0,.8)}
+  .texto .mano{font-size:1.35em;letter-spacing:.14em;padding:.7em 0;text-align:center;position:relative}
+  .texto .mano::before{content:"";position:absolute;inset:-30px -60px;background:radial-gradient(ellipse 60% 70% at 50% 50%,rgba(179,38,30,.16),transparent 70%);z-index:-1}
+  .margen{padding:26px 26px 30px;background:linear-gradient(180deg,rgba(22,27,34,.62),rgba(10,12,16,.82));box-shadow:0 40px 90px -30px rgba(0,0,0,1),inset 0 1px 0 rgba(232,217,181,.10)}
+  .margen h3{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;font-size:17px;color:var(--halogeno)}
+  .cuarentena{padding:12px 18px;background:linear-gradient(90deg,rgba(179,38,30,.22),rgba(179,38,30,.04) 60%,transparent);box-shadow:-30px 0 60px -20px rgba(179,38,30,.8),inset 0 0 0 1px rgba(179,38,30,.25)}
+  .cuarentena b{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;font-size:16px;letter-spacing:0}
+  .costillar li.actual i{box-shadow:0 0 14px 1px rgba(232,217,181,.9)}
+
+
+  body{font-family:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,"Times New Roman",serif;font-size:20px;line-height:1.62;min-width:1024px}
+  .ui{font-family:"Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;letter-spacing:.02em}
+  .pantalla{min-height:100vh}
+  .marco{position:relative;padding:14px 30px}
+  .marco::before,.marco::after{content:"";position:absolute;top:0;bottom:0;width:22px;border:1px solid var(--hilo-fuerte)}
+  .marco::before{left:0;border-right:0}
+  .marco::after{right:0;border-left:0}
+
+  .cabecera{position:sticky;top:0;z-index:2;display:grid;grid-template-columns:1fr auto;align-items:center;gap:32px;padding:26px 56px 18px;
+    background:linear-gradient(180deg,rgba(6,7,10,.96),rgba(6,7,10,.86));backdrop-filter:blur(8px);border-bottom:1px solid var(--hilo)}
+  .cabecera .marco{justify-self:center;text-align:center;min-width:560px}
+  .cabecera h1{margin:0;font-size:22px;font-weight:400;line-height:1.2;color:var(--niebla-baja)}
+  .cabecera h1 small{display:block;font-size:26px;color:var(--halogeno);font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;letter-spacing:0;margin-top:2px}
+  .estado{color:var(--niebla-baja);font-size:14px;text-align:right}
+  .estado b{display:block;color:var(--niebla);font-weight:400;font-size:16px}
+  .estado .ticks{display:flex;gap:3px;justify-content:flex-end;margin-top:6px}
+  .estado .ticks i{width:12px;height:2px;background:var(--hilo-fuerte)}
+  .estado .ticks i.on{background:var(--halogeno)}
+  .estado .ticks i.stop{background:var(--emergencia);box-shadow:0 0 8px var(--emergencia)}
+
+  .cuarentena{margin:0 56px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:24px;padding:10px 16px;
+    background:linear-gradient(90deg,rgba(179,38,30,.16),transparent 70%);border-left:2px solid var(--emergencia);
+    color:var(--niebla-baja);font-size:14px;line-height:1.35;box-shadow:-20px 0 40px -20px rgba(179,38,30,.6)}
+  .cuarentena p{margin:0}
+  .cuarentena b{color:#E0685C;font-weight:400}
+  .cuarentena a{font-size:14px;text-decoration:none;border:1px solid var(--hilo-fuerte);padding:6px 12px;color:var(--niebla);white-space:nowrap}
+  .cuarentena a:hover{background:rgba(214,218,216,.08)}
+
+  .pagina{display:grid;grid-template-columns:120px minmax(560px,66ch) minmax(240px,1fr);gap:0 48px;padding:48px 56px 120px 40px;max-width:1500px;margin:0 auto}
+
+  .costillar{position:sticky;top:150px;align-self:start;height:calc(100vh - 200px);display:flex;flex-direction:column}
+  .costillar ol{list-style:none;margin:0;padding:0;flex:1;display:flex;flex-direction:column;justify-content:space-between;border-left:1px solid var(--hilo)}
+  .costillar li{display:flex;align-items:center;min-height:0}
+  .costillar a,.costillar span{display:flex;align-items:center;gap:8px;text-decoration:none;font-size:12px;color:var(--niebla-baja);width:100%}
+  .costillar i{display:block;height:1px;background:var(--hilo);width:24px;flex:none;margin-left:-1px}
+  .costillar li.leido i{background:var(--hilo-fuerte);width:36px}
+  .costillar li.actual i{background:var(--halogeno);width:56px;height:2px;box-shadow:0 0 10px rgba(232,217,181,.8)}
+  .costillar li.actual a{color:var(--halogeno)}
+  .costillar li.sellado i{background:transparent;border-top:1px dashed var(--hilo)}
+  .costillar li.pausa i{background:var(--emergencia);height:4px;width:20px;box-shadow:0 0 10px var(--emergencia)}
+  .costillar li.pausa span{color:#E0685C}
+  .costillar a:hover{color:var(--niebla)}
+
+  /* El texto bajo el foco: una luz cálida cae sobre la columna, el resto queda en sombra */
+  .texto{position:relative;padding:8px 28px 0;margin:0 -28px}
+  .texto::before{content:"";position:absolute;inset:-40px -10px auto -10px;height:520px;pointer-events:none;z-index:-1;
+    background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(232,217,181,.09),transparent 70%)}
+  .texto header{margin:0 0 40px;padding-bottom:16px;border-bottom:1px solid var(--hilo)}
+  .texto .numero{display:block;font-size:13px;color:var(--niebla-baja);margin-bottom:8px}
+  .texto h2{margin:0;font-size:44px;line-height:1.02;font-weight:400;font-style:italic;color:var(--halogeno);text-shadow:0 0 30px rgba(232,217,181,.25)}
+  .texto .cierre{margin:10px 0 0;font-size:13px;color:var(--niebla-baja)}
+  .texto p{margin:0 0 1.3em;hyphens:auto;text-wrap:pretty;color:#CDD2D0}
+  .texto .aviso{display:block;padding-left:1.4em;font-style:italic;color:var(--niebla-baja)}
+  .texto .mano{display:block;margin:1.6em 0;padding:.6em 0;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700;font-size:1.15em;letter-spacing:.1em;
+    color:#E0685C;border-top:1px solid rgba(179,38,30,.5);border-bottom:1px solid rgba(179,38,30,.5);text-shadow:0 0 18px rgba(179,38,30,.8)}
+  mark.hecho{background:transparent;color:inherit;transition:background-color 500ms ease,box-shadow 500ms ease}
+  body.hechos mark.hecho{background:rgba(168,216,200,.10);box-shadow:0 1px 0 var(--fosforo)}
+  body.hechos mark.hecho.conflicto{background:rgba(179,38,30,.18);box-shadow:0 1px 0 var(--emergencia)}
+  .texto .siguiente{margin-top:64px;padding-top:20px;border-top:1px solid var(--hilo);display:flex;justify-content:space-between;gap:24px;align-items:baseline;font-size:15px}
+  .texto .siguiente a{text-decoration:none;border:1px solid var(--hilo-fuerte);padding:8px 14px;color:var(--niebla)}
+  .texto .siguiente a:hover{background:rgba(214,218,216,.08)}
+  .texto .siguiente small{display:block;color:var(--niebla-baja);margin-top:4px;font-size:12.5px}
+
+  .margen{font-size:13.5px;line-height:1.45;color:var(--niebla-baja);padding:22px 22px 26px}
+  .margen h3{font-size:13.5px;font-weight:400;color:var(--niebla);margin:0 0 6px}
+  .margen .quien{margin:0 0 24px;padding:0 0 12px;border-bottom:1px solid var(--hilo)}
+  .margen dl{margin:0}
+  .margen dt{color:var(--fosforo);margin-top:16px}
+  .margen dt::before{content:"//";opacity:.6}
+  .margen dd{margin:2px 0 0}
+  .margen dd.conflicto{color:#E0685C;padding-left:12px;border-left:1px solid var(--emergencia);margin-top:6px}
+  .margen svg{width:100%;height:auto;display:block;margin-top:24px}
+  .margen svg text{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:.02em}
+  .margen .accion{margin-top:36px}
+  .margen button{display:block;width:100%;text-align:left;background:transparent;border:1px solid var(--hilo-fuerte);padding:12px 14px;cursor:pointer;font-size:14px;line-height:1.35;color:var(--niebla)}
+  .margen button:hover{background:rgba(214,218,216,.08)}
+  .margen button small{display:block;color:var(--niebla-baja);margin-top:4px}
+  body.hechos .margen button{border-color:var(--fosforo)}
+  .margen .actores{margin-top:36px}
+  .margen .actores ul{margin:0;padding:0;list-style:none;border-top:1px solid var(--hilo)}
+  .margen .actores li{padding:6px 0;border-bottom:1px solid var(--hilo)}
+  .margen .actores li b{color:var(--niebla);font-weight:400}
+  @media (prefers-reduced-motion:reduce){mark.hecho{transition:none}}
+  @media (max-width:1280px){.cabecera{padding:22px 36px 16px}.cabecera .marco{min-width:480px}.cuarentena{margin:0 36px}
+    .pagina{grid-template-columns:100px minmax(520px,62ch) minmax(220px,1fr);gap:0 36px;padding:36px 36px 100px 28px}body{font-size:19px}.texto h2{font-size:36px}}
+  .ir{display:flex;flex-wrap:wrap;gap:2px;align-items:baseline;padding:10px 28px;font-size:13.5px;
+      border-bottom:1px solid color-mix(in srgb, currentColor 18%, transparent)}
+  .ir b{font-weight:400;opacity:.45;margin-right:14px}
+  .ir a{color:inherit;opacity:.5;text-decoration:none;padding:3px 11px;border:1px solid transparent}
+  .ir a:hover{opacity:1}
+  .ir a:focus-visible{opacity:1;outline:2px solid currentColor;outline-offset:1px}
+  .ir a[aria-current="page"]{opacity:1;border-color:color-mix(in srgb, currentColor 45%, transparent)}
+  @media (max-width:640px){ .ir{padding:8px 16px} }
+
+  /* La capital grande es solo para la prosa. El <p> del cierre, dentro de la cabecera del
+     capítulo, también es el primero de su padre y heredaba la letra gigante. */
+  .texto header .cierre::first-letter{float:none;font-size:inherit;line-height:inherit;padding:0;
+                                      color:inherit;font-style:inherit;text-shadow:none}
+  /* overflow:hidden convierte la escena en contenedor de desplazamiento y la cabecera pegajosa
+     deja de pegarse al hacer scroll; clip recorta igual sin ese efecto secundario. */
+  .escena{overflow:clip}
+
+  /* La página crecía con el capítulo: 400 palabras daban 2.200 px y 1.500 pasaban de 6.500, así que
+     leer era arrastrar una barra kilométrica y el margen del Extractor quedaba a media altura, lejos
+     del párrafo del que hablaba. Ahora la lectura ocupa exactamente una pantalla: el texto y el
+     margen tienen cada uno su propia rueda, y su contenido se apaga arriba y abajo como una
+     proyección, en vez de cortarse a ras. */
+  .pagina{height:calc(100vh - 150px);padding-bottom:0;align-items:stretch}
+  .texto,.margen{overflow-y:auto;overscroll-behavior:contain;min-height:0;padding-bottom:64px}
+  .texto{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 34px,#000 92%,transparent 100%);
+                 mask-image:linear-gradient(to bottom,transparent 0,#000 34px,#000 92%,transparent 100%)}
+  .margen{-webkit-mask-image:linear-gradient(to bottom,#000 0,#000 93%,transparent 100%);
+                  mask-image:linear-gradient(to bottom,#000 0,#000 93%,transparent 100%)}
+  .texto::-webkit-scrollbar,.margen::-webkit-scrollbar{width:10px}
+  .texto::-webkit-scrollbar-track,.margen::-webkit-scrollbar-track{background:transparent}
+  .texto::-webkit-scrollbar-thumb,.margen::-webkit-scrollbar-thumb{
+    background:var(--hilo-fuerte);border-radius:5px;border:3px solid transparent;background-clip:content-box}
+  .texto::-webkit-scrollbar-thumb:hover,.margen::-webkit-scrollbar-thumb:hover{background:var(--halogeno);background-clip:content-box}
+  .texto,.margen{scrollbar-width:thin;scrollbar-color:var(--hilo-fuerte) transparent}
+  /* El costillar ya era pegajoso dentro de una página larga; dentro de una pantalla fija sobra. */
+  .costillar{position:static;height:auto}
+  /* El conflicto que discute el Revisor, una sola vez y antes de los hechos. */
+  .margen .discute{margin:0 0 20px;padding:10px 12px;border-left:2px solid var(--emergencia);
+    background:rgba(179,38,30,.10);color:#E0685C;font-size:13px;line-height:1.45}
+  @media (max-width:1280px){ .pagina{height:calc(100vh - 140px)} }
+</style>
+</head>
+<body>
+<div class="pantalla escena">
+<nav class="ir" aria-label="Secciones">
+  <b>Creador de novelas</b>
+  <a href="/">Biblioteca</a>
+  <a href="/encargo">Encargo</a>
+  <a href="/consola">Producción</a>
+  <a href="/lectura">Lectura</a>
+</nav>
+<script>
+  // Marca la sección en la que estás. Va aquí y no en cada página para que las cuatro barras sean
+  // literalmente la misma y no se desincronicen al tocar una.
+  (function(){
+    // Las páginas se sirven desde /static/*.html --las rutas bonitas son redirecciones--, así que
+    // la sección activa se deduce del nombre del archivo y no de la ruta, que nunca coincidiría.
+    var donde = {"vestuario.html":"/", "encargo.html":"/encargo",
+                 "consola.html":"/consola", "lectura.html":"/lectura"};
+    var aqui = donde[location.pathname.split("/").pop()] || location.pathname;
+    document.querySelectorAll(".ir a").forEach(function(a){
+      if (a.getAttribute("href") === aqui) a.setAttribute("aria-current", "page");
+    });
+  })();
+</script>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="grano"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></svg>
+<div class="atm atm-luz" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="sangre" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.012" numOctaves="3" seed="7" result="ruido"><animate attributeName="baseFrequency" dur="46s" values="0.006 0.012;0.009 0.008;0.005 0.014;0.006 0.012" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="ruido" scale="90" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<div class="atm atm-sangre" aria-hidden="true"></div>
+
+<div class="atm atm-polvo" aria-hidden="true"></div>
+<div class="atm atm-grano" aria-hidden="true"></div>
+<div class="atm atm-vineta" aria-hidden="true"></div>
+<div class="atm atm-mamparo" aria-hidden="true"></div>
+<div class="atm atm-haz" aria-hidden="true"></div>
+<div class="atm atm-filo" aria-hidden="true"></div>
+  <header class="cabecera ui">
+    <div class="marco">
+      <h1 id="t-cap">Cargando<small id="t-titulo"></small></h1>
+    </div>
+    <div class="estado" role="status">
+      <b id="t-modo">Leyendo...</b>
+      <span id="t-novela"></span>
+      <div class="ticks" id="ticks" aria-hidden="true"></div>
+    </div>
+  </header>
+
+  <div class="cuarentena ui" role="status" id="cuarentena" hidden>
+    <p id="t-cuarentena"></p>
+    <a href="/consola">Ir a la producción</a>
+  </div>
+
+  <div class="pagina">
+    <nav class="costillar ui" aria-label="Capítulos"><ol id="costillar"></ol></nav>
+
+    <article class="texto" id="texto">
+      <header><span class="fantasma" id="fantasma" aria-hidden="true"></span>
+        <span class="numero ui" id="t-locacion"></span>
+        <h2 id="t-h2"></h2>
+        <p class="cierre ui" id="t-cierre"></p>
+        <div class="regla-piloto" aria-hidden="true"></div>
+      </header>
+      <div id="prosa"></div>
+      <nav class="siguiente ui" aria-label="Capítulos contiguos" id="contiguos"></nav>
+    </article>
+
+    <aside class="margen ui vidrio" aria-labelledby="margen-t">
+      <div class="quien">
+        <h3 id="margen-t">Lo que el Extractor fijó en este capítulo</h3>
+        <span id="t-resumen-hechos"></span>
+      </div>
+      <p class="discute" id="discute" hidden></p>
+      <dl id="hechos"></dl>
+
+      <div class="accion" id="caja-accion" hidden>
+        <button type="button" id="btn-conflicto" class="btn-luz" aria-pressed="false">Señalar lo que el Revisor discute<small id="t-btn-ayuda"></small></button>
+      </div>
+
+      <div class="actores" id="veredicto">
+        <h3>Quién ha tocado este capítulo</h3>
+        <ul id="actores"></ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var indice = null, qa = null, actual = null;
+
+function esc(s){ return String(s == null ? "" : s)
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// El capítulo es prosa sin encabezados (EX-07): párrafos separados por línea en blanco y nada más.
+function parrafos(texto){
+  return texto.split(/\n\s*\n/).map(function(p){ return p.trim(); }).filter(Boolean)
+    .map(function(p){ return "<p>" + esc(p).replace(/\n/g, " ") + "</p>"; }).join("");
+}
+
+// El Revisor cita literalmente los pasajes que discute, entre comillas simples. Esas citas SÍ se
+// pueden localizar en el texto; los hechos del Extractor no, porque son paráfrasis, y buscarlos
+// sería inventarse la correspondencia y pintar de verde la frase equivocada.
+function citasDelRevisor(n){
+  if (!qa || !qa.hallazgos) return [];
+  var citas = [];
+  qa.hallazgos.forEach(function(h){
+    if (h.tipo !== "contradiccion") return;
+    var d = h.descripcion || "";
+    if (d.indexOf("Cap. " + n) !== 0 && h.cap_origen !== n) return;
+    (d.match(/'([^']{12,})'/g) || []).forEach(function(c){ citas.push(c.slice(1, -1)); });
+  });
+  return citas;
+}
+
+function marcarCitas(html, citas){
+  citas.forEach(function(c){
+    var e = esc(c), i = html.indexOf(e);
+    if (i >= 0) html = html.slice(0, i) + '<mark class="hecho conflicto">' + e + "</mark>" + html.slice(i + e.length);
+  });
+  return html;
+}
+
+function pintarCostillar(){
+  $("costillar").innerHTML = indice.capitulos.map(function(c){
+    var clase = c.num === actual.num ? "actual" : (c.escrito ? "leido" : "sellado");
+    // En una novela larga el costillar solo numera de cinco en cinco para no amontonarse; en una
+    // corta caben todos, y esconder el «2» de un libro de tres capítulos no ahorra nada.
+    var visible = (indice.capitulos.length <= 12
+                   || c.num % 5 === 0 || c.num === 1 || c.num === actual.num);
+    var txt = c.num === actual.num ? c.num + ", estás aquí" : (visible ? c.num : "");
+    var tit = "Capítulo " + c.num + (c.titulo ? ": " + esc(c.titulo) : "");
+    var celda = c.escrito
+      ? '<a href="?cap=' + c.num + '"' + (c.num === actual.num ? ' aria-current="page"' : "") +
+        ' title="' + tit + '"><i aria-hidden="true"></i>' + txt + "</a>"
+      : '<span title="' + tit + ', todavía sin escribir"><i aria-hidden="true"></i>' + txt + "</span>";
+    var pausa = c.corte_qa ? '<li class="pausa"><span><i aria-hidden="true"></i>revisor</span></li>' : "";
+    return '<li class="' + clase + '">' + celda + "</li>" + pausa;
+  }).join("");
+}
+
+function pintarContiguos(){
+  var escritos = indice.capitulos.filter(function(c){ return c.escrito; }).map(function(c){ return c.num; });
+  var i = escritos.indexOf(actual.num), h = "";
+  if (i > 0) { var a = indice.capitulos[escritos[i-1]-1];
+    h += '<a href="?cap=' + a.num + '">Capítulo ' + a.num + (a.titulo ? ", " + esc(a.titulo) : "") + "<small>anterior</small></a>"; }
+  if (i >= 0 && i < escritos.length - 1) { var s = indice.capitulos[escritos[i+1]-1];
+    h += '<a href="?cap=' + s.num + '">Capítulo ' + s.num + (s.titulo ? ", " + esc(s.titulo) : "") + "<small>siguiente</small></a>"; }
+  $("contiguos").innerHTML = h;
+}
+
+function pintarHechos(){
+  var hs = actual.hechos || [];
+  $("t-resumen-hechos").textContent = hs.length
+    ? (hs.length === 1 ? "Un hecho. " : hs.length + " hechos. ") +
+      "A partir de aquí el Escritor no puede contradecirlos sin que el Revisor lo vea."
+    : "El Extractor no fijó ningún hecho nuevo en este capítulo.";
+  // La contradicción es del capítulo, no de un hecho concreto: QA no dice cuál la provoca. Antes se
+  // repetía bajo cada uno, así que un capítulo con cuatro hechos enseñaba cuatro veces el mismo
+  // párrafo rojo y el margen se estiraba sin decir nada nuevo.
+  var d = $("discute");
+  if (actual.conflicto) { d.textContent = "El Revisor discute: " + actual.conflicto; d.hidden = false; }
+  else d.hidden = true;
+  $("hechos").innerHTML = hs.map(function(h){
+    var s = "<dt>" + esc(h.sujeto || h.categoria || "Sin sujeto") + "</dt><dd>" + esc(h.hecho) + "</dd>";
+    if (h.superado_por) s += '<dd class="conflicto">Superado por un hecho posterior.</dd>';
+    return s;
+  }).join("");
+}
+
+function pintarActores(){
+  var hs = actual.hechos || [];
+  var ficha = indice.capitulos[actual.num - 1] || {};
+  var discutido = hs.some(function(h){ return h.conflicto; });
+  var li = ["<li><b>Escritor</b>, redactó " + actual.palabras.toLocaleString("es-ES") + " palabras.</li>",
+            "<li><b>Extractor de hechos</b>, fijó " + (hs.length || "cero") + (hs.length === 1 ? " hecho" : " hechos") + ".</li>",
+            "<li><b>Revisor de calidad</b>, " + (ficha.corte_qa
+              ? "detuvo la producción al cerrar este capítulo."
+              : discutido ? "señala este capítulo como origen de una contradicción posterior."
+                          : "no ha puesto reparos a este capítulo.") + "</li>"];
+  $("actores").innerHTML = li.join("");
+}
+
+function pintar(){
+  document.title = "Capítulo " + actual.num + " · " + indice.titulo;
+  $("t-cap").firstChild.nodeValue = "Capítulo " + actual.num + " de " + indice.total_capitulos;
+  $("t-titulo").textContent = actual.titulo || "";
+  $("t-novela").textContent = indice.titulo;
+  $("fantasma").textContent = actual.num;
+  $("t-h2").textContent = actual.titulo || "Capítulo " + actual.num;
+  $("t-locacion").textContent = actual.locacion ? "//" + actual.locacion : "";
+  $("t-cierre").textContent = actual.palabras.toLocaleString("es-ES") + " palabras, cerradas por el Escritor.";
+
+  $("ticks").innerHTML = indice.capitulos.map(function(c){
+    return "<i class='" + (c.corte_qa ? "stop" : c.escrito ? "on" : "") + "'></i>";
+  }).join("");
+
+  var citas = citasDelRevisor(actual.num);
+  $("prosa").innerHTML = marcarCitas(parrafos(actual.texto), citas);
+  $("caja-accion").hidden = citas.length === 0;
+  $("t-btn-ayuda").textContent = citas.length === 1
+    ? "El Revisor cita un pasaje de este capítulo en su veredicto."
+    : "El Revisor cita " + citas.length + " pasajes de este capítulo en su veredicto.";
+
+  pintarCostillar(); pintarContiguos(); pintarHechos(); pintarActores();
+}
+
+function pintarCuarentena(){
+  if (indice.estado !== "pausado_por_qa" || !qa || !qa.hallazgos) return;
+  var c = qa.hallazgos.filter(function(h){ return h.tipo === "contradiccion"; }).length;
+  var r = qa.hallazgos.filter(function(h){ return h.tipo === "repeticion"; }).length;
+  $("t-cuarentena").innerHTML = "<b>//Producción detenida en el capítulo " + esc(qa.cap_corte) + ".</b> " +
+    "El Revisor de calidad ha encontrado " + c + (c === 1 ? " contradicción" : " contradicciones") +
+    " con hechos establecidos y " + r + (r === 1 ? " repetición" : " repeticiones") +
+    " de lenguaje. Puedes leer lo cerrado; nada nuevo se escribe hasta que decidas.";
+  $("cuarentena").hidden = false;
+  $("t-modo").textContent = "Detenida...";
+}
+
+function fallo(mensaje){
+  $("t-cap").firstChild.nodeValue = "No se puede leer";
+  $("prosa").innerHTML = "<p>" + esc(mensaje) + "</p>";
+}
+
+fetch("/api/indice").then(function(r){ return r.json(); }).then(function(d){
+  indice = d;
+  var escritos = indice.capitulos.filter(function(c){ return c.escrito; });
+  if (!escritos.length) { fallo("Todavía no hay ningún capítulo escrito. Cuando el Escritor cierre el primero, aparecerá aquí."); return; }
+  var pedido = parseInt(new URLSearchParams(location.search).get("cap"), 10);
+  var n = escritos.some(function(c){ return c.num === pedido; }) ? pedido : escritos[escritos.length - 1].num;
+  return fetch("/api/qa").then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d2){ qa = d2; return fetch("/api/capitulo/" + n); })
+    .then(function(r){ return r.json(); })
+    .then(function(cap){ actual = cap; pintar(); pintarCuarentena(); });
+}).catch(function(e){ fallo("No se pudo hablar con el harness: " + e.message); });
+
+$("btn-conflicto").addEventListener("click", function(){
+  var on = document.body.classList.toggle("hechos");
+  this.setAttribute("aria-pressed", on ? "true" : "false");
+  this.firstChild.nodeValue = on ? "Ocultar lo que el Revisor discute" : "Señalar lo que el Revisor discute";
+});
+})();
+</script>
+<script>
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('#sangre animate').forEach(function(a){ a.remove(); });
+  }
+</script>
+</body>
+</html>

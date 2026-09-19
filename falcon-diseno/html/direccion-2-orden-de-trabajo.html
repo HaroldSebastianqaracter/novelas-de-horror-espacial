@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orden de trabajo — Encargo de novela</title>
+<style>
+  :root{
+    --mesa:#D9DCD6;        /* la mesa gris sobre la que está el impreso */
+    --papel:#F6F6F2;       /* impreso, blanco frío, no crema */
+    --calco:#2E4A7D;       /* azul de papel carbón: lo que la máquina imprime */
+    --tinta:#17191C;       /* lo que escribe la persona */
+    --sello:#A8281F;       /* tampón */
+    --lapiz:#6E726B;       /* anotaciones al margen */
+    --regla:#B9BDB6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--mesa);color:var(--tinta);
+    font-family:Helvetica,"Helvetica Neue",Arial,"Liberation Sans",sans-serif;
+    font-size:14px;line-height:1.4;min-width:1024px;
+    padding:40px 0 72px;
+  }
+  :focus-visible{outline:3px solid var(--calco);outline-offset:2px}
+  button,input,textarea,select{font:inherit;color:inherit}
+
+  /* Hoja + margen de anotaciones */
+  .mesa{width:min(1200px,calc(100% - 64px));margin:0 auto;display:grid;grid-template-columns:1fr 300px;gap:0 36px;align-items:start}
+  .hoja{
+    background:var(--papel);
+    box-shadow:0 1px 0 #fff inset,0 18px 40px -22px rgba(0,0,0,.45),0 0 0 1px #c8ccc5;
+    padding:40px 48px 48px;position:relative;
+  }
+  /* agujeros de archivador */
+  .hoja::before{
+    content:"";position:absolute;left:-1px;top:0;bottom:0;width:20px;
+    background:radial-gradient(circle at 10px 50%,var(--mesa) 5px,transparent 5.5px) 0 0/20px 220px repeat-y;
+    background-position:0 90px;
+  }
+
+  /* Cabecera impresa (azul calco) */
+  .cab{display:grid;grid-template-columns:1fr auto;gap:24px;border-bottom:3px double var(--calco);padding-bottom:14px;color:var(--calco)}
+  .cab h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.01em;line-height:1.05}
+  .cab p{margin:6px 0 0;font-size:13px;max-width:62ch}
+  .num{text-align:right;font-size:13px}
+  .num b{display:block;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--tinta)}
+
+  /* Campos: etiqueta impresa a la izquierda, escritura de la persona en serif */
+  .campo{display:grid;grid-template-columns:168px 1fr;gap:0 20px;padding:18px 0 14px;border-bottom:1px solid var(--regla)}
+  .campo > label,.campo > .et{color:var(--calco);font-size:13px;padding-top:6px}
+  .campo > .et small{display:block;color:var(--lapiz);margin-top:4px;line-height:1.35}
+  .campo > label small{display:block;color:var(--lapiz);margin-top:4px;line-height:1.35}
+  .escrito{
+    font-family:Georgia,"Iowan Old Style","Palatino Linotype","Book Antiqua",serif;
+    font-size:17px;line-height:1.5;color:var(--tinta);
+  }
+  textarea.escrito,input.escrito{
+    width:100%;border:0;background:
+      repeating-linear-gradient(transparent 0 25px, var(--regla) 25px 26px);
+    background-attachment:local;
+    padding:0 2px 6px;resize:vertical;line-height:26px;font-size:17px;
+    border-bottom:1px solid var(--tinta);
+  }
+  textarea.escrito:focus,input.escrito:focus{outline:none;border-bottom:2px solid var(--calco)}
+  input.escrito{line-height:30px;height:34px;background:none}
+
+  /* Recuento de capítulos: 30 palotes en SVG, se tachan de cinco en cinco */
+  .palotes{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .palotes svg{height:38px;width:auto;display:block}
+  .palotes .ctrl{display:flex;align-items:center;gap:6px}
+  .palotes button{width:36px;height:36px;border:1px solid var(--tinta);background:var(--papel);cursor:pointer;font-size:18px;line-height:1}
+  .palotes button:hover{background:#eceee8}
+  .palotes output{font-family:Georgia,serif;font-size:20px;min-width:2.2ch;text-align:center}
+
+  /* Casillas de tono, marcadas a mano */
+  .tonos{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 24px}
+  .tonos label{display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start;cursor:pointer;font-size:14px;line-height:1.35}
+  .tonos input{appearance:none;margin:2px 0 0;width:16px;height:16px;border:1.5px solid var(--calco);background:var(--papel);position:relative;cursor:pointer}
+  .tonos input:checked::after{
+    content:"";position:absolute;left:-3px;top:-6px;width:22px;height:22px;
+    background:
+      linear-gradient(to top right,transparent 46%,var(--tinta) 47%,var(--tinta) 53%,transparent 54%),
+      linear-gradient(to top left,transparent 46%,var(--tinta) 47%,var(--tinta) 53%,transparent 54%);
+  }
+  .tonos label s{color:var(--lapiz)}
+
+  /* Obras de referencia: tres renglones */
+  .obras{display:grid;gap:8px}
+  .obras input{height:32px}
+  .obras .hueco{color:var(--lapiz);font-style:italic}
+
+  /* Personal asignado: los agentes firman */
+  .personal{margin-top:8px}
+  .personal table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .personal th{color:var(--calco);text-align:left;font-weight:400;padding:8px 8px 8px 0;border-bottom:1px solid var(--calco)}
+  .personal td{padding:10px 8px 10px 0;border-bottom:1px solid var(--regla);vertical-align:top}
+  .personal td:first-child{font-weight:700;white-space:nowrap}
+  .personal .firma{font-family:Georgia,serif;font-style:italic;color:var(--tinta);font-size:16px}
+  .personal .firma svg{height:26px;width:auto;display:block}
+  .personal .potestad{color:var(--sello);font-weight:700}
+
+  /* Pie: condiciones + firma */
+  .pie{display:grid;grid-template-columns:1fr 300px;gap:32px;margin-top:28px;align-items:end}
+  .condiciones{font-size:13px;color:var(--tinta);line-height:1.5;border-left:0}
+  .condiciones p{margin:0 0 8px}
+  .condiciones strong{color:var(--calco)}
+  .firmar{position:relative}
+  .firmar button{
+    width:100%;height:56px;border:2px solid var(--tinta);background:var(--tinta);color:var(--papel);
+    font-size:16px;font-weight:700;cursor:pointer;
+  }
+  .firmar button:hover{background:#2a2d31}
+  .firmar button[disabled]{background:var(--papel);color:var(--lapiz);border-color:var(--lapiz);cursor:default}
+  .firmar .nota{font-size:12.5px;color:var(--lapiz);margin:8px 0 0;text-align:center}
+
+  /* Tampón RECIBIDO: aparece al firmar, el único movimiento de la pantalla */
+  .tampon{
+    position:absolute;right:-28px;top:-120px;width:260px;pointer-events:none;
+    transform:rotate(-9deg) scale(1.6);opacity:0;
+    transition:transform 260ms cubic-bezier(.2,1.4,.4,1),opacity 180ms ease;
+  }
+  .tampon.puesto{transform:rotate(-9deg) scale(1);opacity:1}
+  @media (prefers-reduced-motion:reduce){.tampon{transition:none}}
+
+  /* Margen de la mesa: anotaciones a lápiz */
+  .margen{padding-top:56px;color:var(--lapiz);font-size:13.5px;line-height:1.5;display:grid;gap:22px}
+  .margen h2{font-size:13.5px;font-weight:700;margin:0 0 4px;color:var(--tinta)}
+  .margen p{margin:0}
+  .margen .coste{font-family:Georgia,serif;color:var(--tinta);font-size:30px;line-height:1;margin:2px 0 4px}
+  .margen .coste small{font-family:Helvetica,Arial,sans-serif;font-size:13px;color:var(--lapiz)}
+  .margen svg{width:100%;height:auto;display:block}
+
+  @media (max-width:1280px){
+    .mesa{width:calc(100% - 48px);grid-template-columns:1fr 260px;gap:0 28px}
+    .hoja{padding:32px 36px 40px}
+    .campo{grid-template-columns:150px 1fr}
+    .pie{grid-template-columns:1fr 260px}
+  }
+</style>
+</head>
+<body>
+<div class="mesa">
+  <form class="hoja" aria-labelledby="titulo" onsubmit="return false">
+    <header class="cab">
+      <div>
+        <h1 id="titulo">Orden de trabajo para una novela de terror espacial</h1>
+        <p>Rellene los campos a mano. Al firmar, el encargo pasa al Orquestador y usted deja de intervenir: podrá vigilar la producción, detenerla y leer el resultado, pero no corregirlo mientras se escribe.</p>
+      </div>
+      <div class="num">Orden n.º<b>0047</b>Jueves, 17 de septiembre</div>
+    </header>
+
+    <div class="campo">
+      <label for="titulo-obra">Título de trabajo<small>Puede cambiar al final. El Escritor lo respeta.</small></label>
+      <input id="titulo-obra" class="escrito" value="El casco frío del Falcon">
+    </div>
+
+    <div class="campo">
+      <label for="premisa">Premisa<small>Lo que la máquina sabrá de su historia. Todo lo demás lo decidirá ella.</small></label>
+      <textarea id="premisa" class="escrito" rows="3">Una tripulación de seis personas despierta de la hibernación a nueve años de destino y descubre que la nave lleva despierta mucho más tiempo que ellos.</textarea>
+    </div>
+
+    <div class="campo">
+      <div class="et">Número de capítulos<small>Cada capítulo cuesta dinero y unos doce minutos. El revisor audita cada cuatro.</small></div>
+      <div class="palotes" role="group" aria-label="Número de capítulos">
+        <svg id="svg-palotes" viewBox="0 0 330 40" aria-hidden="true">
+          <g id="g-palotes" stroke="#17191C" stroke-width="2.2" stroke-linecap="round" fill="none"></g>
+        </svg>
+        <div class="ctrl">
+          <button type="button" id="menos" aria-label="Un capítulo menos">−</button>
+          <output id="n-cap" for="menos mas">30</output>
+          <button type="button" id="mas" aria-label="Un capítulo más">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="campo">
+      <div class="et">Tono<small>Marque lo que quiere. Tache lo que no quiere ver ni una vez.</small></div>
+      <div class="tonos">
+        <label><input type="checkbox" checked> Terror de interiores industriales: cubiertas de ingeniería, ramales de mantenimiento, talleres.</label>
+        <label><input type="checkbox" checked> Cuarentenas que nadie llegó a levantar.</label>
+        <label><input type="checkbox" checked> Herramientas de minería usadas como armas por desesperación.</label>
+        <label><input type="checkbox" checked> Una fe de a bordo que explica demasiado bien lo que está pasando.</label>
+        <label><input type="checkbox" checked> Cuerpo a cuerpo, sucio, claustrofóbico.</label>
+        <label><input type="checkbox"> <s>Space opera</s>, <s>ciencia ficción contemplativa</s>. No, en ningún capítulo.</label>
+      </div>
+    </div>
+
+    <div class="campo">
+      <div class="et">Obras de referencia<small>El Orquestador destila su estilo antes de escribir. Nunca las cita.</small></div>
+      <div class="obras">
+        <input class="escrito" aria-label="Obra de referencia 1" placeholder="[Título y autor de la primera obra]">
+        <input class="escrito" aria-label="Obra de referencia 2" placeholder="[Título y autor de la segunda obra]">
+        <input class="escrito" aria-label="Obra de referencia 3" placeholder="[Una tercera, si la hay]">
+      </div>
+    </div>
+
+    <section class="campo personal" aria-labelledby="personal-t">
+      <div class="et" id="personal-t">Personal asignado<small>Quién hará qué. No se puede cambiar una vez firmado.</small></div>
+      <table>
+        <thead><tr><th>Agente</th><th>Cometido</th><th>Potestad</th><th>Conforme</th></tr></thead>
+        <tbody>
+          <tr><td>Orquestador</td><td>Destila el estilo de las obras de referencia, planifica la trama completa y reparte el trabajo capítulo a capítulo.</td><td>Puede reordenar el plan.</td>
+            <td class="firma"><svg viewBox="0 0 120 26" aria-label="Firma del Orquestador"><path d="M4 18 C 14 4, 22 4, 26 16 S 40 22, 46 10 C 52 0, 58 20, 70 14 S 92 4, 116 12" stroke="#17191C" stroke-width="1.6" fill="none"/></svg></td></tr>
+          <tr><td>Escritor</td><td>Redacta cada capítulo con el plan, el resumen previo y los hechos vigentes.</td><td>Ninguna. Escribe lo que se le encarga.</td>
+            <td class="firma"><svg viewBox="0 0 120 26" aria-label="Firma del Escritor"><path d="M6 20 C 10 2, 18 2, 20 14 C 22 24, 30 6, 40 10 L 52 16 C 60 20, 66 4, 78 8 C 90 12, 96 22, 114 6" stroke="#17191C" stroke-width="1.6" fill="none"/></svg></td></tr>
+          <tr><td>Extractor de hechos</td><td>Saca de cada capítulo los hechos establecidos: nombres, objetos, lugares, quién sabe qué.</td><td>Marca conflictos para el revisor.</td>
+            <td class="firma"><svg viewBox="0 0 120 26" aria-label="Firma del Extractor"><path d="M4 14 L 30 14 M 36 6 C 40 22, 48 22, 54 8 S 70 2, 76 16 C 80 24, 92 20, 100 10 L 116 14" stroke="#17191C" stroke-width="1.6" fill="none"/></svg></td></tr>
+          <tr><td>Revisor de calidad</td><td>Audita cada cuatro capítulos: contradicciones con los hechos, repeticiones de lenguaje, desvíos de tono.</td><td class="potestad">Puede detener la producción.</td>
+            <td class="firma"><svg viewBox="0 0 120 26" aria-label="Firma del Revisor"><path d="M8 22 L 20 4 L 30 22 M 40 14 C 44 2, 56 2, 58 14 S 74 26, 80 12 C 84 2, 96 8, 104 18 L 114 8" stroke="#17191C" stroke-width="1.6" fill="none"/></svg></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="pie">
+      <div class="condiciones">
+        <p><strong>Condiciones.</strong> El trabajo empieza al firmar y dura unas seis horas. Se factura por capítulo cerrado, aunque el revisor lo rechace después. Si el revisor detiene la producción, usted decide si reanuda bajo su responsabilidad o cancela; lo escrito hasta entonces se conserva y se cobra.</p>
+        <p>Esta orden no admite correcciones en marcha. Si quiere otra novela, abra otra orden.</p>
+      </div>
+      <div class="firmar">
+        <svg class="tampon" id="tampon" viewBox="0 0 260 120" aria-hidden="true">
+          <g fill="none" stroke="#A8281F" stroke-width="3">
+            <rect x="6" y="6" width="248" height="108" rx="4"/>
+            <rect x="14" y="14" width="232" height="92" rx="2" stroke-width="1.5"/>
+          </g>
+          <text x="130" y="58" text-anchor="middle" fill="#A8281F" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="34">Recibido</text>
+          <text x="130" y="86" text-anchor="middle" fill="#A8281F" font-family="Helvetica,Arial,sans-serif" font-size="14">Orquestador, 17 sept, 14:07</text>
+          <path d="M40 96 L 220 96" stroke="#A8281F" stroke-width="1" stroke-dasharray="3 4"/>
+        </svg>
+        <button type="button" id="btn-firmar">Firmar y encargar la novela</button>
+        <p class="nota" id="nota-firma">A partir de aquí solo se mira.</p>
+      </div>
+    </div>
+  </form>
+
+  <aside class="margen" aria-label="Anotaciones al margen">
+    <div>
+      <h2>Lo que costará</h2>
+      <p class="coste" id="coste">31,50 € <small>aprox.</small></p>
+      <p>A 1,05 € por capítulo cerrado. Si el revisor detiene la producción en el capítulo 6, se habrán gastado unos 6,30 € y no se devuelven.</p>
+    </div>
+    <div>
+      <h2>Lo que tardará</h2>
+      <p id="tiempo">Unas 6 horas seguidas. La máquina no se acelera, y usted no puede escribir mientras trabaja.</p>
+    </div>
+    <div>
+      <h2>Dónde puede pararse</h2>
+      <svg viewBox="0 0 300 70" role="img" aria-label="Línea de 30 capítulos con puntos de auditoría del revisor cada cuatro capítulos">
+        <path d="M6 40 L 294 40" stroke="#6E726B" stroke-width="1.5"/>
+        <g id="hitos"></g>
+        <text x="6" y="66" fill="#6E726B" font-size="11" font-family="Helvetica,Arial,sans-serif">cap. 1</text>
+        <text x="294" y="66" fill="#6E726B" font-size="11" font-family="Helvetica,Arial,sans-serif" text-anchor="end" id="ult-cap">cap. 30</text>
+        <text x="150" y="14" fill="#A8281F" font-size="11" font-family="Helvetica,Arial,sans-serif" text-anchor="middle">cada marca roja, el revisor puede detenerlo todo</text>
+      </svg>
+    </div>
+    <div>
+      <h2>Lo que no puede hacer</h2>
+      <p>Cambiar la premisa, el tono o el número de capítulos una vez firmado. Sí puede detener la producción en cualquier momento; lo escrito se queda.</p>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function(){
+  var n=30, out=document.getElementById('n-cap'), g=document.getElementById('g-palotes'),
+      hitos=document.getElementById('hitos'), coste=document.getElementById('coste'),
+      tiempo=document.getElementById('tiempo'), ult=document.getElementById('ult-cap');
+
+  function pintar(){
+    // palotes: grupos de 5 (4 verticales + 1 diagonal), ligeramente irregulares
+    g.innerHTML='';
+    var x=6;
+    for(var i=0;i<n;i++){
+      var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+      var j=i%5;
+      if(j<4){
+        var dx=((i*7)%3)-1; // temblor a mano
+        p.setAttribute('d','M'+(x+j*7)+' 8 L '+(x+j*7+dx)+' 32');
+      }else{
+        p.setAttribute('d','M'+(x-3)+' 30 L '+(x+25)+' 10');
+        p.setAttribute('stroke-width','2.6');
+      }
+      g.appendChild(p);
+      if(j===4) x+=36;
+    }
+    document.getElementById('svg-palotes').setAttribute('viewBox','0 0 '+Math.max(330,x+6)+' 40');
+    out.value=n;
+    coste.innerHTML=(n*1.05).toFixed(2).replace('.',',')+' € <small>aprox.</small>';
+    var h=Math.round(n*12/60*10)/10;
+    tiempo.textContent='Unas '+String(h).replace('.',',')+' horas seguidas. La máquina no se acelera, y usted no puede escribir mientras trabaja.';
+    ult.textContent='cap. '+n;
+    // hitos del revisor en la línea del margen
+    hitos.innerHTML='';
+    for(var k=4;k<=n;k+=4){
+      var cx=6+(k-1)*(288/Math.max(n-1,1));
+      var c=document.createElementNS('http://www.w3.org/2000/svg','path');
+      c.setAttribute('d','M'+cx+' 30 L '+cx+' 50');
+      c.setAttribute('stroke','#A8281F');c.setAttribute('stroke-width','3');
+      hitos.appendChild(c);
+    }
+  }
+  document.getElementById('mas').addEventListener('click',function(){ if(n<60){n++;pintar();} });
+  document.getElementById('menos').addEventListener('click',function(){ if(n>4){n--;pintar();} });
+  pintar();
+
+  var btn=document.getElementById('btn-firmar'), tampon=document.getElementById('tampon'), nota=document.getElementById('nota-firma');
+  btn.addEventListener('click',function(){
+    tampon.classList.add('puesto');
+    btn.disabled=true; btn.textContent='Encargada. En manos del Orquestador';
+    nota.textContent='Puede cerrar esta hoja. La producción sigue sin usted.';
+    document.querySelectorAll('.hoja input, .hoja textarea, .hoja .palotes button').forEach(function(el){el.disabled=true;});
+  });
+})();
+</script>
+</body>
+</html>

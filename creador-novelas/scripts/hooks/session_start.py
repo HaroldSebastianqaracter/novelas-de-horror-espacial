@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _comun import preparar  # noqa: E402
 
 raiz, payload = preparar()
-from harness import hooks  # noqa: E402
+from app import hooks  # noqa: E402
 
 print(hooks.contexto_session_start(raiz))
 sys.exit(0)

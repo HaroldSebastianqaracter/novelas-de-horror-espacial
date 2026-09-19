@@ -14,11 +14,11 @@ import pytest
 RAIZ_REAL = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ_REAL))
 
-from harness.config import cargar_config  # noqa: E402
-from harness.orchestrator import checkpoint  # noqa: E402
-from harness.rutas import Rutas  # noqa: E402
-from harness.schemas import FichaPersonajes, LogContinuidad, Mundo, Outline, RecursosUsados, RecursoUsado  # noqa: E402
-from harness.state import repository as repo  # noqa: E402
+from app.config import cargar_config  # noqa: E402
+from app.orchestrator import checkpoint  # noqa: E402
+from app.rutas import Rutas  # noqa: E402
+from app.schemas import FichaPersonajes, LogContinuidad, Mundo, Outline, RecursosUsados, RecursoUsado  # noqa: E402
+from app.state import repository as repo  # noqa: E402
 
 PERSONAJES = ["Kovacs", "Ilse", "Dara"]
 LOCACIONES = ["Puente", "Bodega 4", "Enfermería"]
@@ -55,9 +55,30 @@ def construir_proyecto(raiz: Path, *, con_estado: bool = True, total: int = 30) 
         origen = RAIZ_REAL / ".claude" / "skills" / skill
         if origen.exists():
             shutil.copytree(origen, rutas.skills / skill, dirs_exist_ok=True)
+    # Los ajustes de la novela se fijan aquí y no se heredan de `config/`, que pertenece al libro que
+    # el usuario tenga cargado. Se descubrió al bajar una novela real a 400 palabras y auditoría cada
+    # capítulo: 25 pruebas se cayeron sin que nadie hubiera tocado el código, porque daban por hecho
+    # 1500 palabras y un corte cada 3. Una suite no puede depender de qué se esté escribiendo.
     novela = json.loads(rutas.novela_json.read_text(encoding="utf-8"))
-    novela["total_capitulos"] = total
+    novela.update({
+        "total_capitulos": total,
+        "palabras_por_capitulo": 1500,
+        "cadencia_qa": 3,
+        "ventana_resumen_rodante": 2,
+        "max_tokens_contexto_escritor": 12000,
+        "max_hechos_por_capitulo": 4,
+        "idioma": "es-ES",
+        "persona_narrativa": "tercera_limitada",
+        "tiempo_verbal": "pasado",
+    })
     rutas.novela_json.write_text(json.dumps(novela, indent=2), encoding="utf-8")
+    ejecucion = json.loads(rutas.ejecucion_json.read_text(encoding="utf-8"))
+    # Lo mismo que arriba, y por el mismo motivo: `config/` es del libro que el usuario tenga
+    # cargado. Una corrida con `escritor_emite_delta` encendido tumbó seis pruebas sin que nadie
+    # hubiera tocado el código, porque el proyecto de pruebas heredó el interruptor.
+    ejecucion.update({"capitulos_por_tanda": 3, "max_llamadas_por_tanda": 30, "registrar_uso": True,
+                      "exportar_trazas": True, "escritor_emite_delta": False})
+    rutas.ejecucion_json.write_text(json.dumps(ejecucion, indent=2), encoding="utf-8")
     if not con_estado:
         return raiz
     repo.escribir_texto(rutas.idea, "Una estación minera en el cinturón pierde contacto con la Tierra.\n")
@@ -140,6 +161,11 @@ class AgentesDobles:
                 {"sujeto": LOCACIONES[(n - 1) % 3], "categoria": "locacion", "hecho": f"La {LOCACIONES[(n - 1) % 3]} cambió en el capítulo {n}.", "cap_origen": n},
             ],
             "resumen_corto": f"Resumen A del capítulo {n}.\nResumen B del capítulo {n}.\nResumen C del capítulo {n}.",
+            # RF-05.5: un recurso que vuelve en todos los capítulos y uno propio de cada uno
+            "recursos_narrativos": [
+                {"recurso": "el zumbido de los ventiladores como coda de escena", "veces": 1},
+                {"recurso": f"imagen propia del capítulo {n}", "veces": 2},
+            ],
         }, ensure_ascii=False)
 
     def ejecutar_corte(self, prompt: str) -> str:

@@ -6,15 +6,15 @@ from pathlib import Path
 
 import pytest
 
-from harness.agents import escritor, extractor, qa
-from harness.agents.plantillas import MARCADORES_OBLIGATORIOS, verificar_checklist
-from harness.errores import ContratoRetornoError, EstadoInvalidoError, OutlineFaltanteError
-from harness.rutas import Rutas
-from harness.schemas import LogContinuidad, HechoContinuidad
-from harness.state import repository as repo
+from app.agents import escritor, extractor, qa
+from app.agents.plantillas import MARCADORES_OBLIGATORIOS, verificar_checklist
+from app.errores import ContratoRetornoError, EstadoInvalidoError, OutlineFaltanteError
+from app.rutas import Rutas
+from app.schemas import LogContinuidad, HechoContinuidad
+from app.state import repository as repo
 from tests.conftest import RAIZ_REAL
 
-FUENTES = RAIZ_REAL / "harness" / "agents"
+FUENTES = RAIZ_REAL / "app" / "agents"
 
 
 def test_escritor_no_importa_lectura_de_manuscrito():
@@ -49,24 +49,29 @@ def test_ensamblar_contexto_rf_05_1(proyecto, config):
     assert "oxígeno para 90 días" in t  # mundo entra siempre
     assert "El Puente perdió la iluminación" in t  # locación del capítulo
     assert "El médico sin validar" in t  # sujeto_validado = false entra siempre
-    assert "Ilse escondió la llave" not in t  # personaje ausente: excluido (criterio d)
-    assert "Bodega 4 está sellada" not in t  # otra locación
-    assert "Dara es la única médica" not in t
-    assert "### Kovacs" in t and "### Ilse" not in t  # fichas solo de los presentes
+    assert "Bodega 4 está sellada" not in t  # otra locación: excluida
+    # X-02.1: fichas y hechos de TODOS los personajes permitidos (los de la escaleta + los que tienen
+    # ficha), no solo los de la entrada. Ilse y Dara tienen ficha, así que ahora entran.
+    assert "### Kovacs" in t and "### Ilse" in t and "### Dara" in t
+    assert "Ilse escondió la llave" in t  # Ilse es un personaje permitido: su hecho viaja
+    assert "Dara es la única médica" in t  # Dara también
     assert "1200" in t and "1800" in t  # ±20 % de 1500
     assert ctx.tokens_estimados > 0 and ctx.metodo_estimacion in ("tiktoken", "heuristica")
-    assert [h.hecho for h in ctx.hechos_inyectados] == [
-        "La estación tiene oxígeno para 90 días.", "El Puente perdió la iluminación principal.", "El médico sin validar dijo algo.",
-    ]
+    hechos = [h.hecho for h in ctx.hechos_inyectados]
+    assert "La estación tiene oxígeno para 90 días." in hechos  # mundo
+    assert "El Puente perdió la iluminación principal." in hechos  # locación
+    assert "El médico sin validar dijo algo." in hechos  # sujeto sin validar
+    assert "Ilse escondió la llave de purga." in hechos  # personaje permitido (X-02.1)
+    assert "La Bodega 4 está sellada desde antes de la llegada." not in hechos  # otra locación
 
 
 def test_ensamblar_contexto_ex03_y_ex04(proyecto, config):
     with pytest.raises(OutlineFaltanteError):
         escritor.ensamblar_contexto(31, config, proyecto)
     texto = ""
-    from harness.state import resumen_rodante as rr
+    from app.state import resumen_rodante as rr
     for n in range(1, 3):
-        texto = rr.agregar(texto, n, "relleno " * 400, 2)
+        texto = rr.agregar(texto, n, "relleno " * 400)
     repo.escribir_resumen_rodante(proyecto, texto)
     ctx = escritor.ensamblar_contexto(3, config.model_copy(update={"max_tokens_contexto_escritor": 900}), proyecto)
     assert ctx.excede_limite()
@@ -78,6 +83,30 @@ def test_ensamblar_contexto_ex03_y_ex04(proyecto, config):
     assert len(repo.leer_continuidad(proyecto)) == 3
 
 
+def test_ensamblar_contexto_lleva_relevo_al_capitulo_siguiente(proyecto, config):
+    # X-02.4b: del capítulo siguiente, su locación y el encargo de dejar la escena; nunca su información nueva.
+    ctx = escritor.ensamblar_contexto(1, config, proyecto)
+    assert "capítulo siguiente (2)" in ctx.texto
+    assert "Bodega 4" in ctx.texto  # LOCACIONES[1], locación del capítulo 2
+    assert "Dato nuevo 2." not in ctx.texto  # su informacion_nueva no se adelanta
+
+
+def test_ensamblar_contexto_ultimo_capitulo_no_deja_relevo(proyecto, config):
+    ctx = escritor.ensamblar_contexto(30, config, proyecto)
+    assert "último capítulo" in ctx.texto
+
+
+def test_ensamblar_contexto_muestra_la_posicion_de_la_ficha(proyecto, config):
+    # X-02.2: la posición que fija el extractor viaja en la ficha del escritor.
+    from app.schemas import FichaPersonajes, Personaje
+    fichas = repo.leer_personajes(proyecto)
+    fichas.root["Kovacs"] = Personaje(estado_fisico="Sano.", estado_psicologico="Alerta.",
+                                      posicion="Puente, junto a la escotilla", ultima_aparicion=0)
+    repo.escribir_personajes(proyecto, fichas)
+    ctx = escritor.ensamblar_contexto(1, config, proyecto)
+    assert "Dónde quedó: Puente, junto a la escotilla" in ctx.texto
+
+
 def test_ensamblar_contexto_no_contiene_manuscrito(proyecto, config):
     capitulo = "Frase única del capítulo uno que no debe viajar al escritor jamás. " * 5
     repo.guardar_capitulo(proyecto, 1, capitulo)
@@ -87,14 +116,14 @@ def test_ensamblar_contexto_no_contiene_manuscrito(proyecto, config):
 
 
 def test_parser_retorno_escritor():
-    r = escritor.parsear_retorno_escritor("cap_7.md · 2.940 palabras · personajes: Kovacs, Ilse")
+    r = escritor.parsear_retorno_escritor("cap_7.md · 2.940 palabras · personajes: Kovacs, Ilse · validado")
     assert (r.n, r.palabras_declaradas, r.personajes) == (7, 2940, ["Kovacs", "Ilse"])
-    r = escritor.parsear_retorno_escritor("05_manuscrito/cap_12.md - 1500 palabras - personajes: Dara\n")
+    r = escritor.parsear_retorno_escritor("05_manuscrito/cap_12.md - 1500 palabras - personajes: Dara - validado\n")
     assert (r.n, r.palabras_declaradas) == (12, 1500)
     with pytest.raises(ContratoRetornoError, match="una línea"):
-        escritor.parsear_retorno_escritor("cap_7.md · 2940 palabras · personajes: Kovacs\nLa nave crujía en la oscuridad.")
+        escritor.parsear_retorno_escritor("cap_7.md · 2940 palabras · personajes: Kovacs · validado\nLa nave crujía en la oscuridad.")
     with pytest.raises(ContratoRetornoError, match="40 palabras"):
-        escritor.parsear_retorno_escritor("cap_7.md · 2940 palabras · personajes: " + " ".join(["nombre"] * 45))
+        escritor.parsear_retorno_escritor("cap_7.md · 2940 palabras · personajes: " + " ".join(["nombre"] * 45) + " · validado")
     with pytest.raises(ContratoRetornoError, match="forma"):
         escritor.parsear_retorno_escritor("Escribí el capítulo siete y quedó muy bien.")
     with pytest.raises(ContratoRetornoError):
@@ -157,7 +186,7 @@ def test_qa_muestra_prompt_y_parser(proyecto, config):
     assert prep.caps_muestra == [1, 2, 3]
     assert "oxígeno para 90 días" in prep.prompt and "superado_por" in prep.prompt  # log completo con superado_por visible
     assert "3 o más" in prep.prompt and "06_qa/reportes/qa_cap_3.json" in prep.prompt
-    r = qa.parsear_retorno_qa("tiene_contradicciones: true\ncontradicciones: 1 · repeticiones: 0\nreporte: 06_qa/reportes/qa_cap_3.md")
+    r = qa.parsear_retorno_qa("tiene_contradicciones: true\ncontradicciones: 1 · repeticiones: 0\nreporte: 06_qa/reportes/qa_cap_3.md\nvalidado")
     assert r.tiene_contradicciones
     with pytest.raises(ContratoRetornoError, match="líneas"):
         qa.parsear_retorno_qa("\n".join(["línea"] * 6))

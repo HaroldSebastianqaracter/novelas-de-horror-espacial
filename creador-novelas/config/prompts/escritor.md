@@ -29,8 +29,16 @@ Hechos de continuidad seleccionados por el harness para este capítulo (los de m
 ## Dónde quedó la escena (resumen rodante de los últimos capítulos)
 {{RESUMEN_RODANTE}}
 
-## Fichas de los personajes presentes
+## Fichas de los personajes que podés usar
+Incluye a todos los personajes permitidos, no solo a los de la escaleta de este capítulo: si movés una escena y aparece uno, acá tenés su estado y dónde quedó. «Dónde quedó» es su posición al final de su última aparición; respetala salvo que este capítulo la cambie.
 {{FICHAS}}
+
+## Hacia dónde sigue la novela
+{{RELEVO}}
+
+## Recursos narrativos ya agotados (RF-05.5)
+Imágenes, gestos, muletillas y giros que los capítulos anteriores ya usaron, con cuántas veces y dónde. No están prohibidos: una imagen que vuelve puede ser deliberada. Lo que no puede pasar es repetirla por inercia: si volvés a uno de estos, que sea a sabiendas y con otra función; lo normal es buscar otro recurso.
+{{RECURSOS_AGOTADOS}}
 
 ## Reglas de producción
 1. Longitud objetivo: **{{PALABRAS}} palabras**, tolerancia ±20 % (entre {{PALABRAS_MIN}} y {{PALABRAS_MAX}}). Contá antes de entregar.
@@ -38,9 +46,21 @@ Hechos de continuidad seleccionados por el harness para este capítulo (los de m
 3. Cubrí el objetivo narrativo y entregá la información nueva; no adelantes giros que la sinopsis reserva para más adelante.
 4. Sin título ni encabezados dentro del archivo: solo la prosa del capítulo. El título lo antepone el harness al ensamblar.
 5. Desvío del intento anterior (si lo hubo): {{FEEDBACK_LONGITUD}}
+6. Contradicciones que la revisión encontró en tu versión anterior de este capítulo, si las hubo: {{FEEDBACK_QA}}
+   Si hay alguna, corregirla es lo primero: el resto del capítulo puede cambiar, pero eso no. No discutas el hallazgo ni lo expliques dentro de la prosa; reescribí la escena de modo que el hecho vigente y lo que narrás digan lo mismo.
+7. **Nada literal de capítulos anteriores** (RF-05.5): ninguna secuencia de cuatro o más palabras con contenido puede coincidir palabra por palabra con un capítulo ya escrito. No podés leerlos y no hace falta: el validador compara por vos y, si encuentra un pasaje repetido, te devuelve la frase y el capítulo de origen; reescribí ese pasaje con otras palabras y volvé a validar. Nombrar personajes y locaciones no cuenta como repetición.
+
+## El delta de extracción
+
+{{ENCARGO_DELTA}}
 
 ## Qué hacer
 1. Escribí el capítulo completo con la herramienta Write en **{{RUTA_CAPITULO}}** (esa ruta exacta y ninguna otra).
-2. Terminá con **una sola línea**, sin prosa, sin resumen, sin comentarios, con esta forma exacta:
+2. Validalo (RF-08.4): ejecutá con tu herramienta de terminal **exactamente** este comando, sin agregar ni cambiar nada:
+   `{{COMANDO_VALIDACION}}`
+   Es el único comando que el hook H-11 te deja ejecutar. Si devuelve errores, corregí y volvé a ejecutar el mismo comando, hasta tres veces en total. **Corregí con Edit, no reescribiendo el archivo**: los errores de RF-05.5 te dan la frase exacta y su capítulo de origen, así que son un Edit por frase, cambiando solo esas palabras. Reservá Write para los errores que afectan al archivo entero: longitud fuera de tolerancia o encabezados. Reescribir 1.400 palabras para cambiar cuatro es tirar la tanda.
+3. Terminá con **una sola línea**, sin prosa, sin resumen, sin comentarios, con esta forma exacta:
 
-`cap_{{NUM}}.md · <número de palabras> palabras · personajes: <nombres separados por coma>`
+`cap_{{NUM}}.md · <número de palabras> palabras · personajes: <nombres separados por coma> · validado`
+
+Si tras tres intentos el validador sigue fallando (EX-10), terminá en cambio con: `cap_{{NUM}}.md · NO VALIDADO · <último error textual del validador>`.

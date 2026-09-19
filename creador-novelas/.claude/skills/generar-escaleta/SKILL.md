@@ -1,7 +1,7 @@
 ---
 name: generar-escaleta
 description: Fase 3 (RF-03.1, RF-03.2). Genera 04_estado/capitulos.json con total_capitulos entradas, títulos únicos y curva de tensión con máximo en el tercio final. Crea el manifiesto.
-allowed-tools: Read, Write, Bash(.venv/Scripts/python.exe -m harness:*)
+allowed-tools: Read, Write, Bash(.venv/Scripts/python.exe -m app:*)
 disable-model-invocation: true
 ---
 
@@ -23,8 +23,9 @@ Pasos:
 2. Los títulos se generan acá, no en el escritor (RF-03.1): estilo consistente, ninguno vacío ni repetido.
 3. Curva de tensión (RF-03.2): no monótonamente decreciente y con el **máximo en el tercio final**. Respirá con niveles 1-2 entre picos.
 4. Cada personaje con nombre que vaya a aparecer en la novela debe figurar en `personajes` de al menos una entrada: la fase 4 crea las fichas a partir de esta lista y el escritor no puede inventar otros (EX-08).
-5. Guardá con Write en `.tanda/borradores/capitulos.json` y persistí con
-   `.venv/Scripts/python.exe -m harness guardar outline --desde .tanda/borradores/capitulos.json`
+5. **Un nombre que es en sí mismo un giro no se adelanta.** Si una entidad recibe su nombre en un capítulo concreto (la tripulación bautiza a la presencia, se descubre quién es el impostor), en las entradas ANTERIORES a ese capítulo figurá por su función, no por ese nombre: `la presencia`, `la voz del intercomunicador`, `el pasajero`. El escritor recibe la lista de `personajes` de su capítulo y usa esos nombres tal cual; si el nombre-giro aparece antes de tiempo, lo escribe antes de tiempo y el giro se quema. En el capítulo del giro y en los siguientes, ya sí, el nombre propio.
+6. Guardá con Write en `.tanda/borradores/capitulos.json` y persistí con
+   `.venv/Scripts/python.exe -m app guardar outline --desde .tanda/borradores/capitulos.json`
    `guardar` valida el esquema, la cantidad, la unicidad de títulos y la curva; si falla, corregí exactamente eso y repetí.
 
 Retorno: una línea con la ruta escrita, la cantidad de entradas y el capítulo donde cae el máximo de tensión.

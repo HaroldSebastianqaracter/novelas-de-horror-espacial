@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lo que quedó despierto — Capítulo 4, El casco frío del Falcon</title>
+<style>
+  :root{
+    --abismo:#06070A;        /* negro casi absoluto, frío */
+    --acero:#0E1116;         /* superficies */
+    --acero-alto:#161B22;    /* superficies iluminadas */
+    --hilo:rgba(214,218,216,.14);   /* líneas finas */
+    --hilo-fuerte:rgba(214,218,216,.32);
+    --niebla:#D6DAD8;        /* texto principal */
+    --niebla-baja:#8A9399;   /* texto secundario */
+    --halogeno:#E8D9B5;      /* luz cálida de foco */
+    --emergencia:#B3261E;    /* luz roja de emergencia */
+    --emergencia-luz:rgba(179,38,30,.55);
+    --fosforo:#A8D8C8;       /* lo que la máquina fija: verde-gris apagado */
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{background:var(--abismo);color:var(--niebla)}
+  a,button,input,textarea{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--halogeno);outline-offset:3px}
+
+  .atm{position:absolute;inset:0;pointer-events:none}
+  .atm-luz{
+    background:
+      radial-gradient(ellipse 58% 42% at 28% -8%,rgba(232,217,181,.17),transparent 62%),
+      radial-gradient(ellipse 34% 60% at 104% 58%,var(--emergencia-luz),transparent 62%),
+      radial-gradient(ellipse 50% 30% at 60% 110%,rgba(179,38,30,.16),transparent 70%);
+  }
+  .atm-vineta{background:radial-gradient(ellipse 70% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.62) 100%)}
+  .atm-grano{background:#7a7a7a;filter:url(#grano);opacity:.10;mix-blend-mode:overlay}
+  .atm-polvo{
+    opacity:.35;
+    background:
+      radial-gradient(circle at 18% 22%,rgba(232,217,181,.35) 0 .8px,transparent 1.6px),
+      radial-gradient(circle at 63% 11%,rgba(232,217,181,.25) 0 .7px,transparent 1.5px),
+      radial-gradient(circle at 41% 37%,rgba(232,217,181,.28) 0 .6px,transparent 1.4px),
+      radial-gradient(circle at 77% 44%,rgba(232,217,181,.22) 0 .9px,transparent 1.8px),
+      radial-gradient(circle at 12% 61%,rgba(232,217,181,.2) 0 .6px,transparent 1.3px),
+      radial-gradient(circle at 88% 80%,rgba(214,218,216,.18) 0 .7px,transparent 1.5px);
+    background-size:900px 700px,1100px 800px,700px 900px,1300px 600px,800px 1000px,1000px 900px;
+  }
+  .escena > *{position:relative;z-index:1}
+  .escena > .atm,.escena > .focos{position:absolute;inset:0;pointer-events:none;z-index:0}
+  .escena > .atm-grano,.escena > .atm-vineta{z-index:2}
+  .escena{position:relative;overflow:hidden;background:var(--abismo)}
+
+  /* Panel de vidrio ahumado: la interfaz flota sobre la oscuridad */
+  .vidrio{
+    background:linear-gradient(180deg,rgba(22,27,34,.72),rgba(14,17,22,.78));
+    border:1px solid var(--hilo);
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.9),inset 0 1px 0 rgba(232,217,181,.08);
+    backdrop-filter:blur(6px);
+  }
+  .hairline{border-top:1px solid var(--hilo)}
+  /* Sangre: la luz roja del fondo fluye despacio, como un líquido que baja por el mamparo */
+  .escena > .atm-sangre{left:auto;right:-8%;width:56%;top:-10%;bottom:-10%;opacity:.85;filter:url(#sangre) blur(2px);mix-blend-mode:screen;
+    background:
+      radial-gradient(ellipse 34% 46% at 78% 26%,rgba(179,38,30,.55),rgba(120,16,14,.25) 45%,transparent 70%),
+      radial-gradient(ellipse 28% 60% at 92% 62%,rgba(150,22,20,.6),rgba(90,10,10,.2) 50%,transparent 72%),
+      radial-gradient(ellipse 40% 30% at 62% 96%,rgba(140,20,18,.5),transparent 70%);
+    background-size:100% 100%;background-repeat:no-repeat;
+    animation:fluir 32s ease-in-out infinite alternate;transform-origin:100% 50%}
+  @keyframes fluir{
+    0%{background-position:0 0,0 0,0 0;transform:translateY(-2%) scale(1)}
+    50%{background-position:-6% 8%,3% -6%,-4% 4%;transform:translateY(1.5%) scale(1.04)}
+    100%{background-position:4% 14%,-5% 6%,6% -3%;transform:translateY(4%) scale(1.02)}
+  }
+  @media (prefers-reduced-motion:reduce){.escena > .atm-sangre{animation:none}}
+
+  /* Haz de luz volumétrico desde el foco, y filo rojo de emergencia en el borde derecho */
+  .atm-haz{background:conic-gradient(from 152deg at 20% -12%,transparent 0deg,transparent 16deg,rgba(232,217,181,.085) 24deg,rgba(232,217,181,.035) 34deg,transparent 46deg)}
+  .atm-filo{background:linear-gradient(270deg,rgba(179,38,30,.55),rgba(179,38,30,.12) 3px,transparent 70px)}
+  .atm-filo::after{content:"";position:absolute;right:0;top:0;bottom:0;width:2px;background:var(--emergencia);box-shadow:0 0 24px 4px rgba(179,38,30,.7)}
+  .escena > .atm-filo{z-index:2}
+  /* Estructura del mamparo: costillas verticales en perspectiva, muy tenues */
+  .atm-mamparo{opacity:.9;
+    background:
+      repeating-linear-gradient(90deg,transparent 0 118px,rgba(214,218,216,.035) 118px 119px,transparent 119px 120px),
+      linear-gradient(180deg,rgba(214,218,216,.05),transparent 18%,transparent 82%,rgba(0,0,0,.6))}
+  /* Texto fantasma: enorme, casi invisible, en serif itálica */
+  .fantasma{position:absolute;pointer-events:none;z-index:0;font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;
+    color:transparent;-webkit-text-stroke:1px rgba(232,217,181,.10);letter-spacing:-.04em;line-height:.8;user-select:none;white-space:nowrap}
+  .escena > .fantasma{position:absolute;z-index:0}
+  /* Botones: vidrio con filo iluminado */
+  .btn-luz{position:relative;overflow:hidden}
+  .btn-luz::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.08),transparent 55%);pointer-events:none}
+  /* Regla ornamental: hilo con un punto rojo al final, como un piloto */
+  .regla-piloto{position:relative;height:1px;background:linear-gradient(90deg,var(--hilo-fuerte),var(--hilo) 70%,transparent)}
+  .regla-piloto::after{content:"";position:absolute;right:0;top:-3px;width:7px;height:7px;border-radius:50%;background:var(--emergencia);box-shadow:0 0 12px 2px rgba(179,38,30,.8)}
+
+  .cabecera h1 small{font-size:30px}
+  .texto h2{font-size:56px;letter-spacing:-.02em;margin-top:6px}
+  .texto header{position:relative;border-bottom:0;padding-bottom:22px}
+  .texto header .regla-piloto{margin-top:22px}
+  .texto .fantasma{left:-40px;top:-70px;font-size:300px;-webkit-text-stroke:1px rgba(232,217,181,.09)}
+  .texto p:first-of-type::first-letter{float:left;font-size:4.2em;line-height:.78;padding:8px 12px 0 0;color:var(--halogeno);font-style:italic;text-shadow:0 0 24px rgba(232,217,181,.35)}
+  .texto p{color:#D3D8D6;text-shadow:0 1px 1px rgba(0,0,0,.8)}
+  .texto .mano{font-size:1.35em;letter-spacing:.14em;padding:.7em 0;text-align:center;position:relative}
+  .texto .mano::before{content:"";position:absolute;inset:-30px -60px;background:radial-gradient(ellipse 60% 70% at 50% 50%,rgba(179,38,30,.16),transparent 70%);z-index:-1}
+  .margen{padding:26px 26px 30px;background:linear-gradient(180deg,rgba(22,27,34,.62),rgba(10,12,16,.82));box-shadow:0 40px 90px -30px rgba(0,0,0,1),inset 0 1px 0 rgba(232,217,181,.10)}
+  .margen h3{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;font-size:17px;color:var(--halogeno)}
+  .cuarentena{padding:12px 18px;background:linear-gradient(90deg,rgba(179,38,30,.22),rgba(179,38,30,.04) 60%,transparent);box-shadow:-30px 0 60px -20px rgba(179,38,30,.8),inset 0 0 0 1px rgba(179,38,30,.25)}
+  .cuarentena b{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;font-size:16px;letter-spacing:0}
+  .costillar li.actual i{box-shadow:0 0 14px 1px rgba(232,217,181,.9)}
+
+
+  body{font-family:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,"Times New Roman",serif;font-size:20px;line-height:1.62;min-width:1024px}
+  .ui{font-family:"Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;letter-spacing:.02em}
+  .pantalla{min-height:100vh}
+  .marco{position:relative;padding:14px 30px}
+  .marco::before,.marco::after{content:"";position:absolute;top:0;bottom:0;width:22px;border:1px solid var(--hilo-fuerte)}
+  .marco::before{left:0;border-right:0}
+  .marco::after{right:0;border-left:0}
+
+  .cabecera{position:sticky;top:0;z-index:2;display:grid;grid-template-columns:1fr auto;align-items:center;gap:32px;padding:26px 56px 18px;
+    background:linear-gradient(180deg,rgba(6,7,10,.96),rgba(6,7,10,.86));backdrop-filter:blur(8px);border-bottom:1px solid var(--hilo)}
+  .cabecera .marco{justify-self:center;text-align:center;min-width:560px}
+  .cabecera h1{margin:0;font-size:22px;font-weight:400;line-height:1.2;color:var(--niebla-baja)}
+  .cabecera h1 small{display:block;font-size:26px;color:var(--halogeno);font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;letter-spacing:0;margin-top:2px}
+  .estado{color:var(--niebla-baja);font-size:14px;text-align:right}
+  .estado b{display:block;color:var(--niebla);font-weight:400;font-size:16px}
+  .estado .ticks{display:flex;gap:3px;justify-content:flex-end;margin-top:6px}
+  .estado .ticks i{width:12px;height:2px;background:var(--hilo-fuerte)}
+  .estado .ticks i.on{background:var(--halogeno)}
+  .estado .ticks i.stop{background:var(--emergencia);box-shadow:0 0 8px var(--emergencia)}
+
+  .cuarentena{margin:0 56px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:24px;padding:10px 16px;
+    background:linear-gradient(90deg,rgba(179,38,30,.16),transparent 70%);border-left:2px solid var(--emergencia);
+    color:var(--niebla-baja);font-size:14px;line-height:1.35;box-shadow:-20px 0 40px -20px rgba(179,38,30,.6)}
+  .cuarentena p{margin:0}
+  .cuarentena b{color:#E0685C;font-weight:400}
+  .cuarentena a{font-size:14px;text-decoration:none;border:1px solid var(--hilo-fuerte);padding:6px 12px;color:var(--niebla);white-space:nowrap}
+  .cuarentena a:hover{background:rgba(214,218,216,.08)}
+
+  .pagina{display:grid;grid-template-columns:120px minmax(560px,66ch) minmax(240px,1fr);gap:0 48px;padding:48px 56px 120px 40px;max-width:1500px;margin:0 auto}
+
+  .costillar{position:sticky;top:150px;align-self:start;height:calc(100vh - 200px);display:flex;flex-direction:column}
+  .costillar ol{list-style:none;margin:0;padding:0;flex:1;display:flex;flex-direction:column;justify-content:space-between;border-left:1px solid var(--hilo)}
+  .costillar li{display:flex;align-items:center;min-height:0}
+  .costillar a,.costillar span{display:flex;align-items:center;gap:8px;text-decoration:none;font-size:12px;color:var(--niebla-baja);width:100%}
+  .costillar i{display:block;height:1px;background:var(--hilo);width:24px;flex:none;margin-left:-1px}
+  .costillar li.leido i{background:var(--hilo-fuerte);width:36px}
+  .costillar li.actual i{background:var(--halogeno);width:56px;height:2px;box-shadow:0 0 10px rgba(232,217,181,.8)}
+  .costillar li.actual a{color:var(--halogeno)}
+  .costillar li.sellado i{background:transparent;border-top:1px dashed var(--hilo)}
+  .costillar li.pausa i{background:var(--emergencia);height:4px;width:20px;box-shadow:0 0 10px var(--emergencia)}
+  .costillar li.pausa span{color:#E0685C}
+  .costillar a:hover{color:var(--niebla)}
+
+  /* El texto bajo el foco: una luz cálida cae sobre la columna, el resto queda en sombra */
+  .texto{position:relative;padding:8px 28px 0;margin:0 -28px}
+  .texto::before{content:"";position:absolute;inset:-40px -10px auto -10px;height:520px;pointer-events:none;z-index:-1;
+    background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(232,217,181,.09),transparent 70%)}
+  .texto header{margin:0 0 40px;padding-bottom:16px;border-bottom:1px solid var(--hilo)}
+  .texto .numero{display:block;font-size:13px;color:var(--niebla-baja);margin-bottom:8px}
+  .texto h2{margin:0;font-size:44px;line-height:1.02;font-weight:400;font-style:italic;color:var(--halogeno);text-shadow:0 0 30px rgba(232,217,181,.25)}
+  .texto .cierre{margin:10px 0 0;font-size:13px;color:var(--niebla-baja)}
+  .texto p{margin:0 0 1.3em;hyphens:auto;text-wrap:pretty;color:#CDD2D0}
+  .texto .aviso{display:block;padding-left:1.4em;font-style:italic;color:var(--niebla-baja)}
+  .texto .mano{display:block;margin:1.6em 0;padding:.6em 0;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700;font-size:1.15em;letter-spacing:.1em;
+    color:#E0685C;border-top:1px solid rgba(179,38,30,.5);border-bottom:1px solid rgba(179,38,30,.5);text-shadow:0 0 18px rgba(179,38,30,.8)}
+  mark.hecho{background:transparent;color:inherit;transition:background-color 500ms ease,box-shadow 500ms ease}
+  body.hechos mark.hecho{background:rgba(168,216,200,.10);box-shadow:0 1px 0 var(--fosforo)}
+  body.hechos mark.hecho.conflicto{background:rgba(179,38,30,.18);box-shadow:0 1px 0 var(--emergencia)}
+  .texto .siguiente{margin-top:64px;padding-top:20px;border-top:1px solid var(--hilo);display:flex;justify-content:space-between;gap:24px;align-items:baseline;font-size:15px}
+  .texto .siguiente a{text-decoration:none;border:1px solid var(--hilo-fuerte);padding:8px 14px;color:var(--niebla)}
+  .texto .siguiente a:hover{background:rgba(214,218,216,.08)}
+  .texto .siguiente small{display:block;color:var(--niebla-baja);margin-top:4px;font-size:12.5px}
+
+  .margen{font-size:13.5px;line-height:1.45;color:var(--niebla-baja);padding:22px 22px 26px}
+  .margen h3{font-size:13.5px;font-weight:400;color:var(--niebla);margin:0 0 6px}
+  .margen .quien{margin:0 0 24px;padding:0 0 12px;border-bottom:1px solid var(--hilo)}
+  .margen dl{margin:0}
+  .margen dt{color:var(--fosforo);margin-top:16px}
+  .margen dt::before{content:"//";opacity:.6}
+  .margen dd{margin:2px 0 0}
+  .margen dd.conflicto{color:#E0685C;padding-left:12px;border-left:1px solid var(--emergencia);margin-top:6px}
+  .margen svg{width:100%;height:auto;display:block;margin-top:24px}
+  .margen svg text{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:.02em}
+  .margen .accion{margin-top:36px}
+  .margen button{display:block;width:100%;text-align:left;background:transparent;border:1px solid var(--hilo-fuerte);padding:12px 14px;cursor:pointer;font-size:14px;line-height:1.35;color:var(--niebla)}
+  .margen button:hover{background:rgba(214,218,216,.08)}
+  .margen button small{display:block;color:var(--niebla-baja);margin-top:4px}
+  body.hechos .margen button{border-color:var(--fosforo)}
+  .margen .actores{margin-top:36px}
+  .margen .actores ul{margin:0;padding:0;list-style:none;border-top:1px solid var(--hilo)}
+  .margen .actores li{padding:6px 0;border-bottom:1px solid var(--hilo)}
+  .margen .actores li b{color:var(--niebla);font-weight:400}
+  @media (prefers-reduced-motion:reduce){mark.hecho{transition:none}}
+  @media (max-width:1280px){.cabecera{padding:22px 36px 16px}.cabecera .marco{min-width:480px}.cuarentena{margin:0 36px}
+    .pagina{grid-template-columns:100px minmax(520px,62ch) minmax(220px,1fr);gap:0 36px;padding:36px 36px 100px 28px}body{font-size:19px}.texto h2{font-size:36px}}
+</style>
+</head>
+<body>
+
+<div class="pantalla escena"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="grano"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></svg>
+<div class="atm atm-luz" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="sangre" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.012" numOctaves="3" seed="7" result="ruido"><animate attributeName="baseFrequency" dur="46s" values="0.006 0.012;0.009 0.008;0.005 0.014;0.006 0.012" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="ruido" scale="90" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<div class="atm atm-sangre" aria-hidden="true"></div>
+
+<div class="atm atm-polvo" aria-hidden="true"></div>
+<div class="atm atm-grano" aria-hidden="true"></div>
+<div class="atm atm-vineta" aria-hidden="true"></div>
+<div class="atm atm-mamparo" aria-hidden="true"></div>
+<div class="atm atm-haz" aria-hidden="true"></div>
+<div class="atm atm-filo" aria-hidden="true"></div>
+
+
+  <header class="cabecera ui">
+    <div class="marco">
+      <h1>Capítulo 4 de 30<small>Lo que quedó despierto</small></h1>
+    </div>
+    <div class="estado" role="status">
+      <b>Leyendo...</b>
+      El casco frío del Falcon
+      <div class="ticks" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="stop"></i><i></i><i></i><i></i></div>
+    </div>
+  </header>
+
+  <div class="cuarentena ui" role="status">
+    <p><b>//Producción detenida en el capítulo 6.</b> El Revisor de calidad ha encontrado dos contradicciones con hechos establecidos y quince repeticiones de lenguaje. Puedes leer lo cerrado; nada nuevo se escribe hasta que decidas.</p>
+    <a href="#veredicto">Ver el veredicto</a>
+  </div>
+
+  <div class="pagina">
+    <nav class="costillar ui" aria-label="Capítulos">
+      <ol>
+        <li class="leido"><a href="#c1"><i aria-hidden="true"></i>1</a></li>
+        <li class="leido"><a href="#c2"><i aria-hidden="true"></i>2</a></li>
+        <li class="leido"><a href="#c3"><i aria-hidden="true"></i>3</a></li>
+        <li class="actual"><a href="#c4" aria-current="page"><i aria-hidden="true"></i>4, estás aquí</a></li>
+        <li class="leido"><a href="#c5"><i aria-hidden="true"></i>5</a></li>
+        <li class="leido"><a href="#c6"><i aria-hidden="true"></i>6</a></li>
+        <li class="pausa"><span><i aria-hidden="true"></i>revisor</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>7</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>8</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>9</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>10</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>15</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>20</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>25</span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i></span></li>
+        <li class="sellado"><span><i aria-hidden="true"></i>30</span></li>
+      </ol>
+    </nav>
+
+    <article class="texto" id="c4">
+      <header><span class="fantasma" aria-hidden="true">4</span>
+        <span class="numero ui">//Cubierta de ingeniería, ramal seis</span>
+        <h2>Lo que quedó despierto</h2>
+        <p class="cierre ui">Cerrado por el Escritor a las 13:27, revisado sin reparos en la auditoría del capítulo 4.</p>
+        <div class="regla-piloto" aria-hidden="true"></div>
+      </header>
+
+      <p>La cubierta de ingeniería olía a hierro caliente y a algo más dulce que Vlk no quiso terminar de nombrar. <mark class="hecho">Las luces de emergencia iban y venían en un ciclo de tres segundos: rojo, nada, rojo.</mark> En cada intervalo de oscuridad el pasillo parecía haber cambiado un poco de forma, y ella había aprendido a no comprobarlo.</p>
+
+      <p>El cortador pesaba lo que pesa una herramienta, no lo que pesa un arma. Eso era lo peor. <mark class="hecho">Estaba diseñado para abrir mamparos de aleación en gravedad cero, con una empuñadura pensada para guantes de trabajo y un seguro que había que soltar con el pulgar</mark> mientras se sujetaba el cuerpo con las piernas. Nadie había previsto que alguien lo llevara así, <mark class="hecho conflicto">contra el pecho, avanzando de espaldas a lo largo de una pared.</mark></p>
+
+      <p><mark class="hecho">El aviso de cuarentena seguía repitiéndose por los altavoces del ramal seis, la misma voz sintética que llevaba sonando desde antes de que ellos despertaran.</mark>
+        <span class="aviso">Permanezcan en sus puestos. La situación está bajo control. El personal médico acudirá a su sección.</span>
+        Vlk había contado las repeticiones durante la primera hora y luego lo había dejado, porque contar implicaba que en algún momento iba a parar.</p>
+
+      <p>En el mamparo, alguien había escrito con las manos, y no con tinta:</p>
+      <span class="mano">NO VOLVÁIS A DORMIR.</span>
+
+      <nav class="siguiente ui" aria-label="Capítulos contiguos">
+        <a href="#c3">Capítulo 3, la cubierta vacía<small>anterior</small></a>
+        <a href="#c5">Capítulo 5, Permanezcan en sus puestos<small>siguiente, cerrado</small></a>
+      </nav>
+    </article>
+
+    <aside class="margen ui vidrio" aria-labelledby="margen-t">
+      <div class="quien">
+        <h3 id="margen-t">Lo que el Extractor fijó en este capítulo</h3>
+        Siete hechos. A partir de aquí el Escritor no puede contradecirlos sin que el Revisor lo vea.
+      </div>
+      <dl>
+        <dt>Vlk</dt>
+        <dd>Lleva el cortador de mamparos contra el pecho. Avanza de espaldas por la cubierta de ingeniería.</dd>
+        <dd class="conflicto">En conflicto con el capítulo 6, donde el cortador sigue guardado en el taller. Es una de las dos contradicciones del veredicto.</dd>
+        <dt>El cortador</dt>
+        <dd>Herramienta de minería. Seguro que se suelta con el pulgar. Pensado para gravedad cero y guantes de trabajo.</dd>
+        <dt>Luces de emergencia</dt>
+        <dd>Ciclo de tres segundos: rojo, nada, rojo.</dd>
+        <dt>Aviso de cuarentena</dt>
+        <dd>Suena en el ramal seis desde antes del despertar. Tres frases, siempre las mismas.</dd>
+        <dt>El mamparo</dt>
+        <dd>Escrito a mano, no con tinta: «No volváis a dormir».</dd>
+      </dl>
+
+      <svg viewBox="0 0 300 160" role="img" aria-label="Plano en alambre del ramal seis: Vlk avanza de espaldas por el pasillo hacia el mamparo escrito; el altavoz de cuarentena a media distancia. Vlk resaltada en verde, el mamparo en rojo.">
+        <defs>
+          <filter id="brillo2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <pattern id="malla2" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M0 5 H10 M5 0 V10" stroke="#2A3138" stroke-width=".6"/></pattern>
+        </defs>
+        <g fill="url(#malla2)" stroke="#6B7378" stroke-width="1.2">
+          <path d="M10 30 h 200 v 40 h -40 v 60 h -160 z"/>
+          <path d="M210 30 h 80 v 100 h -120 v -60 h 40 z"/>
+        </g>
+        <path d="M60 30 v 40 M110 30 v 40 M160 30 v 40 M60 90 h 110" stroke="#2A3138" stroke-width="1" stroke-dasharray="3 4" fill="none"/>
+        <path d="M186 44 l 10 -6 v 24 l -10 -6 z M200 46 q 6 6 0 12 M204 42 q 10 10 0 20" fill="none" stroke="#6B7378" stroke-width="1.2"/>
+        <circle cx="46" cy="52" r="6" fill="#A8D8C8" filter="url(#brillo2)"/>
+        <path d="M54 52 L 96 52 M 88 46 L 96 52 L 88 58" fill="none" stroke="#A8D8C8" stroke-width="1.5"/>
+        <path d="M38 52 L 20 52" fill="none" stroke="#A8D8C8" stroke-width="1.5" stroke-dasharray="2 3"/>
+        <path d="M250 62 h 30" stroke="#B3261E" stroke-width="5" filter="url(#brillo2)"/>
+        <text x="228" y="86" fill="#B3261E">//Mamparo escrito</text>
+        <text x="14" y="146" fill="#8A9399">//Ramal seis, cubierta de ingeniería</text>
+        <text x="34" y="44" fill="#A8D8C8">//Vlk, mirando atrás</text>
+        <text x="180" y="30" fill="#8A9399">//Altavoz</text>
+      </svg>
+
+      <div class="accion">
+        <button type="button" id="btn-hechos" class="btn-luz" aria-pressed="false">Resaltar los hechos fijados en el texto<small>Las frases que el Extractor tomó como hechos se iluminan en verde apagado; la que entra en conflicto, en rojo.</small></button>
+      </div>
+
+      <div class="actores" id="veredicto">
+        <h3>Quién ha tocado este capítulo</h3>
+        <ul>
+          <li><b>Escritor</b>, redactó 2.560 palabras a partir del plan y de 27 hechos vigentes.</li>
+          <li><b>Extractor de hechos</b>, fijó siete hechos; uno entra en conflicto más adelante.</li>
+          <li><b>Revisor de calidad</b>, lo aprobó en la auditoría del capítulo 4; en la del 6 lo señala como origen de una contradicción.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
+
+<script>
+  // Único movimiento orquestado: resaltar en el texto los hechos que el Extractor fijó.
+  (function(){
+    var b=document.getElementById('btn-hechos');
+    b.addEventListener('click',function(){
+      var on=document.body.classList.toggle('hechos');
+      b.setAttribute('aria-pressed',on?'true':'false');
+      b.firstChild.textContent=on?'Ocultar los hechos fijados':'Resaltar los hechos fijados en el texto';
+    });
+  })();
+</script>
+
+<script>
+  // Respeto a prefers-reduced-motion también para la animación SVG del fluido
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('#sangre animate').forEach(function(a){ a.remove(); });
+  }
+</script>
+</body>
+</html>

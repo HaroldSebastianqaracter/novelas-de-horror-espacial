@@ -8,13 +8,35 @@ from pathlib import Path
 
 import pytest
 
-from harness.config import cargar_config
-from harness.errores import LongitudFueraDeRangoAviso, PausadoPorQAError, PersonajeNoPrevistoError, OutlineFaltanteError, ConfiguracionInconsistenteError, ManifiestoInconsistenteError
-from harness.orchestrator import checkpoint, cursor as cur, loop
-from harness.rutas import Rutas
-from harness.schemas import Outline
-from harness.state import repository as repo
+from app.config import cargar_config
+from app.errores import LongitudFueraDeRangoAviso, PausadoPorQAError, PersonajeNoPrevistoError, OutlineFaltanteError, ConfiguracionInconsistenteError, ManifiestoInconsistenteError
+from app.orchestrator import checkpoint, cursor as cur, loop
+from app.rutas import Rutas
+from app.schemas import Outline
+from app.state import repository as repo
 from tests.conftest import AgentesDobles, construir_proyecto, outline_de_prueba
+
+
+def test_el_corte_de_qa_se_cierra_antes_que_el_capitulo_solapado(proyecto, config, dobles):
+    """El corte corre en paralelo con el capítulo siguiente, pero no puede cerrarse después que él.
+
+    Los hooks resuelven el capítulo de QA con `ultimo_capitulo_cerrado` (§13.3). Si el capítulo
+    solapado se cerrara primero, ese número se movería a media auditoría y el `validar-reporte` de QA
+    dejaría de casar con H-11. El harness lo rechaza en vez de dejarlo pasar.
+    """
+    loop.ejecutar_tanda(config, proyecto, dobles)  # cierra 1, 2 y 3, con corte en el 3
+    m = checkpoint.leer_manifest(proyecto)
+    assert (m.ultimo_capitulo_cerrado, m.ultimo_qa_ejecutado) == (3, 3)
+
+    # Se simula el corte del 3 todavía sin cerrar y se intenta cerrar el capítulo 4.
+    checkpoint._actualizar(proyecto, ultimo_qa_ejecutado=0)
+    assert loop._corte_qa_sin_cerrar(checkpoint.leer_manifest(proyecto), config)
+    with pytest.raises(ManifiestoInconsistenteError, match="corte de QA"):
+        loop.aplicar_delta(proyecto, config, 4)
+
+    # Con el corte ya cerrado, el capítulo siguiente puede cerrarse con normalidad.
+    checkpoint._actualizar(proyecto, ultimo_qa_ejecutado=3)
+    assert not loop._corte_qa_sin_cerrar(checkpoint.leer_manifest(proyecto), config)
 
 
 def test_tanda_de_3_cierra_3_y_corre_qa_en_cadencia(proyecto, config, dobles):
@@ -32,8 +54,11 @@ def test_tanda_de_3_cierra_3_y_corre_qa_en_cadencia(proyecto, config, dobles):
     assert len(log) == 3 + 2 * 3 and [h.cap_origen for h in log.root[3:]] == [1, 1, 2, 2, 3, 3]  # cap_origen lo fija el harness
     assert repo.leer_personajes(proyecto).root["Kovacs"].ultima_aparicion == 3
     assert repo.leer_personajes(proyecto).root["Kovacs"].secretos_que_conoce == ["Secreto del capítulo 1", "Secreto del capítulo 2", "Secreto del capítulo 3"]
-    from harness.state import resumen_rodante as rr
-    assert rr.capitulos_cubiertos(repo.leer_resumen_rodante(proyecto)) == [2, 3]  # ventana 2
+    from app.state import resumen_rodante as rr
+    # X-02.3: el almacenamiento conserva todos los capítulos; la ventana (2) solo recorta lo que se entrega.
+    resumen = repo.leer_resumen_rodante(proyecto)
+    assert rr.capitulos_cubiertos(resumen) == [1, 2, 3]
+    assert rr.capitulos_cubiertos(rr.para_escritor(resumen, config.ventana_resumen_rodante)) == [2, 3]
     assert m.prompts_hash.keys() == {"escritor", "extractor", "qa"}
     # el escritor nunca recibió rutas de capítulos cerrados ni su texto
     for i, prompt in enumerate(dobles.prompts_escritor, start=1):
@@ -182,7 +207,7 @@ def test_tramos_por_cli_equivalen_al_loop(proyecto, config):
     ctx = loop.preparar_capitulo(proyecto, config, 1)
     assert rutas.prompt_escritor(1).exists() and rutas.prompt_extractor(1).exists() and rutas.hechos_inyectados(1).exists()
     repo.guardar_capitulo(proyecto, 1, dobles.generar_capitulo(ctx.texto))
-    r = loop.registrar_escritor(proyecto, config, 1, "cap_1.md · 1500 palabras · personajes: Kovacs")
+    r = loop.registrar_escritor(proyecto, config, 1, "cap_1.md · 1500 palabras · personajes: Kovacs · validado")
     assert r.dentro_de_rango and not r.reintentar
     rutas.delta(1).write_text(dobles.extraer("05_manuscrito/cap_1.md"), encoding="utf-8")
     rd = loop.aplicar_delta(proyecto, config, 1)

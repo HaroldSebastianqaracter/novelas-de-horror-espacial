@@ -5,10 +5,10 @@ import re
 
 import pytest
 
-from harness import cli
-from harness.orchestrator import checkpoint, loop
-from harness.rutas import Rutas
-from harness.state import repository as repo
+from app import cli
+from app.orchestrator import checkpoint, loop
+from app.rutas import Rutas
+from app.state import repository as repo
 from tests.conftest import AgentesDobles, construir_proyecto, outline_de_prueba
 
 
@@ -181,7 +181,7 @@ def test_verbos_internos_por_cli(proyecto, config, capsys):
     repo.guardar_capitulo(proyecto, 1, dobles.generar_capitulo(rutas.prompt_escritor(1).read_text(encoding="utf-8")))
     codigo, _, err = correr(capsys, "registrar-escritor", "1", "Quedó un capítulo precioso lleno de tensión y misterio.")
     assert codigo == 1 and "ContratoRetornoError" in err
-    codigo, out, _ = correr(capsys, "registrar-escritor", "1", "cap_1.md · 1500 palabras · personajes: Kovacs")
+    codigo, out, _ = correr(capsys, "registrar-escritor", "1", "cap_1.md · 1500 palabras · personajes: Kovacs · validado")
     assert codigo == 0 and "RESULTADO: borrador_aceptado" in out
     codigo, _, err = correr(capsys, "aplicar-delta", "1")
     assert codigo == 1 and "no existe" in err

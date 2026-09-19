@@ -4,9 +4,9 @@ import json
 
 import pytest
 
-from harness.config import HarnessConfig, cargar_config, construir_config, hash_prompts
-from harness.errores import ConfiguracionInvalidaError
-from harness.rutas import Rutas
+from app.config import HarnessConfig, cargar_config, construir_config, hash_prompts
+from app.errores import ConfiguracionInvalidaError
+from app.rutas import Rutas
 
 BASE_NOVELA = {"total_capitulos": 40, "palabras_por_capitulo": 3000, "idioma": "es-ES", "persona_narrativa": "tercera_limitada",
                "tiempo_verbal": "pasado", "ventana_resumen_rodante": 3, "cadencia_qa": 8, "max_tokens_contexto_escritor": 5000,
@@ -21,7 +21,7 @@ def test_config_valida_y_rango_de_palabras():
 
 
 @pytest.mark.parametrize("campo,valor", [
-    ("total_capitulos", 29), ("total_capitulos", 51), ("palabras_por_capitulo", 0),
+    ("total_capitulos", 0), ("total_capitulos", 201), ("palabras_por_capitulo", 0),
     ("persona_narrativa", "segunda"), ("tiempo_verbal", "futuro"), ("cadencia_qa", 0), ("max_hechos_por_capitulo", 0),
 ])
 def test_ex05_parametros_fuera_de_rango(campo, valor):

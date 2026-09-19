@@ -1,0 +1,73 @@
+{
+  "version": 3,
+  "_comentario": [
+    "Juego 3: amenaza presente. Las diez tienen el peligro a la vista desde el capítulo 1.",
+    "",
+    "El juego 1 y el juego 2 eran de misterio, y ahí el harness se contradice por construcción: el",
+    "preludio anota lo que se cree («no hay ningún pasillo», «el pasajero nunca pregunta»), el clímax",
+    "existe para revelar que era falso, y revelar el misterio y contradecir el log son la misma",
+    "acción. Con una amenaza presente no hay nada que revelar: la escaleta escribe hechos en positivo",
+    "--hay algo a bordo, entró por aquí, mata así-- y la novela avanza sumando, no desmintiendo.",
+    "Es la estructura con la que el harness nunca había fallado.",
+    "",
+    "Se mantiene lo que las hace comparables: tripulación de cinco, un escenario cerrado, una sola",
+    "amenaza, sin saltos temporales, y una config común que no se toca."
+  ],
+  "config": {
+    "total_capitulos": 3,
+    "palabras_por_capitulo": 400,
+    "idioma": "es-ES",
+    "persona_narrativa": "tercera_limitada",
+    "tiempo_verbal": "pasado",
+    "ventana_resumen_rodante": 2,
+    "cadencia_qa": 1,
+    "max_tokens_contexto_escritor": 12000,
+    "max_hechos_por_capitulo": 4,
+    "capitulos_por_tanda": 3,
+    "max_llamadas_por_tanda": 30,
+    "registrar_uso": true,
+    "exportar_trazas": true
+  },
+  "novelas": [
+    {
+      "nombre": "abordaje",
+      "idea": "Algo entró por la esclusa de carga de un remolcador con cinco tripulantes y mató al de guardia delante de los demás. Es grande, se mueve por los conductos y no responde a ningún protocolo de contacto. La tripulación sella los mamparos por secciones e intenta acorralarlo antes de que llegue al puente. Quedan once días hasta puerto."
+    },
+    {
+      "nombre": "brote",
+      "idea": "En una nave de transporte con cinco tripulantes, dos presentan lesiones que la médica no reconoce y que avanzan visiblemente de una guardia a la siguiente. Lo que crece bajo la piel se mueve. La médica declara aislamiento y el resto tiene que decidir cuánto tiempo darles antes de que el aire común deje de ser seguro."
+    },
+    {
+      "nombre": "enjambre",
+      "idea": "Cinco operarios de una estación de superficie ven entrar por los conductos térmicos unas criaturas del tamaño de una mano que huyen del frío exterior. Son muchas y muerden. El calor de la estación las atrae y apagarlo significa morir congelados en cuatro horas. El relevo tarda todavía seis días."
+    },
+    {
+      "nombre": "nido",
+      "idea": "La cuadrilla de cinco de una nave cisterna encuentra el tanque de agua principal lleno de vainas adheridas a las paredes, y varias están abiertas. Lo que salió de ellas ya está en los conductos de ventilación y crece rápido. El agua limpia que queda a bordo alcanza para tres días."
+    },
+    {
+      "nombre": "carga",
+      "idea": "Un carguero de cinco tripulantes transporta contenedores sellados que no debían abrirse. Uno ha reventado desde dentro durante la maniobra y en la bodega hay algo vivo del tamaño de un hombre, cubierto del sellante de la carga. La bodega comunica con el resto de la nave por dos escotillas y solo una cierra bien."
+    },
+    {
+      "nombre": "sombra",
+      "idea": "En una estación minera con cinco trabajadores, algo caza en los tramos sin luz: se ha llevado a uno y han visto cómo lo hacía. El reactor está perdiendo potencia por sectores y cada apagón amplía el territorio de la cosa. Los generadores de reserva están en el nivel inferior, que ya está a oscuras."
+    },
+    {
+      "nombre": "sonda",
+      "idea": "La sonda que cinco tripulantes recuperaron de la superficie volvió con algo adherido al casco que se soltó dentro del hangar. Mide medio metro, se pega a las superficies calientes y ha dejado a un tripulante con el brazo inservible. El hangar no se puede despresurizar sin perder también el aire del pasillo central."
+    },
+    {
+      "nombre": "raices",
+      "idea": "Un hongo avanza por los mamparos de una estación con cinco ocupantes, extendiéndose desde la bodega de muestras a un ritmo que se puede medir hora a hora. Ha atrapado a uno contra una pared y sigue creciendo sobre él. Quemarlo funciona, pero el sistema contra incendios solo tiene tres descargas."
+    },
+    {
+      "nombre": "injerto",
+      "idea": "Cinco tripulantes de una nave de vigilancia ven que uno de ellos lleva prendido en la nuca un organismo del tamaño de una mano que llegó con la última carga. Se mueve cuando él habla. Arrancarlo lo mataría, y en la bodega quedan más contenedores de aquel envío sin abrir."
+    },
+    {
+      "nombre": "jaula",
+      "idea": "Cinco científicos de una estación de estudio tienen en observación una criatura capturada en la superficie. Esta mañana la jaula está abierta desde dentro y hay sangre en el laboratorio. La criatura conoce la estación mejor que ellos porque llevan seis semanas dejándola mirar, y el transporte de salida tarda cuatro días."
+    }
+  ]
+}

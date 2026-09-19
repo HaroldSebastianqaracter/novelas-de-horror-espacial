@@ -4,10 +4,10 @@ import json
 
 import pytest
 
-from harness.orchestrator import checkpoint, cursor as cur, loop
-from harness.orchestrator.cursor import Cursor
-from harness.rutas import Rutas
-from harness.state import repository as repo
+from app.orchestrator import checkpoint, cursor as cur, loop
+from app.orchestrator.cursor import Cursor
+from app.rutas import Rutas
+from app.state import repository as repo
 from tests.conftest import AgentesDobles, ejecutar_script_hook
 
 
@@ -67,7 +67,12 @@ def test_h06_escritura_por_agente(proyecto, config):
     assert r.returncode == 2 and "H-06" in r.stderr
     assert pre(dict(escritor, tool_input={"file_path": "04_estado/continuidad.json", "content": "x"}), proyecto).returncode == 2
     extractor = {"tool_name": "Write", "agent_type": "extractor", "agent_id": "x-1"}
-    assert pre(dict(extractor, tool_input={"file_path": "04_estado/deltas/delta_cap_3.json", "content": "x"}), proyecto).returncode == 2
+    # RF-08.4: el extractor escribe su propio delta, y solo ese
+    assert pre(dict(extractor, tool_input={"file_path": "04_estado/deltas/delta_cap_3.json", "content": "x"}), proyecto).returncode == 0
+    r = pre(dict(extractor, tool_input={"file_path": "04_estado/deltas/delta_cap_2.json", "content": "x"}), proyecto)
+    assert r.returncode == 2 and "H-06" in r.stderr and "delta_cap_3.json" in r.stderr
+    assert pre(dict(extractor, tool_input={"file_path": "04_estado/continuidad.json", "content": "x"}), proyecto).returncode == 2
+    assert pre(dict(extractor, tool_input={"file_path": "05_manuscrito/cap_3.md", "content": "x"}), proyecto).returncode == 2
     qa = {"tool_name": "Write", "agent_type": "qa", "agent_id": "q-1"}
     assert pre(dict(qa, tool_input={"file_path": "06_qa/reportes/qa_cap_3.json", "content": "x"}), proyecto).returncode == 0
     assert pre(dict(qa, tool_input={"file_path": "06_qa/recursos_usados.json", "content": "x"}), proyecto).returncode == 0
@@ -94,7 +99,7 @@ def test_h09_orquestador_no_lee_manuscrito(proyecto, config):
     assert pre({"tool_name": "Glob", "tool_input": {"pattern": "05_manuscrito/*.md"}}, proyecto).returncode == 2
     assert pre({"tool_name": "Write", "tool_input": {"file_path": "05_manuscrito/cap_2.md", "content": "prosa"}}, proyecto).returncode == 2
     assert pre({"tool_name": "Read", "tool_input": {"file_path": "04_estado/prompts/escritor_cap_2.md"}}, proyecto).returncode == 0
-    assert pre({"tool_name": "Grep", "tool_input": {"pattern": "def ", "path": "harness"}}, proyecto).returncode == 0
+    assert pre({"tool_name": "Grep", "tool_input": {"pattern": "def ", "path": "app"}}, proyecto).returncode == 0
     # QA sí puede leer varios
     assert pre({"tool_name": "Read", "tool_input": {"file_path": "05_manuscrito/cap_1.md"}, "agent_type": "qa", "agent_id": "q"}, proyecto).returncode == 0
 
@@ -182,8 +187,10 @@ def test_h10_registra_uso_desde_el_transcript(proyecto, tmp_path):
     payload = {"hook_event_name": "SubagentStop", "agent_type": "extractor", "agent_id": "abc", "stop_hook_active": False,
                "agent_transcript_path": str(transcript), "stop_reason": "end_turn"}
     assert stop(payload, proyecto).returncode == 0
-    registros = [json.loads(l) for l in rutas.uso.read_text(encoding="utf-8").splitlines()]
-    assert len(registros) == 1
+    from app import registro
+
+    registros = registro.leer_uso(registro.dir_actual(proyecto))  # §5.1: uso.jsonl vive en 07_registro/<tanda>/
+    assert len(registros) == 1 and not rutas.uso.exists()
     r = registros[0]
     assert (r["rol"], r["capitulo"], r["modelo"], r["tokens_entrada"], r["tokens_salida"], r["turnos"]) == ("extractor", 1, "modelo-de-prueba-a", 2500, 1000, 2)
     assert cur.leer(proyecto).llamadas == 1  # RF-CFG-06: una llamada por invocación
@@ -192,11 +199,13 @@ def test_h10_registra_uso_desde_el_transcript(proyecto, tmp_path):
 def test_h10_no_registra_dos_veces_si_h07_bloqueo(proyecto):
     rutas = Rutas(proyecto)
     base = {"agent_type": "escritor", "agent_id": "e-x", "stop_hook_active": False}
+    from app import registro
+
     assert stop(base, proyecto).returncode == 2  # bloqueado por H-07: no registra
-    assert not rutas.uso.exists()
+    assert registro.leer_uso(registro.dir_actual(proyecto)) == []
     rutas.capitulo(1).write_text("bien " * 1500, encoding="utf-8")
     assert stop(dict(base, stop_hook_active=True), proyecto).returncode == 0
-    assert len(rutas.uso.read_text(encoding="utf-8").splitlines()) == 1
+    assert len(registro.leer_uso(registro.dir_actual(proyecto))) == 1
 
 
 # ---------- EX-09 ----------
