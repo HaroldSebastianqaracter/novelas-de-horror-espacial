@@ -756,3 +756,11 @@ def test_ningun_campo_de_ejecucion_se_pierde_al_guardar():
     assert set(guardado) == set(CAMPOS_EJECUCION), "hay campos de ejecución que el formulario no guarda"
     for clave in encendidos:
         assert guardado[clave] is True, f"{clave} llegó encendido al formulario y se guardó apagado"
+
+
+def test_el_formulario_suelto_pinta_todos_los_interruptores(proyecto):
+    """Pintaba uno de los cinco a mano, así que guardar ahí apagaba los otros cuatro sin avisar."""
+    html = ui.render_formulario(ui.estado_formulario(proyecto))
+    for clave, valor in ui.DEFAULTS.items():
+        if isinstance(valor, bool):
+            assert f"name='{clave}'" in html, f"{clave} no tiene casilla: guardar aquí lo apagaría"

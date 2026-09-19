@@ -292,6 +292,26 @@ def _campo(clave: str, etiqueta: str, ayuda: str, valor: Any, *, requerido: bool
     return f"<label for='{clave}'>{html.escape(etiqueta)}<small>{html.escape(ayuda)}</small></label>{control}"
 
 
+# Los interruptores de ejecución con su rótulo. Este formulario los pintaba a mano y solo tenía uno
+# de los cinco, así que guardar aquí apagaba `exportar_trazas` y los dos de X-04 y X-05 sin avisar.
+# Ahora se generan desde CAMPOS_EJECUCION: lo que falte en este diccionario sale con su clave por
+# rótulo, feo pero presente, que es mucho mejor que desaparecer.
+ROTULOS_INTERRUPTOR = {
+    "registrar_uso": ("Registrar uso", "RF-CFG-06 · escribe 04_estado/uso.jsonl"),
+    "exportar_trazas": ("Publicar la traza", "RF-09 · al cerrar cada fase, nunca la prosa"),
+    "exportar_para_juez": ("Enviar los capítulos al juez", "X-03.2 · el texto sale hacia Langfuse"),
+    "escritor_emite_delta": ("El escritor fija sus propios hechos", "X-04 · dos agentes, sin extractor"),
+    "aristas_en_continuidad": ("Hechos relacionados entre personajes", "X-05 · se nota desde el capítulo 10"),
+}
+
+
+def _interruptor(clave: str, valor: Any) -> str:
+    rotulo, ayuda = ROTULOS_INTERRUPTOR.get(clave, (clave, ""))
+    marcado = " checked" if valor else ""
+    return (f"<label><input type='checkbox' name='{clave}'{marcado}> {rotulo}"
+            f"<small>{ayuda}</small></label>")
+
+
 def render_formulario(estado: EstadoFormulario, error: str | None = None) -> str:
     v = estado.valores
     aviso = f"<div class='aviso'>{html.escape(estado.motivo_bloqueo)}</div>" if estado.bloqueado else ""
@@ -302,7 +322,8 @@ def render_formulario(estado: EstadoFormulario, error: str | None = None) -> str
     voz = "".join(_campo(c, e, a, v.get(c)) for c, e, a in CAMPOS_VOZ)
     dimension = "".join(_campo(c, e, a, v.get(c)) for c, e, a in CAMPOS_DIMENSION)
     ejecucion = "".join(_campo(c, e, a, v.get(c), requerido=False) for c, e, a in CAMPOS_EJEC)
-    marcado = " checked" if v.get("registrar_uso") else ""
+    interruptores = "".join(_interruptor(c, v.get(c)) for c in CAMPOS_EJECUCION
+                            if isinstance(DEFAULTS.get(c), bool) or isinstance(v.get(c), bool))
     cuerpo = f"""
 {aviso}{err}
 <form method='post' action='/guardar'>
@@ -317,7 +338,7 @@ def render_formulario(estado: EstadoFormulario, error: str | None = None) -> str
 
 <h2>Ejecución <small>RF-CFG-02, RF-CFG-06 · config/ejecucion.json</small></h2>
 <fieldset>{ejecucion}
-<label><input type='checkbox' name='registrar_uso'{marcado}> Registrar uso<small>RF-CFG-06 · escribe 04_estado/uso.jsonl</small></label>
+{interruptores}
 </fieldset>
 
 <h2>Ejemplos de referencia <small>RF-00.2 · copia a 00_referencias/</small></h2>
