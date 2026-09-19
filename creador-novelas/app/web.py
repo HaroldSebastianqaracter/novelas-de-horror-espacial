@@ -345,11 +345,12 @@ def _publicar_traza(raiz: Path | None) -> None:
     def _trabajo() -> None:
         try:
             from app import observabilidad as obs
-            if not cargar_config(raiz).exportar_trazas:
+            config = cargar_config(raiz)
+            if not config.exportar_trazas:
                 return
-            cliente = obs.ClienteHTTP(obs.credenciales_desde_entorno())
+            cliente = obs.ClienteOTLP(obs.credenciales_desde_entorno())
             carpeta = registro.dir_actual(raiz)  # preludio o tanda en curso, lo que toque
-            r = obs.exportar(raiz, carpeta, cliente, con_cuerpos=False)
+            r = obs.exportar(raiz, carpeta, cliente, con_cuerpos=False, para_juez=config.exportar_para_juez)
             _ULTIMA_EXPORTACION.update({"tanda": r.traza.tanda, "trace_id": r.traza.id,
                                         "objetos": r.aceptados, "error": None})
             print(f"[langfuse] {r.traza.tanda} -> {r.traza.id} ({r.aceptados} objetos)")

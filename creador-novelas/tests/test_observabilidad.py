@@ -320,3 +320,124 @@ def test_una_validacion_correcta_no_ensucia_la_traza(proyecto, config):
                     errores=[], avisos=None, datos={"palabras": 1500}, capitulo=1)
     traza = observabilidad.construir_traza(proyecto, carpeta)
     assert not [e for e in traza.lote if e["type"] == "event-create" and "validacion" in e["body"]["name"]]
+
+
+# ---------- X-03.1: transporte por OTLP ----------
+
+def _spans(payload: dict) -> list[dict]:
+    return payload["resourceSpans"][0]["scopeSpans"][0]["spans"]
+
+
+def _attrs(span: dict) -> dict:
+    """Los atributos de un span, aplanados a {clave: texto} para poder afirmar sobre ellos."""
+    salida = {}
+    for a in span["attributes"]:
+        valor = a["value"]
+        salida[a["key"]] = (valor["stringValue"] if "stringValue" in valor
+                            else [v["stringValue"] for v in valor["arrayValue"]["values"]])
+    return salida
+
+
+def test_el_lote_se_traduce_a_otlp_con_la_tanda_de_span_raiz(proyecto, config):
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    traza = observabilidad.construir_traza(proyecto, carpeta)
+    payload = observabilidad.lote_a_otlp([e for e in traza.lote if e["type"] != "score-create"])
+    spans = _spans(payload)
+
+    raiz = spans[0]
+    assert raiz["spanId"] == traza.id[:16] and raiz["traceId"] == traza.id
+    assert "parentSpanId" not in raiz  # la raíz no cuelga de nada: es la traza
+    assert _attrs(raiz)["langfuse.trace.name"] == carpeta.name
+    # los ids de OTLP tienen longitud fija: 32 hex la traza, 16 hex cada span
+    assert all(len(s["traceId"]) == 32 and len(s["spanId"]) == 16 for s in spans)
+    # ningún span queda huérfano: el capítulo cuelga de la tanda, el verbo del capítulo
+    assert all(s.get("parentSpanId") for s in spans[1:])
+    ids = {s["spanId"] for s in spans}
+    assert all(s["parentSpanId"] in ids for s in spans[1:])
+    # el tiempo viaja en nanosegundos, y la raíz abarca a sus hijos
+    assert all(str(s["startTimeUnixNano"]).isdigit() and str(s["endTimeUnixNano"]).isdigit() for s in spans)
+    assert int(raiz["endTimeUnixNano"]) >= max(int(s["endTimeUnixNano"]) for s in spans[1:])
+
+
+def test_la_generacion_otlp_lleva_tipo_modelo_tokens_y_el_rol_filtrable(proyecto, config):
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    _uso(carpeta, "doble-escritor-1", "escritor", 1, **USO_REAL)
+    traza = observabilidad.construir_traza(proyecto, carpeta)
+    payload = observabilidad.lote_a_otlp([e for e in traza.lote if e["type"] != "score-create"])
+    gen = next(s for s in _spans(payload) if s["name"].startswith("escritor:cap_"))
+    attrs = _attrs(gen)
+
+    assert attrs["langfuse.observation.type"] == "generation"
+    # X-03.4: el filtro de la regla selecciona por `metadata.rol`, y solo el prefijo explícito lo hace
+    # filtrable. Sin esto el atributo cae en el cajón `metadata.attributes` y la regla no encuentra nada.
+    assert attrs["langfuse.observation.metadata.rol"] == "escritor"
+    uso = json.loads(attrs["langfuse.observation.usage_details"])
+    assert uso["cache_read_input_tokens"] == USO_REAL["tokens_cache_lectura"]  # §16.3: las cuatro cifras
+    assert uso["total"] == sum(USO_REAL.values())
+
+
+def test_los_eventos_otlp_no_duran_y_un_error_marca_el_estado(proyecto, config):
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    registro.evento(proyecto, "error", excepcion="AutovalidacionFallidaError", mensaje="tres intentos", capitulo=1)
+    traza = observabilidad.construir_traza(proyecto, carpeta)
+    payload = observabilidad.lote_a_otlp([e for e in traza.lote if e["type"] != "score-create"])
+    evento = next(s for s in _spans(payload) if s["name"] == "error:EX-10")
+    assert evento["startTimeUnixNano"] == evento["endTimeUnixNano"]
+    assert evento["status"]["code"] == 2 and _attrs(evento)["langfuse.observation.level"] == "ERROR"
+
+
+def test_las_puntuaciones_no_van_por_otlp_sino_por_su_endpoint(proyecto, config):
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    traza = observabilidad.construir_traza(proyecto, carpeta)
+    scores = [e for e in traza.lote if e["type"] == "score-create"]
+    assert scores, "la tanda debería publicar al menos borradores_descartados"
+    nombres = {s["name"] for s in _spans(observabilidad.lote_a_otlp([e for e in traza.lote if e["type"] != "score-create"]))}
+    assert not nombres & {s["body"]["name"] for s in scores}
+    cuerpo = observabilidad.score_a_cuerpo(scores[0])
+    assert cuerpo["id"] == scores[0]["body"]["id"] and cuerpo["traceId"] == traza.id  # §16.5: el id no cambia
+    assert "dataType" in cuerpo and "value" in cuerpo
+
+
+# ---------- X-03.2: qué recibe el juez ----------
+
+def test_para_juez_sube_el_capitulo_y_su_escaleta(proyecto, config):
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    capitulo = Rutas(proyecto).capitulo(1).read_text(encoding="utf-8")
+    traza = observabilidad.construir_traza(proyecto, carpeta, para_juez=True)
+    gen = next(e["body"] for e in traza.lote
+               if e["type"] == "generation-create" and e["body"]["name"] == "escritor:cap_1")
+
+    assert gen["output"] == capitulo  # el manuscrito, no el retorno de cinco líneas del agente
+    contexto = json.loads(gen["input"])
+    assert contexto["capitulo"] == 1
+    assert contexto["escaleta"]["objetivo_narrativo"]  # sin el encargo, juez-escaleta no puede puntuar nada
+    assert "hechos_vigentes" in contexto and "resumen_rodante" in contexto
+
+
+def test_para_juez_no_sube_la_guia_de_estilo_ni_los_prompts(proyecto, config):
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    guia = observabilidad._normalizar(Rutas(proyecto).style_guide.read_text(encoding="utf-8"))
+    prompt = (carpeta / "prompts" / "001_escritor_cap_1.md").read_text(encoding="utf-8")
+    traza = observabilidad.construir_traza(proyecto, carpeta, para_juez=True)
+    enviado = observabilidad._normalizar(json.dumps(traza.lote, ensure_ascii=False))
+
+    # RF-00.2 / §16.6: la guía destilada de 00_referencias/ no sale ni siquiera para que la lea un juez
+    for i in range(0, max(len(guia) - observabilidad.VENTANA_PRIVACIDAD, 0), 7):
+        assert guia[i:i + observabilidad.VENTANA_PRIVACIDAD] not in enviado
+    assert prompt not in json.dumps(traza.lote, ensure_ascii=False)
+
+
+def test_solo_el_escritor_recibe_cuerpos_para_el_juez(proyecto, config):
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    traza = observabilidad.construir_traza(proyecto, carpeta, para_juez=True)
+    otros = [e["body"] for e in traza.lote if e["type"] == "generation-create"
+             and not e["body"]["name"].startswith("escritor:")]
+    assert otros, "la tanda invoca al extractor"
+    assert all("output" not in b and "input" not in b for b in otros)
+
+
+def test_sin_para_juez_la_generacion_sigue_sin_cuerpos(proyecto, config):
+    carpeta = _tanda_con_dobles(proyecto, config, tope=1)
+    traza = observabilidad.construir_traza(proyecto, carpeta)
+    generaciones = [e["body"] for e in traza.lote if e["type"] == "generation-create"]
+    assert generaciones and all("input" not in b and "output" not in b for b in generaciones)

@@ -69,7 +69,7 @@ def test_guardado_valido_escribe_los_tres_archivos_y_validan(tmp_path, monkeypat
     assert set(novela) == {"total_capitulos", "palabras_por_capitulo", "idioma", "persona_narrativa", "tiempo_verbal",
                            "ventana_resumen_rodante", "cadencia_qa", "max_tokens_contexto_escritor", "max_hechos_por_capitulo"}
     assert ejecucion == {"capitulos_por_tanda": 3, "max_llamadas_por_tanda": 30, "registrar_uso": True,
-                         "exportar_trazas": True}
+                         "exportar_trazas": True, "exportar_para_juez": False}
     assert resultado.comando_siguiente == "/generar-premisa"  # 00_referencias/ vacía
 
 
@@ -528,14 +528,14 @@ def test_la_traza_se_publica_sola_al_cerrar_la_fase_y_se_puede_apagar(monkeypatc
     class _ClienteFalso:
         def __init__(self, *a, **k): pass
 
-    def _exportar(raiz, carpeta, cliente, *, con_cuerpos=False, volcar=None):
-        llamadas.append({"carpeta": carpeta.name, "con_cuerpos": con_cuerpos})
+    def _exportar(raiz, carpeta, cliente, *, con_cuerpos=False, para_juez=False, volcar=None):
+        llamadas.append({"carpeta": carpeta.name, "con_cuerpos": con_cuerpos, "para_juez": para_juez})
         class _R:
             class traza: tanda, id = "t", "abc"
             aceptados = 3
         return _R()
 
-    monkeypatch.setattr(obs, "ClienteHTTP", _ClienteFalso)
+    monkeypatch.setattr(obs, "ClienteOTLP", _ClienteFalso)
     monkeypatch.setattr(obs, "credenciales_desde_entorno", lambda *a, **k: object())
     monkeypatch.setattr(obs, "exportar", _exportar)
     # No se toca `resolver_tanda`: publicar «la última tanda» dejaba fuera el preludio, porque
@@ -551,7 +551,19 @@ def test_la_traza_se_publica_sola_al_cerrar_la_fase_y_se_puede_apagar(monkeypatc
 
     monkeypatch.setattr(web.threading, "Thread", _sincrono)
     web._publicar_traza(proyecto)
-    assert llamadas == [{"carpeta": "preludio", "con_cuerpos": False}], "publica sin prosa de la novela"
+    # X-03.2: `exportar_para_juez` está apagado por defecto, así que la publicación automática no manda
+    # los capítulos a Langfuse mientras nadie lo encienda a propósito.
+    assert llamadas == [{"carpeta": "preludio", "con_cuerpos": False, "para_juez": False}], "publica sin prosa de la novela"
+
+    # Encendido, la traza lleva lo que el evaluador de Langfuse necesita leer: sin esto la regla del juez
+    # no puntúa nada y la pestaña de scores se queda vacía sin decir por qué.
+    llamadas.clear()
+    rutas_j = Rutas(proyecto)
+    ejecucion_j = json.loads(rutas_j.ejecucion_json.read_text(encoding="utf-8"))
+    rutas_j.ejecucion_json.write_text(json.dumps(ejecucion_j | {"exportar_para_juez": True}), encoding="utf-8")
+    web._publicar_traza(proyecto)
+    assert llamadas == [{"carpeta": "preludio", "con_cuerpos": False, "para_juez": True}]
+    rutas_j.ejecucion_json.write_text(json.dumps(ejecucion_j), encoding="utf-8")
 
     # Con el interruptor apagado no sale nada de la máquina.
     llamadas.clear()

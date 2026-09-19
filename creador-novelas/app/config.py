@@ -28,7 +28,8 @@ CAMPOS_NOVELA = (
     "total_capitulos", "palabras_por_capitulo", "idioma", "persona_narrativa", "tiempo_verbal",
     "ventana_resumen_rodante", "cadencia_qa", "max_tokens_contexto_escritor", "max_hechos_por_capitulo",
 )
-CAMPOS_EJECUCION = ("capitulos_por_tanda", "max_llamadas_por_tanda", "registrar_uso", "exportar_trazas")
+CAMPOS_EJECUCION = ("capitulos_por_tanda", "max_llamadas_por_tanda", "registrar_uso", "exportar_trazas",
+                    "exportar_para_juez")
 
 
 class HarnessConfig(BaseModel):
@@ -43,6 +44,12 @@ class HarnessConfig(BaseModel):
     # La traza sale de la máquina hacia un servicio externo, así que se puede apagar. Con `False` el
     # registro se sigue escribiendo en disco: lo único que no ocurre es la publicación.
     exportar_trazas: bool = True  # RF-09
+    # X-03.2: si la publicación automática incluye el capítulo y su escaleta en las generaciones del
+    # escritor. Es lo que el evaluador de Langfuse necesita para puntuar; sin esto la traza llega completa
+    # en todo menos en lo único que el juez lee, y la pestaña de scores se queda vacía sin decir por qué.
+    # Va aparte de `exportar_trazas` porque decide algo distinto: no si se publica, sino si sale el texto
+    # de la novela hacia un servicio externo y de ahí al modelo juez.
+    exportar_para_juez: bool = False
     palabras_por_capitulo: int = Field(gt=0)  # RF-CFG-01
     idioma: str = Field(min_length=2)  # RF-CFG-05
     persona_narrativa: Literal["primera", "tercera_limitada", "tercera_omnisciente"]

@@ -422,12 +422,14 @@ def cmd_exportar_traza(args, raiz: Path) -> int:
         volcar = raiz / volcar
     cliente = None
     if not args.solo_volcar:
-        cliente = observabilidad.ClienteHTTP(observabilidad.credenciales_desde_entorno())  # §16.7: falla antes de leer nada
+        cliente = observabilidad.ClienteOTLP(observabilidad.credenciales_desde_entorno())  # §16.7: falla antes de leer nada
     elif volcar is None:
         raise ConfiguracionInvalidaError("--solo-volcar exige --volcar <archivo>: sin destino no hay nada que hacer")
-    r = observabilidad.exportar(raiz, carpeta, cliente, con_cuerpos=args.con_cuerpos, volcar=volcar)
+    r = observabilidad.exportar(raiz, carpeta, cliente, con_cuerpos=args.con_cuerpos,
+                                para_juez=args.para_juez, volcar=volcar)
     t = r.traza
-    print(f"tanda {t.tanda} -> trace {t.id} ({'con' if t.con_cuerpos else 'sin'} cuerpos de prompts y retornos)")
+    print(f"tanda {t.tanda} -> trace {t.id} ({'con' if t.con_cuerpos else 'sin'} cuerpos de prompts y retornos"
+          f"{', con los capítulos para el juez' if t.para_juez else ''})")
     print(f"metadatos: {json.dumps(t.metadatos, ensure_ascii=False)}")
     print(f"{len(t.capitulos)} capítulos (spans), {len(t.generaciones)} invocaciones (generations), {t.eventos} eventos, "
           f"{len(t.puntuaciones)} puntuaciones; {len(t.lote)} objetos de ingesta")
@@ -507,6 +509,9 @@ def construir_parser() -> argparse.ArgumentParser:
     x = sub.add_parser("exportar-traza", help="RF-09: publica el registro de una tanda en Langfuse (después de la tanda, nunca dentro)")
     x.add_argument("tanda", help="carpeta de 07_registro/ (tanda_<ts>) o `ultima`")
     x.add_argument("--con-cuerpos", action="store_true", help="incluye prompts y retornos (§16.6); por defecto no sale prosa")
+    x.add_argument("--para-juez", action="store_true",
+                   help="sube el capítulo y su escaleta en las generaciones del escritor, para el evaluador de "
+                        "Langfuse (X-03.2); nunca sube el prompt ni la guía de estilo")
     x.add_argument("--volcar", help="además, escribe el lote de ingesta completo en este archivo JSON")
     x.add_argument("--solo-volcar", action="store_true", help="no publica: solo escribe el archivo de --volcar (nada sale de la máquina)")
     x.set_defaults(fn=cmd_exportar_traza)

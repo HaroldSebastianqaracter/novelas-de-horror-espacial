@@ -5,10 +5,21 @@ con `python -m app exportar-traza <tanda>`. El registro sigue siendo la fuente d
 
 Decisión de §16.8, tomada contra la biblioteca instalable (langfuse 4.15.3): su API pública no permite fijar el
 instante de inicio de una observación (solo `completion_start_time` y `end(end_time=...)`), así que las trazas de
-hechos pasados saldrían apiladas en el instante de la exportación. Se usa la API de ingesta por HTTP
-(`POST /api/public/ingestion`), que acepta `startTime` y `endTime` explícitos, `usageDetails` con las cuatro cifras
-de tokens (§16.3) y hace upsert por `body.id`, que es lo que hace idempotente la reexportación (§16.5). Sin
-dependencias: solo `urllib`.
+hechos pasados saldrían apiladas en el instante de la exportación. Se publica por HTTP directo, sin dependencias:
+solo `urllib`.
+
+Transporte (X-03.1, 2026-09-18). Las observaciones salen por **OTLP** (`POST /api/public/otel/v1/traces`, con la
+cabecera `x-langfuse-ingestion-version: 4`) y las puntuaciones por `POST /api/public/scores`. La ingesta v3
+(`/api/public/ingestion`) no se usa por dos razones, y conviene no confundirlas: se apaga el 2026-11-16, y —lo
+que de verdad obliga a migrar— las observaciones que produce **no las evalúa ningún evaluador de Langfuse**.
+Comprobado el 2026-09-18: una generación ingerida por esa vía, con `input`, `output` y `metadata.rol` correctos y
+una regla activa que la seleccionaba, no recibió ni un score en 21 minutos. Sí persistía: aparece a los ~9
+minutos, y esa demora ya hizo creer dos veces lo contrario. En esta plataforma ni un `201` ni un cero inmediato
+son evidencia; hay que releer después de esperar.
+
+Los sobres siguen siendo la representación interna (`type` + `body` con su `id` determinista) y se traducen a
+OTLP en el último paso: es lo que conserva el upsert por `body.id` de §16.5 y, con él, que reexportar una tanda
+actualice en vez de duplicar.
 
 Mapeo (§16.2): trace = tanda · span = capítulo · span anidado = verbo determinista del bucle con su duración real
 (`ts - ms` → `ts`) · generation = invocación de subagente · event = bloqueo de hook, EX-10 o descarte EX-08 ·
@@ -17,6 +28,11 @@ score = métricas del corte de QA y de la tanda (§16.4).
 Por defecto no sale prosa ni el cuerpo de ningún prompt (§16.6): todo texto libre que viaja se compara contra los
 prompts, los borradores descartados y el manuscrito, y se omite si comparte con ellos una ventana de más de 30
 caracteres. `--con-cuerpos` incluye prompts y retornos y desactiva ese filtro.
+
+`--para-juez` (X-03.2) es otra cosa, y más estrecha: sube el capítulo y el estado con el que se encargó, y solo
+en las generaciones del escritor, que son las únicas que el evaluador puntúa. El prompt sigue sin salir, porque
+ahí vive la guía destilada de `00_referencias/` (RF-00.2). El filtro de privacidad sigue aplicándose a todo lo
+demás: la excepción es el par `input`/`output` del escritor, no el modo entero.
 """
 
 from __future__ import annotations
@@ -38,12 +54,21 @@ from app.config import VERSION_SPECS, cargar_config
 from app.errores import ConfiguracionInvalidaError, HarnessError
 from app.orchestrator import checkpoint
 from app.rutas import Rutas
+from app.state import continuidad as cont
+from app.state import personajes as pers
 from app.state import repository as repo
 
 VARIABLES_CREDENCIALES = ("LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY")
 VARIABLES_HOST = ("LANGFUSE_HOST", "LANGFUSE_BASE_URL")  # los dos nombres que usa el SDK
 HOST_DEFECTO = "https://cloud.langfuse.com"
-RUTA_INGESTA = "/api/public/ingestion"
+# X-03.1: la ingesta v3 (`/api/public/ingestion`) sí persiste —con unos 9 minutos de retraso—, pero las
+# observaciones que produce NO las evalúa ningún evaluador de Langfuse, y se apaga el 2026-11-16. Comprobado
+# el 2026-09-18 con una generación `escritor:cap_99` que cumplía el filtro de la regla y no recibió ni un
+# score en 21 minutos. La vía viva para las observaciones es OTLP; la de las puntuaciones, su propio endpoint.
+RUTA_OTLP = "/api/public/otel/v1/traces"
+RUTA_SCORES = "/api/public/scores"
+CABECERA_OTLP = {"x-langfuse-ingestion-version": "4"}  # sin ella los datos no entran en tiempo real
+NOMBRE_INSTRUMENTACION = "creador-novelas/exportar-traza"
 VENTANA_PRIVACIDAD = 31  # RF-09: ninguna subcadena de más de 30 caracteres del manuscrito ni de un prompt
 MAX_EVENTOS_POR_LOTE = 100
 MAX_BYTES_POR_LOTE = 3_000_000  # el servicio corta en 3,5 MB por petición
@@ -141,6 +166,64 @@ def _normalizar(texto: str) -> str:
     return re.sub(r"\s+", " ", texto).lower()
 
 
+# ---------- contexto del juez (X-03.2) ----------
+
+def contexto_del_juez(raiz: Path, n: int) -> dict:
+    """El `input` de `escritor:cap_N` cuando se exporta con `--para-juez`.
+
+    Un evaluador de Langfuse solo ve la observación que puntúa: no carga las hermanas ni las hijas de su
+    traza. Lo que no esté aquí no existe para el juez, y sin la escaleta no puede decir si el capítulo
+    cumplió su encargo.
+
+    Se reconstruye del estado (las mismas fuentes que `escritor.ensamblar_contexto`) y **no** del prompt
+    guardado en `prompts/`, por una razón concreta: el prompt lleva `STYLE_GUIDE`, la guía destilada de
+    `00_referencias/`, que está fuera del control de versiones porque pueden ser obras con derechos
+    (RF-00.2, §16.6). Recortar el prompt por texto funcionaría hasta que alguien cambiara la plantilla, y
+    entonces fallaría en silencio subiendo justo lo que no debe salir. Aquí la guía no está porque no se
+    lee, no porque se filtre.
+    """
+    entrada = repo.leer_outline_entry(raiz, n)
+    if entrada is None:
+        return {"capitulo": n, "escaleta": None, "nota": "el capítulo no tiene entrada de escaleta"}
+    fichas = repo.leer_personajes(raiz)
+    permitidos = list(dict.fromkeys(list(entrada.personajes) + list(fichas.root.keys())))
+    hechos = cont.filtrar_para_capitulo(repo.leer_continuidad(raiz), entrada, set(permitidos))
+    contexto: dict[str, Any] = {
+        "capitulo": n,
+        "escaleta": {"titulo": entrada.titulo, "objetivo_narrativo": entrada.objetivo_narrativo,
+                     "locacion": entrada.locacion, "personajes": list(entrada.personajes),
+                     "informacion_nueva": entrada.informacion_nueva, "tension": entrada.tension},
+        "hechos_vigentes": [{"hecho": h.hecho, "sujeto": h.sujeto, "categoria": h.categoria,
+                             "cap_origen": h.cap_origen} for h in hechos],
+        "personajes": {nombre: ficha.model_dump(mode="json")
+                       for nombre, ficha in pers.fichas_presentes(fichas, permitidos).items()},
+        "resumen_rodante": repo.leer_resumen_rodante(raiz).strip(),
+    }
+    try:
+        config = cargar_config(raiz)
+    except HarnessError:
+        return contexto
+    contexto["parametros"] = {"idioma": config.idioma, "persona_narrativa": config.persona_narrativa,
+                              "tiempo_verbal": config.tiempo_verbal,
+                              "palabras_objetivo": config.palabras_por_capitulo}
+    return contexto
+
+
+def _cuerpos_para_el_juez(raiz: Path, n: int) -> tuple[str, str] | None:
+    """(input, output) de la generación del escritor del capítulo `n`, o None si el capítulo no está escrito.
+
+    El `output` es el manuscrito, no el retorno del agente: el escritor devuelve cinco líneas
+    (`cap_7.md · 1.520 palabras · …`) y el texto vive en `05_manuscrito/`.
+    """
+    try:
+        capitulo = repo.leer_manuscrito(raiz, n)
+    except HarnessError:
+        return None
+    if not capitulo.strip():
+        return None
+    return json.dumps(contexto_del_juez(raiz, n), ensure_ascii=False, indent=2), capitulo
+
+
 # ---------- construcción de la traza ----------
 
 @dataclass
@@ -172,6 +255,7 @@ class Traza:
     puntuaciones: dict[str, Any]
     con_cuerpos: bool
     metadatos: dict
+    para_juez: bool = False
 
 
 def resolver_tanda(raiz: Path, nombre: str) -> Path:
@@ -383,8 +467,8 @@ def _descartes_de_borrador(carpeta: Path) -> list[tuple[str, int | None, str]]:
     return resultado
 
 
-def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False) -> Traza:
-    """Lee la carpeta de la tanda y devuelve el lote de ingesta completo, sin enviar nada."""
+def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False, para_juez: bool = False) -> Traza:
+    """Lee la carpeta de la tanda y devuelve el lote completo, sin enviar nada."""
     tanda = carpeta.name
     eventos = registro.leer_eventos(carpeta)
     if not eventos:
@@ -476,6 +560,13 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False) -> 
         if con_cuerpos:
             cuerpo["input"] = _archivo_k(carpeta, "prompts", g.rol, g.capitulo, g.orden, ".md")
             cuerpo["output"] = _archivo_k(carpeta, "retornos", g.rol, g.capitulo, g.orden, ".txt")
+        # X-03.2: `--para-juez` no es `--con-cuerpos` con otro nombre. Sube el capítulo y el estado con el
+        # que se encargó, y solo en las generaciones del escritor, que son las únicas que el evaluador
+        # puntúa. El prompt sigue sin salir: ahí vive la guía destilada de `00_referencias/`.
+        if para_juez and g.rol == "escritor" and g.capitulo is not None:
+            cuerpos = _cuerpos_para_el_juez(raiz, g.capitulo)
+            if cuerpos is not None:
+                cuerpo["input"], cuerpo["output"] = cuerpos
         lote.append(_envolver("generation-create", {k: v for k, v in cuerpo.items() if v is not None}))
 
     # event = bloqueo de hook, fallo de autovalidación (EX-10), descarte de borrador (EX-08) y demás errores
@@ -574,7 +665,127 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False) -> 
         "value": len(descartes), "dataType": "NUMERIC", "comment": "borradores descartados para regenerar (EX-08) en la tanda",
     }))
     return Traza(tanda=tanda, id=trace_id, lote=lote, generaciones=generaciones, capitulos=capitulos,
-                 eventos=total_eventos, puntuaciones=puntuaciones, con_cuerpos=con_cuerpos, metadatos=metadatos)
+                 eventos=total_eventos, puntuaciones=puntuaciones, con_cuerpos=con_cuerpos, metadatos=metadatos,
+                 para_juez=para_juez)
+
+
+# ---------- traducción a OTLP (X-03.1) ----------
+
+_TIPO_OTEL = {"span-create": "span", "generation-create": "generation", "event-create": "event"}
+
+
+def _a_nanos(iso: str | None) -> str | None:
+    """ISO 8601 -> nanosegundos desde epoch, que es como OTLP transporta el tiempo.
+
+    Un instante sin zona se interpreta en la del equipo: el registro lo escribe con `astimezone()`, así que
+    en la práctica siempre la trae."""
+    if not iso:
+        return None
+    try:
+        momento = datetime.fromisoformat(str(iso))
+    except ValueError:
+        return None
+    if momento.tzinfo is None:
+        momento = momento.astimezone()
+    return str(int(momento.timestamp() * 1_000_000_000))
+
+
+def _atributo(clave: str, valor: Any) -> dict | None:
+    """Un atributo OTLP. Las listas de texto viajan como `arrayValue` (las `tags` de la traza); todo lo demás
+    como `stringValue`, con los objetos serializados a JSON: es lo que Langfuse espera en `usage_details`, en
+    `metadata.*` y en `input`/`output`."""
+    if valor is None:
+        return None
+    if isinstance(valor, list) and all(isinstance(v, str) for v in valor):
+        return {"key": clave, "value": {"arrayValue": {"values": [{"stringValue": v} for v in valor]}}}
+    texto = valor if isinstance(valor, str) else json.dumps(valor, ensure_ascii=False)
+    return {"key": clave, "value": {"stringValue": texto}}
+
+
+def _atributos(pares: list, metadatos: dict | None, prefijo_meta: str) -> list[dict]:
+    attrs = []
+    for clave, valor in pares:
+        a = _atributo(clave, valor)
+        if a is not None:
+            attrs.append(a)
+    for clave, valor in (metadatos or {}).items():
+        # El prefijo explícito es lo que hace filtrable el metadato: sin él cae en el cajón
+        # `metadata.attributes` y la regla del evaluador no puede seleccionar por `rol` (X-03.4).
+        a = _atributo(f"{prefijo_meta}{clave}", valor)
+        if a is not None:
+            attrs.append(a)
+    return attrs
+
+
+def lote_a_otlp(lote: list[dict]) -> dict:
+    """Traduce los sobres de la traza a una petición OTLP/HTTP (`ExportTraceServiceRequest` en JSON).
+
+    Función pura y sin red: es la pieza que los tests comprueban sin publicar nada.
+
+    La tanda deja de ser un objeto aparte y pasa a ser el **span raíz**, que es como el modelo de datos v4
+    representa una traza. Los spans de capítulo, que en la ingesta antigua no colgaban de nada, cuelgan de él.
+    """
+    trazas = [e["body"] for e in lote if e.get("type") == "trace-create"]
+    if not trazas:
+        raise ExportacionError("RF-09: el lote no trae traza; no se puede armar la petición OTLP")
+    raiz = trazas[0]
+    trace_id = raiz["id"]
+    id_raiz = trace_id[:16]  # 16 hex derivados del id de la traza: estable entre exportaciones (§16.5)
+
+    spans: list[dict] = []
+    fines: list[str] = []
+    for sobre in lote:
+        tipo = _TIPO_OTEL.get(str(sobre.get("type")))
+        if tipo is None:
+            continue
+        cuerpo = sobre["body"]
+        inicio = _a_nanos(cuerpo.get("startTime"))
+        if inicio is None:
+            continue
+        fin = _a_nanos(cuerpo.get("endTime")) or inicio  # un `event` no dura: empieza y acaba en su instante
+        fines.append(fin)
+        attrs = _atributos([
+            ("langfuse.observation.type", tipo),
+            ("langfuse.observation.level", cuerpo.get("level")),
+            ("langfuse.observation.status_message", cuerpo.get("statusMessage")),
+            ("langfuse.observation.input", cuerpo.get("input")),
+            ("langfuse.observation.output", cuerpo.get("output")),
+            ("langfuse.observation.model.name", cuerpo.get("model")),
+            ("langfuse.observation.usage_details", cuerpo.get("usageDetails")),
+        ], cuerpo.get("metadata"), "langfuse.observation.metadata.")
+        span = {"traceId": trace_id, "spanId": cuerpo["id"], "name": cuerpo.get("name") or tipo, "kind": 1,
+                "startTimeUnixNano": inicio, "endTimeUnixNano": fin, "attributes": attrs,
+                "parentSpanId": cuerpo.get("parentObservationId") or id_raiz}
+        if str(cuerpo.get("level")) == "ERROR":
+            span["status"] = {"code": 2, "message": str(cuerpo.get("statusMessage") or "")}
+        spans.append(span)
+
+    inicio_raiz = _a_nanos(raiz.get("timestamp")) or min((s["startTimeUnixNano"] for s in spans), default=None)
+    attrs_raiz = _atributos([
+        ("langfuse.observation.type", "span"),
+        ("langfuse.trace.name", raiz.get("name")),
+        ("langfuse.trace.tags", raiz.get("tags")),
+    ], raiz.get("metadata"), "langfuse.trace.metadata.")
+    spans.insert(0, {"traceId": trace_id, "spanId": id_raiz, "name": raiz.get("name") or "tanda", "kind": 1,
+                     "startTimeUnixNano": inicio_raiz,
+                     "endTimeUnixNano": max(fines) if fines else inicio_raiz,
+                     "attributes": attrs_raiz})
+    return {"resourceSpans": [{
+        "resource": {"attributes": [a for a in (
+            _atributo("service.name", "creador-novelas"),
+            _atributo("service.version", str(raiz.get("version") or VERSION_SPECS)),
+        ) if a is not None]},
+        "scopeSpans": [{"scope": {"name": NOMBRE_INSTRUMENTACION}, "spans": spans}],
+    }]}
+
+
+def score_a_cuerpo(sobre: dict) -> dict:
+    """Un `score-create` de la traza -> el cuerpo de `POST /api/public/scores`, que es la vía que sobrevive
+    al apagado de la ingesta v3."""
+    b = sobre["body"]
+    cuerpo = {"id": b.get("id"), "traceId": b.get("traceId"), "name": b.get("name"), "value": b.get("value"),
+              "dataType": b.get("dataType"), "comment": b.get("comment"), "observationId": b.get("observationId")}
+    return {k: v for k, v in cuerpo.items() if v is not None}
 
 
 # ---------- envío ----------
@@ -583,36 +794,45 @@ class Cliente(Protocol):
     def enviar(self, lote: list[dict]) -> dict: ...
 
 
-class ClienteHTTP:
-    """POST {host}/api/public/ingestion con autenticación básica (clave pública:clave secreta)."""
+class ClienteOTLP:
+    """Publica las observaciones por OTLP y las puntuaciones por su propio endpoint (X-03.1).
+
+    Recibe el mismo lote de sobres que construye `construir_traza` y decide por dónde va cada cosa. Conservar
+    los sobres como representación interna no es nostalgia: es lo que mantiene los `body.id` deterministas de
+    §16.5 y, con ellos, que reexportar una tanda actualice en vez de duplicar.
+    """
 
     def __init__(self, credenciales: Credenciales, tiempo_maximo: float = 30.0):
         self.credenciales = credenciales
         self.tiempo_maximo = tiempo_maximo
 
-    def enviar(self, lote: list[dict]) -> dict:
-        cuerpo = json.dumps({"batch": lote, "metadata": {"origen": "creador-novelas exportar-traza", "specs": VERSION_SPECS}},
-                            ensure_ascii=False).encode("utf-8")
+    def _peticion(self, ruta: str, cuerpo: dict, cabeceras: dict | None = None) -> int:
         token = base64.b64encode(f"{self.credenciales.clave_publica}:{self.credenciales.clave_secreta}".encode("utf-8")).decode("ascii")
-        peticion = urlrequest.Request(
-            self.credenciales.host + RUTA_INGESTA, data=cuerpo, method="POST",
-            headers={"Content-Type": "application/json", "Authorization": f"Basic {token}", "User-Agent": "creador-novelas/exportar-traza"},
-        )
+        cabecera = {"Content-Type": "application/json", "Authorization": f"Basic {token}",
+                    "User-Agent": "creador-novelas/exportar-traza"}
+        cabecera.update(cabeceras or {})
+        peticion = urlrequest.Request(self.credenciales.host + ruta, method="POST",
+                                      data=json.dumps(cuerpo, ensure_ascii=False).encode("utf-8"), headers=cabecera)
         try:
             with urlrequest.urlopen(peticion, timeout=self.tiempo_maximo) as respuesta:
-                texto = respuesta.read().decode("utf-8", errors="replace")
-                estado = respuesta.status
+                respuesta.read()
+                return respuesta.status
         except urlerror.HTTPError as e:
             detalle = e.read().decode("utf-8", errors="replace")[:500]
-            raise ExportacionError(f"RF-09: el servicio respondió {e.code} al ingerir el lote: {detalle}") from e
+            raise ExportacionError(f"RF-09: el servicio respondió {e.code} en {ruta}: {detalle}") from e
         except (urlerror.URLError, TimeoutError, OSError) as e:
             raise ExportacionError(f"RF-09: no se pudo conectar con {self.credenciales.host}: {e}") from e
-        try:
-            datos = json.loads(texto) if texto.strip() else {}
-        except json.JSONDecodeError:
-            datos = {"crudo": texto[:500]}
-        datos["_estado_http"] = estado
-        return datos
+
+    def enviar(self, lote: list[dict]) -> dict:
+        observaciones = [e for e in lote if e.get("type") == "trace-create" or e.get("type") in _TIPO_OTEL]
+        puntuaciones = [e for e in lote if e.get("type") == "score-create"]
+        exitos: list[dict] = []
+        if any(e.get("type") == "trace-create" for e in observaciones):
+            estado = self._peticion(RUTA_OTLP, lote_a_otlp(observaciones), CABECERA_OTLP)
+            exitos.extend({"id": e["id"], "status": estado} for e in observaciones)
+        for sobre in puntuaciones:
+            exitos.append({"id": sobre["id"], "status": self._peticion(RUTA_SCORES, score_a_cuerpo(sobre))})
+        return {"successes": exitos, "errors": []}
 
 
 def _partir_en_lotes(eventos: list[dict]) -> list[list[dict]]:
@@ -641,10 +861,10 @@ class ResultadoExportacion:
 
 
 def exportar(raiz: Path, carpeta: Path, cliente: Cliente | None, *, con_cuerpos: bool = False,
-             volcar: Path | None = None) -> ResultadoExportacion:
+             para_juez: bool = False, volcar: Path | None = None) -> ResultadoExportacion:
     """Construye la traza y la publica en lotes. Con `volcar`, además deja el lote completo en un archivo local.
     Sin cliente (solo volcado) no sale nada de la máquina."""
-    traza = construir_traza(raiz, carpeta, con_cuerpos=con_cuerpos)
+    traza = construir_traza(raiz, carpeta, con_cuerpos=con_cuerpos, para_juez=para_juez)
     if volcar is not None:
         volcar.parent.mkdir(parents=True, exist_ok=True)
         volcar.write_text(json.dumps({"tanda": traza.tanda, "trace_id": traza.id, "batch": traza.lote}, ensure_ascii=False, indent=2) + "\n",
