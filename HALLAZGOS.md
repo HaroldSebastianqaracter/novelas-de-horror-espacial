@@ -16,13 +16,13 @@ la razón que explica la sección siguiente.
 
 | premisa | base | dos-agentes-sonnet | Δ reloj | contradicciones | correcciones | coste |
 |---|---|---|---|---|---|---|
-| nido | 25,7 min | 13,2 min | −49 % | 2 → 0 | 1 → 0 | 6,83 → 2,65 $ |
-| carga | 26,1 min | 13,1 min | −50 % | 1 → 0 | 1 → 0 | 5,83 → 2,51 $ |
-| sombra | 23,9 min | 12,9 min | −46 % | 1 → 0 | 1 → 0 | 6,33 → 2,46 $ |
-| **media** | **25,2** | **13,1** | **−48 %** | 4 → 0 | 3 → 0 | −61 % |
+| nido | 25,7 min | 13,2 min | −49 % | 2 → 0 | 1 → 0 | 6,83 → 3,17 $ |
+| carga | 26,1 min | 13,1 min | −50 % | 1 → 0 | 1 → 0 | 5,83 → 2,92 $ |
+| sombra | 23,9 min | 12,9 min | −46 % | 1 → 0 | 1 → 0 | 6,33 → 4,00 $ |
+| **media** | **25,2** | **13,1** | **−48 %** | 4 → 0 | 3 → 0 | −47 % |
 
 Buscábamos un 20 % de reloj. Sale un 48 %, con 0,2 minutos de dispersión, sin una sola excepción en
-tres pares, y con el coste a menos de la mitad. `dos-agentes-sonnet` es el escritor emitiendo su
+tres pares, y con el coste a poco más de la mitad. `dos-agentes-sonnet` es el escritor emitiendo su
 propio delta (Spec-X 04, sin agente extractor) con el orquestador en sonnet.
 
 **No es solo que haya menos agentes: es que se equivoca menos.** La base gastó una corrección en cada
@@ -33,6 +33,13 @@ de ventaja, la mitad es no tener que corregir y la otra mitad es la arquitectura
 
 Se comprobó que los ceros no son ausencia de trabajo: QA corrió sus tres cortes en las seis novelas,
 con 10.000–15.000 tokens de salida en las dos variantes.
+
+**Aviso sobre la columna de coste.** `claude-sonnet-5` no estaba en `config/precios.json`, y el coste
+se calcula con esa tabla, así que el orquestador de las novelas sonnet entró a 0,00 $ y el CSV marcó
+2,54 $ de media cuando eran 3,36 $. El ahorro es del 47 %, no del 61 % que dijo este documento
+durante unas horas. **El reloj no está afectado**, porque el tiempo se mide, no se tarifa. La entrada
+ya está puesta, con la advertencia de que es tarifa publicada y no derivada de una traza como las
+otras dos.
 
 ## La premisa pesa más que la arquitectura
 

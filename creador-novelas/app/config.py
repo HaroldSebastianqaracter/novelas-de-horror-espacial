@@ -52,10 +52,10 @@ class HarnessConfig(BaseModel):
     # registro se sigue escribiendo en disco: lo único que no ocurre es la publicación.
     exportar_trazas: bool = True  # RF-09
     # X-04: el escritor entrega el capítulo y su delta en la misma invocación, y el extractor no se
-    # llama. Ahorra la invocación de agente más cara del sistema --12 de los 18 minutos de una
-    # novela-- a cambio de que el delta describa lo que el escritor quiso escribir en vez de lo que
-    # escribió. Por eso va detrás de un interruptor y se mide contra la base.
-    escritor_emite_delta: bool = False
+    # llama. El miedo era que el delta contase lo que el escritor quiso escribir y no lo que escribió;
+    # medido sobre tres premisas emparejadas pasa lo contrario, 0 contradicciones frente a 4 y la
+    # mitad de reloj (19/09, ver HALLAZGOS.md). Por eso viene encendido; apagarlo devuelve el extractor.
+    escritor_emite_delta: bool = True
     palabras_por_capitulo: int = Field(gt=0)  # RF-CFG-01
     idioma: str = Field(min_length=2)  # RF-CFG-05
     persona_narrativa: Literal["primera", "tercera_limitada", "tercera_omnisciente"]

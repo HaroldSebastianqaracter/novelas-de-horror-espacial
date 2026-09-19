@@ -60,9 +60,12 @@ FASES_DINAMICAS = ("reanudar", "corregir")
 # Modelo del orquestador de las fases con agentes. No redacta: ejecuta verbos, lee la línea
 # RESULTADO y despacha subagentes (INV-08). Cada subagente declara el suyo en `.claude/agents/`,
 # de modo que este valor no influye en con qué modelo se escribe la novela.
+# Es sonnet desde el 19/09: como no redacta, medirlo en opus solo añadía coste. Sobre las mismas
+# premisas sale igual de rápido y a menos de la mitad de precio, y el orquestador ocupa 0,8 min de
+# los 20 de una novela, así que su modelo no está en el camino crítico.
 # El entorno puede fijarlo para una corrida entera sin tocar el código, que es como el loop de
-# velocidad prueba una vuelta: `HARNESS_MODELO_ORQUESTADOR=sonnet`.
-MODELO_ORQUESTADOR = os.environ.get("HARNESS_MODELO_ORQUESTADOR") or "opus"
+# velocidad probaba cada vuelta: `HARNESS_MODELO_ORQUESTADOR=opus`.
+MODELO_ORQUESTADOR = os.environ.get("HARNESS_MODELO_ORQUESTADOR") or "sonnet"
 # El mismo modelo con su identificador completo. `--model` acepta el alias, pero `config/precios.json`
 # y Langfuse se llevan por el nombre canónico: anotar «opus» en `uso.jsonl` dejaba el consumo del
 # orquestador a 0,00 $ en el informe, que es peor que no contarlo, porque parece gratis.

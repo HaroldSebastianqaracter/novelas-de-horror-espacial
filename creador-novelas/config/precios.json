@@ -9,6 +9,13 @@
       "tokens_cache_lectura": 0.5,
       "tokens_cache_creacion": 6.25
     },
+    "claude-sonnet-5": {
+      "_origen": "Tarifa publicada, NO derivada de una traza como las otras dos. Faltar aqui no era neutro: el orquestador en sonnet se contaba a 0,00 $ y el ahorro medido el 19/09 parecia del 61 % cuando es del 47 %. Rederivarla de una traza de una corrida sonnet cuando haya una.",
+      "tokens_entrada": 3.0,
+      "tokens_salida": 15.0,
+      "tokens_cache_lectura": 0.3,
+      "tokens_cache_creacion": 3.75
+    },
     "claude-haiku-4-5-20251001": {
       "tokens_entrada": 1.0,
       "tokens_salida": 5.0,
