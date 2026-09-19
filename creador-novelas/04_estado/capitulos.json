@@ -1,44 +1,51 @@
 [
   {
     "num": 1,
-    "titulo": "El libro del pasillo central",
-    "objetivo_narrativo": "Tras la caída de la Quilla de Ámbar, los tres supervivientes alcanzan la colonia sellada y encuentran el libro de guardias: el alivio del refugio se convierte en la certeza de que alguien los esperaba. Ferrán impone el transmisor como única prioridad; la colonia responde cerrando sola las puertas a la hora escrita.",
+    "titulo": "La baliza sin registro",
+    "objetivo_narrativo": "Establecer el encierro de once meses y la fricción entre los seis tripulantes del Nereida, y obligarlos por protocolo a abordar un pecio a la deriva del que vuelven aparentemente solos; cerrar con la primera prueba objetiva de que no lo están.",
     "personajes": [
-      "Idoia Ferrán",
-      "Casimiro Vlach",
-      "Nieve Ospina",
-      "la letra del libro de guardias"
+      "Irune Vasari",
+      "Tomás Reder",
+      "Nadia Okonjo",
+      "Álvaro Sein",
+      "Kiril Dovan",
+      "Mirén Aguilar",
+      "la presencia"
     ],
-    "locacion": "Colonia minera de Vireo b",
-    "informacion_nueva": "Once años de turnos anotados sin un solo hueco, con la fecha de hoy en la última página y los nombres de los tres asignados a las once noches siguientes, escritos antes de que cayeran.",
+    "locacion": "Nereida — puente",
+    "informacion_nueva": "El pecio no tiene nombre en el casco, sus compartimentos fueron abiertos desde dentro y no hay un solo cuerpo a bordo; esa misma noche el consumo de aire del Nereida no cuadra con seis personas y Mirén oye por el canal interno una orden con la voz de Vasari que Vasari no dio.",
     "tension": 2
   },
   {
     "num": 2,
-    "titulo": "Cuatro presencias en el panel",
-    "objetivo_narrativo": "La colonia cumple su horario con puntualidad imposible mientras Vlach rehace el transmisor y Ospina levanta el plano de los niveles. El panel de personal marca cuatro, los túneles descienden en espiral hacia una cavidad destapada, y Vlach amanece descansado tras dos jornadas en vela con su propio turno ya anotado de una letra que no es la suya.",
+    "titulo": "La voz en el conducto",
+    "objetivo_narrativo": "Vaciar la nave de dentro hacia fuera —Dovan desaparece sin rastro y su voz vuelve mal entonada desde la recirculación— y girar la historia: revelar que la baliza fue un anzuelo y que la criatura no devora las comunicaciones, las usa, porque no quiere matarlos a bordo sino llegar a Halcón.",
     "personajes": [
-      "Idoia Ferrán",
-      "Casimiro Vlach",
-      "Nieve Ospina",
-      "Teodora Marchesi"
+      "Mirén Aguilar",
+      "Nadia Okonjo",
+      "Álvaro Sein",
+      "Kiril Dovan",
+      "Irune Vasari",
+      "el pasajero"
     ],
-    "locacion": "Colonia minera de Vireo b",
-    "informacion_nueva": "Los registros de Teodora Marchesi, jefa de turno, revelan su caligrafía idéntica a la del libro y describen a los colonos durmiendo mientras otro hacía sus guardias: lo que ocupa el turno vacío no imita a los vivos, los cubre.",
-    "tension": 4
+    "locacion": "Nereida — conducto de recirculación",
+    "informacion_nueva": "El consumo anómalo empezó horas antes de abrir la esclusa, así que la llamada de socorro era un cebo; el array de comunicaciones está intacto y ha enviado durante semanas, con la voz y las credenciales de Vasari, una confirmación de ruta y una petición de atraque prioritario en Halcón.",
+    "tension": 3
   },
   {
     "num": 3,
-    "titulo": "Un nombre por noche",
-    "objetivo_narrativo": "Ferrán intenta quemar el libro y la colonia deja de fingir que es un edificio: los pasillos se reordenan según la espiral y arrastran a los tres hacia la cavidad del fondo. En la undécima noche, con el módulo de proa listo para dos, Ferrán firma el turno y se queda para que la contabilidad cuadre y las puertas se abran.",
+    "titulo": "Seis versiones de la misma mujer",
+    "objetivo_narrativo": "Resolver con la única victoria posible y su derrota simultánea: Vasari desvía el Nereida hacia la sombra del gigante exterior y muere, Sein sella el mamparo con su propio cuerpo, y Mirén pierde la última palabra cuando la criatura habla a la vez que ella desde los seis canales; el módulo de escape entra limpio en el corredor despejado.",
     "personajes": [
-      "Idoia Ferrán",
-      "Casimiro Vlach",
-      "Nieve Ospina",
-      "Teodora Marchesi"
+      "Mirén Aguilar",
+      "Irune Vasari",
+      "Álvaro Sein",
+      "Tomás Reder",
+      "Nadia Okonjo",
+      "el pasajero"
     ],
-    "locacion": "Colonia minera de Vireo b",
-    "informacion_nueva": "El libro no puede cerrarse mientras haya un turno sin cubrir: importa poco si la cosa llegó del vacío o es en lo que se volvió la colonia, porque ambas respuestas piden un nombre por noche. En la última página, el de Nieve Ospina encabeza las once siguientes con la caligrafía de Ferrán.",
+    "locacion": "Nereida — sala de comunicaciones",
+    "informacion_nueva": "La trayectoria hacia el gigante exterior no admite intercepción y el sello del puente solo aguanta mientras alguien vivo lo sostiene; Halcón acusa recibo del atraque prioritario, elige entre seis versiones de Mirén la más tranquila, y el módulo de escape se desprende con un único ocupante que responde a todas las preguntas correctamente.",
     "tension": 5
   }
 ]

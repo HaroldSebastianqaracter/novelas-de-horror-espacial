@@ -19,7 +19,7 @@ Los hechos con `superado_por` distinto de null fueron reemplazados por una corre
     "sujeto": "mundo",
     "categoria": "mundo",
     "sujeto_validado": true,
-    "hecho": "La Quilla de Ámbar se partió al entrar en la atmósfera de Vireo b y sobrevivieron tres: Ferrán, Vlach y Ospina. La baliza no llegó a emitir: nadie sabe dónde están ni va a venir a buscarlos.",
+    "hecho": "El Nereida es un carguero de mineral con seis tripulantes en el mes once de una travesía hacia la estación Halcón; no hay relevo, ni retorno, ni auxilio posible más allá de la última órbita cartografiada.",
     "cap_origen": 0,
     "superado_por": null
   },
@@ -27,7 +27,7 @@ Los hechos con `superado_por` distinto de null fueron reemplazados por una corre
     "sujeto": "mundo",
     "categoria": "mundo",
     "sujeto_validado": true,
-    "hecho": "Vireo b es una luna sin registrar que no aparece en ninguna carta comercial. Afuera de la colonia no hay nada en ochenta kilómetros salvo los restos de la nave.",
+    "hecho": "El soporte vital es un circuito cerrado de recirculación que mide y registra el consumo de aire por hora: cualquier respiración de más queda en los números antes de verse.",
     "cap_origen": 0,
     "superado_por": null
   },
@@ -35,7 +35,7 @@ Los hechos con `superado_por` distinto de null fueron reemplazados por una corre
     "sujeto": "mundo",
     "categoria": "mundo",
     "sujeto_validado": true,
-    "hecho": "El soporte vital de la colonia funciona solo desde la evacuación: aire respirable, luz de emergencia encendida y cámaras frías con comida sin caducar. Nada de eso depende de que haya alguien vivo dentro.",
+    "hecho": "Con Halcón no hay comunicación en tiempo real: los mensajes tardan horas y nada de lo enviado puede desmentirse enseguida.",
     "cap_origen": 0,
     "superado_por": null
   },
@@ -43,7 +43,7 @@ Los hechos con `superado_por` distinto de null fueron reemplazados por una corre
     "sujeto": "mundo",
     "categoria": "mundo",
     "sujeto_validado": true,
-    "hecho": "El libro de guardias del pasillo central lleva once años de turnos anotados sin un solo hueco, con una letra cuidadosa y sin temblor, y la última página lleva la fecha de hoy.",
+    "hecho": "Cada tripulante tiene credencial y canal propios, y el sistema no distingue quién habla sino qué credencial habla.",
     "cap_origen": 0,
     "superado_por": null
   },
@@ -51,7 +51,7 @@ Los hechos con `superado_por` distinto de null fueron reemplazados por una corre
     "sujeto": "mundo",
     "categoria": "mundo",
     "sujeto_validado": true,
-    "hecho": "La colonia cumple los horarios escritos en el libro: puertas y mamparos se sellan y se abren en los minutos anotados, y las luces bajan al final de cada guardia.",
+    "hecho": "El protocolo de salvamento obliga a responder a toda baliza de socorro y la capitana no tiene margen legal para negarse.",
     "cap_origen": 0,
     "superado_por": null
   },
@@ -59,103 +59,135 @@ Los hechos con `superado_por` distinto de null fueron reemplazados por una corre
     "sujeto": "mundo",
     "categoria": "mundo",
     "sujeto_validado": true,
-    "hecho": "La única vía de salida posible es el módulo de proa de la Quilla de Ámbar: un solo ascenso y capacidad para dos. El transmisor no funciona todavía.",
+    "hecho": "Once meses de encierro han agotado la convivencia: los seis ya no tienen nada nuevo que decirse y cada uno se ha replegado en su rutina.",
     "cap_origen": 0,
     "superado_por": null
   },
   {
-    "sujeto": "Colonia minera de Vireo b",
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La estación Halcón, destino del Nereida, tiene cuatro mil personas dentro.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irune Vasari",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es la capitana del Nereida y lleva meses gobernando el calendario más que la nave, evitando toda decisión irreversible.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tomás Reder",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el piloto y cuenta los días de travesía en voz alta para molestar a los demás.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nadia Okonjo",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es la ingeniera de sistemas y la única persona a bordo que entiende los conductos de recirculación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Álvaro Sein",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el médico, lleva por su cuenta un registro de sueño de toda la tripulación y sospecha que alguien miente en el suyo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kiril Dovan",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el operario de bodega y duerme con la escotilla de su litera trabada.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Mirén Aguilar",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el enlace de comunicaciones, oye estática ocho horas al día y ha empezado a distinguir formas dentro de ella.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la presencia",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Lleva décadas a la deriva con el pecio, emitiendo una baliza de socorro que es un anzuelo y no una llamada de auxilio.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "el pasajero",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "No pretende matar a la tripulación a bordo: quiere usar al Nereida para llegar a la estación Halcón, y para eso imita voces, credenciales y razones.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nereida — puente",
     "categoria": "locacion",
     "sujeto_validado": true,
-    "hecho": "La colonia está sellada desde dentro y fue evacuada hace once años; los túneles de extracción descienden en espiral cerrada hacia una cavidad del fondo que los colonos no abrieron, sino destaparon.",
+    "hecho": "El mamparo de emergencia del puente solo mantiene el sellado mientras alguien lo sostiene manualmente desde dentro.",
     "cap_origen": 0,
     "superado_por": null
   },
   {
-    "sujeto": "Colonia minera de Vireo b",
+    "sujeto": "Nereida — conducto de recirculación",
     "categoria": "locacion",
     "sujeto_validado": true,
-    "hecho": "En el pasillo central hay un atril atornillado al mamparo con el libro de guardias en hojas de papel real; entre los restos del alojamiento quedan los registros personales de la jefa de turno.",
+    "hecho": "Los conductos de recirculación recorren toda la nave, se transitan a rastras y el flujo de aire deforma cualquier voz que suene en ellos.",
     "cap_origen": 0,
     "superado_por": null
   },
   {
-    "sujeto": "Idoia Ferrán",
-    "categoria": "personaje",
+    "sujeto": "Nereida — sala de comunicaciones",
+    "categoria": "locacion",
     "sujeto_validado": true,
-    "hecho": "Es piloto y comandante interina; bajó del módulo de proa con una fractura mal entablillada y decidió que lo único importante es el transmisor.",
+    "hecho": "Desde la sala de comunicaciones se gobiernan los seis canales de tripulación y el array conserva el registro de todos los mensajes enviados a Halcón.",
     "cap_origen": 0,
     "superado_por": null
   },
   {
-    "sujeto": "Idoia Ferrán",
-    "categoria": "personaje",
+    "sujeto": "mundo",
+    "categoria": "mundo",
     "sujeto_validado": true,
-    "hecho": "En un accidente anterior abandonó a un tripulante y dijo al hacerlo una frase concreta; no se lo ha contado nunca a Vlach ni a Ospina.",
-    "cap_origen": 0,
-    "superado_por": null
-  },
-  {
-    "sujeto": "Casimiro Vlach",
-    "categoria": "personaje",
-    "sujeto_validado": true,
-    "hecho": "Es técnico de sistemas y el único capaz de intentar rehacer el transmisor con piezas del módulo de proa y de la colonia.",
-    "cap_origen": 0,
-    "superado_por": null
-  },
-  {
-    "sujeto": "Nieve Ospina",
-    "categoria": "personaje",
-    "sujeto_validado": true,
-    "hecho": "Es cartógrafa de a bordo, contratada para levantar mapas de una luna que oficialmente no existe; documenta y fotografía antes de reaccionar.",
-    "cap_origen": 0,
-    "superado_por": null
-  },
-  {
-    "sujeto": "Teodora Marchesi",
-    "categoria": "personaje",
-    "sujeto_validado": true,
-    "hecho": "Fue jefa de turno de la colonia hasta la evacuación, hace once años; su caligrafía es la misma que la del libro de guardias y ninguno de los tres supervivientes la ha visto todavía.",
-    "cap_origen": 0,
-    "superado_por": null
-  },
-  {
-    "sujeto": "la letra del libro de guardias",
-    "categoria": "personaje",
-    "sujeto_validado": true,
-    "hecho": "Antes de que la Quilla de Ámbar cayera, ya había anotado los nombres de Ferrán, Vlach y Ospina asignados turno a turno a las once noches siguientes.",
-    "cap_origen": 0,
-    "superado_por": null
-  },
-  {
-    "sujeto": "la letra del libro de guardias",
-    "categoria": "personaje",
-    "sujeto_validado": true,
-    "hecho": "Contiene los nombres de Ferrán, Vlach y Ospina escritos en fechas futuras con la misma caligrafía que once años de registros previos.",
+    "hecho": "Un pulso de socorro sin identificación ni distintivo transmite en banda baja.",
     "cap_origen": 1,
     "superado_por": null
   },
   {
-    "sujeto": "Colonia minera de Vireo b",
-    "categoria": "locacion",
+    "sujeto": "mundo",
+    "categoria": "mundo",
     "sujeto_validado": true,
-    "hecho": "Los mamparos de los niveles inferiores se cierran automáticamente sin intervención humana a las 21:12.",
+    "hecho": "Se descubre un carguero antiguo sin identificación visible con compartimentos abiertos desde el interior y ningún cuerpo a bordo.",
     "cap_origen": 1,
     "superado_por": null
   },
   {
-    "sujeto": "Colonia minera de Vireo b",
+    "sujeto": "Nereida — conducto de recirculación",
     "categoria": "locacion",
     "sujeto_validado": true,
-    "hecho": "La compuerta de entrada se abre sin requerir credenciales cuando se toca con la palma de Vlach.",
+    "hecho": "El circuito de recirculación consume más de lo que gastarían seis personas por hora.",
     "cap_origen": 1,
     "superado_por": null
   },
   {
-    "sujeto": "Colonia minera de Vireo b",
-    "categoria": "locacion",
+    "sujeto": "mundo",
+    "categoria": "mundo",
     "sujeto_validado": true,
-    "hecho": "El soporte vital y la luz de emergencia funcionan sin interrupciones tras once años de evacuación.",
+    "hecho": "Existe referencia a una orden de purga de bodega tres que no consta en los registros de la capitana Vasari.",
     "cap_origen": 1,
     "superado_por": null
   }

@@ -2,25 +2,20 @@
   "cap_corte": 1,
   "hallazgos": [
     {
-      "tipo": "contradiccion",
-      "descripcion": "El narrador del capitulo 1 afirma que la caligrafia es la de 'las once mil noches anteriores' (unos treinta anos de registros), cuando el hecho vigente establece que el libro de guardias lleva once anos de turnos anotados sin un solo hueco y que la colonia fue evacuada hace once anos.",
-      "cap_origen": 0
-    },
-    {
       "tipo": "repeticion",
-      "descripcion": "Personificacion cortes o domestica de lo mecanico: 'temperatura de habitacion ocupada', 'un chasquido educado', 'la misma mano tranquila'. 3 apariciones acumuladas, capitulo 1.",
+      "descripcion": "Estructura de correccion 'no X, sino/debajo de Y': 'No estatica; debajo de la estatica', 'lo que trajeron no fue miedo sino una perplejidad incomoda', 'No mucho. Lo suficiente para no ser un error de sensor'. 3 apariciones, capitulos [1].",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "Estructura de negacion 'sin + sustantivo' para describir perfeccion o ausencia: 'sin pedirles nada', 'sin una caida', 'sin un solo trazo dudoso'. 3 apariciones acumuladas, capitulo 1.",
+      "descripcion": "Tic lexico de la rutina como marca de normalidad: 'olia a lo de siempre', 'como cada noche', 'el zumbido de costumbre'. 3 apariciones, capitulos [1].",
       "cap_origen": null
     },
     {
       "tipo": "repeticion",
-      "descripcion": "Repeticion lexica dentro de la misma frase como remate: 'entro primero, porque le tocaba entrar primero', 'decia Ferran, decia Vlach, decia Ospina', 'fue un alivio trabajar'. 3 apariciones acumuladas, capitulo 1.",
+      "descripcion": "Marca horaria exacta para escandir la escena: 'a las nueve horas', 'en cuarenta minutos', 'a las veintidos', 'a las cero cuarenta', 'en seis horas'. 5 apariciones, capitulos [1].",
       "cap_origen": null
     }
   ],
-  "tiene_contradicciones": true
+  "tiene_contradicciones": false
 }

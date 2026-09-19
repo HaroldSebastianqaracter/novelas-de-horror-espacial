@@ -1,7 +1,7 @@
 [
   {
-    "recurso": "personificacion cortes o domestica de lo mecanico ('habitacion ocupada', 'chasquido educado', 'mano tranquila')",
-    "veces": 10,
+    "recurso": "estructura de correccion 'no X, sino/debajo de Y'",
+    "veces": 9,
     "caps": [
       1,
       2,
@@ -9,32 +9,15 @@
     ]
   },
   {
-    "recurso": "estructura de negacion 'sin + sustantivo' para describir perfeccion o ausencia",
-    "veces": 10,
-    "caps": [
-      1,
-      2,
-      3
-    ]
-  },
-  {
-    "recurso": "repeticion lexica dentro de la misma frase como remate ('entro primero, porque le tocaba entrar primero')",
-    "veces": 5,
-    "caps": [
-      1,
-      3
-    ]
-  },
-  {
-    "recurso": "enumeracion triple por negacion ('ni una casilla vacia, ni una tachadura, ni un cambio de pulso')",
-    "veces": 1,
+    "recurso": "tic lexico de la rutina como marca de normalidad ('de siempre', 'como cada noche', 'de costumbre')",
+    "veces": 3,
     "caps": [
       1
     ]
   },
   {
-    "recurso": "la caligrafia descrita por su pulso o firmeza como indicio de lo inhumano",
-    "veces": 7,
+    "recurso": "marca horaria exacta para escandir la escena ('a las nueve horas', 'a las cero cuarenta')",
+    "veces": 9,
     "caps": [
       1,
       2,
@@ -42,24 +25,54 @@
     ]
   },
   {
-    "recurso": "frase corta aislada en parrafo propio como golpe de suspense",
+    "recurso": "enumeracion de negaciones absolutas como remate ('Ni pintado ni troquelado. Nada.')",
+    "veces": 5,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "detalle olfativo como indicio ('el aire olia a', 'habia olido algo dulce')",
+    "veces": 2,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "personaje que anota o apunta en lugar de reaccionar",
     "veces": 4,
     "caps": [
       1,
-      3
-    ]
-  },
-  {
-    "recurso": "remate por negacion seguida de afirmacion correctiva en frases cortas ('No decia que la cosa los imitara. Decia que los relevaba')",
-    "veces": 6,
-    "caps": [
       2,
       3
     ]
   },
   {
-    "recurso": "el horror enunciado en lexico administrativo o de turnos ('correccion silenciosa y administrativa', 'nos esta pasando lista', 'un turno sin cubrir')",
-    "veces": 3,
+    "recurso": "anafora triple con 'siempre' para describir un patron inhumano",
+    "veces": 1,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "testigo que sale de un espacio cerrado y se niega a contar lo que vio",
+    "veces": 1,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "voz propia multiplicada por credenciales ajenas diciendo lo contrario",
+    "veces": 1,
+    "caps": [
+      3
+    ]
+  },
+  {
+    "recurso": "la pantalla o consola trae la noticia antes que la voz humana",
+    "veces": 2,
     "caps": [
       3
     ]

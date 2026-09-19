@@ -1,98 +1,86 @@
 [
   {
-    "recurso": "luz amarilla de emergencia sin proyectar sombras nítidas",
+    "recurso": "Zumbido de los ventiladores como sonido de fondo permanente del Nereida",
     "apariciones": {
-      "1": 1
+      "1": 2
     }
   },
   {
-    "recurso": "caligrafía menuda y regular sin un solo trazo dudoso",
+    "recurso": "Olor dulce desconocido como amenaza sin nombre en los trajes",
     "apariciones": {
-      "1": 1
+      "1": 2
     }
   },
   {
-    "recurso": "nombres propios leídos en fechas futuras (inversión de lo esperado)",
+    "recurso": "Cifras y mediciones precisas, registro obsesivo sin interpretación",
     "apariciones": {
       "1": 3
     }
   },
   {
-    "recurso": "chasquido educado de los mamparos cerrándose",
+    "recurso": "Perplejidad incómoda ante lo inexplicable, especialmente la apertura desde adentro",
     "apariciones": {
-      "1": 1
+      "1": 3
     }
   },
   {
-    "recurso": "Ferrán sujetándose el antebrazo como gesto de contención",
+    "recurso": "Compartimentos abiertos desde el interior como lo imposible manifestado",
     "apariciones": {
-      "1": 1
+      "1": 2
     }
   },
   {
-    "recurso": "racionalización mediante lógica técnica ante lo sobrenatural",
+    "recurso": "Silencio y quietud como señal de alerta crítica",
     "apariciones": {
-      "1": 1
+      "1": 2
     }
   },
   {
-    "recurso": "Ruidos del edificio como marcadores horarios (suspiro hidráulico a las 04:40, ventilación a las 06:15)",
+    "recurso": "La voz repetida idénticamente con acento en sílaba equivocada, como alguien leyendo en idioma no nativo",
     "apariciones": {
-      "2": 2
+      "2": 1
     }
   },
   {
-    "recurso": "Dígito verde del panel contando ocupantes de forma exacta y serena",
-    "apariciones": {
-      "2": 3
-    }
-  },
-  {
-    "recurso": "La mano cuidadosa que escribe y firma por otros sin notarse",
+    "recurso": "El silencio de Okonjo y su rechazo a revelar lo que vio en el conducto; su encierro posterior",
     "apariciones": {
       "2": 3
     }
   },
   {
-    "recurso": "Gesto de doblar y desdoblar como anomalía psicológica, herencia maternal",
+    "recurso": "Los registros y datos numéricos como modo de deducción: detector, curvas vitales, transmisiones archivadas",
+    "apariciones": {
+      "2": 4
+    }
+  },
+  {
+    "recurso": "La mano inmóvil sobre el teclado o la pluma como gesto de indecisión ante decisión crucial",
     "apariciones": {
       "2": 2
     }
   },
   {
-    "recurso": "«Relevar» versus «imitar» como distinción crucial de intención",
-    "apariciones": {
-      "2": 2
-    }
-  },
-  {
-    "recurso": "Túneles estrechándose en espiral sobre sí mismos hacia lo desconocido",
-    "apariciones": {
-      "2": 2
-    }
-  },
-  {
-    "recurso": "la pluma escribiendo sola, anotando la hora exacta",
-    "apariciones": {
-      "3": 2
-    }
-  },
-  {
-    "recurso": "el descenso en espiral hacia lo desconocido, pasillos que bajan",
-    "apariciones": {
-      "3": 3
-    }
-  },
-  {
-    "recurso": "los nombres como moneda de sacrificio, un nombre por noche",
-    "apariciones": {
-      "3": 2
-    }
-  },
-  {
-    "recurso": "la caligrafía de Ferrán apareciendo de forma autónoma en el libro",
+    "recurso": "Estructura «No X. Y» como negación seguida de afirmación contraposición",
     "apariciones": {
       "3": 1
+    }
+  },
+  {
+    "recurso": "Voz serena del pasajero como distintivo de verdad vs. temblor del miedo de Mirén",
+    "apariciones": {
+      "3": 2
+    }
+  },
+  {
+    "recurso": "Presión del gigante doblando el casco con sonido largo",
+    "apariciones": {
+      "3": 1
+    }
+  },
+  {
+    "recurso": "Tiempo acumulado en días como cuenta atrás (trescientos días, tres días)",
+    "apariciones": {
+      "3": 2
     }
   }
 ]

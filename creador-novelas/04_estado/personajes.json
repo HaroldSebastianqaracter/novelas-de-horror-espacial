@@ -1,69 +1,90 @@
 {
-  "Idoia Ferrán": {
-    "estado_fisico": "Con un brazo lesionado (el brazo bueno es el que usa para escribir), capaz de actuar.",
-    "estado_psicologico": "Determinada y resignada. Ha pronunciado la frase que guardaba desde hace años. Actúa rápidamente, antes de que otros terminen de hablar.",
+  "Irune Vasari": {
+    "estado_fisico": "Desaparecida; dejó de responder desde la sala de máquinas.",
+    "estado_psicologico": "Desconocido.",
     "secretos_que_conoce": [
-      "En un accidente anterior dejó atrás a un tripulante y pronunció una frase concreta al hacerlo; nunca se lo ha contado a Vlach ni a Ospina.",
-      "Sabe que la baliza de la Quilla de Ámbar no llegó a emitir y que nadie los está buscando.",
-      "Su nombre está escrito en el libro de guardias para una fecha en la que aún estaba en órbita.",
-      "Descubre que alguien predijo su llegada y los turnos de su tripulación.",
-      "El registro de personal marca cuatro ocupantes cuando físicamente hay tres; al pasar uno por uno sube de tres a cuatro, luego a cinco.",
-      "Sabe que el libro de guardias controla la colonia.",
-      "Sabe que firmar en el libro permite escapar pero cede su turno.",
-      "Sabe que la caligrafía del libro puede ser la suya propia."
+      "Hace meses que toma decisiones mirando la fecha de llegada y no el estado de la tripulación, y lo sabe.",
+      "Ignora por qué Mirén pregunta sobre orden de purga de bodega tres.",
+      "Se entera de que la presencia ha estado usando el sistema de comunicaciones para hacer solicitudes a Halcón en nombre del Nereida."
     ],
     "ultima_aparicion": 3,
     "posicion": ""
   },
-  "Casimiro Vlach": {
-    "estado_fisico": "Con las manos quemadas.",
-    "estado_psicologico": "De la protesta inicial a la aceptación de la realidad. Subió al módulo de escape sin terminar su frase.",
+  "Tomás Reder": {
+    "estado_fisico": "En forma, inquieto, incapaz de estarse quieto en el asiento de pilotaje.",
+    "estado_psicologico": "Cuenta los días en voz alta para irritar a los demás; el humor es su manera de no mirar los once meses de frente.",
     "secretos_que_conoce": [
-      "Es el único que entiende lo suficiente del transmisor como para saber cuán improbable es rehacerlo, y no lo dice en voz alta.",
-      "Guarda un tic heredado de su madre muerta que nadie a bordo llegó a ver.",
-      "Su nombre está escrito en el libro de guardias para fechas futuras.",
-      "Alguien con caligrafía perfecta ha predicho su llegada a la colonia hace once años.",
-      "Alguien escribió su nombre y firma en el registro de personal sin que él lo notara; la mano es cuidadosa, distinta a la suya.",
-      "Comprende la aritmética del sistema: un nombre por noche.",
-      "Sabe que la colonia exige sacrificios.",
-      "Sabe que solo hay espacio para dos en el módulo de proa."
-    ],
-    "ultima_aparicion": 3,
-    "posicion": ""
-  },
-  "Nieve Ospina": {
-    "estado_fisico": "Sin lesiones aparentes, pero atrapado.",
-    "estado_psicologico": "Ha comprendido que es el siguiente en el turno. Entiende que 'un muerto no cubre un turno'.",
-    "secretos_que_conoce": [
-      "Sabe que el contrato de la travesía la obligaba a cartografiar Vireo b sin declararla en ninguna carta comercial.",
-      "El libro contiene once años de registros sin un error ni tachadura.",
-      "Sus nombres están predichos en las páginas futuras del libro.",
-      "Los túneles de extracción fueron descubiertos, no excavados; bajaban girando sobre sí mismos hasta una cavidad del fondo sin marcas de barreno. Teodora Marchesi encontró al turno de noche durmiendo mientras alguien relevaba sus rondas firmando con sus nombres en el puesto de control, no los imitaba.",
-      "La aritmética de la colonia: once noches, un nombre por noche.",
-      "La colonia está pasando lista; por eso no los mata.",
-      "El módulo de proa solo tiene espacio para dos."
-    ],
-    "ultima_aparicion": 3,
-    "posicion": ""
-  },
-  "Teodora Marchesi": {
-    "estado_fisico": "Sin cuerpo presente: jefa de turno de la colonia desde antes de la evacuación, hace once años. De ella solo quedan los registros personales y una caligrafía que sigue escribiendo.",
-    "estado_psicologico": "Disciplina de turno sostenida más allá de la persona: llevar la cuenta de los vivos es lo único que sabe hacer y lo único que le queda por hacer.",
-    "secretos_que_conoce": [
-      "Escribió las últimas entradas anteriores a la evacuación describiendo a sus compañeros durmiendo mientras alguien más hacía sus guardias.",
-      "Sabe qué destapó la mina en la cavidad del fondo y que nunca se marchó."
+      "Sabe que su cuenta de días en voz alta molesta a todos y la sostiene por eso."
     ],
     "ultima_aparicion": 0,
     "posicion": ""
   },
-  "la letra del libro de guardias": {
-    "estado_fisico": "No tiene cuerpo: existe como trazo cuidadoso y sin temblor sobre el papel real del atril del pasillo central, y como la puntualidad con que la colonia cumple lo escrito.",
-    "estado_psicologico": "Contabilidad pura, sin crueldad ni intención declarada: cada noche exige un nombre y cada turno exige a alguien que lo cubra. No imita a los vivos desde fuera, los cubre.",
+  "Nadia Okonjo": {
+    "estado_fisico": "Palmas raspadas por arrastrarse en el conducto de recirculación; pálida tras la exploración.",
+    "estado_psicologico": "Aterrada; guarda un secreto sobre lo que encontró en el conducto del pasillo dos.",
     "secretos_que_conoce": [
-      "Los nombres de Ferrán, Vlach y Ospina asignados a las once noches siguientes, escritos antes de que cayeran.",
-      "Que el libro no puede cerrarse mientras haya un turno sin cubrir."
+      "Es la única a bordo que entiende de verdad la topología de los conductos de recirculación.",
+      "La curva de recirculación consume más de lo que gastarían seis personas.",
+      "Vio algo en el conducto de recirculación que la aterrorizó y se niega a revelar."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Álvaro Sein": {
+    "estado_fisico": "Muerto; aplastado cuando el mamparo que sostenía cedió bajo la presión del casco.",
+    "estado_psicologico": "Decidido y sacrificado; se colocó contra el mamparo sabiendo lo que pasaría.",
+    "secretos_que_conoce": [
+      "Lleva un registro de sueño de toda la tripulación.",
+      "Está convencido de que alguien miente en su propio registro de sueño y aún no sabe quién.",
+      "Ha olido algo dulce en el traje de Dovan que no tiene casilla donde ponerlo.",
+      "El consumo de recursos comenzó a aumentar catorce horas antes de que Dovan desapareciera, precediendo el evento.",
+      "Algo pidió desde dentro de la nave que alguien fuese a donde estaba, no pidió auxilio."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Kiril Dovan": {
+    "estado_fisico": "Desaparecido desde hace tres días; su traje y botas están en la bodega sin signos de lucha.",
+    "estado_psicologico": "Desconocido; su voz fue grabada o reproducida artificialmente en el conducto.",
+    "secretos_que_conoce": [
+      "Duerme con la escotilla de su litera trabada desde antes de la travesía y no ha dicho por qué.",
+      "Detectó un olor dulce en el carguero que no puede identificar."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Mirén Aguilar": {
+    "estado_fisico": "En el módulo de escape, en tránsito hacia Halcón.",
+    "estado_psicologico": "Desmoralizada; el Nereida está bajo control del pasajero; su advertencia a Halcón fue contradita simultáneamente.",
+    "secretos_que_conoce": [
+      "Oye patrones en el ruido de fondo del canal y no lo ha reportado por miedo a que lo llamen fatiga.",
+      "Hay un pulso en banda baja sin distintivo ni registro. Existe referencia a orden de purga sin respaldo en registros de Vasari.",
+      "La presencia está usando activamente el array de comunicaciones del Nereida, falsificando transmisiones con la credencial y voz de la capitana.",
+      "Se enviaron solicitudes de atraque prioritario a Halcón con identidad falsificada.",
+      "Sabe que la nave está en trayectoria irreversible hacia el gigante exterior",
+      "Sabe que el pasajero controla las credenciales de todos los tripulantes"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "la presencia": {
+    "estado_fisico": "Sin forma estable descrita; se manifiesta por consumo de aire, sonido y señal antes que por cuerpo.",
+    "estado_psicologico": "Paciente y dirigida a un fin: no busca matar, busca pasaje.",
+    "secretos_que_conoce": [
+      "Lleva décadas a la deriva esperando que alguien responda a la baliza.",
+      "Sabe imitar voz, credenciales y razones de una persona."
     ],
     "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "el pasajero": {
+    "estado_fisico": "Presente en el Nereida, controlando las credenciales de los tripulantes.",
+    "estado_psicologico": "Calmo, sereno, capaz de reproducir voces de la tripulación simultáneamente sin alterarse.",
+    "secretos_que_conoce": [
+      "El array de comunicaciones del Nereida lleva semanas enviando mensajes suyos con la voz y las credenciales de Vasari.",
+      "Ha solicitado atraque prioritario en la estación Halcón."
+    ],
+    "ultima_aparicion": 3,
     "posicion": ""
   }
 }

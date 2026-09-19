@@ -1,31 +1,32 @@
 {
   "reglas": [
-    "El libro de guardias no admite huecos: cada turno de cada noche tiene que quedar anotado con un nombre, y lo que no cubre un vivo lo cubre otra cosa.",
-    "La colonia obedece lo escrito en el libro, no a quien la habita: puertas, mamparos y luces se sellan y se abren en los minutos que marca el turno.",
-    "Vireo b no figura en ninguna carta comercial; nadie va a pasar por allí ni a buscar a quien caiga.",
-    "La colonia está sellada desde dentro, con aire respirable, luz de emergencia y cámaras frías llenas de comida que no ha caducado: nada de lo que sostiene la vida allí necesita a los vivos.",
-    "Lo que ocupa un turno vacío no imita a los vivos desde fuera: los cubre, y puede hablar con su voz, repetir sus gestos y saber lo que solo ellos saben.",
-    "El único camino de salida es el módulo de proa de la Quilla de Ámbar: un solo ascenso, capacidad para dos.",
-    "Los túneles de extracción no siguen la lógica de una mina: descienden en espiral cerrada hacia una cavidad que los colonos no abrieron sino destaparon."
+    "El Nereida es un carguero de mineral tripulado por seis personas en una travesía de once meses hacia la estación Halcón; no hay relevos ni escalas intermedias.",
+    "El soporte vital recircula el aire en circuito cerrado y su consumo se mide de forma continua: el sistema sabe cuánto aire gasta la nave, y ese número debe cuadrar con el número de personas a bordo.",
+    "El protocolo de salvamento obliga a responder a toda baliza de socorro; la capitana no tiene margen legal para negarse.",
+    "Las comunicaciones con Halcón viajan con retardo y se autentican por voz y credenciales de tripulación, no por presencia física.",
+    "Fuera del casco no hay nadie: la ruta pasa más allá de la última órbita cartografiada y ningún remolcador llega hasta ahí en tiempo útil.",
+    "El canal interno de tripulación llega a toda la nave y cualquiera puede hablar por él desde cualquier puesto.",
+    "Una voz por el canal o detrás de un mamparo no prueba quién habla."
   ],
   "objetos": [
-    "El libro de guardias: hojas de papel real manuscritas, atornillado su atril al mamparo del pasillo central, once años de turnos sin un solo hueco.",
-    "El transmisor a medio rehacer, armado por Vlach con piezas del módulo de proa y de la colonia.",
-    "El módulo de proa de la Quilla de Ámbar, único resto aprovechable de la nave, con un solo ascenso posible y capacidad para dos.",
-    "El escáner de mano, que detectó una sola estructura artificial en ochenta kilómetros.",
-    "El equipo de cartografía de Ospina, con el que levanta el plano de los niveles y fotografía las páginas.",
-    "El panel de personal de la colonia, reconectado por Vlach, que cuenta las presencias.",
-    "Los registros personales de Teodora Marchesi, hallados entre los restos del alojamiento.",
-    "El entablillado improvisado del antebrazo de Ferrán."
+    "Baliza de socorro sin registro, captada más allá de la última órbita cartografiada.",
+    "Pecio: nave de carga antigua, sin nombre en el casco, con las luces de emergencia encendidas y los compartimentos abiertos desde el interior.",
+    "Array de comunicaciones del Nereida.",
+    "Registro de sueño de la tripulación que lleva Álvaro Sein.",
+    "Registro de consumo de aire del soporte vital.",
+    "Tarjetas de acceso de tripulación.",
+    "Módulo de escape del Nereida.",
+    "Escotilla trabada de la litera de Kiril Dovan."
   ],
   "linea_de_tiempo": [
-    "Hace más de once años: la mina destapa, en el fondo de la espiral, una cavidad que los colonos no abrieron.",
-    "Hace once años: Teodora Marchesi, jefa de turno, anota que sus compañeros duermen mientras alguien más hace sus guardias; la colonia se evacúa y queda sellada desde dentro.",
-    "Los once años siguientes: el libro de guardias registra cada turno de cada noche sin un solo hueco, con la misma letra cuidadosa.",
-    "Hoy: la Quilla de Ámbar se parte al entrar en la atmósfera de Vireo b; la baliza no llega a emitir y sobreviven Ferrán, Vlach y Ospina.",
-    "Hoy, poco después: los tres alcanzan la colonia y encuentran en el atril del pasillo central el libro abierto con la fecha del día."
+    "Décadas antes: el pecio queda a la deriva con sus compartimentos abiertos desde dentro y su baliza emitiendo.",
+    "Mes cero: el Nereida parte con seis tripulantes rumbo a la estación Halcón.",
+    "Meses uno a diez: travesía sin incidentes; la convivencia se agota y cada uno se repliega en su rutina.",
+    "Mes once, antes del capítulo 1: el Nereida entra en el tramo final de ruta, más allá de la última órbita cartografiada."
   ],
   "locaciones": {
-    "Colonia minera de Vireo b": "Instalación minera sellada desde dentro sobre una luna sin registrar: aire respirable, luz de emergencia siempre encendida, cámaras frías con comida que no ha caducado. Un pasillo central con el atril del libro de guardias, niveles inferiores de alojamiento y servicios, y túneles de extracción que descienden en espiral cerrada hacia una cavidad del fondo. Cumple su propio horario con puntualidad imposible."
+    "Nereida — puente": "Puesto de mando del carguero: consolas de navegación, la silla de la capitana y la pantalla de ruta que marca los días restantes hasta Halcón. Es el único mamparo de la nave que puede sellarse desde dentro.",
+    "Nereida — conducto de recirculación": "Red estrecha de conductos por la que circula todo el aire de la nave. Solo Okonjo conoce su trazado completo; se recorre a rastras, con el zumbido constante de los extractores y ecos que devuelven las voces desplazadas.",
+    "Nereida — sala de comunicaciones": "Cubículo donde Mirén pasa ocho horas diarias con los auriculares puestos. Aloja el array, los seis canales de tripulación y el enlace con Halcón; la estática de fondo nunca se apaga."
   }
 }

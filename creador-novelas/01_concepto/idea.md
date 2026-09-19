@@ -1,1 +1,1 @@
-Un grupo de navegación perdido en un planeta por una falla en su nave» describe la situación, pero no dice qué hay ahí que no debería estar, que es lo que convierte un accidente en terror
+un alien se met en una nave y matara a toda la tripulacion

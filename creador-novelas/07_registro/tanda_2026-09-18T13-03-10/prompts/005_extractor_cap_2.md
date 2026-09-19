@@ -6,8 +6,8 @@ Sos el agente extractor. Tu trabajo es mecánico: leer UN capítulo y dejar en d
 Leé con la herramienta Read el archivo **C:/Users/harold.rodriguez/Desktop/Nueva carpeta/novelas-de-horror-espacial/creador-novelas/05_manuscrito/cap_2.md** y nada más del manuscrito. Cualquier otra ruta de `05_manuscrito/` está bloqueada y no la necesitás.
 
 ## Registro de sujetos (vocabulario canónico, no memoria)
-- Personajes: Idoia Ferrán, Casimiro Vlach, Nieve Ospina, Teodora Marchesi, la letra del libro de guardias
-- Locaciones: Colonia minera de Vireo b
+- Personajes: Irune Vasari, Tomás Reder, Nadia Okonjo, Álvaro Sein, Kiril Dovan, Mirén Aguilar, la presencia, el pasajero
+- Locaciones: Nereida — puente, Nereida — conducto de recirculación, Nereida — sala de comunicaciones
 - Sujeto para reglas del universo sin protagonista: `mundo`
 
 Usá EXACTAMENTE estos nombres como `sujeto` y como claves de `personajes`. Nunca «el capitán» donde el registro dice «Kovacs». Si el capítulo establece un hecho sobre una entidad que no está en el registro, emitilo igual con el nombre que use el texto: el harness lo marcará como no validado, no lo descartará.

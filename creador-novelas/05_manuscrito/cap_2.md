@@ -1,19 +1,27 @@
-Vlach llevaba dos jornadas soldando el transmisor sobre una mesa de acero, con la palma quemada envuelta en cinta aislante. Ferrán le acercaba piezas y contaba las horas por los ruidos del edificio: a las 04:40 el nivel dos se abría con un suspiro hidráulico; a las 06:15 la ventilación cambiaba de tono. Ninguno de los dos comentaba ya la puntualidad. Comentarla era admitirla.
+Dovan no apareció en el relevo de las seis. Su traje seguía colgado en la bodega, con las botas alineadas debajo, y la escotilla de su litera estaba abierta por primera vez en once meses. Okonjo pasó el detector por el suelo y no encontró nada: ni arrastre, ni humedad, ni una sola marca de forcejeo. La bodega estaba más limpia que el día del embarque.
 
-Ospina trabajaba en el plano. Había recorrido los niveles con el escáner de mano y volcaba las lecturas sobre papel, porque el papel era lo único que la colonia no le discutía. El resultado no le gustó. Los túneles de extracción no buscaban vetas: bajaban girando sobre sí mismos, estrechándose, seis vueltas completas hasta una cavidad del fondo cuyo perfil no tenía marcas de barreno. Nadie había excavado aquello. Lo habían descubierto y habían seguido bajando de todos modos.
+Sein anotó la hora. Después dejó de anotar, porque de pronto le pareció una cobardía.
 
-—Mira el panel —dijo Vlach.
+Dos días más tarde, Mirén oyó la voz. Venía del conducto de recirculación del pasillo dos, aplastada por el flujo de aire, y era la de Dovan hasta en las muletillas: «venga, venga, que me he quedado atascado, venga». La repitió doce veces. Siempre igual, siempre con la misma pausa, y siempre con un acento mínimo puesto en la sílaba equivocada, como quien lee en voz alta un idioma que entiende pero no habla.
 
-Al reconectar la alimentación del pasillo, esperando acercarse a la antena, había despertado el registro de personal. La pantalla mostraba el recuento de ocupantes de la colonia en un dígito verde, sereno, actualizado cada minuto. Marcaba cuatro.
+Okonjo entró a rastras con una linterna frontal. Volvió a salir cuarenta minutos después, sola, blanca, con las palmas raspadas. No quiso decir qué había visto. Cuando Vasari se lo preguntó dos veces, contestó que el conducto estaba vacío y luego se encerró en su camarote.
 
-Ferrán se acercó con el antebrazo pegado al cuerpo y pulsó el diagnóstico. Sin fallos. Cuatro. Salieron los tres al exterior del pasillo y volvieron a entrar en fila; el dígito subió a cuatro desde tres con exactitud contable, uno por cada cuerpo, y luego uno más.
+Sein fue el que juntó las piezas, esa noche, comparando su registro de sueño con las curvas del soporte vital. El consumo había empezado a subir catorce horas antes de que la esclusa se abriera. Catorce horas. La lectura anómala precedía a la visita, no la seguía.
 
-Esa noche Ospina abrió las cajas del alojamiento. Dentro había cuadernos personales de Teodora Marchesi, jefa de turno hasta la evacuación, y la letra de aquellas páginas era, trazo por trazo, la del atril. Leyó en voz alta la última entrada. Marchesi describía haber entrado en los dormitorios a las tres de la madrugada y haber encontrado a todo el turno de noche durmiendo, respirando despacio, mientras en el puesto de control alguien firmaba las rondas con los nombres de ellos. No decía que la cosa los imitara. Decía que los relevaba.
+—Entonces no pedía auxilio —dijo Vasari.
 
-Vlach no durmió. Al amanecer del ciclo siguiente, Ferrán lo encontró sentado junto al transmisor, la cara descansada, los ojos sin la irritación de cuarenta horas, doblando y desdoblando una esquina de papel con un gesto que no era suyo sino de su madre.
+—Pedía que alguien fuese —contestó Sein.
 
-—¿Cuándo has dormido? —preguntó ella.
+Mirén bajó a comunicaciones a mandar un aviso a Halcón. Encontró el array perfectamente sano. Ni una avería, ni un paquete perdido: el registro de salida mostraba semanas enteras de transmisiones limpias, todas firmadas con la credencial de la capitana, todas con su voz en el archivo adjunto. Una confirmación de ruta. Una solicitud de atraque prioritario, cursada y en cola.
 
-—No he dormido.
+Tardó un rato largo frente al monitor en entender lo que significaba, y lo que significaba no era que los estuvieran cazando.
 
-En el atril, el turno de la noche anterior aparecía cubierto. Constaba su apellido, su hora de entrada, su firma. Vlach reconoció la mano: no era la propia. Era la otra, la cuidadosa, y había escrito por él sin que él lo notara.
+—No nos está comiendo las comunicaciones —dijo, cuando Vasari llegó y se quedó de pie detrás de ella—. Las está usando.
+
+Fuera, el gigante exterior seguía a ocho días de distancia y Halcón a seis semanas, con cuatro mil personas dentro y un corredor de atraque ya reservado a nombre del Nereida.
+
+Vasari se inclinó sobre la consola.
+
+—Cancélalo —dijo—. Ahora.
+
+Mirén puso la mano sobre el teclado y no la movió.

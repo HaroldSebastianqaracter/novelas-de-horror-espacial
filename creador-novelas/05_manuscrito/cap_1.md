@@ -1,29 +1,27 @@
-La compuerta de la colonia estaba sellada por dentro y se abrió igual, sin pedirles nada, cuando Vlach apoyó la palma quemada sobre el panel. Ferrán entró primero, porque le tocaba entrar primero. El aire tenía temperatura de habitación ocupada. En el techo, las tiras de emergencia daban esa luz amarilla que no proyecta sombras nítidas, y a treinta pasos, en las cámaras frías, había bandejas apiladas con fechas que todavía no habían vencido.
+Trescientos veintinueve, dijo Reder desde el asiento de pilotaje, y nadie levantó la vista. Vasari anotó la cifra en el parte porque anotarla le costaba menos que discutirla. En el puente del Nereida el aire olía a lo de siempre: metal tibio, filtro saturado, seis cuerpos que llevaban once meses respirándose.
 
-Ospina ya estaba midiendo el pasillo con el equipo de mano.
+Mirén fue quien rompió la rutina. Se quitó un auricular, lo dejó colgando y dijo que había algo en la banda baja. No estática; debajo de la estática. Un pulso corto, repetido, con la estructura de una llamada de socorro y sin ningún distintivo asociado.
 
-—Once años evacuada —dijo—. Y el soporte vital sin una caída.
+—Sin registro —dijo—. No figura en ninguna parte.
 
-—Mejor para nosotros. —Ferrán se sujetó el antebrazo izquierdo contra el costado y contó los ramales: cuatro, más los accesos a los niveles de abajo—. Vlach, quiero inventario de repuestos antes de la noche. Todo lo que sirva para una antena.
+Vasari sostuvo la pausa lo que pudo. Sabía lo que decía el protocolo y sabía que el protocolo no le dejaba un solo resquicio. Ordenó la desviación con la misma voz con la que pedía los partes de consumo.
 
-Fue Vlach quien se detuvo en el atril.
+El pecio apareció a las nueve horas: un carguero antiguo, girando despacio, con las luces de emergencia todavía encendidas después de vaya a saber cuánto. Dovan pegó la frente al visor.
 
-Estaba atornillado al mamparo del pasillo central, a la altura del pecho, y sostenía un libro abierto de papel de verdad. Ferrán pensó primero en un manual de procedimiento. Después vio las columnas: fecha, hora de relevo, nombre de quien cubría. Una caligrafía menuda, regular, sin un solo trazo dudoso, que se repetía página tras página hacia atrás hasta perderse en el lomo. Ospina pasó hojas con dos dedos. No faltaba ninguna noche. Ni una casilla vacía, ni una tachadura, ni un cambio de pulso en once años de turnos.
+—No tiene nombre en el casco —dijo—. Ni pintado ni troquelado. Nada.
 
-La última columna escrita llevaba la fecha de aquel día.
+Cruzaron él y Reder. Okonjo les siguió el consumo de los trajes desde su consola, cifra a cifra. Volvieron en cuarenta minutos, y lo que trajeron no fue miedo sino una perplejidad incómoda: los compartimentos estaban abiertos, todos, y las palancas habían sido accionadas desde el lado interior. Ni un cuerpo. Ni uno solo, en toda la nave.
 
-—Alguien vive aquí —dijo Vlach, y le salió demasiado rápido.
+—Se fueron —dijo Reder, y se rió sin ganas—. Se fueron andando.
 
-Ospina no contestó. Había pasado a la página siguiente, que también estaba llena. Y a la otra. Once noches por delante, repartidas turno a turno, y en las casillas de los nombres decía Ferrán, decía Vlach, decía Ospina, con la misma tinta y la misma mano tranquila que las once mil noches anteriores.
+Sein no se rió. Había olido algo dulce en el traje de Dovan al descolgarlo y no tenía casilla donde ponerlo. Lo apuntó igual, junto a los registros de sueño, en la columna de cosas que aún no significaban nada.
 
-Vlach agarró la hoja por el borde.
+La esclusa se cerró a las veintidós. La cena fue normal. Dovan trabó su escotilla como cada noche y el Nereida siguió su rumbo con el zumbido de costumbre.
 
-—No la toques —dijo Ospina, y levantó la cámara. El obturador sonó cuatro veces.
+A las cero cuarenta, Okonjo se quedó mirando la curva de recirculación. El circuito medía por hora, sin criterio ni opinión, y la curva de esa noche subía por encima de lo que consumían seis personas. No mucho. Lo suficiente para no ser un error de sensor.
 
-Ferrán leyó su apellido escrito en una fecha en la que ella todavía estaba en órbita, sin saber que iba a caer, y esperó a que se le ordenara el pulso antes de hablar.
+Buscó a Mirén para pedirle el registro del canal interno y la encontró con los dos auriculares puestos, muy quieta.
 
-—Es papel —dijo—. Lo único que importa es el transmisor. Vlach, repuestos. Ospina, planos de los niveles. Al libro le hacemos el caso que se le hace a una tubería que golpea.
+—¿Cuándo dio la capitana la orden de purgar la bodega tres? —preguntó Mirén.
 
-Se repartieron los ramales. Trabajaron cuatro horas y fue un alivio trabajar.
-
-A las veintiuna doce, exactamente, los mamparos de los niveles inferiores se cerraron solos, uno detrás de otro, con un chasquido educado. Nadie había tocado nada. Ferrán se quedó mirando el pasillo vacío y decidió, en voz alta, que aquello era un temporizador.
+Vasari, dos pasos detrás, en el vano, no había dado ninguna orden en seis horas.

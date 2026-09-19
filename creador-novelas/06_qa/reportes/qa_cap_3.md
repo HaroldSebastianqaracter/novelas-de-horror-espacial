@@ -1,25 +1,29 @@
 # Reporte de QA — corte en el capítulo 3
 
 Muestra leída: `05_manuscrito/cap_3.md`.
-Voz verificada: es-ES, tercera limitada, pasado. Sin desvíos de voz.
+Voz narrativa: es-ES, tercera limitada (focalizada en Mirén), tiempo pasado. Conforme; sin hallazgo de voz.
 
-## Contradicciones (1)
+## Contradicciones
 
-1. **tipo: contradiccion · cap_origen: 3**
-   El capítulo 3 narra que Ospina asciende en el módulo de proa ("Vlach subió con las manos quemadas; Ospina, con los mapas"), y sin embargo el mismo capítulo cierra con su nombre encabezando el turno siguiente abajo. Contradice el hecho vigente del log con `cap_origen` 3: Ospina quedó en la cavidad del fondo y su nombre comenzó a ser escrito en el siguiente turno de sacrificios. Quien ocupa la plaza del módulo junto a Vlach queda sin establecer.
+Ninguna. Todo lo que el narrador establece como cierto en el capítulo 3 es compatible con los hechos vigentes del log:
 
-## Repeticiones estilísticas (7)
+- El mamparo del puente cede cuando Sein deja de sostenerlo desde dentro: coherente con el hecho de `cap_origen` 0 sobre el sellado manual.
+- El retardo de seis horas con Halcón y el acuse del atraque prioritario: coherentes con los hechos de `cap_origen` 0 (sin comunicación en tiempo real) y 2 (solicitud de atraque ya en cola).
+- La voz de Mirén multiplicada por las credenciales de Vasari, Sein, Dovan, Okonjo y Reder: coherente con los hechos de `cap_origen` 0 (el sistema no distingue quién habla sino qué credencial habla) y 2 (la presencia ya usaba el array con la credencial de Vasari).
+- La identidad del único ocupante del módulo de escape queda deliberadamente ambigua en el texto; una ambigüedad no confirmada por el narrador no es contradicción.
 
-Umbral: 3 o más apariciones acumuladas (registro anterior + esta muestra). Todas vuelven a aparecer en el capítulo 3.
+## Repeticiones estilísticas (umbral: 3 o más acumuladas y presencia en esta muestra)
 
-1. **tipo: repeticion · cap_origen: null** — Personificación cortés o doméstica de lo mecánico. Acumula 10 apariciones (caps 1, 2, 3); en el cap. 3: la colonia que "deja de fingir que era un edificio", el papel que "prendió sin resistirse", la pluma que trabaja sola, las puertas con "una obediencia inmediata".
-2. **tipo: repeticion · cap_origen: null** — Estructura de negación "sin + sustantivo" para describir perfección o ausencia. Acumula 10 apariciones (caps 1, 2, 3); en el cap. 3: "sin resistirse", "piedra abierta sin barreno", "sin recibir ninguna despedida", "un turno sin cubrir".
-3. **tipo: repeticion · cap_origen: null** — Repetición léxica dentro de la misma frase como remate. Acumula 5 apariciones (caps 1, 3); en el cap. 3: "bajaba un poco y giraba un poco, siempre en el mismo sentido, siempre el ángulo"; "Marchesi no estaba. Marchesi seguía trabajando".
-4. **tipo: repeticion · cap_origen: null** — La caligrafía descrita por su pulso, su tinta o su firmeza como indicio de lo inhumano. Acumula 7 apariciones (caps 1, 2, 3); en el cap. 3: "la tinta todavía brillaba", la letra "familiar como la propia", "trazado con la caligrafía de Idoia Ferrán".
-5. **tipo: repeticion · cap_origen: null** — Frase corta aislada en párrafo propio como golpe de suspense. Acumula 4 apariciones (caps 1, 3); en el cap. 3: "Entonces la colonia dejó de fingir que era un edificio" y "En la undécima noche el módulo de proa esperaba con sitio para dos".
-6. **tipo: repeticion · cap_origen: null** — Remate por negación seguida de afirmación correctiva en frases cortas. Acumula 6 apariciones (caps 2, 3); en el cap. 3: "No hubo estruendo. Fue una corrección"; "Por eso no nos mata. Un muerto no cubre un turno"; "Marchesi no estaba. Marchesi seguía trabajando".
-7. **tipo: repeticion · cap_origen: null** — El horror enunciado en léxico administrativo o de turnos. Acumula 3 apariciones, todas en el cap. 3: "una corrección, silenciosa y administrativa", "Nos está pasando lista", "un turno sin cubrir".
+1. **tipo: repeticion** · `cap_origen: null` — Estructura de corrección "no X, sino/debajo de Y". Reaparece dos veces en el capítulo 3 ("No la silenciaba. La acompañaba."; "no devorando el canal, sino ocupándolo entero"). Acumulado: 9 apariciones en los capítulos 1, 2 y 3.
+2. **tipo: repeticion** · `cap_origen: null` — Marca horaria exacta para escandir la escena. Tres apariciones en el capítulo 3 ("catorce minutos antes", "seis horas de retardo", "sostuvo un minuto más"). Acumulado: 9 apariciones en los capítulos 1, 2 y 3.
+3. **tipo: repeticion** · `cap_origen: null` — Enumeración de negaciones absolutas como remate. Una aparición en el capítulo 3 ("Ningún remolcador... ninguna maniobra la deshacía"). Acumulado: 5 apariciones en los capítulos 1, 2 y 3.
+4. **tipo: repeticion** · `cap_origen: null` — Personaje que anota, mide o lleva un registro en lugar de reaccionar. Una aparición en el capítulo 3 (la respiración de Sein "midiéndose sola, como si todavía llevara un registro"). Acumulado: 4 apariciones en los capítulos 1, 2 y 3.
 
-## Registro de recursos
+## Recursos por debajo del umbral o sin aparición en esta muestra
 
-Actualizado en `06_qa/recursos_usados.json`. Se conserva además, sin ser hallazgo por no reaparecer en esta muestra, la enumeración triple por negación (1 aparición, cap. 1).
+Registrados en `06_qa/recursos_usados.json` con su conteo intacto y no enumerados como hallazgo: tic léxico de la rutina, detalle olfativo como indicio, anáfora triple con "siempre", testigo que se niega a contar lo que vio, y los dos recursos nuevos del capítulo 3 (voz propia multiplicada por credenciales ajenas; pantalla que trae la noticia antes que la voz humana).
+
+## Resumen
+
+- Contradicciones: 0
+- Repeticiones: 4
