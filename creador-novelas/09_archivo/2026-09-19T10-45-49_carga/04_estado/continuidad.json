@@ -1,0 +1,242 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El Ámbar Tardío es un carguero de cinco tripulantes en travesía larga, a semanas de cualquier puerto habitado, con vacío al otro lado del casco.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El soporte vital funciona en circuito cerrado: un único bucle de aire reciclado recorre todos los compartimentos, y la bodega está conectada a ese bucle.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El contrato de flete prohíbe a la tripulación inventariar la carga y el manifiesto viaja cifrado desde origen.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La nave lleva un registro automático de presión y maniobras con marca horaria, consultable por cualquiera de a bordo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La bodega se comunica con el resto del carguero por dos escotillas, la de proa y la de popa; la junta de la de popa figura en la lista de reparaciones pendientes desde hace siete meses, firmada y sin presupuesto.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La carga viene envasada en un sellante lechoso que no se evapora y se adhiere a las superficies.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Llevan once semanas de travesía y la ruta contratada incluye correcciones de rumbo programadas desde origen que la nave ejecuta sola en minutos.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nadia Bregan",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es la capitana del Ámbar Tardío y firmó el contrato de este flete sin leer los anexos, porque pagaba lo que tres viajes normales.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Beni Saad",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el estibador de a bordo y le corresponde comprobar las amarras de la bodega durante las maniobras.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Osmar Tiel",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el maquinista, conoce el estado real de cada pieza de la nave y consulta los registros automáticos por costumbre.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Lucía Ferrán",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es la médica de a bordo y dispone solo de instrumental clínico básico, sin capacidad de análisis biológico fino.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kemal Ostrov",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el piloto y el único que trabaja habitualmente con el sistema de navegación y la ruta contratada.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "bodega del Ámbar Tardío",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Guarda los contenedores sellados en origen, amarrados con bridas tensadas, y tiene una compuerta de estiba al vacío que solo se acciona desde un panel manual situado dentro de la propia bodega.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "pasillo de las escotillas del Ámbar Tardío",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Es el tramo estrecho entre las dos escotillas de la bodega, con las tuberías del reciclado a la vista, y transmite el sonido de cualquier golpe en el metal.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la presencia",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "La presencia respira de forma rítmica y regular dentro del séptimo contenedor de la bodega.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "bodega del Ámbar Tardío",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Las bridas del séptimo contenedor se abrieron desde el interior y filtra un sellante lechoso que no se seca.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "bodega del Ámbar Tardío",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La junta de popa de la bodega está defectuosa y estaba en lista de reparaciones sin presupuesto.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Ambas escotillas de la bodega del Ámbar Tardío fueron cerradas como medida de confinamiento.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la presencia",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ha aprendido a calcular los huecos de vigilancia y corrige su timing hacia adelante para golpear antes del relevo esperado.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Un hilo blanco se estira sin romperse desde los mamparos de la nave, propagándose.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El aire de la cubierta de vigilancia es idéntico al aire de la bodega, indicando contaminación.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nadia Bregan",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ha ordenado un descenso de los cinco tripulantes despiertos al día siguiente para inspeccionar la bodega con la tabla de registros.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Beni Saad",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Beni Saad muere succionado al vacío cuando se abre la bodega del Ámbar Tardío.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "bodega del Ámbar Tardío",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La bodega del Ámbar Tardío fue abierta y ventilada al vacío, destruyendo su contenido incluidas formas vivas de la presencia.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La maniobra de la semana once fue programada desde origen con una coordenada escrita a mano; alguien pagó para que la nave completara la travesía.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El Ámbar Tardío gira hacia una coordenada no programada a bordo, bajo órdenes externas.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "bodega del Ámbar Tardío",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La compuerta de estiba fue abierta al vacío, decomprimiendo la bodega y expulsando contenedores, cordones blancos del sellante y el estibador que había bajado primero.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "bodega del Ámbar Tardío",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El cierre de popa fue soldado permanentemente sin presupuesto, sellando la bodega.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kemal Ostrov",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Kemal descubrió una maniobra archivada desde el astillero, sin firma ni solicitud a bordo, cargada con una coordenada escrita a mano que se ejecutó hace once semanas.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La presencia vigilada en la bodega no estaba sola; los cordones blancos del sellante tenían volumen, articulación y una manera distinta de ocupar el aire.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

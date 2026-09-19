@@ -1,0 +1,56 @@
+{
+  "Yenner": {
+    "estado_fisico": "muerta en el umbral de proa de la bodega de carga, alcanzada por la criatura tras trabar los pernos",
+    "estado_psicologico": "resuelta al final; asumió la reparación del sabotaje que ella misma ordenó",
+    "secretos_que_conoce": [
+      "aceptó un soborno de un remitente para dejar una salida de la bodega sin trabar del todo"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Ibarra": {
+    "estado_fisico": "sana, sin heridas",
+    "estado_psicologico": "endurecida; firmó el parte del viaje porque nadie más podía",
+    "secretos_que_conoce": [
+      "Leyó los manifiestos prohibidos: el flete se pagó muy por encima del mercado y el remitente canceló contacto al despegar",
+      "Sabe del sabotaje de los pernos",
+      "el flete se pagó muy por encima del mercado y el remitente canceló contacto al despegar",
+      "sabe del sabotaje de los pernos",
+      "accionó la purga que expulsó a la criatura y la carga"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Ossman": {
+    "estado_fisico": "sano, agotado por la soldadura de la escotilla de popa",
+    "estado_psicologico": "callado y penitente; revisa las trabas de proa por costumbre",
+    "secretos_que_conoce": [
+      "limó los pernos de traba de la escotilla de proa de la bodega de carga por orden de Yenner, a cambio de parte de la paga",
+      "Limó los pernos de traba de la escotilla de proa por orden de Yenner, a cambio de parte de la paga; ya lo ha confesado ante Sarn, Ibarra y Calloway",
+      "limó los pernos de traba de la escotilla de proa por orden de Yenner, a cambio de parte de la paga; ya lo confesó ante la tripulación"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Sarn": {
+    "estado_fisico": "sano, manos golpeadas contra el cristal reforzado",
+    "estado_psicologico": "marcado por haber visto morir a Yenner sin poder abrir",
+    "secretos_que_conoce": [
+      "Sabe que los pernos de proa fueron limados a propósito y que la orden vino de Yenner",
+      "vio el ataque a Yenner desde el otro lado del cristal reforzado"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Calloway": {
+    "estado_fisico": "sana",
+    "estado_psicologico": "clínica hasta el final; dirigió la maniobra sin levantar la voz",
+    "secretos_que_conoce": [
+      "Sabe que el sellante es tejido vivo del propio pasajero y que se mueve hacia el calor",
+      "el sellante es tejido vivo del pasajero y se mueve hacia el calor",
+      "el conducto de purga térmica descarga a ochenta grados antes de abrir al vacío"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "Vainas en el metal",
+    "objetivo_narrativo": "La cuadrilla descubre durante una inspección rutinaria que el tanque principal está tapizado de vainas orgánicas reventadas, y Vance detecta la primera anomalía de humedad en los conductos de ventilación que confirma que algo ya se propaga por la nave.",
+    "personajes": [
+      "Reyes",
+      "Okafor",
+      "Vance",
+      "Sol",
+      "Ibarra"
+    ],
+    "locacion": "tanque principal",
+    "informacion_nueva": "Las vainas orgánicas adheridas al metal del tanque, muchas ya reventadas desde dentro, y la primera anomalía de humedad detectada en los conductos de ventilación de toda la nave.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "Lo que respira en los conductos",
+    "objetivo_narrativo": "El agua potable se agota más rápido de lo previsto, Ibarra descubre que la presencia reacciona al calor corporal, y Okafor halla evidencia de que el sellado automático del tanque ya fue activado una vez desde dentro sin dejar registro, sembrando la sospecha de un traidor en la cuadrilla.",
+    "personajes": [
+      "Reyes",
+      "Okafor",
+      "Vance",
+      "Sol",
+      "Ibarra"
+    ],
+    "locacion": "conductos de ventilación",
+    "informacion_nueva": "La presencia se alimenta de la humedad del aire y reacciona al calor corporal; el sistema de sellado automático del tanque ya fue activado antes por alguien que no dejó registro de haberlo hecho.",
+    "tension": 4
+  },
+  {
+    "num": 3,
+    "titulo": "Agua Muerta",
+    "objetivo_narrativo": "Con las últimas horas de agua limpia, la cuadrilla se divide entre sellar el tanque o purgar los conductos; Sol confirma que las vainas han vuelto a moverse, Vance aísla el agua que aún no fue tocada, y la decisión final de Reyes e Ibarra determina cuántos de los cinco llegan vivos al momento en que la nave, ya en cuarentena, transmite su última señal.",
+    "personajes": [
+      "Reyes",
+      "Okafor",
+      "Vance",
+      "Sol",
+      "Ibarra"
+    ],
+    "locacion": "núcleo de sellado",
+    "informacion_nueva": "Las vainas ya no están vacías y han vuelto a moverse en un nuevo ciclo; la Deméter IX queda en cuarentena y transmite su última señal antes de perder el contacto con la colonia.",
+    "tension": 5
+  }
+]

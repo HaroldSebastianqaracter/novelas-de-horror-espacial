@@ -1,0 +1,45 @@
+[
+  {
+    "num": 1,
+    "titulo": "Dotación: cuatro",
+    "objetivo_narrativo": "Instalar la estación encogida tras la pérdida de Damián Sarpe y mostrar que los apagones de sector avanzan hacia los supervivientes, hasta que Ilse demuestra que esperar es solo elegir el orden.",
+    "personajes": [
+      "Vera Ostrov",
+      "Ilse Marek",
+      "Kell",
+      "Bram"
+    ],
+    "locacion": "Cubierta habitable de la Perforación Calisto-9",
+    "informacion_nueva": "El reactor no falla al azar: se apaga por sectores en dirección a los módulos habitados; el rescate tarda once semanas y las baterías de emergencia nueve días; los generadores de reserva están en el nivel inferior, el primero que se apagó.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "El primer metro de oscuridad",
+    "objetivo_narrativo": "Bajar a los cuatro atados por una línea de seguridad, encontrar lo que queda de Damián dispuesto con cuidado contra un mamparo y detonar la doble confesión que convierte el miedo compartido en culpa compartida.",
+    "personajes": [
+      "Vera Ostrov",
+      "Ilse Marek",
+      "Kell",
+      "Bram",
+      "Damián Sarpe"
+    ],
+    "locacion": "Nivel inferior de la Perforación Calisto-9",
+    "informacion_nueva": "Bram apagó la primera lámpara para dormir en el módulo cálido: la oscuridad no es la herramienta de la cosa sino su puerta. Vera ha estado firmando los apagones de sector para conservar el aire, trazando sin saberlo el mapa del territorio. La línea de seguridad vuelve cortada.",
+    "tension": 4
+  },
+  {
+    "num": 3,
+    "titulo": "Nadie apaga nada",
+    "objetivo_narrativo": "Arrancar los generadores de reserva a costa de noventa segundos de oscuridad total, perder a Kell y recuperar a un Bram que no recuerda nada, y cerrar con una vigilancia que no termina.",
+    "personajes": [
+      "Vera Ostrov",
+      "Ilse Marek",
+      "Kell",
+      "Bram"
+    ],
+    "locacion": "Sala de generadores del nivel inferior",
+    "informacion_nueva": "Con la luz encendida la cosa no aparece ni deja cuerpo: solo queda Bram, que bajó a oscuras sin linterna y despierta sin memoria. Los generadores dan noventa días; el rescate, ochenta y cinco. El consumo de las últimas doce horas es un dos por ciento más alto de lo que gastan tres personas respirando.",
+    "tension": 5
+  }
+]

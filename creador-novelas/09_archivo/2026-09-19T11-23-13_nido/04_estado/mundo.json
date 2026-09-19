@@ -1,0 +1,23 @@
+{
+  "reglas": [
+    "El sistema de soporte vital de la Deméter IX recicla el agua potable captando la humedad del aire en los conductos de ventilación que recorren toda la nave.",
+    "El sistema de sellado automático del tanque principal puede activarse desde dentro o desde el puente, y cada activación queda registrada en los sistemas de la nave.",
+    "Las comunicaciones entre la Deméter IX y la colonia minera más cercana tardan horas en llegar por la distancia que las separa en el cinturón exterior.",
+    "Los sensores de la nave registran anomalías de humedad y temperatura por zona, pero solo alertan cuando la desviación supera el margen previsto."
+  ],
+  "objetos": [
+    "vainas orgánicas adheridas al metal de las paredes internas del tanque principal, muchas de ellas reventadas desde dentro",
+    "sistema de sellado automático del tanque principal",
+    "sensores de humedad y temperatura de los conductos de ventilación",
+    "reservas de agua potable ya tratada, distintas del agua aún sin tocar en las bodegas"
+  ],
+  "linea_de_tiempo": [
+    "La Deméter IX zarpa con las bodegas llenas de agua para las colonias mineras y cruza el cinturón exterior.",
+    "La cuadrilla de cinco lleva semanas de travesía sin incidentes registrados antes de la inspección rutinaria del tanque principal."
+  ],
+  "locaciones": {
+    "tanque principal": "el mayor depósito de agua de la Deméter IX, con las paredes internas de metal tapizadas de vainas orgánicas, muchas ya reventadas; se accede a él para las inspecciones de rutina de la carga.",
+    "conductos de ventilación": "la red de conductos que hace circular y recicla el aire y la humedad por toda la nave; corre entre los distintos niveles y comunica el tanque principal con el resto de los espacios habitados.",
+    "núcleo de sellado": "el compartimento donde se concentran los controles manuales del sistema de sellado del tanque principal, distinto del panel automático que puede activarse desde el puente."
+  }
+}

@@ -116,14 +116,42 @@ en `PROXIMOS-PASOS.md`.
 
 **No sacar conclusiones de medias entre juegos de premisas distintos.** Ver más arriba.
 
+## QA no aprueba por vago: comprobado
+
+La explicación alternativa que habría tumbado el titular era que el verificador fuese blando. Si QA
+aprobara sin mirar, el «cero contradicciones» de `dos-agentes-sonnet` no significaría nada y la mitad
+de la ventaja de reloj sería contable, no real.
+
+`herramientas/contradiccion-inyectada.py` corre el corte de verdad --subagente `qa` en opus, con
+hooks-- dos veces sobre la misma novela: intacta, y con un párrafo que niega a la cara un hecho de
+canon del preludio. Resultado:
+
+| vuelta | `tiene_contradicciones` | manifiesto | hallazgos |
+|---|---|---|---|
+| control | `false` | `en_progreso` | 3 repeticiones de estilo, ninguna contradicción |
+| inyectado | `true` | `pausado_por_qa` | la contradicción inyectada, la primera de la lista |
+
+Cazó el párrafo, lo identificó como afirmación en voz del narrador --no un personaje equivocándose,
+que es la distinción que importa-- y pausó la novela. Y en el control calló sobre continuidad
+mientras seguía marcando estilo, así que tampoco marca por sistema.
+
+## Lo que se encontró montando ese test
+
+**`corte-qa` estaba rota y nadie podía saberlo.** Su `allowed-tools` no declaraba `Write`, mientras
+que las otras dos skills que despachan subagentes que escriben sí lo hacen. Su subagente `qa` leía la
+muestra, producía el análisis completo --`0 contradicciones · 3 repeticiones`, con acumulados por
+capítulo-- y después no podía persistir ni uno de los tres archivos. La skill no ha funcionado nunca.
+No se veía porque en producción el corte va dentro de `escribir-tanda`, que sí lo declara.
+
+Es el mismo patrón que el fallo del escritor de ayer: **trabajo hecho de verdad que se pierde en el
+último paso, el de escribir.** Dos en dos días sugiere mirar si hay más.
+
+**H-06 compara rutas como texto.** Corriendo el harness desde otra raíz, la forma corta de Windows
+(`HAROLD~1.ROD`) y la larga del mismo directorio le parecen sitios distintos, y bloquea escrituras
+que están dentro de `06_qa/`. En una corrida normal no aparece, porque el árbol siempre se nombra
+igual; para cualquier herramienta que corra sobre una copia, es una mina.
+
 ## Lo siguiente
 
-El objetivo del loop está cumplido con margen, así que lo que queda ya no es velocidad.
-
-Lo único que podría tumbar el titular es que QA apruebe sin mirar: si el verificador es blando, el
-«cero contradicciones» de `dos-agentes-sonnet` no significaría nada y la mitad de la ventaja sería
-contable. Para eso está `herramientas/contradiccion-inyectada.py`, que corre el corte real sobre una
-novela intacta y sobre la misma novela con un hecho de canon negado a la cara, y exige que calle en
-la primera y pause en la segunda.
-
-Después, Spec-X 05, que no es velocidad sino coherencia a partir del capítulo 10.
+El objetivo del loop está cumplido con margen y verificado, así que lo que queda ya no es velocidad.
+Spec-X 05, que no es velocidad sino coherencia a partir del capítulo 10.

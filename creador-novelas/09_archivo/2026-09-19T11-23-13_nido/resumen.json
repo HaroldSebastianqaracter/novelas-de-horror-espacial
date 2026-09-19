@@ -1,0 +1,104 @@
+{
+  "version_specs": "v1.12",
+  "config": {
+    "novela.json": {
+      "total_capitulos": 3,
+      "palabras_por_capitulo": 400,
+      "idioma": "es-ES",
+      "persona_narrativa": "tercera_limitada",
+      "tiempo_verbal": "pasado",
+      "ventana_resumen_rodante": 2,
+      "cadencia_qa": 1,
+      "max_tokens_contexto_escritor": 12000,
+      "max_hechos_por_capitulo": 4
+    },
+    "ejecucion.json": {
+      "capitulos_por_tanda": 3,
+      "max_llamadas_por_tanda": 30,
+      "registrar_uso": true,
+      "exportar_trazas": true,
+      "escritor_emite_delta": true
+    }
+  },
+  "capitulos": {
+    "cerrados": 3,
+    "esperados": 3,
+    "estado": "completo",
+    "palabras": [
+      415,
+      417,
+      451
+    ]
+  },
+  "reloj": {
+    "preludio_s": 200.0,
+    "por_fase_s": {
+      "generar-premisa": 22.0,
+      "generar-sinopsis": 42.0,
+      "generar-escaleta": 42.0,
+      "inicializar-estado": 94.0
+    },
+    "tandas": [
+      {
+        "tanda": "tanda_2026-09-19T11-13-32",
+        "inicio": "2026-09-19T11:13:32.843+02:00",
+        "fin": "2026-09-19T11:23:11.797+02:00",
+        "segundos": 579.0
+      }
+    ],
+    "tandas_s": 579.0,
+    "total_s": 779.0
+  },
+  "agentes": {
+    "escritor": {
+      "invocaciones": 3,
+      "segundos": 413.8,
+      "tokens_salida": 10778,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "qa": {
+      "invocaciones": 3,
+      "segundos": 303.8,
+      "tokens_salida": 13459,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "orquestador": {
+      "invocaciones": 4,
+      "segundos": 200.0,
+      "tokens_salida": 6857,
+      "modelos": [
+        "claude-sonnet-5"
+      ]
+    }
+  },
+  "calidad": {
+    "contradicciones": 0,
+    "cortes_qa": 3,
+    "reintentos_de_escritor": 0,
+    "borradores_descartados": 0,
+    "tandas_abortadas": 0,
+    "motivos_de_aborto": [],
+    "pausado_al_archivar": false
+  },
+  "coste": {
+    "moneda": "USD",
+    "total": 2.6511,
+    "tokens": 2790746,
+    "por_rol": {
+      "preludio": 0.9276,
+      "qa": 0.9008,
+      "escritor": 0.8228
+    },
+    "modelos_sin_precio": [
+      "claude-sonnet-5"
+    ],
+    "carpetas_con_uso": 2
+  },
+  "nombre": "2026-09-19T11-23-13_nido",
+  "titulo": "Agua Muerta",
+  "archivado": "2026-09-19T11:23:13+02:00"
+}

@@ -1,0 +1,26 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Describir por negacion: los hechos se establecen enumerando lo que no ocurre. En el capitulo 3: 'No la solto', 'No hay discusion que dure tanto', 'no los toca nadie', 'Vance no levanto la vista', 'Nadie dijo nada', 'Ibarra no recito ningun protocolo', 'que ya no estaban vacias'. Acumulado 19 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Las vainas nombradas como 'cascaras' o comparadas con cascara seca. En el capitulo 3 aparece tres veces ('Las cascaras', 'las veintiuna cascaras', 'las cascaras que ya no estaban vacias'). Acumulado 5 apariciones en los capitulos 1 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Acotacion de dialogo que senala tono plano o contenido para no alarmar. En el capitulo 3: 'declaro la cuarentena por canal abierto, sin adornos'. Acumulado 4 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cifra exacta como recurso de tension: cada dato se da contado o cronometrado. En el capitulo 3: veinte minutos, once horas, doce horas, cuatrocientos litros, veintiuna vainas, tres segundos, cuarenta y un segundos, diez segundos, cinco a bordo. Acumulado 9 apariciones en el capitulo 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

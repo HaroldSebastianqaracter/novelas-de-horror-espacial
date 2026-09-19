@@ -1,0 +1,21 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 establece que la nave de relevo anclo catorce horas despues del apagado total de los generadores y encontro tres figuras vivas (Mara, Tomas y Lena), pese a que el capitulo mismo repite el limite. Contradice el hecho vigente de que los registros de mantenimiento de Karn-9 fijan en menos de cuatro horas el tiempo hasta la hipotermia generalizada si se apagan los generadores del nucleo termico; el texto no aporta ninguna fuente de calor ni medida que explique la supervivencia durante catorce horas.",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Frase corta sentenciosa como cierre de parrafo o escena: tres apariciones nuevas en el capitulo 3 ('Van en linea.', 'El no.', 'Nadie discutio.') sobre seis previas, nueve acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personaje que se queda mirando algo en silencio como reaccion: dos apariciones nuevas en el capitulo 3 (Tomas que no dice nada durante un rato largo, Mara que mira la pantalla del nucleo) sobre cuatro previas, seis acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

@@ -1,0 +1,11 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Frase corta sentenciosa como cierre de parrafo o escena: 'Eso fue todo el conflicto del dia.', 'Translucida.' y 'Afuera, el hielo siguio exactamente igual de quieto.' 3 apariciones acumuladas, todas en el capitulo 1.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

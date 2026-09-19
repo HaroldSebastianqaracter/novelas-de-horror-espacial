@@ -1,0 +1,50 @@
+{
+  "Mara Vintila": {
+    "estado_fisico": "Hipotermia leve; sobrevivió dentro de un traje de superficie con batería térmica en reserva.",
+    "estado_psicologico": "Vaciada: ordenó el apagado sabiendo que Ibrahim no volvería.",
+    "secretos_que_conoce": [
+      "Sabe que el calor no atrae a las criaturas sino que las orienta hacia algo que ya está dentro de la estación.",
+      "Sabe que Dov guiaba al enjambre hacia el núcleo cuando ordenó el apagado.",
+      "Sabe que el enjambre convergía hacia el núcleo guiado por Dov cuando ordenó el apagado."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Tomás Auer": {
+    "estado_fisico": "Hipotermia leve tras esperar el anclaje dentro del traje.",
+    "estado_psicologico": "Callado; aceptó la orden sin discutirla.",
+    "secretos_que_conoce": [
+      "Sabe que las rejillas se abrían al paso de Dov.",
+      "Sabe que las compuertas quedaban abiertas detrás del paso de Dov."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Ibrahim Sosa": {
+    "estado_fisico": "Muerto dentro de su traje, de pie contra la compuerta exterior del núcleo.",
+    "estado_psicologico": "Murió cumpliendo la maniobra que él mismo propuso.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Lena Kwan": {
+    "estado_fisico": "Hipotermia leve; sobrevivió dentro del traje hasta el anclaje.",
+    "estado_psicologico": "Derrotada: no pudo retener a Dov ni explicar su estado.",
+    "secretos_que_conoce": [
+      "Sabe que la mordida de Dov calienta el tejido en una dirección y que Dov le oculta su avance.",
+      "Sabe que Dov no temblaba a treinta y un grados de temperatura corporal.",
+      "Sabe que Dov no temblaba ni reaccionaba a treinta y un grados de temperatura corporal."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Dov Reyes": {
+    "estado_fisico": "Desaparecido; su cuerpo ya no regulaba el frío como humano.",
+    "estado_psicologico": "Sin reacción humana observable; tardaba segundos en responder a la voz.",
+    "secretos_que_conoce": [
+      "Oculta que la línea pálida de su antebrazo avanzó dos dedos en un día."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

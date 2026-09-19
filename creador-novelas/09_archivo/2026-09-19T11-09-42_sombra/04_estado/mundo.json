@@ -1,0 +1,35 @@
+{
+  "reglas": [
+    "El reactor de la Perforación Calisto-9 no sostiene la carga eléctrica completa: el protocolo de consumo permite apagar sectores enteros para conservar el aire de los módulos habitados.",
+    "Todo apagón de sector requiere la firma de autorización de la jefa de turno y queda anotado en el parte de consumo correspondiente.",
+    "Los partes de consumo registran el gasto por turno y permiten calcular cuánta gente respira y cuántas lámparas arden en cada sector.",
+    "Las pilas de las linternas están racionadas y se anotan por turno en el inventario.",
+    "Arrancar los generadores de reserva exige derivar toda la potencia disponible de la estación durante noventa segundos, dejando a oscuras todos los sectores a la vez, incluidos los habitables.",
+    "Una llamada de auxilio a la ruta comercial recibe respuesta en once semanas según la carta de tránsito vigente.",
+    "Las baterías de emergencia de la cubierta habitable tienen nueve días de autonomía según su ficha técnica.",
+    "Las cartas de la zona no recogen ningún otro asentamiento habitado al alcance de la estación: afuera hay vacío, radiación y la superficie de Calisto.",
+    "El diario de a bordo es el registro oficial de la estación y solo lo escribe la jefa de turno."
+  ],
+  "objetos": [
+    "Linternas portátiles, una por persona, con pilas racionadas y anotadas por turno.",
+    "Línea de seguridad: cabo largo con el que la dotación se ata para descender al nivel inferior.",
+    "Diario de a bordo de la Perforación Calisto-9, donde Vera Ostrov anota las incidencias en lenguaje de protocolo.",
+    "Partes de consumo firmados turno a turno, con la autorización de cada apagón de sector.",
+    "Esquema eléctrico de la estación, que sitúa los generadores de reserva en el nivel inferior.",
+    "Acoplamiento manual de la sala de generadores, que no cierra solo y hay que sostener a mano.",
+    "Baterías de emergencia de la cubierta habitable.",
+    "Lámparas de sector, que una vez apagadas nadie ha vuelto a encender."
+  ],
+  "linea_de_tiempo": [
+    "Tres semanas antes del capítulo 1: empiezan los apagones de sector autorizados por Vera Ostrov para aliviar la carga del reactor.",
+    "Seis días antes del capítulo 1: Bram apaga la lámpara de un sector en cuarentena por consumo para dormir en el módulo cálido.",
+    "Tres días antes del capítulo 1: Damián Sarpe desaparece en un tramo a oscuras del nivel inferior, con Bram sujetando la linterna y Kell a metro y medio.",
+    "Tres días antes del capítulo 1: Vera Ostrov anota «pérdida de personal» en el diario y cursa la llamada de auxilio a la ruta comercial.",
+    "Capítulo 1: la estación cuenta cuatro personas y los apagones avanzan hacia los módulos habitados."
+  ],
+  "locaciones": {
+    "Cubierta habitable de la Perforación Calisto-9": "Los módulos de descanso, la cocina y el puesto de turno de la estación minera; el único sector que sigue iluminado de forma continua, cada vez más apretado a medida que los pasillos vecinos dejan de estar en el mapa de lo transitable. Huele a filtro viejo y a metal templado, y las lámparas zumban lo justo para que se note cuando una deja de zumbar.",
+    "Nivel inferior de la Perforación Calisto-9": "El sector técnico bajo la cubierta habitable: escalera de bajada, pasillos de servicio, bombas y conductos. Fue el primero que quedó a oscuras y nunca se ha vuelto a encender. No está en silencio: bombas, dilatación del metal y goteo llenan el aire de ruidos que no son el que se busca. En algún tramo el metal está limpio de polvo, como si algo pasara por ahí muchas veces.",
+    "Sala de generadores del nivel inferior": "Cámara al fondo del nivel inferior donde están los generadores de reserva y el acoplamiento manual que no cierra solo. Encenderlos apaga la estación entera durante noventa segundos. Suelo de rejilla, tableros fríos y un eco que devuelve las voces con retraso."
+  }
+}

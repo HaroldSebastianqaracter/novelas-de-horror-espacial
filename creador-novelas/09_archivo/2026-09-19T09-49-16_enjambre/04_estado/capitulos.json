@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "Lo que sale del conducto",
+    "objetivo_narrativo": "Establecer la rutina de la estación Karn-9, la aparición del primer enjambre y la mordida a Dov, y plantear el dilema irresoluble entre apagar la calefacción y morir de frío o mantenerla y seguir atrayendo criaturas.",
+    "personajes": [
+      "Mara Vintila",
+      "Tomás Auer",
+      "Ibrahim Sosa",
+      "Lena Kwan",
+      "Dov Reyes"
+    ],
+    "locacion": "Estación Karn-9",
+    "informacion_nueva": "Los conductos térmicos vomitan criaturas del tamaño de una mano que se mueven hacia el calor con precisión; la primera muerde a Dov; apagar los generadores mata por hipotermia en menos de cuatro horas; el relevo más cercano está a seis días.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "Lo que no muerde al azar",
+    "objetivo_narrativo": "Revelar que las criaturas evitan sistemáticamente la enfermería y comunicaciones, y que no son depredadoras sino parásitos en migración hacia algo que ya está dentro de Dov, forzando el racionamiento sección por sección de la calefacción.",
+    "personajes": [
+      "Mara Vintila",
+      "Tomás Auer",
+      "Ibrahim Sosa",
+      "Lena Kwan",
+      "Dov Reyes"
+    ],
+    "locacion": "Estación Karn-9",
+    "informacion_nueva": "El patrón de evasión de las criaturas hacia los módulos fríos; la mordida de Dov no es una infección conocida sino el rastro de una migración parasitaria; Dov empieza a ocultarle a Lena hasta dónde avanzó lo que lleva dentro.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "Lo que decide Karn-9",
+    "objetivo_narrativo": "Resolver el asedio con la decisión de apagar por completo el núcleo térmico para frenar al enjambre guiado por Dov, el sacrificio de Ibrahim sellando desde afuera, y la llegada del relevo a una estación helada con Dov desaparecido.",
+    "personajes": [
+      "Mara Vintila",
+      "Tomás Auer",
+      "Ibrahim Sosa",
+      "Lena Kwan",
+      "Dov Reyes"
+    ],
+    "locacion": "Estación Karn-9",
+    "informacion_nueva": "Dov ya no reacciona como humano y guía al enjambre hacia el núcleo; Mara ordena apagar los generadores y aceptar la cuenta regresiva contra el hielo; Ibrahim muere sellando el núcleo desde afuera; el relevo llega y encuentra una rejilla abierta hacia el hielo por donde algo se fue caminando.",
+    "tension": 5
+  }
+]

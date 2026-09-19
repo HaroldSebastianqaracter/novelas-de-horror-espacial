@@ -1,0 +1,85 @@
+{
+  "Nadia Bregan": {
+    "estado_fisico": "Con la frente apoyada en el mamparo.",
+    "estado_psicologico": "Abrumada por reconocer su propia letra en los anexos; aceptando una orden terminal sin resistencia.",
+    "secretos_que_conoce": [
+      "Firmó la cláusula del flete sin leer los anexos porque pagaba tres viajes normales.",
+      "El manifiesto de la bodega viene cifrado y la tripulación tiene prohibido inventariarlo.",
+      "Beni comunicó el descubrimiento mediante escritura en la pizarra de turnos.",
+      "Hay algo en el séptimo contenedor.",
+      "El manifiesto viaja cifrado y el contrato prohibía inventariar.",
+      "La presencia es deliberada, inteligente, no aleatoria.",
+      "Reconoce las palabras del manifiesto.",
+      "Entiende que fueron pagados por estar dentro de la nave.",
+      "La cláusula que ella firmó hablaba de duración de travesía y dotación mínima de cinco cuerpos en circuito cerrado, no de contenedores; la ruta no podía interrumpirse por ninguna causa, lo que significa que fueron pagados para permanecer a bordo sin importar qué."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Beni Saad": {
+    "estado_fisico": "Herido en la chaqueta por el metal de la goma de popa; en la popa del carguero.",
+    "estado_psicologico": "En esfuerzo máximo de sacrificio; viendo lo que sucede a Lucía en el último instante.",
+    "secretos_que_conoce": [
+      "Baja a la bodega a comprobar amarras en maniobras que nadie anota.",
+      "Hay una presencia viva respirando dentro del séptimo contenedor.",
+      "Las bridas del contenedor están abiertas desde el interior.",
+      "Filtra un sellante lechoso que no se seca.",
+      "Vio a Lucía cruzar y llegar al panel, y la miró una sola vez mientras él mismo era presionado por el diferencial."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Osmar Tiel": {
+    "estado_fisico": "En la popa, tras soldar el cierre sin presupuesto.",
+    "estado_psicologico": "En shock tras los doce minutos de gritos de Kemal; actuando por supervivencia instintiva.",
+    "secretos_que_conoce": [
+      "La junta de la escotilla de popa lleva siete meses en la lista de reparaciones pendientes, firmada y sin presupuesto.",
+      "Sabe qué piezas del Ámbar Tardío no aguantarían un diferencial de presión.",
+      "El patrón de 14 golpes en 8 días coincide exactamente con los huecos de vigilancia en el 100% de los casos.",
+      "La presencia está calculando deliberadamente cuándo golpear para evitar a los vigilantes.",
+      "Vio los cordones blancos del sellante subir por los mamparos, algunos con volumen y articulación, y comprendió que la presencia era múltiple y no había estodo sola."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Lucía Ferrán": {
+    "estado_fisico": "Encerrada en la enfermería, puerta trabada desde dentro.",
+    "estado_psicologico": "Con una calma que no le pertenecía del todo; disociada o en control sobrenatural de sí misma.",
+    "secretos_que_conoce": [
+      "La enfermería de a bordo no tiene instrumental para analizar material biológico desconocido.",
+      "Hay algo en el séptimo contenedor que filtra un sellante.",
+      "El manifiesto viaja cifrado.",
+      "Existe un hilo blanco en los mamparos que se estira sin romperse.",
+      "El aire de la cubierta de vigilancia es idéntico al aire de la bodega, indicando contaminación sistémica.",
+      "Sabe qué hay o qué pasó en la bodega, lo suficiente para aislarse completamente.",
+      "Se pinchó el dedo esa mañana y vio lo que salía, pero no lo contó a nadie; accionó el panel manual que abrió la compuerta de estiba."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Kemal Ostrov": {
+    "estado_fisico": "En el puente del Ámbar Tardío, pilotando la nave durante la decompresión de la bodega.",
+    "estado_psicologico": "Perturbado por el descubrimiento de una maniobra archivada sin firma desde el astillero; manteniendo control durante la crisis.",
+    "secretos_que_conoce": [
+      "La ruta contratada incluye correcciones de rumbo programadas desde origen.",
+      "Hay algo en el séptimo contenedor.",
+      "Hay dos escotillas entre la bodega y el puente.",
+      "La presencia no está tratando de escapar; está jugando con los tiempos de vigilancia.",
+      "La maniobra de la semana once estaba cargada desde origen con una coordenada escrita a mano.",
+      "Fueron pagados para estar a bordo durante la travesía, no por bodega.",
+      "Hay una maniobra archivada desde el astillero sin firma, cargada con una coordenada escrita a mano, que se ejecutó hace once semanas sin haber sido calculada por la nave ni solicitada por nadie a bordo."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "la presencia": {
+    "estado_fisico": "Encerrada tras la escotilla de popa.",
+    "estado_psicologico": "Ha dejado de ser aleatoria. Ahora es deliberada, inteligente, calculando los tiempos de vigilancia e incluso anticipándose a ellos.",
+    "secretos_que_conoce": [
+      "El contenedor se abrió en la coordenada exacta prevista desde origen.",
+      "El sellante es medio de cultivo, no embalaje."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "reglas": [
+    "El sistema de soporte vital recircula el aire entre todos los sectores de la nave; no existe un circuito de aire independiente para el sector médico.",
+    "El sector médico puede sellarse con una escotilla estanca operable desde el puente de mando, pero sellarlo no aísla el aire que ya circula por el resto de la nave.",
+    "La Deméter Once viaja con un cargamento reciente que no fue inspeccionado a fondo antes de zarpar."
+  ],
+  "objetos": [
+    "Sistema de soporte vital: mantiene el aire recirculado de toda la nave; a cargo de Dov Kessler.",
+    "Escotilla estanca del sector médico: permite sellar el sector desde el puente de mando.",
+    "Cargamento sin inspeccionar: bodega con mercancía reciente que nadie a bordo recuerda haber revisado a fondo."
+  ],
+  "linea_de_tiempo": [
+    "La nave zarpó de su último puerto con los cinco tripulantes sanos y el cargamento ya a bordo.",
+    "Faltan varios días de viaje para llegar al puerto de destino cuando Yara examina a Toma y a Dov."
+  ],
+  "locaciones": {
+    "Sector médico": "La enfermería de la Deméter Once, con una escotilla estanca que puede sellarse desde el puente de mando.",
+    "Puente de mando": "El centro de control de la nave, desde donde se gobiernan el rumbo automático y las escotillas estancas de los demás sectores."
+  }
+}

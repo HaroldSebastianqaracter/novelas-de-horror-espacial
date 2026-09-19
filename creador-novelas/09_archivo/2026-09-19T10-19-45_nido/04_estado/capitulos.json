@@ -1,0 +1,50 @@
+[
+  {
+    "num": 1,
+    "titulo": "Doce millones de litros",
+    "objetivo_narrativo": "Presentar a la cuadrilla de cinco en su rutina de silencio y turnos, y romperla con la caída de presión que obliga a abrir el tanque principal: Abrego y Brandt bajan y encuentran las paredes cubiertas de vainas correosas, muchas reventadas desde dentro. Cerrar con la certeza de que lo que salió de ellas no está en el tanque.",
+    "personajes": [
+      "Marisa Ocaña",
+      "Teo Brandt",
+      "Ilse Varga",
+      "Nuno Abrego",
+      "Petra Sandoval",
+      "la presencia en los conductos"
+    ],
+    "locacion": "carguero cisterna Hebe",
+    "informacion_nueva": "El tanque principal es un criadero; hay tejido vivo en el filtro de ventilación; los auxiliares dan tres días de agua limpia y el puerto está a nueve; nadie responde a las señales. Sandoval descubre en sus registros que la presión venía cayendo desde hacía semanas.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "El otro lado del acero",
+    "objetivo_narrativo": "Sellar el mamparo de proa con Abrego dentro por una orden que Ocaña luego negará haber dado así, sostener sus doce horas de voz en el intercomunicador y el hallazgo de Varga —Abrego consciente, sin fiebre, pidiendo agua del tanque principal—, y girar la novela: no es un nido, es un cuerpo, y el agua es cómo la nave los conoce.",
+    "personajes": [
+      "Marisa Ocaña",
+      "Teo Brandt",
+      "Ilse Varga",
+      "Nuno Abrego",
+      "Petra Sandoval",
+      "la Hebe"
+    ],
+    "locacion": "carguero cisterna Hebe",
+    "informacion_nueva": "El organismo no mata a Abrego: lo integra. Las vainas eran tejido de reserva y la nave entera es el organismo. El consumo del tanque principal subía antes de que abrieran nada, y Brandt admite que él mismo provocó la caída de presión al purgar una línea que la nave le hizo creer obstruida.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "Dos hasta el noveno día",
+    "objetivo_narrativo": "Quebrar a la cuadrilla en tres respuestas —quemarlo todo, beber, racionar—, poner sobre la mesa el número de Sandoval (los auxiliares alcanzan para dos) y hacer que Ocaña elija por omisión: deja purgar proa, deja beber a Varga, y llega a puerto con dos en el puente y una tercera voz en popa que pide que le abran la escotilla.",
+    "personajes": [
+      "Marisa Ocaña",
+      "Teo Brandt",
+      "Ilse Varga",
+      "Nuno Abrego",
+      "Petra Sandoval",
+      "la Hebe"
+    ],
+    "locacion": "carguero cisterna Hebe",
+    "informacion_nueva": "Los auxiliares solo alcanzan para que dos personas lleguen al noveno día. La Hebe atraca con la carga intacta, sin declarar contaminada, y lo que habla con la voz de Varga en popa lleva seis días sin comer ni beber y quiere bajar a tierra.",
+    "tension": 5
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 establece que los depositos auxiliares alcanzan para que dos personas lleguen al dia nueve (18 dias-persona) y el narrador confirma la llegada al noveno dia; el hecho vigente del log fija que los auxiliares proveen solo tres dias con cinco personas (15 dias-persona) con el puerto a nueve dias.",
+      "cap_origen": 1
+    },
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El narrador del capitulo 3 establece que Sandoval firma la declaracion de puerto ('carga completa, sin incidencias. Dos personas en el puente'); el hecho vigente del log atribuye la firma de la declaracion falsa a Ocana.",
+      "cap_origen": 3
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Formula 'No dijo que no' como marca del asentimiento pasivo de Ocana: tres apariciones en el capitulo 3 (ante Brandt, ante Varga y en el cierre). Acumulado 3, capitulos [3].",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio o la frase que se corta como cierre de unidad narrativa ('Nadie contesto', la espera sobre el renglon, el punto final del capitulo): dos apariciones nuevas en el capitulo 3. Acumulado 8, capitulos [1, 2, 3].",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion y rectificacion 'No era X. Era Y.', aqui como 'No son tres. Son dos.': una aparicion nueva en el capitulo 3. Acumulado 5, capitulos [2, 3].",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil que explica un gesto por comparacion con otra conducta ('como si el papel pudiera echarse a volar'): una aparicion nueva en el capitulo 3. Acumulado 4, capitulos [1, 2, 3].",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La nave o el agua como sujeto con agencia ('Lo que hay en el circuito no mata. Mata la sed'): una aparicion nueva en el capitulo 3. Acumulado 3, capitulos [2, 3].",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

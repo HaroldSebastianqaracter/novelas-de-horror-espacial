@@ -1,0 +1,16 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de frase con una negacion o una ausencia como remate de la imagen: 4 apariciones en el capitulo 2 ('una correccion de deriva que el piloto automatico no necesitaba', 'una risa corta que no encontro destino', 'aire que ya no es de nadie', 'dos tubos de nada'). Capitulos: 2. Acumulado: 4.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La risa o sonrisa de Toma como indice de su negacion, oida de lejos y sin interlocutor: reaparece en el capitulo 2 ('Toma solto una risa corta que no encontro destino') sobre dos apariciones del capitulo 1. Capitulos: 1, 2. Acumulado: 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

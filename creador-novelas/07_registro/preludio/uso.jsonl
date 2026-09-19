@@ -1,0 +1,1 @@
+{"rol": "qa", "capitulo": null, "modelo": "claude-opus-5", "tokens_entrada": 10, "tokens_salida": 4842, "tokens_cache_lectura": 92687, "tokens_cache_creacion": 27321, "turnos": 5, "agent_id": "acb49acaee40ed1f4", "stop_reason": null}

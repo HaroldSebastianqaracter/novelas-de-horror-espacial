@@ -1,0 +1,27 @@
+{
+  "reglas": [
+    "El agua potable de a bordo sale del circuito de recirculación, que toma del tanque principal y devuelve por las mismas líneas: beber y respirar en la Hebe son parte del mismo sistema.",
+    "Los depósitos auxiliares están separados del tanque principal y contienen la única reserva declarada limpia; su capacidad se mide en días de consumo, no en litros brutos.",
+    "La ventilación mantiene el calor y la humedad constantes en todo el casco, y su filtro es el punto por donde pasa todo el aire de los compartimentos habitados.",
+    "Los mamparos de sector pueden sellarse desde el puente o desde una consola local, y una vez sellados solo se abren con una orden confirmada.",
+    "La ruta es comercial y sin vigilancia: las señales emitidas tardan y no hay nadie obligado a contestarlas.",
+    "Cada litro que entra o sale del tanque principal queda anotado en el registro de carga, firmado por la oficial de turno.",
+    "La cuadrilla se turna el sueño, de modo que nunca están los cinco despiertos ni los cinco dormidos a la vez."
+  ],
+  "objetos": [
+    "Registro de carga de Sandoval: planillas de consumo y trasvase, firmadas día a día desde el inicio de la ruta.",
+    "Intercomunicador de sector: permite hablar entre compartimentos aunque el mamparo esté sellado.",
+    "Equipo de aislamiento de enfermería: un único juego completo a bordo.",
+    "Linternas de mano del equipo de bombas, usadas para inspeccionar el interior del tanque.",
+    "Filtro de la ventilación, accesible desde el paso de servicio que Brandt conoce de memoria.",
+    "Consola de presión de la línea de trasvase, donde se leen las caídas y se ordenan las purgas."
+  ],
+  "linea_de_tiempo": [
+    "Semana 0: la Hebe zarpa con doce millones de litros hacia un puerto a once semanas de distancia.",
+    "Semanas 1 a 11: rutina de turnos y silencio; el consumo del tanque principal sube en curvas mínimas que Sandoval firma sin alarmarse.",
+    "Semana 11: quedan nueve días de travesía hasta puerto cuando empieza la novela."
+  ],
+  "locaciones": {
+    "carguero cisterna Hebe": "Carguero cisterna de ruta comercial: puente a proa alta, pasillos estrechos de nivel único, sector de proa con los pasos de servicio y el acceso al tanque, sector de popa con las literas y la enfermería, y el tanque principal ocupando el centro del casco con doce millones de litros. Todo huele a agua recirculada y a metal tibio; el ruido de las bombas es el fondo constante de la vida a bordo."
+  }
+}

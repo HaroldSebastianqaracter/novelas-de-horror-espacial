@@ -1,0 +1,26 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de parrafo con subordinada de relativo en negativo; 4 apariciones acumuladas (caps. 1, 2), en esta muestra 'un hilo blanco que no llegaba a romperse'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil introducido con 'como' para rematar la imagen; 3 apariciones acumuladas (caps. 1, 2), en esta muestra 'como quien espera un tranvia'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personaje que reacciona por omision; 3 apariciones acumuladas (caps. 1, 2), en esta muestra 'Nadie respondio'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion correctiva 'No X: Y'; 3 apariciones acumuladas (caps. 1, 2), dos de ellas en esta muestra.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

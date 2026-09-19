@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "El hallazgo bajo la piel",
+    "objetivo_narrativo": "Establecer la amenaza médica a bordo y la decisión de aislamiento de Yara, que divide de entrada a la tripulación.",
+    "personajes": [
+      "Yara Voss",
+      "Toma Ilić",
+      "Dov Kessler",
+      "Reiko Alma",
+      "Sena Okafor"
+    ],
+    "locacion": "Sector médico",
+    "informacion_nueva": "Yara descubre bajo la piel de Toma y Dov un movimiento propio, un pulso que no es el suyo, y declara aislamiento sin pruebas concluyentes; la orden cae mal entre la tripulación.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "El aire que ya no es de nadie",
+    "objetivo_narrativo": "Revelar que el aislamiento no contuvo nada y que el aire compartido es el vector, forzando a cada tripulante a tomar bando.",
+    "personajes": [
+      "Yara Voss",
+      "Reiko Alma",
+      "Dov Kessler",
+      "Sena Okafor",
+      "Toma Ilić"
+    ],
+    "locacion": "Puente de mando",
+    "informacion_nueva": "Las muestras de aire del sector médico ya no se distinguen de las del resto de la nave: lo que crece en Toma y Dov se mueve por el aire que respiran los cinco, y la tripulación se parte en dos bandos abiertos.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "El triaje de la Deméter",
+    "objetivo_narrativo": "Resolver quién vive: Yara ejecuta un triaje mientras Kessler fuerza una purga parcial del aire y la nave llega a puerto con menos tripulantes de los que salieron.",
+    "personajes": [
+      "Sena Okafor",
+      "Reiko Alma",
+      "Yara Voss",
+      "Dov Kessler",
+      "Toma Ilić"
+    ],
+    "locacion": "Sector médico",
+    "informacion_nueva": "Sena empieza a mostrar el mismo movimiento bajo la piel que Toma; Kessler fuerza una purga parcial del aire recirculado y Yara toma la decisión final de a quién aislar, tratar o dejar ir.",
+    "tension": 5
+  }
+]

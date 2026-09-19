@@ -1,0 +1,13 @@
+# Los Tramos Sin Luz — Sinopsis en tres actos
+
+## Gancho inicial
+
+En la estación minera Perséfone, la ingeniera de turno Vela Ostrowski repasa los diagnósticos del reactor cuando el sector C sufre el tercer apagón de la semana, uno más largo que los anteriores. Con ella trabajan el jefe de cuadrilla Denny Ashworth, curtido y desconfiado de los sistemas automáticos; la técnica de soporte vital Iris Kanoa, que lleva meses documentando fallos que nadie más registra; el minero novato Tobías Reyes, que todavía no conoce bien los tramos más viejos de la estación; y Marsh Okonkwo, el operador de comunicaciones que debía relevar a Vela esa noche. Cuando las luces del sector C vuelven, Marsh ya no está: solo queda su radio abierta, transmitiendo estática, y una marca húmeda que se pierde hacia un conducto de mantenimiento. Los cuatro que quedan entienden, sin decirlo todavía en voz alta, que algo se movió en la oscuridad y que la estación ya no es del todo suya.
+
+## Punto medio (giro)
+
+Los apagones dejan de ser aleatorios: cada vez que el reactor tropieza, la zona sin luz se expande un sector más, como si algo la estuviera empujando desde dentro de los conductos. Denny insiste en que se trata de un fallo mecánico que puede repararse desde la sala de control, hasta que revisa los registros con Iris y descubre que los cortes empezaron exactamente en el turno en que Marsh desapareció, no antes. Tobías, enviado a sellar una escotilla en el límite del sector oscurecido, encuentra las herramientas de Marsh ordenadas con cuidado sobre una repisa, como si alguien las hubiera dejado ahí a propósito para que las vieran. Vela comprende entonces que no basta con sobrevivir a los apagones: la única forma de recuperar la estación es bajar hasta los generadores de reserva, en el nivel inferior, que lleva días completamente a oscuras y que es, casi con certeza, donde la cosa se ha instalado.
+
+## Clímax / final
+
+En el nivel inferior, Vela, Denny, Iris y Tobías avanzan divididos por los mismos conductos que se tragaron a Marsh, guiándose por las últimas luces de emergencia mientras la criatura se mueve entre ellos sin que ninguno logre verla completa. Denny cae defendiendo la escotilla de los generadores, comprando el tiempo justo para que Iris fuerce el arranque manual mientras Tobías, ya sin miedo que perder, atrae el ataque hacia el conducto opuesto. Cuando los generadores responden y la luz vuelve al nivel inferior, Vela alcanza a ver, por primera vez con claridad, lo que queda de Marsh y de lo que se ha convertido; apaga el sistema de una vez por lo que dura el resplandor, y con Iris y Tobías sube de nuevo hacia la superficie sabiendo que la estación entera tardará mucho más que unas horas en volver a sentirse segura.

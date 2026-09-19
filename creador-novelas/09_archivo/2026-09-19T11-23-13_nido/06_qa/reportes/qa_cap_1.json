@@ -1,0 +1,16 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Describir por negacion: el capitulo establece los hechos enumerando lo que no ocurre ('Nada en los registros pedia otra cosa', 'no devolvia la luz como debia', 'la linterna no terminaba de decidir', 'no dijo nada mas', 'Ninguna alerta. Ningun registro de entrada. Ninguna variacion', 'Los sensores no vieron llegar nada', 'No hay fuga'). 7 apariciones acumuladas, todas en el capitulo 1.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La linterna y su haz como instrumento que revela: la bajada de Sol con la linterna al pecho, 'Sol acerco el haz', el color que 'la linterna no terminaba de decidir' y el cierre con Sol barriendo la pared con la linterna. 4 apariciones acumuladas, todas en el capitulo 1.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

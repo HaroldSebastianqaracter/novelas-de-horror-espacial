@@ -1,0 +1,11 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de frase con accion truncada hacia el silencio unida por 'y': 'lo escribio y siguio', 'y volvio a callarse', 'solto una risa corta y la dejo morir'. 3 apariciones acumuladas, capitulos: [1].",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

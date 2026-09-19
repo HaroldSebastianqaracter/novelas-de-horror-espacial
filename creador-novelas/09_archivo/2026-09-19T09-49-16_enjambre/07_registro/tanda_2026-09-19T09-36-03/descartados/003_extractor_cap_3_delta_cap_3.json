@@ -1,0 +1,52 @@
+{
+  "personajes": {
+    "Mara Vintila": {
+      "estado_fisico": "Hipotermia leve, atendida por el relevo bajo manta térmica.",
+      "estado_psicologico": "Vaciada tras ordenar el apagado y la muerte de Ibrahim.",
+      "secretos_que_conoce": ["Sabe que Dov guiaba al enjambre hacia el núcleo cuando ordenó el apagado."],
+      "posicion": "Estación Karn-9, junto a la esclusa exterior, recibida por el relevo",
+      "ultima_aparicion": 3
+    },
+    "Tomás Auer": {
+      "estado_fisico": "Hipotermia leve, envuelto en manta térmica.",
+      "estado_psicologico": "Callado, sin resistencia; acepta el final sin discutirlo.",
+      "secretos_que_conoce": ["Sabe que las rejillas se abrían al paso de Dov."],
+      "posicion": "Estación Karn-9, junto a la esclusa exterior",
+      "ultima_aparicion": 3
+    },
+    "Ibrahim Sosa": {
+      "estado_fisico": "Muerto dentro de su traje, contra la compuerta exterior del núcleo.",
+      "estado_psicologico": "Murió cumpliendo la orden sin discutirla.",
+      "secretos_que_conoce": [],
+      "posicion": "Estación Karn-9, exterior del núcleo térmico, sellado en su traje",
+      "ultima_aparicion": 3
+    },
+    "Lena Kwan": {
+      "estado_fisico": "Hipotermia leve, envuelta en manta térmica.",
+      "estado_psicologico": "Derrotada: no logró retener a Dov ni explicarlo.",
+      "secretos_que_conoce": ["Sabe que Dov no temblaba a treinta y un grados de temperatura corporal."],
+      "posicion": "Estación Karn-9, junto a la esclusa exterior",
+      "ultima_aparicion": 3
+    },
+    "Dov Reyes": {
+      "estado_fisico": "Desaparecido; su cuerpo ya no respondía al frío como humano.",
+      "estado_psicologico": "Sin reacción humana observable al final.",
+      "secretos_que_conoce": [],
+      "posicion": "Fuera de Karn-9, caminando por el hielo exterior tras salir por una rejilla",
+      "ultima_aparicion": 3
+    }
+  },
+  "hechos_nuevos": [
+    { "sujeto": "Ibrahim Sosa", "categoria": "personaje", "hecho": "Ibrahim murió sellando a mano los pernos de la compuerta exterior del núcleo térmico y su traje quedó contra esa compuerta.", "cap_origen": 3 },
+    { "sujeto": "Estación Karn-9", "categoria": "locacion", "hecho": "Los generadores del núcleo térmico de Karn-9 fueron apagados por completo y la estación quedó helada y en silencio.", "cap_origen": 3 },
+    { "sujeto": "Dov Reyes", "categoria": "personaje", "hecho": "Dov mantenía treinta y un grados de temperatura corporal sin temblar y las rejillas se abrían a su paso.", "cap_origen": 3 },
+    { "sujeto": "Dov Reyes", "categoria": "personaje", "hecho": "Dov desapareció por una rejilla abierta hacia el hielo exterior, dejando una hilera de huellas regulares que se alejaban.", "cap_origen": 3 }
+  ],
+  "resumen_corto": "Al sexto día Tomás confirma que el enjambre converge en línea hacia el núcleo y Lena que Dov ya no reacciona al frío como humano.\nMara ordena apagar del todo los generadores del núcleo, aceptando las menos de cuatro horas hasta la hipotermia.\nIbrahim sale a sellar la compuerta exterior a mano y muere en la maniobra, pero deja el núcleo cerrado.\nEl relevo ancla catorce horas después y encuentra la estación helada, tres supervivientes junto a la esclusa y el traje de Ibrahim.\nDe Dov solo queda una rejilla abierta al hielo y huellas que se alejan caminando.",
+  "recursos_narrativos": [
+    { "recurso": "el conteo en voz alta por intercomunicador como cuenta regresiva de una muerte", "veces": 1 },
+    { "recurso": "el silencio tras apagar la maquinaria como peor que el ruido", "veces": 1 },
+    { "recurso": "huellas en el hielo como rastro de lo que ya no es humano", "veces": 1 },
+    { "recurso": "el ausente cuyo cuerpo no tiembla al frío", "veces": 1 }
+  ]
+}

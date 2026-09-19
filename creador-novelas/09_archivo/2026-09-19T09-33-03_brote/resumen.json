@@ -1,0 +1,104 @@
+{
+  "version_specs": "v1.12",
+  "config": {
+    "novela.json": {
+      "total_capitulos": 3,
+      "palabras_por_capitulo": 400,
+      "idioma": "es-ES",
+      "persona_narrativa": "tercera_limitada",
+      "tiempo_verbal": "pasado",
+      "ventana_resumen_rodante": 2,
+      "cadencia_qa": 1,
+      "max_tokens_contexto_escritor": 12000,
+      "max_hechos_por_capitulo": 4
+    },
+    "ejecucion.json": {
+      "capitulos_por_tanda": 3,
+      "max_llamadas_por_tanda": 30,
+      "registrar_uso": true,
+      "exportar_trazas": true,
+      "escritor_emite_delta": true
+    }
+  },
+  "capitulos": {
+    "cerrados": 3,
+    "esperados": 3,
+    "estado": "en_progreso",
+    "palabras": [
+      444,
+      413,
+      410
+    ]
+  },
+  "reloj": {
+    "preludio_s": 240.0,
+    "por_fase_s": {
+      "generar-premisa": 22.0,
+      "generar-sinopsis": 40.0,
+      "generar-escaleta": 42.0,
+      "inicializar-estado": 136.0
+    },
+    "tandas": [
+      {
+        "tanda": "tanda_2026-09-19T09-20-49",
+        "inicio": "2026-09-19T09:20:49.975+02:00",
+        "fin": "2026-09-19T09:33:02.043+02:00",
+        "segundos": 732.1
+      }
+    ],
+    "tandas_s": 732.1,
+    "total_s": 972.1
+  },
+  "agentes": {
+    "escritor": {
+      "invocaciones": 4,
+      "segundos": 507.7,
+      "tokens_salida": 14798,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "qa": {
+      "invocaciones": 3,
+      "segundos": 296.0,
+      "tokens_salida": 15536,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "orquestador": {
+      "invocaciones": 4,
+      "segundos": 240.0,
+      "tokens_salida": 11479,
+      "modelos": [
+        "claude-sonnet-5"
+      ]
+    }
+  },
+  "calidad": {
+    "contradicciones": 1,
+    "cortes_qa": 3,
+    "reintentos_de_escritor": 0,
+    "borradores_descartados": 0,
+    "tandas_abortadas": 0,
+    "motivos_de_aborto": [],
+    "pausado_al_archivar": false
+  },
+  "coste": {
+    "moneda": "USD",
+    "total": 2.9186,
+    "tokens": 2914988,
+    "por_rol": {
+      "escritor": 1.124,
+      "qa": 0.9556,
+      "preludio": 0.839
+    },
+    "modelos_sin_precio": [
+      "claude-sonnet-5"
+    ],
+    "carpetas_con_uso": 2
+  },
+  "nombre": "2026-09-19T09-33-03_brote",
+  "titulo": "Lo que crece bajo la piel",
+  "archivado": "2026-09-19T09:33:03+02:00"
+}

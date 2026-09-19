@@ -1,0 +1,11 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Tic lexico 'nominal/nominales' para lecturas de instrumentos: 3 apariciones acumuladas en el capitulo 1 ('Presion de la escotilla exterior, nominal', 'Sellos de la puerta interior, nominales', 'la escotilla exterior registraba presion nominal'). Capitulos: [1].",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

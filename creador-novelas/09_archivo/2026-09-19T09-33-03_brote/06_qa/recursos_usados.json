@@ -1,0 +1,76 @@
+[
+  {
+    "recurso": "enumeracion negativa en serie como cierre de frase ('sin X, sin Y' / 'No tenia X. No tenia nada')",
+    "veces": 3,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "el gesto de apoyar o levantar los dedos sobre la piel como unidad de suspense",
+    "veces": 4,
+    "caps": [
+      1,
+      3
+    ]
+  },
+  {
+    "recurso": "la formula 'el mismo movimiento propio' para nombrar lo que se desplaza bajo la piel",
+    "veces": 2,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "la sonrisa de Toma como indice de su negacion",
+    "veces": 3,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "mirar el brazo propio como si fuera de otro",
+    "veces": 2,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "cerrar la frase con una negacion o una ausencia como remate de la imagen ('que no encontro destino', 'aire que ya no es de nadie', 'dos tubos de nada', 'a metal limpio, a nada', 'A nadie mas')",
+    "veces": 7,
+    "caps": [
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "el frio de la pared exterior descrito como una presencia fisica quieta",
+    "veces": 1,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "el silencio o la voz dotados de cualidad material ('su silencio tenia filo', voz 'mas plana de lo habitual', respiracion 'rota y regular')",
+    "veces": 3,
+    "caps": [
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "lo que se desplaza bajo la piel descrito con un simil de criatura serena ('como si escuchara', 'con la misma calma con que se mueve un pez')",
+    "veces": 2,
+    "caps": [
+      3
+    ]
+  },
+  {
+    "recurso": "la nave y sus conductos personificados como organismo que respira o aulla",
+    "veces": 2,
+    "caps": [
+      3
+    ]
+  }
+]

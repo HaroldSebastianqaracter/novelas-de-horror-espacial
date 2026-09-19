@@ -1,0 +1,36 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El cap. 3 afirma como cierto que las palabras de Lucia tras la puerta de la enfermeria 'eran las palabras del manifiesto' y que Bregan las reconocio. Contradice el hecho vigente de que el manifiesto viaja cifrado desde origen y el contrato prohibe a la tripulacion inventariar la carga: nadie a bordo pudo conocer su texto y el log no registra ningun descifrado.",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion correctiva 'No X: Y' / 'No era X. Era Y.': 7 apariciones acumuladas en caps 1, 2 y 3; cuatro en esta muestra ('no era un ajuste de deriva: el sistema la traia cargada', 'El flete no compraba bodega. Compraba cinco respiraciones', 'ya no tenia mamparos: tenia una superficie blanca', 'no era residuo ni envase; era tierra sembrada').",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de frase o parrafo con subordinada de relativo en negativo: 7 acumuladas en caps 1, 2 y 3; en esta muestra 'que jamas pisaria el Ambar Tardio', 'sin un sonido que cruzara al otro lado', 'que nadie a bordo habia escrito'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personaje que reacciona por omision: 5 acumuladas en caps 1, 2 y 3; en esta muestra 'nadie discutio quien iria al panel manual', 'Beni bajo detras de Lucia sin que nadie lo mandara', 'Ninguna se movio deprisa. No hacia falta'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil introducido con 'como' para rematar la imagen: 4 acumuladas en caps 1, 2 y 3; en esta muestra 'subia por los tabiques como una escarcha que se hubiera tomado su tiempo'.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Metafora mercantil de compra y pago aplicada a las vidas de la tripulacion: 4 apariciones, todas en el cap. 3 ('El flete no compraba bodega. Compraba cinco respiraciones', 'Nos pagaron por estar dentro', 'sabiendo que compraba', 'aun pagaba el flete y esperaba su entrega').",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

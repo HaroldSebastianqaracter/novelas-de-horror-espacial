@@ -75,17 +75,26 @@ def parrafo_que_niega(hecho: dict) -> str:
     )
 
 
+# Lo que hace falta para que el árbol copiado sea un harness y no solo una novela. `app` es el que se
+# olvidó la primera vez: sin él `python -m app` no existe, la fase muere al arrancar y el test lo
+# contaba como que QA no había detectado nada.
+DEL_HARNESS = ("app", "scripts", ".claude", "config", "herramientas", "CLAUDE.md", "pyproject.toml")
+
+
 def preparar_copia(origen: Path, destino: Path) -> int:
     shutil.copytree(origen, destino, dirs_exist_ok=True)
-    # El árbol copiado necesita el .claude y el .venv del árbol de trabajo: las novelas archivadas
-    # guardan su estado y su manuscrito, no el harness que las escribió.
+    # Las novelas archivadas guardan su estado y su manuscrito, no el harness que las escribió.
     raiz_trabajo = Path(__file__).resolve().parents[1]
-    for pieza in (".claude", "config", "CLAUDE.md"):
+    for pieza in DEL_HARNESS:
         fuente = raiz_trabajo / pieza
         if fuente.is_dir():
-            shutil.copytree(fuente, destino / pieza, dirs_exist_ok=True)
+            shutil.copytree(fuente, destino / pieza, dirs_exist_ok=True,
+                            ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
         elif fuente.is_file():
             shutil.copy2(fuente, destino / pieza)
+    faltan = [p for p in DEL_HARNESS if not (destino / p).exists()]
+    if faltan:
+        raise SystemExit(f"el árbol de prueba quedó incompleto, falta: {', '.join(faltan)}")
     (destino / ".venv").mkdir(exist_ok=True)
     venv = raiz_trabajo / ".venv"
     if venv.is_dir() and not (destino / ".venv" / "Scripts").exists():
@@ -119,10 +128,18 @@ def volver_a_en_progreso(raiz: Path, cap: int) -> None:
 
 
 def correr(raiz: Path, cap: int, tope_s: float) -> dict:
-    web.ejecutar_fase(raiz, "corte-qa", tope_s=tope_s)
+    # H-06 resuelve las rutas permitidas contra `HARNESS_RAIZ`, y la fase la hereda del proceso. Si
+    # queda apuntando al árbol de trabajo, el hook bloquea escrituras a `06_qa/` del árbol de prueba
+    # --que están dentro de `06_qa/`, solo que del otro árbol-- y el corte muere sin dejar reporte.
+    # Se fija aquí, que es el único sitio que sabe cuál es el árbol bueno.
+    os.environ["HARNESS_RAIZ"] = str(raiz)
+    fin = web.ejecutar_fase(raiz, "corte-qa", tope_s=tope_s)
     reporte = raiz / "06_qa" / "reportes" / f"qa_cap_{cap}.json"
     if not reporte.is_file():
-        return {"error": "QA no dejó reporte", "marca": None}
+        # Sin reporte no se sabe nada de QA: la fase no llegó a producir veredicto. Esto tiene que
+        # salir como error del test y no como «QA no detectó», que es la lectura que más daño hace.
+        salida = str(fin.get("salida") or fin.get("stderr") or fin)[-400:]
+        return {"error": f"la fase corte-qa no dejó reporte: {salida}", "marca": None}
     d = json.loads(reporte.read_text(encoding="utf-8"))
     estado = json.loads((raiz / "04_estado" / "manifest.json").read_text(encoding="utf-8")).get("estado")
     return {"marca": bool(d.get("tiene_contradicciones")), "estado": estado,
@@ -130,7 +147,11 @@ def correr(raiz: Path, cap: int, tope_s: float) -> dict:
 
 
 def una_vuelta(novela: Path, etiqueta: str, inyectar: bool, tope_s: float) -> dict:
-    base = Path(tempfile.mkdtemp(prefix=f"qa-{etiqueta}-"))
+    # `resolve()` no es cosmético: en Windows `mkdtemp` devuelve la forma corta 8.3
+    # (`C:\\Users\\HAROLD~1.ROD\\...`) y el hook H-06 compara la ruta escrita contra la raíz como
+    # texto. Con las dos formas mezcladas, una escritura que está dentro de `06_qa/` se ve fuera de
+    # la raíz y el corte muere sin dejar reporte.
+    base = Path(tempfile.mkdtemp(prefix=f"qa-{etiqueta}-")).resolve()
     destino = base / "novela"
     cap = preparar_copia(novela, destino)
     volver_a_en_progreso(destino, cap)
@@ -175,6 +196,17 @@ def main(argv: list[str]) -> int:
 
     print("\n== veredicto ==")
     por = {r["etiqueta"]: r for r in salida}
+
+    # Primero, si el corte no llegó a correr. Un test que dijera «QA no detectó» cuando en realidad
+    # la fase ni arrancó estaría acusando al verificador de lo que es un fallo suyo, y esa lectura es
+    # la que mandaría a rehacer medidas que están bien.
+    rotas = [r for r in salida if r.get("error")]
+    if rotas:
+        for r in rotas:
+            print(f"  SIN VEREDICTO ({r['etiqueta']}): {r['error']}")
+        print("  El test no dice nada sobre QA: lo que falló es el test.")
+        return 3
+
     fallos = []
     if "control" in por and por["control"].get("marca") is not False:
         fallos.append("el control marcó contradicciones en una novela que salió limpia: QA es ruidoso "

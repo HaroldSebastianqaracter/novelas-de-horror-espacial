@@ -1,0 +1,298 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La Perforación Calisto-9 es una estación minera aislada; el diario de a bordo registra una dotación de cinco personas hasta hace tres días y de cuatro desde entonces.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El reactor no sostiene la carga eléctrica completa, y el protocolo de consumo permite apagar sectores enteros para conservar el aire de los módulos habitados.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los partes de consumo recogen cada apagón de sector con la firma de autorización de la jefa de turno, y las últimas tres semanas de apagones llevan la firma de Vera Ostrov.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los sectores que se apagan quedan a oscuras y nadie los ha vuelto a encender: cada turno hay un pasillo menos en el mapa de lo transitable y la dotación se reagrupa en los módulos que todavía brillan.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las pilas de las linternas están racionadas y se anotan por turno en el inventario; cada miembro de la dotación lleva una linterna portátil.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Vera Ostrov cursó una llamada de auxilio a la ruta comercial hace tres días: la respuesta tarda once semanas en llegar y las baterías de emergencia de la cubierta habitable dan nueve días de autonomía.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los generadores de reserva están en el nivel inferior, y arrancarlos exige derivar toda la potencia disponible durante noventa segundos, con la estación entera a oscuras mientras sube la carga.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las cartas de la zona no recogen ningún otro asentamiento habitado al alcance de la estación: fuera del casco hay vacío, radiación y la superficie helada.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vera Ostrov",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Vera Ostrov es la jefa de turno, la única con acceso autorizado al reactor, y la única que escribe en el diario de a bordo, donde anotó la desaparición de Damián Sarpe como «pérdida de personal».",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vera Ostrov",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Vera Ostrov sostiene el protocolo —rondas, partes de consumo, entradas de diario— como la última prueba de que la estación sigue funcionando.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ilse Marek",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ilse Marek es la técnica de sistemas y la única que sabe leer los registros de consumo y los esquemas eléctricos de la estación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ilse Marek",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ilse Marek ha cotejado los partes y sostiene que los apagones no son aleatorios: se ordenan por sectores en dirección a los módulos habitados.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kell",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Kell es el perforista de la dotación y repite ante los demás que a Damián Sarpe se lo llevó un fallo de presión y una fuga que arrastró el cuerpo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kell",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Kell estuvo a metro y medio del tramo oscuro cuando desapareció Damián Sarpe y no oyó ninguna fuga; eso se lo calla.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Bram",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Bram es el más joven de la dotación, tiene veinte años y sujetaba la linterna cuando la oscuridad se cerró detrás de Damián Sarpe.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Bram",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Bram ha dejado de dormir con la luz apagada y de hablar más de tres palabras seguidas desde la desaparición de Damián Sarpe.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Bram",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Bram apagó la lámpara de un sector en cuarentena por consumo para dormir en el módulo cálido, tres días antes de que desapareciera Damián Sarpe, y hasta ahora se lo ha callado.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Damián Sarpe",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Damián Sarpe era el quinto miembro de la dotación y desapareció hace tres días en un tramo a oscuras del nivel inferior; nadie ha recuperado nada suyo desde entonces.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Cubierta habitable de la Perforación Calisto-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La cubierta habitable reúne los módulos de descanso y el puesto de turno, y es el sector que la dotación mantiene iluminado de forma continua mientras los pasillos vecinos se apagan.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nivel inferior de la Perforación Calisto-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El nivel inferior fue el primer sector que quedó a oscuras, aloja los generadores de reserva y está lleno de ruidos de estación: bombas, dilatación del metal, goteo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sala de generadores del nivel inferior",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La sala de generadores está al fondo del nivel inferior y tiene un acoplamiento manual que no cierra solo: alguien debe sostenerlo mientras sube la carga.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los fallos de energía forman un patrón progresivo que avanza desde el nivel inferior hacia la cubierta habitable, comenzando hace tres semanas.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las baterías de emergencia de la cubierta habitable proporcionan nueve días de energía, mientras que la respuesta a una llamada externa tardará once semanas.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nivel inferior de la Perforación Calisto-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El nivel inferior alberga los generadores de reserva que pueden cubrir el déficit de energía durante el tiempo de espera.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vera Ostrov",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Vera Ostrov ha planificado descender al nivel inferior para acceder a los generadores de reserva antes de que se agote la energía de emergencia.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Damián Sarpe",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Damián Sarpe se encuentra muerto en el nivel inferior, cuerpo dispuesto de forma ordenada contra el mamparo.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vera Ostrov",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Vera autorizó una serie de apagones de sectores que dibujaban un territorio ensanchándose hacia dentro, sin saber que estaba autorizando un corredor de entrada para el depredador.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Bram",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Bram apagó la lámpara del sector en cuarentena hace tres días para dormir en el módulo cálido, lo que abrió un acceso inicial al depredador.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El depredador no apaga las luces para cazar, sino que entra por sectores ya apagados, buscando acceso ya autorizado.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kell",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Kell desaparece sin explicación mientras cierra el acoplamiento del generador; su voz se corta sin grito ni arrastre.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Bram",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Bram aparece en la sala de generadores tras la apagada, sin linterna, aseverando que abajo se ve bien, con cambios notables en su apariencia y comportamiento.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Sala de generadores del nivel inferior",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El acoplamiento del generador queda cerrado durante la apagada, sostenido por un peso que no responde.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los generadores mantienen suministro para 90 días; el rescate tardará 85 días sin retrasos.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Kell",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Kell desapareció sin dejar rastro durante el apagón en la Sala de generadores, su voz se corta a mitad de palabra sin grito ni ruido de caída.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sala de generadores del nivel inferior",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El acoplamiento de la sala se cerró automáticamente con presión exacta durante el apagón, sin que nadie lo manejara.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La Perforación consume 2% más oxígeno del que debería consumir una tripulación de tres personas.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Vera Ostrov",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Vera registró la dotación como 'tres' en el diario de control y ordenó que nadie apague nada, ninguna lámpara ni sector.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

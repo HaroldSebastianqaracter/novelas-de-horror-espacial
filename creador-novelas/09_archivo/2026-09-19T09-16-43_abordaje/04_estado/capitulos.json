@@ -1,0 +1,45 @@
+[
+  {
+    "num": 1,
+    "titulo": "Silencio en la Esclusa",
+    "objetivo_narrativo": "Establecer la rutina de la tripulación del Deriva Larga antes del tramo largo y romperla de golpe: algo sin nombre entra por la esclusa de carga y despedaza a Sorrentino ante los demás, dejando claro que no hay forma de negociar ni de saber cómo entró.",
+    "personajes": [
+      "Ilsa Byrne",
+      "Priya Voss",
+      "Dante Ashworth",
+      "Elena Kass",
+      "Mikel Sorrentino"
+    ],
+    "locacion": "Esclusa de carga",
+    "informacion_nueva": "Existe una criatura a bordo que mata sin dejar rastro de cómo entra ni de qué está hecha; la esclusa y el sector de carga quedan sellados; quedan once días de navegación sin ningún lugar adonde huir.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "Lo que Aprende la Oscuridad",
+    "objetivo_narrativo": "Voss descubre que la criatura memoriza los mamparos sellados y se adelanta a la tripulación, obligando a repensar la caza de cero; Ashworth acusa a Kass de haber ocultado reportes previos de Sorrentino, y Byrne fuerza una tregua incómoda para diseñar una trampa.",
+    "personajes": [
+      "Ilsa Byrne",
+      "Priya Voss",
+      "Dante Ashworth",
+      "Elena Kass"
+    ],
+    "locacion": "Puente",
+    "informacion_nueva": "La criatura aprende la disposición de la nave más rápido de lo que pueden sellarla; Kass reportó ruidos extraños días antes del ataque sin que nadie actuara; la desconfianza fractura a la tripulación.",
+    "tension": 4
+  },
+  {
+    "num": 3,
+    "titulo": "Once Días Después",
+    "objetivo_narrativo": "La tripulación acorrala a la criatura junto al puente y ejecuta la trampa de Voss: purgar el aire de los conductos para forzarla hacia una esclusa sellada. Kass resulta malherida sosteniendo la puerta, la criatura queda expulsada al vacío, y los cuatro sobrevivientes cargan con lo que la desconfianza les hizo entre sí.",
+    "personajes": [
+      "Ilsa Byrne",
+      "Priya Voss",
+      "Dante Ashworth",
+      "Elena Kass"
+    ],
+    "locacion": "Puente",
+    "informacion_nueva": "La trampa funciona y la criatura es expulsada al vacío junto con el compartimento sellado; el costo es Kass malherida y una tripulación que ya no confía entre sí, aunque sobrevivió.",
+    "tension": 5
+  }
+]

@@ -1,0 +1,1 @@
+La cuadrilla de cinco de una nave cisterna encuentra el tanque de agua principal lleno de vainas adheridas a las paredes, y varias están abiertas. Lo que salió de ellas ya está en los conductos de ventilación y crece rápido. El agua limpia que queda a bordo alcanza para tres días.

@@ -1,0 +1,250 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La Hebe lleva once semanas de travesía con doce millones de litros en el tanque principal y el puerto de destino queda a nueve días de camino.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El agua que bebe la cuadrilla sale del circuito de recirculación, que toma del tanque principal y devuelve por las mismas líneas.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los depósitos auxiliares son la única reserva declarada limpia y su contenido se mide en días de consumo para cinco personas.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La ruta es comercial y sin vigilancia: el registro de comunicaciones recoge las señales emitidas desde la Hebe y ningún acuse de recibo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La cuadrilla la forman cinco personas que se turnan el sueño y han aprendido a no hablarse fuera de lo que exige el trabajo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La ventilación mantiene el casco tibio y húmedo, y todo el aire de los compartimentos habitados pasa por un único filtro.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "carguero cisterna Hebe",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Los mamparos de sector de la Hebe se sellan desde el puente o desde una consola local, y los sectores sellados siguen comunicados por intercomunicador.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "carguero cisterna Hebe",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El ruido constante de las bombas y de la recirculación es el fondo sonoro habitual de la vida a bordo, y la cuadrilla lo atribuye al desgaste normal de una nave vieja.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Marisa Ocaña",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Marisa Ocaña es la capitana de la Hebe y las órdenes de apertura, sellado y purga de sectores pasan por ella.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Teo Brandt",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Teo Brandt es el maquinista y conoce los conductos y pasos de servicio de la Hebe mejor de lo que los recogen los planos de a bordo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ilse Varga",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ilse Varga es la médica de vuelo, contratada por horas para esta travesía, y a bordo hay un único equipo de aislamiento completo, que es el suyo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nuno Abrego",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Nuno Abrego es el operario de bombas, el más joven de los cinco, y es a quien le corresponde bajar cuando hay que inspeccionar el interior del tanque.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Petra Sandoval",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Petra Sandoval es la oficial de carga y lleva firmadas, día a día desde el inicio de la ruta, las planillas de todo lo que entra y sale del tanque principal.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la presencia en los conductos",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Hay tejido vivo instalado en la ventilación y en las líneas de recirculación de la Hebe desde antes de que empiece la novela, alimentándose del calor y la humedad del sistema.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la Hebe",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "El consumo registrado del tanque principal viene subiendo desde hace semanas en curvas mínimas que Sandoval firmó sin alarmarse.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la Hebe",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El tanque principal de la Hebe contiene vainas correosas vivas, muchas abiertas desde dentro.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la Hebe",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Hay tejido vivo colonizando el sistema de ventilación de la Hebe, alimentándose del calor y la humedad que mantienen respirable la nave.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los depósitos auxiliares de la Hebe proveen oxígeno para solo tres días con cinco personas a bordo, siendo el puerto comercial más cercano está a nueve días de distancia.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Marisa Ocaña",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Marisa Ocaña emitió llamadas de distress que no reciben acuse de recibo.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nuno Abrego",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "El tejido se instaló en los intersticios corporales de Nuno Abrego sin destruir el tejido existente, formando lo que Varga identifica como una sutura.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las vainas en los conductos eran despensa guardada contra el acero, no un depósito de huevos de la entidad.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El agua en los conductos informa en lugar de contagiar, tomando nota a través del consumo y devolución litro a litro.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Teo Brandt",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Teo Brandt ejecutó la purga de la línea del tanque grande por instrucciones de la nave basadas en una obstrucción que no existía.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Marisa Ocaña",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ocaña permite que se abra proa al vacío para incinerar el tanque de combustible de la Hebe y firma una declaración falsa diciendo que solo dos personas llegaron al puerto.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Ilse Varga",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Varga desciende a popa tras renunciar a su ración de agua del suministro principal, bebiéndose la línea de recirculación; seis días después aparece viva sin signos de deshidratación.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "carguero cisterna Hebe",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La Hebe atracó en puerto al noveno día con la carga intacta y sin incidencias, llevando solo dos personas en el puente según la declaración oficial.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La decisión de racionamiento de agua se volvió una selección de quién muere de sed o desaparece: la supervivencia se cuenta en cuerpos que no reclaman ración.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Nuno Abrego",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Nuno Abrego fue incinerado cuando abrieron proa al vacío para incinerar el tanque, tras rechazar auxilios durante días.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ilse Varga",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ilse Varga renunció voluntariamente a su ración de agua del suministro principal y se aisló en popa bebiendo del circuito de recirculación.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Marisa Ocaña",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Marisa Ocaña ordenó a Teo Brandt esperar junto a la válvula de purga en lugar de ejecutar inmediatamente el plan de abrir proa al vacío.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ilse Varga",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ilse Varga sobrevivió seis días sin agua ni comida en popa y solicita que le abran la escotilla desde el intercomunicador.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

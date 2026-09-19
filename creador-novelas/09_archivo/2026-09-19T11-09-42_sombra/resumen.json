@@ -1,0 +1,112 @@
+{
+  "version_specs": "v1.12",
+  "config": {
+    "novela.json": {
+      "total_capitulos": 3,
+      "palabras_por_capitulo": 400,
+      "idioma": "es-ES",
+      "persona_narrativa": "tercera_limitada",
+      "tiempo_verbal": "pasado",
+      "ventana_resumen_rodante": 2,
+      "cadencia_qa": 1,
+      "max_tokens_contexto_escritor": 12000,
+      "max_hechos_por_capitulo": 4
+    },
+    "ejecucion.json": {
+      "capitulos_por_tanda": 3,
+      "max_llamadas_por_tanda": 30,
+      "registrar_uso": true,
+      "exportar_trazas": true,
+      "escritor_emite_delta": false
+    }
+  },
+  "capitulos": {
+    "cerrados": 3,
+    "esperados": 3,
+    "estado": "en_progreso",
+    "palabras": [
+      431,
+      438,
+      422
+    ]
+  },
+  "reloj": {
+    "preludio_s": 216.0,
+    "por_fase_s": {
+      "generar-premisa": 28.0,
+      "generar-sinopsis": 58.0,
+      "generar-escaleta": 28.0,
+      "inicializar-estado": 102.0
+    },
+    "tandas": [
+      {
+        "tanda": "tanda_2026-09-19T10-49-33",
+        "inicio": "2026-09-19T10:49:33.112+02:00",
+        "fin": "2026-09-19T11:09:40.634+02:00",
+        "segundos": 1207.5
+      }
+    ],
+    "tandas_s": 1207.5,
+    "total_s": 1423.5
+  },
+  "agentes": {
+    "orquestador": {
+      "invocaciones": 5,
+      "segundos": 1148.5,
+      "tokens_salida": 30936,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "extractor": {
+      "invocaciones": 4,
+      "segundos": 821.4,
+      "tokens_salida": 23303,
+      "modelos": [
+        "claude-haiku-4-5-20251001"
+      ]
+    },
+    "escritor": {
+      "invocaciones": 4,
+      "segundos": 623.9,
+      "tokens_salida": 5921,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    },
+    "qa": {
+      "invocaciones": 3,
+      "segundos": 363.5,
+      "tokens_salida": 11464,
+      "modelos": [
+        "claude-opus-5"
+      ]
+    }
+  },
+  "calidad": {
+    "contradicciones": 1,
+    "cortes_qa": 3,
+    "reintentos_de_escritor": 0,
+    "borradores_descartados": 0,
+    "tandas_abortadas": 0,
+    "motivos_de_aborto": [],
+    "pausado_al_archivar": false
+  },
+  "coste": {
+    "moneda": "USD",
+    "total": 6.334,
+    "tokens": 5483703,
+    "por_rol": {
+      "orquestador": 2.6319,
+      "preludio": 1.6443,
+      "escritor": 0.952,
+      "qa": 0.8505,
+      "extractor": 0.2552
+    },
+    "modelos_sin_precio": [],
+    "carpetas_con_uso": 2
+  },
+  "nombre": "2026-09-19T11-09-42_sombra",
+  "titulo": "El territorio de la oscuridad",
+  "archivado": "2026-09-19T11:09:42+02:00"
+}

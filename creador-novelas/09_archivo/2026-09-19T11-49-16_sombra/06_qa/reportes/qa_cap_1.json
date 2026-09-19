@@ -1,0 +1,11 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personificacion de los sistemas y objetos de la estacion (voluntad o actitud humana atribuida a maquinas): valores 'obedientes, aburridos', el reactor que 'insistia en declararse sano', 'los diagnosticos se creen mucho', la radio que transmitia estatica 'con una paciencia horrible', las luces 'encendiendo tramos como si dudaran'. 5 apariciones acumuladas, capitulos [1].",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

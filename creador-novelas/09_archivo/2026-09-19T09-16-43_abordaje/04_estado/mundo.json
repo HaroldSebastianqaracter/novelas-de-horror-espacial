@@ -1,0 +1,22 @@
+{
+  "reglas": [
+    "El soporte vital del Deriva Larga depende de un único sistema central; aislar un sector durante horas pone en riesgo grave a quien quede dentro.",
+    "Los conductos de ventilación recorren todos los sectores de la nave y son lo bastante anchos para el paso de mantenimiento.",
+    "La nave no lleva armamento a bordo, solo herramientas de mantenimiento y equipo de emergencia.",
+    "Una vez iniciado el tramo largo entre puertos, no hay puntos de rescate intermedios: una señal de auxilio tardaría días en ser escuchada."
+  ],
+  "objetos": [
+    "Traje de presión de emergencia, uno por tripulante",
+    "Consola de control de esclusas y mamparos, operable desde el puente y desde estaciones auxiliares",
+    "Registro médico de a bordo, bajo custodia de la médica",
+    "Herramientas de mantenimiento de la sala de máquinas"
+  ],
+  "linea_de_tiempo": [
+    "El Deriva Larga zarpa con una tripulación de cinco rumbo a un tramo de once días sin escalas.",
+    "Antes de iniciar el tramo largo, la capitana ordena una última ronda de inspección y Sorrentino queda de guardia en la esclusa de carga."
+  ],
+  "locaciones": {
+    "Esclusa de carga": "Punto de acceso exterior para mercancía: una escotilla externa y una puerta interior sellable, conectadas al resto de la nave por un conducto de ventilación.",
+    "Puente": "Centro de mando de la nave, con las consolas de navegación y el control de mamparos y esclusas."
+  }
+}

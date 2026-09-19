@@ -1,0 +1,21 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personificacion de sistemas y objetos de la estacion (maquinas con voluntad o actitud humana): el reactor que 'va a seguir tropezando' y 'regala' un sector, el aire de retorno 'indiferente'. 3 apariciones en el capitulo 2; 8 acumuladas (capitulos 1, 2).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil introducido con 'como si': los conductos que se ensanchan 'como si alguien las anchara a codazos' y el cuaderno cerrado 'como si el ruido pudiera oirse mas abajo'. 2 apariciones en el capitulo 2; 4 acumuladas (capitulos 1, 2).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion seguida de afirmacion enfatica ('No fue X. Fue Y.'): la cuenta de Vela sobre el primer corte y el cierre 'El patron no habia empezado con la averia. Habia empezado con el.'. 2 apariciones en el capitulo 2; 4 acumuladas (capitulos 1, 2).",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

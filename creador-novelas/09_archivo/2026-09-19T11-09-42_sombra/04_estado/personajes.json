@@ -1,0 +1,71 @@
+{
+  "Vera Ostrov": {
+    "estado_fisico": "Intacta.",
+    "estado_psicologico": "Asustada, en modo protocolo defensivo. Toma la decisión de mantener todas las lámparas encendidas permanentemente y duerme vigilando a Bram sin poder dejar de mirarlo dormir.",
+    "secretos_que_conoce": [
+      "Ha firmado ella misma los apagones de sector de las últimas tres semanas para que el reactor conservara el aire",
+      "La llamada a la ruta comercial tardará once semanas en traer respuesta y las baterías de emergencia dan nueve días",
+      "Sabe que la presión lateral ha apagado una lámpara del puesto de turno.",
+      "Conoce la ubicación de los generadores de reserva en el nivel inferior.",
+      "Ha recibido análisis de Ilse sobre el patrón de fallos progresivo hacia la cubierta.",
+      "Sabe que cada apagón queda registrado con su firma.",
+      "Sabe que los apagones que autorizó dibujaban un territorio ensanchándose hacia dentro.",
+      "Kell desapareció sin explicación mientras cerraba el acoplamiento del generador.",
+      "Hay un consumo anómalo de energía en los sistemas.",
+      "Kell desapareció de forma inexplicable durante el apagón en la Sala de generadores."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Ilse Marek": {
+    "estado_fisico": "Intacta.",
+    "estado_psicologico": "Su voz se vuelve delgada de miedo al darse cuenta de la desaparición de Kell. Asustada y analítica frente a la anomalía de consumo.",
+    "secretos_que_conoce": [
+      "Los apagones del reactor no son aleatorios: avanzan por sectores en dirección a los módulos habitados",
+      "Los generadores de reserva están en el nivel inferior y sin ellos la cubierta habitable se apaga en menos de una semana",
+      "Ha rastreado un patrón de fallos que forma una línea recta desde hace tres semanas.",
+      "Sabe que las baterías de emergencia de la cubierta dan solo nueve días de luz.",
+      "Ha calculado que la respuesta a la llamada de Vera tardará once semanas.",
+      "Sabe que cada apagón queda registrado con una firma.",
+      "Sabe que la firma de los apagones es la de Vera.",
+      "El consumo de energía es 2% más alto de lo esperado para tres personas.",
+      "Los generadores duran 90 días; el rescate, 85 si no se retrasa.",
+      "La Perforación consume 2% más oxígeno del que deberían consumir tres personas.",
+      "Noventa días de luz total disponible; el rescate responde a las once semanas."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Kell": {
+    "estado_fisico": "Desaparecido. Se desvaneció sin rastro durante el apagón mientras cerraba el acoplamiento.",
+    "estado_psicologico": "Desapareció tranquilamente, contando tornillos y hablando de su madre. Última frase incompleta: 'la muy pe...'",
+    "secretos_que_conoce": [
+      "No oyó ninguna fuga cuando Damián Sarpe desapareció, y sabe que a metro y medio la habría oído",
+      "Atribuye la lámpara apagada a una fuga de presión en el tramo bajo.",
+      "Sabe que esto es algo que pasa.",
+      "Su madre tenía una casa con porche de chapa que suena igual que la palanca de metal.",
+      "Conocía una chapa que sonaba igual a la de un porche de la casa de su madre."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Bram": {
+    "estado_fisico": "Intacta. Baja tranquilamente en la oscuridad total sin linterna ni tanteo.",
+    "estado_psicologico": "Inquietantemente tranquilo y despierto. Su aspecto es el de alguien recién despertado, veinte años en la cara. No muestra miedo ante la oscuridad ni la desaparición de Kell.",
+    "secretos_que_conoce": [
+      "Fue él quien apagó la primera lámpara del sector en cuarentena, tres días antes de la desaparición de Damián Sarpe",
+      "Sabe que apagó la lámpara del sector en cuarentena hace tres días para dormir en el módulo cálido.",
+      "Afirma que en la sala de generadores abajo se ve bien a pesar de la oscuridad total.",
+      "Afirma que 'aquí abajo se ve bien' durante la oscuridad total."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Damián Sarpe": {
+    "estado_fisico": "Muerto. Cuerpo descompuesto, piezas agrupadas contra la chapa del mamparo.",
+    "estado_psicologico": "Difunto.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  }
+}

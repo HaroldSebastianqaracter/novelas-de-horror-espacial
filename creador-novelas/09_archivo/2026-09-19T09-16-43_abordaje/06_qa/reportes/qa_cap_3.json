@@ -1,0 +1,11 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Reaccion emocional descrita por lo que un personaje calla o no se atreve a decir: en el capitulo 3 aparece tres veces ('nadie se habia atrevido a describir en voz alta', 'Nadie celebro', 'sin saber si le permitian tocar a la mujer'). Acumula 8 apariciones en los capitulos 1, 2 y 3; recurso agotado.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

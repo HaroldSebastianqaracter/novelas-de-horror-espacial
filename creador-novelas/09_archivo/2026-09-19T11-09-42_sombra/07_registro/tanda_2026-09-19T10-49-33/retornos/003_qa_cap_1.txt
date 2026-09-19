@@ -1,0 +1,4 @@
+tiene_contradicciones: false
+contradicciones: 0 · repeticiones: 1
+reporte: C:/Users/harold.rodriguez/Desktop/Nueva carpeta/velocidad/creador-novelas/06_qa/reportes/qa_cap_1.md
+validado

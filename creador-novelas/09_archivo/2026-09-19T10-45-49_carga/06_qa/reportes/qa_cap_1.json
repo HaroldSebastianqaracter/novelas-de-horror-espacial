@@ -1,0 +1,11 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de parrafo con subordinada de relativo en negativo: 'una gota de cera que nunca termina de enfriarse', 'una pared que no ha probado', 'lo que ninguno de ellos supo interpretar'. 3 apariciones acumuladas, todas en el capitulo 1.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

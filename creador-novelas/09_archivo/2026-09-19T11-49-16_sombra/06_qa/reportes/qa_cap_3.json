@@ -1,0 +1,21 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personificacion de los sistemas y objetos de la estacion: en el capitulo 3, el pasillo que 'devolvia cada silaba', los generadores que 'tosieron' y la luz 'sin misericordia'. Acumulado: 11 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil introducido con 'como si': en el capitulo 3, 'como si alguien mas las repitiera al fondo'. Acumulado: 5 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Repeticion anaforica en frases cortas yuxtapuestas como recurso de tension: en el capitulo 3, 'Y otra. Y otra.', 'Iris entro. Vela entro.' y 'un golpe, otro, un chasquido'. Acumulado: 3 apariciones en el capitulo 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

@@ -1,0 +1,80 @@
+[
+  {
+    "recurso": "la linterna de Sol barriendo la pared del tanque",
+    "apariciones": {
+      "1": 3
+    }
+  },
+  {
+    "recurso": "los sensores que informan normalidad mientras algo ocurre",
+    "apariciones": {
+      "1": 2
+    }
+  },
+  {
+    "recurso": "Ibarra recitando protocolos de memoria en voz baja",
+    "apariciones": {
+      "1": 1
+    }
+  },
+  {
+    "recurso": "silencio de un personaje como reacción al hallazgo",
+    "apariciones": {
+      "1": 2
+    }
+  },
+  {
+    "recurso": "vainas descritas como cáscara seca abierta hacia fuera",
+    "apariciones": {
+      "1": 2
+    }
+  },
+  {
+    "recurso": "la prueba repetida con y sin guante como método de verificación",
+    "apariciones": {
+      "2": 2
+    }
+  },
+  {
+    "recurso": "el vacío exterior recordado como distancia y retardo de transmisión",
+    "apariciones": {
+      "2": 2
+    }
+  },
+  {
+    "recurso": "el registro del sistema que falta o no cuadra como indicio de traición",
+    "apariciones": {
+      "2": 2
+    }
+  },
+  {
+    "recurso": "sonido mecánico aislado (clic del pestillo) para cortar la tensión",
+    "apariciones": {
+      "2": 1
+    }
+  },
+  {
+    "recurso": "conteo de tiempo o cantidades exactas como medida de la amenaza",
+    "apariciones": {
+      "3": 3
+    }
+  },
+  {
+    "recurso": "voz deformada por el intercomunicador desde el tanque",
+    "apariciones": {
+      "3": 1
+    }
+  },
+  {
+    "recurso": "el calor del cuerpo como señuelo involuntario",
+    "apariciones": {
+      "3": 2
+    }
+  },
+  {
+    "recurso": "indicador que baja a cero como cierre",
+    "apariciones": {
+      "3": 1
+    }
+  }
+]

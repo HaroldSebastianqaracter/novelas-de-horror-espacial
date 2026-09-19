@@ -1,0 +1,11 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio o la frase que se corta como cierre de unidad narrativa: cuatro apariciones en el capitulo 1 ('ninguna de las dos hablo / no se hablaba', 'Se callo a mitad de frase', 'y no continuo', 'Nadie dijo lo evidente hasta que lo dijo Varga'). Capitulos: 1.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

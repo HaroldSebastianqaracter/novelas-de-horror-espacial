@@ -1,0 +1,26 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Frase corta sentenciosa como cierre de parrafo o escena: 6 apariciones acumuladas (caps 1, 2); en el cap 2 cierra el parrafo del plano, la replica de Ibrahim sobre los equipos y el remate sobre su forma de estar asustado.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de correccion con dos puntos, 'no X: Y': 4 apariciones acumuladas (caps 1, 2); en el cap 2 en la diferencia termica de la mordida y en la deduccion de Lena tras la tercera medicion.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personaje que se queda mirando algo en silencio como reaccion: 4 apariciones acumuladas (caps 1, 2); en el cap 2 Mara ante el plano y Dov ante su propio brazo.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Negacion seguida de afirmacion correctiva en dos frases ('No X. Y'): 3 apariciones acumuladas, todas en el cap 2 (las marcas, el origen de las criaturas y la formulacion sobre el calor).",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

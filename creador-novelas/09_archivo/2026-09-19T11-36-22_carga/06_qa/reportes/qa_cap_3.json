@@ -1,0 +1,16 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Repeticion literal de un sintagma como enfasis; reaparece dos veces en el capitulo 3 ('y estaban verdes, y siguieron verdes', 'todo hacia fuera, hacia nada'). Capitulos: 1, 2, 3. Acumulado: 10 apariciones.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil introducido con 'como'; reaparece dos veces en el capitulo 3 (la superficie de la criatura como agua en una bandeja, su desplazamiento como el agua hacia un desague). Capitulos: 1, 2, 3. Acumulado: 5 apariciones.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

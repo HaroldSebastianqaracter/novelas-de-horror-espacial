@@ -1,0 +1,5 @@
+Título: Lo que crece bajo la piel
+
+Logline: A bordo de una nave de transporte aislada, una médica debe decidir cuánto tiempo puede dejar con vida a dos tripulantes cuyas heridas no dejan de moverse antes de que el aire compartido deje de ser seguro para los tres que quedan.
+
+Premisa: La Deméter Once cruza el vacío con cinco tripulantes y una carga que nadie recuerda haber revisado a fondo. Cuando dos de ellos empiezan a mostrar lesiones que no encajan con ningún manual, la médica de a bordo nota algo peor que la falta de diagnóstico: bajo la piel de sus pacientes hay un movimiento propio, un pulso que no es el suyo, que crece un poco más de una guardia a la siguiente. Declara aislamiento antes de tener pruebas, solo por instinto, y esa decisión parte a la tripulación en dos: los que quieren ganar tiempo y los que quieren cerrar la escotilla ahora mismo. Mientras la nave sigue su curso automático hacia un puerto que tardará días en llegar, cada turno de guardia se convierte en una negociación silenciosa entre la piedad y el miedo, y en el aire recirculado empieza a notarse que el tiempo que le dieron a los enfermos también se lo están robando a los sanos.

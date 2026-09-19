@@ -1,0 +1,21 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Describir por negacion: los hechos se establecen enumerando lo que no ocurre ('no goteaba ni se secaba', 'No mucho', 'No busca la luz', 'No esta. No hay orden, no hay firma, no hay operador'). Capitulos 1 y 2; 12 apariciones acumuladas.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La linterna como instrumento que revela o prueba lo que hay en la superficie ('Lo hicieron con la linterna apagada'). Capitulos 1 y 2; 5 apariciones acumuladas.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Acotacion de dialogo que senala tono plano, quieto o contenido para no alarmar ('pidio Vance, muy quieto'). Capitulos 1 y 2; 3 apariciones acumuladas.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

@@ -1,0 +1,26 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "El silencio o la frase que se corta como cierre de unidad narrativa: 6 apariciones acumuladas (caps. 1 y 2). En el cap. 2, el canal que sigue abierto tras callar Abrego y el cierre seco del capitulo sobre Brandt.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion y rectificacion tipo 'No era X. Era Y.': 4 apariciones acumuladas, todas en el cap. 2 (vibrar/respirar, no infeccion sino sutura, el tejido que no destruye, el agua que no contagia sino informa).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El adjetivo 'tibio/tibia' para el calor organico de la nave: 3 apariciones acumuladas (caps. 1 y 2). En el cap. 2, los conductos tibios en el razonamiento de Varga.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil que explica un gesto o una accion por la conducta de otra persona ('como quien...'): 3 apariciones acumuladas (caps. 1 y 2). En el cap. 2, el tejido instalado 'como quien ocupa un espacio previsto'.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

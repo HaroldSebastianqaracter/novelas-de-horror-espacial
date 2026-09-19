@@ -1,0 +1,26 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 establece como cierto que el rescate tardara ochenta y cinco dias; el hecho vigente fija que la respuesta a la llamada de auxilio de Vera Ostrov tarda once semanas (setenta y siete dias).",
+      "cap_origen": 0
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de frase con accion truncada hacia el silencio unida por 'y' ('y no dijo nada mas' en el capitulo 3). Acumula 6 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La linterna de Bram, o su ausencia, como foco emocional de la escena (Bram baja sin linterna y pide no gastar pilas en el capitulo 3). Acumula 5 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Conteo de luces o sectores como medida del deterioro (la luz vuelve en todos los sectores a la vez, encienden cada lampara del modulo, en el capitulo 3). Acumula 5 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

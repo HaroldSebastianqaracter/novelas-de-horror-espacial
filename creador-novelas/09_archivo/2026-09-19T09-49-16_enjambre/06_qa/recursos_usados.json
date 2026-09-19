@@ -1,0 +1,63 @@
+[
+  {
+    "recurso": "frase corta sentenciosa como cierre de parrafo o escena",
+    "veces": 9,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "estructura de correccion con dos puntos, 'no X: Y'",
+    "veces": 4,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "personaje que se queda mirando algo en silencio como reaccion",
+    "veces": 6,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "negacion seguida de afirmacion correctiva en dos frases, 'No X. Y'",
+    "veces": 3,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "gesto de ocultar el brazo bajandose la manga",
+    "veces": 2,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "cadena de sintagmas con 'sin' para negar una reaccion",
+    "veces": 2,
+    "caps": [
+      3
+    ]
+  },
+  {
+    "recurso": "simil introducido con 'como quien...'",
+    "veces": 1,
+    "caps": [
+      3
+    ]
+  },
+  {
+    "recurso": "el silencio descrito como peor que el ruido",
+    "veces": 1,
+    "caps": [
+      3
+    ]
+  }
+]

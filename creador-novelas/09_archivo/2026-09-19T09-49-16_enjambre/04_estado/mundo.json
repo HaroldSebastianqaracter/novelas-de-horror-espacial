@@ -1,0 +1,21 @@
+{
+  "reglas": [
+    "Los generadores del núcleo térmico son la única fuente de calor de Karn-9; los registros de mantenimiento marcan la hipotermia generalizada en menos de cuatro horas sin ellos.",
+    "Los conductos térmicos distribuyen el calor entre los módulos de la estación y son accesibles desde el interior mediante rejillas.",
+    "El protocolo técnico de Karn-9 exige mantener la calefacción de la enfermería y del módulo de comunicaciones por debajo de la del resto de la estación, por conservación de equipos.",
+    "El relevo más cercano registra un tiempo de llegada de seis días desde que se lo solicita."
+  ],
+  "objetos": [
+    "Rejillas de los conductos térmicos, aseguradas desde adentro",
+    "Generadores del núcleo térmico de Karn-9",
+    "Equipo de comunicaciones del módulo correspondiente",
+    "Registros de mantenimiento de los conductos"
+  ],
+  "linea_de_tiempo": [
+    "Antes del capítulo 1: los cinco operarios llevan meses en Karn-9 con rutina de mantenimiento y turnos de sueño corto.",
+    "Antes del capítulo 1: el registro de mantenimiento de Tomás anota una vibración distinta en un conducto térmico durante los días previos."
+  ],
+  "locaciones": {
+    "Estación Karn-9": "Estación de extracción sobre el hielo perpetuo de una luna sin nombre, con módulos conectados por conductos térmicos y una tripulación de cinco operarios."
+  }
+}

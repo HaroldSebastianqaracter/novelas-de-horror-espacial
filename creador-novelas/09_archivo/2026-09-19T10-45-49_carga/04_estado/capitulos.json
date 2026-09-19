@@ -1,0 +1,50 @@
+[
+  {
+    "num": 1,
+    "titulo": "Las bridas empujadas",
+    "objetivo_narrativo": "Establecer el Ámbar Tardío, la carga prohibida y el contrato firmado sin leer; Beni baja a revisar las amarras durante la corrección de rumbo y ve un contenedor abriéndose desde dentro. La tripulación decide sellar la bodega y repartir turnos de vigilia.",
+    "personajes": [
+      "Nadia Bregan",
+      "Beni Saad",
+      "Osmar Tiel",
+      "Lucía Ferrán",
+      "Kemal Ostrov",
+      "la presencia"
+    ],
+    "locacion": "bodega del Ámbar Tardío",
+    "informacion_nueva": "Hay dos escotillas entre la bodega y el resto de la nave: la de proa cierra, la de popa lleva siete meses en la lista de reparaciones pendientes. Lo que salió del contenedor tiene el tamaño de un hombre, respira y va empapado en un sellante lechoso que no se evapora.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "El ritmo de los relevos",
+    "objetivo_narrativo": "Ocho días de turnos sin un solo ataque. Osmar encuentra en el registro de presión que los golpes contra la escotilla de popa caen en el minuto muerto de cada relevo y se adelantan: la presencia aprendió el ritmo. La vigilia se revela como una cuenta atrás administrada por el otro lado.",
+    "personajes": [
+      "Osmar Tiel",
+      "Nadia Bregan",
+      "Kemal Ostrov",
+      "Lucía Ferrán",
+      "Beni Saad",
+      "la presencia"
+    ],
+    "locacion": "pasillo de las escotillas del Ámbar Tardío",
+    "informacion_nueva": "La presencia no intenta salir: mide cuánto tardan en darse cuenta. El sellante se adhiere a los mamparos y ya está en el aire reciclado.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "Quien paga el flete",
+    "objetivo_narrativo": "Kemal descubre que la corrección de rumbo estaba programada desde origen para esa coordenada exacta y Bregan encuentra en los anexos que el flete pagaba por la tripulación. Despresurizan la bodega: Lucía alcanza el panel manual mientras Beni sostiene con el cuerpo la escotilla de popa y se va al vacío con la carga.",
+    "personajes": [
+      "Nadia Bregan",
+      "Kemal Ostrov",
+      "Lucía Ferrán",
+      "Beni Saad",
+      "Osmar Tiel",
+      "la presencia"
+    ],
+    "locacion": "bodega del Ámbar Tardío",
+    "informacion_nueva": "El contenedor no falló: se abrió cuando le tocaba, y la tripulación es el experimento, no el transportista. El sellante era siembra, no residuo, y la presencia ya no está sola. Lucía da positivo, se encierra en la enfermería y pide que no la abran; la nave ejecuta sola una corrección de rumbo que nadie programó.",
+    "tension": 5
+  }
+]

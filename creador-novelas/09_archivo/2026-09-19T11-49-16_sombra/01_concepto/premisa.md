@@ -1,0 +1,5 @@
+Título: Los Tramos Sin Luz
+
+Logline: En una estación minera a oscuras, los cuatro trabajadores que quedan deben llegar a los generadores del nivel inferior antes de que la cosa que caza en los apagones reclame al resto.
+
+Premisa: En la estación minera Perséfone, aislada en el vacío, cinco trabajadores bastan para mantener el reactor y las cuadrillas de extracción funcionando hasta que algo empieza a cazar en los tramos donde la luz falla. Se ha llevado a uno de ellos ante los ojos de los demás, y desde entonces cada apagón del reactor amplía el territorio de la criatura, sector a sector, mientras los sistemas de energía ceden de forma inexplicable. Los generadores de reserva, la única esperanza de restaurar la luz y contener a la cosa, están en el nivel inferior de la estación, que ya quedó completamente a oscuras; para llegar hasta ellos, los cuatro supervivientes tendrán que atravesar el mismo territorio que reclamó a su compañero, sin saber si la amenaza se mueve por instinto, por hambre o por algo que entiende exactamente lo que están haciendo.

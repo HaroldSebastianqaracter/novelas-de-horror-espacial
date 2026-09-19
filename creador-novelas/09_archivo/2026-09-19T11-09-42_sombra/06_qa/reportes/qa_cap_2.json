@@ -1,0 +1,21 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cierre de frase con accion truncada hacia el silencio unida por 'y' ('y nadie le habia preguntado', 'y sono a lo que era'); acumula 5 apariciones en los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La linterna de Bram como foco emocional de la escena (apuntando a sus botas; apagada y vuelta a encender); acumula 4 apariciones en los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Conteo de luces, haces o sectores como medida del deterioro ('cuatro haces sueltos', 'Tres haces se volvieron', el gesto de contarlos); acumula 4 apariciones en los capitulos 1 y 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

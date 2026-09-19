@@ -1,0 +1,16 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Repeticion literal de un sintagma como enfasis: 'no dijo cuanto faltaba / sin decir cuanto faltaba', 'se hinchaba y se aflojaba, se hinchaba y se aflojaba', 'Ambar... Ambar', 'No traba... No traba del todo'. 4 apariciones acumuladas (caps: 1).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Imagen del sellante que respira, repetida como cierre de escena: el compas que Ibarra reconoce, 'la cosa que respiraba', 'el sellante seguia subiendo y bajando'. 3 apariciones acumuladas (caps: 1).",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

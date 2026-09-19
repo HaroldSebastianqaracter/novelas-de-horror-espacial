@@ -1,0 +1,1 @@
+Un carguero de cinco tripulantes transporta contenedores sellados que no debían abrirse. Uno ha reventado desde dentro durante la maniobra y en la bodega hay algo vivo del tamaño de un hombre, cubierto del sellante de la carga. La bodega comunica con el resto de la nave por dos escotillas y solo una cierra bien.

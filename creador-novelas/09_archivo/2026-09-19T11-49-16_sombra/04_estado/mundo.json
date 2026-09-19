@@ -1,0 +1,21 @@
+{
+  "reglas": [
+    "El reactor central de la estación Perséfone alimenta los sectores por turnos; un tropiezo en el suministro puede cortar la luz de un sector completo.",
+    "El soporte vital y la energía de emergencia de la estación dependen de generadores de reserva ubicados en el nivel inferior, que solo se activan de forma manual.",
+    "Las radios de comunicación de la tripulación quedan abiertas por defecto salvo que el operador las cierre a mano."
+  ],
+  "objetos": [
+    "La radio de Marsh Okonkwo, que sigue transmitiendo estática abierta tras su desaparición.",
+    "Las herramientas de mantenimiento de Marsh Okonkwo.",
+    "Los generadores de reserva del nivel inferior."
+  ],
+  "linea_de_tiempo": [
+    "Antes del capítulo 1: la estación Perséfone ya registró dos apagones breves en el sector C durante la semana.",
+    "Antes del capítulo 1: Marsh Okonkwo tenía asignado el relevo del turno de comunicaciones de Vela Ostrowski esa noche."
+  ],
+  "locaciones": {
+    "Sector C": "Sector de la estación Perséfone donde ocurren los apagones; tiene un conducto de mantenimiento que se pierde en la oscuridad.",
+    "Sala de Control": "Centro desde donde Denny e Iris siguen los diagnósticos de energía y revisan los registros de los apagones.",
+    "Nivel Inferior": "Nivel más profundo de la estación, donde están los generadores de reserva; lleva días completamente a oscuras."
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "reglas": [
+    "El Ámbar Tardío es un carguero de travesía larga: soporte vital de circuito cerrado, un solo bucle de aire reciclado que pasa por todos los compartimentos, incluida la bodega.",
+    "Afuera hay vacío: sin traje, la exposición mata en segundos, y la nave está a semanas de cualquier puerto habitado.",
+    "La comunicación con el armador viaja con retraso de horas y queda registrada; una petición de puerto de emergencia tiene que justificarse por escrito.",
+    "La nave anota sola, sin que nadie se lo pida, un registro continuo de presión, consumo y maniobras que cualquiera de a bordo puede consultar.",
+    "El manifiesto de la carga viene cifrado desde origen y la tripulación tiene contractualmente prohibido inventariar la bodega.",
+    "Las correcciones de rumbo programadas desde origen se ejecutan solas y duran minutos; el protocolo de a bordo no obliga a anotarlas.",
+    "La tripulación es de cinco personas y no hay relevo: cada turno de vigilia sale de las mismas cinco.",
+    "La compuerta de estiba solo puede abrirse al vacío desde un panel manual situado al otro lado de la escotilla de popa."
+  ],
+  "objetos": [
+    "Contenedores sellados en origen con bridas que solo pueden cortarse desde fuera.",
+    "Sellante lechoso en el que viene envasada la carga: no se evapora, se adhiere a los mamparos.",
+    "Escotilla de proa: cierra bien y aísla la bodega del resto del carguero.",
+    "Escotilla de popa: junta defectuosa, en la lista de reparaciones pendientes desde hace siete meses.",
+    "Registro de presión del sistema de a bordo, con marca horaria de cada golpe y cada variación.",
+    "Contrato de flete con anexos que Bregan firmó sin leer.",
+    "Panel manual de la compuerta de estiba, en el interior de la bodega.",
+    "Instrumental médico básico de la enfermería, sin capacidad de análisis biológico fino."
+  ],
+  "linea_de_tiempo": [
+    "Origen: se carga la bodega con los contenedores sellados y se firma el contrato de flete con sus anexos.",
+    "Once semanas de travesía sin incidentes registrados.",
+    "Corrección de rumbo programada desde origen, en el punto donde arranca el capítulo 1."
+  ],
+  "locaciones": {
+    "bodega del Ámbar Tardío": "Nave de carga refrigerada y a media luz, con los contenedores amarrados en hileras y las bridas tensadas. Huele a sellante. Tiene dos salidas al resto del carguero, proa y popa, y la compuerta de estiba al vacío con su panel manual.",
+    "pasillo de las escotillas del Ámbar Tardío": "Tramo estrecho entre las dos escotillas que aíslan la bodega, con las tuberías del reciclado a la vista y un banco corrido donde se hacen los relevos de vigilia. Se oye todo lo que golpea el metal."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Repeticion literal de un sintagma como enfasis: en el cap. 2 'Tiene fibra. Tiene riego.', 'Nos pagaron de mas. Mucho de mas.', 'de dejarlos asi, de dejarlos justo asi', 'Limados. No gastados. Limados.' Acumulado 8 apariciones en los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura 'No es X. Es Y.': en el cap. 2 'No es embalaje... Tiene fibra.', 'Limados. No gastados.', 'iba a salir alguien, no algo.' Acumulado 3 apariciones en los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La imagen del sellante o la criatura que respira: en el cap. 2 'Nadie respiraba fuerte salvo lo que habia al fondo.' Acumulado 4 apariciones en los capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Simil introducido con 'como': en el cap. 2 'como si soltarla fuera peor.' Acumulado 3 apariciones en los capitulos 1 y 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

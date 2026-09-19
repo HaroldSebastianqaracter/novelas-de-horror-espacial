@@ -1,0 +1,45 @@
+{
+  "Yara Voss": {
+    "estado_fisico": "Sana, sin síntomas.",
+    "estado_psicologico": "Ejecutó el triaje y calla ante el personal de puerto lo que sabe del aire.",
+    "secretos_que_conoce": [
+      "Sabe que el aislamiento no separa el aire del sector médico del resto de la nave.",
+      "Sabe que las muestras de aire del sector médico y del puente son indistinguibles.",
+      "Sabe que el aire de la nave sigue contaminado tras la purga y la llegada a puerto.",
+      "Sabe que el aire de la nave sigue contaminado después de la purga y de la llegada a puerto."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Toma Ilić": {
+    "estado_fisico": "Muerto tras la purga, cubierto en el sector médico.",
+    "estado_psicologico": "Murió consciente, acompañado por Yara Voss.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Dov Kessler": {
+    "estado_fisico": "Muerto poco después de forzar la purga, cubierto en el sector médico.",
+    "estado_psicologico": "Murió asumiendo el precio de la purga que él mismo abrió.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Reiko Alma": {
+    "estado_fisico": "Sana.",
+    "estado_psicologico": "Cedió la decisión final a Yara Voss y declaró que la acataba.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Sena Okafor": {
+    "estado_fisico": "Con el movimiento bajo la piel del antebrazo; lleva puesto un sello estanco.",
+    "estado_psicologico": "Rendida a la evidencia de su contagio; acepta pilotar la aproximación sin discutir.",
+    "secretos_que_conoce": [
+      "Sabe que el sello que lleva solo le da horas de ventaja.",
+      "Sabe que el sello estanco solo le da horas de ventaja."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "El sellante rasgado",
+    "objetivo_narrativo": "Establecer el atraque fallido del Deriva Cuarta y la ruptura del contenedor prohibido, revelando que la bodega alberga algo vivo y que una de sus dos escotillas ya no cierra del todo.",
+    "personajes": [
+      "Yenner",
+      "Ibarra",
+      "Ossman",
+      "Sarn",
+      "Calloway"
+    ],
+    "locacion": "bodega de carga",
+    "informacion_nueva": "Un contenedor sellado se abre desde dentro durante el atraque y deja en la bodega algo del tamaño de un hombre, cubierto de sellante viscoso, que respira; la escotilla de proa, que Ossman debía reparar, no traba del todo, dejando solo la de popa operativa.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "Los pernos limados",
+    "objetivo_narrativo": "Descubrir que el sellante es tejido vivo del propio pasajero, que la ruta fue pagada para que la tripulación desapareciera en tránsito, y que el fallo de la escotilla de proa fue sabotaje deliberado.",
+    "personajes": [
+      "Yenner",
+      "Ibarra",
+      "Ossman",
+      "Sarn",
+      "Calloway"
+    ],
+    "locacion": "bodega de carga",
+    "informacion_nueva": "El sellante extraído por Calloway es tejido vivo; los manifiestos que revisa Ibarra muestran un sobrepago de un remitente que quería la carga perdida en tránsito; Sarn encuentra los pernos de la escotilla de proa limados a propósito, y Ossman confiesa que fue orden de Yenner, sobornada para dejar esa salida abierta.",
+    "tension": 4
+  },
+  {
+    "num": 3,
+    "titulo": "La purga térmica",
+    "objetivo_narrativo": "Resolver el enfrentamiento: sellar ambas escotillas, atraer a la criatura hacia la purga térmica y expulsarla al vacío, al costo de la vida de Yenner y de la carga que pagaría la deuda del viaje.",
+    "personajes": [
+      "Yenner",
+      "Ibarra",
+      "Ossman",
+      "Sarn",
+      "Calloway"
+    ],
+    "locacion": "bodega de carga",
+    "informacion_nueva": "El tejido del sellante se alimenta de calor y puede atraerse hacia un conducto de purga térmica; Yenner muere trabando los pernos de la escotilla de proa que ella misma había dejado saboteada; la criatura es expulsada al vacío junto con la carga, y el Deriva Cuarta llega a destino con cuatro tripulantes y sin la paga de la deuda.",
+    "tension": 5
+  }
+]

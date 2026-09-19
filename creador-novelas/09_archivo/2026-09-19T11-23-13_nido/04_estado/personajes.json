@@ -1,0 +1,48 @@
+{
+  "Reyes": {
+    "estado_fisico": "sana",
+    "estado_psicologico": "resuelta y seca; asume la pérdida de la carga como precio del mando",
+    "secretos_que_conoce": [
+      "Sabe que el sellado del tanque se activó una vez sin operador registrado.",
+      "Sabe que el cierre manual del tanque fue preparado por alguien antes de la maniobra."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Okafor": {
+    "estado_fisico": "sana",
+    "estado_psicologico": "resignada tras perder la purga que defendía; sostuvo el contacto del cierre",
+    "secretos_que_conoce": [
+      "Sabe que el sellado del tanque se activó una vez sin operador registrado."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Vance": {
+    "estado_fisico": "sano",
+    "estado_psicologico": "metódico hasta el final; consciente de que solo compró tiempo",
+    "secretos_que_conoce": [
+      "ninguno registrado"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Sol": {
+    "estado_fisico": "sano, empapado y con temblor en las manos",
+    "estado_psicologico": "conmocionado por ver movimiento dentro de las vainas",
+    "secretos_que_conoce": [
+      "Sabe que la pletina del cierre manual fue limpiada recientemente por alguien."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Ibarra": {
+    "estado_fisico": "sana, con guantes hasta media antebrazo",
+    "estado_psicologico": "decidida; actúa sin repasar protocolos por primera vez",
+    "secretos_que_conoce": [
+      "Sabe por experiencia directa que la presencia se orienta hacia el calor de la piel expuesta."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

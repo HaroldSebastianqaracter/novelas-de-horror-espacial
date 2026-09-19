@@ -1,0 +1,170 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los registros de mantenimiento de Karn-9 fijan en menos de cuatro horas el tiempo hasta la hipotermia generalizada si se apagan los generadores del núcleo térmico.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La solicitud de relevo más cercana registra un tiempo de llegada de seis días desde que se envía.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El protocolo técnico de Karn-9 exige mantener la enfermería y el módulo de comunicaciones a menor temperatura que el resto de la estación, por conservación de equipos.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tomás Auer",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "El registro de mantenimiento de Tomás anota, en los días previos al capítulo 1, una vibración distinta en uno de los conductos térmicos.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dov Reyes",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "El registro de rotaciones de Karn-9 marca a Dov en su segunda rotación en la estación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dov Reyes",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dov fue mordido en el antebrazo por una criatura la primera noche, con dos marcas paralelas limpias que Lena vendó.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Estación Karn-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La rejilla del conducto térmico del ramal este apareció arrancada desde el interior, con los tornillos puestos y un charco de escarcha derretida debajo.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las criaturas de los conductos son del tamaño de una mano, translúcidas, y corrigen su rumbo para avanzar hacia las fuentes de calor.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ibrahim Sosa",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ibrahim mató con la bota a la primera criatura vista dentro de la estación.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las criaturas no entran en la enfermería ni en el módulo de comunicaciones, los dos únicos sectores mantenidos cuatro grados por debajo del resto de Karn-9.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dov Reyes",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "El tejido de la mordida de Dov está caliente en el centro y frío en el borde, y una línea pálida avanza por su antebrazo.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Lena concluye que el calor no atrae a las criaturas sino que las orienta hacia algo que la mordida dejó dentro de Dov.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Estación Karn-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Mara dividió Karn-9 en cinco bloques para bajarlos cuatro grados por turnos, rotando al personal cada dos horas fuera del sector enfriado.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ibrahim Sosa",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ibrahim murió sellando a mano los pernos de la compuerta exterior del núcleo térmico y su traje quedó contra esa compuerta.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Estación Karn-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Los generadores del núcleo térmico de Karn-9 fueron apagados por completo y la estación quedó helada y en silencio.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Dov Reyes",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dov mantenía treinta y un grados de temperatura corporal sin temblar y las rejillas se abrían a su paso.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Dov Reyes",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dov desapareció por una rejilla abierta hacia el hielo exterior, dejando una hilera de huellas regulares que se alejaban.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Ibrahim Sosa",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ibrahim murió en el ramal inferior tras cerrar a mano la compuerta exterior del núcleo, y su traje quedó de pie contra el acero.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Estación Karn-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Los generadores del núcleo de Karn-9 quedaron apagados por completo y la estación descendió a cuarenta grados bajo cero.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los trajes de superficie de Karn-9 tienen batería térmica propia que permite sobrevivir dentro de la estación sin calefacción durante unas horas.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dov Reyes",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dov salió de Karn-9 por una rejilla del ramal este y se alejó caminando por el hielo exterior.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

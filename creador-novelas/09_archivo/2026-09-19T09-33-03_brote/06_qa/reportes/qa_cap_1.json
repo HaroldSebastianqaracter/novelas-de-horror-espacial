@@ -1,0 +1,16 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion negativa en serie como cierre de frase ('sin fiebre, sin el olor que habria esperado'; 'No tenia herida. No tenia nada'; 'sin numeros que ensenar, sin nombre para lo que habia palpado'). 3 apariciones acumuladas, capitulos: [1].",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El gesto de apoyar o levantar los dedos sobre la piel como unidad de suspense ('apoyo dos dedos junto al borde de la herida'; 'Levanto los dedos. Volvio a apoyarlos'; 'le apoyo los dedos bajo el codo'). 3 apariciones acumuladas, capitulos: [1].",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

@@ -1,0 +1,16 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "El conducto o rejilla de ventilacion como via y amenaza de la criatura: 3 apariciones acumuladas (capitulos 1 y 2); en el capitulo 2 sostiene toda la escena de contencion (ramales seis y nueve, ruidos en los conductos).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Reaccion de un personaje descrita por lo que calla o por lo que tarda en decir: 5 apariciones acumuladas (capitulos 1 y 2); en el capitulo 2 se repite tres veces en la misma escena del puente.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

@@ -1,0 +1,39 @@
+{
+  "Vela Ostrowski": {
+    "estado_fisico": "Sana, exhausta tras el descenso y el arranque manual.",
+    "estado_psicologico": "Endurecida; es la única que vio de cerca en qué se convirtió Marsh Okonkwo.",
+    "secretos_que_conoce": [
+      "Sabe que la criatura conserva el uniforme de comunicaciones de Marsh Okonkwo con su apellido cosido."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Denny Ashworth": {
+    "estado_fisico": "Muerto en el umbral de la escotilla de los generadores del Nivel Inferior.",
+    "estado_psicologico": "No aplica.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Iris Kanoa": {
+    "estado_fisico": "Manos y hombro forzados por las palancas del arranque manual.",
+    "estado_psicologico": "Conmocionada por la muerte de Denny Ashworth; sostenida por haber conseguido la luz.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Tobías Reyes": {
+    "estado_fisico": "Herido en una pierna, cojea, tras atraer al ataque por el conducto opuesto.",
+    "estado_psicologico": "Sin miedo que perder; sereno y ausente.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Marsh Okonkwo": {
+    "estado_fisico": "Transformado en una criatura de miembros largos y articulaciones equivocadas, con piel pálida; huye de la luz.",
+    "estado_psicologico": "Sin rastro reconocible de conciencia humana.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

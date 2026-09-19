@@ -1,0 +1,22 @@
+{
+  "reglas": [
+    "El contrato de transporte del Deriva Cuarta prohíbe abrir, escanear o preguntar por los contenedores sellados de esta carga.",
+    "El manifiesto oficial de la nave clasifica el sellante de embalaje de estos contenedores como material inerte de protección.",
+    "La bodega de carga tiene dos escotillas de acceso independientes, una de proa y otra de popa, cada una con su propio mecanismo de traba."
+  ],
+  "objetos": [
+    "contenedores sellados de la carga bajo cláusula de no apertura",
+    "sellante viscoso de embalaje",
+    "escotilla de proa de la bodega de carga",
+    "escotilla de popa de la bodega de carga",
+    "conducto de purga térmica de la bodega de carga"
+  ],
+  "linea_de_tiempo": [
+    "Antes del despegue: el Deriva Cuarta acepta un contrato de transporte de contenedores sellados con la cláusula de no abrirlos, no escanearlos ni preguntar por ellos.",
+    "Durante los meses de tránsito: la tripulación transporta la carga sin incidentes registrados, cumpliendo la cláusula del contrato.",
+    "Poco antes del capítulo 1: el Deriva Cuarta inicia la maniobra de atraque en la estación Punta Escoria con varias correcciones de rumbo por fallos en los propulsores de maniobra."
+  ],
+  "locaciones": {
+    "bodega de carga": "Compartimento de carga del Deriva Cuarta donde se almacenan los contenedores sellados de la travesía; tiene dos escotillas de acceso, una de proa y otra de popa, y un conducto de purga térmica."
+  }
+}

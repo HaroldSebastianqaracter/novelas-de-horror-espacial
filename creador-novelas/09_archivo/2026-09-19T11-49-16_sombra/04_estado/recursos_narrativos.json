@@ -1,0 +1,80 @@
+[
+  {
+    "recurso": "la duración en segundos del apagón como medida creciente de la amenaza",
+    "apariciones": {
+      "1": 2
+    }
+  },
+  {
+    "recurso": "el cuaderno de fallos de Iris como archivo de lo que los sistemas no ven",
+    "apariciones": {
+      "1": 2
+    }
+  },
+  {
+    "recurso": "Denny desestima los diagnósticos automáticos con una réplica seca",
+    "apariciones": {
+      "1": 2
+    }
+  },
+  {
+    "recurso": "objeto dejado con cuidado y orden por la criatura (rejilla apoyada)",
+    "apariciones": {
+      "1": 1
+    }
+  },
+  {
+    "recurso": "la radio abierta transmitiendo estática en ausencia de su dueño",
+    "apariciones": {
+      "1": 1
+    }
+  },
+  {
+    "recurso": "objeto dejado con cuidado y orden por la criatura (herramientas alineadas)",
+    "apariciones": {
+      "2": 1
+    }
+  },
+  {
+    "recurso": "la planta de la estación con zonas muertas en gris como mapa de la amenaza",
+    "apariciones": {
+      "2": 2
+    }
+  },
+  {
+    "recurso": "Denny defiende una explicación mecánica y se le desarma",
+    "apariciones": {
+      "2": 1
+    }
+  },
+  {
+    "recurso": "el residuo pálido en el pulgar de Denny que no se va",
+    "apariciones": {
+      "2": 1
+    }
+  },
+  {
+    "recurso": "objeto dejado con cuidado y orden por la criatura (rejillas alineadas contra el mamparo)",
+    "apariciones": {
+      "3": 1
+    }
+  },
+  {
+    "recurso": "el eco retardado del pasillo como presencia que repite las voces",
+    "apariciones": {
+      "3": 1
+    }
+  },
+  {
+    "recurso": "la luz blanca como revelación sin misericordia",
+    "apariciones": {
+      "3": 1
+    }
+  },
+  {
+    "recurso": "el frío del metal medido en el cuerpo antes que en el instrumento",
+    "apariciones": {
+      "3": 1
+    }
+  }
+]

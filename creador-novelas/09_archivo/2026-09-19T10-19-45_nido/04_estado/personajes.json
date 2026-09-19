@@ -1,0 +1,94 @@
+{
+  "Marisa Ocaña": {
+    "estado_fisico": "Íntegra; mano sobre el mando de la escotilla.",
+    "estado_psicologico": "Afronta decisiones morales sobre racionamientos. Ordena esperar en lugar de ejecutar inmediatamente. Registra eventos sin comentarios audibles. Al final, su mano está sobre el mando, escuchando a Varga desde popa.",
+    "secretos_que_conoce": [
+      "Aceptó esta ruta por dinero y sin leer del todo el contrato de la carga.",
+      "La caída de presión en el tanque es progresiva y múltiple, no un fallo puntual.",
+      "El tanque contiene vainas vivas que han eclosionado desde dentro.",
+      "Sus llamadas de distress no reciben acuse de recibo.",
+      "Sabe que la tripulación ha sido dejada a elegir entre morir de sed o abandonar la nave; firma falsamente que solo dos están en el puente.",
+      "Sabe que Varga sobrevivió seis días sin agua ni comida en popa.",
+      "Permitió que se ejecutara la incineración del tanque (cuyo resultado presenciaba como siseo de proa).",
+      "Firmó una declaración de puerto falsa: carga completa, doce millones íntegros y limpio, dos personas a bordo."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Teo Brandt": {
+    "estado_fisico": "Manos sucias de la consola local.",
+    "estado_psicologico": "Directo y ejecutor del plan de sacrificio.",
+    "secretos_que_conoce": [
+      "Ha hecho reparaciones no registradas en líneas secundarias para no discutir con carga.",
+      "Las vainas correosas están vivas, tersas, tibias, muchas rotas desde dentro.",
+      "Lo que eclosionó ha salido del tanque.",
+      "Ejecutó la purga de la línea del tanque grande por orden de la nave",
+      "La nave le mostró una obstrucción que no existía",
+      "Sabe que Nuno ya no bebe del suministro principal; que abrir proa al vacío incinerará el tanque."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Ilse Varga": {
+    "estado_fisico": "Labios partidos antes de renunciar a su ración. Tras seis días sin agua ni comida en popa, vuelve sin ronquera, sin sequedad aparente, sin prisa en la voz.",
+    "estado_psicologico": "Renunció voluntariamente a su ración de agua del principal. Se aisló consciente en popa. Tras la privación extrema, mantiene lucidez y habla como quien tiene toda la ruta por delante.",
+    "secretos_que_conoce": [
+      "Aceptó el contrato por una deuda profesional que prefiere no explicar.",
+      "El aire de los compartimentos huele distinto.",
+      "El filtro de ventilación contiene tejido vivo que se alimenta del calor y la humedad de la nave.",
+      "Las vainas eran despensa guardada contra el acero, no depósito de huevos",
+      "El tejido se instaló como quien ocupa un espacio previsto",
+      "El agua informa a través de consumo y devolución, tomando nota litro a litro",
+      "Abrego ha estado entregándose al sistema durante 11 semanas",
+      "Bebe solo del circuito de recirculación; sabe que hay dos raciones enteras del principal sin tocar.",
+      "Bebe solo del circuito de recirculación de la nave.",
+      "Sabe que transcurrieron seis días y llegaron a puerto.",
+      "Conoce el resultado del siseo de proa."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Nuno Abrego": {
+    "estado_fisico": "En el tanque, rechazando auxilios. Tras el siseo de proa (incineración del tanque), desaparece del registro como superviviente.",
+    "estado_psicologico": "No acepta nada de los auxiliares.",
+    "secretos_que_conoce": [
+      "Lleva semanas bajando al nivel de bombas fuera de turno solo por no estar solo en su litera.",
+      "El tanque no contiene metal, sino hileras de vainas que suben más allá del alcance del haz de linterna.",
+      "Doce millones de litros contaminados.",
+      "Necesita agua del tanque grande, no la cantimplora estándar",
+      "Ha estado bebiendo del sistema durante 11 semanas, entregándose litro a litro"
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Petra Sandoval": {
+    "estado_fisico": "Aparentemente íntegra; sostiene la planilla sin soltarla.",
+    "estado_psicologico": "Determinada y calculadora; verifica cuatro veces los números que determinan quién vive y quién muere.",
+    "secretos_que_conoce": [
+      "Ha firmado curvas de consumo que no terminaba de entender, y lo ha dejado pasar.",
+      "La curva de presión venía bajando en escalones que ella misma había firmado sin detenerla.",
+      "Los depósitos auxiliares proveen solo tres días de oxígeno para cinco personas.",
+      "Solo dos auxiliares dan para que dos personas lleguen al día nueve."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "la presencia en los conductos": {
+    "estado_fisico": "Tejido vivo repartido por la ventilación y las líneas de recirculación de la Hebe, alimentándose del calor y la humedad del sistema.",
+    "estado_psicologico": "No tiene voluntad reconocible como humana: aprende por el agua que la cuadrilla bebe y devuelve. Paciente, sin prisa, a nueve días de puerto.",
+    "secretos_que_conoce": [
+      "Conoce el consumo, los turnos y los hábitos de los cinco desde antes de que ninguno sospechara nada."
+    ],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  },
+  "la Hebe": {
+    "estado_fisico": "Carguero cisterna de ruta comercial, once semanas de travesía, doce millones de litros en el tanque principal y depósitos auxiliares aparte; conductos tibios y recirculación constante.",
+    "estado_psicologico": "Se comporta como una nave vieja y previsible, y esa previsibilidad es lo que la cuadrilla llama confianza.",
+    "secretos_que_conoce": [
+      "Sus lecturas y avisos son lo único que la cuadrilla tiene para saber qué ocurre dentro de ella."
+    ],
+    "ultima_aparicion": 0,
+    "posicion": ""
+  }
+}

@@ -1,0 +1,146 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El contrato de transporte del Deriva Cuarta prohíbe abrir, escanear o preguntar por los contenedores sellados de esta carga.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El manifiesto oficial de la nave clasifica el sellante de embalaje de estos contenedores como material inerte de protección.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los registros de mantenimiento del Deriva Cuarta no recogen ninguna reparación completada en la escotilla de proa de la bodega de carga.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Ossman",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Ossman tiene asignada la reparación pendiente de la escotilla de proa de la bodega de carga.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Yenner",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Yenner es la capitana del Deriva Cuarta y la responsable última de autorizar cualquier comunicación oficial con estaciones externas.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "bodega de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La bodega de carga es el único compartimento del Deriva Cuarta habilitado para almacenar los contenedores sellados de esta travesía.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "bodega de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Durante el atraque en Punta Escoria, un contenedor sellado del fondo de la bodega se abrió desde dentro y dejó sobre la rejilla un cuerpo del tamaño de un hombre cubierto de sellante que respira.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "bodega de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La escotilla de proa de la bodega de carga no llega a trabar y su indicador queda en ámbar; solo la escotilla de popa cierra correctamente.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Calloway",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Calloway declaró el aislamiento preventivo de la bodega de carga y prohibió bajar o tocar nada.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La estación Punta Escoria respondió a la llamada del Deriva Cuarta pidiendo el número de contrato y después dejó de contestar.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El sellante de los contenedores es tejido vivo del pasajero no declarado y se desplaza por sí solo hacia las fuentes de calor.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El flete del Deriva Cuarta se pagó por adelantado muy por encima del precio de mercado y el remitente canceló todo contacto desde la hora del despegue.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "bodega de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Los pernos de traba de la escotilla de proa de la bodega fueron limados a mano en puerto, antes de cargar.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "bodega de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El cuerpo cubierto de sellante abandonó la rejilla del fondo de la bodega y su paradero dentro del compartimento es desconocido.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Yenner",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Yenner murió en el umbral de proa de la bodega, alcanzada por la criatura justo después de trabar los pernos nuevos.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "bodega de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La bodega de carga fue vaciada por la purga térmica: la criatura y todos los contenedores sellados salieron al vacío.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "bodega de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La escotilla de proa de la bodega quedó trabada con pernos nuevos y su indicador en verde.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El Deriva Cuarta llegó a destino con cuatro tripulantes, sin carga que entregar y sin cobrar la paga que cubría la deuda del viaje.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

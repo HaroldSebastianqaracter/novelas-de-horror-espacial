@@ -1,0 +1,1 @@
+En una estación minera con cinco trabajadores, algo caza en los tramos sin luz: se ha llevado a uno y han visto cómo lo hacía. El reactor está perdiendo potencia por sectores y cada apagón amplía el territorio de la cosa. Los generadores de reserva están en el nivel inferior, que ya está a oscuras.

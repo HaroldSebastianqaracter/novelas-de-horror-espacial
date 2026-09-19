@@ -1,7 +1,7 @@
 ---
 name: corte-qa
 description: Fase 7 (RF-07.1 a RF-07.5) fuera de cadencia, sobre el último capítulo cerrado. Invoca al subagente qa y cierra el corte con el CLI.
-allowed-tools: Read, Agent, Bash(.venv/Scripts/python.exe -m app:*)
+allowed-tools: Read, Write, Agent, Bash(.venv/Scripts/python.exe -m app:*)
 disable-model-invocation: true
 ---
 

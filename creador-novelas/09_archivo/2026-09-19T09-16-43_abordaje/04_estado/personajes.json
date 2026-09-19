@@ -1,0 +1,39 @@
+{
+  "Ilsa Byrne": {
+    "estado_fisico": "Sana, sin heridas.",
+    "estado_psicologico": "Aliviada sin consuelo; asume que la desconfianza entre los cuatro no se repara.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Priya Voss": {
+    "estado_fisico": "Sana, sin heridas.",
+    "estado_psicologico": "Agotada; su trampa funcionó y no siente victoria.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Dante Ashworth": {
+    "estado_fisico": "Sano, sin heridas.",
+    "estado_psicologico": "Avergonzado de su acusación; incapaz de sostener la mirada de Kass.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Elena Kass": {
+    "estado_fisico": "Malherida: herida abierta desde el hombro hasta la cadera por el zarpazo de la criatura.",
+    "estado_psicologico": "Consciente y serena; sostuvo la puerta sabiendo el costo.",
+    "secretos_que_conoce": [
+      "Días antes del ataque a Sorrentino, reportó ruidos extraños en los conductos de ventilación sin que nadie los investigara."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Mikel Sorrentino": {
+    "estado_fisico": "Muerto, despedazado en la esclusa de carga.",
+    "estado_psicologico": "Sin estado: fallecido.",
+    "secretos_que_conoce": [],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  }
+}

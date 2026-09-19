@@ -1,0 +1,57 @@
+[
+  {
+    "recurso": "cierre de frase con accion truncada hacia el silencio unida por 'y' ('y siguio', 'y volvio a callarse', 'y la dejo morir')",
+    "veces": 6,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "la linterna de Bram como foco emocional de la escena",
+    "veces": 5,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "papeles (partes, esquema, diario) extendidos, alineados u ordenados con cuidado",
+    "veces": 2,
+    "caps": [
+      1
+    ]
+  },
+  {
+    "recurso": "conteo de luces o sectores como medida del deterioro",
+    "veces": 5,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "restos u objetos dispuestos con orden deliberado como signo inquietante",
+    "veces": 1,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "inventario de ruidos de la estacion (bombas, metal que se ajusta, goteo)",
+    "veces": 1,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "cifras y plazos enunciados en voz alta como medida del tiempo restante (noventa segundos, noventa dias, ochenta y cinco)",
+    "veces": 2,
+    "caps": [
+      3
+    ]
+  }
+]

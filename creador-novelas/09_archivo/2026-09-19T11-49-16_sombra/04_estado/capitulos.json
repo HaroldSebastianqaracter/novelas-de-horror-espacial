@@ -1,0 +1,45 @@
+[
+  {
+    "num": 1,
+    "titulo": "El tercer apagón",
+    "objetivo_narrativo": "Establecer la rutina de la tripulación de la estación Perséfone y mostrar cómo el apagón del sector C se lleva a Marsh sin dejar rastro salvo su radio abierta.",
+    "personajes": [
+      "Vela Ostrowski",
+      "Denny Ashworth",
+      "Iris Kanoa",
+      "Tobías Reyes",
+      "Marsh Okonkwo"
+    ],
+    "locacion": "Sector C",
+    "informacion_nueva": "Marsh desaparece durante el apagón; solo queda su radio abierta transmitiendo estática y una marca húmeda que se pierde hacia un conducto de mantenimiento.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "Lo que dejó ordenado",
+    "objetivo_narrativo": "Denny e Iris confirman que los apagones se expanden sector a sector desde el turno en que desapareció Marsh; Tobías halla sus herramientas ordenadas a propósito, y Vela decide que la única salida es bajar a los generadores del nivel inferior.",
+    "personajes": [
+      "Vela Ostrowski",
+      "Denny Ashworth",
+      "Iris Kanoa",
+      "Tobías Reyes"
+    ],
+    "locacion": "Sala de Control",
+    "informacion_nueva": "Los cortes de energía avanzan sector a sector empujados desde dentro de los conductos y comenzaron exactamente con la desaparición de Marsh; los generadores de reserva del nivel inferior son la única forma de recuperar la estación.",
+    "tension": 4
+  },
+  {
+    "num": 3,
+    "titulo": "Lo que quedó de Marsh",
+    "objetivo_narrativo": "Los cuatro atraviesan el nivel inferior a oscuras hasta los generadores: Denny cae defendiendo la escotilla, Iris fuerza el arranque manual y Tobías atrae el ataque hacia el conducto opuesto, hasta que la luz vuelve y Vela ve con claridad en qué se convirtió Marsh.",
+    "personajes": [
+      "Vela Ostrowski",
+      "Denny Ashworth",
+      "Iris Kanoa",
+      "Tobías Reyes"
+    ],
+    "locacion": "Nivel Inferior",
+    "informacion_nueva": "La luz revela en qué se convirtió Marsh; Denny muere conteniendo el ataque; los generadores vuelven a funcionar y la estación queda contenida por ahora.",
+    "tension": 5
+  }
+]

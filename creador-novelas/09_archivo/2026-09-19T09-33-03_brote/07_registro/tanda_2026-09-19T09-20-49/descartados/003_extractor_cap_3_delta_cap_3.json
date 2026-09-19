@@ -1,0 +1,52 @@
+{
+  "personajes": {
+    "Sena Okafor": {
+      "estado_fisico": "Con el movimiento bajo la piel del antebrazo, sellada y consciente.",
+      "estado_psicologico": "Rendida a la evidencia de su propio contagio; acepta pilotar la aproximación.",
+      "secretos_que_conoce": ["Sabe que el sello que lleva solo le da horas de ventaja."],
+      "posicion": "Puente de mando, al mando de la aproximación a puerto",
+      "ultima_aparicion": 3
+    },
+    "Toma Ilić": {
+      "estado_fisico": "Muerto tras la purga, cubierto en el sector médico.",
+      "estado_psicologico": "Murió consciente, sostenido por Yara Voss.",
+      "secretos_que_conoce": [],
+      "posicion": "Sector médico, cubierto",
+      "ultima_aparicion": 3
+    },
+    "Dov Kessler": {
+      "estado_fisico": "Muerto tras forzar la purga, cubierto en el sector médico.",
+      "estado_psicologico": "Murió asumiendo la responsabilidad por la carga sin revisar.",
+      "secretos_que_conoce": [],
+      "posicion": "Sector médico, cubierto",
+      "ultima_aparicion": 3
+    },
+    "Yara Voss": {
+      "estado_fisico": "Sana, sin síntomas.",
+      "estado_psicologico": "Ejecutó el triaje y sabe que lo que subió a bordo sigue en los conductos.",
+      "secretos_que_conoce": ["Sabe que el aire de la nave sigue contaminado tras la purga y la llegada a puerto."],
+      "posicion": "Puerto de destino, cruzando el umbral de salida de la nave",
+      "ultima_aparicion": 3
+    },
+    "Reiko Alma": {
+      "estado_fisico": "Sana.",
+      "estado_psicologico": "Cedió la decisión final a Yara Voss y la aceptó sin discutirla.",
+      "secretos_que_conoce": [],
+      "posicion": "Sector médico, tras aceptar el triaje",
+      "ultima_aparicion": 3
+    }
+  },
+  "hechos_nuevos": [
+    { "sujeto": "Sena Okafor", "categoria": "personaje", "hecho": "Sena Okafor presenta en el antebrazo el mismo movimiento bajo la piel que Toma Ilić.", "cap_origen": 3 },
+    { "sujeto": "mundo", "categoria": "mundo", "hecho": "Dov Kessler abrió el ciclo tres a vacío parcial durante veinte segundos para barrer el aire recirculado.", "cap_origen": 3 },
+    { "sujeto": "mundo", "categoria": "mundo", "hecho": "La Deméter Once llegó a su puerto de destino con dos tripulantes muertos, Toma Ilić y Dov Kessler.", "cap_origen": 3 },
+    { "sujeto": "Sector médico", "categoria": "locacion", "hecho": "Los conductos del sector médico siguen contaminados después de la purga y de la llegada a puerto.", "cap_origen": 3 }
+  ],
+  "resumen_corto": "Sena se descubre el antebrazo ante Yara y muestra el mismo movimiento bajo la piel que Toma.\nDov abre el ciclo tres a vacío parcial veinte segundos: limpia el aire recirculado y acelera lo que ya crece dentro de los infectados.\nYara ejecuta el triaje: sella a Sena y la manda al puente, acompaña a Toma hasta el final y deja a Dov tras la escotilla.\nReiko cede la decisión y la acata.\nLa nave entra en puerto con dos cuerpos cubiertos y los conductos todavía respirando.",
+  "recursos_narrativos": [
+    { "recurso": "la purga como tirón de presión en los oídos", "veces": 1 },
+    { "recurso": "el movimiento bajo la piel comparado con un animal en el agua", "veces": 1 },
+    { "recurso": "el triaje dicho en voz alta como lista de nombres", "veces": 1 },
+    { "recurso": "los conductos que respiran como cierre tras la tensión", "veces": 1 }
+  ]
+}

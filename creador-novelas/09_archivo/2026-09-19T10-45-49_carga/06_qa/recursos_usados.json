@@ -1,0 +1,82 @@
+[
+  {
+    "recurso": "cierre de parrafo con subordinada de relativo en negativo ('que nunca termina de enfriarse', 'que no ha probado', 'que ninguno de ellos supo interpretar')",
+    "veces": 7,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "simil introducido con 'como' para rematar la imagen",
+    "veces": 4,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "personaje que reacciona por omision ('no grito', 'no encontro la voz')",
+    "veces": 5,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "estructura de negacion correctiva 'No X: Y'",
+    "veces": 7,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "serie de negaciones encadenadas en la misma frase ('no se extendia, no se secaba')",
+    "veces": 2,
+    "caps": [
+      1,
+      3
+    ]
+  },
+  {
+    "recurso": "repeticion enfatica por yuxtaposicion ('marca horaria por marca horaria', 'catorce veces de catorce')",
+    "veces": 2,
+    "caps": [
+      1,
+      2
+    ]
+  },
+  {
+    "recurso": "enumeracion anaforica con 'todos' ('todos breves, todos secos')",
+    "veces": 1,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "gradacion temporal encadenada con 'despues' ('despues treinta, despues casi un minuto antes')",
+    "veces": 1,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "metafora mercantil de compra y pago aplicada a las vidas de la tripulacion ('compraba cinco respiraciones', 'aun pagaba el flete')",
+    "veces": 4,
+    "caps": [
+      3
+    ]
+  },
+  {
+    "recurso": "enumeracion asindetica acumulativa de objetos y personas ('contenedores, hilos, blanco, las formas, y Beni con todo ello')",
+    "veces": 1,
+    "caps": [
+      3
+    ]
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 situa a Dov Kessler fuera del recinto de la escena: su respiracion llega por el altavoz del mamparo mientras Yara, Reiko y Sena estan en el sector medico con Toma Ilic, y el narrador afirma que Yara 'lo dejo donde estaba, detras de la escotilla'. El hecho vigente de cap 1 establece que Yara Voss declaro el aislamiento de Toma Ilic y Dov Kessler en el sector medico, es decir, ambos en el mismo sector; el texto no narra ningun traslado ni reapertura que lo explique.",
+      "cap_origen": 1
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Cerrar la frase con una negacion o una ausencia como remate de la imagen. Registrado con 4 apariciones en el cap 2; vuelve tres veces en el cap 3 ('olio a metal limpio, a nada'; 'A Toma no le puso nada'; 'A ti. A Sena, si llegamos. A nadie mas.'). Acumulado: 7 apariciones en los caps 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El contacto de la mano sobre la piel como unidad de suspense, incluso en su forma negada. Registrado con 3 apariciones en el cap 1; reaparece en el cap 3 ('Yara no necesito tocarlo', 'Le sostuvo la muneca mientras aquello le recorria el cuello'). Acumulado: 4 apariciones en los caps 1 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "El sonido dotado de cualidad material o fisica para medir el estado de un personaje. Registrado con 2 apariciones en el cap 2 ('su silencio tenia filo', voz 'mas plana de lo habitual'); en el cap 3 la respiracion de Dov 'sonaba rota y regular'. Acumulado: 3 apariciones en los caps 2 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

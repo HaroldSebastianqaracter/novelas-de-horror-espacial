@@ -1,0 +1,210 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los planos de la nave no recogen un circuito de aire independiente para el sector médico.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los registros de mantenimiento no recogen ninguna inspección a fondo del cargamento más reciente antes de zarpar.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Toma Ilić",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "El último parte médico registra en Toma Ilić una herida reciente que no cicatriza al ritmo esperado.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dov Kessler",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "El último parte médico no registra síntomas en Dov Kessler.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dov Kessler",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dov Kessler es el ingeniero a cargo del sistema de soporte vital de la nave.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Reiko Alma",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Reiko Alma es la capitana de la Deméter Once y responde por las decisiones de la tripulación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sena Okafor",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Sena Okafor es la piloto de la Deméter Once y mantiene el rumbo automático hacia el puerto de destino.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Yara Voss",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Yara Voss es la médica de a bordo, a cargo del sector médico.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sector médico",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El sector médico es el único lugar de la nave con equipo de diagnóstico clínico.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Puente de mando",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El puente de mando es el único lugar de la nave desde el que se gobiernan el rumbo automático y las escotillas estancas de los demás sectores.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Yara Voss",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Yara Voss declaró el aislamiento de Toma Ilić y Dov Kessler en el sector médico basándose solo en la palpación, sin respaldo del equipo de diagnóstico.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dov Kessler",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dov Kessler presenta bajo la piel del brazo el mismo movimiento propio que Toma Ilić, sin herida y sin anomalía detectada por el equipo de diagnóstico.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Reiko Alma",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Reiko Alma respaldó la orden de aislamiento de Yara Voss mientras no exista un criterio mejor.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El ciclo tres del sistema de soporte vital arroja diferencias de presión que Dov Kessler no consigue localizar.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las muestras de aire tomadas en el sector médico y en el puente de mando resultan indistinguibles en carga orgánica y firma.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Reiko Alma",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Reiko Alma rechazó la propuesta de sellar la escotilla del sector médico y decidió esperar los cuatro días que faltan hasta puerto.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dov Kessler",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dov Kessler declaró ante la tripulación que asume la responsabilidad por lo que pudo entrar en el cargamento sin revisar.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La Deméter Once se encuentra a cuatro días de su puerto de destino.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sena Okafor",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Sena Okafor presenta en el antebrazo el mismo movimiento bajo la piel que Toma Ilić.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Dov Kessler abrió el ciclo tres a vacío parcial durante veinte segundos para barrer el aire recirculado.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La Deméter Once llegó a su puerto de destino con dos tripulantes muertos, Toma Ilić y Dov Kessler.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Sector médico",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Los conductos del sector médico siguen contaminados después de la purga y de la llegada a puerto.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Dov Kessler",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dov Kessler abrió el ciclo tres a vacío parcial durante veinte segundos y murió poco después.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Toma Ilić",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Toma Ilić murió en el sector médico durante la purga del aire recirculado.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Sena Okafor",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Sena Okafor presenta bajo la piel del antebrazo el mismo movimiento que Toma Ilić y pilotó la aproximación dentro de un sello estanco.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La Deméter Once atracó en puerto con tres tripulantes vivos y el personal de puerto subió a bordo sin máscara.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

@@ -1,0 +1,4 @@
+{"ts": "2026-09-19T09:54:28.894+02:00", "fase": "generar-premisa", "coste_usd": 0.5833204999999999, "turnos": 4, "segundos": 26.0, "tokens": 191962}
+{"ts": "2026-09-19T09:55:12.953+02:00", "fase": "generar-sinopsis", "coste_usd": 0.326018, "turnos": 3, "segundos": 44.0, "tokens": 148698}
+{"ts": "2026-09-19T09:55:55.001+02:00", "fase": "generar-escaleta", "coste_usd": 0.48434599999999994, "turnos": 7, "segundos": 42.0, "tokens": 322696}
+{"ts": "2026-09-19T09:57:25.103+02:00", "fase": "inicializar-estado", "coste_usd": 0.61978, "turnos": 9, "segundos": 90.1, "tokens": 391065}
