@@ -30,26 +30,19 @@ escritor. Ver Spec-X 05: lo que falta son aristas, no un motor de consulta.
 
 ## Por probar, en orden
 
-### 1. Caché de prefijos en el escritor y en QA
+### 1. Test de contradicción inyectada en QA
 
-**La única palanca que queda sobre el camino crítico**, y es reordenar cadenas, no arquitectura.
+No es velocidad: es la validez de la métrica con la que decidimos todo lo demás.
 
-La caché de Anthropic casa **por prefijo, byte a byte**. Si el prompt se arma con el estado en orden
-variable --el filtro cambia de capítulo a capítulo, el JSON no sale ordenado--, cada capítulo es un
-fallo de caché completo y se vuelve a pagar el prefill entero de un prompt de ~12.000 tokens, en
-Opus, tres veces por novela y otras tantas en QA.
+Anthropic documenta el «problema de la victoria temprana»: verificadores que aprueban tras comprobar
+lo mínimo. Nuestro «cero contradicciones» podría ser menos riguroso de lo que creemos, y toda la
+columna `contradicciones` del CSV cuelga de que el corte de QA cace lo que decimos que caza.
 
-Reordenar el prompt como **[guía de estilo + sinopsis + canon del preludio]** (inmutable) seguido de
-**[hechos de capítulos 1..N−1]** (crece por el final, nunca por el medio) y **[objetivo del capítulo
-N]** al final convierte la mayor parte del prefill en lectura de caché.
+**Cómo:** meter a mano una contradicción evidente en un capítulo cerrado y comprobar que el corte de
+QA la marca y pausa la novela. Si no la caza, la mitad de las conclusiones de `HALLAZGOS.md` hay que
+revisarlas.
 
-Anthropic declara hasta −85 % de latencia y −80 % de TTFT en la parte cacheada.
-
-**Cómo se verifica:** `usage.cache_read_input_tokens > 0` en `uso.jsonl`, que ya lo registramos. Si
-hoy sale 0 o casi, está todo por ganar. **Primer paso: mirarlo antes de tocar nada.**
-
-**Cuidado:** cambiar el `effort` a media conversación invalida la caché; el orden es
-`tools → system → messages`, lo estable primero.
+Estaba en tercer lugar. Sube al primero porque el que estaba primero se cayó: ver el punto 3.
 
 ### 2. Apagar (o presupuestar) el thinking del extractor
 
@@ -63,16 +56,27 @@ thinking activado, no inevitable.
 
 Riesgo acotado: el delta pasa por QA de todas formas.
 
-### 3. Test de contradicción inyectada en QA
+### 3. Reordenar prefijos: queda poco que ganar
 
-No es velocidad: es la validez de la métrica con la que decidimos todo lo demás.
+Era la apuesta principal, y **la medición la desinfla**. Agregando `uso.jsonl` de las 23 novelas
+archivadas, por rol:
 
-Anthropic documenta el «problema de la victoria temprana»: verificadores que aprueban tras comprobar
-lo mínimo. Nuestro «cero contradicciones» podría ser menos riguroso de lo que creemos.
+| rol | invocaciones | lee de caché | crea caché | entrada fresca | % leído |
+|---|---|---|---|---|---|
+| escritor | 103 | 9.443.588 | 2.362.593 | 866 | 80,0 % |
+| qa | 72 | 6.761.824 | 1.740.745 | 642 | 79,5 % |
+| extractor | 59 | 4.425.411 | 1.253.090 | 2.099 | 77,9 % |
+| orquestador | 148 | 62.805.671 | 1.056.602 | 609 | 98,3 % |
 
-**Cómo:** meter a mano una contradicción evidente en un capítulo cerrado y comprobar que el corte de
-QA la marca y pausa la novela. Si no la caza, la mitad de las conclusiones de `HALLAZGOS.md` hay que
-revisarlas.
+La hipótesis era «si sale 0, está todo por ganar». Sale 80 %. La entrada fresca del escritor son
+**866 tokens en 103 invocaciones**: ocho por llamada. El prompt ya entra por caché casi entero, así
+que el desorden del estado que sospechábamos, o no existe, o cae en la parte que de todas formas
+habría que crear.
+
+Lo que queda es el 20 % de creación: unos 23.000 tokens de prefill por invocación del escritor. Parte
+es inevitable --cada subagente es una sesión nueva y su propio turno anterior nunca está cacheado-- y
+parte sí es reordenable, pero el techo son unos segundos por llamada, tres en el escritor y tres en
+QA: del orden del 2–3 % del reloj. No justifica tocar la construcción del prompt todavía.
 
 ### 4. Spec-X 05: aristas entre hechos
 
