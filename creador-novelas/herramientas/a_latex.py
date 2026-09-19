@@ -316,6 +316,20 @@ def construir_cuerpo(capitulos: list[tuple[int, str]], titulos: dict[int, str]) 
     return "\n\n".join(piezas)
 
 
+def pie_de_portada(raiz: Path) -> str:
+    """La línea pequeña bajo la logline.
+
+    Llevaba el nombre de la carpeta de archivo, que en la primera compilación salió impreso en la
+    cubierta como `2026-09-18T13-03-10_el-pasajero-del-vacio-del-arbol-principal`. Sirve para
+    rastrear la novela, pero un identificador de carpeta en la portada de un libro es ruido. Se queda
+    la fecha, que es lo único de ese nombre que le dice algo a un lector.
+    """
+    sello = raiz.name[:10]
+    if len(sello) == 10 and sello[4] == "-" and sello[7] == "-" and sello[:4].isdigit():
+        return sello
+    return ""
+
+
 def construir_documento(raiz: Path, plantilla: Path = PLANTILLA_POR_DEFECTO) -> tuple[str, str]:
     """Devuelve (documento .tex completo, título de la novela)."""
     if not plantilla.exists():
@@ -325,7 +339,7 @@ def construir_documento(raiz: Path, plantilla: Path = PLANTILLA_POR_DEFECTO) -> 
     reemplazos = {
         "{{TITULO}}": escapar(titulo),
         "{{LOGLINE}}": escapar(logline),
-        "{{PIE_PORTADA}}": escapar(raiz.name),
+        "{{PIE_PORTADA}}": escapar(pie_de_portada(raiz)),
         "{{CUERPO}}": cuerpo,
     }
     doc = _leer_texto(plantilla)

@@ -268,3 +268,10 @@ def test_la_plantilla_tiene_un_unico_marcador_de_cuerpo():
     """Guardarraíl de la plantilla: dos `{{CUERPO}}` meterían el libro dentro de un comentario."""
     plantilla = a_latex.PLANTILLA_POR_DEFECTO.read_text(encoding="utf-8")
     assert plantilla.count("{{CUERPO}}") == 1
+
+
+def test_el_pie_de_portada_es_la_fecha_y_no_el_nombre_de_la_carpeta(tmp_path):
+    """En la primera compilación real la cubierta imprimió el slug entero del archivo."""
+    from herramientas.a_latex import pie_de_portada
+    assert pie_de_portada(tmp_path / "2026-09-18T13-03-10_el-pasajero-del-vacio") == "2026-09-18"
+    assert pie_de_portada(tmp_path / "una-carpeta-cualquiera") == ""

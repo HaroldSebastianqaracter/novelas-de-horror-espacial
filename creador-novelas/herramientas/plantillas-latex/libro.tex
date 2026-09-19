@@ -107,7 +107,7 @@
   \addcontentsline{toc}{chapter}{#1.~#2}%
   \vspace*{0.10\textheight}%
   {\centering
-    {\footnotesize\scshape\spanishchaptername~#1}\par
+    {\footnotesize\scshape\rotulodecapitulo~#1}\par
     \vspace{0.9em}
     {\Large #2\par}
     \vspace{0.6em}
@@ -118,7 +118,11 @@
   \noindent\ignorespaces
 }
 % babel define \chaptername = «Capítulo»; se guarda en un alias por si alguien cambia de idioma.
-\newcommand{\spanishchaptername}{\chaptername}
+% El nombre es largo y feo a propósito: se llamaba \spanishchaptername y babel-spanish YA define esa
+% macro, así que la plantilla la pisaba y LaTeX abortaba con «already defined». No se vio hasta la
+% primera compilación de verdad, que es exactamente la clase de fallo que la validación estructural
+% del conversor no puede encontrar: está en la plantilla, no en el texto.
+\newcommand{\rotulodecapitulo}{\chaptername}
 
 % Corte de escena dentro de un capítulo: el clásico asterisco centrado.
 \newcommand{\escena}{%
