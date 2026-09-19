@@ -89,8 +89,9 @@ contradicciones sino para medir el mecanismo, que no tiene ruido.
 
 `esclusas` con el interruptor encendido: 114,1 min, 19,68 $, 6 contradicciones.
 
-**El escritor rellena el campo, y bien.** 51 de 84 hechos (61 %) traen `relacionados`; de 11 nombres
-distintos, 8 son personajes del registro. Ejemplo real:
+**El campo se rellena, y bien. Lo rellena el extractor**, que es quien escribe el delta con tres
+agentes; el extractor corrió 19 veces en esta novela. 51 de 84 hechos (61 %) traen `relacionados`, y
+de 11 nombres distintos 8 son personajes del registro. Ejemplo real:
 
 > `Ramiro Solís` → `["Inés Vasconcelos", "Tomás Aguirre"]`
 > «Ramiro Solís desapareció en los conductos de ventilación durante la ronda…»
@@ -98,6 +99,12 @@ distintos, 8 son personajes del registro. Ejemplo real:
 Los otros 3 nombres son locaciones o `mundo`. No rompen nada, pero tampoco sirven: el salto compara
 contra los personajes en escena, así que una locación en `relacionados` nunca casa. Si X-05 sigue
 adelante, conviene decírselo al que rellena el campo.
+
+**Queda sin comprobar lo que más importa para producción:** con `escritor_emite_delta` encendido el
+delta lo escribe el **escritor**, no el extractor, y esa es la configuración que se envía. Que el
+escritor rellene `relacionados` igual de bien es una suposición, no una medida. El escritor trabaja
+sin haber leído los capítulos anteriores y con el capítulo recién escrito en la cabeza, así que no
+hay razón para darlo por hecho en ninguna de las dos direcciones.
 
 **El salto tiene alcance.** Contando sobre el log y la escaleta reales, **212 de 971 inyecciones de
 hecho (22 %) entran solo por la arista**: unos 14 por capítulo que el filtro viejo escondía.
