@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "_comentario": "Premisas para medir X-05 (aristas entre hechos). Tres diferencias deliberadas frente a premisas-velocidad.json, y las tres vienen de lo que el filtro tiene que demostrar. (1) Quince capitulos: con tres cabe todo en el presupuesto del escritor y los dos brazos dan el mismo resultado; el filtro solo empieza a recortar a partir del capitulo 10. (2) Tripulaciones de seis a ocho que se separan pronto y siguen separadas: la arista es un hecho sobre alguien que NO esta en escena y que cambia la situacion de quien si lo esta, asi que una novela donde todos van juntos no puede producir ninguna. (3) Cada idea dice explicitamente que lo que hace un grupo le cierra o le abre camino al otro, que es la relacion que el extractor tiene que anotar en `relacionados`.",
+  "config": {
+    "total_capitulos": 15,
+    "palabras_por_capitulo": 400,
+    "idioma": "es-ES",
+    "persona_narrativa": "tercera_limitada",
+    "tiempo_verbal": "pasado",
+    "ventana_resumen_rodante": 2,
+    "cadencia_qa": 1,
+    "max_tokens_contexto_escritor": 12000,
+    "max_hechos_por_capitulo": 4,
+    "capitulos_por_tanda": 3,
+    "max_llamadas_por_tanda": 30,
+    "registrar_uso": true,
+    "exportar_trazas": true
+  },
+  "novelas": [
+    {
+      "nombre": "esclusas",
+      "idea": "Los siete de la estacion minera Perseida descubren que algo se mueve entre los modulos usando los conductos, y que solo avanza por donde hay presion. La unica defensa es sellar esclusas, pero cada esclusa que un grupo cierra para protegerse deja al otro grupo sin ruta de vuelta y sin el equipo que guardaba detras. A la tercera noche estan repartidos en cuatro modulos que ya no se comunican, cada uno decidiendo a ciegas que puerta cerrar, y ninguno sabe que la criatura ya esta dentro de uno de ellos."
+    },
+    {
+      "nombre": "relevos",
+      "idea": "La tripulacion de ocho del carguero Argos se organiza en dos turnos que no coinciden nunca: cuando unos duermen, los otros trabajan. Despues de atravesar una nube de polvo, los del turno de noche empiezan a hacer cosas en la nave que los del turno de dia encuentran por la manana sin explicacion: mamparos soldados, raciones escondidas, un cadaver que nadie declara. Los dos turnos se dejan notas, y las notas empiezan a mentir. Ninguno de los dos grupos ve nunca al otro despierto."
+    },
+    {
+      "nombre": "descenso",
+      "idea": "Seis cientificos aterrizan en una luna helada con dos vehiculos y una base a medio montar. Una tormenta electrica parte al equipo en tres: dos en la base, dos en un vehiculo varado a once kilometros y dos en la grieta que vinieron a estudiar. La radio solo funciona en rafagas de treinta segundos cada seis horas, asi que cada grupo toma decisiones con informacion de hace medio dia: consumir el generador, mover el vehiculo, abrir la grieta. Cada una de esas decisiones le quita a otro grupo algo con lo que contaba, y lo que subio de la grieta aprende a imitar las rafagas de radio."
+    }
+  ]
+}

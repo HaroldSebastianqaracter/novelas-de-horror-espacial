@@ -362,3 +362,11 @@ def test_una_columna_nueva_no_descuadra_la_tabla(vacio):
         filas = list(_csv.DictReader(fh))
     assert [f["novela"] for f in filas] == ["vieja", "nueva"]  # rehecha desde el JSONL, sin perder nada
     assert all(f["capitulos"] == "3" for f in filas)
+
+
+def test_el_tope_de_resoluciones_crece_con_la_novela():
+    """Con QA por capítulo, las pausas escalan con los capítulos: un tope fijo abortaría las largas."""
+    from app.corredor import tope_resoluciones
+    assert tope_resoluciones(3) == 4, "las cortas conservan el mínimo de siempre"
+    assert tope_resoluciones(15) == 15, "una pausa por capítulo en las largas, que sigue siendo techo"
+    assert tope_resoluciones(None) == 4 and tope_resoluciones(0) == 4

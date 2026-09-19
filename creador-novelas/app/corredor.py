@@ -44,6 +44,17 @@ MAX_TANDAS = 12
 # algo va mal de verdad y no que el revisor esté haciendo su trabajo.
 MAX_RESOLUCIONES = 4
 
+
+def tope_resoluciones(total_capitulos: int | None) -> int:
+    """El techo va con el número de capítulos, porque con QA por capítulo las pausas también.
+
+    Con 15 capítulos hay 15 cortes, y un tope fijo de 4 no querría decir «algo va mal» sino «la
+    novela es larga»: la abortaría a mitad y nos dejaría sin medición. Se conserva el mínimo de 4
+    para las cortas y se permite una pausa por capítulo en las largas, que sigue siendo un techo.
+    Una novela que se contradice en todos los capítulos tiene un problema distinto de este loop.
+    """
+    return max(MAX_RESOLUCIONES, int(total_capitulos or 0))
+
 CORRIDAS = "corridas.jsonl"
 CORRIDAS_CSV = "corridas.csv"
 
@@ -134,8 +145,9 @@ def correr_novela(raiz: Path, encargo: dict[str, Any], *, tope_fase_s: float = 3
                 # completaba y no había nada que medir. La calidad no se pierde por resolver, se
                 # pierde por no mirarla: `contradicciones` y `resoluciones` siguen en la tabla, y una
                 # vuelta que acelere a cambio de contradecirse más se ve igual de bien.
-                if resoluciones >= MAX_RESOLUCIONES:
-                    fallo = f"QA pausó más de {MAX_RESOLUCIONES} veces"
+                tope = tope_resoluciones((encargo.get("config") or {}).get("total_capitulos"))
+                if resoluciones >= tope:
+                    fallo = f"QA pausó más de {tope} veces"
                     break
                 resoluciones += 1
                 # Corregir de verdad: `corregir` marca el capítulo, `/resolver-qa` manda al escritor a
