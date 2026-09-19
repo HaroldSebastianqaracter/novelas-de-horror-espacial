@@ -1,0 +1,16 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Imagineria anatomica aplicada a la estacion y su red de conductos ('Karst-9 respiraba por sus conductos termicos', 'escuchaba ese aliento', 'conocia esa red como conocia las venas de sus propias manos'): 3 apariciones acumuladas, caps [1].",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion seguida de correccion 'no X: Y' ('ya no es una mancha'; 'No rasgado por vibracion, no fatigado por el calor: abierto'; 'No es un roce... Algo mordio ahi'): 3 apariciones acumuladas, caps [1].",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

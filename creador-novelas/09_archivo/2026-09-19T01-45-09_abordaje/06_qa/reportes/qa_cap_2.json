@@ -1,0 +1,26 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Caracterizacion por el objeto que el personaje lleva en la mano al entrar o permanecer en escena: la llave de Dez tres veces en el capitulo 2, mas el terminal de Mireia y el escaner de Tobias. Acumulado 6 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura paralela de presentacion del grupo por reparto de tareas rutinarias: el reparto de tareas durante el sellado y el cierre del capitulo 2 con los tres personajes en serie. Acumulado 5 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Afirmacion seguida de negacion breve: 'tenia la llave en la mano, pero no se movio' y 'El ramal doce no llega a esta seccion. No hay conexion en los planos' en el capitulo 2. Acumulado 4 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Apertura de dialogo con una sola palabra o sintagma breve seguido de '-dijo X' ('-Sellado -dijo Yara', '-Al puente -dijo Yara') en el capitulo 2. Acumulado 4 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

@@ -1,0 +1,24 @@
+{
+  "reglas": [
+    "El reciclador de aire del Deneb Once opera un único circuito que abastece a toda la nave.",
+    "El botiquín de a bordo y el instrumental de la enfermería son los únicos recursos médicos disponibles.",
+    "El itinerario de carga del Deneb Once fija la ruta y los plazos que la capitana debe cumplir.",
+    "La comunicación entre camarotes y el resto de la nave se hace por intercomunicador."
+  ],
+  "objetos": [
+    "botiquín de a bordo",
+    "reciclador de aire",
+    "intercomunicador",
+    "instrumental médico de la enfermería",
+    "válvulas de sellado de sector"
+  ],
+  "linea_de_tiempo": [
+    "El Deneb Once zarpa con una tripulación de cinco rumbo a su destino de carga.",
+    "La nave entra en el tramo muerto de la ruta, sin auxilio cercano."
+  ],
+  "locaciones": {
+    "enfermería del Deneb Once": "El consultorio médico de la nave, con el botiquín y el único instrumental de diagnóstico a bordo.",
+    "sala de máquinas del Deneb Once": "El compartimento donde opera el reciclador de aire que abastece a toda la nave.",
+    "puente de mando del Deneb Once": "El puesto de navegación y mando, donde constan la ruta, el itinerario y las comunicaciones con el resto de la nave."
+  }
+}

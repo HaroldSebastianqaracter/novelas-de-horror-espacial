@@ -1,0 +1,14 @@
+{
+  "inicio": 1,
+  "tope": 3,
+  "max_llamadas": 30,
+  "cerrados": 3,
+  "llamadas": 8,
+  "capitulo_en_curso": null,
+  "intentos_longitud": 0,
+  "intentos_personaje": 0,
+  "avisos": [],
+  "registro": "07_registro/tanda_2026-09-19T01-32-34",
+  "motivo_salida": "novela_completa",
+  "ts_fin": "2026-09-19T01:43:09.809+02:00"
+}

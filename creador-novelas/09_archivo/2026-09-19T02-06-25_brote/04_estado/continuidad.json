@@ -1,0 +1,218 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El registro de mantenimiento del Deneb Once describe el reciclador de aire como un circuito único que abastece a toda la nave, sin ninguna línea de aislamiento total documentada.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La bitácora de navegación sitúa al Deneb Once a tres semanas de cualquier auxilio en el tramo que atraviesa.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El manual médico de la naviera no registra ningún caso de bultos que se desplazan bajo la piel.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Selene Vargas",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Selene Vargas es la única médica a bordo del Deneb Once.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Inés Okafor",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Inés Okafor es la capitana del Deneb Once y responde por el itinerario de carga.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tomás Reyes",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Tomás Reyes es el ingeniero responsable del sistema de aire del Deneb Once.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Yara Bosch",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Yara Bosch es ingeniera de mantenimiento del Deneb Once.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Lior Castell",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Lior Castell es el piloto del Deneb Once.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "enfermería del Deneb Once",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La enfermería del Deneb Once cuenta con el único instrumental médico de la nave.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "sala de máquinas del Deneb Once",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La sala de máquinas del Deneb Once aloja el reciclador de aire que abastece a toda la nave.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "puente de mando del Deneb Once",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "En el puente de mando del Deneb Once constan la ruta y el itinerario de navegación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Yara Bosch",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Yara Bosch tiene una protuberancia móvil bajo el hombro derecho que se desplaza por sí sola bajo el tejido",
+    "cap_origen": 1,
+    "superado_por": 1
+  },
+  {
+    "sujeto": "Lior Castell",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Lior Castell tiene una protuberancia móvil anómala bajo el antebrazo, idéntica a la de Yara Bosch",
+    "cap_origen": 1,
+    "superado_por": 1
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El reciclador del Deneb Once es un circuito único sin línea de aislamiento total documentada",
+    "cap_origen": 1,
+    "superado_por": 1
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La capitana Inés Okafor ordena confinar a los afectados en camarotes con comida por esclusa y válvulas cerradas",
+    "cap_origen": 1,
+    "superado_por": 1
+  },
+  {
+    "sujeto": "Yara Bosch",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Yara Bosch tiene una masa móvil bajo la piel que se desplaza sin dejar rastro y causa dolor de nervio pinzado.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Lior Castell",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Lior Castell tiene la misma condición que Yara: masa móvil bajo la piel con perfil nítido.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "sala de máquinas del Deneb Once",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El circuito de aire del Deneb Once es único y abastece toda la nave; no puede aislarse por camarote según su diseño.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La enfermedad desconocida que afecta a Yara y Lior no aparece en manuales de la naviera y su vía de transmisión es desconocida.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Yara Bosch",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Las muestras de Yara Bosch cambian de densidad y forma de bordes entre mediciones con dos horas de diferencia, sin contaminación.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "sala de máquinas del Deneb Once",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El aire de los camarotes de cuarentena ha desembocado en la sala de máquinas a través del intercambiador durante al menos 40 horas.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El ciclo completo de circulación de aire del Deneb Once es de once minutos, de modo que la tripulación respira aire de los camarotes de cuarentena con once minutos de retardo.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tomás Reyes",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Tomás Reyes cerró todas las válvulas que el diseño permite en los camarotes de cuarentena, pero el retorno sigue fluyendo por el intercambiador.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tomás Reyes",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Tomás Reyes presenta una elevación pálida bajo las costillas que crece cuando el intercambiador de calor sube de treinta y un grados.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Lo que está en cuarentena no es un organismo vivo sino materia inerte que obedece al calor del reciclador de aire.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "sala de máquinas del Deneb Once",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El intercambiador de calor fue cortado de emergencia desde el puente de mando, interrumpiendo el zumbido de fondo que duraba tres semanas.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La temperatura del Deneb Once comenzó a descender tras el corte del intercambiador y la renovación de aire se interrumpió a partir del minuto once.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

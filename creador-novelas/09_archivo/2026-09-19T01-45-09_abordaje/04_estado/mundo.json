@@ -1,0 +1,22 @@
+{
+  "reglas": [
+    "El protocolo de contacto de la tripulación no contempla organismos no catalogados a bordo.",
+    "La sección de carga solo puede sellarse de forma remota desde el puente.",
+    "Los planos oficiales de a bordo no registran ningún conducto de mantenimiento adicional en la sección de máquinas."
+  ],
+  "objetos": [
+    "el contenedor recuperado de un pecio a la deriva, ingresado por la esclusa de carga tres",
+    "los planos oficiales de la nave",
+    "los sensores térmicos de soporte vital que calibra Tobias Renn",
+    "el compresor de la sección de máquinas, en falla intermitente desde hace semanas"
+  ],
+  "linea_de_tiempo": [
+    "El Perseverancia lleva once días de navegación desde el último puerto, sin ninguna otra nave lo bastante cerca para responder a una llamada de auxilio.",
+    "El último contenedor recuperado de un pecio a la deriva entra por la esclusa de carga tres poco antes de la ronda nocturna de Kip Anwar."
+  ],
+  "locaciones": {
+    "sección de carga": "Bodega con la esclusa de carga tres, la única que da al casco exterior sin blindaje reforzado; se sella de forma remota desde el puente.",
+    "sección de máquinas": "Sala de motores y sistemas de presión, con un compresor en falla intermitente; los planos oficiales no registran ningún conducto de mantenimiento adicional aquí.",
+    "puente": "Puesto de mando de la nave, desde donde se controla el sellado remoto de las demás secciones y se traza la ruta de reentrada."
+  }
+}

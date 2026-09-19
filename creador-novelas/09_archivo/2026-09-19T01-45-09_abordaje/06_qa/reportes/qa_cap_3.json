@@ -1,0 +1,26 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Caracterizacion por el objeto que el personaje lleva en la mano al entrar o salir de escena: en el cap 3, Dez con la llave manual al abrir la placa y al subir por la trampilla con la llave apretada. Acumulado 7 apariciones en caps 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de afirmacion seguida de negacion breve: 'La criatura no iba hacia maquinas: venia al puente' y 'Tenian la nave. No estaba claro que tuvieran nada mas' (cap 3). Acumulado 6 apariciones en caps 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Anafora de 'Nadie' abriendo frases consecutivas: 'Nadie discutio eso', 'Nadie lo ayudo a salir. Nadie se lo agradecio tampoco' (cap 3). 3 apariciones, todas en el cap 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "La nave o el pasillo como propiedad que se pierde o se recupera frente a la tripulacion: el cierre del cap 3 ('Tenian la nave') retoma el recurso del cap 2. Acumulado 3 apariciones en caps 2 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

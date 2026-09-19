@@ -1,0 +1,5 @@
+Título: Ecos en el Casco
+
+Logline: A once días de puerto, la tripulación de un remolcador de carga debe acorralar a una criatura que entró por la esclusa y ya mató a uno de los suyos, antes de que alcance el puente y los deje a la deriva.
+
+Premisa: Cuando algo se cuela por la esclusa de carga del remolcador Perseverancia y despedaza al tripulante de guardia frente a sus compañeros, los cuatro supervivientes comprenden que no están solos y que nada de lo que saben sobre protocolos de contacto sirve contra lo que ahora comparte sus conductos. La criatura no habla, no negocia y no se detiene: se desliza entre los pasillos estrechos de la nave con una inteligencia fría que aprende sus movimientos tan rápido como ellos aprenden los suyos. Con once días de navegación por delante y ningún lugar adonde huir, la tripulación sella mamparo tras mamparo, sacrificando secciones enteras de la nave con la esperanza de embudar a la amenaza hacia una trampa antes de que alcance el puente y los deje sin control ni comunicaciones, mientras el aislamiento y el miedo empiezan a resquebrajar la confianza entre ellos tanto como la criatura resquebraja el casco.

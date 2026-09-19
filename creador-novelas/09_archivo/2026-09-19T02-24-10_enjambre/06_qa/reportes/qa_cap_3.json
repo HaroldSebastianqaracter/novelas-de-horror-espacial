@@ -1,0 +1,36 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 3 situa la oleada del enjambre durante el cuarto corte de generadores y describe a las criaturas moviendose con violencia y golpeando la chapa del pasillo durante seis minutos sin calefaccion, mientras el hecho vigente establece que las entidades se detienen sin el calor de los generadores y son inertes como piedra; el propio capitulo lo confirma en el primer corte, cuando los puntos palidos pierden brillo y velocidad hasta detenerse.",
+      "cap_origen": 2
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Imagineria anatomica aplicada a la estacion y su red de conductos (respirar, aliento, venas): reaparece en el cap. 3 con 'La estacion volvio a respirar despacio, tibia otra vez'. Acumulado 4 apariciones en caps. 1, 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion seguida de correccion ('no X: Y'): reaparece en el cap. 3 con 'no dijo ninguna palabra, solo nego apenas con la cabeza'. Acumulado 7 apariciones en caps. 1, 2, 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "'Puntos palidos' como designacion fija del enjambre en la camara termica: reaparece en el cap. 3 al describir el primer corte. Acumulado 3 apariciones en caps. 1, 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Frase muy corta aislada como golpe de cierre de parrafo o de escena: en el cap. 3, 'No hacia falta.' y 'Duro seis minutos.'. Acumulado 5 apariciones en caps. 2, 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personaje que calla informacion deliberadamente ante otro: en el cap. 3, Tomas oculta el brazo hasta que Elena le abre la manga y Elena comunica el diagnostico a Mara solo negando con la cabeza. Acumulado 4 apariciones en caps. 2, 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": true
+}

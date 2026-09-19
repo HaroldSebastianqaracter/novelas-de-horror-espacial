@@ -1,0 +1,48 @@
+[
+  {
+    "recurso": "el bulto descrito por su 'borde limpio' (demasiado limpio para ser un ganglio / el mismo borde limpio / dibujaba su propio borde contra el musculo / las muestras cambiaban de borde)",
+    "veces": 4,
+    "caps": [
+      1,
+      3
+    ]
+  },
+  {
+    "recurso": "enumeracion por negacion acumulada ('ninguna causa, ninguna prueba de contagio y ninguna prueba de lo contrario' / 'no coinciden consigo mismas, no es contaminacion, no se dejan medir' / 'No crece. Nunca crecio... no es un organismo que avanza hacia algo')",
+    "veces": 3,
+    "caps": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "el sistema de aire personificado como algo que respira por la tripulacion ('siguio respirando por todos')",
+    "veces": 1,
+    "caps": [
+      2
+    ]
+  },
+  {
+    "recurso": "el conteo mental del tiempo como marcador de tension (contar los segundos hasta once minutos / calcular los cuatro minutos y medio y el minuto once)",
+    "veces": 2,
+    "caps": [
+      2,
+      3
+    ]
+  },
+  {
+    "recurso": "estructura 'no es X: es Y' para redefinir la naturaleza de la amenaza",
+    "veces": 1,
+    "caps": [
+      3
+    ]
+  },
+  {
+    "recurso": "el zumbido de fondo del reciclador y su silencio como marcador atmosferico",
+    "veces": 1,
+    "caps": [
+      3
+    ]
+  }
+]

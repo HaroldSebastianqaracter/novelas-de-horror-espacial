@@ -1,0 +1,11 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "contradiccion",
+      "descripcion": "El capitulo 1 usa voseo rioplatense (es-AR) en el dialogo de Yara Bosch y de la capitana Okafor, con tres formas verbales voseantes, mientras la voz configurada de la novela es es-ES; la narracion mantiene el registro peninsular, de modo que el capitulo alterna dos variantes de idioma. Persona narrativa (tercera limitada) y tiempo verbal (pasado) si se respetan.",
+      "cap_origen": 0
+    }
+  ],
+  "tiene_contradicciones": true
+}

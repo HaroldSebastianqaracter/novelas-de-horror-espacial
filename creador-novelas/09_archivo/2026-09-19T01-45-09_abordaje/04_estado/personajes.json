@@ -1,0 +1,57 @@
+{
+  "Kip Anwar": {
+    "estado_fisico": "Arrastrado por una entidad desconocida hacia los conductos de mantenimiento; estado actual desconocido.",
+    "estado_psicologico": "Reaccionaba proceduralmente a las tareas antes del ataque; última comunicación consciente fue la alerta al puente.",
+    "secretos_que_conoce": [
+      "Descubrió la brecha de presión en la esclusa de carga tres",
+      "Fue el primero en contacto directo con la entidad desconocida"
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Yara Solís": {
+    "estado_fisico": "Sin cambios visibles.",
+    "estado_psicologico": "Odia a la criatura por su capacidad de aprender; aliviada tras cercarla pero con dudas sobre lo que han perdido.",
+    "secretos_que_conoce": [
+      "Sabe que una entidad desconocida se mueve por los conductos de mantenimiento",
+      "Conoce la presencia del contenedor recuperado del pecio",
+      "Sabe que existe un conducto de aire no registrado en los planos de la nave.",
+      "Descubre que la criatura/amenaza se desplaza entre cubiertas de formas no documentadas."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Dez Okafor": {
+    "estado_fisico": "Mano sangrando tras cerrar manualmente el ramal desde dentro.",
+    "estado_psicologico": "Actúa sin pedir ayuda ni reconocimiento; profesional bajo presión extrema.",
+    "secretos_que_conoce": [
+      "cerró sin registrar, meses atrás, un conducto de mantenimiento en la sección de máquinas para robar presión de aire a un sistema sin mantenimiento",
+      "Sabe que los conductos de mantenimiento conectan la sección de carga con la sección de máquinas",
+      "Cerró un conducto de aire hace meses para aliviar presión de un circuito nunca revisado.",
+      "No registró ese conducto en ningún lugar, ocultando deliberadamente esta información.",
+      "Sabe que el ramal de mantenimiento puede sellarse desde dentro sin palanca externa."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Mireia Vance": {
+    "estado_fisico": "Sin cambios.",
+    "estado_psicologico": "Alerta, analizando datos anomalías; reacciona con sorpresa a la discrepancia entre planos y realidad física.",
+    "secretos_que_conoce": [
+      "Sabe que el ramal doce conecta con la sección de máquinas pero no existe en los planos oficiales."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  },
+  "Tobias Renn": {
+    "estado_fisico": "Sin cambios.",
+    "estado_psicologico": "Atento, precisión en el monitoreo; experimenta el momento en que su lectura térmica contradice los planos conocidos.",
+    "secretos_que_conoce": [
+      "El escáner detectó una masa moviéndose a velocidad anómala en los conductos",
+      "Sabe que la entidad se mueve con conocimiento de la estructura de los conductos",
+      "Detecta que la criatura/amenaza está en el ramal doce, dos cubiertas arriba de la sección de máquinas."
+    ],
+    "ultima_aparicion": 2,
+    "posicion": ""
+  }
+}

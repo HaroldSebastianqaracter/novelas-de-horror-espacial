@@ -1,0 +1,21 @@
+{
+  "cap_corte": 1,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Tic lexico 'rejilla' como nombre unico del acceso al conducto: 3 apariciones en el capitulo 1 ('la rejilla del techo', 'el hueco de la rejilla', 'aparto la vista de la rejilla').",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Caracterizacion por el objeto que el personaje lleva en la mano al entrar en escena: 3 apariciones en el capitulo 1 (tableta en el antebrazo, la llave todavia en la mano, el escaner encendido).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura paralela de presentacion por rutina repetida y futil: 3 apariciones en el capitulo 1 (el compresor por tercera semana consecutiva, el atraque que ya se sabia de memoria, los sensores uno a uno).",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

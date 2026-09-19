@@ -1,0 +1,47 @@
+[
+  {
+    "num": 1,
+    "titulo": "El frío que muerde",
+    "objetivo_narrativo": "Establecer la rutina de la estación Karst-9 y el momento en que el enjambre deja de ser una sospecha en las cámaras térmicas para convertirse en una amenaza confirmada dentro de los conductos.",
+    "personajes": [
+      "Mara Ibáñez",
+      "Tomás Herrera",
+      "Yusuf Kader",
+      "Elena Voss",
+      "Darío Lang"
+    ],
+    "locacion": "Estación Karst-9",
+    "informacion_nueva": "El enjambre se ha filtrado por los conductos térmicos; Tomás encuentra la primera mordedura y Elena confirma que no fue un accidente, sino un ataque.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "Lo que alimenta el calor",
+    "objetivo_narrativo": "Revelar que el calor de la estación no solo atrae al enjambre sino que lo mantiene activo, obligando a Mara a sopesar apagar la calefacción mientras Tomás oculta que ya fue mordido.",
+    "personajes": [
+      "Mara Ibáñez",
+      "Tomás Herrera",
+      "Yusuf Kader",
+      "Elena Voss",
+      "Darío Lang"
+    ],
+    "locacion": "Estación Karst-9",
+    "informacion_nueva": "Yusuf descubre que el calor mantiene activo y agresivo al enjambre; apagarlo detendría el avance en minutos pero la temperatura exterior mataría a la tripulación en menos de cuatro horas; Tomás esconde su mordedura por miedo a ser aislado.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "El precio del abrigo",
+    "objetivo_narrativo": "Ejecutar el plan de apagar la calefacción por ciclos cronometrados y resistir el ataque final del enjambre, cerrando con el costo humano de la decisión justo cuando llega el contacto por radio del relevo.",
+    "personajes": [
+      "Mara Ibáñez",
+      "Tomás Herrera",
+      "Yusuf Kader",
+      "Elena Voss",
+      "Darío Lang"
+    ],
+    "locacion": "Estación Karst-9",
+    "informacion_nueva": "El plan de Yusuf obliga a usar los trajes térmicos como refugio portátil mientras el enjambre, privado del calor, se repliega hacia los conductos profundos en una oleada final; Tomás no llega consciente al momento en que el relevo contacta por radio.",
+    "tension": 5
+  }
+]

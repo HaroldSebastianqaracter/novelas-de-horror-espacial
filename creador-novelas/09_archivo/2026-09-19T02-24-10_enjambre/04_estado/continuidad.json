@@ -1,0 +1,202 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El soporte vital de la estación depende de generadores que mantienen la calefacción de las secciones habitables.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las cámaras térmicas de los conductos han registrado movimientos anómalos que todavía no se han confirmado como una amenaza.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El registro de la estación anota que el último relevo de personal llegó con retraso respecto del cronograma previsto.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Mara Ibáñez",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Mara Ibáñez ha asumido el mando de las decisiones de la estación desde el retraso del último relevo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tomás Herrera",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Los registros de mantenimiento acreditan a Tomás Herrera como el técnico que conoce cada conducto térmico de la estación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Yusuf Kader",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Yusuf Kader es responsable de mantener los generadores en funcionamiento continuo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Elena Voss",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Elena Voss es la única médica asignada a la estación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Darío Lang",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Darío Lang opera las comunicaciones y las cámaras térmicas de la estación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Estación Karst-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Los planos de mantenimiento de Karst-9 documentan una red de conductos térmicos que conecta todas las secciones habitables.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Hay algo vivo afuera de la Estación Karst-9 que ha atacado el aislante del ducto de mantenimiento, dejando marcas de mordiscos en la chapa metálica.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Estación Karst-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El aislante del tramo del ducto de mantenimiento bajo la cocina está abierto en un semicírculo limpio, con los bordes plegados hacia dentro, indicando una brecha por donde entra aire del exterior.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Mara Ibáñez",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Mara ordena mantener el descubrimiento de la amenaza en secreto de la estación, asumiendo el control de la información y la respuesta.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las cámaras térmicas detectan un enjambre de entidades pálidas que se mueven coordinadamente contra la corriente de aire caliente del ducto.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tomás Herrera",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Tomás Herrera tiene quemaduras térmicas en el antebrazo: dos arcos de puntos violeta, hinchados.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Las entidades exteriores se encienden con el calor de los generadores y se detienen sin él; sin calor son inertes como piedra.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La estación puede sobrevivir 3 a 4 horas con calor residual si se corta la calefacción central.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Mara Ibáñez",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Mara está en control y conoce la verdad sobre las entidades y el dilema de detenerlas versus mantener la vida en la estación.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tomás Herrera",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Tomás tiene una infección avanzada con arcos violeta que cubren su brazo izquierdo; la infección lleva días creciendo y su condición es crítica, posiblemente terminal.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El enjambre fue expulsado de la estación mediante ciclos alternados de apagón de generadores y exterminado en el exterior por el frío absoluto; ninguna criatura sobrevivió fuera de la red de la estación.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Estación Karst-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Se anuncia la llegada de una nave de relevo en aproximadamente cuatro horas.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Mara Ibáñez",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Mara descubre que la amenaza más peligrosa para la estación no está afuera en el espacio vacío, sino dentro de ella.",
+    "cap_origen": 3,
+    "superado_por": 3
+  },
+  {
+    "sujeto": "Tomás Herrera",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Tomás Herrera porta una infección de arcos violeta en el antebrazo izquierdo que lleva días creciendo; la carne bajo los arcos está rígida y helada de forma anómala.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Estación Karst-9",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El enjambre fue eliminado mediante ciclos de apagón-encendido que lo congelaban y empujaban hacia el colector inferior; en el cuarto ciclo regresaron enloquecidos pero un corte total los paralizó y el hielo exterior los terminó.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Una transmisión de radio con retardo anuncia descenso en cuarenta horas y solicita confirmación de estado de la tripulación.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La infección por arcos violeta representa una amenaza interior más grave que el enjambre que intentaba penetrar desde el exterior.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

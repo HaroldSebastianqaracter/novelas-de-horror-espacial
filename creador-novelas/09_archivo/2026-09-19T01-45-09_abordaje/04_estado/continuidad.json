@@ -1,0 +1,178 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El Perseverancia lleva once días de navegación desde el último puerto, sin ninguna otra nave lo bastante cerca para responder a una llamada de auxilio.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El protocolo de contacto de la tripulación no contempla organismos no catalogados a bordo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Los planos oficiales de a bordo no registran ningún conducto de mantenimiento adicional en la sección de máquinas.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El último contenedor recuperado de un pecio a la deriva entra por la esclusa de carga tres poco antes de la ronda nocturna de Kip Anwar.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "sección de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La sección de carga solo puede sellarse de forma remota desde el puente.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kip Anwar",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Kip Anwar hace la ronda nocturna de la sección de carga cuando una alarma de presión lo manda a revisar la esclusa de carga tres.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Yara Solís",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Yara Solís revisa la ruta de reentrada desde el puente y acude a la sección de carga en cuanto suena la alarma de presión.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dez Okafor",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dez Okafor repara el compresor de la sección de máquinas cuando suena la alarma de presión, y acude a la sección de carga.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Mireia Vance",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Mireia Vance está en el simulador de atraque cuando suena la alarma de presión, y acude a la sección de carga.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tobias Renn",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Tobias Renn calibra los sensores de soporte vital de la bodega cuando suena la alarma de presión, y acude a la sección de carga.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kip Anwar",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Kip Anwar fue arrastrado hacia los conductos de mantenimiento por una entidad desconocida que emergió de la sección de carga.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "sección de carga",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La sección de carga fue sellada remotamente por orden de Yara Solís tras detectarse una brecha de presión en la esclusa de carga tres.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Una entidad desconocida, posiblemente procedente del contenedor recuperado o del exterior, fue detectada en la sección de carga y entró en los conductos de mantenimiento.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La entidad se mueve por los conductos de mantenimiento demostrando conocimiento de su estructura y funcionamiento.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "sección de máquinas",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "La sección de máquinas fue sellada desde los pasillos habitables mediante una válvula manual cerrada por Dez Okafor.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dez Okafor",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dez Okafor cerró hace meses un conducto de aire para aliviar presión de un circuito obsoleto, sin registrarlo oficialmente.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La nave posee conductos de aire no documentados que conectan secciones distantes de formas no reflejadas en los planos oficiales.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La criatura/amenaza se desplaza entre cubiertas con regularidad, ocupando el ramal doce (dos cubiertas arriba de la sección de máquinas) que teóricamente no existe en los registros.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La criatura fue expulsada hacia el espacio a través de la esclusa de mantenimiento durante la descompresión.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "sección de mantenimiento",
+    "categoria": "locacion",
+    "sujeto_validado": false,
+    "hecho": "Media sección de mantenimiento fue despresurizada y se perdió hacia el espacio.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Dez Okafor",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Dez resultó herido en la mano durante la maniobra de cierre manual del ramal.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Quedan once horas de trayecto hasta llegar a puerto.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]

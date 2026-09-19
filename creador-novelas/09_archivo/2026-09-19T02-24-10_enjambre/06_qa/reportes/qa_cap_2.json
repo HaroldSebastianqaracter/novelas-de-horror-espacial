@@ -1,0 +1,16 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de negacion seguida de correccion ('no X: Y' / 'No era X. Era Y.'): 6 apariciones acumuladas en los capitulos 1 y 2; en el capitulo 2 reaparece al menos tres veces (el grafico que no desmiente, la replica de Yusuf sobre el descanso y el apagado, y la negacion del motivo del calor corregida por su funcion de encendido).",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Frase muy corta aislada como golpe de cierre de parrafo o de escena: 3 apariciones acumuladas, todas en el capitulo 2 (cierre del primer parrafo, cierre del parrafo de Tomas en la enfermeria y ultima linea del capitulo).",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

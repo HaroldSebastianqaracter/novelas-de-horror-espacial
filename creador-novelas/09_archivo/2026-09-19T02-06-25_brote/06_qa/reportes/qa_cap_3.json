@@ -1,0 +1,16 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "El bulto descrito por su borde: 'demasiado limpio para ser un ganglio' y 'el mismo borde limpio' (cap. 1); 'dibujaba su propio borde contra el musculo' y 'Las muestras cambiaban de borde' (cap. 3). 4 apariciones acumuladas en los capitulos 1 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion por negacion acumulada como cierre de razonamiento: 'ninguna causa, ninguna prueba...' (cap. 1); 'no coinciden consigo mismas, no es contaminacion...' (cap. 2); 'No crece. Nunca crecio... no es un organismo que avanza hacia algo' (cap. 3). 3 apariciones acumuladas en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

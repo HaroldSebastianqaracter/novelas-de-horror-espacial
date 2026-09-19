@@ -1,0 +1,64 @@
+{
+  "Yara Bosch": {
+    "estado_fisico": "Masa móvil bajo la piel del hombro derecho, desplazada hacia la clavícula; dolor como nervio pinzado; medicinas de botiquín inefectivas.",
+    "estado_psicologico": "Controlada, voz plana, mantiene compostura.",
+    "secretos_que_conoce": [
+      "Tiene un bulto anómalo bajo su piel que se desplaza por sí solo"
+    ],
+    "ultima_aparicion": 1,
+    "posicion": ""
+  },
+  "Lior Castell": {
+    "estado_fisico": "Expuesto al frío y a la falta de aire tras el corte del intercambiador; respiración ralentizada.",
+    "estado_psicologico": "Consciente de su situación; acepta el sacrificio.",
+    "secretos_que_conoce": [
+      "Tiene una protuberancia móvil bajo su antebrazo",
+      "Sabe que su camarote está en el mismo circuito que será cortado."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Selene Vargas": {
+    "estado_fisico": "Sin cambios.",
+    "estado_psicologico": "Aliviada tras resolber el misterio de las mediciones; acepta la acción inmediata.",
+    "secretos_que_conoce": [
+      "Dos miembros de la tripulación tienen masas móviles anómalas",
+      "El manual de naviera no contiene casos documentados de masas que se desplacen por sí solas",
+      "No hay confirmación de contagio ni de ausencia del mismo",
+      "La enfermedad es desconocida y no aparece en manuales de la naviera.",
+      "Podría haberse contagiado.",
+      "Las muestras de Yara Bosch cambian de densidad y bordes sin que medie contaminación.",
+      "El aire de cuarentena lleva 40+ horas recirculándose hacia la sala de máquinas.",
+      "Descubre que lo que está en cuarentena no es un organismo que avanza, sino materia inerte que obedece al calor del reciclador.",
+      "Sabe que las muestras cambiaban de borde solo por las distintas temperaturas de medición."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Inés Okafor": {
+    "estado_fisico": "Sin cambios visibles.",
+    "estado_psicologico": "Ha tomado mando de la situación; asume la responsabilidad de decidir cortar el intercambiador y sus riesgos para Lior y Yara.",
+    "secretos_que_conoce": [
+      "Dos miembros de la tripulación tienen masas móviles anómalas",
+      "El reciclador no puede ser completamente aislado por limitaciones de diseño",
+      "La nave está a tres semanas de cualquier auxilio.",
+      "El aislamiento de cuarentena ha fracasado hace 40+ horas.",
+      "Las muestras de Yara son anómalas sin explicación inmediata.",
+      "Sabe que el aire puede no volver a tiempo después del corte."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Tomás Reyes": {
+    "estado_fisico": "Presenta una elevación pálida bajo las costillas izquierdas que crece cuando la temperatura del circuito sube más de treinta y un grados.",
+    "estado_psicologico": "Colaborador con la decisión crítica; calcula las consecuencias sin rodeos.",
+    "secretos_que_conoce": [
+      "El reciclador es un circuito único sin línea de aislamiento documentada",
+      "El cierre de válvulas es insuficiente: el retorno de cuarentena fluye igualmente por el intercambiador.",
+      "Puede sellar el sector en dos horas, pero eso asfixiaría a los aislados.",
+      "Sabe que cortar el intercambiador causará pérdida de aire respirable en el minuto once."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

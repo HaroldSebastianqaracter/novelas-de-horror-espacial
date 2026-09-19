@@ -1,0 +1,45 @@
+[
+  {
+    "num": 1,
+    "titulo": "Bajo la Piel",
+    "objetivo_narrativo": "Establecer el aislamiento forzado en el Deneb Once cuando dos tripulantes muestran bultos que se desplazan bajo la piel y la médica no encuentra protocolo que lo explique.",
+    "personajes": [
+      "Yara Bosch",
+      "Lior Castell",
+      "Selene Vargas",
+      "Inés Okafor",
+      "Tomás Reyes"
+    ],
+    "locacion": "enfermería del Deneb Once",
+    "informacion_nueva": "Los bultos de Yara y Lior se desplazan bajo la piel en cuestión de horas; el sistema de aire de la nave circula en un solo circuito y no admite un aislamiento total.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "El Aire Compartido",
+    "objetivo_narrativo": "Revelar que el reciclador ha mezclado el aire de la cuarentena con el resto de la nave y forzar a la capitana a sopesar sellar el sector aun a costa de los enfermos.",
+    "personajes": [
+      "Selene Vargas",
+      "Tomás Reyes",
+      "Inés Okafor",
+      "Lior Castell"
+    ],
+    "locacion": "sala de máquinas del Deneb Once",
+    "informacion_nueva": "Las muestras que toma Selene se comportan de forma distinta cada vez que las observa; Tomás confirma que el reciclador lleva más tiempo del admitido devolviendo aire de la cuarentena al resto de la nave.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "El Corte Final",
+    "objetivo_narrativo": "Llevar a Inés y Tomás, ya reducidos a los dos únicos sanos, a ejecutar el corte que Selene calculó contra el reloj del aire común.",
+    "personajes": [
+      "Selene Vargas",
+      "Tomás Reyes",
+      "Inés Okafor",
+      "Lior Castell"
+    ],
+    "locacion": "puente de mando del Deneb Once",
+    "informacion_nueva": "Selene descubre que el fenómeno responde a la temperatura del propio reciclador y no es una enfermedad que crece; con el consentimiento de Lior transmitido por intercomunicador, Inés y Tomás ejecutan el corte sin saber a cuántos alcanzará.",
+    "tension": 5
+  }
+]

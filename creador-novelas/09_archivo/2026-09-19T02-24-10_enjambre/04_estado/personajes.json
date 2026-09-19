@@ -1,0 +1,69 @@
+{
+  "Mara Ibáñez": {
+    "estado_fisico": "Sin daño visible.",
+    "estado_psicologico": "Acaba de descubrir que la amenaza mortal no es el enjambre exterior sino la infección interior que crece desde hace días en Tomás, a tres metros de ella.",
+    "secretos_que_conoce": [
+      "Hay algo vivo afuera que ha atacado la estación.",
+      "Existe una brecha en el ducto de mantenimiento por donde entra aire exterior.",
+      "Hay un enjambre coordinado visible en las cámaras térmicas.",
+      "Las entidades se activan con el calor.",
+      "Apagar la calefacción las detendría pero la estación aguantaría solo 3-4 horas de calor residual.",
+      "El relevo llega en 6 días.",
+      "Comprende que el verdadero peligro es interno a la estación.",
+      "Descubre que Tomás está infectado con arcos violeta desde hace días."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Tomás Herrera": {
+    "estado_fisico": "Brazo izquierdo débil, antebrazo cubierto de arcos violeta gruesos, carne rígida y helada de un modo anómalo. Fuera del traje.",
+    "estado_psicologico": "Debilitado, ocultaba su condición al intentar no levantar el brazo izquierdo.",
+    "secretos_que_conoce": [
+      "El aislante del ducto bajo la cocina está abierto en un semicírculo limpio.",
+      "Hay dos arcos de marcas pequeñas y enfrentadas en la chapa desnuda, como si algo la hubiera cerrado sobre el metal.",
+      "Estuvo dentro del ducto y se quemó.",
+      "Oculta las quemaduras a Elena y a Mara.",
+      "Está infectado con arcos violeta que llevan días creciendo, lo ha ocultado."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Yusuf Kader": {
+    "estado_fisico": "Manos temblando después del corte total.",
+    "estado_psicologico": "Ha dirigido la táctica de ciclos de calor-frío; comete error de cálculo en tanda cuarta; bajo estrés extremo.",
+    "secretos_que_conoce": [
+      "El sensor tres no estaba dando ruido falso.",
+      "La amenaza es real y acecha fuera.",
+      "Las entidades exteriores se encienden con el calor de la estación y se apagan sin él.",
+      "Sin calor son piedra.",
+      "El plan de ciclos de apagón funciona para expulsar el enjambre hacia tramos profundos.",
+      "El plan de ciclos de apagón-encendido puede expulsar el enjambre hacia abajo; el error del bypass causó regreso enloquecido del enjambre."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Elena Voss": {
+    "estado_fisico": "Sin daño visible.",
+    "estado_psicologico": "Examina a Tomás, constata la gravedad, comunica sin palabras a Mara la severidad.",
+    "secretos_que_conoce": [
+      "Los bordes de las marcas están biselados hacia el mismo punto.",
+      "Algo mordió la chapa, no una vez sino varias.",
+      "La infección de Tomás lleva días avanzando; conoce su severidad verdadera.",
+      "Sabe que Tomás está infectado con arcos violeta que llevan días creciendo, carne rígida de modo anómalo."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  },
+  "Darío Lang": {
+    "estado_fisico": "Sin daño visible.",
+    "estado_psicologico": "Alerta; realiza órdenes; responde al radio mirando a Elena antes de reportar.",
+    "secretos_que_conoce": [
+      "Los puntos en la cámara térmica se mueven coordinadamente contra la corriente.",
+      "Se han detenido como si escucharan.",
+      "La estación tiene cinco personas a bordo, contando a Tomás en su estado actual.",
+      "La tripulación es de cinco a bordo, incluido Tomás en su estado."
+    ],
+    "ultima_aparicion": 3,
+    "posicion": ""
+  }
+}

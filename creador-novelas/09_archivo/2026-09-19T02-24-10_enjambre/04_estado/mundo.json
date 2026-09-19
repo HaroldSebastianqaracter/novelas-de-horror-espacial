@@ -1,0 +1,19 @@
+{
+  "reglas": [
+    "La temperatura exterior de Karst-9 no sube de los cincuenta grados bajo cero.",
+    "Sin calefacción, la temperatura interior de la estación desciende a niveles letales para la tripulación en menos de cuatro horas.",
+    "El relevo de personal solo puede llegar por nave y tarda varios días en trasladarse hasta la estación."
+  ],
+  "objetos": [
+    "Cámaras térmicas que vigilan los conductos de mantenimiento",
+    "Conductos térmicos que recorren toda la estación",
+    "Generadores que producen la calefacción de las secciones habitables",
+    "Trajes térmicos de exterior, únicos aptos para resistir el frío fuera de la estación"
+  ],
+  "linea_de_tiempo": [
+    "El último relevo de personal se retrasó respecto de lo previsto."
+  ],
+  "locaciones": {
+    "Estación Karst-9": "Estación minera construida sobre un campo de hielo perpetuo, sostenida por generadores que calientan sus secciones habitables y recorrida por una red de conductos de mantenimiento térmico."
+  }
+}

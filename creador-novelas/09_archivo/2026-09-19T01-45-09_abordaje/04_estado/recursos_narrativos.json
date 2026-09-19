@@ -1,0 +1,104 @@
+[
+  {
+    "recurso": "silencio como atmósfera: ausencia de palabras interrumpida solo por ruidos mecánicos",
+    "apariciones": {
+      "1": 2
+    }
+  },
+  {
+    "recurso": "frío anómalo como señal ambiental de que algo está mal",
+    "apariciones": {
+      "1": 2
+    }
+  },
+  {
+    "recurso": "la voz propia sonando ajena como síntoma de shock o disociación",
+    "apariciones": {
+      "1": 1
+    }
+  },
+  {
+    "recurso": "retirada física o apartamiento de la vista como respuesta instintiva al horror",
+    "apariciones": {
+      "1": 2
+    }
+  },
+  {
+    "recurso": "la entidad conoce o maneja el interior de la nave con propósito",
+    "apariciones": {
+      "1": 1
+    }
+  },
+  {
+    "recurso": "El compresor con su temblor doméstico como marcador de tiempo anormal.",
+    "apariciones": {
+      "2": 2
+    }
+  },
+  {
+    "recurso": "El escáner emitiendo pitidos (dos cortos, uno largo) como gradación de amenaza.",
+    "apariciones": {
+      "2": 1
+    }
+  },
+  {
+    "recurso": "Silencio como respuesta a revelaciones (nadie le contestó en seguida).",
+    "apariciones": {
+      "2": 1
+    }
+  },
+  {
+    "recurso": "Dez con la mano quieta/llave en el puño como gesto de culpa y tensión.",
+    "apariciones": {
+      "2": 2
+    }
+  },
+  {
+    "recurso": "Órdenes en voz plana y palabra plana como signo de estrés contenido.",
+    "apariciones": {
+      "2": 2
+    }
+  },
+  {
+    "recurso": "Dez subiendo último, aislado del grupo, como posición de marginación.",
+    "apariciones": {
+      "2": 1
+    }
+  },
+  {
+    "recurso": "La criatura aprendiendo, observable en lecturas térmicas con movimientos cíclicos de subida y retroceso",
+    "apariciones": {
+      "3": 2
+    }
+  },
+  {
+    "recurso": "Sonidos húmedos y viscerales del cuerpo de la criatura arrastrándose sobre chapa",
+    "apariciones": {
+      "3": 1
+    }
+  },
+  {
+    "recurso": "El metal pandeándose bajo presión física y recuperándose",
+    "apariciones": {
+      "3": 1
+    }
+  },
+  {
+    "recurso": "Yara tocando el casco frío pero entero, verificando supervivencia después de la maniobra",
+    "apariciones": {
+      "3": 1
+    }
+  },
+  {
+    "recurso": "Silencio final en el puente: cuatro personas mirando pantallas distintas sin volver a hablar",
+    "apariciones": {
+      "3": 1
+    }
+  },
+  {
+    "recurso": "Ambigüedad moral: ganaron la nave pero es dudoso que tengan algo más",
+    "apariciones": {
+      "3": 1
+    }
+  }
+]

@@ -1,0 +1,1 @@
+Algo entró por la esclusa de carga de un remolcador con cinco tripulantes y mató al de guardia delante de los demás. Es grande, se mueve por los conductos y no responde a ningún protocolo de contacto. La tripulación sella los mamparos por secciones e intenta acorralarlo antes de que llegue al puente. Quedan once días hasta puerto.

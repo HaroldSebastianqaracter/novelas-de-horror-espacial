@@ -1,0 +1,45 @@
+[
+  {
+    "num": 1,
+    "titulo": "La Esclusa Tres",
+    "objetivo_narrativo": "Establecer la rutina de la tripulación y romperla con la muerte de Kip Anwar, forzando el sellado de la sección de carga.",
+    "personajes": [
+      "Kip Anwar",
+      "Yara Solís",
+      "Dez Okafor",
+      "Mireia Vance",
+      "Tobias Renn"
+    ],
+    "locacion": "sección de carga",
+    "informacion_nueva": "Algo entró por la esclusa de carga tres junto con un contenedor recuperado de un pecio y mató a Kip Anwar; no responde a ningún protocolo de contacto y se mueve por los conductos de mantenimiento más rápido de lo esperado.",
+    "tension": 3
+  },
+  {
+    "num": 2,
+    "titulo": "El Conducto que Nadie Marcó",
+    "objetivo_narrativo": "Tender la primera trampa real contra la criatura embudada en la sección de máquinas y ver cómo fracasa, revelando un conducto oculto que fractura la confianza del grupo.",
+    "personajes": [
+      "Yara Solís",
+      "Dez Okafor",
+      "Mireia Vance",
+      "Tobias Renn"
+    ],
+    "locacion": "sección de máquinas",
+    "informacion_nueva": "Existe un conducto de mantenimiento sin registrar que Dez cerró por su cuenta meses atrás para robar presión de aire, y la criatura lo usa para aparecer donde nadie la espera.",
+    "tension": 2
+  },
+  {
+    "num": 3,
+    "titulo": "Lo que Queda del Casco",
+    "objetivo_narrativo": "Usar el conducto no registrado como embudo final hacia la trampa de descompresión y llegar al puente con la nave a salvo, aunque la confianza entre ellos quede tan maltrecha como los mamparos.",
+    "personajes": [
+      "Yara Solís",
+      "Dez Okafor",
+      "Mireia Vance",
+      "Tobias Renn"
+    ],
+    "locacion": "puente",
+    "informacion_nueva": "Dez, el único que conoce el conducto por dentro, logra sellarlo a tiempo desde dentro y la criatura es arrastrada al vacío junto con la esclusa de mantenimiento.",
+    "tension": 5
+  }
+]
