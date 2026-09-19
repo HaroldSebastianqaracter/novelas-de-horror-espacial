@@ -1,11 +1,15 @@
 # Medir Spec-X 05: qué se compara y qué se ha visto
 
-En curso desde el 19/09/2026, rama `specs/aristas`. Este documento se escribe mientras corre, así que
-las secciones marcadas **(provisional)** cambiarán.
+19/09/2026, rama `specs/aristas`. Cuatro novelas de quince capítulos: tres de control y una con el
+interruptor encendido. **Veredicto corto: el mecanismo de X-05 funciona y está medido; su efecto
+sobre la calidad final no se puede demostrar con esta muestra, y probablemente sea pequeño, porque
+solo 1 de cada 9 contradicciones es del tipo que arregla.**
 
 ## El diseño
 
-Seis novelas de **15 capítulos** × 400 palabras, tres premisas escritas por las dos variantes:
+Previsto: seis novelas de **15 capítulos** × 400 palabras, tres premisas por las dos variantes.
+Ejecutado: las tres de control y **una** con aristas, por lo que explica la sección «X-05 ataca una
+minoría del problema».
 
 | brazo | `aristas_en_continuidad` | qué hace el filtro |
 |---|---|---|
@@ -28,9 +32,19 @@ brazo de control viera el mismo prompt, los dos se diferenciarían en algo más 
 pronto y siguen separadas. En una novela donde todos van juntos no hay ningún hecho «de alguien que
 no está en escena», y no habría nada que arreglar.
 
-## Lo que ya enseñó el brazo de control (provisional, n=1)
+## El brazo de control, completo (n=3)
 
-`esclusas`: 15 capítulos, **105 min**, 22,67 $, **5 contradicciones**, 3 correcciones automáticas.
+| novela | reloj | contradicciones | coste |
+|---|---|---|---|
+| esclusas | 105,0 min | 5 | 22,67 $ |
+| relevos | 88,9 min | 1 | 17,69 $ |
+| descenso | 92,2 min | 3 | 17,87 $ |
+| **media** | **95,4 min** | **3,0** | 19,4 $ |
+
+Las tres corrieron con **tres agentes**, no con dos. No era lo previsto: `campos_de_encargo` solo
+ponía por defecto dos interruptores, y lo que el encargo no decía llegaba al formulario como casilla
+desmarcada, o sea apagado, así que el valor por defecto del harness no se respetaba por esa vía.
+Está arreglado, pero estas cifras son de la configuración de tres agentes.
 
 **El defecto existe y aparece donde la spec decía.**
 
@@ -51,9 +65,54 @@ ni preguntar, escribió a dos personajes hablando por esa radio. QA lo marcó la
 Con `relacionados` ese hecho llevaría a los personajes a los que deja incomunicados, y el salto de
 vecindad se lo entregaría al capítulo 14 aunque la escena no transcurra en máquinas.
 
-Cuidado al leerlo: **esto demuestra que el brazo de control falla, no que el otro lo arregle.** Eso
-depende de que el escritor rellene bien `relacionados`, que es lo único del cambio que no se puede
-cubrir con pruebas.
+Cuidado al leerlo: **esto demuestra que el brazo de control falla, no que el otro lo arregle.**
+
+## Pero X-05 ataca una minoría del problema
+
+Clasificando las 9 contradicciones de las tres novelas con `herramientas/ceguera_del_filtro.py`:
+
+| clase | cuántas |
+|---|---|
+| **el hecho estaba en su prompt y lo contradijo igual** | **7** |
+| ceguera del filtro (lo que X-05 arregla) | 1 |
+| no se pudo atar a un hecho | 1 |
+
+**Siete de cada nueve contradicciones no son un problema de información sino de atención**, y ningún
+filtro las arregla. De ahí sale `spec-x-06`, que apunta a un margen siete veces mayor.
+
+Esto cambió el plan. Tres novelas con aristas (5 h, ~58 $) para detectar un cambio de una
+contradicción sobre nueve, con una variación entre novelas del mismo brazo que va de 1 a 5, habrían
+dado «no concluyente» pasara lo que pasara. Se corrió **una sola**, y no para comparar
+contradicciones sino para medir el mecanismo, que no tiene ruido.
+
+## El brazo con aristas (n=1): el mecanismo funciona
+
+`esclusas` con el interruptor encendido: 114,1 min, 19,68 $, 6 contradicciones.
+
+**El escritor rellena el campo, y bien.** 51 de 84 hechos (61 %) traen `relacionados`; de 11 nombres
+distintos, 8 son personajes del registro. Ejemplo real:
+
+> `Ramiro Solís` → `["Inés Vasconcelos", "Tomás Aguirre"]`
+> «Ramiro Solís desapareció en los conductos de ventilación durante la ronda…»
+
+Los otros 3 nombres son locaciones o `mundo`. No rompen nada, pero tampoco sirven: el salto compara
+contra los personajes en escena, así que una locación en `relacionados` nunca casa. Si X-05 sigue
+adelante, conviene decírselo al que rellena el campo.
+
+**El salto tiene alcance.** Contando sobre el log y la escaleta reales, **212 de 971 inyecciones de
+hecho (22 %) entran solo por la arista**: unos 14 por capítulo que el filtro viejo escondía.
+
+**Emparejado con su control, misma premisa:**
+
+| | sin aristas | con aristas |
+|---|---|---|
+| contradicciones | 5 | 6 |
+| **cegueras del filtro** | **1** | **0** |
+| hechos entrados por la arista | — | 212 (22 %) |
+
+La ceguera desapareció, que es exactamente lo que el cambio promete. Pero **1 → 0 es un solo suceso**
+y el total subió de 5 a 6, dentro del ruido (el control fue de 1 a 5). Lo honesto: el mecanismo está
+demostrado, su efecto sobre la calidad final no.
 
 ## Hallazgo lateral: en novelas largas, QA es el actor caro
 
@@ -81,5 +140,15 @@ degrada el harness con poco contexto.
 
 ## Coste
 
-Una novela de 15 capítulos: **105 minutos y 22,67 $**. Las seis: unas diez horas y media y ~136 $.
-La estimación previa era de una hora y 17 $ por novela; se quedó corta en las dos cosas.
+Una novela de 15 capítulos: **95 minutos y 19,4 $** de media. La estimación previa era de una hora y
+17 $; se quedó corta en las dos cosas. Las cuatro corridas suman unas 6,7 horas y ~78 $. Las seis del
+plan original habrían sido diez horas y media y ~136 $.
+
+## Qué haría falta para cerrar X-05
+
+1. **Decidir si merece la pena.** Ataca 1 de cada 9 contradicciones; `spec-x-06` ataca 7. Si hay una
+   sola vuelta disponible, es la otra.
+2. **Si sigue adelante**: repetir con `escritor_emite_delta` encendido, que es la configuración que
+   se envía, y decirle a quien rellena `relacionados` que ponga personajes y no locaciones.
+3. **Medir por cegueras, no por contradicciones totales.** El total varía de 1 a 5 entre novelas del
+   mismo brazo; las cegueras son pocas y directamente atribuibles al filtro.
