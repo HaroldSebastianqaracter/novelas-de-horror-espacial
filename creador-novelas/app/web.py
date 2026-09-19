@@ -43,6 +43,7 @@ SKILLS: dict[str, str] = {
     "generar-escaleta": "/generar-escaleta",
     "inicializar-estado": "/inicializar-estado",
     "escribir-tanda": "/escribir-tanda",
+    "resolver-qa": "/resolver-qa",
 }
 # `--salida` va explícito aunque §8.2 diga que tiene valor por defecto: el CLI todavía lo exige.
 # Pasarlo aquí funciona con las dos versiones del verbo, así que no hay que esperar a nadie.
@@ -54,16 +55,22 @@ VERBOS: dict[str, list[str]] = {"ensamblar": ["ensamblar", "--salida", "08_entre
 # reporte pendiente y ese lo dice el manifiesto. Es `resolver --sin-cambios`, es decir: acepto el
 # veredicto tal como esta y sigo. No existe una variante desde la web que afirme haber corregido
 # capitulos, porque el harness no puede comprobarlo y seria una mentira anotada en el registro.
-FASES_DINAMICAS = ("reanudar",)
+FASES_DINAMICAS = ("reanudar", "corregir")
 
 # Modelo del orquestador de las fases con agentes. No redacta: ejecuta verbos, lee la línea
 # RESULTADO y despacha subagentes (INV-08). Cada subagente declara el suyo en `.claude/agents/`,
 # de modo que este valor no influye en con qué modelo se escribe la novela.
-MODELO_ORQUESTADOR = "opus"
+# Es sonnet desde el 19/09: como no redacta, medirlo en opus solo añadía coste. Sobre las mismas
+# premisas sale igual de rápido y a menos de la mitad de precio, y el orquestador ocupa 0,8 min de
+# los 20 de una novela, así que su modelo no está en el camino crítico.
+# El entorno puede fijarlo para una corrida entera sin tocar el código, que es como el loop de
+# velocidad probaba cada vuelta: `HARNESS_MODELO_ORQUESTADOR=opus`.
+MODELO_ORQUESTADOR = os.environ.get("HARNESS_MODELO_ORQUESTADOR") or "sonnet"
 # El mismo modelo con su identificador completo. `--model` acepta el alias, pero `config/precios.json`
 # y Langfuse se llevan por el nombre canónico: anotar «opus» en `uso.jsonl` dejaba el consumo del
 # orquestador a 0,00 $ en el informe, que es peor que no contarlo, porque parece gratis.
-MODELO_ORQUESTADOR_ID = "claude-opus-5"
+_ID_POR_ALIAS = {"opus": "claude-opus-5", "sonnet": "claude-sonnet-5", "haiku": "claude-haiku-4-5-20251001"}
+MODELO_ORQUESTADOR_ID = _ID_POR_ALIAS.get(MODELO_ORQUESTADOR, MODELO_ORQUESTADOR)
 
 # Una tanda lanzada desde la terminal no deja proceso hijo aquí; se la reconoce porque su registro
 # sigue creciendo. Por debajo de este margen se considera viva.
@@ -214,7 +221,9 @@ def _cerrar_proceso() -> dict[str, Any] | None:
     return fin
 
 
-SIN_SUBAGENTES = tuple(f for f in SKILLS if f != "escribir-tanda")
+# Las que no despachan subagentes: su coste entero es de la sesión y va a `fases.jsonl`.
+CON_SUBAGENTES = ("escribir-tanda", "resolver-qa")
+SIN_SUBAGENTES = tuple(f for f in SKILLS if f not in CON_SUBAGENTES)
 
 # Qué campo del resumen de `claude -p` corresponde a cada columna de `uso.jsonl`.
 _CAMPOS_USO = {"tokens_entrada": "input_tokens", "tokens_salida": "output_tokens",
@@ -251,6 +260,10 @@ def _anotar_coste_de_fase(raiz: Path | None, fase: str | None, log: str | None,
     """
     if not raiz or not fase or not log:
         return
+    if fase in VERBOS or fase in FASES_DINAMICAS:
+        # Un verbo del CLI no deja el resumen JSON de `claude -p`: su log es texto. Intentar leerlo
+        # como JSON solo servía para escupir «no se pudo anotar el coste de reanudar» en cada pausa.
+        return
     try:
         datos = json.loads(Path(log).read_text(encoding="utf-8"))
         uso = datos.get("usage") or {}
@@ -258,6 +271,9 @@ def _anotar_coste_de_fase(raiz: Path | None, fase: str | None, log: str | None,
             fila = {"ts": datetime.now().astimezone().isoformat(timespec="milliseconds"),
                     "fase": fase, "coste_usd": float(datos.get("total_cost_usd") or 0),
                     "turnos": datos.get("num_turns"),
+                    # El reloj de pared de la fase. Sin él, `fases.jsonl` solo decía cuándo terminó
+                    # cada una, y la duración de la primera no se podía deducir de nada.
+                    "segundos": round(time.time() - desde, 1) if desde else None,
                     "tokens": sum(int(uso.get(k) or 0) for k in _CAMPOS_USO.values())}
             destino = Rutas(raiz).registro / "fases.jsonl"
             destino.parent.mkdir(parents=True, exist_ok=True)
@@ -376,6 +392,16 @@ def lanzar_fase(raiz: Path, fase: str) -> dict[str, Any]:
         if getattr(m, "estado", None) != "pausado_por_qa" or not pendiente:
             raise RuntimeError("No hay ninguna pausa por QA que reanudar.")
         cmd = [_python(raiz), "-m", "app", "resolver", "--reporte", pendiente, "--sin-cambios"]
+    elif fase == "corregir":
+        # La otra salida de una pausa de QA, y la única que arregla algo: marca el capítulo del corte
+        # para rehacerlo. Después va `/resolver-qa`, que ahora manda al escritor a reescribirlo con el
+        # hallazgo delante, y al final `resolver --cerrar`.
+        m = checkpoint.leer_manifest(raiz)
+        pendiente = getattr(m, "reporte_qa_pendiente", None) if m else None
+        if getattr(m, "estado", None) != "pausado_por_qa" or not pendiente:
+            raise RuntimeError("No hay ninguna pausa por QA que corregir.")
+        cmd = [_python(raiz), "-m", "app", "resolver", "--reporte", pendiente,
+               "--capitulos", pendiente.rsplit("_", 1)[-1]]
     elif fase in VERBOS:
         cmd = [_python(raiz), "-m", "app", *VERBOS[fase]]
     else:
@@ -416,6 +442,30 @@ def lanzar_fase(raiz: Path, fase: str) -> dict[str, Any]:
     _EN_CURSO.clear()
     _EN_CURSO.update({"proc": proc, "fase": fase, "desde": time.time(), "log": str(log), "raiz": raiz})
     return {"lanzada": fase, "pid": proc.pid, "log": str(log)}
+
+
+def ejecutar_fase(raiz: Path, fase: str, *, tope_s: float = 3600, latido: float = 2.0) -> dict[str, Any]:
+    """Lanza una fase y espera a que termine. La versión de un paso de lo que la pantalla hace en dos.
+
+    La pantalla lanza y vuelve enseguida, porque tiene a alguien mirando que pregunta por el estado.
+    Una corrida encadenada no tiene a nadie, así que necesita esperar aquí mismo --y por el mismo
+    camino, no por uno paralelo: si la corrida midiera un lanzamiento distinto del que usa el usuario,
+    estaría midiendo otra cosa.
+
+    `tope_s` es el seguro: una fase colgada se lleva por delante la noche entera si nadie la corta.
+    """
+    inicio = time.monotonic()
+    lanzada = lanzar_fase(raiz, fase)
+    while proceso_vivo():
+        if time.monotonic() - inicio > tope_s:
+            proc = _EN_CURSO.get("proc")
+            if proc is not None:
+                proc.kill()
+            _cerrar_proceso()
+            raise TimeoutError(f"la fase {fase} pasó de {tope_s / 60:.0f} min sin terminar y se cortó")
+        time.sleep(latido)
+    fin = _cerrar_proceso() or {}
+    return {**lanzada, **fin, "segundos": round(time.monotonic() - inicio, 1)}
 
 
 def _python(raiz: Path) -> str:

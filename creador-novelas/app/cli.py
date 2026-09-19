@@ -1,6 +1,6 @@
 """Interfaz de línea de comandos (spec técnica §8.2).
 
-Capa externa: status · resolver · ensamblar · guardar · ui · exportar-traza (RF-09, después de la tanda).
+Capa externa: status · resolver · ensamblar · archivar · guardar · ui · exportar-traza (RF-09, después de la tanda).
 Capa interna (la usa la skill /escribir-tanda, un tramo del loop por verbo): tanda · preparar-capitulo ·
 registrar-escritor · aplicar-delta · descartar-borrador · preparar-qa · cerrar-qa.
 Capa de validación (la ejecuta cada agente sobre su propio artefacto, RF-08.4): validar-capitulo ·
@@ -13,6 +13,7 @@ decida el paso siguiente sin interpretar prosa. Errores: `ERROR <Tipo>: motivo` 
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import re
 import sys
@@ -21,7 +22,7 @@ from pathlib import Path
 
 import time
 
-from app import registro, validacion
+from app import archivo, registro, validacion
 from app.agents import extractor as ag_extractor, qa as ag_qa
 from app.config import HarnessConfig, cargar_config, cargar_proveedores
 from app.errores import ConfiguracionInvalidaError, EstadoInvalidoError, HarnessError, PausadoPorQAError
@@ -109,6 +110,30 @@ def cmd_ensamblar(args, raiz: Path) -> int:
     salida.write_text("\n".join(partes) + ("\n" if partes else ""), encoding="utf-8")
     print(f"{m.ultimo_capitulo_cerrado} capítulos ensamblados en {salida}")
     _resultado("ensamblado", capitulos=m.ultimo_capitulo_cerrado, salida=str(salida))
+    return 0
+
+
+def cmd_archivar(args, raiz: Path) -> int:
+    """Guarda la novela terminada en 09_archivo/ y deja el árbol listo para la siguiente.
+
+    No borra nada: mueve. Por eso no exige que git tenga el trabajo confirmado, al contrario que el
+    botón de borrar de la pantalla.
+    """
+    r = archivo.archivar(raiz, nombre=args.nombre, forzar=args.forzar)
+    resumen = r["resumen"]
+    reloj, calidad = resumen["reloj"], resumen["calidad"]
+    print(f"archivada en {r['carpeta']} ({r['entradas']} entradas movidas)")
+    print(f"- {resumen['capitulos']['cerrados']} capítulos cerrados, palabras {resumen['capitulos']['palabras']}")
+    if reloj["total_s"] is not None:
+        print(f"- reloj: {reloj['total_s'] / 60:.1f} min "
+              f"(preludio {(reloj['preludio_s'] or 0) / 60:.1f}, tandas {(reloj['tandas_s'] or 0) / 60:.1f})")
+    for rol, fila in resumen["agentes"].items():
+        print(f"  · {rol}: {fila['invocaciones']} invocaciones, {fila['segundos'] / 60:.1f} min, "
+              f"{fila['tokens_salida']} tokens de salida")
+    print(f"- calidad: {calidad['contradicciones']} contradicciones en {calidad['cortes_qa']} cortes, "
+          f"{calidad['reintentos_de_escritor']} reintentos de escritor")
+    _resultado("archivado", carpeta=r["carpeta"], capitulos=resumen["capitulos"]["cerrados"],
+               segundos=reloj["total_s"], contradicciones=calidad["contradicciones"])
     return 0
 
 
@@ -249,6 +274,29 @@ def cmd_guardar(args, raiz: Path) -> int:
         malos = [h for h in log.root if h.cap_origen != 0]
         if malos:
             raise EstadoInvalidoError("RF-04.3: los hechos iniciales llevan cap_origen = 0 (derivados de la premisa, previos al capítulo 1)")
+        absolutos = cont.absolutos_que_la_trama_desmentira(log)
+        if absolutos:
+            detalle = "; ".join(f"«{h[:90]}» ({motivo})" for h, motivo in absolutos)
+            raise EstadoInvalidoError(
+                "RF-04.3: hay hechos iniciales escritos como ley del mundo, y son los que la novela "
+                f"tiene que desmentir para tener giro: {detalle}. Reformulalos como lo que un "
+                "registro recoge, lo que alguien sabe o lo que se ha medido. «No hay ningún pasillo "
+                "entre la bodega y la sala de máquinas» cierra la puerta al capítulo que lo "
+                "encuentra; «los planos de a bordo no recogen ningún pasillo entre la bodega y la "
+                "sala de máquinas» es cierto para siempre y no cierra ninguna.")
+        outline_actual = repo.leer_outline(raiz)
+        mundo_actual = repo.leer_mundo(raiz)
+        if outline_actual is not None and mundo_actual is not None:
+            dobles = cont.personajes_en_dos_sitios(log, outline_actual, sorted(mundo_actual.locaciones))
+            if dobles:
+                detalle = "; ".join(f"{s}: el hecho lo sitúa en «{a}» y el capítulo {n} transcurre en «{b}»"
+                                    for s, a, b, n in dobles)
+                raise EstadoInvalidoError(
+                    f"RF-04.3: hay personajes puestos en dos sitios a la vez: {detalle}. El escritor no "
+                    "puede preguntar ni leer capítulos anteriores, así que el salto que no narres lo "
+                    "rellena él a ciegas y acaba contradiciéndose. Hay dos arreglos y los dos valen: "
+                    "narrar el paso en el hecho («tiene la guardia del puente y baja al nivel dos al oír "
+                    "la alarma») o dejar al personaje donde el capítulo lo necesita.")
         hechos = [cont.validar_sujeto(h, registro) for h in log.root]
         repo.escribir_continuidad(raiz, LogContinuidad(hechos))
         destino = rutas.continuidad
@@ -318,9 +366,33 @@ def cmd_preparar_capitulo(args, raiz: Path) -> int:
     print(f"prompt en {rutas.prompt_escritor(args.n).relative_to(raiz).as_posix()}; el escritor debe escribir "
           f"{rutas.capitulo(args.n).relative_to(raiz).as_posix()}; prompt del extractor en "
           f"{rutas.prompt_extractor(args.n).relative_to(raiz).as_posix()}")
+    # X-04: quien orquesta no tiene por qué leer la config; la línea RESULTADO le dice si el delta
+    # llega con el capítulo o si hay que despachar al extractor.
     _resultado("contexto_listo", n=args.n, prompt=rutas.prompt_escritor(args.n).relative_to(raiz).as_posix(),
                prompt_extractor=rutas.prompt_extractor(args.n).relative_to(raiz).as_posix(),
+               delta_del_escritor=config.escritor_emite_delta,
                tokens=contexto.tokens_estimados, hechos=len(contexto.hechos_inyectados))
+    return 0
+
+
+def cmd_preparar_correccion(args, raiz: Path) -> int:
+    """Prompt para que el escritor rehaga un capítulo que el revisor tumbó (RF-07.6, paso 2).
+
+    Hasta ahora una contradicción solo tenía dos salidas: aceptarla y dejarla escrita, o que una
+    persona corrigiera la prosa a mano. El escritor ya sabe corregir --lo hace con los desvíos de
+    longitud y con las repeticiones-- y lo único que le faltaba era que alguien le contase el
+    hallazgo.
+    """
+    config = _config(raiz)
+    contexto = loop.preparar_correccion(raiz, config, args.n)
+    rutas = Rutas(raiz)
+    print(f"corrección del capítulo {args.n}: {contexto.tokens_estimados} tokens estimados de {contexto.limite}")
+    print(f"prompt en {rutas.prompt_escritor(args.n).relative_to(raiz).as_posix()}; el escritor reescribe "
+          f"{rutas.capitulo(args.n).relative_to(raiz).as_posix()}")
+    _resultado("correccion_lista", n=args.n,
+               prompt=rutas.prompt_escritor(args.n).relative_to(raiz).as_posix(),
+               delta_del_escritor=config.escritor_emite_delta,
+               tokens=contexto.tokens_estimados)
     return 0
 
 
@@ -466,7 +538,18 @@ def _imprimir_validacion(r: validacion.ResultadoValidacion, raiz: Path, n: int) 
 
 
 def cmd_validar_capitulo(args, raiz: Path) -> int:
-    return _imprimir_validacion(validacion.validar_capitulo(raiz, _config(raiz), args.n), raiz, args.n)
+    """Con `--con-delta` valida también el delta que el escritor acaba de escribir (X-04).
+
+    Un solo comando en vez de dos porque H-11 le deja al escritor exactamente uno. Abrirle la valla
+    a dos comandos era la alternativa, y esa puerta luego no se cierra sola.
+    """
+    config = _config(raiz)
+    r = validacion.validar_capitulo(raiz, config, args.n)
+    if getattr(args, "con_delta", False) and r.valido:
+        # El rol lo fija el verbo, no quien lo ejecuta, así que sin esto el registro anotaba un
+        # extractor que en esta corrida no ha existido, y Langfuse enseñaba una invocación fantasma.
+        r = dataclasses.replace(validacion.validar_delta(raiz, config, args.n), rol="escritor")
+    return _imprimir_validacion(r, raiz, args.n)
 
 
 def cmd_validar_delta(args, raiz: Path) -> int:
@@ -496,6 +579,11 @@ def construir_parser() -> argparse.ArgumentParser:
     e = sub.add_parser("ensamblar", help="concatena los capítulos cerrados con su título")
     e.add_argument("--salida", required=True)
     e.set_defaults(fn=cmd_ensamblar)
+
+    a = sub.add_parser("archivar", help="cierra la novela: la mueve a 09_archivo/ con su resumen y vacía el árbol")
+    a.add_argument("--nombre", help="nombre de la carpeta; por defecto sale del título de la premisa")
+    a.add_argument("--forzar", action="store_true", help="archiva aunque haya una tanda en curso o QA pausado")
+    a.set_defaults(fn=cmd_archivar)
 
     g = sub.add_parser("guardar", help="fases 0-4: persiste con validación un artefacto generado por la skill")
     g.add_argument("artefacto", choices=ARTEFACTOS)
@@ -527,6 +615,11 @@ def construir_parser() -> argparse.ArgumentParser:
     pc.add_argument("--feedback", help="desvío de longitud del intento anterior (EX-07)")
     pc.set_defaults(fn=cmd_preparar_capitulo)
 
+    pk = sub.add_parser("preparar-correccion",
+                        help="RF-07.6: prompt para que el escritor rehaga un capítulo con contradicciones")
+    pk.add_argument("n", type=int)
+    pk.set_defaults(fn=cmd_preparar_correccion)
+
     pe = sub.add_parser("preparar-extractor", help="prompt del extractor para el capítulo en curso o uno en reextracción")
     pe.add_argument("n", type=int)
     pe.set_defaults(fn=cmd_preparar_extractor)
@@ -556,11 +649,14 @@ def construir_parser() -> argparse.ArgumentParser:
     cq.add_argument("--retorno", help="mensaje final de QA, hasta cinco líneas (RF-08.1); se valida antes de cerrar")
     cq.set_defaults(fn=cmd_cerrar_qa)
 
-    for verbo, fn, ayuda in (("validar-capitulo", cmd_validar_capitulo, "escritor: longitud ±20 %, solo prosa, personajes en escena"),
+    for verbo, fn, ayuda in (("validar-capitulo", cmd_validar_capitulo, "escritor: longitud ±20 %%, solo prosa, personajes en escena"),
                              ("validar-delta", cmd_validar_delta, "extractor: esquema, sujetos, tope de hechos"),
                              ("validar-reporte", cmd_validar_reporte, "qa: esquema de ReporteQA y recursos_usados.json")):
         v = sub.add_parser(verbo, help=f"RF-08.4, solo lectura; {ayuda}")
         v.add_argument("n", type=int)
+        if verbo == "validar-capitulo":
+            v.add_argument("--con-delta", action="store_true",
+                           help="X-04: valida además delta_cap_N.json, cuando el delta lo escribe el escritor")
         v.set_defaults(fn=fn)
     return p
 

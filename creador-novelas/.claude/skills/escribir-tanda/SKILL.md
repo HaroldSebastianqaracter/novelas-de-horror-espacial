@@ -33,7 +33,18 @@ Guardá textualmente su mensaje final y validalo (el harness vuelve a validar el
 - `ERROR AutovalidacionFallidaError` (EX-10: el escritor agotó sus intentos) → `... descartar-borrador N` y volver a 1 con `--feedback "<detalle del error>"`, una sola vez; si repite, detenete y reportá EX-07/EX-08 con el error textual.
 - `ERROR EstadoInvalidoError` (el borrador no valida por algo distinto de la longitud) → detenete y reportá el error textual.
 
-## 3. Invocar al extractor
+## 3. El delta
+
+Mirá `delta_del_escritor` en la línea `RESULTADO: contexto_listo` del paso anterior.
+
+**`delta_del_escritor=true` (X-04): no invoques al extractor.** El escritor ya dejó
+`04_estado/deltas/delta_cap_N.json` junto al capítulo y lo validó con el mismo comando. Aplicá
+el delta directamente, sin `--retorno`, porque no hay línea de extractor que pasar:
+`.venv/Scripts/python.exe -m app aplicar-delta N`
+Si eso devuelve `ERROR` porque el delta no está o no vale, entonces sí despachá al extractor
+como abajo: ese capítulo pierde la ventaja de velocidad, pero la novela sigue.
+
+**`delta_del_escritor=false`: invocá al extractor.**
 `preparar-capitulo` ya dejó su prompt en `04_estado/prompts/extractor_cap_N.md` (si hace falta regenerarlo: `.venv/Scripts/python.exe -m app preparar-extractor N`). Leé ese archivo con Read y pasalo completo: `Agent(subagent_type="extractor", prompt=<contenido>)`. No le pases el texto del capítulo: él lo lee con Read (única ruta permitida por H-05).
 El extractor escribe él mismo `04_estado/deltas/delta_cap_N.json`, lo valida (`validar-delta N`, RF-08.4) y devuelve **una línea** `delta_cap_N.json · K hechos · P personajes · validado`. El JSON no pasa por vos: no lo pidas, no lo escribas. Guardá su línea y aplicá el delta (el harness vuelve a validar el archivo):
 `.venv/Scripts/python.exe -m app aplicar-delta N --retorno "<línea del extractor>"`

@@ -73,7 +73,11 @@ def construir_proyecto(raiz: Path, *, con_estado: bool = True, total: int = 30) 
     })
     rutas.novela_json.write_text(json.dumps(novela, indent=2), encoding="utf-8")
     ejecucion = json.loads(rutas.ejecucion_json.read_text(encoding="utf-8"))
-    ejecucion.update({"capitulos_por_tanda": 3, "max_llamadas_por_tanda": 30, "registrar_uso": True})
+    # Lo mismo que arriba, y por el mismo motivo: `config/` es del libro que el usuario tenga
+    # cargado. Una corrida con `escritor_emite_delta` encendido tumbó seis pruebas sin que nadie
+    # hubiera tocado el código, porque el proyecto de pruebas heredó el interruptor.
+    ejecucion.update({"capitulos_por_tanda": 3, "max_llamadas_por_tanda": 30, "registrar_uso": True,
+                      "exportar_trazas": True, "escritor_emite_delta": False})
     rutas.ejecucion_json.write_text(json.dumps(ejecucion, indent=2), encoding="utf-8")
     if not con_estado:
         return raiz

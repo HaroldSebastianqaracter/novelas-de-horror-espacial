@@ -21,15 +21,22 @@ INTERPRETE = ".venv/Scripts/python.exe"  # solo el intérprete del entorno virtu
 VERBO_POR_ROL = {"escritor": "validar-capitulo", "extractor": "validar-delta", "qa": "validar-reporte"}
 
 
-def comando_validador(rol: str, n: int) -> str:
-    return f"{INTERPRETE} -m app {VERBO_POR_ROL[rol]} {n}"
+def comando_validador(rol: str, n: int, *, con_delta: bool = False) -> str:
+    """El único comando de terminal que H-11 le deja a cada rol.
+
+    `con_delta` es para el escritor que además emite su propio delta (X-04): en vez de abrirle la
+    valla a dos comandos --que es una puerta que luego no se cierra sola-- se le cambia el suyo por
+    uno que valida las dos cosas de una vez.
+    """
+    sufijo = " --con-delta" if con_delta and rol == "escritor" else ""
+    return f"{INTERPRETE} -m app {VERBO_POR_ROL[rol]} {n}{sufijo}"
 
 CAMPOS_NOVELA = (
     "total_capitulos", "palabras_por_capitulo", "idioma", "persona_narrativa", "tiempo_verbal",
     "ventana_resumen_rodante", "cadencia_qa", "max_tokens_contexto_escritor", "max_hechos_por_capitulo",
 )
 CAMPOS_EJECUCION = ("capitulos_por_tanda", "max_llamadas_por_tanda", "registrar_uso", "exportar_trazas",
-                    "exportar_para_juez")
+                    "exportar_para_juez", "escritor_emite_delta")
 
 
 class HarnessConfig(BaseModel):
@@ -50,6 +57,11 @@ class HarnessConfig(BaseModel):
     # Va aparte de `exportar_trazas` porque decide algo distinto: no si se publica, sino si sale el texto
     # de la novela hacia un servicio externo y de ahí al modelo juez.
     exportar_para_juez: bool = False
+    # X-04: el escritor entrega el capítulo y su delta en la misma invocación, y el extractor no se
+    # llama. El miedo era que el delta contase lo que el escritor quiso escribir y no lo que escribió;
+    # medido sobre tres premisas emparejadas pasa lo contrario, 0 contradicciones frente a 4 y la
+    # mitad de reloj (19/09, ver HALLAZGOS.md). Por eso viene encendido; apagarlo devuelve el extractor.
+    escritor_emite_delta: bool = True
     palabras_por_capitulo: int = Field(gt=0)  # RF-CFG-01
     idioma: str = Field(min_length=2)  # RF-CFG-05
     persona_narrativa: Literal["primera", "tercera_limitada", "tercera_omnisciente"]

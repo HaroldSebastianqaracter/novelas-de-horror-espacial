@@ -1,1 +1,0 @@
-un alien se met en una nave y matara a toda la tripulacion

@@ -93,7 +93,7 @@ def _formatear_fichas(fichas: dict) -> str:
 
 
 def ensamblar_contexto(n: int, config: HarnessConfig, raiz: Path, *, feedback_longitud: str | None = None,
-                       resumen_minimo: bool = False) -> Contexto:
+                       feedback_qa: str | None = None, resumen_minimo: bool = False) -> Contexto:
     """RF-05.1: construye el prompt del escritor desde el estado persistente, sin el manuscrito."""
     rutas = Rutas(raiz)
     entrada = repo.leer_outline_entry(raiz, n)
@@ -147,7 +147,9 @@ def ensamblar_contexto(n: int, config: HarnessConfig, raiz: Path, *, feedback_lo
         "PALABRAS_MAX": str(maximo),
         "PERSONAJES_PERMITIDOS": ", ".join(permitidos) if permitidos else "(ninguno)",
         "FEEDBACK_LONGITUD": feedback_longitud or "(primer intento: sin desvío previo)",
-        "COMANDO_VALIDACION": comando_validador("escritor", n),
+        "FEEDBACK_QA": feedback_qa or "(no hay revisión previa de este capítulo)",
+        "COMANDO_VALIDACION": comando_validador("escritor", n, con_delta=config.escritor_emite_delta),
+        "ENCARGO_DELTA": _encargo_delta(n, config, raiz),
         "RECURSOS_AGOTADOS": rec.formatear_agotados(recursos),
     }
     texto = plantillas.rellenar(plantillas.cargar_plantilla(raiz, "escritor"), valores)
@@ -158,6 +160,35 @@ def ensamblar_contexto(n: int, config: HarnessConfig, raiz: Path, *, feedback_lo
         feedback_longitud=feedback_longitud, recursos_inyectados=len(agotados), _config=config, _raiz=raiz,
     )
 
+
+def _encargo_delta(n: int, config: HarnessConfig, raiz: Path) -> str:
+    """X-04: el segundo archivo que el escritor entrega, cuando emite su propio delta.
+
+    Va como un bloque entero del prompt en vez de como varias claves sueltas para que la
+    plantilla siga leyéndose igual con el interruptor apagado, que es como corre la línea base.
+    """
+    if not config.escritor_emite_delta:
+        return "(en esta corrida no escribís delta: de eso se encarga otro agente)"
+    from app.agents.extractor import ESQUEMA_DELTA, registro_de_sujetos
+
+    personajes, locaciones = registro_de_sujetos(raiz)
+    rutas = Rutas(raiz)
+    partes = [
+        "Además del capítulo escribís su **delta de extracción**, que es lo que el harness usa "
+        f"para armar el capítulo siguiente. Va en `{rutas.delta(n).as_posix()}` con Write, solo "
+        "el objeto JSON, sin bloque de código ni texto alrededor.",
+        "Describí **lo que quedó escrito en el capítulo**, no lo que pensabas escribir: si la "
+        "escena se te fue por otro lado, manda el texto. Ese delta viaja a los capítulos "
+        "siguientes y es lo único que sabrán de este.",
+        f"Registro de sujetos, usá estos nombres exactos. Personajes: "
+        f"{chr(44).join(personajes) if personajes else chr(40) + chr(41)}. "
+        f"Locaciones: {chr(44).join(locaciones) if locaciones else chr(40) + chr(41)}. "
+        "Y `mundo` para lo general.",
+        f"Tope: {config.max_hechos_por_capitulo} hechos nuevos. Solo lo que este capítulo "
+        "establece, no lo que reitera. Los `recursos_narrativos` no cuentan para el tope.",
+        f"Esquema:{chr(10)}{ESQUEMA_DELTA.replace(chr(60) + chr(78) + chr(85) + chr(77) + chr(62), str(n))}",
+    ]
+    return (chr(10) * 2).join(partes)
 
 def recortar_resumen_rodante(contexto: Contexto) -> Contexto:
     """EX-04: recorta el resumen rodante a su mínimo. Nunca toca continuidad ni personajes."""

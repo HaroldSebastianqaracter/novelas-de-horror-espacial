@@ -17,3 +17,10 @@ __pycache__/
 
 # Salida derivada de `ensamblar`: se regenera desde 05_manuscrito/ (spec tecnica 8.2)
 08_entrega/
+
+# novelas archivadas: el harness las produce, no son código. Lo que se guarda de ellas es la fila de
+# medidas en corridas.csv, que es la evidencia de HALLAZGOS.md. Las 29 novelas del loop de velocidad
+# (manuscritos, reportes de QA y registros) viven en la rama specs/velocidad si hacen falta.
+09_archivo/*
+!09_archivo/corridas.csv
+!09_archivo/corridas.jsonl

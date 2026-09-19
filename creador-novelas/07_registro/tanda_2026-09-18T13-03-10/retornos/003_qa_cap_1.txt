@@ -1,4 +1,0 @@
-tiene_contradicciones: false
-contradicciones: 0 · repeticiones: 3
-reporte: C:/Users/harold.rodriguez/Desktop/Nueva carpeta/novelas-de-horror-espacial/creador-novelas/06_qa/reportes/qa_cap_1.md
-validado

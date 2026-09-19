@@ -113,16 +113,20 @@ def credenciales_desde_entorno(entorno: dict | None = None) -> Credenciales:
 
 # ---------- identidad (§16.5) ----------
 
-def id_traza(tanda: str) -> str:
-    return uuid.uuid5(_ESPACIO, f"traza/{tanda}").hex  # 32 hex: válido como trace id
+# La semilla es «<id de novela>/<carpeta>», no la carpeta sola. La del preludio se llama siempre
+# `preludio`, así que derivar los identificadores solo del nombre hacía que el preludio de cada
+# novela sobrescribiera al de la anterior: diez libros, una sola traza de preludio, y la de la
+# primera pisada por la última.
+def id_traza(semilla: str) -> str:
+    return uuid.uuid5(_ESPACIO, f"traza/{semilla}").hex  # 32 hex: válido como trace id
 
 
-def id_observacion(tanda: str, clave: str) -> str:
-    return uuid.uuid5(_ESPACIO, f"obs/{tanda}/{clave}").hex[:16]
+def id_observacion(semilla: str, clave: str) -> str:
+    return uuid.uuid5(_ESPACIO, f"obs/{semilla}/{clave}").hex[:16]
 
 
-def id_puntuacion(tanda: str, clave: str) -> str:
-    return uuid.uuid5(_ESPACIO, f"score/{tanda}/{clave}").hex
+def id_puntuacion(semilla: str, clave: str) -> str:
+    return uuid.uuid5(_ESPACIO, f"score/{semilla}/{clave}").hex
 
 
 # ---------- filtro de privacidad (§16.6) ----------
@@ -476,13 +480,18 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False, par
     filtro = None if con_cuerpos else FiltroPrivacidad.desde_tanda(raiz, carpeta)
     limpiar = (lambda v: v) if filtro is None else filtro.limpiar
     metadatos = _metadatos_tanda(raiz, carpeta)
-    trace_id = id_traza(tanda)
+    novela = registro.id_novela(raiz)
+    semilla = f"{novela}/{tanda}"
+    trace_id = id_traza(semilla)
     lote: list[dict] = []
 
     # trace = la tanda
     ts_inicio = eventos[0].get("ts")
     lote.append(_envolver("trace-create", {
-        "id": trace_id, "name": tanda, "timestamp": ts_inicio, "metadata": metadatos,
+        "id": trace_id, "name": tanda, "timestamp": ts_inicio,
+        # `sessionId` es lo que agrupa en Langfuse: con diez novelas en marcha, ver el preludio y sus
+        # tandas juntos es la diferencia entre una medición y una lista de trazas sueltas.
+        "sessionId": novela, "metadata": {**metadatos, "novela": novela},
         "tags": ["creador-novelas", f"specs-{metadatos.get('version_specs', VERSION_SPECS)}"],
         "version": metadatos.get("version_specs", VERSION_SPECS),
     }))
@@ -503,7 +512,7 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False, par
     spans: dict[int, str] = {}
     for n in capitulos:
         evs = por_capitulo[n]
-        spans[n] = id_observacion(tanda, f"cap_{n}")
+        spans[n] = id_observacion(semilla, f"cap_{n}")
         lote.append(_envolver("span-create", {
             "id": spans[n], "traceId": trace_id, "name": f"cap_{n}",
             "startTime": min(_inicio_de(e) for e in evs), "endTime": evs[-1].get("ts"),
@@ -525,7 +534,7 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False, par
         verbos_mapeados += 1
         resultado = str(e.get("resultado") or "")
         cuerpo_verbo: dict[str, Any] = {
-            "id": id_observacion(tanda, f"verbo/{i}"), "traceId": trace_id, "name": f"verbo:{e.get('verbo')}",
+            "id": id_observacion(semilla, f"verbo/{i}"), "traceId": trace_id, "name": f"verbo:{e.get('verbo')}",
             "parentObservationId": spans.get(e["capitulo"]), "startTime": _inicio_de(e), "endTime": e.get("ts"),
             "metadata": {"verbo": e.get("verbo"), "capitulo": e["capitulo"], "args": limpiar(e.get("args")),
                          "resultado": resultado, "ms": e.get("ms")},
@@ -539,7 +548,7 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False, par
     generaciones = _emparejar_generaciones(eventos, _uso_por_agent_id(carpeta))
     for g in generaciones:
         clave = f"agente/{g.agent_id}" if g.agent_id else f"agente/{g.rol}/cap_{g.capitulo}/{g.orden}"
-        g.id = id_observacion(tanda, clave)
+        g.id = id_observacion(semilla, clave)
         uso = {CLAVES_USO[campo]: g.uso[campo] for campo in CLAVES_USO}
         uso["total"] = sum(g.uso.values())
         cuerpo: dict[str, Any] = {
@@ -576,7 +585,7 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False, par
     for j, (ts, n_descarte, nombre_archivo) in enumerate(descartes):
         total_eventos += 1
         lote.append(_envolver("event-create", {
-            "id": id_observacion(tanda, f"descarte/{j}"), "traceId": trace_id, "name": "EX-08:descarte_de_borrador",
+            "id": id_observacion(semilla, f"descarte/{j}"), "traceId": trace_id, "name": "EX-08:descarte_de_borrador",
             "startTime": ts, "level": "WARNING", "parentObservationId": spans.get(n_descarte),
             "statusMessage": f"borrador del capítulo {n_descarte} descartado para regenerar",
             "metadata": {"capitulo": n_descarte, "archivo": nombre_archivo},
@@ -620,7 +629,7 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False, par
         total_eventos += 1
         n = e.get("capitulo") if isinstance(e.get("capitulo"), int) else capitulo_en_curso
         cuerpo_evento.update({
-            "id": id_observacion(tanda, f"evento/{i}"), "traceId": trace_id, "startTime": e.get("ts"),
+            "id": id_observacion(semilla, f"evento/{i}"), "traceId": trace_id, "startTime": e.get("ts"),
             "parentObservationId": spans.get(n) if n is not None else None,
         })
         cuerpo_evento["metadata"] = {k: v for k, v in cuerpo_evento["metadata"].items() if v is not None}
@@ -646,7 +655,7 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False, par
         for nombre, (valor, tipo_dato) in valores.items():
             puntuaciones[f"{nombre}[cap_{n}]"] = valor
             lote.append(_envolver("score-create", {
-                "id": id_puntuacion(tanda, f"{nombre}/cap_{n}"), "traceId": trace_id, "observationId": spans.get(n),
+                "id": id_puntuacion(semilla, f"{nombre}/cap_{n}"), "traceId": trace_id, "observationId": spans.get(n),
                 "name": nombre, "value": valor, "dataType": tipo_dato, "comment": f"corte de QA en el capítulo {n}",
             }))
     objetivo = metadatos.get("palabras_por_capitulo")
@@ -655,13 +664,13 @@ def construir_traza(raiz: Path, carpeta: Path, *, con_cuerpos: bool = False, par
         desvio = max(abs(p - objetivo) / objetivo for p in palabras.values())
         puntuaciones["desvio_longitud"] = round(desvio, 4)
         lote.append(_envolver("score-create", {
-            "id": id_puntuacion(tanda, "desvio_longitud"), "traceId": trace_id, "name": "desvio_longitud",
+            "id": id_puntuacion(semilla, "desvio_longitud"), "traceId": trace_id, "name": "desvio_longitud",
             "value": round(desvio, 4), "dataType": "NUMERIC",
             "comment": f"mayor desvío relativo respecto de {objetivo} palabras entre {len(palabras)} capítulos",
         }))
     puntuaciones["borradores_descartados"] = len(descartes)
     lote.append(_envolver("score-create", {
-        "id": id_puntuacion(tanda, "borradores_descartados"), "traceId": trace_id, "name": "borradores_descartados",
+        "id": id_puntuacion(semilla, "borradores_descartados"), "traceId": trace_id, "name": "borradores_descartados",
         "value": len(descartes), "dataType": "NUMERIC", "comment": "borradores descartados para regenerar (EX-08) en la tanda",
     }))
     return Traza(tanda=tanda, id=trace_id, lote=lote, generaciones=generaciones, capitulos=capitulos,

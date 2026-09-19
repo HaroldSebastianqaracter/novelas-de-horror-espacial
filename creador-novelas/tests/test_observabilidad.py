@@ -151,7 +151,8 @@ def test_exportar_dos_veces_no_duplica(proyecto, config):
     assert {e["id"] for e in primera}.isdisjoint({e["id"] for e in segunda})
     # el agent_id es la identidad de la generation (§16.5)
     gen = next(e["body"] for e in primera if e["type"] == "generation-create")
-    assert gen["id"] == observabilidad.id_observacion(carpeta.name, f"agente/{gen['metadata']['agent_id']}")
+    semilla = f"{registro.id_novela(proyecto)}/{carpeta.name}"
+    assert gen["id"] == observabilidad.id_observacion(semilla, f"agente/{gen['metadata']['agent_id']}")
 
 
 # ---------- privacidad §16.6 ----------
@@ -441,3 +442,41 @@ def test_sin_para_juez_la_generacion_sigue_sin_cuerpos(proyecto, config):
     traza = observabilidad.construir_traza(proyecto, carpeta)
     generaciones = [e["body"] for e in traza.lote if e["type"] == "generation-create"]
     assert generaciones and all("input" not in b and "output" not in b for b in generaciones)
+
+
+# ---------- identidad entre novelas ----------
+
+def _preludio_con_un_evento(raiz) -> "Path":
+    carpeta = Rutas(raiz).registro / "preludio"
+    carpeta.mkdir(parents=True, exist_ok=True)
+    (carpeta / "eventos.jsonl").write_text(
+        json.dumps({"ts": "2026-09-18T12:58:09.161+02:00", "tipo": "verbo", "verbo": "status",
+                    "resultado": "ok", "capitulo": None}) + "\n", encoding="utf-8")
+    return carpeta
+
+
+def test_el_preludio_de_dos_novelas_no_comparte_traza(proyecto):
+    carpeta = _preludio_con_un_evento(proyecto)
+    primera = observabilidad.construir_traza(proyecto, carpeta)
+
+    # Archivar se lleva 07_registro/ entero, novela.json incluido, así que el libro siguiente nace
+    # con otra identidad. Antes los dos preludios se llamaban igual y el segundo pisaba al primero:
+    # con diez novelas, nueve preludios desaparecían de Langfuse.
+    (Rutas(proyecto).registro / "novela.json").unlink()
+    segunda = observabilidad.construir_traza(proyecto, carpeta)
+
+    assert primera.tanda == segunda.tanda == "preludio"
+    assert primera.id != segunda.id
+
+
+def test_el_preludio_y_sus_tandas_se_agrupan_por_novela(proyecto, config):
+    preludio = observabilidad.construir_traza(proyecto, _preludio_con_un_evento(proyecto))
+    tanda = observabilidad.construir_traza(proyecto, _tanda_con_dobles(proyecto, config))
+
+    def sesion(t):
+        return next(e["body"]["sessionId"] for e in t.lote if e["type"] == "trace-create")
+
+    # Dos trazas distintas, una sesión común: es lo que permite mirar una novela entera en Langfuse
+    # en vez de una lista de trazas sueltas que no se sabe de qué libro son.
+    assert preludio.id != tanda.id
+    assert sesion(preludio) == sesion(tanda) == registro.id_novela(proyecto)

@@ -56,6 +56,14 @@ def _capitulo_activo(raiz: Path, rol: str | None = None) -> int:
     return capitulo_de_invocacion(raiz, rol)
 
 
+def _escritor_emite_delta(raiz: Path) -> bool:
+    """X-04, leído del disco en cada hook: los hooks corren en procesos sueltos y no comparten estado."""
+    try:
+        return cargar_config(raiz).escritor_emite_delta
+    except HarnessError:
+        return False  # sin config válida no se concede nada de más
+
+
 def _identidad(payload: dict) -> str:
     return payload.get("agent_id") or f"orquestador:{payload.get('session_id', 'sesion')}"
 
@@ -141,7 +149,8 @@ def decidir_h11(payload: dict, raiz: Path) -> Decision | None:
     if payload.get("tool_name") not in HERRAMIENTAS_TERMINAL or payload.get("agent_id") is None             or agent_type not in ROLES:
         return None
     comando = str((payload.get("tool_input") or {}).get("command") or "").strip()
-    esperado = comando_validador(agent_type, _capitulo_activo(raiz, agent_type))
+    esperado = comando_validador(agent_type, _capitulo_activo(raiz, agent_type),
+                                 con_delta=_escritor_emite_delta(raiz))
     # El separador de ruta no cambia lo que hace el comando, y en Windows el agente lo escribe con
     # `\` mientras la forma canonica lleva `/`. Se compara sobre una sola forma para no bloquear el
     # unico comando permitido por un detalle de la plataforma.
@@ -190,9 +199,13 @@ def decidir_pre_tool_use(payload: dict, raiz: Path) -> Decision:
     if tool in HERRAMIENTAS_ESCRITURA and es_subagente and agent_type in ROLES:
         if agent_type == "escritor":
             activo = _capitulo_activo(raiz, "escritor")
-            permitido = f"05_manuscrito/cap_{activo}.md"
-            if rel_posix != permitido:
-                return _bloquear(raiz, payload, "H-06", f"el escritor solo escribe {permitido} (INV-01); intentó {rel_posix or ruta}")
+            # X-04: cuando el escritor emite su propio delta, escribe dos archivos y ninguno más.
+            permitidos = [f"05_manuscrito/cap_{activo}.md"]
+            if _escritor_emite_delta(raiz):
+                permitidos.append(f"04_estado/deltas/delta_cap_{activo}.json")
+            if rel_posix not in permitidos:
+                return _bloquear(raiz, payload, "H-06",
+                                 f"el escritor solo escribe {' y '.join(permitidos)} (INV-01); intentó {rel_posix or ruta}")
         elif agent_type == "extractor":
             activo = _capitulo_activo(raiz, "extractor")
             permitido = f"04_estado/deltas/delta_cap_{activo}.json"
