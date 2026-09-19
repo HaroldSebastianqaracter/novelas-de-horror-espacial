@@ -12,8 +12,9 @@ from app.state import repository as repo
 from app.state import resumen_rodante as rr
 
 
-def hecho(sujeto, categoria, texto, cap, validado=True, superado=None):
-    return HechoContinuidad(sujeto=sujeto, categoria=categoria, hecho=texto, cap_origen=cap, sujeto_validado=validado, superado_por=superado)
+def hecho(sujeto, categoria, texto, cap, validado=True, superado=None, relacionados=None):
+    return HechoContinuidad(sujeto=sujeto, categoria=categoria, hecho=texto, cap_origen=cap, sujeto_validado=validado,
+                            superado_por=superado, relacionados=relacionados or [])
 
 
 REGISTRO = {"Kovacs", "Ilse", "Puente", "Bodega 4", "mundo"}
@@ -156,3 +157,69 @@ def test_validar_archivo_por_ruta(proyecto):
     (rutas.estado / "raro.json").write_text("{}", encoding="utf-8")
     with pytest.raises(EstadoInvalidoError, match="esquema conocido"):
         repo.validar_archivo(rutas, Path("04_estado/raro.json"))
+
+
+# ---------- X-05: aristas entre hechos ----------
+
+def _entrada_cap(n, personajes, locacion="Puente"):
+    return EntradaOutline(num=n, titulo="T", objetivo_narrativo="o", personajes=personajes,
+                          locacion=locacion, informacion_nueva="", tension=3)
+
+
+def test_un_hecho_de_otro_llega_si_toca_a_alguien_en_escena():
+    """La arista es justo el hecho que hoy se pierde: sujeto ausente, consecuencia presente."""
+    entrada = _entrada_cap(5, ["Ruiz"])
+    log = LogContinuidad([
+        hecho("Volkov", "personaje", "Volkov selló la esclusa y dejó a Ruiz aislada.", 3, relacionados=["Ruiz"]),
+        hecho("Volkov", "personaje", "Volkov perdió su linterna.", 3),  # no toca a nadie en escena
+    ])
+    textos = [h.hecho for h in cont.filtrar_para_capitulo(log, entrada, {"Ruiz"})]
+    assert "Volkov selló la esclusa y dejó a Ruiz aislada." in textos
+    assert "Volkov perdió su linterna." not in textos
+
+
+def test_los_hechos_sin_el_campo_siguen_entrando_por_sujeto():
+    """Los 385 hechos ya guardados no tienen `relacionados`: no pueden dejar de funcionar."""
+    entrada = _entrada_cap(5, ["Kovacs"])
+    log = LogContinuidad([hecho("Kovacs", "personaje", "Kovacs herido.", 2)])
+    assert log.root[0].relacionados == []
+    assert [h.hecho for h in cont.filtrar_para_capitulo(log, entrada, {"Kovacs"})] == ["Kovacs herido."]
+
+
+def test_el_canon_del_preludio_nunca_se_recorta():
+    """cap_origen 0 son las reglas del mundo: recortarlas provoca la contradicción que esto evita."""
+    entrada = _entrada_cap(12, ["Kovacs"])
+    canon = [hecho("mundo", "mundo", f"Regla {i} del universo.", 0) for i in range(5)]
+    tardios = [hecho("Kovacs", "personaje", f"Kovacs hizo la cosa {i}.", 10) for i in range(20)]
+    quedan = cont.recortar_a_presupuesto(canon + tardios, entrada, {"Kovacs"}, 12,
+                                         tope_tokens=10, coste=lambda h: 5)
+    assert [h.hecho for h in quedan] == [h.hecho for h in canon], "el canon entra aunque no quepa nada más"
+
+
+def test_cuando_aprieta_el_presupuesto_gana_quien_esta_en_escena():
+    entrada = _entrada_cap(12, ["Kovacs"])
+    en_escena = hecho("Kovacs", "personaje", "Kovacs sangra.", 11)
+    lejano = hecho("mundo", "mundo", "Dato de mundo viejo.", 4)
+    quedan = cont.recortar_a_presupuesto([lejano, en_escena], entrada, {"Kovacs"}, 12,
+                                         tope_tokens=5, coste=lambda h: 5)
+    assert [h.hecho for h in quedan] == ["Kovacs sangra."]
+
+
+def test_la_salida_va_en_orden_de_capitulo_no_de_puntuacion():
+    """El escritor tiene que leer una cronología; un ranking le cuenta la historia desordenada."""
+    entrada = _entrada_cap(12, ["Kovacs"])
+    hechos = [hecho("Kovacs", "personaje", "C tardío.", 11),
+              hecho("mundo", "mundo", "A del preludio.", 0),
+              hecho("Kovacs", "personaje", "B medio.", 5)]
+    quedan = cont.recortar_a_presupuesto(hechos, entrada, {"Kovacs"}, 12,
+                                         tope_tokens=1000, coste=lambda h: 5)
+    assert [h.cap_origen for h in quedan] == [0, 5, 11]
+
+
+def test_con_sitio_de_sobra_no_se_recorta_nada():
+    """Con 3 capítulos cabe todo: el interruptor no puede cambiar la línea base por accidente."""
+    entrada = _entrada_cap(3, ["Kovacs"])
+    hechos = [hecho("Kovacs", "personaje", f"Hecho {i}.", i) for i in range(4)]
+    quedan = cont.recortar_a_presupuesto(hechos, entrada, {"Kovacs"}, 3,
+                                         tope_tokens=100000, coste=lambda h: 5)
+    assert len(quedan) == len(hechos)

@@ -70,7 +70,7 @@ def test_guardado_valido_escribe_los_tres_archivos_y_validan(tmp_path, monkeypat
                            "ventana_resumen_rodante", "cadencia_qa", "max_tokens_contexto_escritor", "max_hechos_por_capitulo"}
     assert ejecucion == {"capitulos_por_tanda": 3, "max_llamadas_por_tanda": 30, "registrar_uso": True,
                          "exportar_trazas": True, "exportar_para_juez": False,
-                         "escritor_emite_delta": False}
+                         "escritor_emite_delta": False, "aristas_en_continuidad": False}
     assert resultado.comando_siguiente == "/generar-premisa"  # 00_referencias/ vacía
 
 

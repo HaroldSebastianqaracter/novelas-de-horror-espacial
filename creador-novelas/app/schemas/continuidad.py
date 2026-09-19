@@ -16,6 +16,11 @@ class HechoContinuidad(BaseModel):
     hecho: str = Field(min_length=1)  # la formulación en prosa: es lo que lee el escritor
     cap_origen: int  # INV-03: todo hecho es trazable a su capítulo
     superado_por: int | None = None  # RF-07.6; nulo mientras el hecho siga vigente
+    # X-05: a quién MÁS toca este hecho, además del sujeto. Si Volkov sella la esclusa y eso deja a
+    # Ruiz aislada, el hecho es de Volkov y `relacionados` lleva a Ruiz; sin esto, el capítulo donde
+    # actúa Ruiz no lo recibe, y el escritor --que no puede leer capítulos anteriores-- escribe a
+    # ciegas sobre ello. Con valor por defecto, así que los hechos ya guardados siguen validando.
+    relacionados: list[str] = Field(default_factory=list)
 
     def vigente(self) -> bool:
         return self.superado_por is None

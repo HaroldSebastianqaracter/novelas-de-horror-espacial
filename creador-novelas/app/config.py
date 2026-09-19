@@ -36,7 +36,7 @@ CAMPOS_NOVELA = (
     "ventana_resumen_rodante", "cadencia_qa", "max_tokens_contexto_escritor", "max_hechos_por_capitulo",
 )
 CAMPOS_EJECUCION = ("capitulos_por_tanda", "max_llamadas_por_tanda", "registrar_uso", "exportar_trazas",
-                    "exportar_para_juez", "escritor_emite_delta")
+                    "exportar_para_juez", "escritor_emite_delta", "aristas_en_continuidad")
 
 
 class HarnessConfig(BaseModel):
@@ -62,6 +62,11 @@ class HarnessConfig(BaseModel):
     # medido sobre tres premisas emparejadas pasa lo contrario, 0 contradicciones frente a 4 y la
     # mitad de reloj (19/09, ver HALLAZGOS.md). Por eso viene encendido; apagarlo devuelve el extractor.
     escritor_emite_delta: bool = True
+    # X-05: el salto de vecindad y el recorte por puntuación en el filtro de continuidad. Apagado
+    # arranca el filtro de siempre --solo el sujeto, y `mundo` entra completo-- que es el brazo de
+    # control. Con 3 capítulos los dos dan lo mismo, porque todo cabe; la diferencia aparece a
+    # partir del capítulo 10, que es donde hay que medirlo.
+    aristas_en_continuidad: bool = False
     palabras_por_capitulo: int = Field(gt=0)  # RF-CFG-01
     idioma: str = Field(min_length=2)  # RF-CFG-05
     persona_narrativa: Literal["primera", "tercera_limitada", "tercera_omnisciente"]
