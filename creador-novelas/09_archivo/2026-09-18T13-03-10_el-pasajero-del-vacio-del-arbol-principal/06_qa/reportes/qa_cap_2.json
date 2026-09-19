@@ -1,0 +1,26 @@
+{
+  "cap_corte": 2,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de correccion 'no X, sino/debajo de Y': cuatro apariciones en el capitulo 2 ('precedia a la visita, no la seguia'; 'Entonces no pedia auxilio / Pedia que alguien fuese'; 'no era que los estuvieran cazando'; 'No nos esta comiendo las comunicaciones. Las esta usando'). Acumulado 7 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Marca horaria exacta para escandir la escena: 'el relevo de las seis' abre el capitulo 2 con el mismo procedimiento del capitulo 1. Acumulado 6 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion de negaciones absolutas como remate: 'ni arrastre, ni humedad, ni una sola marca de forcejeo' y 'Ni una averia, ni un paquete perdido' en el capitulo 2. Acumulado 4 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personaje que anota o apunta en lugar de reaccionar: 'Sein anoto la hora. Despues dejo de anotar' en el capitulo 2. Acumulado 3 apariciones, capitulos 1 y 2.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

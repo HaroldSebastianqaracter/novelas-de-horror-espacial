@@ -1,0 +1,26 @@
+{
+  "cap_corte": 3,
+  "hallazgos": [
+    {
+      "tipo": "repeticion",
+      "descripcion": "Estructura de correccion 'no X, sino/debajo de Y': dos apariciones en el capitulo 3 ('No la silenciaba. La acompanaba.'; 'no devorando el canal, sino ocupandolo entero'). Acumulado: 9 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Marca horaria exacta para escandir la escena: tres apariciones en el capitulo 3 ('catorce minutos antes', 'seis horas de retardo', 'sostuvo un minuto mas'). Acumulado: 9 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Enumeracion de negaciones absolutas como remate: una aparicion en el capitulo 3 ('Ningun remolcador... ninguna maniobra la deshacia'). Acumulado: 5 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    },
+    {
+      "tipo": "repeticion",
+      "descripcion": "Personaje que anota, mide o lleva un registro en lugar de reaccionar: una aparicion en el capitulo 3 (la respiracion de Sein 'midiendose sola, como si todavia llevara un registro'). Acumulado: 4 apariciones en los capitulos 1, 2 y 3.",
+      "cap_origen": null
+    }
+  ],
+  "tiene_contradicciones": false
+}

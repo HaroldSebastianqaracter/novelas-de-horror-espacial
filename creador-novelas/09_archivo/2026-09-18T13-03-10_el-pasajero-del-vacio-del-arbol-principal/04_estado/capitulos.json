@@ -1,0 +1,51 @@
+[
+  {
+    "num": 1,
+    "titulo": "La baliza sin registro",
+    "objetivo_narrativo": "Establecer el encierro de once meses y la fricción entre los seis tripulantes del Nereida, y obligarlos por protocolo a abordar un pecio a la deriva del que vuelven aparentemente solos; cerrar con la primera prueba objetiva de que no lo están.",
+    "personajes": [
+      "Irune Vasari",
+      "Tomás Reder",
+      "Nadia Okonjo",
+      "Álvaro Sein",
+      "Kiril Dovan",
+      "Mirén Aguilar",
+      "la presencia"
+    ],
+    "locacion": "Nereida — puente",
+    "informacion_nueva": "El pecio no tiene nombre en el casco, sus compartimentos fueron abiertos desde dentro y no hay un solo cuerpo a bordo; esa misma noche el consumo de aire del Nereida no cuadra con seis personas y Mirén oye por el canal interno una orden con la voz de Vasari que Vasari no dio.",
+    "tension": 2
+  },
+  {
+    "num": 2,
+    "titulo": "La voz en el conducto",
+    "objetivo_narrativo": "Vaciar la nave de dentro hacia fuera —Dovan desaparece sin rastro y su voz vuelve mal entonada desde la recirculación— y girar la historia: revelar que la baliza fue un anzuelo y que la criatura no devora las comunicaciones, las usa, porque no quiere matarlos a bordo sino llegar a Halcón.",
+    "personajes": [
+      "Mirén Aguilar",
+      "Nadia Okonjo",
+      "Álvaro Sein",
+      "Kiril Dovan",
+      "Irune Vasari",
+      "el pasajero"
+    ],
+    "locacion": "Nereida — conducto de recirculación",
+    "informacion_nueva": "El consumo anómalo empezó horas antes de abrir la esclusa, así que la llamada de socorro era un cebo; el array de comunicaciones está intacto y ha enviado durante semanas, con la voz y las credenciales de Vasari, una confirmación de ruta y una petición de atraque prioritario en Halcón.",
+    "tension": 3
+  },
+  {
+    "num": 3,
+    "titulo": "Seis versiones de la misma mujer",
+    "objetivo_narrativo": "Resolver con la única victoria posible y su derrota simultánea: Vasari desvía el Nereida hacia la sombra del gigante exterior y muere, Sein sella el mamparo con su propio cuerpo, y Mirén pierde la última palabra cuando la criatura habla a la vez que ella desde los seis canales; el módulo de escape entra limpio en el corredor despejado.",
+    "personajes": [
+      "Mirén Aguilar",
+      "Irune Vasari",
+      "Álvaro Sein",
+      "Tomás Reder",
+      "Nadia Okonjo",
+      "el pasajero"
+    ],
+    "locacion": "Nereida — sala de comunicaciones",
+    "informacion_nueva": "La trayectoria hacia el gigante exterior no admite intercepción y el sello del puente solo aguanta mientras alguien vivo lo sostiene; Halcón acusa recibo del atraque prioritario, elige entre seis versiones de Mirén la más tranquila, y el módulo de escape se desprende con un único ocupante que responde a todas las preguntas correctamente.",
+    "tension": 5
+  }
+]

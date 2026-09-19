@@ -1,0 +1,32 @@
+{
+  "reglas": [
+    "El Nereida es un carguero de mineral tripulado por seis personas en una travesía de once meses hacia la estación Halcón; no hay relevos ni escalas intermedias.",
+    "El soporte vital recircula el aire en circuito cerrado y su consumo se mide de forma continua: el sistema sabe cuánto aire gasta la nave, y ese número debe cuadrar con el número de personas a bordo.",
+    "El protocolo de salvamento obliga a responder a toda baliza de socorro; la capitana no tiene margen legal para negarse.",
+    "Las comunicaciones con Halcón viajan con retardo y se autentican por voz y credenciales de tripulación, no por presencia física.",
+    "Fuera del casco no hay nadie: la ruta pasa más allá de la última órbita cartografiada y ningún remolcador llega hasta ahí en tiempo útil.",
+    "El canal interno de tripulación llega a toda la nave y cualquiera puede hablar por él desde cualquier puesto.",
+    "Una voz por el canal o detrás de un mamparo no prueba quién habla."
+  ],
+  "objetos": [
+    "Baliza de socorro sin registro, captada más allá de la última órbita cartografiada.",
+    "Pecio: nave de carga antigua, sin nombre en el casco, con las luces de emergencia encendidas y los compartimentos abiertos desde el interior.",
+    "Array de comunicaciones del Nereida.",
+    "Registro de sueño de la tripulación que lleva Álvaro Sein.",
+    "Registro de consumo de aire del soporte vital.",
+    "Tarjetas de acceso de tripulación.",
+    "Módulo de escape del Nereida.",
+    "Escotilla trabada de la litera de Kiril Dovan."
+  ],
+  "linea_de_tiempo": [
+    "Décadas antes: el pecio queda a la deriva con sus compartimentos abiertos desde dentro y su baliza emitiendo.",
+    "Mes cero: el Nereida parte con seis tripulantes rumbo a la estación Halcón.",
+    "Meses uno a diez: travesía sin incidentes; la convivencia se agota y cada uno se repliega en su rutina.",
+    "Mes once, antes del capítulo 1: el Nereida entra en el tramo final de ruta, más allá de la última órbita cartografiada."
+  ],
+  "locaciones": {
+    "Nereida — puente": "Puesto de mando del carguero: consolas de navegación, la silla de la capitana y la pantalla de ruta que marca los días restantes hasta Halcón. Es el único mamparo de la nave que puede sellarse desde dentro.",
+    "Nereida — conducto de recirculación": "Red estrecha de conductos por la que circula todo el aire de la nave. Solo Okonjo conoce su trazado completo; se recorre a rastras, con el zumbido constante de los extractores y ecos que devuelven las voces desplazadas.",
+    "Nereida — sala de comunicaciones": "Cubículo donde Mirén pasa ocho horas diarias con los auriculares puestos. Aloja el array, los seis canales de tripulación y el enlace con Halcón; la estática de fondo nunca se apaga."
+  }
+}

@@ -1,0 +1,242 @@
+[
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El Nereida es un carguero de mineral con seis tripulantes en el mes once de una travesía hacia la estación Halcón; no hay relevo, ni retorno, ni auxilio posible más allá de la última órbita cartografiada.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El soporte vital es un circuito cerrado de recirculación que mide y registra el consumo de aire por hora: cualquier respiración de más queda en los números antes de verse.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Con Halcón no hay comunicación en tiempo real: los mensajes tardan horas y nada de lo enviado puede desmentirse enseguida.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Cada tripulante tiene credencial y canal propios, y el sistema no distingue quién habla sino qué credencial habla.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El protocolo de salvamento obliga a responder a toda baliza de socorro y la capitana no tiene margen legal para negarse.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Once meses de encierro han agotado la convivencia: los seis ya no tienen nada nuevo que decirse y cada uno se ha replegado en su rutina.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "La estación Halcón, destino del Nereida, tiene cuatro mil personas dentro.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Irune Vasari",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es la capitana del Nereida y lleva meses gobernando el calendario más que la nave, evitando toda decisión irreversible.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Tomás Reder",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el piloto y cuenta los días de travesía en voz alta para molestar a los demás.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nadia Okonjo",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es la ingeniera de sistemas y la única persona a bordo que entiende los conductos de recirculación.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Álvaro Sein",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el médico, lleva por su cuenta un registro de sueño de toda la tripulación y sospecha que alguien miente en el suyo.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kiril Dovan",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el operario de bodega y duerme con la escotilla de su litera trabada.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Mirén Aguilar",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Es el enlace de comunicaciones, oye estática ocho horas al día y ha empezado a distinguir formas dentro de ella.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la presencia",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Lleva décadas a la deriva con el pecio, emitiendo una baliza de socorro que es un anzuelo y no una llamada de auxilio.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "el pasajero",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "No pretende matar a la tripulación a bordo: quiere usar al Nereida para llegar a la estación Halcón, y para eso imita voces, credenciales y razones.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nereida — puente",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El mamparo de emergencia del puente solo mantiene el sellado mientras alguien lo sostiene manualmente desde dentro.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nereida — conducto de recirculación",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Los conductos de recirculación recorren toda la nave, se transitan a rastras y el flujo de aire deforma cualquier voz que suene en ellos.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nereida — sala de comunicaciones",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Desde la sala de comunicaciones se gobiernan los seis canales de tripulación y el array conserva el registro de todos los mensajes enviados a Halcón.",
+    "cap_origen": 0,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Un pulso de socorro sin identificación ni distintivo transmite en banda baja.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Se descubre un carguero antiguo sin identificación visible con compartimentos abiertos desde el interior y ningún cuerpo a bordo.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nereida — conducto de recirculación",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El circuito de recirculación consume más de lo que gastarían seis personas por hora.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "Existe referencia a una orden de purga de bodega tres que no consta en los registros de la capitana Vasari.",
+    "cap_origen": 1,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Kiril Dovan",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Kiril Dovan desapareció hace tres días sin rastros de lucha; su traje y botas quedaron en la bodega.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "la presencia",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "La presencia está usando el array de comunicaciones del Nereida, falsificando transmisiones con la credencial y voz de la capitana Vasari para enviar solicitudes a Halcón.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "mundo",
+    "categoria": "mundo",
+    "sujeto_validado": true,
+    "hecho": "El consumo de recursos del soporte vital comenzó a aumentar catorce horas antes de que Dovan desapareciera, indicando que algo solicitó activamente que alguien fuese desde dentro de la nave.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nereida — sala de comunicaciones",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "Las comunicaciones están comprometidas con múltiples transmisiones falsificadas incluyendo una solicitud de atraque prioritario ya en cola en Halcón con el Nereida como remitente.",
+    "cap_origen": 2,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Nereida — puente",
+    "categoria": "locacion",
+    "sujeto_validado": true,
+    "hecho": "El mamparo del puente cede bajo la presión del casco del Nereida que se dobla bajo el tirón del gigante exterior.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Álvaro Sein",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Álvaro Sein muere aplastado cuando el mamparo del puente que sostenía desde adentro cede.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "el pasajero",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "El pasajero controla simultáneamente las credenciales de Irune Vasari, Álvaro Sein, Kiril Dovan, Nadia Okonjo y Tomás Reder, multiplicando la voz de Mirén Aguilar para transmitir mensajes contradictorios.",
+    "cap_origen": 3,
+    "superado_por": null
+  },
+  {
+    "sujeto": "Mirén Aguilar",
+    "categoria": "personaje",
+    "sujeto_validado": true,
+    "hecho": "Mirén Aguilar se lanza en el módulo de escape hacia Halcón, donde se identifica automáticamente como Mirén Aguilar.",
+    "cap_origen": 3,
+    "superado_por": null
+  }
+]
