@@ -310,22 +310,29 @@
 
     <div class="pie">
       <div class="condiciones">
-        <!-- Estos dos tienen que estar en el formulario, no solo en el archivo de configuración: una
-             casilla ausente se guarda como apagada, así que sin ellos cualquier guardado desde la
-             pantalla devolvía la tripulación a tres agentes sin decir nada. -->
+        <!-- Todos los interruptores de ejecución tienen que estar aquí, no solo en el archivo de
+             configuración: una casilla ausente se guarda como apagada, así que el que falte se apaga
+             solo al firmar. Sin los dos primeros, cualquier guardado devolvía la tripulación a tres
+             agentes sin decir nada; `exportar_para_juez` se quedó fuera de ese arreglo y caía en la
+             misma trampa, callada porque su valor por defecto ya era apagado. -->
         <label><input type="checkbox" name="escritor_emite_delta" id="escritor_emite_delta"> El escritor fija sus propios hechos</label>
         <p>Dos agentes en vez de tres: el escritor entrega el capítulo y los hechos que establece, y
-          no se llama al extractor. Medido el 19/09 sobre las mismas premisas, la mitad de reloj y
-          ninguna contradicción. Apagarlo devuelve al extractor.</p>
+          no se llama al extractor. Medido el 19/09 sobre tres premisas emparejadas: la mitad de
+          reloj, la mitad de coste y ninguna contradicción en esa muestra. Apagarlo devuelve al
+          extractor.</p>
         <label><input type="checkbox" name="aristas_en_continuidad" id="aristas_en_continuidad"> Hechos relacionados entre personajes</label>
         <p>Un hecho sobre quien no está en la escena llega igual si toca a quien sí está: lo que
-          Volkov hace a la esclusa aparece en el capítulo de Ruiz. En novelas cortas no cambia nada;
-          se nota a partir del capítulo diez.</p>
+          Volkov hace a la esclusa aparece en el capítulo de Ruiz. Entrega un 22 % más de hechos,
+          pero de nueve contradicciones medidas solo una era de las que arregla, y cuesta unos veinte
+          minutos más por novela. Sin probar con dos agentes.</p>
         <label><input type="checkbox" name="registrar_uso" id="registrar_uso"> Registrar el uso de tokens</label>
         <p>Sin esto no hay forma de saber lo que cuesta cada capítulo.</p>
         <label><input type="checkbox" name="exportar_trazas" id="exportar_trazas"> Publicar la traza en Langfuse</label>
         <p>Al terminar cada fase se envía el registro de ejecución: tiempos, tokens, coste y códigos
           de regla. Nunca la prosa de la novela. Si no hay credenciales en el entorno, no se intenta.</p>
+        <label><input type="checkbox" name="exportar_para_juez" id="exportar_para_juez"> Enviar los capítulos al juez</label>
+        <p>Además de la traza sale el texto del capítulo, para que el evaluador de Langfuse pueda
+          puntuarlo. Es la única casilla que hace salir prosa de esta máquina.</p>
         <p><strong>Condiciones.</strong> Se factura por capítulo cerrado, aunque el revisor lo rechace
           después. Si el revisor detiene la producción, usted decide si reanuda bajo su responsabilidad;
           lo escrito hasta entonces se conserva y se cobra.</p>
@@ -468,6 +475,7 @@ fetch("/api/formulario").then(function(r){ return r.json(); }).then(function(d){
   // contra `false`: un proyecto sin configurar no debe aparecer con ellos marcados.
   $("escritor_emite_delta").checked = d.valores.escritor_emite_delta === true;
   $("aristas_en_continuidad").checked = d.valores.aristas_en_continuidad === true;
+  $("exportar_para_juez").checked = d.valores.exportar_para_juez === true;
   pintarAjustes();
   recalcular();
 

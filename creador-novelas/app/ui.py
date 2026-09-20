@@ -317,7 +317,7 @@ ROTULOS_INTERRUPTOR = {
     "exportar_trazas": ("Publicar la traza", "RF-09 · al cerrar cada fase, nunca la prosa"),
     "exportar_para_juez": ("Enviar los capítulos al juez", "X-03.2 · el texto sale hacia Langfuse"),
     "escritor_emite_delta": ("El escritor fija sus propios hechos", "X-04 · dos agentes, sin extractor"),
-    "aristas_en_continuidad": ("Hechos relacionados entre personajes", "X-05 · se nota desde el capítulo 10"),
+    "aristas_en_continuidad": ("Hechos relacionados entre personajes", "X-05 · entrega más hechos; su efecto no está demostrado"),
 }
 
 

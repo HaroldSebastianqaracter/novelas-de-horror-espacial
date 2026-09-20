@@ -463,15 +463,22 @@ function pintarCuarentena(){
   $("t-modo").textContent = "Detenida...";
 }
 
-function fallo(mensaje){
-  $("t-cap").firstChild.nodeValue = "No se puede leer";
+function fallo(mensaje, titulo, modo){
+  // Una biblioteca vacía no es un error: si se rotula «No se puede leer» y «Leyendo...», la pantalla
+  // dice que algo ha ido mal cuando lo único que pasa es que la novela aún no ha empezado.
+  $("t-cap").firstChild.nodeValue = titulo || "No se puede leer";
+  $("t-modo").textContent = modo || "Sin lectura";
   $("prosa").innerHTML = "<p>" + esc(mensaje) + "</p>";
 }
 
 fetch("/api/indice").then(function(r){ return r.json(); }).then(function(d){
   indice = d;
   var escritos = indice.capitulos.filter(function(c){ return c.escrito; });
-  if (!escritos.length) { fallo("Todavía no hay ningún capítulo escrito. Cuando el Escritor cierre el primero, aparecerá aquí."); return; }
+  if (!escritos.length) {
+    fallo("Todavía no hay ningún capítulo escrito. Cuando el Escritor cierre el primero, aparecerá aquí.",
+          "Todavía no hay nada que leer", "En espera");
+    return;
+  }
   var pedido = parseInt(new URLSearchParams(location.search).get("cap"), 10);
   var n = escritos.some(function(c){ return c.num === pedido; }) ? pedido : escritos[escritos.length - 1].num;
   return fetch("/api/qa").then(function(r){ return r.ok ? r.json() : null; })

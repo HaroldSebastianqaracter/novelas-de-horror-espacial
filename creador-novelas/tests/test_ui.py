@@ -765,3 +765,25 @@ def test_el_formulario_suelto_pinta_todos_los_interruptores(proyecto):
     for clave, valor in ui.DEFAULTS.items():
         if isinstance(valor, bool):
             assert f"name='{clave}'" in html, f"{clave} no tiene casilla: guardar aquí lo apagaría"
+
+
+def test_la_pantalla_del_encargo_pinta_todos_los_interruptores():
+    """La misma trampa, un piso más arriba: la casilla que falta en el HTML se guarda apagada.
+
+    El arreglo anterior cubrió `_ejecucion_desde_formulario` y el formulario suelto, pero
+    `encargo.html` --que es la pantalla que se usa-- seguía sin `exportar_para_juez`. Al firmar,
+    FormData no incluye lo que no existe, así que la casilla ausente se guardaba en False. No dolió
+    porque ese campo ya venía apagado de fábrica; el siguiente que se añada sí dolería.
+    """
+    from pathlib import Path
+
+    from app.config import CAMPOS_EJECUCION
+
+    html_encargo = (Path(__file__).resolve().parents[1] / "app" / "static" / "encargo.html").read_text(encoding="utf-8")
+    interruptores = [c for c in CAMPOS_EJECUCION if ui._es_bool(c)]
+
+    faltan = [c for c in interruptores if f'name="{c}"' not in html_encargo]
+    assert not faltan, f"encargo.html no pinta estos interruptores, y se apagarán al firmar: {faltan}"
+
+    sin_estado = [c for c in interruptores if f'$("{c}").checked' not in html_encargo]
+    assert not sin_estado, f"encargo.html pinta pero no rellena estos interruptores: {sin_estado}"
