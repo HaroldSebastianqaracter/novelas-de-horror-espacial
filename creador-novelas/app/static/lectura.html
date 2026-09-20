@@ -104,6 +104,13 @@
   .texto .mano::before{content:"";position:absolute;inset:-30px -60px;background:radial-gradient(ellipse 60% 70% at 50% 50%,rgba(179,38,30,.16),transparent 70%);z-index:-1}
   .margen{padding:26px 26px 30px;background:linear-gradient(180deg,rgba(22,27,34,.62),rgba(10,12,16,.82));box-shadow:0 40px 90px -30px rgba(0,0,0,1),inset 0 1px 0 rgba(232,217,181,.10)}
   .margen h3{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;font-size:17px;color:var(--halogeno)}
+  .encuadernar{margin-top:22px;padding-top:16px;border-top:1px solid var(--hilo)}
+  .encuadernar button{width:100%;padding:10px 12px;background:transparent;color:var(--halogeno);
+    border:1px solid var(--hilo);font:inherit;font-size:13px;letter-spacing:.02em;cursor:pointer}
+  .encuadernar button:hover:not([disabled]){border-color:var(--halogeno);background:rgba(232,217,181,.08)}
+  .encuadernar button[disabled]{color:var(--niebla-baja);cursor:default}
+  .nota-pdf{margin:8px 0 0;font-size:11.5px;line-height:1.45;color:var(--niebla-baja)}
+  .nota-pdf.mal{color:#E0483C}
   .cuarentena{padding:12px 18px;background:linear-gradient(90deg,rgba(179,38,30,.22),rgba(179,38,30,.04) 60%,transparent);box-shadow:-30px 0 60px -20px rgba(179,38,30,.8),inset 0 0 0 1px rgba(179,38,30,.25)}
   .cuarentena b{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-style:italic;font-size:16px;letter-spacing:0}
   .costillar li.actual i{box-shadow:0 0 14px 1px rgba(232,217,181,.9)}
@@ -287,7 +294,13 @@
   </div>
 
   <div class="pagina">
-    <nav class="costillar ui" aria-label="Capítulos"><ol id="costillar"></ol></nav>
+    <nav class="costillar ui" aria-label="Capítulos">
+      <ol id="costillar"></ol>
+      <div class="encuadernar" id="encuadernar" hidden>
+        <button type="button" id="btn-pdf">Encuadernar en PDF</button>
+        <p class="nota-pdf" id="nota-pdf"></p>
+      </div>
+    </nav>
 
     <article class="texto" id="texto">
       <header><span class="fantasma" id="fantasma" aria-hidden="true"></span>
@@ -463,6 +476,50 @@ function pintarCuarentena(){
   $("t-modo").textContent = "Detenida...";
 }
 
+function prepararPdf(indice){
+  // El libro se puede encuadernar a medias: no hay razón para esconder el botón hasta el capítulo
+  // final, y quien lleva ocho escritos quiere verlos maquetados. Lo que sí se dice es cuántos van.
+  var escritos = indice.capitulos.filter(function(c){ return c.escrito; }).length;
+  if (!escritos) return;
+  var total = indice.capitulos.length;
+  $("encuadernar").hidden = false;
+  $("nota-pdf").textContent = escritos < total
+    ? "Saldrán los " + escritos + " capítulos cerrados de " + total + "."
+    : "El libro entero, " + total + " capítulos.";
+
+  $("btn-pdf").addEventListener("click", function(){
+    var boton = $("btn-pdf"), nota = $("nota-pdf");
+    boton.disabled = true;
+    boton.textContent = "Componiendo...";
+    nota.className = "nota-pdf";
+    // La primera vez tectonic se descarga los paquetes que le faltan y tarda de verdad. Sin este
+    // aviso la pantalla parece colgada y se pulsa otra vez.
+    nota.textContent = "Compilando el LaTeX. La primera vez puede tardar un par de minutos.";
+
+    fetch("/api/pdf").then(function(r){
+      if (!r.ok) { return r.json().then(function(d){ throw new Error(d.error || "no se pudo componer"); }); }
+      var nombre = "novela.pdf";
+      var cab = r.headers.get("Content-Disposition") || "";
+      var m = cab.match(/filename="([^"]+)"/);
+      if (m) nombre = m[1];
+      return r.blob().then(function(b){ return {blob:b, nombre:nombre}; });
+    }).then(function(x){
+      var url = URL.createObjectURL(x.blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = x.nombre;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 10000);
+      nota.textContent = "Descargado: " + x.nombre;
+    }).catch(function(e){
+      nota.className = "nota-pdf mal";
+      nota.textContent = String(e.message || e);
+    }).then(function(){
+      boton.disabled = false;
+      boton.textContent = "Encuadernar en PDF";
+    });
+  });
+}
+
 function fallo(mensaje, titulo, modo){
   // Una biblioteca vacía no es un error: si se rotula «No se puede leer» y «Leyendo...», la pantalla
   // dice que algo ha ido mal cuando lo único que pasa es que la novela aún no ha empezado.
@@ -479,6 +536,7 @@ fetch("/api/indice").then(function(r){ return r.json(); }).then(function(d){
           "Todavía no hay nada que leer", "En espera");
     return;
   }
+  prepararPdf(indice);
   var pedido = parseInt(new URLSearchParams(location.search).get("cap"), 10);
   var n = escritos.some(function(c){ return c.num === pedido; }) ? pedido : escritos[escritos.length - 1].num;
   return fetch("/api/qa").then(function(r){ return r.ok ? r.json() : null; })

@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -367,12 +368,50 @@ def _orden(motor: str, tex: Path) -> list[list[str]]:
     `.toc`; tectonic y latexmk ya deciden ellos cuántas pasadas hacen falta.
     """
     salida = str(tex.parent)
-    if motor == "tectonic":
-        return [["tectonic", "--outdir", salida, str(tex)]]
-    if motor == "latexmk":
-        return [["latexmk", "-pdf", "-interaction=nonstopmode", f"-outdir={salida}", str(tex)]]
+    # `motor` puede ser un nombre suelto del PATH o la ruta completa al ejecutable, así que la
+    # familia se decide por el nombre del archivo y no comparando la cadena entera.
+    familia = Path(motor).stem.lower()
+    if familia == "tectonic":
+        return [[motor, "--outdir", salida, str(tex)]]
+    if familia == "latexmk":
+        return [[motor, "-pdf", "-interaction=nonstopmode", f"-outdir={salida}", str(tex)]]
     base = [motor, "-interaction=nonstopmode", f"-output-directory={salida}", str(tex)]
     return [base, base]
+
+
+# Dónde mirar cuando el motor no está en el PATH. MiKTeX se instala por usuario y no toca el PATH
+# de los procesos que ya estaban vivos, así que el servidor de la web --arrancado antes de instalar,
+# o desde un shell distinto-- no lo veía y el botón del PDF habría dicho «no hay motor» con el motor
+# instalado. Es el mismo modo de fallo de siempre: trabajo que no ocurre, anotado como respuesta.
+def _carpetas_conocidas() -> list[Path]:
+    if os.name != "nt":
+        return [Path("/usr/local/texlive")]
+    candidatas = []
+    for var in ("LOCALAPPDATA", "PROGRAMFILES", "PROGRAMFILES(X86)"):
+        base = os.environ.get(var)
+        if not base:
+            continue
+        candidatas += [Path(base) / "Programs" / "MiKTeX" / "miktex" / "bin" / "x64",
+                       Path(base) / "MiKTeX" / "miktex" / "bin" / "x64",
+                       Path(base) / "MiKTeX" / "miktex" / "bin"]
+    raiz_tl = Path(os.environ.get("SYSTEMDRIVE", "C:") + "/texlive")
+    if raiz_tl.is_dir():
+        candidatas += sorted((d / "bin" / "windows" for d in raiz_tl.iterdir() if d.is_dir()), reverse=True)
+    return candidatas
+
+
+def buscar_motor() -> str | None:
+    """El primer motor disponible, mirando el PATH y luego las instalaciones típicas."""
+    for motor in MOTORES:
+        if shutil.which(motor):
+            return motor
+    sufijo = ".exe" if os.name == "nt" else ""
+    for carpeta in _carpetas_conocidas():
+        for motor in MOTORES:
+            exe = carpeta / (motor + sufijo)
+            if exe.is_file():
+                return str(exe)
+    return None
 
 
 def compilar(tex: Path) -> Path | None:
@@ -381,13 +420,13 @@ def compilar(tex: Path) -> Path | None:
     No se instala nada ni se falla por esto: el `.tex` ya está escrito y es el entregable. Si no hay
     motor, se dice cómo conseguir uno y se sigue.
     """
-    motor = next((m for m in MOTORES if shutil.which(m)), None)
+    motor = buscar_motor()
     if motor is None:
         _avisar("no hay motor LaTeX instalado (se probaron: " + ", ".join(MOTORES) + ")")
         _avisar(f"el .tex está en {tex}; para compilarlo: instala tectonic y ejecuta "
                 f"`tectonic \"{tex.name}\"` en {tex.parent}")
         return None
-    print(f"compilando con {motor}...", file=sys.stderr)
+    print(f"compilando con {Path(motor).stem}...", file=sys.stderr)
     for orden in _orden(motor, tex):
         proc = subprocess.run(orden, capture_output=True, text=True, encoding="utf-8",
                               errors="replace", cwd=str(tex.parent))

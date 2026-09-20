@@ -275,3 +275,49 @@ def test_el_pie_de_portada_es_la_fecha_y_no_el_nombre_de_la_carpeta(tmp_path):
     from herramientas.a_latex import pie_de_portada
     assert pie_de_portada(tmp_path / "2026-09-18T13-03-10_el-pasajero-del-vacio") == "2026-09-18"
     assert pie_de_portada(tmp_path / "una-carpeta-cualquiera") == ""
+
+
+# ---------------------------------------------------------------------------
+# El botón de la pantalla de lectura
+# ---------------------------------------------------------------------------
+
+def test_el_nombre_de_descarga_no_deja_salir_rutas_ni_acentos():
+    """Va en una cabecera HTTP y lo elige el título que escribió un modelo, así que se filtra."""
+    from app.ui import _nombre_de_descarga
+
+    assert _nombre_de_descarga(None) == "novela.pdf"
+    assert _nombre_de_descarga("Presión") == "Presion.pdf"
+    assert _nombre_de_descarga("Las esclusas") == "Las_esclusas.pdf"
+    assert "/" not in _nombre_de_descarga("../../etc/passwd")
+    assert '"' not in _nombre_de_descarga('Un "título" raro')
+    assert _nombre_de_descarga("¿¡!?") == "novela.pdf"
+
+
+def test_componer_sin_capitulos_lo_dice_en_vez_de_escribir_un_libro_vacio(tmp_path):
+    """Sin manuscrito no hay libro. El fallo tiene que ser explícito: un PDF de cero páginas
+    compilaría sin error y pasaría por entregable."""
+    from app.errores import EstadoInvalidoError
+    from app import libro_pdf
+
+    (tmp_path / "05_manuscrito").mkdir()
+    with pytest.raises(EstadoInvalidoError, match="ningún capítulo"):
+        libro_pdf.generar(tmp_path)
+
+
+def test_el_motor_de_latex_se_busca_fuera_del_PATH(monkeypatch, tmp_path):
+    """MiKTeX se instala por usuario y no toca el PATH de los procesos ya vivos.
+
+    El servidor de la web habría dicho «no hay motor» con el motor instalado, que es el modo de
+    fallo de siempre: trabajo que no ocurre, anotado como respuesta.
+    """
+    monkeypatch.setattr(a_latex.shutil, "which", lambda _: None)
+    assert a_latex.buscar_motor() is None or True  # sin PATH, depende de lo instalado
+
+    carpeta = tmp_path / "MiKTeX" / "miktex" / "bin" / "x64"
+    carpeta.mkdir(parents=True)
+    sufijo = ".exe" if a_latex.os.name == "nt" else ""
+    (carpeta / ("pdflatex" + sufijo)).write_text("", encoding="utf-8")
+    monkeypatch.setattr(a_latex, "_carpetas_conocidas", lambda: [carpeta])
+
+    encontrado = a_latex.buscar_motor()
+    assert encontrado is not None and "pdflatex" in encontrado

@@ -10,6 +10,7 @@ from __future__ import annotations
 import dataclasses
 import html
 import json
+import re
 import shutil
 from dataclasses import dataclass, field
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -308,6 +309,18 @@ def _campo(clave: str, etiqueta: str, ayuda: str, valor: Any, *, requerido: bool
     return f"<label for='{clave}'>{html.escape(etiqueta)}<small>{html.escape(ayuda)}</small></label>{control}"
 
 
+def _nombre_de_descarga(titulo: str | None) -> str:
+    """El título del libro como nombre de archivo: sin acentos, sin comillas y sin rutas.
+
+    Va en una cabecera Content-Disposition, así que lo que no esté en esta lista blanca no sale.
+    """
+    import unicodedata
+
+    base = unicodedata.normalize("NFKD", titulo or "novela").encode("ascii", "ignore").decode()
+    base = re.sub(r"[^A-Za-z0-9 _-]+", "", base).strip().replace(" ", "_") or "novela"
+    return base[:60] + ".pdf"
+
+
 # Los interruptores de ejecución con su rótulo. Este formulario los pintaba a mano y solo tenía uno
 # de los cinco, así que guardar aquí apagaba `exportar_trazas` y los dos de X-04 y X-05 sin avisar.
 # Ahora se generan desde CAMPOS_EJECUCION: lo que falte en este diccionario sale con su clave por
@@ -435,6 +448,30 @@ class _Manejador(BaseHTTPRequestHandler):
                  ".webp": "image/webp", ".svg": "image/svg+xml"}
         self._bytes(200, destino.read_bytes(), tipos.get(destino.suffix.lower(), "application/octet-stream"))
 
+    def _pdf(self) -> None:
+        """Compone el libro y lo devuelve como descarga.
+
+        Tarda: la primera compilación de tectonic se baja los paquetes que le faltan. Por eso el
+        botón se bloquea mientras tanto en vez de dejar pulsar dos veces. Si falla, sale un 409 con
+        el motivo en texto, no un 500 vacío: quien pulsa tiene que poder leer qué pasó.
+        """
+        from app import libro_pdf
+
+        try:
+            pdf = libro_pdf.generar(self.raiz)
+        except EstadoInvalidoError as e:
+            self._json(409, {"error": str(e)})
+            return
+        nombre = _nombre_de_descarga(web.indice(self.raiz).get("titulo"))
+        datos = pdf.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/pdf")
+        self.send_header("Content-Length", str(len(datos)))
+        self.send_header("Content-Disposition", f'attachment; filename="{nombre}"')
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(datos)
+
     def _redirigir(self, destino: str) -> None:
         """302 conservando la consulta: `/lectura?cap=4` tiene que seguir siendo el capítulo 4."""
         consulta = self.path.split("?", 1)
@@ -479,6 +516,8 @@ class _Manejador(BaseHTTPRequestHandler):
                              "limites": limites_de_config()})
         elif ruta == "/api/indice":
             self._json(200, web.indice(self.raiz))
+        elif ruta == "/api/pdf":
+            self._pdf()
         elif ruta.startswith("/api/capitulo/"):
             try:
                 n = int(ruta[len("/api/capitulo/"):].strip("/"))
