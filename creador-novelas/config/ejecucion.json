@@ -5,5 +5,5 @@
   "exportar_trazas": true,
   "exportar_para_juez": false,
   "escritor_emite_delta": true,
-  "aristas_en_continuidad": true
+  "aristas_en_continuidad": false
 }
