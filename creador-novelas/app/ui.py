@@ -289,12 +289,15 @@ textarea{min-height:10rem}.aviso{background:#fff3cd;border:1px solid #e0a800;pad
 .error{background:#f8d7da;border:1px solid #b02a37;padding:.75rem 1rem;margin:1rem 0;white-space:pre-wrap}
 .ok{background:#d1e7dd;border:1px solid #0f5132;padding:.75rem 1rem;margin:1rem 0}
 button{font:inherit;padding:.6rem 1.4rem;cursor:pointer}code{background:#eee;padding:0 .25rem}
+h1{display:flex;align-items:center;gap:.6rem}.logotipo{border-radius:6px;flex:none}
 """
 
 
 def _pagina(titulo: str, cuerpo: str) -> str:
     return (f"<!doctype html><html lang='es'><head><meta charset='utf-8'><title>{html.escape(titulo)}</title>"
-            f"<style>{_ESTILO}</style></head><body><h1>{html.escape(titulo)}</h1>{cuerpo}</body></html>")
+            f"<style>{_ESTILO}</style></head><body>"
+            f"<h1><img class='logotipo' src='/static/logo.png' alt='Qaracter' width='26' height='26'>"
+            f"{html.escape(titulo)}</h1>{cuerpo}</body></html>")
 
 
 def _campo(clave: str, etiqueta: str, ayuda: str, valor: Any, *, requerido: bool = True) -> str:
