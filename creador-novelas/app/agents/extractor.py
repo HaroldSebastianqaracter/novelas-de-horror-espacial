@@ -56,6 +56,19 @@ def parsear_retorno_extractor(texto: str) -> RetornoExtractor:
         )
     return RetornoExtractor(n=int(m.group("n")), hechos=int(m.group("hechos")), personajes=int(m.group("personajes")), linea=linea)
 
+# X-05: la arista solo aparece en el esquema con el interruptor encendido. El brazo de control tiene
+# que ver el prompt de siempre, palabra por palabra: si los dos prompts se diferencian en algo más que
+# el filtro, la comparacion deja de medir el filtro.
+LINEA_ARISTAS = """,
+      "relacionados": ["a quién MÁS toca este hecho, además del sujeto, con las claves exactas del registro. Si Volkov sella la esclusa y eso deja a Ruiz aislada, el hecho es de Volkov y aquí va Ruiz. Lista vacía si no toca a nadie más."]"""
+
+
+def esquema_delta(n: int, *, con_aristas: bool = False) -> str:
+    """El esquema del delta tal como lo ve el agente que lo escribe."""
+    aristas = LINEA_ARISTAS if con_aristas else ""
+    return ESQUEMA_DELTA.replace("<ARISTAS>", aristas).replace("<NUM>", str(n))
+
+
 ESQUEMA_DELTA = """{
   "personajes": {
     "<clave del registro>": {
@@ -71,7 +84,7 @@ ESQUEMA_DELTA = """{
       "sujeto": "<clave del registro, locación del registro o \\"mundo\\">",
       "categoria": "personaje | locacion | mundo",
       "hecho": "una oración en prosa, atómica y verificable",
-      "cap_origen": <NUM>
+      "cap_origen": <NUM><ARISTAS>
     }
   ],
   "resumen_corto": "3 a 5 líneas",
@@ -110,7 +123,7 @@ def preparar_prompt_extractor(n: int, config: HarnessConfig, raiz: Path) -> str:
         "RUTA_CAPITULO": rutas.capitulo(n).as_posix(),
         "REGISTRO_PERSONAJES": ", ".join(personajes) if personajes else "(vacío)",
         "REGISTRO_LOCACIONES": ", ".join(locaciones) if locaciones else "(vacío)",
-        "ESQUEMA": ESQUEMA_DELTA.replace("<NUM>", str(n)),
+        "ESQUEMA": esquema_delta(n, con_aristas=config.aristas_en_continuidad),
         "MAX_HECHOS": str(config.max_hechos_por_capitulo),
         "RUTA_DELTA": rutas.delta(n).as_posix(),
         "COMANDO_VALIDACION": comando_validador("extractor", n),

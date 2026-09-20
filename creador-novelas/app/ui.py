@@ -42,6 +42,12 @@ DEFAULTS: dict[str, Any] = {
     "max_llamadas_por_tanda": 30,
     "registrar_uso": True,
     "exportar_trazas": True,
+    # Los mismos valores que trae `HarnessConfig`, y por la misma razón: dos agentes está medido
+    # (19/09, la mitad de reloj y ninguna contradicción sobre las mismas premisas) y las aristas
+    # todavía no. Si estos dos no estuvieran aquí, una novela encargada desde la pantalla saldría
+    # con tres agentes mientras el resto del harness da por hecho que son dos.
+    "escritor_emite_delta": True,
+    "aristas_en_continuidad": False,
 }
 
 OPCIONES = {
@@ -162,18 +168,42 @@ def _novela_desde_formulario(campos: dict[str, str]) -> dict[str, Any]:
     return novela
 
 
+VERDADERO = ("on", "true", "1", "si", "sí")
+
+# Los únicos campos de ejecución que no son interruptores. El resto sale de CAMPOS_EJECUCION en vez
+# de enumerarse aquí, y esa enumeración a mano era un fallo con consecuencias: `aristas_en_continuidad`
+# se añadió a CAMPOS_EJECUCION y no a esta función, así que se perdía al guardar. Como una casilla
+# desmarcada llega ausente y ausente vale False, el interruptor se apagaba en silencio. El corredor
+# encarga las novelas por este mismo camino, de modo que una vuelta entera del loop habría corrido
+# como su propio control sin que nada avisara, y la conclusión habría sido «no hay diferencia».
+def _es_bool(clave: str) -> bool:
+    campo = HarnessConfig.model_fields.get(clave)
+    return campo is not None and campo.annotation is bool
+
+
+def _es_texto(clave: str) -> bool:
+    campo = HarnessConfig.model_fields.get(clave)
+    return campo is not None and campo.annotation is str
+
+
 def _ejecucion_desde_formulario(campos: dict[str, str]) -> dict[str, Any]:
-    return {
-        "capitulos_por_tanda": _valor_o_nulo(campos, "capitulos_por_tanda"),
-        "max_llamadas_por_tanda": _valor_o_nulo(campos, "max_llamadas_por_tanda"),
-        "registrar_uso": campos.get("registrar_uso", "").strip().lower() in ("on", "true", "1", "si", "sí"),
-        # RF-09: publicar la traza al cerrar cada fase. La casilla desmarcada llega ausente,
-        # que es justo lo que hace falta para poder apagarlo desde la pantalla.
-        "exportar_trazas": campos.get("exportar_trazas", "").strip().lower() in ("on", "true", "1", "si", "sí"),
-        # X-04: el escritor entrega también su delta y el extractor no se llama. Viaja por aquí
-        # porque el corredor encarga las novelas por este mismo camino, que es el del formulario.
-        "escritor_emite_delta": campos.get("escritor_emite_delta", "").strip().lower() in ("on", "true", "1", "si", "sí"),
-    }
+    """Cada campo de ejecución se lee según su tipo en el modelo, no según una lista escrita a mano.
+
+    Tratar todo lo que no fuera numérico como interruptor habría convertido el primer campo de texto
+    --`variante_prompt_escritor`-- en un `False`, que es el mismo fallo silencioso de un campo que se
+    pierde, solo que disfrazado de valor válido.
+    """
+    salida: dict[str, Any] = {}
+    for clave in CAMPOS_EJECUCION:
+        if _es_bool(clave):
+            # La casilla desmarcada llega ausente, que es justo lo que hace falta para poder apagar
+            # cualquiera de estos desde la pantalla (RF-09 y los interruptores de X-04 y X-05).
+            salida[clave] = campos.get(clave, "").strip().lower() in VERDADERO
+        elif _es_texto(clave):
+            salida[clave] = campos.get(clave, "").strip()
+        else:
+            salida[clave] = _valor_o_nulo(campos, clave)
+    return salida
 
 
 def _rutas_referencia(campos: dict[str, str]) -> list[Path]:
@@ -278,6 +308,26 @@ def _campo(clave: str, etiqueta: str, ayuda: str, valor: Any, *, requerido: bool
     return f"<label for='{clave}'>{html.escape(etiqueta)}<small>{html.escape(ayuda)}</small></label>{control}"
 
 
+# Los interruptores de ejecución con su rótulo. Este formulario los pintaba a mano y solo tenía uno
+# de los cinco, así que guardar aquí apagaba `exportar_trazas` y los dos de X-04 y X-05 sin avisar.
+# Ahora se generan desde CAMPOS_EJECUCION: lo que falte en este diccionario sale con su clave por
+# rótulo, feo pero presente, que es mucho mejor que desaparecer.
+ROTULOS_INTERRUPTOR = {
+    "registrar_uso": ("Registrar uso", "RF-CFG-06 · escribe 04_estado/uso.jsonl"),
+    "exportar_trazas": ("Publicar la traza", "RF-09 · al cerrar cada fase, nunca la prosa"),
+    "exportar_para_juez": ("Enviar los capítulos al juez", "X-03.2 · el texto sale hacia Langfuse"),
+    "escritor_emite_delta": ("El escritor fija sus propios hechos", "X-04 · dos agentes, sin extractor"),
+    "aristas_en_continuidad": ("Hechos relacionados entre personajes", "X-05 · se nota desde el capítulo 10"),
+}
+
+
+def _interruptor(clave: str, valor: Any) -> str:
+    rotulo, ayuda = ROTULOS_INTERRUPTOR.get(clave, (clave, ""))
+    marcado = " checked" if valor else ""
+    return (f"<label><input type='checkbox' name='{clave}'{marcado}> {rotulo}"
+            f"<small>{ayuda}</small></label>")
+
+
 def render_formulario(estado: EstadoFormulario, error: str | None = None) -> str:
     v = estado.valores
     aviso = f"<div class='aviso'>{html.escape(estado.motivo_bloqueo)}</div>" if estado.bloqueado else ""
@@ -288,7 +338,7 @@ def render_formulario(estado: EstadoFormulario, error: str | None = None) -> str
     voz = "".join(_campo(c, e, a, v.get(c)) for c, e, a in CAMPOS_VOZ)
     dimension = "".join(_campo(c, e, a, v.get(c)) for c, e, a in CAMPOS_DIMENSION)
     ejecucion = "".join(_campo(c, e, a, v.get(c), requerido=False) for c, e, a in CAMPOS_EJEC)
-    marcado = " checked" if v.get("registrar_uso") else ""
+    interruptores = "".join(_interruptor(c, v.get(c)) for c in CAMPOS_EJECUCION if _es_bool(c))
     cuerpo = f"""
 {aviso}{err}
 <form method='post' action='/guardar'>
@@ -303,7 +353,7 @@ def render_formulario(estado: EstadoFormulario, error: str | None = None) -> str
 
 <h2>Ejecución <small>RF-CFG-02, RF-CFG-06 · config/ejecucion.json</small></h2>
 <fieldset>{ejecucion}
-<label><input type='checkbox' name='registrar_uso'{marcado}> Registrar uso<small>RF-CFG-06 · escribe 04_estado/uso.jsonl</small></label>
+{interruptores}
 </fieldset>
 
 <h2>Ejemplos de referencia <small>RF-00.2 · copia a 00_referencias/</small></h2>

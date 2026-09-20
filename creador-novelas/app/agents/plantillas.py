@@ -45,15 +45,23 @@ MARCADORES_OBLIGATORIOS: dict[str, tuple[str, ...]] = {
 }
 
 
-def cargar_plantilla(raiz: Path, rol: str) -> str:
-    path = Rutas(raiz).prompts_config / f"{rol}.md"
+def cargar_plantilla(raiz: Path, rol: str, variante: str = "") -> str:
+    """La plantilla del rol, o una variante suya con nombre.
+
+    Las variantes son para el loop de prompts: `escritor-v2.md` convive con `escritor.md` en vez de
+    sustituirlo, así que el control sigue en el repo tal cual y cada vuelta queda como un archivo con
+    nombre que se puede leer y comparar meses después. Pasan el mismo checklist de marcadores, de
+    modo que una variante a la que le falte un bloque falla al cargarla y no a mitad de novela.
+    """
+    nombre = f"{rol}-{variante}" if variante else rol
+    path = Rutas(raiz).prompts_config / f"{nombre}.md"
     if not path.exists():
         raise ConfiguracionInvalidaError(f"falta la plantilla de prompt {path.as_posix()} (§11.5)")
     texto = path.read_text(encoding="utf-8")
     faltantes = verificar_checklist(texto, rol)
     if faltantes:
         raise ConfiguracionInvalidaError(
-            f"la plantilla config/prompts/{rol}.md omite marcadores del checklist §11.5: {', '.join(faltantes)}"
+            f"la plantilla config/prompts/{nombre}.md omite marcadores del checklist §11.5: {', '.join(faltantes)}"
         )
     return texto
 

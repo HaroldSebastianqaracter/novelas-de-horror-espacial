@@ -302,7 +302,9 @@
 
     <aside class="margen ui vidrio" aria-labelledby="margen-t">
       <div class="quien">
-        <h3 id="margen-t">Lo que el Extractor fijó en este capítulo</h3>
+        <!-- Sin nombrar quién lo fijó: desde X-04 puede ser el Extractor o el propio Escritor según
+             el interruptor, y a quien lee la novela le da igual cuál de los dos fue. -->
+        <h3 id="margen-t">Lo que quedó fijado en este capítulo</h3>
         <span id="t-resumen-hechos"></span>
       </div>
       <p class="discute" id="discute" hidden></p>
@@ -391,7 +393,7 @@ function pintarHechos(){
   $("t-resumen-hechos").textContent = hs.length
     ? (hs.length === 1 ? "Un hecho. " : hs.length + " hechos. ") +
       "A partir de aquí el Escritor no puede contradecirlos sin que el Revisor lo vea."
-    : "El Extractor no fijó ningún hecho nuevo en este capítulo.";
+    : "No se fijó ningún hecho nuevo en este capítulo.";
   // La contradicción es del capítulo, no de un hecho concreto: QA no dice cuál la provoca. Antes se
   // repetía bajo cada uno, así que un capítulo con cuatro hechos enseñaba cuatro veces el mismo
   // párrafo rojo y el margen se estiraba sin decir nada nuevo.
@@ -409,12 +411,19 @@ function pintarActores(){
   var hs = actual.hechos || [];
   var ficha = indice.capitulos[actual.num - 1] || {};
   var discutido = hs.some(function(h){ return h.conflicto; });
-  var li = ["<li><b>Escritor</b>, redactó " + actual.palabras.toLocaleString("es-ES") + " palabras.</li>",
-            "<li><b>Extractor de hechos</b>, fijó " + (hs.length || "cero") + (hs.length === 1 ? " hecho" : " hechos") + ".</li>",
+  // X-04: con el escritor emitiendo su propio delta no hay extractor. Enumerarlo igual sería
+  // atribuirle trabajo a un agente que no llegó a existir en esta novela, así que los hechos se
+  // cuentan en la línea del escritor, que es quien los fijó.
+  var cuenta = (hs.length || "cero") + (hs.length === 1 ? " hecho" : " hechos");
+  var li = indice.escritor_emite_delta
+    ? ["<li><b>Escritor</b>, redactó " + actual.palabras.toLocaleString("es-ES") + " palabras y fijó " + cuenta + ".</li>"]
+    : ["<li><b>Escritor</b>, redactó " + actual.palabras.toLocaleString("es-ES") + " palabras.</li>",
+       "<li><b>Extractor de hechos</b>, fijó " + cuenta + ".</li>"];
+  li = li.concat([
             "<li><b>Revisor de calidad</b>, " + (ficha.corte_qa
               ? "detuvo la producción al cerrar este capítulo."
               : discutido ? "señala este capítulo como origen de una contradicción posterior."
-                          : "no ha puesto reparos a este capítulo.") + "</li>"];
+                          : "no ha puesto reparos a este capítulo.") + "</li>"]);
   $("actores").innerHTML = li.join("");
 }
 

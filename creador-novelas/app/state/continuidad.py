@@ -6,6 +6,8 @@ Todas las funciones devuelven un log nuevo: nunca mutan el recibido.
 
 from __future__ import annotations
 
+from typing import Callable
+
 from app.schemas.continuidad import HechoContinuidad, LogContinuidad
 from app.schemas.outline import EntradaOutline
 
@@ -60,7 +62,65 @@ def filtrar_para_capitulo(log: LogContinuidad, entrada: EntradaOutline,
             seleccion.append(h)
         elif h.sujeto in personajes or h.sujeto == entrada.locacion:
             seleccion.append(h)
+        # X-05: el salto de vecindad. Un hecho cuyo sujeto no está en escena pero que toca a alguien
+        # que sí lo está entra igual: es exactamente el que hoy se pierde y sobre el que el escritor
+        # --que no puede leer capítulos anteriores-- acaba escribiendo a ciegas.
+        elif set(h.relacionados) & personajes:
+            seleccion.append(h)
     return seleccion
+
+
+# X-05: pesos de la puntuación. Salen de para qué sirve cada hecho en el prompt, no de un ajuste
+# fino: quien está en escena manda sobre quien la toca de refilón, y lo reciente sobre lo viejo.
+PESO_SUJETO_EN_ESCENA = 3
+PESO_LOCACION = 2
+PESO_RELACIONADO = 1
+PESO_CATEGORIA = {"personaje": 2, "locacion": 1, "mundo": 0}
+
+
+def puntuar(h: HechoContinuidad, entrada: EntradaOutline, personajes: set[str], n: int) -> int:
+    """Cuánto pide este hecho su sitio en el prompt del capítulo `n`.
+
+    No sirve para descartar por debajo de un umbral: solo para ordenar la cola cuando el presupuesto
+    aprieta. Con sitio de sobra entra todo, igual que hasta ahora.
+    """
+    puntos = PESO_CATEGORIA.get(h.categoria, 0)
+    if h.sujeto in personajes:
+        puntos += PESO_SUJETO_EN_ESCENA
+    if h.sujeto == entrada.locacion:
+        puntos += PESO_LOCACION
+    if set(h.relacionados) & personajes:
+        puntos += PESO_RELACIONADO
+    # Recencia: lo de hace dos capítulos pesa más que lo de hace doce, pero nunca al punto de que un
+    # hecho antiguo de un personaje en escena pierda contra uno reciente de alguien que no está.
+    antiguedad = max(0, n - (h.cap_origen or 0))
+    return puntos * 10 - antiguedad
+
+
+def recortar_a_presupuesto(hechos: list[HechoContinuidad], entrada: EntradaOutline, personajes: set[str],
+                           n: int, *, tope_tokens: int,
+                           coste: Callable[[HechoContinuidad], int]) -> list[HechoContinuidad]:
+    """X-05: si los hechos no caben, se quedan los que más falta hacen. Pero se leen en orden.
+
+    Dos reglas que no se negocian:
+
+    - Los de `cap_origen = 0` entran siempre. Son el canon del preludio, las reglas del mundo que la
+      novela no puede contradecir; recortarlas provoca justo la contradicción que esto evita.
+    - La salida va ordenada por `cap_origen`, no por puntuación. El escritor tiene que leer una
+      cronología; un ranking le cuenta la historia desordenada, y eso es peor que darle menos hechos.
+    """
+    canon = [h for h in hechos if (h.cap_origen or 0) == 0]
+    resto = [h for h in hechos if (h.cap_origen or 0) != 0]
+    gastado = sum(coste(h) for h in canon)
+    elegidos = list(canon)
+    if gastado < tope_tokens:
+        for h in sorted(resto, key=lambda x: puntuar(x, entrada, personajes, n), reverse=True):
+            c = coste(h)
+            if gastado + c > tope_tokens:
+                continue  # sigue mirando: detrás puede venir uno más corto que sí cabe
+            elegidos.append(h)
+            gastado += c
+    return sorted(elegidos, key=lambda h: (h.cap_origen or 0))
 
 
 def es_superconjunto(anterior: LogContinuidad, nuevo: LogContinuidad) -> tuple[bool, str]:

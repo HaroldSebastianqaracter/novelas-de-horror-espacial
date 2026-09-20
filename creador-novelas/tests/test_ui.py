@@ -70,7 +70,8 @@ def test_guardado_valido_escribe_los_tres_archivos_y_validan(tmp_path, monkeypat
                            "ventana_resumen_rodante", "cadencia_qa", "max_tokens_contexto_escritor", "max_hechos_por_capitulo"}
     assert ejecucion == {"capitulos_por_tanda": 3, "max_llamadas_por_tanda": 30, "registrar_uso": True,
                          "exportar_trazas": True, "exportar_para_juez": False,
-                         "escritor_emite_delta": False}
+                         "escritor_emite_delta": False, "aristas_en_continuidad": False,
+                         "variante_prompt_escritor": ""}
     assert resultado.comando_siguiente == "/generar-premisa"  # 00_referencias/ vacía
 
 
@@ -736,3 +737,31 @@ def test_las_directivas_se_resuelven_sin_shell(proyecto, config):
     assert web._resolver_directiva(proyecto, "cat hay.txt") == "contenido"
     assert web._resolver_directiva(proyecto, 'cat no.txt 2>/dev/null || echo "(no está)"') == "(no está)"
     assert web._resolver_directiva(proyecto, 'ls -1 no_existe 2>/dev/null || echo "(vacía)"') == "(vacía)"
+
+
+def test_ningun_campo_de_ejecucion_se_pierde_al_guardar():
+    """El encargo del corredor pasa por el formulario: lo que no llegue aquí se apaga en silencio.
+
+    `aristas_en_continuidad` se añadió a CAMPOS_EJECUCION y no a `_ejecucion_desde_formulario`, que
+    enumeraba las claves a mano. Como una casilla desmarcada llega ausente y ausente vale False, el
+    interruptor se apagaba al guardar y la vuelta del loop habría corrido como su propio control.
+    """
+    from app.config import CAMPOS_EJECUCION
+    from app.corredor import campos_de_encargo
+    from app.ui import _ejecucion_desde_formulario
+
+    encendidos = {c: True for c in CAMPOS_EJECUCION if ui._es_bool(c)}
+    campos = campos_de_encargo({"idea": "x", "config": {**encendidos, "capitulos_por_tanda": 3}})
+    guardado = _ejecucion_desde_formulario(campos)
+
+    assert set(guardado) == set(CAMPOS_EJECUCION), "hay campos de ejecución que el formulario no guarda"
+    for clave in encendidos:
+        assert guardado[clave] is True, f"{clave} llegó encendido al formulario y se guardó apagado"
+
+
+def test_el_formulario_suelto_pinta_todos_los_interruptores(proyecto):
+    """Pintaba uno de los cinco a mano, así que guardar ahí apagaba los otros cuatro sin avisar."""
+    html = ui.render_formulario(ui.estado_formulario(proyecto))
+    for clave, valor in ui.DEFAULTS.items():
+        if isinstance(valor, bool):
+            assert f"name='{clave}'" in html, f"{clave} no tiene casilla: guardar aquí lo apagaría"

@@ -589,6 +589,11 @@ def estado(raiz: Path) -> dict[str, Any]:
         "capitulos_por_tanda": ejecucion.get("capitulos_por_tanda") or meta.get("capitulos_por_tanda"),
         "max_llamadas_por_tanda": ejecucion.get("max_llamadas_por_tanda") or meta.get("max_llamadas_por_tanda"),
         "cadencia_qa": novela.get("cadencia_qa") or meta.get("cadencia_qa"),
+        # X-04: con el interruptor encendido no hay agente extractor, y la pantalla no puede seguir
+        # dando por hecho que son tres. Viene del servidor en vez de deducirse en el navegador
+        # porque una cubierta que no se enciende también es lo que se vería si el extractor se
+        # hubiera colgado, y esas dos cosas no deben parecer iguales.
+        "escritor_emite_delta": bool(ejecucion.get("escritor_emite_delta", meta.get("escritor_emite_delta"))),
         "palabras_objetivo": novela.get("palabras_por_capitulo") or meta.get("palabras_por_capitulo"),
         # No hay `palabras_actual`: el capítulo no existe en disco hasta que el escritor termina de
         # escribirlo entero, así que cualquier porcentaje sería inventado. La consola enseña el reloj.
@@ -764,6 +769,9 @@ def indice(raiz: Path) -> dict[str, Any]:
         "total_capitulos": total,
         "capitulos_cerrados": cerrados,
         "cadencia_qa": novela.get("cadencia_qa"),
+        # X-04: la ficha de cada capítulo enumera quién trabajó en él, y con el interruptor encendido
+        # el extractor no existe. Enumerarlo igual sería inventar un agente que no corrió.
+        "escritor_emite_delta": bool(_json(rutas.ejecucion_json).get("escritor_emite_delta")),
         "estado": getattr(m, "estado", None) if m else None,
         "capitulos": capitulos,
     }

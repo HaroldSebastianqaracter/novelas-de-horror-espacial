@@ -67,6 +67,12 @@ class RetornoEscritor:
     linea: str
 
 
+# X-05: lo que se deja libre sobre el tope del escritor al repartir el presupuesto de los hechos. El
+# prompt se mide antes de escribirlo, pero el modelo no cuenta exactamente igual que tiktoken; apurar
+# el tope al token cambiaría un recorte silencioso por un prompt rechazado.
+MARGEN_TOKENS_HECHOS = 500
+
+
 def _formatear_hechos(hechos: list[HechoContinuidad]) -> str:
     if not hechos:
         return "(todavía no hay hechos establecidos)"
@@ -152,7 +158,18 @@ def ensamblar_contexto(n: int, config: HarnessConfig, raiz: Path, *, feedback_lo
         "ENCARGO_DELTA": _encargo_delta(n, config, raiz),
         "RECURSOS_AGOTADOS": rec.formatear_agotados(recursos),
     }
-    texto = plantillas.rellenar(plantillas.cargar_plantilla(raiz, "escritor"), valores)
+    plantilla = plantillas.cargar_plantilla(raiz, "escritor", config.variante_prompt_escritor)
+    if config.aristas_en_continuidad:
+        # X-05: el presupuesto de los hechos no es un número inventado, es lo que sobra. Se mide el
+        # prompt sin ellos y se les da el resto menos un margen, así el recorte solo actúa cuando de
+        # verdad no caben: en una novela corta, donde cabe todo, no cambia absolutamente nada.
+        base, _ = estimar_tokens(plantillas.rellenar(plantilla, {**valores, "HECHOS": ""}))
+        tope = max(0, config.max_tokens_contexto_escritor - base - MARGEN_TOKENS_HECHOS)
+        hechos = cont.recortar_a_presupuesto(
+            hechos, entrada, set(permitidos), n, tope_tokens=tope,
+            coste=lambda h: estimar_tokens(_formatear_hechos([h]))[0])
+        valores["HECHOS"] = _formatear_hechos(hechos)
+    texto = plantillas.rellenar(plantilla, valores)
     tokens, metodo = estimar_tokens(texto)
     return Contexto(
         n=n, texto=texto, tokens_estimados=tokens, limite=config.max_tokens_contexto_escritor,
@@ -169,7 +186,7 @@ def _encargo_delta(n: int, config: HarnessConfig, raiz: Path) -> str:
     """
     if not config.escritor_emite_delta:
         return "(en esta corrida no escribís delta: de eso se encarga otro agente)"
-    from app.agents.extractor import ESQUEMA_DELTA, registro_de_sujetos
+    from app.agents.extractor import esquema_delta, registro_de_sujetos
 
     personajes, locaciones = registro_de_sujetos(raiz)
     rutas = Rutas(raiz)
@@ -186,7 +203,7 @@ def _encargo_delta(n: int, config: HarnessConfig, raiz: Path) -> str:
         "Y `mundo` para lo general.",
         f"Tope: {config.max_hechos_por_capitulo} hechos nuevos. Solo lo que este capítulo "
         "establece, no lo que reitera. Los `recursos_narrativos` no cuentan para el tope.",
-        f"Esquema:{chr(10)}{ESQUEMA_DELTA.replace(chr(60) + chr(78) + chr(85) + chr(77) + chr(62), str(n))}",
+        f"Esquema:{chr(10)}{esquema_delta(n, con_aristas=config.aristas_en_continuidad)}",
     ]
     return (chr(10) * 2).join(partes)
 
