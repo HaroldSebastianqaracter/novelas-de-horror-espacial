@@ -490,3 +490,44 @@ def test_el_traductor_otlp_conserva_la_sesion_de_la_novela(proyecto, config):
     payload = observabilidad.lote_a_otlp([e for e in traza.lote if e["type"] != "score-create"])
     raiz = _spans(payload)[0]
     assert _attrs(raiz)["langfuse.trace.session_id"] == registro.id_novela(proyecto)
+
+
+def test_el_preludio_no_se_cobra_dos_veces(tmp_path):
+    """`07_registro/preludio/uso.jsonl` y `fases.jsonl` anotan las mismas cuatro fases.
+
+    `coste()` sumaba las dos fuentes, así que el preludio se cobraba doble. Descubierto el 20/09
+    cuadrando el uso por llamada contra `corridas.csv`: en una novela de 15 capítulos eran 0,63 $
+    de más sobre 16,25, y en una de 3 el preludio pesa tanto que el inflado pasaba del 20 %. La
+    fuente buena es `fases.jsonl`, porque el uso.jsonl del preludio está además incompleto: H-10 no
+    caza todos los finales de subagente.
+    """
+    import json
+
+    from app.web import coste
+
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config" / "precios.json").write_text(json.dumps({
+        "moneda": "USD",
+        "por_millon": {"m": {"tokens_entrada": 1.0, "tokens_salida": 1.0,
+                             "tokens_cache_lectura": 1.0, "tokens_cache_creacion": 1.0}},
+    }), encoding="utf-8")
+
+    registro = tmp_path / "07_registro"
+    (registro / "preludio").mkdir(parents=True)
+    (registro / "tanda_1").mkdir()
+    # El preludio, visto por H-10: 1.000.000 de tokens de entrada, o sea 1,00 $.
+    (registro / "preludio" / "uso.jsonl").write_text(json.dumps({
+        "rol": "orquestador", "modelo": "m", "tokens_entrada": 1_000_000, "agent_id": "p1"}) + "\n",
+        encoding="utf-8")
+    # La misma fase, vista por la pantalla al cerrarla. Este es el total bueno.
+    (registro / "fases.jsonl").write_text(json.dumps({
+        "fase": "generar-premisa", "coste_usd": 1.5, "tokens": 1_500_000}) + "\n", encoding="utf-8")
+    # Y una tanda de verdad: 2.000.000 de tokens de salida, 2,00 $.
+    (registro / "tanda_1" / "uso.jsonl").write_text(json.dumps({
+        "rol": "escritor", "modelo": "m", "tokens_salida": 2_000_000, "agent_id": "e1"}) + "\n",
+        encoding="utf-8")
+
+    total = coste(tmp_path)["total"]
+    assert total == pytest.approx(3.5), (
+        f"esperado 1,50 del preludio + 2,00 de la tanda; salió {total}. "
+        "Si sale 4,50 el preludio se está cobrando dos veces.")

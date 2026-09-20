@@ -862,8 +862,15 @@ def coste(raiz: Path) -> dict[str, Any]:
     por_rol: dict[str, float] = {}
 
     registro = Rutas(raiz).registro
-    # Todas las carpetas con uso, no solo las `tanda_*`: el preludio (fases 0 a 3) tambien cuesta.
-    carpetas = sorted(c for c in registro.iterdir() if (c / "uso.jsonl").is_file()) if registro.is_dir() else []
+    # Solo las tandas. El preludio se cobra por `fases.jsonl`, mas abajo, y NO por su `uso.jsonl`:
+    # los dos anotan las mismas cuatro fases, asi que sumar ambos cobraba el preludio dos veces.
+    # Medido el 20/09 sobre una novela de 15 capitulos: 0,63 $ de mas sobre 16,25, un 4 %; en una
+    # novela de 3 capitulos el preludio pesa mucho mas y el inflado pasaba del 20 %. El uso.jsonl
+    # del preludio ademas esta incompleto --H-10 no caza todos los finales de subagente-- asi que la
+    # fuente buena es `fases.jsonl`, que trae los totales de cada fase.
+    carpetas = (sorted(c for c in registro.iterdir()
+                       if c.name.startswith("tanda_") and (c / "uso.jsonl").is_file())
+                if registro.is_dir() else [])
     vistos: set[str] = set()
     for carpeta in carpetas:
         for fila in _lineas_jsonl(carpeta / "uso.jsonl"):
@@ -887,7 +894,7 @@ def coste(raiz: Path) -> dict[str, Any]:
             total += gasto
             por_rol[fila.get("rol") or "?"] = por_rol.get(fila.get("rol") or "?", 0.0) + gasto
 
-    # Las fases del preludio no pasan por H-10; su coste lo anota la pantalla al cerrar el proceso.
+    # El preludio entero, y solo desde aqui: su coste lo anota la pantalla al cerrar cada fase.
     fases = _lineas_jsonl(registro / "fases.jsonl") if registro.is_dir() else []
     for fila in fases:
         gasto = float(fila.get("coste_usd") or 0)
