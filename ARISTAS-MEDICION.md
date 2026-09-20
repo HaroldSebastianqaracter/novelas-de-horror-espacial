@@ -159,3 +159,64 @@ plan original habrían sido diez horas y media y ~136 $.
    se envía, y decirle a quien rellena `relacionados` que ponga personajes y no locaciones.
 3. **Medir por cegueras, no por contradicciones totales.** El total varía de 1 a 5 entre novelas del
    mismo brazo; las cegueras son pocas y directamente atribuibles al filtro.
+
+---
+
+# El loop de prompts: parado antes de gastar
+
+## Por qué había que medir el instrumento primero
+
+El plan era cinco vueltas de dos novelas cada una, cambiando el prompt del escritor y viendo si baja
+la retención rota. Antes de gastar la primera vuelta hacía falta saber cuánto ruido mete el propio
+comprobador, porque si el ruido es mayor que la mejora esperable, las cinco vueltas no miden nada.
+
+Se midió lo obvio: pasar el mismo comprobador tres veces sobre las mismas tres novelas, sin cambiar
+nada. Si el instrumento fuera fiel, las tres pasadas darían el mismo número.
+
+## Lo que dio
+
+| novela | pasadas | media | desviación | error de la media |
+|---|---|---|---|---|
+| esclusas | 4, 6, 6 | 5,3 | 1,2 | 0,7 |
+| relevos | 16, 9, 15 | 13,3 | 3,8 | 2,2 |
+| descenso | 6, 5, 10 | 7,0 | 2,6 | 1,5 |
+| **total por pasada** | **26, 20, 31** | **25,7** | **5,5** | **3,2** |
+
+El ruido crece con el número de sucesos. En `relevos`, tres mediciones idénticas del mismo texto van
+de 9 a 16: el recorrido es más de la mitad de la media.
+
+## El número que decide
+
+Con tres pasadas promediadas, el error de la media de un brazo es 3,2. El error de la diferencia
+entre dos brazos es 4,5. Para afirmar una diferencia hacen falta unos dos errores:
+
+- con las **tres** novelas: **9 contradicciones menos de 25,7, un 35 %**;
+- con las **dos** novelas del loop: **5,2 de 12,3, un 43 %**.
+
+Y esas cifras son el suelo optimista, porque solo cuentan el ruido de medir. La vuelta 1 generaría
+novelas nuevas, no volvería a medir las mismas: encima va la variación de la generación, que no está
+medida y que por lo visto en el loop de velocidad es grande.
+
+Es decir: para ver algo, reordenar el prompt tendría que quitar cuatro de cada diez contradicciones.
+Un cambio de orden de bloques no hace eso.
+
+## Decisión
+
+**Parado.** No se lanzan las dos novelas de la vuelta 1 (~39 $, hora y media). La regla que se fijó
+antes de medir era: si la media no es estable, decirlo y parar, como se hizo con X-05. No es estable.
+
+`config/prompts/escritor-v2.md` queda escrito y sin probar. No está mal; simplemente no hay forma de
+saber si está bien con este instrumento.
+
+## Qué sí tendría potencia
+
+El problema es el tamaño de muestra: tres novelas son tres datos. El suceso que interesa —el escritor
+contradice un hecho que tiene delante— aparece 26 veces en el corpus actual. Medir sobre esas 26 en
+vez de sobre 3 novelas multiplica la potencia por ocho.
+
+La forma sería **rehacer solo el capítulo culpable**: reconstruir desde el registro la entrada exacta
+que recibió el escritor en ese capítulo, pedirla otra vez con `escritor.md` y con `escritor-v2.md`, y
+ver en cuál reaparece la contradicción. Queda emparejado hecho a hecho, no novela a novela, y cuesta
+capítulos sueltos en vez de novelas enteras.
+
+Requiere construir el reproductor de capítulo, que hoy no existe. Es la propuesta, no algo hecho.
