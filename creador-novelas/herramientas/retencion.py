@@ -62,6 +62,15 @@ conversa, que una cifra es otra. No cuenta como contradicción:
 - que el capítulo no mencione el hecho (omitir no es contradecir)
 - que un personaje se equivoque o mienta, si el texto lo presenta como error suyo
 - que el hecho se cumpla de forma distinta a la esperada pero compatible
+- **que se consiga el mismo fin por otro medio**. Si el hecho dice que el intercomunicador está
+  muerto y el capítulo hace hablar a dos personajes por una línea de diagnóstico, eso NO lo
+  contradice: el aparato averiado sigue averiado. Solo cuenta si el capítulo usa **ese mismo** medio.
+- **que una regla general se cumpla con matices**. Si el hecho dice que sellar una esclusa aísla el
+  módulo, y el capítulo describe algo moviéndose por rutas que quedaron abiertas, eso NO lo
+  contradice. Solo cuenta si el capítulo afirma que lo sellado no aisló.
+
+Fuera de esos casos, marcá todo lo que puedas defender citando una frase del capítulo. No hace falta
+que sea flagrante: si el texto afirma algo que no cabe con el hecho, cuenta.
 
 Respondé SOLO con un objeto JSON, sin bloque de código ni texto alrededor:
 
@@ -149,6 +158,18 @@ def analizar(raiz: Path, exe: str, aviso=print) -> dict:
                 i = x.get("n")
                 x["hecho"] = hechos[i - 1] if isinstance(i, int) and 1 <= i <= len(hechos) else "(fuera de rango)"
                 rotos.append(x)
+        # Un solo desliz contradice varios hechos emparentados: en el capítulo 14, «algo quedó
+        # encajado y dejó de desplazarse» chocaba con tres hechos distintos sobre cómo se mueve la
+        # presencia. Contarlo tres veces mide cuántos hechos hay sobre el tema, no cuántas veces
+        # falló el escritor. La unidad es el pasaje, así que se agrupa por la cita.
+        vistas: dict[str, dict] = {}
+        for x in rotos:
+            clave = " ".join(str(x.get("cita") or "").lower().split())[:120]
+            if clave in vistas:
+                vistas[clave].setdefault("tambien", []).append(x.get("hecho"))
+            else:
+                vistas[clave] = x
+        rotos = list(vistas.values())
         if fallos:
             # Una tanda caída deja el capítulo incompleto, y un capítulo incompleto contado como
             # limpio es justo la mentira que este comprobador tiene que no decir.
@@ -203,6 +224,8 @@ def main(argv: list[str]) -> int:
     ap.add_argument("novelas", nargs="+", type=Path)
     ap.add_argument("--validar", action="store_true",
                     help="compara con lo que QA encontró, para saber si el comprobador sirve")
+    ap.add_argument("--veces", type=int, default=1,
+                    help="repite la medición y da media y recorrido; con 1 sola el número no es fiable")
     ap.add_argument("--salida", type=Path, help="además, un JSONL con todo el detalle")
     a = ap.parse_args(argv[1:])
 
@@ -215,11 +238,27 @@ def main(argv: list[str]) -> int:
         print("ninguna de esas carpetas tiene 05_manuscrito/")
         return 1
 
-    analisis = []
+    # Tres pasadas idénticas sobre la misma novela dieron 9, 5 y 7. El verificador es un modelo y no
+    # un contador: su número oscila un tercio arriba o abajo. Lo salva que repetirlo cuesta un par de
+    # dólares y diez minutos, mientras que reducir el ruido de la otra forma --más novelas-- cuesta
+    # 19 $ y hora y media cada una. Por eso se promedia aquí y no allí.
+    analisis, repeticiones = [], []
     for n in validas:
         print(f"{n.name}")
-        analisis.append(analizar(n, exe))
+        pasadas = [analizar(n, exe) for _ in range(max(1, a.veces))]
+        cuentas = [sum(len(f.get("contradichos") or []) for f in p["filas"]) for p in pasadas]
+        if len(cuentas) > 1:
+            print(f"  {a.veces} pasadas: {cuentas} · media {sum(cuentas) / len(cuentas):.1f} "
+                  f"· recorrido {max(cuentas) - min(cuentas)}")
+        repeticiones.append({"novela": n.name, "cuentas": cuentas})
+        analisis.append(pasadas[0])
     print(informe(analisis))
+    if a.veces > 1:
+        print("\n== estabilidad ==")
+        for r in repeticiones:
+            c = r["cuentas"]
+            print(f"  {r['novela'][19:]:12} {c} · media {sum(c) / len(c):.1f} · recorrido {max(c) - min(c)}")
+        print("El detalle listado arriba es el de la primera pasada; la media es lo que hay que comparar.")
 
     if a.validar:
         print("\n== validación contra QA ==")
