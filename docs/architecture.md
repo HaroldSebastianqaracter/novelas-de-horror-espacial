@@ -12,12 +12,22 @@ El proyecto es un monorepo con estas carpetas principales:
 
 `src/backend/` y `src/frontend/` están creadas pero sin scaffolding todavía; ver sus respectivos `README.md` para el estado actual.
 
-## Requisitos técnicos
+## El sistema
 
-- **Backend**: FastAPI.
-- **Frontend**: React.
-- **Persistencia**: SQLite con extensión vectorial (`sqlite-vec`). Un único fichero guarda el grafo de estado, el texto de los capítulos y los embeddings.
-- **Límite de contexto**: **100.000 tokens por llamada al modelo.** No es un detalle de implementación: es la restricción que da forma a todo el pipeline. Obliga a que el contexto se ensamble por selección y no por volcado, y es la razón de que la unidad de trabajo sea el capítulo y no el acto.
+Lo que se construye es un **sistema con dos mitades**: un backend que genera la novela y un frontend desde el que se arranca, se vigila y se lee. No es una librería ni un script: es una aplicación con servidor e interfaz.
+
+| Mitad | Tecnología | De qué responde |
+| --- | --- | --- |
+| **Backend** | **FastAPI** + Python | Ejecuta el pipeline de agentes, mantiene el canon y aplica las puertas. FastAPI es el borde HTTP entre las dos mitades: no llama al modelo ni orquesta nada. |
+| **Frontend** | **React** + Three.js | Configurar la obra, arrancar y parar la generación, ver el pipeline correr y leer el manuscrito. |
+| **Motor de agentes** | **Claude Code** | Ejecuta cada agente con su skill. No es una librería del backend: es el programa al que el worker invoca. |
+| **Persistencia** | **SQLite** + `sqlite-vec` | Un único fichero con el grafo de estado, el texto de los capítulos y los embeddings. |
+
+Las dos mitades se detallan en [Arquitectura de ejecución](#arquitectura-de-ejecución) y [Arquitectura del frontend](#arquitectura-del-frontend).
+
+### Restricción que condiciona el resto
+
+**Límite de contexto: 100.000 tokens por llamada al modelo.** No es un detalle de implementación: es la restricción que da forma a todo el pipeline. Obliga a que el contexto se ensamble por selección y no por volcado, y es la razón de que la unidad de trabajo sea el capítulo y no el acto.
 
 ## Principios de diseño
 
@@ -52,6 +62,12 @@ De ahí salen dos reglas duras:
 
 Un agente por fase del proceso. Cada uno tiene una entrada, una salida y un criterio de terminación, y ninguno ve más contexto del que su fase necesita.
 
+Los agentes son el punto donde se encuentran los otros tres documentos de `docs/`, y ninguno de los tres es opcional:
+
+- **[definitions.md](definitions.md)** dice **qué escribe** cada agente. Un agente no inventa su salida: rellena entidades de la ontología, y lo que no está modelado ahí no puede producirlo.
+- **[domain-knowledge.md](domain-knowledge.md)** dice **con qué criterio** la escribe. Sus 55 principios son el oficio; sin ellos un agente produce texto correcto y narrativamente inerte.
+- **[validators.md](validators.md)** dice **cómo se comprueba** que lo hizo bien, y con qué etiqueta del Trust Spec.
+
 > **Decisión sin entrevistar.** Lo decidido es el *criterio* de reparto —uno por fase, frente a uno por capa de oficio, redactor único con herramientas, o fases más críticos en paralelo—. **Cuáles son esas fases, y por tanto cuántos agentes hay, lo derivé yo** del proceso manual de escritura. La tabla es una propuesta, no una decisión tomada.
 >
 > El **extractor** merece mención aparte: no corresponde a ninguna fase del oficio humano. Existe solo porque quien escribe es un modelo sin memoria entre llamadas, y porque la coherencia gana a la riqueza (principios 2 y 3). Un escritor humano no extrae sus propios hechos a una base de datos.
@@ -68,9 +84,77 @@ Un agente por fase del proceso. Cada uno tiene una entrada, una salida y un crit
 | **Redactor** | La prosa de las escenas de un capítulo | El capítulo está escrito entero, sin marcadores pendientes |
 | **Extractor** | `Hecho`, `EstadoDeConocimiento`, `EstadoObjeto`, `EstadoPersonaje`, `Evento` | Todo lo que el texto afirma está registrado en el grafo |
 | **Revisor de continuidad** | Informe de conflictos contra el canon | No hay contradicciones, o las hay y el pipeline para |
-| **Revisor de oficio** | Informe de voz, subtexto, función de escena y cliché | Cada criterio tiene veredicto contra su principio de `domain-knowledge.md` |
+| **Revisor de oficio** | Informe de voz, subtexto, función de escena y cliché | Cada criterio tiene veredicto contra su principio de [domain-knowledge.md](domain-knowledge.md) |
 
+### Agentes y sus skills
+
+Cada agente se materializa como una **skill de Claude Code**: una carpeta en `.claude/skills/` con su `SKILL.md`, donde vive el oficio que ese agente necesita y solo ese. Es la aplicación del principio 7 al conocimiento: igual que ningún agente recibe el canon entero, ninguno recibe los 55 principios del oficio.
+
+| Agente | Skill | Ontología que escribe ([definitions.md](definitions.md)) | Oficio que aplica ([domain-knowledge.md](domain-knowledge.md)) |
+| --- | --- | --- | --- |
+| **Arquitecto** | `arquitecto` | `Novela`, `Tema`, `Motivo`, `Restriccion` | 1, 7, 8 · 39, 52 |
+| **Constructor de mundo** | `mundo` | `Mundo`, `SistemaTecnologico`, `Lugar`, `Faccion`, `Amenaza` | 43, 44, 46, 47, 48, 53 |
+| **Diseñador de elenco** | `elenco` | `Personaje` | 20, 21, 22, 24, 25, 27 · 50 |
+| **Estructurador** | `estructura` | `Acto`, `HiloNarrativo`, `PuntoDeGiro`, `Siembra` | 2, 3, 4, 5, 6, 16, 18 · 51, 54 |
+| **Escaletador** | `escaleta` | `Capitulo`, `Secuencia`, `Escena`, `Beat`, `Secuela` | 9, 10, 11, 12, 13, 17 · 41, 45 |
+| **Redactor** | `redaccion` | — (escribe prosa, no ontología) | 28, 29, 30, 31, 32, 33, 34, 35, 36, 37 · 40, 42, 49 |
+| **Extractor** | `extraccion` | `Hecho`, `EstadoDeConocimiento`, `EstadoObjeto`, `EstadoPersonaje`, `Evento` | 26 |
+| **Revisor de continuidad** | `continuidad` | — (solo lee) | 14, 26 · 44 |
+| **Revisor de oficio** | `oficio` | — (solo informa) | 10, 19, 25, 29, 31, 33, 38 · 55 |
+
+**El redactor es el único agente que produce algo que no es ontología.** Escribe prosa; que esa prosa se convierta en canon es trabajo del extractor. Esa asimetría es justo la razón de que el extractor exista y de que un capítulo sin extraer no esté terminado (principio 3).
+
+Los números remiten a los principios numerados de [domain-knowledge.md](domain-knowledge.md); el punto separa el oficio general del propio del terror espacial (capa 5).
+
+**Tres cosas que la tabla hace evidentes:**
+
+- **El redactor carga con la capa 4 casi entera.** Es el agente con más oficio encima y en el que más caro sale equivocarse, lo que refuerza que la puerta 4 reintente en vez de dejar pasar.
+- **El extractor casi no tiene oficio.** Solo el principio 26, y de rebote. Confirma lo que ya dice la nota de arriba: no es una fase del oficio humano, es una consecuencia de que escriba un modelo sin memoria. Su dificultad es de exhaustividad, no de criterio.
+- **El revisor de continuidad no escribe ontología ni necesita juicio.** Su puerta es SQL (principio 5). La skill existe solo para redactar el informe cuando ya hay conflicto.
+
+**Ninguna de estas skills existe todavía.** La única que hay en `.claude/skills/` es `verificacion`, que es de desarrollo: sirve para construir este sistema, no forma parte de él. Las nueve de la tabla se escriben junto con la spec de su agente, no antes.
 El **orquestador** no es un agente: es código. Decide qué fase toca, ensambla los paquetes de contexto, ejecuta las puertas y aplica la política de fallo.
+
+## El motor de los agentes: Claude Code
+
+Los agentes **no son llamadas a una API de modelo**. Cada uno es una invocación de **Claude Code** con su skill cargada. El orquestador sigue siendo código propio; quien escribe, extrae y juzga es Claude Code.
+
+Tres capas, y conviene no confundirlas:
+
+| Capa | Qué hace | Quién lo hace |
+| --- | --- | --- |
+| **FastAPI** | Borde HTTP entre backend y frontend. No ve el modelo nunca. | Código propio |
+| **Orquestación** | Qué fase toca, ensamblado del paquete de contexto, puertas, política de fallo, reanudación. | Código propio, en el worker |
+| **Ejecución del agente** | Escribir, extraer, juzgar. | Claude Code, con la skill de ese agente |
+
+### Por qué esto y no la API
+
+- **Un solo servicio.** No hay clave de proveedor que gestionar ni un segundo sistema del que depender.
+- **Las skills dejan de ser una metáfora.** La [tabla de agentes y skills](#agentes-y-sus-skills) describe carpetas reales en `.claude/skills/` que Claude Code carga. Contra una API, «la skill del redactor» sería un prompt y nada más.
+- **El oficio se versiona con el repositorio.** [domain-knowledge.md](domain-knowledge.md) y las skills que lo reparten viven en el mismo árbol de git que el código que las invoca, y cambian en el mismo commit.
+
+Esto cierra la pendiente de *modelos por fase* tal como estaba planteada: la elección de modelo deja de ser un parámetro de cada llamada del orquestador.
+
+### Cómo invoca el worker a Claude Code
+
+Dos formas, y las dos son Claude Code:
+
+| Forma | Qué es | A cambio |
+| --- | --- | --- |
+| **La terminal, como subproceso** | El worker ejecuta `claude` en modo no interactivo y lee su salida. | Lo más simple de arrancar y de ver funcionar. Hay que serializar entrada y salida a través de la frontera del proceso. |
+| **El Claude Agent SDK** | El mismo motor, pero como librería, sin subproceso. | Mejor integración con el worker y con el manejo de errores. Más acoplamiento. |
+
+Sin decidir. Empezar por la terminal y migrar al SDK es barato; al revés no.
+
+### Las dos gestiones de contexto se pisan
+
+Es el punto de fricción real de esta decisión, y no existía mientras el agente era una llamada a una API.
+
+El principio 7 dice que **el contexto se selecciona, nunca se vuelca**: lo que entra en una llamada entra porque el orquestador lo decidió. Pero Claude Code trae su propia gestión de contexto —lee ficheros por su cuenta, busca por el repositorio, compacta cuando se llena—. Si no se acota, el agente ignora el paquete que se le montó y se pone a leer lo que le parece; con ello se pierden a la vez el presupuesto de tokens y la garantía de que la selección la hizo el orquestador.
+
+De ahí una regla dura: **el paquete de capítulo se le entrega al agente, y el agente no busca canon por su cuenta.**
+
+Cómo se impone —qué herramientas se le permiten, si el canon entra por la entrada o como ficheros acotados, qué pasa cuando Claude Code decide compactar a mitad de un capítulo— está sin decidir, y es la primera pregunta que tiene que responder la spec del redactor.
 
 ## Fases del pipeline
 
@@ -98,6 +182,20 @@ graph TD
 ```
 
 La planificación corre una vez. El bucle central —paquete, redacción, extracción, puertas— se repite por capítulo. Las pasadas globales corren sobre el manuscrito terminado.
+
+### El proceso, paso a paso
+
+1. **Planificación.** Arquitecto, constructor de mundo, diseñador de elenco y estructurador corren una sola vez, en ese orden, y cada uno escribe su parte del canon en el grafo. La **puerta 1** comprueba que el arco resuelve antes de dejar bajar a capítulos.
+2. **Escaleta.** El escaletador convierte la estructura en capítulos, secuencias y escenas con POV, objetivo, conflicto y valor en juego. La **puerta 2** verifica que ninguna escena deja el valor donde estaba.
+3. **Paquete de capítulo.** El orquestador —que es código, no agente— selecciona del grafo lo que este capítulo necesita y lo ajusta al presupuesto de tokens. Nada se vuelca entero.
+4. **Redacción.** El redactor escribe las escenas del capítulo con libertad dentro de ese paquete.
+5. **Extracción.** El extractor lee la prosa recién escrita y registra en el grafo todo lo que el texto ha fijado. Hasta aquí, el capítulo no está terminado.
+6. **Puerta 3, continuidad.** Consultas SQL contra el canon. Si hay conflicto, **el pipeline para** y espera a un humano: nunca se acumula deuda narrativa.
+7. **Puerta 4, oficio.** Con la 3 limpia se juzgan voz, subtexto, función de escena y cliché. Si falla, vuelve al paso 4 con el criterio incumplido; a los tres intentos escala a parada.
+8. **Siguiente capítulo.** Se recomprime el estado rodante y se vuelve al paso 3. Los pasos 3 a 8 son el bucle central, y son también la unidad de transacción: texto, hechos y avance de estado entran juntos o no entra nada.
+9. **Pasadas globales.** Con el manuscrito completo, las cuatro pasadas de revisión en orden y sin mezclarlas, y la **puerta 5** sobre el conjunto.
+
+Los pasos 1, 2, 4, 5 y la parte de juicio del 7 los hace un agente. Todo lo demás es código; el reparto completo está en [Qué es código y qué es agente](#qué-es-código-y-qué-es-agente).
 
 ## Gestión de contexto
 
@@ -207,9 +305,11 @@ Dentro de cada tarea, siempre los mismos ficheros: `router.py` si se expone por 
 **Dos reglas la sostienen:**
 
 - **Una tarea no importa de otra.** Si dos la necesitan, eso baja a `compartido/`. El día que una tarea importe de otra, el corte vertical ha dejado de existir.
-- **FastAPI solo aparece en los `router.py`.** FastAPI es el borde HTTP entre backend y frontend; no llama al modelo, no orquesta y no toca el grafo. Quien llama al modelo es el worker, a través del puerto de `compartido/`.
+- **FastAPI solo aparece en los `router.py`.** FastAPI es el borde HTTP entre backend y frontend; no llama al modelo, no orquesta y no toca el grafo. Quien invoca a Claude Code es el worker, a través del puerto de `compartido/`.
 
-**Qué vive en `compartido/` y por qué no es una vía de escape:** solo lo que es infraestructura o canon —la conexión y las transacciones, el grafo de [definitions.md](definitions.md), el ensamblado de paquetes de contexto y el puerto al proveedor de modelo—. Nada de lógica de una fase concreta. `compartido/` creciendo sin parar es la señal de que el corte está mal hecho.
+**Qué vive en `compartido/` y por qué no es una vía de escape:** solo lo que es infraestructura o canon —la conexión y las transacciones, el grafo de [definitions.md](definitions.md), el ensamblado de paquetes de contexto y el **puerto que invoca a Claude Code**—. Nada de lógica de una fase concreta.
+
+Ese puerto es la única abstracción real del backend: absorbe la decisión pendiente entre terminal y SDK, y es lo que permite probar el orquestador sin gastar dinero ni depender de la no determinación de un agente. SQLite y el sistema de ficheros no se van a cambiar nunca: no llevan puerto. `compartido/` creciendo sin parar es la señal de que el corte está mal hecho.
 
 **Por qué vertical y no por capas.** Cada tarea de este pipeline tiene poco que ver con la siguiente: el extractor y el redactor no comparten nada salvo el grafo. Un corte por capas los obligaría a compartir carpeta de servicios sin compartir nada real, y tocar una fase significaría abrir cinco directorios. El corte vertical hace que trabajar en una fase sea abrir una carpeta, que es también lo que hace que cada una pueda tener su propia spec y sus propias evals —empezando por el extractor.
 
@@ -299,8 +399,8 @@ Cinco puertas. Las deterministas van primero porque son baratas y su fallo inval
 | **1. Estructura** | Tras la estructura global | El clímax responde la pregunta dramática; los hilos cierran en orden inverso al de apertura; el arco del protagonista resuelve | `A` + `I` |
 | **2. Escaleta** | Tras la escaleta | Toda escena tiene POV declarado y cambia un valor; ninguna escena carece de conflicto; presupuesto de longitud dentro de rango | `A` |
 | **3. Continuidad** | Tras extraer los hechos del capítulo | Contradicción con el canon; conocimiento no adquirido; presencia imposible; coherencia temporal | `A` |
-| **4. Oficio** | Con la puerta 3 limpia | Voz constante, distancia psíquica modulada, subtexto en diálogo, emoción no nombrada, la escena se gana su lugar, cliché | `I` |
-| **5. Global** | Sobre el manuscrito completo | Siembras sin pagar, hilos sin cerrar, curva de tensión, reglas de la amenaza respetadas de principio a fin | `A` + `D` |
+| **4. Oficio** | Con la puerta 3 limpia | Voz constante, distancia psíquica modulada, subtexto en diálogo, emoción no nombrada, la escena se gana su lugar, cliché — principios 10, 25, 29, 31, 33, 38 y 55 de [domain-knowledge.md](domain-knowledge.md) | `I` |
+| **5. Global** | Sobre el manuscrito completo | Siembras sin pagar, hilos sin cerrar, curva de tensión, reglas de la amenaza respetadas de principio a fin — principios 6, 14, 16, 18 y 44 | `A` + `D` |
 
 ## Política de fallo
 
@@ -314,12 +414,12 @@ Cinco puertas. Las deterministas van primero porque son baratas y su fallo inval
 
 Cuando el primer manuscrito completo existe, se aplican las pasadas del oficio en orden y **sin mezclarlas**, que es la regla que las hace útiles: cada una tiene un objetivo y una altitud distinta, y pulir prosa que se va a eliminar es trabajo perdido.
 
-| Pasada | Objetivo | Permiso sobre el grafo |
-| --- | --- | --- |
-| **Estructural** | Estructura, causalidad, arcos, ritmo, función de cada escena | Puede alterar estado |
-| **De línea** | Párrafo y frase: claridad, ritmo, voz, transiciones, concisión | Solo prosa |
-| **De continuidad** | Cotejo completo contra el canon, incluidas las siembras | Solo lectura |
-| **De estilo** | Mecánica, consistencia léxica, tics prohibidos, ortografía de nombres inventados | Solo prosa |
+| Pasada | Objetivo | Oficio | Permiso sobre el grafo |
+| --- | --- | --- | --- |
+| **Estructural** | Estructura, causalidad, arcos, ritmo, función de cada escena | 11, 13, 17, 19 | Puede alterar estado |
+| **De línea** | Párrafo y frase: claridad, ritmo, voz, transiciones, concisión | 29, 32, 36 | Solo prosa |
+| **De continuidad** | Cotejo completo contra el canon, incluidas las siembras | 16, 26 | Solo lectura |
+| **De estilo** | Mecánica, consistencia léxica, tics prohibidos, ortografía de nombres inventados | 36, 38 | Solo prosa |
 
 Toda escena que una pasada toque vuelve a extraerse y a pasar la puerta 3, junto con las escenas que dependen de sus hechos.
 
@@ -340,7 +440,8 @@ El **extractor** es la pieza frágil del diseño: es el único punto por el que 
 - **Arranque del worker**: si lo lanza el `lifespan` de la API como subproceso o son dos comandos separados. Dos comandos es más honesto de depurar; no está decidido.
 - **Recuperación del worker caído a medio capítulo**: al arrancar debe detectar intenciones tomadas y sin terminar, y revertir al último capítulo íntegro. Es la parte de la reanudación que más cuidado necesita al especificarse.
 - **Límites de `async`**: el worker puede ser síncrono, pero falta decidir qué consultas del grafo no pueden bloquear el bucle de eventos de la API.
-- **Modelos por fase**: si todas las fases usan el mismo modelo o la redacción y el juicio se separan.
+- **Terminal o Agent SDK**: cómo invoca el worker a Claude Code. Lo absorbe el puerto de `compartido/`, así que es reversible, pero condiciona el manejo de errores y la traza.
+- **Cómo se acota el contexto de Claude Code**: qué herramientas se le permiten a un agente y por qué vía recibe el canon, para que la gestión de contexto de Claude Code no anule el principio 7. Es la pendiente más urgente: sin ella el presupuesto de tokens no se sostiene.
 - **Qué fases existen y dónde están sus fronteras**: el criterio de reparto está decidido, la lista de nueve agentes no. Se entrevista al escribir la primera spec.
 - **Esquema concreto de las tablas** y las migraciones: la sección de persistencia fija los grupos y la naturaleza de cada uno, no las columnas.
 - **Modelo de embeddings** y su dimensión, más si los vectores se calculan por escena, por párrafo o por ambos.
