@@ -92,8 +92,8 @@ Son consultas sobre las entidades de estado de [definitions.md](definitions.md).
 
 | Propiedad | Se comprueba sobre | Fallo que detecta |
 | --- | --- | --- |
-| Continuidad factual | `Hecho` (`enunciado`, `escenaOrigen`) | El texto afirma algo que contradice un hecho ya establecido: un nombre, una fecha, un rasgo físico, una distancia. |
-| Conocimiento no adquirido | `EstadoDeConocimiento` (`postura`, `via`, escena de origen) | Un personaje actúa sobre información que todavía no ha recibido, o se sorprende de algo que ya sabía. Es la fuente número uno de errores en obra larga. |
+| Continuidad factual | `Hecho` (`enunciado`, relación `establecidoEn`) | El texto afirma algo que contradice un hecho ya establecido: un nombre, una fecha, un rasgo físico, una distancia. |
+| Conocimiento no adquirido | `EstadoDeConocimiento` (`postura`, `via`, relación `desde`) | Un personaje actúa sobre información que todavía no ha recibido, o se sorprende de algo que ya sabía. Es la fuente número uno de errores en obra larga. |
 | Siembras sin pago | `Siembra` (`estado`) | Elemento plantado que llega al final sin recogerse, o pago que aparece sin siembra previa. |
 | Hilos sin cerrar | `HiloNarrativo` (`estado`) | Hilo que termina la novela en `abierto` sin estar marcado como abierto deliberadamente; hilo `latente` más allá del umbral fijado; cierre en orden distinto al inverso de apertura. |
 | Presencia imposible | `Escena` (reparto), `Lugar` (`presenciaActual`), `EstadoObjeto` | Un personaje en dos lugares a la vez; un objeto que aparece sin traslado registrado desde su última ubicación. |
