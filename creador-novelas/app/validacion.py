@@ -121,6 +121,17 @@ def validar_delta(raiz: Path, config: HarnessConfig, n: int) -> ResultadoValidac
     if validado.sujetos_no_validados:
         r.avisos.append(f"sujetos fuera del registro (se conservan con sujeto_validado=false): {validado.sujetos_no_validados}")
     if validado.claves_no_previstas:
+        # Que alguna clave sea nueva es EX-08 y se avisa: el harness regenera el capítulo más
+        # adelante. Que NO se reconozca ninguna es otra cosa: un delta cuyo reparto entero es ajeno
+        # al libro no es un delta con un fallo, es el delta de otro libro. Las marcas de tiempo no
+        # bastan para distinguirlo --una copia del árbol las iguala-- y esto no depende del reloj.
+        # Desde dos: con un solo nombre nuevo y ninguno conocido no hay reparto del que hablar, y un
+        # capítulo que presenta a alguien es normal. Dos o más desconocidos y cero conocidos ya no.
+        if len(validado.claves_no_previstas) == len(validado.delta.personajes) >= 2:
+            r.errores.append(
+                f"ninguno de los personajes del delta está en el registro de esta novela: "
+                f"{validado.claves_no_previstas}. Es el delta de otro libro; borralo y volvé a emitirlo")
+            return r
         r.avisos.append(f"EX-08: claves de personajes fuera del registro: {validado.claves_no_previstas}; "
                         "no las quites: el harness regenera el capítulo")
     return r

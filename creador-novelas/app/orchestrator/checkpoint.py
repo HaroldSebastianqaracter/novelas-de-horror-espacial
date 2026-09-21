@@ -5,7 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from app.config import HarnessConfig
-from app.errores import ConfiguracionInconsistenteError, ManifiestoInconsistenteError, PausadoPorQAError
+from app.errores import (ConfiguracionInconsistenteError, EstadoInvalidoError, ManifiestoInconsistenteError,
+                         PausadoPorQAError)
 from app.rutas import Rutas
 from app.schemas import Manifest
 from app.state import repository as repo
@@ -44,9 +45,41 @@ def _actualizar(raiz: Path, **cambios) -> Manifest:
     return m
 
 
+def deltas_huerfanos(raiz: Path) -> list[str]:
+    """Deltas cuyo capítulo no está escrito: son de otra novela.
+
+    El escritor escribe `cap_N.md` y después `delta_cap_N.json`, siempre en ese orden, así que un
+    delta sin su borrador no puede ser de esta corrida. Pasó el 20/09: una limpieza a mano dejó tres
+    deltas del libro anterior y el capítulo 1 se rompió sin remedio, porque el escritor no tiene
+    herramienta de lectura (INV-01) y Write exige leer antes de sobrescribir. Y lo peor no fue eso:
+    el validador dio por bueno el delta ajeno --EX-08 era solo un aviso-- así que con nombres de
+    personaje coincidentes habría entrado la continuidad de otro libro sin que saltara nada.
+    """
+    rutas = Rutas(raiz)
+    carpeta = rutas.deltas_trabajo
+    if not carpeta.is_dir():
+        return []
+    sueltos = []
+    for f in sorted(carpeta.glob("delta_cap_*.json")):
+        try:
+            n = int(f.stem.rsplit("_", 1)[1])
+        except (IndexError, ValueError):
+            continue
+        if not rutas.capitulo(n).exists():
+            sueltos.append(f.name)
+    return sueltos
+
+
 def verificar_reanudable(raiz: Path, config: HarnessConfig) -> Manifest:
     """RF-CFG-04, RF-07.4, EX-06, §5: todo lo que impide reanudar, en orden."""
     m = exigir_manifest(raiz)
+    sueltos = deltas_huerfanos(raiz)
+    if sueltos:
+        raise EstadoInvalidoError(
+            "hay deltas sin su capítulo en 04_estado/deltas/, así que son de otra novela: "
+            + ", ".join(sueltos)
+            + ". Borralos antes de seguir; `archivar` lo hace solo, una limpieza a mano no."
+        )
     if m.editado_a_mano():
         raise ManifiestoInconsistenteError(
             f"§5: el manifiesto está en_progreso pero el reporte {m.reporte_qa_pendiente} sigue sin resolver; "

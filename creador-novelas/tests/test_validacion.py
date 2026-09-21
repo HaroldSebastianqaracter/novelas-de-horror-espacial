@@ -91,6 +91,11 @@ def test_validar_delta_mismo_error_que_aplicar_delta(proyecto, config, capsys):
 def test_validar_delta_avisa_ex08_y_sujetos_sin_validar_sin_invalidar(proyecto, config, capsys):
     rutas = Rutas(proyecto)
     rutas.deltas_trabajo.mkdir(parents=True, exist_ok=True)
+    # El borrador va antes que el delta, como en la corrida: el escritor escribe `cap_N.md` y luego
+    # `delta_cap_N.json`. Sin esto el delta parece de otra novela, que es justo lo que se comprueba
+    # en `test_un_delta_sin_su_capitulo_no_se_aprueba`.
+    rutas.capitulo(1).parent.mkdir(parents=True, exist_ok=True)
+    rutas.capitulo(1).write_text("Un capitulo cualquiera.", encoding="utf-8")
     rutas.delta(1).write_text(json.dumps({
         "personajes": {"Vos": {"estado_fisico": "a", "estado_psicologico": "b", "secretos_que_conoce": [], "ultima_aparicion": 1}},
         "hechos_nuevos": [{"sujeto": "la bodega", "categoria": "locacion", "hecho": "Se abrió.", "cap_origen": 1}],
@@ -174,3 +179,42 @@ def test_aplicar_delta_y_cerrar_qa_aceptan_retorno_por_cli(proyecto, config, cap
     assert codigo == 1 and "delta_cap_2.json" in err
     codigo, out, _ = correr(capsys, "aplicar-delta", "1", "--retorno", "delta_cap_1.json · 2 hechos · 1 personajes · validado")
     assert codigo == 0 and "capitulo_cerrado" in out
+
+
+def test_la_tanda_no_arranca_con_deltas_de_otra_novela(proyecto, config):
+    """La guarda de arriba: el harness se niega a empezar con restos en el árbol."""
+    from app.errores import EstadoInvalidoError
+    from app.orchestrator import checkpoint
+
+    rutas = Rutas(proyecto)
+    rutas.deltas_trabajo.mkdir(parents=True, exist_ok=True)
+    assert checkpoint.deltas_huerfanos(proyecto) == []
+
+    rutas.delta(2).write_text("{}", encoding="utf-8")
+    rutas.delta(3).write_text("{}", encoding="utf-8")
+    assert checkpoint.deltas_huerfanos(proyecto) == ["delta_cap_2.json", "delta_cap_3.json"]
+
+    with pytest.raises(EstadoInvalidoError, match="otra novela"):
+        checkpoint.verificar_reanudable(proyecto, config)
+
+
+def test_un_delta_con_todo_el_reparto_ajeno_no_se_aprueba(proyecto, config):
+    """La guarda que no depende del reloj.
+
+    Las marcas de tiempo distinguen un delta viejo de uno nuevo hasta que alguien copia el árbol y
+    se igualan. Esto mira el contenido: si ninguno de los personajes del delta existe en esta
+    novela, es de otro libro. Es el caso real del 20/09, cinco nombres de «El pasajero del vacío».
+    """
+    rutas = Rutas(proyecto)
+    rutas.deltas_trabajo.mkdir(parents=True, exist_ok=True)
+    rutas.capitulo(1).parent.mkdir(parents=True, exist_ok=True)
+    rutas.capitulo(1).write_text("Un capitulo cualquiera.", encoding="utf-8")
+    ficha = {"estado_fisico": "a", "estado_psicologico": "b", "secretos_que_conoce": [], "ultima_aparicion": 1}
+    rutas.delta(1).write_text(json.dumps({
+        "personajes": {"Irune Vasari": ficha, "Kiril Dovan": ficha, "Nadia Okonjo": ficha},
+        "hechos_nuevos": [],
+        "resumen_corto": "a" + chr(10) + "b" + chr(10) + "c"}), encoding="utf-8")
+
+    v = validacion.validar_delta(proyecto, config, 1)
+    assert not v.valido
+    assert any("otro libro" in e for e in v.errores), v.errores
