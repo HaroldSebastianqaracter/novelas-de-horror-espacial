@@ -52,6 +52,12 @@ De ahí salen dos reglas duras:
 
 Un agente por fase del proceso. Cada uno tiene una entrada, una salida y un criterio de terminación, y ninguno ve más contexto del que su fase necesita.
 
+> **Decisión sin entrevistar.** Lo decidido es el *criterio* de reparto —uno por fase, frente a uno por capa de oficio, redactor único con herramientas, o fases más críticos en paralelo—. **Cuáles son esas fases, y por tanto cuántos agentes hay, lo derivé yo** del proceso manual de escritura. La tabla es una propuesta, no una decisión tomada.
+>
+> El **extractor** merece mención aparte: no corresponde a ninguna fase del oficio humano. Existe solo porque quien escribe es un modelo sin memoria entre llamadas, y porque la coherencia gana a la riqueza (principios 2 y 3). Un escritor humano no extrae sus propios hechos a una base de datos.
+>
+> Las fronteras entre agentes se ven bien cuando se define qué produce cada uno exactamente, así que esta tabla se revisa al escribir la primera spec.
+
 | Agente | Produce | Termina cuando |
 | --- | --- | --- |
 | **Arquitecto** | Premisa, logline, pregunta dramática, tema, subgénero dominante, tipo de final | Las tres compresiones son coherentes entre sí y el final está declarado |
@@ -130,6 +136,127 @@ Dos consecuencias que conviene tener presentes:
 - **La compresión pierde información, y por eso el grafo existe.** Lo que se comprime es la narración de lo ocurrido, no los hechos: esos viven en el registro y se consultan íntegros. Si algo solo está en el estado rodante, tarde o temprano se pierde.
 - **Superar el presupuesto es un fallo del orquestador, no del modelo.** Si un paquete no cabe, la respuesta correcta es partir la unidad o recomprimir, nunca truncar el canon.
 
+## Arquitectura de ejecución
+
+> **Decisión sin entrevistar.** Esta sección se aceptó sin la entrevista que exige `AGENTS.md`. Descansa sobre tres premisas no verificadas: **un solo autor**, **una obra a la vez** y **ejecución en máquina propia, sin usuarios ajenos**. Si alguna cae, la sección se rehace entera.
+
+El patrón es **web-queue-worker**: dos procesos sobre una única base de datos, con la cola dentro de esa misma base.
+
+```mermaid
+graph LR
+  F["Frontend<br/>React"] -- "HTTP" --> A["API<br/>FastAPI · solo lee"]
+  A -- "SSE" --> F
+  A -- "lee" --> DB[("novela.db<br/>SQLite + WAL + sqlite-vec")]
+  W["Worker<br/>orquestador"] -- "escribe en exclusiva" --> DB
+  DB -- "cola de intenciones" --> W
+```
+
+La API **no ejecuta el pipeline**. Escribe una intención (`arrancar`, `parar`, `relanzar desde el capítulo N`) en una tabla y el worker la recoge. El orquestador vive en el worker; la API ni lo importa.
+
+### Por qué esta forma y no otra
+
+| Alternativa | Por qué se descarta |
+| --- | --- |
+| **Tareas en el propio proceso** (`BackgroundTasks`) | El pipeline dura horas y muere con el proceso. No deja nada que restaurar, y la reanudación de este sistema es restaurar el grafo al final del capítulo N-1, no reintentar un paso. |
+| **Cola con broker** (Celery, RQ + Redis) | Añade un servicio que administrar y una segunda sede del estado, justo lo que la decisión de SQLite evita. Resuelve fan-out y concurrencia; aquí hay una sola tarea en serie. |
+| **Motor de ejecución durable** (Temporal, Prefect) | Regala reanudación y reintentos a cambio de una **segunda fuente de verdad**: el estado del flujo en el motor y el canon en SQLite. Esos dos se desincronizan, que es el fallo que el principio 3 existe para evitar. La reanudación que hace falta es de dominio, no de flujo. |
+| **Un solo proceso** | Impide reiniciar la API sin matar una generación en curso. |
+
+### El escritor único
+
+SQLite admite un escritor a la vez. Con dos procesos, esto deja de ser trivia y pasa a ser una regla de diseño:
+
+- **El worker escribe. La API solo lee.** Única excepción: insertar una fila en la tabla de intenciones.
+- `PRAGMA journal_mode=WAL` — lectores y escritor no se bloquean entre sí.
+- `PRAGMA busy_timeout` distinto de cero.
+
+Sin esta regla, el fallo aparece como `database is locked` en mitad de un capítulo.
+
+### La cola es una tabla
+
+Una tabla `intencion` y un worker que hace *polling* cada pocos segundos. No hace falta más: la latencia aceptable se mide en segundos y el *throughput* es una tarea.
+
+La ventaja no es la simplicidad, es la transaccionalidad: **encolar el capítulo siguiente entra en la misma transacción** que guardar el anterior con sus hechos extraídos. La unidad de encolado y la unidad de trabajo coinciden.
+
+### Organización del código: cortes verticales
+
+**Una carpeta por tipo de tarea.** El corte es vertical: cada tarea del pipeline se lleva dentro todo lo suyo —su esquema de entrada y salida, su servicio, su prompt si es agente, su puerta si la tiene, sus pruebas— en vez de repartirse entre una carpeta de rutas, otra de modelos y otra de servicios.
+
+```
+src/backend/
+├── main.py              # monta los routers de cada tarea
+├── config.py
+├── compartido/          # lo transversal: db, grafo, contexto, puerto al modelo
+└── tareas/
+    ├── premisa/
+    ├── mundo/
+    ├── elenco/
+    ├── estructura/
+    ├── escaleta/
+    ├── redaccion/
+    ├── extraccion/
+    ├── continuidad/
+    ├── oficio/
+    └── revision/
+```
+
+Dentro de cada tarea, siempre los mismos ficheros: `router.py` si se expone por HTTP, `esquemas.py`, `servicio.py`, `prompt.py`, `puerta.py`, y sus pruebas al lado.
+
+**La lista de carpetas es la lista de agentes**, así que se mueve con ella: mientras la tabla de agentes siga siendo una propuesta, esta estructura también lo es.
+
+**Dos reglas la sostienen:**
+
+- **Una tarea no importa de otra.** Si dos la necesitan, eso baja a `compartido/`. El día que una tarea importe de otra, el corte vertical ha dejado de existir.
+- **FastAPI solo aparece en los `router.py`.** FastAPI es el borde HTTP entre backend y frontend; no llama al modelo, no orquesta y no toca el grafo. Quien llama al modelo es el worker, a través del puerto de `compartido/`.
+
+**Qué vive en `compartido/` y por qué no es una vía de escape:** solo lo que es infraestructura o canon —la conexión y las transacciones, el grafo de [definitions.md](definitions.md), el ensamblado de paquetes de contexto y el puerto al proveedor de modelo—. Nada de lógica de una fase concreta. `compartido/` creciendo sin parar es la señal de que el corte está mal hecho.
+
+**Por qué vertical y no por capas.** Cada tarea de este pipeline tiene poco que ver con la siguiente: el extractor y el redactor no comparten nada salvo el grafo. Un corte por capas los obligaría a compartir carpeta de servicios sin compartir nada real, y tocar una fase significaría abrir cinco directorios. El corte vertical hace que trabajar en una fase sea abrir una carpeta, que es también lo que hace que cada una pueda tener su propia spec y sus propias evals —empezando por el extractor.
+
+### Comunicación con el frontend
+
+**SSE para el progreso, `GET` para la verdad.** Un endpoint de eventos emite lo que va ocurriendo; un `GET` normal devuelve el estado completo. Si el stream se cae, el frontend reconsulta y se recupera.
+
+**Ninguna decisión del frontend depende de haber recibido un evento.** El stream es comodidad; la tabla `ejecucion` es el estado. WebSockets pagaría una bidireccionalidad que no se usa; el *polling* puro perdería el ver aparecer el capítulo.
+
+## Arquitectura del frontend
+
+> **Decisión sin entrevistar.** Igual que la sección anterior. Además descansa sobre una decisión todavía abierta —**qué ve el frontend**—, así que aquí solo está el esqueleto: lo que se sostiene sea cual sea la respuesta.
+
+**Agrupación por funcionalidad (*package by feature*), sin Feature-Sliced Design.** Una carpeta por funcionalidad, con sus componentes, sus hooks de datos y sus tipos dentro. Es el mismo criterio que en el backend: el corte sigue al trabajo, no a la técnica.
+
+```
+src/frontend/src/
+├── app/                 # arranque, rutas, providers
+├── compartido/          # primitivos de UI, cliente de API generado, hooks base
+└── funcionalidades/
+    ├── novela/          # crear y configurar la obra
+    ├── ejecucion/       # arrancar, parar, ver el pipeline correr
+    ├── canon/           # consultar el grafo
+    └── manuscrito/      # leer capítulos y comparar versiones
+```
+
+**Se descarta FSD** explícitamente. Feature-Sliced Design impone capas (`entities`, `widgets`, `features`, `pages`) con reglas de importación jerárquicas entre ellas. Resuelve un problema de equipos grandes y disciplina compartida; aquí añadiría ceremonia sin resolver nada, y su capa de `entities` duplicaría lo que ya modela [definitions.md](definitions.md).
+
+**Una funcionalidad no importa del interior de otra.** Si necesitan compartir algo, baja a `compartido/`; si necesitan componerse, se componen en `app/`.
+
+### El frontend observa, no posee
+
+El pipeline corre solo durante horas y el frontend no lo controla (principio 1). Eso invierte lo habitual: **no hay estado de cliente que merezca la pena**, porque el estado vive en SQLite. Lo que hay es una caché de lo que el servidor dice.
+
+- **Nada de un almacén global que duplique datos del servidor.** Lo que hace falta es una capa de *server state* con su caché, su revalidación y sus reintentos. El estado propiamente de cliente —qué panel está abierto, qué capítulo se está leyendo— es poco y va aparte.
+- **Los eventos SSE invalidan, no rellenan.** Un evento avisa de que algo cambió; el frontend vuelve a consultar. Si construyera su estado a partir de los eventos, perder uno lo dejaría desfasado en silencio, y eso rompería desde el frontend la regla de que el `GET` es la verdad.
+- **La reconexión es un caso de primera clase, no un error.** Esto va a estar abierto horas: el equipo se suspende, la red salta. Al reconectar hay que reconsultar el estado completo, porque lo ocurrido mientras tanto se perdió.
+
+### Los tipos se generan
+
+FastAPI publica OpenAPI. El cliente TypeScript se genera desde ahí en vez de escribirse a mano: elimina de raíz el desajuste entre un esquema Pydantic que cambia y un frontend que sigue creyendo en el campo viejo.
+
+### Pendiente antes de poder cerrarla
+
+- **Qué ve el frontend**: panel de control de un proceso, o sala de lectura del manuscrito. Las dos llevan a interfaces que no se parecen, y de ahí cuelga el reparto de pantallas.
+- **Three.js**: aparece en el stack sin una razón escrita. Si es para visualizar el grafo de canon, conviene contrastarlo con 2D antes de comprometerse: un grafo tridimensional se ocluye y cuesta leerlo. Si es para una pieza expresiva —la novela como objeto—, es una decisión de producto que debe declararse como tal.
+
 ## Persistencia
 
 Un solo SQLite guarda las tres cosas: el grafo de estado, el texto y los vectores. No hay base de datos aparte para el manuscrito ni almacén vectorial separado, y eso es deliberado: si el texto y el estado vivieran en sistemas distintos podrían desincronizarse, que es justo el fallo que el principio 3 pretende evitar.
@@ -149,6 +276,7 @@ Un solo SQLite guarda las tres cosas: el grafo de estado, el texto y los vectore
 
 - **Transaccional.** El texto de un capítulo, los hechos extraídos de él y el avance del estado se escriben **en una sola transacción**. O entra todo o no entra nada: no puede existir un capítulo escrito cuyos hechos no se hayan capturado. La unidad de transacción es la misma que la unidad de trabajo.
 - **Un fichero.** La reanudación desde el capítulo N es restaurar un estado concreto, y con un único fichero eso es una operación trivial y auditable.
+- **Un solo escritor, y eso obliga.** SQLite admite un escritor a la vez, así que la separación API/worker no es estética: el worker escribe y la API lee, con WAL activado. Ver [Arquitectura de ejecución](#arquitectura-de-ejecución).
 - **Embebido.** No hay servicio que administrar, y el backend de FastAPI lo abre directamente. Para un sistema de un solo autor y una obra a la vez, cualquier cosa mayor es infraestructura sin contrapartida.
 - **Consultable.** Las puertas deterministas de [validators.md](validators.md) son consultas SQL, no llamadas a un modelo. Esto es lo que hace barato el principio 5.
 
@@ -209,8 +337,11 @@ El **extractor** es la pieza frágil del diseño: es el único punto por el que 
 
 - **Alcance de la revalidación en cascada** cuando una pasada reescribe una escena antigua: revalidar solo las escenas dependientes exige que las dependencias entre hechos estén modeladas, y eso todavía no está en [definitions.md](definitions.md).
 - **Cifras concretas del presupuesto de contexto**: el reparto está definido por bloques y por prioridad de recorte, pero no en tokens. Hay que medirlo contra un capítulo real antes de fijarlo.
-- **Orquestación**: si el orquestador es código propio o se apoya en un framework de agentes. El documento asume código propio; adoptar un framework cambiaría la máquina de estados y la reanudación.
+- **Arranque del worker**: si lo lanza el `lifespan` de la API como subproceso o son dos comandos separados. Dos comandos es más honesto de depurar; no está decidido.
+- **Recuperación del worker caído a medio capítulo**: al arrancar debe detectar intenciones tomadas y sin terminar, y revertir al último capítulo íntegro. Es la parte de la reanudación que más cuidado necesita al especificarse.
+- **Límites de `async`**: el worker puede ser síncrono, pero falta decidir qué consultas del grafo no pueden bloquear el bucle de eventos de la API.
 - **Modelos por fase**: si todas las fases usan el mismo modelo o la redacción y el juicio se separan.
+- **Qué fases existen y dónde están sus fronteras**: el criterio de reparto está decidido, la lista de nueve agentes no. Se entrevista al escribir la primera spec.
 - **Esquema concreto de las tablas** y las migraciones: la sección de persistencia fija los grupos y la naturaleza de cada uno, no las columnas.
 - **Modelo de embeddings** y su dimensión, más si los vectores se calculan por escena, por párrafo o por ambos.
-- **Qué ve el frontend** de todo esto.
+- **Qué ve el frontend**: panel de control o sala de lectura, y qué papel tiene Three.js. La estructura por funcionalidades está decidida; el reparto de pantallas no.
