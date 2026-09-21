@@ -1,9 +1,0 @@
-{
-  "capitulos_por_tanda": 3,
-  "max_llamadas_por_tanda": 30,
-  "registrar_uso": true,
-  "exportar_trazas": true,
-  "exportar_para_juez": false,
-  "escritor_emite_delta": true,
-  "aristas_en_continuidad": false
-}
