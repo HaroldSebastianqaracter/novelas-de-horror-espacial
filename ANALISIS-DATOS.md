@@ -115,7 +115,10 @@ No significa que QA sobre —revisar cada capítulo salió más rápido que revi
 
 ![Premisa frente a arquitectura](graficas/premisa-vs-arquitectura.png)
 
-Con la variante **fija**, cambiando solo la premisa, el reloj se mueve:
+Con la variante **fija**, cambiando solo la premisa, el reloj se mueve. La gráfica va en desviación
+sobre la media de cada columna y no en minutos: medido en minutos, las novelas de 15 capítulos
+parecen más dispersas --16 minutos de recorrido frente a 9-- cuando en proporción son la mitad de
+dispersas, y el ojo leía lo contrario de lo que decía la etiqueta.
 
 | variante | recorrido |
 |---|---|
@@ -133,12 +136,16 @@ También se ve que las novelas largas son más estables: con quince capítulos l
 
 ---
 
-## 6. Los fallos son historia, no un defecto vivo
+## 6. Las corridas que se caen son historia
 
 ![Fiabilidad en el tiempo](graficas/fiabilidad.png)
 
 **8 de las 37 corridas no terminaron**, un 22 %. Todas por QA: cuatro dejaron el manuscrito pausado
 y cuatro no pudieron cerrar la resolución.
+
+Cuidado con la palabra «fallo» aquí: significa **que la novela no llegó al final**, no que el texto
+sea coherente. Son dos medidas distintas y esta sección solo habla de la primera. Lo que queda de
+contradicciones en el texto acabado se mide aparte, con `herramientas/retencion.py`.
 
 Pero están todas en las **primeras nueve corridas**. Desde la noche del 18/09 hay **27 corridas
 seguidas sin un solo fallo**, incluidas las siete de quince capítulos, que son las largas. La tasa

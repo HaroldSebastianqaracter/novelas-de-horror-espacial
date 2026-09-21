@@ -25,6 +25,7 @@ PRECIOS = json.loads((RAIZ / "config" / "precios.json").read_text(encoding="utf-
 TINTA, SUAVE, MALLA = "#1A1D21", "#8A93A0", "#E3E6EA"
 ROJO, VERDE = "#B3402F", "#2F7A4F"
 COLOR = {"escritor": "#C2703D", "qa": "#3D6FA8", "extractor": "#7E9B4E", "orquestador": "#8A6BA8"}
+NL = chr(10)
 NOMBRE = {"escritor": "Escritor", "qa": "Revisor", "extractor": "Extractor", "orquestador": "Orquestador"}
 
 
@@ -214,24 +215,31 @@ fig.savefig(SALIDA / "emparejado.png", facecolor="white"); plt.close(fig)
 print("   emparejado.png")
 
 # ------------------------------------------------------------------ 4. premisa
-fig, ax = lienzo(9.0, 4.4)
-g2 = [("base", "base\n3 ag. + opus"), ("dos-agentes-sonnet", "2 ag. + sonnet"),
-      ("sin-aristas", "15 caps\nsin aristas"), ("aristas-dos-agentes", "15 caps\ncon aristas")]
+# El eje va en desviacion sobre la media de cada columna, no en minutos. Con minutos, las novelas
+# de 15 capitulos parecian mas dispersas --16 min de recorrido frente a 9-- cuando en proporcion
+# son la mitad de dispersas: el ojo leia lo contrario de lo que decia la etiqueta.
+fig, ax = lienzo(9.2, 4.6)
+g2 = [("base", "base" + NL + "3 ag. + opus"), ("dos-agentes-sonnet", "dos agentes" + NL + "+ sonnet"),
+      ("sin-aristas", "15 caps" + NL + "sin aristas"), ("aristas-dos-agentes", "15 caps" + NL + "con aristas")]
+etiquetas = []
 for i, (v, et) in enumerate(g2):
     mins = [num(r, "minutos") for r in corridas
             if r["variante"] == v and r["completa"] == "1" and num(r, "minutos")]
     if not mins: continue
-    ax.vlines(i, min(mins), max(mins), color=SUAVE, lw=1.4)
-    ax.scatter([i] * len(mins), mins, s=44, color=COLOR["escritor"], zorder=5, edgecolor="white", lw=.8)
-    ax.scatter([i], [st.mean(mins)], s=140, marker="_", color=TINTA, lw=2.6, zorder=6)
-    ax.text(i + .18, st.mean(mins),
-            f"{100*(max(mins)-min(mins))/st.mean(mins):.0f} % de recorrido\ncon la variante fija",
-            fontsize=8.6, color=TINTA, va="center")
-ax.set_xticks(range(len(g2))); ax.set_xticklabels([e for _, e in g2], fontsize=9, color=TINTA)
-ax.set_xlim(-.5, len(g2) - .1); ax.set_ylabel("reloj (min)", color=SUAVE, fontsize=9)
+    m = st.mean(mins)
+    rel = [100 * (x - m) / m for x in mins]
+    ax.vlines(i, min(rel), max(rel), color=SUAVE, lw=1.4)
+    ax.scatter([i] * len(rel), rel, s=46, color=COLOR["escritor"], zorder=5, edgecolor="white", lw=.8)
+    ax.scatter([i], [0], s=160, marker="_", color=TINTA, lw=2.6, zorder=6)
+    ax.text(i, max(rel) + 3.4, f"{max(rel)-min(rel):.0f} %", ha="center", fontsize=13, weight="bold", color=TINTA)
+    etiquetas.append(et + NL + f"media {m:.0f} min")
+ax.axhline(0, color=MALLA, lw=1)
+ax.set_xticks(range(len(etiquetas))); ax.set_xticklabels(etiquetas, fontsize=9, color=TINTA)
+ax.set_xlim(-.5, len(etiquetas) - .5)
+ax.set_ylabel("desviacion sobre la media de su columna", color=SUAVE, fontsize=9)
+ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:+.0f} %"))
 guardar(fig, "premisa-vs-arquitectura.png", "La premisa mueve el reloj tanto como la arquitectura",
-        "Cada punto es una novela. Dentro de cada columna la variante no cambia: todo lo que se ve "
-        "ahí es la premisa y el azar.")
+        "Dentro de cada columna la variante no cambia: lo que se ve es la premisa y el azar.")
 
 # ------------------------------------------------------------------ 5. fiabilidad
 fig, ax = lienzo(9.4, 3.2)
@@ -249,9 +257,8 @@ ax.text(corte - .9, .5, f"{fallos} de las primeras {corte}\nno terminaron", font
 ax.set_ylim(-1, 1.1); ax.set_yticks([]); ax.grid(False)
 ax.spines["left"].set_visible(False)
 ax.set_xticks([0, len(orden) - 1]); ax.set_xticklabels(["18/09", "20/09"], color=SUAVE)
-guardar(fig, "fiabilidad.png", "Los fallos son historia, no un defecto vivo",
-        "Las 37 corridas en orden · aspa roja = no terminó · los 8 fallos fueron de QA y todos "
-        "antes de los arreglos de la noche del 18/09")
+guardar(fig, "fiabilidad.png", "Las corridas que se caen son historia",
+        "Aspa roja = la novela no llegó al final. No dice nada sobre si el texto salió coherente.")
 
 # ------------------------------------------------------------------ números
 print("\n== números para el documento ==")
