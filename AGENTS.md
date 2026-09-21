@@ -16,3 +16,5 @@ Monorepo con [src/](src/) (todo el código: [src/backend/](src/backend/) y [src/
 **El código sigue a la spec.** Todo cambio en `src/` empieza por escribir o actualizar su spec en `specs/`. Si lo que vas a tocar no tiene spec, la escribes primero. La spec actualizada entra en el mismo commit que el código.
 
 **Los cambios en `docs/` se entrevistan antes de ejecutarse.** Antes de añadir o editar cualquier cosa en `docs/`, usa la skill `grillme` para interrogar a fondo sobre el cambio. Edita solo cuando las respuestas cubran tres puntos: qué decisión lo motiva, qué alternativas se descartaron y qué otros documentos de `docs/` quedan afectados.
+
+**Los diagramas van en Mermaid.** Todo diagrama, en respuestas, en `docs/` o en `specs/`, se escribe como bloque ` ```mermaid `. Nada de ASCII art ni de imágenes.
