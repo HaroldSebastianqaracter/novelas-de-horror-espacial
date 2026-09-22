@@ -5,6 +5,7 @@ from __future__ import annotations
 import sqlite3
 from typing import TYPE_CHECKING
 
+from . import demo
 from .base import (
     AgenteInterrumpido,
     AgenteNoAutenticado,
@@ -28,6 +29,7 @@ __all__ = [
     "PuertoAgente",
     "PuertoFalso",
     "PuertoTerminal",
+    "demo",
     "ResultadoAgente",
     "SalidaInvalida",
     "SkillDesconocida",
@@ -39,7 +41,13 @@ __all__ = [
 def construir(cfg: Config, con: sqlite3.Connection | None = None) -> PuertoAgente:
     """Devuelve el puerto que pide la configuracion (RF-PROC-02)."""
     if cfg.puerto == "falso":
-        return PuertoFalso(fixtures_dir=cfg.puerto_falso_dir, con=con)
+        # Sin fixtures propios, los generadores de demostracion: asi `NOVELAS_PUERTO=falso`
+        # arranca y corre sin preparar nada (RF-PUERTO-07).
+        return PuertoFalso(
+            fixtures_dir=cfg.puerto_falso_dir,
+            generadores=None if cfg.puerto_falso_dir else dict(demo.TODOS),
+            con=con,
+        )
     return PuertoTerminal(
         claude_bin=cfg.claude_bin,
         skills_dir=cfg.skills_dir,

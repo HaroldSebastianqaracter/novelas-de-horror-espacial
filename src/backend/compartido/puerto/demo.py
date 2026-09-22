@@ -3,12 +3,18 @@
 No pretenden escribir bien. Pretenden producir salidas **validas** para que el orquestador,
 las puertas y la persistencia se puedan ejercitar de punta a punta, que es lo que dice
 RF-PUERTO-07: el pipeline debe correr sin Claude Code instalado.
+
+Viven aqui y no en `tests/` porque correr el pipeline sin Claude Code es una capacidad del
+sistema, no una comodidad de la suite: es lo que permite arrancar el worker con
+NOVELAS_PUERTO=falso y ver el pipeline entero funcionando.
 """
 
 from __future__ import annotations
 
 import re
 from typing import Any
+
+from config import CRITERIOS_OFICIO
 
 LUGARES = ["Puente", "Modulo de carga", "Esclusa"]
 PERSONAJES = ["Idris", "Vaan", "Reyes"]
@@ -22,6 +28,12 @@ ESCENAS_POR_CAPITULO = 2
 def _ordenes(entrada: str) -> list[int]:
     """Saca los numeros de escena del paquete, que es como los ve el agente real."""
     return sorted({int(n) for n in re.findall(r"### Escena (\d+)", entrada)})
+
+
+def _objetivo_palabras(entrada: str, defecto: int = 5400) -> int:
+    """Lee el presupuesto del paquete, como haria el agente real."""
+    m = re.search(r"PRESUPUESTO: (\d+) palabras", entrada)
+    return int(m.group(1)) if m else defecto
 
 
 def _capitulo(entrada: str) -> int:
@@ -178,6 +190,9 @@ def estructura(entrada: str, agente: str) -> dict[str, Any]:
 
 
 def escaleta(entrada: str, agente: str) -> dict[str, Any]:
+    # La longitud por escena sale del presupuesto, no de una constante: si no, la puerta 2
+    # rechaza la escaleta por desviarse del objetivo, con razon.
+    por_escena = max(300, _objetivo_palabras(entrada) // (CAPITULOS * ESCENAS_POR_CAPITULO))
     capitulos = []
     for numero in range(1, CAPITULOS + 1):
         escenas = []
@@ -194,7 +209,7 @@ def escaleta(entrada: str, agente: str) -> dict[str, Any]:
                 "valor_final": "expuesto" if orden == 1 else "acorralado",
                 "tension": 3 + numero,
                 "gancho_salida": "Algo respira al otro lado",
-                "longitud_prevista": 900,
+                "longitud_prevista": por_escena,
                 "analepsis": False,
                 "secuencia": f"sec{numero}",
                 "objetos": [OBJETO] if orden == 2 else [],
@@ -272,8 +287,6 @@ def extraccion(entrada: str, agente: str) -> dict[str, Any]:
 
 
 def oficio(entrada: str, agente: str) -> dict[str, Any]:
-    from config import CRITERIOS_OFICIO
-
     return {"veredictos": [
         {"criterio": c, "veredicto": "pasa", "evidencia": "", "sugerencia": ""}
         for c in CRITERIOS_OFICIO

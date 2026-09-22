@@ -92,12 +92,12 @@ Son consultas sobre las entidades de estado de [definitions.md](definitions.md).
 
 | Propiedad | Se comprueba sobre | Fallo que detecta |
 | --- | --- | --- |
-| Continuidad factual | `Hecho` (`enunciado`, relación `establecidoEn`) | El texto afirma algo que contradice un hecho ya establecido: un nombre, una fecha, un rasgo físico, una distancia. |
-| Conocimiento no adquirido | `EstadoDeConocimiento` (`postura`, `via`, relación `desde`) | Un personaje actúa sobre información que todavía no ha recibido, o se sorprende de algo que ya sabía. Es la fuente número uno de errores en obra larga. |
-| Siembras sin pago | `Siembra` (`estado`) | Elemento plantado que llega al final sin recogerse, o pago que aparece sin siembra previa. |
-| Hilos sin cerrar | `HiloNarrativo` (`estado`) | Hilo que termina la novela en `abierto` sin estar marcado como abierto deliberadamente; hilo `latente` más allá del umbral fijado; cierre en orden distinto al inverso de apertura. |
+| Continuidad factual | `Hecho` (triple `sujeto`/`atributo`/`valor`, relación `establecidoEn`) | El texto afirma algo que contradice un hecho ya establecido: un nombre, una fecha, un rasgo físico, una distancia. |
+| Conocimiento no adquirido | `UsoDeConocimiento` contra `EstadoDeConocimiento` (`postura`, `via`, relación `desde`) | Un personaje actúa sobre información que todavía no ha recibido, o se sorprende de algo que ya sabía. Es la fuente número uno de errores en obra larga. |
+| Siembras sin pago | `EstadoSiembra` (`estado`) | Elemento plantado que llega al final sin recogerse, o pago que aparece sin siembra previa. |
+| Hilos sin cerrar | `EstadoHilo` (`estado`) | Hilo que termina la novela en `abierto` sin estar marcado como abierto deliberadamente; hilo `latente` más allá del umbral fijado; cierre en orden distinto al inverso de apertura. |
 | Presencia imposible | `Escena` (reparto), `Lugar` (`presenciaActual`), `EstadoObjeto` | Un personaje en dos lugares a la vez; un objeto que aparece sin traslado registrado desde su última ubicación. |
-| Coherencia temporal | `LineaDeTiempo`, `Evento` (`fechaInterna`) | Duraciones incompatibles, edades que no cuadran, sucesos fuera de orden. |
+| Coherencia temporal | `LineaDeTiempo`, `Evento` (`ordenInterno`) | Duraciones incompatibles, edades que no cuadran, sucesos fuera de orden. |
 | Escena sin cambio de valor | `Escena` (`valorInicial`, `valorFinal`) | La escena termina en la misma polaridad en que empezó: es relleno declarado. |
 | Integridad de POV | `Escena` (`pov`), `Novela` (`povPorDefecto`) | Escena sin POV declarado, o cambio de conciencia focal dentro de una misma escena. |
 | Presupuesto | `Restriccion` (`valor`) | Longitud de acto, capítulo o escena fuera del rango fijado; desviación de la longitud objetivo. |
@@ -153,3 +153,7 @@ La salida narrativa se reparte entre los dos mundos, y esa es la decisión de di
 El orden importa. Las puertas deterministas van primero porque son baratas y su fallo invalida el trabajo posterior: no tiene sentido evaluar la prosa de una escena que contradice el canon. La secuencia concreta de puertas por etapa del pipeline vive en [architecture.md](architecture.md).
 
 Toda propiedad que importe debe terminar con una etiqueta asignada. Si no cae en `T`, `A`, `I` ni `D`, se marca `U` y se deja escrita como riesgo aceptado.
+
+> **Decisión sin entrevistar, 22 de septiembre de 2026.** Tres filas de la tabla determinista se apoyaban en atributos que [definitions.md](definitions.md) ha dejado de tener, y se han reapuntado a los registros que los sustituyen. El cambio de fondo está en las dos primeras: la continuidad factual se comprueba sobre un **triple** y no sobre un enunciado libre, y el conocimiento no adquirido necesita **dos** registros, el de lo que un personaje adquirió y el de lo que usó. Sin esa segunda lista la comprobación no se puede escribir como consulta, y quedaría como juicio: exactamente lo que este documento dice que no debe pasar.
+>
+> El plan de verificación concreto del backend, con su estado fila a fila, vive en [specs/spec1-verification.md](../specs/spec1-verification.md).

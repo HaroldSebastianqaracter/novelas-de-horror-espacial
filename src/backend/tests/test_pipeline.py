@@ -19,8 +19,8 @@ import config
 from compartido import db
 from compartido.db import transaccion
 from compartido.puerto import PuertoFalso
+from compartido.puerto import demo as agentes_falsos
 from orquestador import cola, fallo, pipeline
-from tests import agentes_falsos
 
 
 @pytest.fixture()
