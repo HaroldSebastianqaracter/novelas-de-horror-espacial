@@ -13,8 +13,6 @@ import sqlite3
 import tempfile
 from pathlib import Path
 
-import pytest
-
 from compartido import db
 from compartido.tipos import AGENTES
 
@@ -78,21 +76,35 @@ def test_la_lista_de_carpetas_es_la_lista_de_agentes() -> None:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="BRECHA CONOCIDA: todavia no hay ninguna SKILL.md de agente. Con el puerto de "
-           "terminal no hay a quien invocar. Al escribir las nueve skills, este test pasa y "
-           "xfail(strict) lo hace fallar para que se quite la marca.",
-)
 def test_cada_agente_de_la_v1_tiene_su_skill() -> None:
-    """Cada agente se materializa como una skill de Claude Code, y el puerto la exige.
-
-    Mientras este test falle, el pipeline no puede correr con el puerto de terminal: hay
-    esquemas y puertas, pero ningun agente al que invocar.
-    """
+    """Cada agente se materializa como una skill de Claude Code, y el puerto la exige."""
     skills = RAIZ.parents[1] / ".claude" / "skills"
     faltan = [a for a in AGENTES if not (skills / a / "SKILL.md").is_file()]
     assert not faltan, f"Agentes sin SKILL.md: {faltan}"
+
+
+def test_las_skills_tienen_la_forma_que_pide_la_spec() -> None:
+    """RF-SKILL-02: cada SKILL.md lleva que produce, con que criterio, que no hace y el
+    formato de salida. Sin la ultima seccion el puerto recibe texto en vez de JSON."""
+    skills = RAIZ.parents[1] / ".claude" / "skills"
+    fallos: list[str] = []
+    for agente in AGENTES:
+        texto = (skills / agente / "SKILL.md").read_text(encoding="utf-8").lower()
+        if not texto.startswith("---") or "description:" not in texto:
+            fallos.append(f"{agente}: sin cabecera con description")
+        for seccion in ("## qué no haces", "## formato de salida"):
+            if seccion not in texto:
+                fallos.append(f"{agente}: falta la seccion '{seccion}'")
+        if "únicamente" not in texto:
+            fallos.append(f"{agente}: no exige devolver unicamente el objeto JSON")
+        if "no tienes herramientas" not in texto:
+            fallos.append(f"{agente}: no declara que el agente no tiene herramientas")
+    assert not fallos, "Skills mal formadas:\n" + "\n".join(fallos)
+
+
+def test_ninguna_skill_de_agente_es_la_de_desarrollo() -> None:
+    """RF-SKILL-03: `verificacion` sirve para construir el sistema, no forma parte de el."""
+    assert "verificacion" not in AGENTES
 
 
 # --- El borde HTTP (RF-COD-04, RF-COD-05) ---------------------------------------------------
