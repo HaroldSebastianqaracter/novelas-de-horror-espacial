@@ -111,12 +111,22 @@ def test_ninguna_skill_de_agente_es_la_de_desarrollo() -> None:
 
 
 def test_fastapi_solo_en_los_router() -> None:
-    """FastAPI es el borde HTTP: no llama al modelo, no orquesta y no toca el grafo."""
+    """FastAPI es el borde HTTP: no llama al modelo, no orquesta y no toca el grafo.
+
+    Se exceptua el cliente de pruebas: probar la API exige instanciarla, y ese import no
+    puede colarse en ningun camino de produccion.
+    """
+    permitidos = ("fastapi.testclient", "starlette.testclient")
     fallos: list[str] = []
-    for fichero in [*_modulos(DIR_TAREAS), *_modulos(DIR_COMPARTIDO), *_modulos(RAIZ / "tests")]:
-        if fichero.name in ("router.py", "main.py"):
+    for fichero in [
+        *_modulos(DIR_TAREAS), *_modulos(DIR_COMPARTIDO), *_modulos(RAIZ / "tests"),
+        *_modulos(RAIZ / "orquestador"), RAIZ / "worker.py",
+    ]:
+        if fichero.name in ("router.py", "main.py") or not fichero.exists():
             continue
         for nombre in _imports(fichero):
+            if nombre in permitidos:
+                continue
             if nombre.split(".")[0] in ("fastapi", "starlette"):
                 fallos.append(f"{fichero.relative_to(RAIZ)} importa {nombre}")
     assert not fallos, "FastAPI fuera de los router.py:\n" + "\n".join(fallos)

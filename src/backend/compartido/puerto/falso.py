@@ -106,6 +106,10 @@ class PuertoFalso:
 
         cruda = json.dumps({"result": json.dumps(salida), "structured_output": salida,
                             "is_error": False}, ensure_ascii=False)
+        llamada_id = self._trazar(
+            agente, entrada, esquema_salida, cruda, novela_id, capitulo, intento,
+            tokens_por_bloque,
+        )
         return ResultadoAgente(
             agente=agente,
             salida=salida,
@@ -114,8 +118,50 @@ class PuertoFalso:
             exit_code=0,
             tokens_entrada=len(entrada) // 4,
             tokens_salida=len(cruda) // 4,
+            llamada_id=llamada_id,
             metadatos={"puerto": "falso"},
         )
+
+    def _trazar(
+        self,
+        agente: str,
+        entrada: str,
+        esquema: dict[str, Any],
+        cruda: str,
+        novela_id: int | None,
+        capitulo: int | None,
+        intento: int | None,
+        tokens_por_bloque: dict[str, int] | None,
+    ) -> int | None:
+        """Registra la llamada igual que el puerto real.
+
+        Sin esto el puerto falso seria un sustituto infiel: el pipeline correria pero sin
+        traza, y RNF-01 —toda llamada se reconstruye desde `llamada_modelo`— no se podria
+        comprobar sin gastar dinero.
+        """
+        if self.con is None:
+            return None
+        from ..db import transaccion
+
+        with transaccion(self.con):
+            cur = self.con.execute(
+                """
+                INSERT INTO llamada_modelo
+                    (novela_id, agente, capitulo, intento, sistema, entrada, esquema,
+                     salida_cruda, tokens_entrada_por_bloque, tokens_entrada, tokens_salida,
+                     duracion_ms, exit_code, estado, metadatos, terminado_en)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,0,'ok',?, datetime('now'))
+                """,
+                (
+                    novela_id, agente, capitulo, intento,
+                    f"(puerto falso: skill de '{agente}')", entrada,
+                    json.dumps(esquema, ensure_ascii=False), cruda,
+                    json.dumps(tokens_por_bloque or {}, ensure_ascii=False),
+                    len(entrada) // 4, len(cruda) // 4, 1,
+                    json.dumps({"puerto": "falso"}, ensure_ascii=False),
+                ),
+            )
+            return int(cur.lastrowid or 0)
 
     def interrumpir(self) -> None:
         self._interrumpido.set()
