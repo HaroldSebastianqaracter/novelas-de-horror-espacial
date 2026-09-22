@@ -13,6 +13,7 @@ dependencies = [
 # El indice vectorial es derivado: el pipeline corre sin el (RF-CTX-09).
 vectores = [
     "sqlite-vec>=0.1.6",
+    "model2vec>=0.9",
     "fastembed>=0.4",
 ]
 dev = [

@@ -159,3 +159,19 @@ def test_sorpresa_repetida_es_aviso_y_no_para(grafo: tuple[sqlite3.Connection, G
     resultado = puerta.evaluar(con, g.novela_id, 2)
     assert resultado.pasa, "una sorpresa repetida es aviso, no debe parar el pipeline"
     assert any(c.comprobacion == "sorpresa_imposible" for c in resultado.avisos)
+
+
+# --- El indice no cambia ningun veredicto (propiedad 25) -----------------------------------
+
+
+def test_puerta_no_depende_del_indice(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    """Ningun veredicto de puerta cambia si el indice vectorial esta o no."""
+    from compartido.vectores import Indice
+
+    con, g = grafo
+    sin_indice = {c.comprobacion for c in puerta.evaluar(con, g.novela_id, 2).conflictos}
+    con.execute("BEGIN")
+    Indice(con, modelo="hash")
+    con.execute("COMMIT")
+    con_indice = {c.comprobacion for c in puerta.evaluar(con, g.novela_id, 2).conflictos}
+    assert sin_indice == con_indice

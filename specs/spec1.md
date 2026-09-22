@@ -200,7 +200,6 @@ src/backend/
 | `NOVELAS_PRESUPUESTO_TOKENS` | no | `100000` | Techo por llamada |
 | `NOVELAS_PUERTO` | no | `terminal` | `terminal` o `falso` (tests y demos) |
 | `NOVELAS_EMBEDDING_MODELO` | no | provisional, ver RF-CTX-10 | Modelo local de embeddings |
-| `NOVELAS_EMBEDDING_DIM` | no | según el modelo | Dimensión de las tablas `vec0` |
 | `NOVELAS_VECTORES` | no | `1` | `0` desactiva el índice; el pipeline sigue (RF-CTX-09) |
 
 **RF-PROC-03** Si `NOVELAS_DB_PATH` no existe, cualquiera de los dos procesos crea el fichero y aplica el esquema completo al arrancar. Si existe, aplica las migraciones pendientes (RF-PER-04).
@@ -479,7 +478,20 @@ Si un paquete de planificación no cabe, se aplica RF-CTX-03: el canon completo 
 
 **RF-CTX-09 — El índice es derivado y no verifica.** Ningún resultado de puerta depende del índice vectorial. Si `sqlite-vec` no está disponible o el índice está vacío, el bloque recuperado queda vacío, RF-CTX-08 desempata por `id`, y el pipeline sigue. Una llamada al índice que falle se registra como aviso en la traza, no como error.
 
-**RF-CTX-10 — Modelo de embeddings.** Claude Code escribe y juzga, pero no produce embeddings, así que el índice necesita un modelo aparte. Se usa un modelo **local, multilingüe, en CPU**, cargado como dependencia Python desde `compartido/vectores/`; nombre y dimensión viven en `config.py` (`NOVELAS_EMBEDDING_MODELO`, `NOVELAS_EMBEDDING_DIM`). Se vectoriza por **escena** (una fila por versión vigente de `escena_texto`) y por **hecho** (una fila por triple vigente), tras confirmar el capítulo y fuera de la transacción del capítulo. Cambiar de modelo obliga a reconstruir el índice entero con `reconstruir_indice()`, que también corre tras cualquier reversión (RF-FALLO-04).
+**RF-CTX-10 — Modelo de embeddings.** Claude Code escribe y juzga, pero no produce embeddings, así que el índice necesita un modelo aparte. Se usa uno **local, multilingüe y en CPU**, cargado como dependencia Python desde `compartido/vectores/`. El nombre vive en `config.py` (`NOVELAS_EMBEDDING_MODELO`); **la dimensión no se configura**, porque es una propiedad del modelo y un valor de entorno que pueda contradecirla es un fallo esperando. El índice la toma del modelo y la escribe en `indice_estado`.
+
+**El modelo tiene que ser multilingüe.** Los pequeños más citados (`bge-small-en-v1.5`, `all-MiniLM-L6-v2`, `potion-base-8M`) son de inglés y sobre texto español degradan. Hay dos backends, y el código elige el que arranque:
+
+| Backend | Modelo | Dimensión | Requisito |
+| --- | --- | --- | --- |
+| `fastembed` | `intfloat/multilingual-e5-small` | 384 | Redistribuible de Visual C++ para `onnxruntime` |
+| `model2vec` | `minishlab/potion-multilingual-128M` | 256 | Solo `numpy` |
+
+El preferido es el primero. Si no arranca se usa el segundo **con su propio modelo**, nunca con el nombre del otro: un nombre de modelo no es intercambiable entre backends. El último recurso es un embedding determinista por hash, que recupera mal pero no rompe nada. Cuál se usó de verdad queda en `indice_estado`, para que la diferencia entre recuperar bien y recuperar por hash no sea invisible.
+
+Los modelos de la familia **e5 esperan prefijos**: `query:` para lo que se busca y `passage:` para lo indexado. Sin ellos la recuperación empeora de forma silenciosa, así que el tipo de texto es parte de la interfaz del módulo y no una decisión del llamante.
+
+Se vectoriza por **escena** (una fila por versión vigente de `escena_texto`) y por **hecho** (una fila por triple vigente), tras confirmar el capítulo y fuera de su transacción. Cambiar de modelo obliga a reconstruir el índice entero, que también corre tras cualquier reversión (RF-FALLO-04).
 
 > **Decisión de la spec (21-09-2026).** architecture.md dejaba pendientes el modelo de embeddings, su dimensión y la granularidad. Se decide local y por escena y por hecho, y se descarta por párrafo en la v1: la unidad que el redactor necesita recuperar es la escena que describió un lugar, no un párrafo suelto, y el índice de párrafos multiplica el coste sin que el paquete lo pueda aprovechar con 4.000 tokens. Se descarta un modelo por API porque introduce la clave de proveedor que la elección de Claude Code evita. El modelo concreto es provisional y se fija midiendo sobre un capítulo real, igual que las cifras del presupuesto. El bloque recuperado va **después** del capítulo anterior en el orden de recorte porque el capítulo anterior es lo que el redactor necesita para el enlace inmediato de voz y ritmo; lo recuperado es textura de fondo.
 

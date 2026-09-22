@@ -30,7 +30,15 @@ from __future__ import annotations
 import hashlib
 import math
 import struct
-from typing import Protocol, runtime_checkable
+from typing import Literal, Protocol, runtime_checkable
+
+# Los modelos de la familia e5 se entrenan con prefijos y los esperan: 'query:' para lo que
+# se busca y 'passage:' para lo indexado. Sin ellos la recuperacion empeora de forma
+# apreciable, y es un fallo silencioso: el indice sigue devolviendo resultados, solo que
+# peores. Por eso el tipo de texto es parte de la interfaz y no una decision del llamante.
+Tipo = Literal["pasaje", "consulta"]
+
+PREFIJOS_E5: dict[str, str] = {"pasaje": "passage: ", "consulta": "query: "}
 
 MODELO_POR_DEFECTO: dict[str, str] = {
     "model2vec": "minishlab/potion-multilingual-128M",
@@ -48,7 +56,7 @@ class Embedder(Protocol):
     nombre: str
     dimension: int
 
-    def codificar(self, textos: list[str]) -> list[list[float]]: ...
+    def codificar(self, textos: list[str], *, tipo: Tipo = "pasaje") -> list[list[float]]: ...
 
 
 def _normalizar(v: list[float]) -> list[float]:
@@ -67,7 +75,8 @@ class EmbedderHash:
         self.nombre = "hash-384"
         self.dimension = dimension
 
-    def codificar(self, textos: list[str]) -> list[list[float]]:
+    def codificar(self, textos: list[str], *, tipo: Tipo = "pasaje") -> list[list[float]]:
+        del tipo  # el hash no distingue consulta de pasaje
         salida: list[list[float]] = []
         for texto in textos:
             vector = [0.0] * self.dimension
@@ -91,7 +100,8 @@ class EmbedderModel2Vec:
         self._modelo = StaticModel.from_pretrained(self.nombre)
         self.dimension = int(self._modelo.dim)
 
-    def codificar(self, textos: list[str]) -> list[list[float]]:
+    def codificar(self, textos: list[str], *, tipo: Tipo = "pasaje") -> list[list[float]]:
+        del tipo  # los embeddings estaticos no usan prefijos
         return [_normalizar([float(x) for x in v]) for v in self._modelo.encode(textos)]
 
 
@@ -105,38 +115,55 @@ class EmbedderFastEmbed:
             raise EmbeddingNoDisponible("fastembed no esta instalado.") from exc
         self.nombre = modelo or MODELO_POR_DEFECTO["fastembed"]
         self._modelo = TextEmbedding(model_name=self.nombre)
+        self.usa_prefijos = "e5" in self.nombre.lower()
         self.dimension = len(next(iter(self._modelo.embed(["dimension"]))))
 
-    def codificar(self, textos: list[str]) -> list[list[float]]:
+    def codificar(self, textos: list[str], *, tipo: Tipo = "pasaje") -> list[list[float]]:
+        if self.usa_prefijos:
+            textos = [PREFIJOS_E5[tipo] + t for t in textos]
         return [_normalizar([float(x) for x in v]) for v in self._modelo.embed(textos)]
+
+
+def _backend_de(modelo: str) -> str:
+    if modelo in ("hash", "hash-384"):
+        return "hash"
+    if modelo == "model2vec" or "potion" in modelo or "model2vec" in modelo:
+        return "model2vec"
+    return "fastembed"
 
 
 def construir(modelo: str, *, permitir_hash: bool = True) -> Embedder:
     """Devuelve el embedder que pide la configuracion, cayendo con elegancia.
 
-    `modelo` puede ser un nombre de modelo o uno de los alias 'model2vec', 'fastembed', 'hash'.
-    Si el backend pedido no esta instalado y `permitir_hash`, cae al deterministico: el
-    indice es derivado y ninguna decision del pipeline depende de el (RF-CTX-09).
+    `modelo` es un nombre de modelo o uno de los alias 'model2vec', 'fastembed', 'hash'.
+
+    Si el backend pedido no arranca, se prueba el otro CON SU PROPIO MODELO por defecto: un
+    nombre de modelo no es intercambiable entre backends, y pasarle a model2vec el nombre de
+    un modelo de fastembed solo produce un segundo fallo.
+
+    El ultimo recurso es el deterministico por hash, que recupera mal pero no rompe nada: el
+    indice es derivado y ninguna decision del pipeline depende de el (RF-CTX-09). Cual se
+    acabo usando de verdad queda escrito en la tabla `indice_estado`, para que la diferencia
+    entre "recupera bien" y "recupera por hash" no sea invisible.
     """
-    if modelo in ("hash", "hash-384"):
+    pedido = _backend_de(modelo)
+    if pedido == "hash":
         return EmbedderHash()
 
-    intentos: list[type[EmbedderModel2Vec] | type[EmbedderFastEmbed]]
-    nombre: str | None = modelo
-
-    if modelo == "model2vec":
-        intentos, nombre = [EmbedderModel2Vec], None
-    elif modelo == "fastembed":
-        intentos, nombre = [EmbedderFastEmbed], None
-    elif "potion" in modelo or "model2vec" in modelo:
-        intentos = [EmbedderModel2Vec]
-    else:
-        intentos = [EmbedderFastEmbed, EmbedderModel2Vec]
+    clases: dict[str, type[EmbedderModel2Vec] | type[EmbedderFastEmbed]] = {
+        "model2vec": EmbedderModel2Vec,
+        "fastembed": EmbedderFastEmbed,
+    }
+    # Primero el pedido con el nombre dado; despues el otro con el suyo.
+    orden: list[tuple[str, str | None]] = [
+        (pedido, None if modelo == pedido else modelo),
+        *[(b, None) for b in clases if b != pedido],
+    ]
 
     ultimo: Exception | None = None
-    for clase in intentos:
+    for backend, nombre in orden:
         try:
-            return clase(nombre)
+            return clases[backend](nombre)
         except Exception as exc:  # noqa: BLE001 - se prueba el siguiente backend
             ultimo = exc
 

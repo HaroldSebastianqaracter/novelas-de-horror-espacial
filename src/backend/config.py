@@ -86,6 +86,15 @@ CRITERIOS_OFICIO: tuple[str, ...] = (
     "tropos_con_causalidad",
 )
 
+# --- Embeddings (RF-CTX-10) ---------------------------------------------------------------
+# Multilingue a proposito: la novela es en castellano y los modelos pequenos mas citados
+# (bge-small-en, all-MiniLM-L6-v2, potion-base-8M) son de ingles.
+#
+# El preferido es el de fastembed. En una maquina sin el redistribuible de Visual C++,
+# onnxruntime no carga y `vectores.construir` cae solo al de model2vec, que es numpy puro.
+# Que modelo se acabo usando de verdad queda en la tabla indice_estado.
+MODELO_EMBEDDING_PREFERIDO = "intfloat/multilingual-e5-small"
+
 MAX_INTENTOS_CAPITULO = 3
 UMBRAL_HILO_LATENTE = 6
 CAPITULOS_RESUMEN_COMPLETO = 3
@@ -103,8 +112,10 @@ class Config:
     presupuesto_tokens: int
     puerto: Literal["terminal", "falso"]
     puerto_falso_dir: Path | None
+    # La dimension NO se configura: es una propiedad del modelo, y un valor de entorno que
+    # pueda contradecirla es un fallo esperando. El indice la toma del embedder y la escribe
+    # en la tabla indice_estado.
     embedding_modelo: str
-    embedding_dim: int
     vectores_activos: bool
     presupuesto_bloques: dict[str, int] = field(default_factory=lambda: dict(PRESUPUESTO_BLOQUES))
 
@@ -144,8 +155,7 @@ def cargar() -> Config:
         presupuesto_tokens=_env_int("PRESUPUESTO_TOKENS", 100_000),
         puerto=puerto,  # type: ignore[arg-type]
         puerto_falso_dir=Path(falso_bruto).expanduser() if falso_bruto else None,
-        embedding_modelo=_env("EMBEDDING_MODELO", "intfloat/multilingual-e5-small")
-        or "intfloat/multilingual-e5-small",
-        embedding_dim=_env_int("EMBEDDING_DIM", 384),
+        embedding_modelo=_env("EMBEDDING_MODELO", MODELO_EMBEDDING_PREFERIDO)
+        or MODELO_EMBEDDING_PREFERIDO,
         vectores_activos=_env_bool("VECTORES", True),
     )

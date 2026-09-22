@@ -232,7 +232,7 @@ class Indice:
             return []
 
         permitidos = {c["texto_id"] for c in candidatos}
-        vector = self.embedder.codificar([consulta])[0]
+        vector = self.embedder.codificar([consulta], tipo="consulta")[0]
         cercanos = self.con.execute(
             """
             SELECT escena_texto_id, distance FROM vec_escena
