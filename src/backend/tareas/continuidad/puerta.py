@@ -117,11 +117,17 @@ WHERE e.novela_id = ? AND c.numero = ?
 """
 
 # --- 4b. Presencia imposible: dos lugares a la vez -----------------------------------------
+# SIMULTANEO significa mismo `orden_interno`, no misma fecha. Comparar por fecha daria un
+# falso positivo en cuanto dos escenas del mismo dia ocurran en sitios distintos, que es lo
+# normal: dentro de un dia el tiempo pasa. El `orden_interno` es el ordinal estricto de la
+# cronologia interna, y dos sucesos con el mismo ordinal si son a la vez.
 _SQL_UBICUIDAD = """
-SELECT p.nombre AS personaje, ev1.fecha_interna, l1.nombre AS lugar_a, l2.nombre AS lugar_b,
+SELECT p.nombre AS personaje, ev1.fecha_interna, ev1.orden_interno,
+       l1.nombre AS lugar_a, l2.nombre AS lugar_b,
        e1.id AS escena_a, e2.id AS escena_b, c1.numero AS capitulo
 FROM escena_personaje sp1
-JOIN escena_personaje sp2 ON sp2.personaje_id = sp1.personaje_id AND sp2.escena_id <> sp1.escena_id
+JOIN escena_personaje sp2 ON sp2.personaje_id = sp1.personaje_id
+                         AND sp2.escena_id <> sp1.escena_id
 JOIN personaje p  ON p.id = sp1.personaje_id
 JOIN escena e1    ON e1.id = sp1.escena_id
 JOIN escena e2    ON e2.id = sp2.escena_id
@@ -132,7 +138,8 @@ JOIN evento ev1   ON ev1.escena_id = e1.id AND ev1.dramatizado = 1
 JOIN evento ev2   ON ev2.escena_id = e2.id AND ev2.dramatizado = 1
 WHERE e1.novela_id = ? AND c1.numero = ?
   AND e1.lugar_id <> e2.lugar_id
-  AND TRIM(ev1.fecha_interna) = TRIM(ev2.fecha_interna)
+  AND ev1.orden_interno IS NOT NULL AND ev2.orden_interno IS NOT NULL
+  AND ev1.orden_interno = ev2.orden_interno
   AND e1.id < e2.id
 """
 
@@ -239,8 +246,9 @@ def evaluar(con: sqlite3.Connection, novela_id: int, capitulo: int) -> Resultado
         conflictos.append(Conflicto(
             comprobacion="presencia_imposible",
             descripcion=(
-                f"{f['personaje']} esta en '{f['lugar_a']}' y en '{f['lugar_b']}' a la vez "
-                f"({f['fecha_interna']})."
+                f"{f['personaje']} esta en '{f['lugar_a']}' y en '{f['lugar_b']}' en el mismo "
+                f"momento de la cronologia ({f['fecha_interna']}, orden "
+                f"{f['orden_interno']})."
             ),
             escena_id=f["escena_a"], capitulo=capitulo, datos=f,
         ))

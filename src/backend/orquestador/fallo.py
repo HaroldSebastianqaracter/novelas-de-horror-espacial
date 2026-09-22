@@ -1,0 +1,217 @@
+"""Politica de fallo: paradas y reversion (RF-FALLO-01 a RF-FALLO-05).
+
+Dos ideas sostienen este modulo.
+
+**La friccion es informacion.** Una parada no es un fallo del sistema, es el sistema haciendo
+su trabajo. Nunca se acumula deuda narrativa silenciosa: ante un conflicto de continuidad se
+detiene la generacion y se espera a un humano.
+
+**El estado es la unidad de reanudacion, no el texto.** Relanzar desde el capitulo N es
+restaurar el grafo a como estaba al terminar N-1. Eso es posible porque todo el estado es
+append-only y lleva su escena de origen: revertir es borrar por escena, no deshacer pasos.
+"""
+
+from __future__ import annotations
+
+import json
+import sqlite3
+from typing import Any
+
+from compartido.grafo import emitir_evento, insertar
+
+from . import estados
+
+# Tablas de estado que se borran al revertir, todas con `escena_id`.
+TABLAS_DE_ESTADO = (
+    "hecho", "estado_conocimiento", "uso_conocimiento", "estado_personaje", "estado_objeto",
+    "siembra_estado", "hilo_estado", "amenaza_revelacion", "entidad_no_reconocida",
+)
+
+
+def abrir_parada(
+    con: sqlite3.Connection,
+    novela_id: int,
+    tipo: str,
+    informe: dict[str, Any],
+    *,
+    capitulo: int | None = None,
+    intento: int | None = None,
+) -> int:
+    """Crea la parada y la deja abierta. El informe se lee sin abrir la base de datos."""
+    ejecucion = con.execute(
+        "SELECT id FROM ejecucion WHERE novela_id = ?", (novela_id,)
+    ).fetchone()
+    parada_id = insertar(
+        con, "parada", ejecucion_id=int(ejecucion["id"]), tipo=tipo, capitulo=capitulo,
+        intento=intento, informe=json.dumps(informe, ensure_ascii=False, default=str),
+        estado="abierta",
+    )
+    emitir_evento(
+        con, novela_id, "parada", parada_id=parada_id, tipo=tipo, capitulo=capitulo,
+        intento=intento,
+    )
+    return parada_id
+
+
+def cerrar_parada(
+    con: sqlite3.Connection, novela_id: int, parada_id: int, resolucion: str
+) -> None:
+    con.execute(
+        "UPDATE parada SET estado = 'resuelta', resolucion = ?, resuelto_en = datetime('now') "
+        "WHERE id = ?",
+        (resolucion, parada_id),
+    )
+    emitir_evento(con, novela_id, "parada_resuelta", parada_id=parada_id, resolucion=resolucion)
+
+
+def paradas_abiertas(con: sqlite3.Connection, novela_id: int) -> list[dict[str, Any]]:
+    return [
+        dict(f) for f in con.execute(
+            """
+            SELECT p.* FROM parada p
+            JOIN ejecucion e ON e.id = p.ejecucion_id
+            WHERE e.novela_id = ? AND p.estado = 'abierta' ORDER BY p.id
+            """,
+            (novela_id,),
+        )
+    ]
+
+
+def aceptar_retcon(con: sqlite3.Connection, novela_id: int, parada_id: int) -> int:
+    """Revoca a mano los hechos que el conflicto senala, con rastro (RF-FALLO-03).
+
+    La regla dice que un hecho establecido no se borra por una pasada de prosa. Aqui no lo
+    borra una pasada: lo retira una persona, a conciencia, y queda registrado quien y por que.
+    El capitulo se regenera entero; la prosa rechazada no se reutiliza.
+    """
+    fila = con.execute("SELECT informe FROM parada WHERE id = ?", (parada_id,)).fetchone()
+    if fila is None:
+        return 0
+    try:
+        informe = json.loads(fila["informe"] or "{}")
+    except json.JSONDecodeError:
+        return 0
+
+    ids: set[int] = set()
+    for conflicto in informe.get("conflictos", []):
+        datos = conflicto.get("datos") or {}
+        previo = datos.get("hecho_previo_id")
+        if previo:
+            ids.add(int(previo))
+    if not ids:
+        return 0
+
+    con.execute(
+        f"UPDATE hecho SET vigente = 0, motivo_no_vigente = 'retcon', parada_id = ? "
+        f"WHERE id IN ({','.join('?' * len(ids))})",
+        [parada_id, *ids],
+    )
+
+    linea = con.execute(
+        "SELECT id FROM linea_de_tiempo WHERE novela_id = ?", (novela_id,)
+    ).fetchone()
+    if linea is not None:
+        insertar(
+            con, "evento", novela_id=novela_id, linea_de_tiempo_id=int(linea["id"]),
+            fecha_interna="(retcon)", descripcion=(
+                f"El autor revoco {len(ids)} hecho(s) al resolver la parada {parada_id}."
+            ),
+            tipo="retcon", dramatizado=False,
+        )
+    return len(ids)
+
+
+def revertir_a(con: sqlite3.Connection, novela_id: int, desde_capitulo: int) -> dict[str, int]:
+    """Deja el grafo como estaba al terminar el capitulo N-1 (RF-FALLO-04).
+
+    No toca el canon ni la escaleta: relanzar regenera prosa, no plan.
+    """
+    borrado: dict[str, int] = {}
+
+    escenas = [
+        int(f["id"]) for f in con.execute(
+            """
+            SELECT e.id FROM escena e JOIN capitulo c ON c.id = e.capitulo_id
+            WHERE e.novela_id = ? AND c.numero >= ?
+            """,
+            (novela_id, desde_capitulo),
+        )
+    ]
+
+    if escenas:
+        huecos = ",".join("?" * len(escenas))
+        # El conocimiento cuelga de hechos que estan a punto de desaparecer, asi que va antes.
+        for tabla in ("estado_conocimiento", "uso_conocimiento"):
+            cur = con.execute(
+                f"DELETE FROM {tabla} WHERE escena_id IN ({huecos}) OR hecho_id IN "
+                f"(SELECT id FROM hecho WHERE escena_id IN ({huecos}))",
+                [*escenas, *escenas],
+            )
+            borrado[tabla] = cur.rowcount
+        for tabla in TABLAS_DE_ESTADO:
+            if tabla in ("estado_conocimiento", "uso_conocimiento"):
+                continue
+            cur = con.execute(f"DELETE FROM {tabla} WHERE escena_id IN ({huecos})", escenas)
+            borrado[tabla] = cur.rowcount
+        cur = con.execute(
+            f"DELETE FROM evento WHERE escena_id IN ({huecos})", escenas
+        )
+        borrado["evento"] = cur.rowcount
+
+        # Las siembras que planifico el estructurador se conservan; las que nacieron de la
+        # extraccion de estos capitulos, no.
+        cur = con.execute(
+            f"DELETE FROM siembra WHERE novela_id = ? AND origen = 'extraccion' "
+            f"AND sembrada_en_escena_id IN ({huecos})",
+            [novela_id, *escenas],
+        )
+        borrado["siembra"] = cur.rowcount
+        con.execute(
+            f"UPDATE siembra SET sembrada_en_escena_id = NULL WHERE sembrada_en_escena_id IN "
+            f"({huecos})",
+            escenas,
+        )
+
+        # El texto no se borra: se descarta. Es historia legible en /versiones.
+        cur = con.execute(
+            f"UPDATE escena_texto SET estado = 'descartada' WHERE escena_id IN ({huecos}) "
+            f"AND estado = 'vigente'",
+            escenas,
+        )
+        borrado["escena_texto_descartada"] = cur.rowcount
+
+    con.execute(
+        """
+        UPDATE capitulo_compilado SET estado = 'descartada'
+         WHERE capitulo_id IN (SELECT id FROM capitulo WHERE novela_id = ? AND numero >= ?)
+           AND estado = 'vigente'
+        """,
+        (novela_id, desde_capitulo),
+    )
+    con.execute(
+        "UPDATE capitulo SET estado = 'planificado', resumen = NULL, resumen_breve = NULL "
+        "WHERE novela_id = ? AND numero >= ?",
+        (novela_id, desde_capitulo),
+    )
+
+    for parada in paradas_abiertas(con, novela_id):
+        cerrar_parada(con, novela_id, int(parada["id"]), "relanzado")
+
+    # Revertir el grafo y dejar el estado diciendo «completada» seria mentir: el manuscrito
+    # que justificaba ese estado acaba de descartarse. La ejecucion vuelve a generando, que es
+    # justo lo que significa `relanzar`.
+    estado_actual = str(con.execute(
+        "SELECT estado FROM ejecucion WHERE novela_id = ?", (novela_id,)
+    ).fetchone()["estado"])
+    destino = estados.siguiente(estado_actual, "relanzar")
+    con.execute(
+        """
+        UPDATE ejecucion SET estado = ?, fase = 'paquete', capitulo_actual = ?,
+               intento_actual = 1, capitulos_completados = ?, parada_abierta_id = NULL,
+               ultimo_error = NULL, actualizado_en = datetime('now')
+         WHERE novela_id = ?
+        """,
+        (destino, desde_capitulo, desde_capitulo - 1, novela_id),
+    )
+    emitir_evento(con, novela_id, "revertido", desde_capitulo=desde_capitulo, borrado=borrado)
+    return borrado

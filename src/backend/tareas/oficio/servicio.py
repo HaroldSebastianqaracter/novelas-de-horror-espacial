@@ -1,0 +1,74 @@
+"""El paquete del revisor de oficio: la parte de juicio de la puerta 4."""
+
+from __future__ import annotations
+
+import sqlite3
+
+from compartido.contexto import Paquete, ajustar
+from compartido.grafo import lectura
+from compartido.puerta_base import ResultadoPuerta
+
+AGENTE = "oficio"
+
+
+def paquete(
+    con: sqlite3.Connection,
+    novela_id: int,
+    capitulo: int,
+    texto: str,
+    mecanica: ResultadoPuerta | None = None,
+) -> Paquete:
+    e = lectura.estilo(con, novela_id) or {}
+    escenas = lectura.escenas_del_capitulo(con, novela_id, capitulo)
+    canon = lectura.canon_del_capitulo(con, novela_id, capitulo)
+
+    p = Paquete(agente=AGENTE, capitulo=capitulo)
+
+    instrucciones = [
+        f"Juzga el capitulo {capitulo}. Ya ha pasado la continuidad: no busques "
+        "contradicciones.",
+        "",
+        "ESTILO NARRATIVO DE LA OBRA (contra el que se mide la voz):",
+        f"- Registro: {e.get('registro', '')}",
+        f"- Ritmo de prosa: {e.get('ritmo_prosa', '')}",
+        f"- Densidad sensorial: {e.get('densidad_sensorial', '')}",
+        f"- Distancia psiquica por defecto: {e.get('distancia_psiquica', '')}",
+    ]
+    tics = lectura.tics_prohibidos(con, novela_id)
+    if tics:
+        instrucciones.append("- Tics prohibidos: " + "; ".join(tics))
+    p.anadir("instrucciones", "\n".join(instrucciones), "TU ENCARGO Y EL ESTILO")
+
+    voces = [
+        f"- **{per['nombre']}**: {per['idiolecto']}"
+        for per in canon["personajes"] if per.get("idiolecto")
+    ]
+    if voces:
+        p.anadir(
+            "canon",
+            "Al tapar las acotaciones se tiene que seguir sabiendo quien habla:\n"
+            + "\n".join(voces),
+            "VOZ DE CADA PERSONAJE",
+        )
+
+    plan = [
+        f"- Escena {x['orden']} ({x['pov_nombre']}, {x['lugar_nombre']}): "
+        f"objetivo «{x['objetivo']}», conflicto «{x['conflicto']}», "
+        f"valor {x['valor_inicial']} -> {x['valor_final']}, tension {x['tension']}/10"
+        for x in escenas
+    ]
+    p.anadir(
+        "escaleta",
+        "Lo que cada escena tenia que conseguir:\n" + "\n".join(plan) + "\n\n---\n\n" + texto,
+        f"ESCALETA Y PROSA DEL CAPITULO {capitulo}",
+    )
+
+    if mecanica is not None and mecanica.conflictos:
+        p.anadir(
+            "criterios_incumplidos",
+            "Son insumo, no veredicto: mira cada caso en su sitio y decide.\n"
+            + "\n".join(f"- {c}" for c in mecanica.conflictos),
+            "AVISOS DE LA PASADA MECANICA",
+        )
+
+    return ajustar(p)

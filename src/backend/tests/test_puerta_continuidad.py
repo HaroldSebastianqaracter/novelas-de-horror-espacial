@@ -84,17 +84,26 @@ def test_detecta_personaje_muerto_que_reaparece(grafo: tuple[sqlite3.Connection,
 
 
 def test_detecta_dos_lugares_a_la_vez(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    """Simultaneo es el mismo orden interno, no la misma fecha."""
     con, g = grafo
-    # Las dos escenas del capitulo 2 pasan en la misma fecha interna y en lugares distintos.
-    con.execute(
-        "UPDATE evento SET fecha_interna = 'dia 3' WHERE escena_id = ?",
-        (g.escenas[(2, 2)],),
-    )
-    con.execute(
-        "UPDATE evento SET fecha_interna = 'dia 3' WHERE escena_id = ?",
-        (g.escenas[(2, 1)],),
-    )
+    for orden in (1, 2):
+        con.execute(
+            "UPDATE evento SET fecha_interna = 'dia 3', orden_interno = 30 WHERE escena_id = ?",
+            (g.escenas[(2, orden)],),
+        )
     assert "presencia_imposible" in comprobaciones(con, g)
+
+
+def test_misma_fecha_en_distinto_momento_no_es_ubicuidad(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """Dos escenas del mismo dia en sitios distintos son lo normal: el tiempo pasa."""
+    con, g = grafo
+    con.execute("UPDATE evento SET fecha_interna = 'dia 3', orden_interno = 30 WHERE escena_id = ?",
+                (g.escenas[(2, 1)],))
+    con.execute("UPDATE evento SET fecha_interna = 'dia 3', orden_interno = 31 WHERE escena_id = ?",
+                (g.escenas[(2, 2)],))
+    assert "presencia_imposible" not in comprobaciones(con, g)
 
 
 def test_detecta_objeto_sin_traslado(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
