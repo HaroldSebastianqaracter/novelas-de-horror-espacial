@@ -135,7 +135,8 @@ def _script_atomico(con: sqlite3.Connection, sql: str, version: int) -> None:
     `executescript` confirma cualquier transaccion pendiente antes de arrancar y no abre
     ninguna por su cuenta, asi que el control de transaccion tiene que ir DENTRO del script.
     """
-    guion = f"BEGIN;\n{sql}\nINSERT OR REPLACE INTO esquema_version (version) VALUES ({version});\nCOMMIT;"
+    sello = f"INSERT OR REPLACE INTO esquema_version (version) VALUES ({version});"
+    guion = f"BEGIN;\n{sql}\n{sello}\nCOMMIT;"
     try:
         con.executescript(guion)
     except Exception:

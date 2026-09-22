@@ -36,7 +36,7 @@ __all__ = [
 ]
 
 
-def construir(cfg: "Config", con: sqlite3.Connection | None = None) -> PuertoAgente:
+def construir(cfg: Config, con: sqlite3.Connection | None = None) -> PuertoAgente:
     """Devuelve el puerto que pide la configuracion (RF-PROC-02)."""
     if cfg.puerto == "falso":
         return PuertoFalso(fixtures_dir=cfg.puerto_falso_dir, con=con)
