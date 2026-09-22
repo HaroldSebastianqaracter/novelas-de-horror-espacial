@@ -1,0 +1,49 @@
+[project]
+name = "novelas-backend"
+version = "0.1.0"
+description = "Backend del sistema de generacion de novela de terror espacial"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+]
+
+[project.optional-dependencies]
+# El indice vectorial es derivado: el pipeline corre sin el (RF-CTX-09).
+vectores = [
+    "sqlite-vec>=0.1.6",
+    "fastembed>=0.4",
+]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.27",
+    "ruff>=0.7",
+    "pyright>=1.1.390",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["compartido", "tareas"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pyright]
+include = ["."]
+exclude = ["**/__pycache__", ".venv"]
+typeCheckingMode = "strict"
+pythonVersion = "3.12"
+reportMissingImports = "warning"
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "tareas"]
+python_files = ["test_*.py"]

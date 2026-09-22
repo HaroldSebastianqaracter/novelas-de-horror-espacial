@@ -489,15 +489,26 @@ Si un paquete de planificación no cabe, se aplica RF-CTX-03: el canon completo 
 
 **RF-PUERTO-02** `PuertoTerminal` ejecuta Claude Code como **subproceso en modo no interactivo**, con:
 
-- El **prompt de sistema sustituido** por el contenido de `.claude/skills/<agente>/SKILL.md` más el esquema JSON de la salida esperada, generado desde el Pydantic de la tarea.
-- **Sin herramientas**: la lista de herramientas permitidas vacía. El agente no puede leer ficheros, buscar ni ejecutar nada. Todo lo que sabe está en el paquete.
-- Salida en **formato JSON** para poder separar el texto del resultado de los metadatos.
-- El directorio de trabajo es un **directorio temporal vacío** creado para la llamada, no la raíz del repo.
-- Sin sesión persistente: cada invocación es nueva.
+Las banderas están **verificadas contra la versión 2.1.274** del CLI instalada; las que se citan existen y hacen lo que aquí se dice.
+
+| Qué | Bandera | Por qué |
+| --- | --- | --- |
+| Turno único, no interactivo | `-p` | Una invocación, una salida |
+| Prompt de sistema **sustituido** por la `SKILL.md` | `--system-prompt-file` | El puerto lee la skill del disco y la inyecta; no depende del descubrimiento de skills ni de una herramienta que las cargue |
+| **Sin herramientas** | `--allowedTools ""` | El agente no puede leer ficheros, buscar ni ejecutar. Todo lo que sabe está en el paquete |
+| Salida estructurada y validada | `--output-format json` con `--json-schema` | Devuelve `structured_output` ya conforme al esquema, además del texto y los metadatos |
+| Directorio de trabajo | Un **temporal vacío** por llamada | No la raíz del repo: no hay nada que leer por su cuenta |
+
+Dos hechos verificados que condicionan la implementación:
+
+- **`--bare` no se usa.** Rompe la autenticación: no lee las credenciales de la sesión y responde «Not logged in». Sin él, el CLI autentica con la sesión del autor y no hace falta ninguna clave, que es lo que exige RNF-06.
+- **La entrada va por `stdin`, nunca como argumento.** En Windows la línea de comandos tiene un techo cercano a 32.000 caracteres y un paquete de capítulo lo supera con holgura.
+
+Sin sesión persistente: cada invocación es nueva.
 
 > **Decisión de la spec (21-09-2026).** Cierra la pendiente más urgente de architecture.md, «cómo se acota el contexto de Claude Code». La skill no se carga por el mecanismo de descubrimiento de Claude Code sino que el puerto la lee del disco y la inyecta como prompt de sistema: así no depende de si el modo no interactivo descubre skills, y el agente no necesita la herramienta que las invoca. Con la lista de herramientas vacía y el directorio de trabajo vacío, la gestión de contexto de Claude Code no tiene nada que leer, y el principio 7 se sostiene por construcción, no por instrucción. Se elige terminal y no SDK porque architecture.md ya dice que migrar en ese sentido es barato y al revés no.
 
-**RF-PUERTO-03** El puerto exige que el texto de resultado sea **un único objeto JSON** conforme al esquema. Si el texto trae texto alrededor, extrae el primer objeto JSON completo. Si la validación Pydantic falla, **repite la llamada una vez** añadiendo al final de la entrada el error de validación literal. Si vuelve a fallar, lanza `SalidaInvalida`; la tarea decide (RF-PIPE-03, RF-PIPE-09, RF-PIPE-13).
+**RF-PUERTO-03** El puerto toma la salida de `structured_output`, que el CLI ya devuelve validada contra el esquema. Si ese campo falta, cae a extraer el primer objeto JSON completo del texto del resultado. Si no hay objeto válido, o el CLI marca error, **repite la llamada una vez** añadiendo a la entrada el error literal. Si vuelve a fallar, lanza `SalidaInvalida`; la tarea decide (RF-PIPE-03, RF-PIPE-09, RF-PIPE-13). Un «Not logged in» no se reintenta: lanza `AgenteNoAutenticado` de inmediato, porque reintentar no lo arregla.
 
 **RF-PUERTO-04** El puerto registra cada invocación en `llamada_modelo` **antes** de lanzar el subproceso (con estado `en_curso`) y la completa al terminar, con exit code, duración, salida cruda, y estado `ok`, `salida_invalida`, `timeout`, `interrumpida` o `error`. Guarda el `sistema` y la `entrada` completos: la traza es lo que permite reproducir una llamada.
 

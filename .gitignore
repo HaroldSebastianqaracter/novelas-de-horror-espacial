@@ -1,28 +1,8 @@
-# Python
 __pycache__/
 *.py[cod]
 .venv/
-venv/
 .pytest_cache/
-.mypy_cache/
 .ruff_cache/
-*.egg-info/
-
-# Node
-node_modules/
-dist/
-build/
-
-# SQLite (la novela vive en un fichero; no se versiona)
 *.db
 *.db-wal
 *.db-shm
-
-# Entorno y sistema
-.env
-.env.*
-.DS_Store
-Thumbs.db
-
-# Claude Code: las skills se versionan, la configuracion local no
-.claude/settings.local.json
