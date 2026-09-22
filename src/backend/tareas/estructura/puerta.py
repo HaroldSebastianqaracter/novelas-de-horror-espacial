@@ -83,6 +83,26 @@ def evaluar(con: sqlite3.Connection, novela_id: int) -> ResultadoPuerta:
     if len(aperturas) > 1:
         orden_apertura = [i for _, i in sorted(aperturas)]
         orden_cierre = [i for _, i in sorted(cierres)]
+
+        # El nucleo duro de la regla: el hilo principal cierra EL ULTIMO. Si una subtrama
+        # cierra despues del climax, el lector siente que el libro termino y quedo un
+        # apendice colgando. Eso si para: es un defecto estructural, no una preferencia.
+        if principales:
+            id_principal = principales[0]["id"]
+            posicion_principal = next(p for p, i in cierres if i == id_principal)
+            despues = [i for p, i in cierres if p > posicion_principal]
+            if despues:
+                conflictos.append(Conflicto(
+                    comprobacion="subtrama_cierra_tras_el_principal",
+                    descripcion=(
+                        f"{len(despues)} hilo(s) cierran despues del principal. El climax deja "
+                        "de ser el final y lo que queda se lee como apendice."
+                    ),
+                    datos={"hilos_posteriores": despues},
+                ))
+
+        # El anidamiento completo es mas exigente y se apoya en posiciones aproximadas, asi
+        # que queda como aviso: senala un riesgo, no un defecto seguro.
         if orden_cierre != list(reversed(orden_apertura)):
             conflictos.append(Conflicto(
                 comprobacion="cierre_en_orden_inverso",
