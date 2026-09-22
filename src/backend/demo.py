@@ -3,9 +3,9 @@
 No sustituye al worker ni a la API: encola intenciones igual que haria el frontend, y luego
 va leyendo el estado. Sirve para ver el pipeline correr sin montar nada mas.
 
-    python demo.py --puerto falso      # sin Claude Code y sin gastar nada
-    python demo.py --puerto terminal   # con Claude Code de verdad (cuesta dinero)
-    python demo.py --ver               # solo mirar como va lo que ya hay
+    python demo.py            # crear una novela, arrancarla y ver como avanza
+    python demo.py --arrancar # arrancar la que ya existe, sin crear otra
+    python demo.py --ver      # solo mirar
 """
 
 from __future__ import annotations
@@ -85,6 +85,18 @@ def parar(ruta: Path, novela_id: int) -> None:
         con.close()
 
 
+def _ultima(ruta: Path) -> int:
+    """La novela mas reciente. Casi siempre es con la que se quiere trabajar."""
+    if not ruta.exists():
+        return 0
+    con = db.conectar(ruta, solo_lectura=True)
+    try:
+        fila = con.execute("SELECT id FROM novela ORDER BY id DESC LIMIT 1").fetchone()
+        return int(fila["id"]) if fila else 0
+    finally:
+        con.close()
+
+
 def mirar(ruta: Path, novela_id: int | None, segundos: int) -> None:
     """Muestra el estado cada pocos segundos, como haria el panel del frontend."""
     if not ruta.exists():
@@ -93,11 +105,10 @@ def mirar(ruta: Path, novela_id: int | None, segundos: int) -> None:
     con = db.conectar(ruta, solo_lectura=True)
     try:
         if novela_id is None:
-            fila = con.execute("SELECT id FROM novela ORDER BY id DESC LIMIT 1").fetchone()
-            if fila is None:
+            novela_id = _ultima(ruta)
+            if not novela_id:
                 print("No hay ninguna novela todavia.")
                 return
-            novela_id = int(fila["id"])
 
         ultimo = ""
         limite = time.monotonic() + segundos
@@ -160,8 +171,7 @@ def leer(ruta: Path, novela_id: int | None, numero: int) -> None:
     con = db.conectar(ruta, solo_lectura=True)
     try:
         if novela_id is None:
-            fila = con.execute("SELECT id FROM novela ORDER BY id DESC LIMIT 1").fetchone()
-            novela_id = int(fila["id"]) if fila else 0
+            novela_id = _ultima(ruta)
         texto = lectura.texto_capitulo(con, novela_id, numero)
         print(texto or f"El capitulo {numero} no esta escrito todavia.")
     finally:
@@ -173,6 +183,10 @@ def main() -> int:
     parser.add_argument("--novela", type=int, default=None, help="id; por defecto, la ultima")
     parser.add_argument("--titulo", default="Cerro Quince")
     parser.add_argument("--ver", action="store_true", help="solo mirar, sin crear nada")
+    parser.add_argument(
+        "--arrancar", action="store_true",
+        help="arrancar una novela que ya existe, sin crear otra",
+    )
     parser.add_argument("--parar", action="store_true")
     parser.add_argument("--relanzar", type=int, default=None, metavar="N")
     parser.add_argument("--leer", type=int, default=None, metavar="N")
@@ -188,11 +202,19 @@ def main() -> int:
     ruta = cfg.db_path
     print(f"Base de datos: {ruta}   Puerto: {cfg.puerto}\n")
 
+    if args.arrancar:
+        novela_id = args.novela or _ultima(ruta)
+        if not novela_id:
+            print("No hay ninguna novela que arrancar.", file=sys.stderr)
+            return 1
+        arrancar(ruta, novela_id)
+        mirar(ruta, novela_id, args.segundos)
+        return 0
     if args.leer is not None:
         leer(ruta, args.novela, args.leer)
         return 0
     if args.parar:
-        parar(ruta, args.novela or 0)
+        parar(ruta, args.novela or _ultima(ruta))
         return 0
     if args.relanzar is not None:
         con = db.preparar(ruta)
