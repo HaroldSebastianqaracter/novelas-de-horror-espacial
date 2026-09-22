@@ -7,9 +7,14 @@ Implementa [specs/spec1.md](../../specs/spec1.md); su plan de verificación est�
 
 ## Preparar el entorno
 
-Una sola vez, desde `src\backend` en **cmd**:
+**Todos los comandos de este README se ejecutan desde `src\backend`.** Es la causa número uno
+de que fallen: lanzados desde otro sitio, `pip install -e .` no encuentra el proyecto y
+`python -m worker` no encuentra el módulo.
+
+Una sola vez, en **cmd**:
 
 ```bat
+cd /d "C:\Users\<tu-usuario>\Desktop\Nueva carpeta\novelasv2\src\backend"
 python -m venv .venv
 .venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
@@ -25,7 +30,7 @@ demostración que devuelven salidas válidas. Son dos ventanas de cmd.
 **Ventana 1, el worker.** Es el único que escribe, y aquí vive el orquestador.
 
 ```bat
-cd src\backend
+cd /d "...\novelasv2\src\backend"
 set NOVELAS_DB_PATH=novela.db
 set NOVELAS_PUERTO=falso
 .venv\Scripts\python.exe -m worker
@@ -34,7 +39,7 @@ set NOVELAS_PUERTO=falso
 **Ventana 2, el lanzador.** Crea una novela, la arranca y muestra cómo avanza.
 
 ```bat
-cd src\backend
+cd /d "...\novelasv2\src\backend"
 set NOVELAS_DB_PATH=novela.db
 set NOVELAS_PUERTO=falso
 .venv\Scripts\python.exe demo.py
@@ -55,7 +60,7 @@ generación y rehacerla desde un capítulo concreto.
 **Ventana 3, la API**, si quieres verlo por HTTP. Es opcional.
 
 ```bat
-cd src\backend
+cd /d "...\novelasv2\src\backend"
 set NOVELAS_DB_PATH=novela.db
 .venv\Scripts\python.exe -m main
 ```
