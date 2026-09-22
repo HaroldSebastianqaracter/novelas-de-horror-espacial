@@ -44,19 +44,33 @@ class Indice:
         self.con = con
         self.disponible = False
         self.embedder: Embedder | None = None
+        self._modelo = modelo
+        self._intentado = False
         if not activo:
             self._registrar_estado()
             return
-        if not self._cargar_extension():
-            self._registrar_estado()
-            return
+        # Solo se comprueba que la extension cargue, que es instantaneo. El MODELO se carga
+        # la primera vez que hace falta: pesa cientos de megas y se descarga la primera vez,
+        # y un worker no puede pasarse medio minuto bajandolo antes de aceptar una intencion
+        # que quiza ni use el indice.
+        self.disponible = self._cargar_extension()
+        self._registrar_estado()
+
+    def _asegurar_embedder(self) -> bool:
+        """Carga el modelo y crea las tablas vec0 la primera vez que se usan de verdad."""
+        if self.embedder is not None:
+            return True
+        if not self.disponible or self._intentado:
+            return False
+        self._intentado = True
         try:
-            self.embedder = construir(modelo)
+            self.embedder = construir(self._modelo)
             self._crear_tablas(self.embedder.dimension)
-            self.disponible = True
         except Exception:  # noqa: BLE001 - el indice es prescindible por diseno
+            self.embedder = None
             self.disponible = False
         self._registrar_estado()
+        return self.embedder is not None
 
     # -- montaje ---------------------------------------------------------------------------
 
@@ -100,7 +114,7 @@ class Indice:
 
     def indexar_capitulo(self, novela_id: int, capitulo: int) -> int:
         """Vectoriza las escenas y los hechos del capitulo. Se llama TRAS confirmarlo."""
-        if not self.disponible or self.embedder is None:
+        if not self._asegurar_embedder() or self.embedder is None:
             return 0
 
         filas = [dict(f) for f in self.con.execute(
@@ -147,8 +161,8 @@ class Indice:
 
     def purgar(self, novela_id: int, desde_capitulo: int) -> None:
         """Quita del indice lo que una reversion ha descartado (RF-CTX-10, RF-FALLO-04)."""
-        if not self.disponible:
-            return
+        if not self.disponible or self.embedder is None:
+            return  # si nunca se cargo el modelo, no hay tablas que purgar
         self.con.execute(
             """
             DELETE FROM vec_escena WHERE escena_texto_id IN (
@@ -165,7 +179,7 @@ class Indice:
 
     def reconstruir(self, novela_id: int) -> int:
         """Borra y rehace el indice entero. Necesario al cambiar de modelo."""
-        if not self.disponible:
+        if not self._asegurar_embedder():
             return 0
         self.con.execute("DELETE FROM vec_escena")
         self.con.execute("DELETE FROM vec_hecho")
@@ -196,7 +210,7 @@ class Indice:
         que el filtro determinista ya admitio, nunca decide por su cuenta quien entra
         (RF-CTX-08).
         """
-        if not self.disponible or self.embedder is None or not consulta.strip():
+        if not consulta.strip() or not self._asegurar_embedder() or self.embedder is None:
             return []
 
         condiciones = ["et.novela_id = ?", "c.numero < ?", "et.estado = 'vigente'"]
