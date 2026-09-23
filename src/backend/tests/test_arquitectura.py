@@ -136,7 +136,7 @@ def test_fastapi_solo_en_los_router() -> None:
     fallos: list[str] = []
     for fichero in [
         *_modulos(DIR_TAREAS), *_modulos(DIR_COMPARTIDO), *_modulos(RAIZ / "tests"),
-        *_modulos(RAIZ / "orquestador"), RAIZ / "worker.py",
+        *_modulos(RAIZ / "orquestador"), *_modulos(RAIZ / "evals"), RAIZ / "worker.py",
     ]:
         if fichero.name in ("router.py", "main.py") or not fichero.exists():
             continue
@@ -159,6 +159,22 @@ def test_los_router_no_invocan_al_modelo_ni_orquestan() -> None:
             if "puerto" in nombre or "orquestador" in nombre:
                 fallos.append(f"{fichero.relative_to(RAIZ)} importa {nombre}")
     assert not fallos, "Un router alcanza el puerto o el orquestador:\n" + "\n".join(fallos)
+
+
+def test_nada_del_pipeline_depende_de_las_evals() -> None:
+    """Las evals miden el pipeline y lo importan; el pipeline no las importa a ellas
+    (docs/architecture.md, paquete `evals/`)."""
+    fallos = [
+        f"{f.relative_to(RAIZ)} importa {n}"
+        for f in [
+            *_modulos(DIR_TAREAS), *_modulos(DIR_COMPARTIDO), *_modulos(RAIZ / "orquestador"),
+            RAIZ / "worker.py", RAIZ / "main.py",
+        ]
+        if f.exists()
+        for n in _imports(f)
+        if n.split(".")[0] == "evals"
+    ]
+    assert not fallos, "El pipeline importa de evals:\n" + "\n".join(fallos)
 
 
 def test_el_worker_no_importa_fastapi() -> None:

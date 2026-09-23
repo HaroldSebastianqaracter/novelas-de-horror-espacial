@@ -6,8 +6,10 @@ fuera» con una cuadrilla de seis paso las cinco puertas. El banco mete a propos
 conocidos en una novela aprobada y cuenta cuantos detecta cada comprobacion, y tambien cuantos
 casos limpios paran sin motivo (la idea es la de FlawedFictions y ConStory-Bench).
 
-Cada caso cambia el grafo del ultimo capitulo como lo habria dejado el extractor ante una prosa
-con ese error, o lo deja sin tocar si el extractor no lo habria registrado. Mide la puerta, no
+Cada caso cambia el grafo de la novela aprobada como lo habria dejado el extractor ante una
+prosa con ese error, o lo deja sin tocar si el extractor no lo habria registrado. El cambio puede
+caer en un capitulo anterior (una muerte, una presencia), pero la contradiccion aflora siempre en
+el ultimo, que es el que la puerta evalua. Mide la puerta, no
 el extractor: el extractor tiene su propia eval (spec3-verification, fila 34).
 """
 
@@ -122,6 +124,14 @@ class Informe:
     def desviados(self) -> list[Resultado]:
         return [r for r in self.resultados if not r.conforme]
 
+    def avisos(self) -> dict[str, int]:
+        """En cuantos casos sale cada aviso: se cuentan aparte, porque no paran (RF3-BAN-03)."""
+        salida: dict[str, int] = {}
+        for r in self.resultados:
+            for a in r.avisos:
+                salida[a] = salida.get(a, 0) + 1
+        return salida
+
     def tabla(self) -> str:
         filas = [
             "| Caso | Subtipo | Verdad | Esperado | Bloqueantes | Avisos | Conforme |",
@@ -140,6 +150,9 @@ class Informe:
         filas.append(f"Falsos positivos sobre los casos limpios: {self.falsos_positivos:.0%}")
         for subtipo, (d, t) in sorted(self.por_subtipo().items()):
             filas.append(f"- {subtipo}: {d} de {t}")
+        filas.append(f"Avisos, en cuantos de los {len(self.resultados)} casos sale cada uno:")
+        for aviso, n in sorted(self.avisos().items()):
+            filas.append(f"- {aviso}: {n}")
         return "\n".join(filas)
 
 
@@ -154,10 +167,12 @@ def _cfg(ruta: Path) -> config.Config:
     )
 
 
-def construir_base(directorio: Path | None = None) -> Base:
-    """La novela de demo entera con el puerto falso: tres capitulos aprobados, sin coste."""
-    carpeta = directorio or Path(tempfile.mkdtemp(prefix="banco-"))
-    ruta = carpeta / "base.db"
+def construir_base(directorio: Path) -> Base:
+    """La novela de demo entera con el puerto falso: tres capitulos aprobados, sin coste.
+
+    Quien la pide pone la carpeta y la borra: la base vive lo que viva el banco.
+    """
+    ruta = directorio / "base.db"
     con = db.preparar(ruta)
     try:
         with db.transaccion(con):
@@ -198,9 +213,8 @@ def construir_base(directorio: Path | None = None) -> Base:
         con.close()
 
 
-def _copia(base: Base) -> sqlite3.Connection:
+def _copia(base: Base, destino: Path) -> sqlite3.Connection:
     """Una copia de la base para un caso: ningun caso ve lo que cambio otro."""
-    destino = Path(tempfile.mkdtemp(prefix="banco-caso-")) / "caso.db"
     origen = db.conectar(base.ruta, solo_lectura=True)
     copia = db.conectar(destino)
     try:
@@ -221,24 +235,31 @@ def _textos(con: sqlite3.Connection, novela_id: int, capitulo: int) -> dict[int,
 
 
 def evaluar_caso(base: Base, caso: Caso) -> Resultado:
-    con = _copia(base)
-    try:
-        prosa = _textos(con, base.novela_id, CAPITULO)
-        with db.transaccion(con):
-            prosa.update(caso.mutar(con, base) or {})
-            r = puerta.evaluar(con, base.novela_id, CAPITULO, textos=prosa)
-        return Resultado(
-            caso=caso,
-            bloqueantes={c.comprobacion for c in r.bloqueantes},
-            avisos={c.comprobacion for c in r.avisos},
-        )
-    finally:
-        con.close()
+    # La copia se borra al acabar el caso; la conexion se cierra antes, porque en Windows un
+    # fichero abierto no se borra.
+    with tempfile.TemporaryDirectory(prefix="banco-caso-") as carpeta:
+        con = _copia(base, Path(carpeta) / "caso.db")
+        try:
+            prosa = _textos(con, base.novela_id, CAPITULO)
+            with db.transaccion(con):
+                prosa.update(caso.mutar(con, base) or {})
+                r = puerta.evaluar(con, base.novela_id, CAPITULO, textos=prosa)
+        finally:
+            con.close()
+    return Resultado(
+        caso=caso,
+        bloqueantes={c.comprobacion for c in r.bloqueantes},
+        avisos={c.comprobacion for c in r.avisos},
+    )
 
 
 def correr(base: Base | None = None, casos: list[Caso] | None = None) -> Informe:
-    base = base or construir_base()
-    return Informe([evaluar_caso(base, c) for c in (casos if casos is not None else CASOS)])
+    lista = casos if casos is not None else CASOS
+    if base is not None:
+        return Informe([evaluar_caso(base, c) for c in lista])
+    with tempfile.TemporaryDirectory(prefix="banco-") as carpeta:
+        nueva = construir_base(Path(carpeta))
+        return Informe([evaluar_caso(nueva, c) for c in lista])
 
 
 # --- RF3-BAN-02: las mutaciones ------------------------------------------------------------------
@@ -329,7 +350,8 @@ def _dos_lugares_a_la_vez(con: sqlite3.Connection, b: Base) -> None:
 
 
 def _retroceso_temporal(con: sqlite3.Connection, b: Base) -> None:
-    _evento(con, b, (3, 2), 15, 3)
+    # Dia 2, como los ordenes 21 y 22: el unico error es el orden que retrocede.
+    _evento(con, b, (3, 2), 15, 2)
 
 
 def _dia_contra_orden(con: sqlite3.Connection, b: Base) -> None:
@@ -369,11 +391,22 @@ def _deduccion_falsa(con: sqlite3.Connection, b: Base) -> None:
     _usar(con, b, intruso, b.hechos[("Puente", "olor")], (3, 1))
 
 
-def _cifra_solo_en_la_prosa(con: sqlite3.Connection, b: Base) -> dict[int, str]:
-    # La esclusa esta a «doce metros» del puente (hecho del capitulo 1). La prosa de la 3.2 dice
-    # otra cifra y el extractor no registra nada: el caso de «siete de fuera».
-    return {2: "Idris midio el pasillo con la linterna: la esclusa estaba a veinte metros del "
+def _prosa_con_otra_distancia(con: sqlite3.Connection, b: Base, cifra: str) -> dict[int, str]:
+    # La esclusa esta a «doce metros» del puente (hecho del capitulo 1). La prosa de la 3.2 da
+    # otra cifra y el extractor no la registra. Como ya no dice «doce metros», tampoco registra
+    # el uso de ese hecho, que es lo que la demo tenia en la 3.2.
+    con.execute("DELETE FROM hecho_uso WHERE escena_id = ?", (b.escenas[(3, 2)],))
+    return {2: f"Idris midio el pasillo con la linterna: la esclusa estaba a {cifra} metros del "
                "puente, no a los que recordaba. Vaan no dijo nada."}
+
+
+def _cifra_solo_en_la_prosa(con: sqlite3.Connection, b: Base) -> dict[int, str]:
+    return _prosa_con_otra_distancia(con, b, "20")
+
+
+def _cifra_en_letra(con: sqlite3.Connection, b: Base) -> dict[int, str]:
+    # En letra, que es como la escribe la prosa real: «los siete de fuera».
+    return _prosa_con_otra_distancia(con, b, "veinte")
 
 
 def _aritmetica_entre_hechos(con: sqlite3.Connection, b: Base) -> None:
@@ -426,7 +459,7 @@ CASOS: list[Caso] = [
          _dos_lugares_a_la_vez, Esperado(frozenset({"presencia_imposible"}))),
     Caso("C07", "tiempo", "contradiccion",
          "Una escena retrocede en el tiempo sin estar marcada como analepsis",
-         _retroceso_temporal, Esperado(frozenset({"coherencia_temporal", "dia_contra_orden"}))),
+         _retroceso_temporal, Esperado(frozenset({"coherencia_temporal"}))),
     Caso("C08", "tiempo", "contradiccion",
          "Un suceso posterior cae en un dia anterior",
          _dia_contra_orden, Esperado(frozenset({"dia_contra_orden"}))),
@@ -437,9 +470,10 @@ CASOS: list[Caso] = [
                      "el cambio (fila 50)"),
     Caso("C10", "factual", "contradiccion",
          "La prosa da otra cifra de un hecho y el extractor no la registra",
-         _cifra_solo_en_la_prosa, Esperado(),
-         punto_ciego="Una cifra que no llega a hecho no se compara con el canon; como mucho "
-                     "avisa `cifra_sin_hecho` (fila 50)"),
+         _cifra_solo_en_la_prosa, Esperado(avisos=frozenset({"cifra_sin_hecho"})),
+         punto_ciego="Una cifra que no llega a hecho no se compara con el canon; solo avisa "
+                     "`cifra_sin_hecho`, y solo si la escena no tiene ningun hecho de fecha ni "
+                     "de distancia (fila 50)"),
     Caso("C11", "conocimiento", "contradiccion",
          "El extractor toma por deduccion un hecho que el personaje no pudo deducir",
          _deduccion_falsa, Esperado(avisos=frozenset({"deduccion_por_verificar"})),
@@ -455,6 +489,11 @@ CASOS: list[Caso] = [
          _faccion_contra_la_prosa, Esperado(),
          punto_ciego="Un hecho de pertenencia no se compara con la faccion del elenco, que es "
                      "la que usa el conocimiento por faccion (fila 50)"),
+    Caso("C14", "factual", "contradiccion",
+         "Lo mismo que C10, con la cifra en letra",
+         _cifra_en_letra, Esperado(),
+         punto_ciego="`cifra_sin_hecho` solo reconoce digitos: la cifra en letra, que es como "
+                     "la escribe la prosa, ni avisa (fila 50)"),
     Caso("L01", "control", "limpio", "La novela aprobada, sin cambios", _sin_cambios, Esperado()),
     Caso("L02", "control", "limpio", "Un hecho repetido con el valor exacto",
          _reafirmacion, Esperado()),

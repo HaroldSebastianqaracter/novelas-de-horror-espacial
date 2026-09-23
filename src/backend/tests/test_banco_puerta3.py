@@ -17,8 +17,8 @@ from evals import banco_puerta3 as banco
 
 
 @pytest.fixture(scope="module")
-def base() -> banco.Base:
-    return banco.construir_base()
+def base(tmp_path_factory: pytest.TempPathFactory) -> banco.Base:
+    return banco.construir_base(tmp_path_factory.mktemp("banco"))
 
 
 @pytest.mark.parametrize("caso", banco.CASOS, ids=[c.id for c in banco.CASOS])
@@ -57,6 +57,22 @@ def test_las_metricas_salen_de_los_casos(base: banco.Base) -> None:
     assert informe.falsos_positivos == 1.0
     assert informe.por_subtipo() == {"x": (1, 2)}
     assert "Recall sobre las contradicciones: 50%" in informe.tabla()
+    con_aviso = banco.Informe([banco.Resultado(a, set(), {"cifra_sin_hecho"})] * 2)
+    assert con_aviso.avisos() == {"cifra_sin_hecho": 2}
+    assert "- cifra_sin_hecho: 2" in con_aviso.tabla()
+
+
+def test_el_comando_sale_con_1_si_un_caso_se_desvia(
+    base: banco.Base, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import banco_contraejemplos
+
+    c01 = next(c for c in banco.CASOS if c.id == "C01")
+    desviado = banco.Caso("X", c01.subtipo, c01.verdad, "", c01.mutar, banco.Esperado())
+    correr = banco.correr
+    monkeypatch.setattr(banco, "correr", lambda: correr(base, [desviado]))
+    assert banco_contraejemplos.main() == 1
+    assert "DESVIADO X" in capsys.readouterr().out
 
 
 def test_el_comando_imprime_la_tabla_y_sale_limpio() -> None:

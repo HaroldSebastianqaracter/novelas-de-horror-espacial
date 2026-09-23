@@ -25,5 +25,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
+    # La consola de Windows no es UTF-8 y la tabla lleva tildes y rayas.
+    reconfigurar = getattr(sys.stdout, "reconfigure", None)
+    if callable(reconfigurar):
+        reconfigurar(encoding="utf-8")
     sys.exit(main())

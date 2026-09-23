@@ -408,19 +408,20 @@ La idea de medirlo metiendo errores a propósito viene de FlawedFictions (arXiv 
 - un identificador;
 - un subtipo: factual, personaje, conocimiento, objeto, espacio, tiempo, estado, aritmética, pertenencia o control;
 - la verdad: contradicción o caso limpio;
-- una mutación del grafo del último capítulo;
+- una mutación del grafo de la novela aprobada: puede caer en un capítulo anterior, como una muerte o una presencia, pero la contradicción aflora siempre en el último, que es el que la puerta evalúa;
 - lo que la puerta hace hoy: los bloqueantes que salen y los avisos que tienen que salir.
 
 La mutación deja el grafo como lo habría dejado el extractor ante una prosa con ese error. Si el extractor no lo habría registrado, como una cifra dicha solo en un diálogo, lo deja sin tocar. Una contradicción que hoy no para, o un caso limpio que para, lleva su **punto ciego**: por qué pasa, con su fila del plan de verificación. Algunos casos van por pares, con el mismo grafo y distinta verdad, para dejar a la vista lo que la puerta no puede distinguir: la presencia inflada frente a la presencia real fuera del reparto, y el muerto que vuelve frente al reparto desfasado.
 
-**RF3-BAN-03 — La medida.** El **recall** es la parte de las contradicciones que paran la novela. Los **falsos positivos** son la parte de los casos limpios que la paran. Las dos se dan también por subtipo, y los avisos se cuentan aparte. La línea base del 23 de septiembre (13 contradicciones y 8 limpios) da un recall del 54 % y un 25 % de falsos positivos.
+**RF3-BAN-03 — La medida.** El **recall** es la parte de las contradicciones que paran la novela. Los **falsos positivos** son la parte de los casos limpios que la paran. Las dos se dan también por subtipo. Los avisos no paran, así que se cuentan aparte: en cuántos casos sale cada uno. La línea base del 23 de septiembre (14 contradicciones y 8 limpios) da un recall del 50 % y un 25 % de falsos positivos.
 
 **RF3-BAN-04 — Regresión en los dos sentidos.** Un test fija lo que la puerta hace hoy con cada caso. Si un cambio hace que deje de detectar una contradicción, o que empiece a parar un caso limpio, el test falla. Entonces el banco se actualiza a conciencia y deja su entrada en el registro de iteraciones. Mejorar la puerta también obliga a tocar el banco, y así la mejora queda medida.
 
 **RF3-BAN-05 — El informe.** `banco_contraejemplos.py`, desde `src/backend`, imprime:
 - la tabla de casos, con el subtipo, la verdad, lo esperado, los bloqueantes y avisos que salen y si el caso es conforme;
 - las dos métricas;
-- el desglose por subtipo.
+- el desglose por subtipo;
+- el recuento de avisos.
 
 Sale con código 1 si algún caso se desvía de lo esperado. Solo trabaja sobre bases temporales.
 
