@@ -142,18 +142,23 @@ def test_un_valor_corto_sin_cifras_no_se_busca_y_una_cifra_si() -> None:
     assert con.execute("SELECT cita FROM hecho_uso").fetchone()[0] == "12"
 
 
-def test_un_valor_ya_sustituido_no_se_busca_como_mencion() -> None:
+@pytest.mark.parametrize(("sustituido_en", "menciones"), [((1, 2), 0), ((2, 2), 1)])
+def test_un_valor_solo_se_busca_mientras_no_este_sustituido(
+    sustituido_en: tuple[int, int], menciones: int
+) -> None:
+    """Repetir «12 metros» en la escena 2.1: despues de la sustitucion no es un uso; antes de
+    ella, cuando todavia era el valor vigente, si."""
     con, _ = nueva_bd()
     g = fabrica.novela_minima(con)
     viejo = _hecho_literal(con, g, (1, 1), "12 metros", categoria="distancia")
     insertar_hecho(
-        con, novela_id=g.novela_id, escena_id=g.escenas[(1, 2)], sujeto_tipo="mundo",
+        con, novela_id=g.novela_id, escena_id=g.escenas[sustituido_en], sujeto_tipo="mundo",
         sujeto_id=None, sujeto_nombre="Estacion Tesalia", atributo="dato 12 metros",
         valor="15 metros", categoria="distancia", cita=None, supersede_a=viejo,
     )
     assert s_extraccion.registrar_menciones(
         con, g.novela_id, {1: g.escenas[(2, 1)]}, {1: "Antes estaba a 12 metros."}
-    ) == 0
+    ) == menciones
 
 
 def test_revertir_un_capitulo_borra_sus_usos() -> None:
@@ -504,6 +509,24 @@ def test_la_integridad_ve_una_version_con_titulo_o_capitulos_desfasados() -> Non
     # Una escaleta rehecha con un capitulo menos: la version conserva uno que ya no existe.
     con.execute("DELETE FROM capitulo WHERE novela_id = ? AND numero = 3", (novela_id,))
     assert "version_desfasada" in _nombres(verificar_integridad(con))
+
+
+def test_todo_tipo_de_evento_que_se_emite_esta_registrado() -> None:
+    """Revalidacion del bloque 3: `version_publicada` falto en TIPOS_EVENTO y nada lo vio."""
+    import re
+
+    from compartido.tipos import TIPOS_EVENTO
+
+    raiz = Path(__file__).resolve().parents[1]
+    llamada = re.compile(r'emitir_(?:evento|traza)\(\s*(?:[\w.]+\s*,\s*){1,2}"([a-z_]+)"')
+    emitidos = {
+        tipo
+        for fichero in raiz.rglob("*.py")
+        if ".venv" not in fichero.parts and "tests" not in fichero.parts
+        for tipo in llamada.findall(fichero.read_text(encoding="utf-8"))
+    }
+    assert "version_publicada" in emitidos
+    assert emitidos - set(TIPOS_EVENTO) == set()
 
 
 def test_relanzar_y_completar_con_el_mismo_texto_no_crea_version() -> None:

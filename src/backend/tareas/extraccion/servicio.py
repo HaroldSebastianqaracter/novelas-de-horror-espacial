@@ -462,12 +462,14 @@ def aplicar(
 #: distancia o una cifra. «Castano corto» o «alta» aparecen en cualquier descripcion, y buscarlos
 #: llenaria la tabla de usos falsos.
 _SQL_BUSCABLES = """
-SELECT h.id, h.valor, o.ordinal
+SELECT h.id, h.valor, o.ordinal,
+       (SELECT MIN(os.ordinal) FROM hecho_vigente s
+        JOIN escena_ordinal os ON os.escena_id = s.escena_id
+        WHERE s.supersede_a = h.id) AS sustituido_en
 FROM hecho_vigente h
 JOIN escena_ordinal o ON o.escena_id = h.escena_id
 WHERE h.novela_id = ?
   AND (h.categoria IN ('nombre', 'fecha', 'distancia') OR h.valor GLOB '*[0-9]*')
-  AND NOT EXISTS (SELECT 1 FROM hecho_vigente s WHERE s.supersede_a = h.id)
 """
 _LETRAS_MINIMAS = 3
 
@@ -486,11 +488,15 @@ def registrar_menciones(
 
     Es el segundo metodo que mira el texto (regla 3 de validators.md): la reafirmacion depende
     de que el extractor repita el hecho, y esto no. Solo cuentan los hechos establecidos en una
-    escena ANTERIOR: la propia no es un uso, y una posterior todavia no existia. Devuelve cuantos
-    usos registro.
+    escena ANTERIOR: la propia no es un uso, y una posterior todavia no existia. Y un hecho solo
+    mientras no este sustituido en ese punto de la historia: repetir un valor viejo despues de
+    la sustitucion no es usarlo. Devuelve cuantos usos registro.
     """
     candidatos = [
-        (int(f["id"]), str(f["valor"]), int(f["ordinal"]))
+        (
+            int(f["id"]), str(f["valor"]), int(f["ordinal"]),
+            int(f["sustituido_en"]) if f["sustituido_en"] is not None else None,
+        )
         for f in con.execute(_SQL_BUSCABLES, (novela_id,)).fetchall()
         if _buscable(str(f["valor"]))
     ]
@@ -505,8 +511,11 @@ def registrar_menciones(
             "SELECT ordinal FROM escena_ordinal WHERE escena_id = ?", (eid,)
         ).fetchone()[0])
         presentes = palabras(texto)
-        for hid, valor, ordinal_hecho in candidatos:
-            if ordinal_hecho < ordinal and aparece_en(presentes, valor):
+        for hid, valor, ordinal_hecho, sustituido_en in candidatos:
+            vigente_aqui = ordinal_hecho < ordinal and (
+                sustituido_en is None or ordinal < sustituido_en
+            )
+            if vigente_aqui and aparece_en(presentes, valor):
                 cur = con.execute(
                     "INSERT OR IGNORE INTO hecho_uso (novela_id, hecho_id, escena_id, via, cita) "
                     "VALUES (?, ?, ?, 'menciona', ?)",
