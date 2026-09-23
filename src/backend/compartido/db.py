@@ -93,11 +93,15 @@ def _activar_wal(con: sqlite3.Connection) -> None:
             time.sleep(0.05)
 
 
-def conectar(ruta: Path, *, solo_lectura: bool = False) -> sqlite3.Connection:
+def conectar(
+    ruta: Path, *, solo_lectura: bool = False, entre_hilos: bool = False
+) -> sqlite3.Connection:
     """Abre la base de datos con los PRAGMAs de la spec.
 
     `solo_lectura=True` es lo que usa la API: cualquier escritura falla en el motor, no por
-    disciplina del programador.
+    disciplina del programador. `entre_hilos=True` deja abrir la conexion en un hilo y usarla o
+    cerrarla en otro, como hace el threadpool de FastAPI con una dependencia (RF2-API-06); quien
+    la pide responde de que no la usen dos hilos a la vez.
     """
     ruta = Path(ruta)
     if solo_lectura:
@@ -106,12 +110,13 @@ def conectar(ruta: Path, *, solo_lectura: bool = False) -> sqlite3.Connection:
         uri = f"file:{ruta.as_posix()}?mode=ro"
         con = sqlite3.connect(
             uri, uri=True, timeout=BUSY_TIMEOUT_MS / 1000, isolation_level=None,
-            factory=Conexion,
+            factory=Conexion, check_same_thread=not entre_hilos,
         )
     else:
         ruta.parent.mkdir(parents=True, exist_ok=True)
         con = sqlite3.connect(
-            ruta, timeout=BUSY_TIMEOUT_MS / 1000, isolation_level=None, factory=Conexion
+            ruta, timeout=BUSY_TIMEOUT_MS / 1000, isolation_level=None, factory=Conexion,
+            check_same_thread=not entre_hilos,
         )
 
     con.row_factory = sqlite3.Row

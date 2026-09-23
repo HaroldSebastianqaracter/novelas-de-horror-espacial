@@ -290,3 +290,25 @@ def test_cada_entidad_del_canon_sale_con_su_esquema(cliente) -> None:
         assert all(f["entidad"] == entidad for f in filas)
     amenaza = c.get(f"/novelas/{novela_id}/canon/amenaza").json()[0]
     assert amenaza["reglas"] and "capacidad" in amenaza["reglas"][0]
+
+
+# --- RF2-API-06: la conexion de una peticion puede abrirse y cerrarse en hilos distintos ----------
+
+
+@pytest.mark.parametrize("dependencia", [main.leer, main.escribir_intencion])
+def test_la_conexion_de_una_peticion_se_puede_cerrar_desde_otro_hilo(
+    cliente: tuple[TestClient, Path], dependencia: object,
+) -> None:
+    """FastAPI corre las dependencias sincronas en su threadpool: la conexion se abre en un
+    hilo y se usa o se cierra en otro. Con varias consultas a la vez la API daba 500."""
+    import threading
+
+    tc, _ = cliente
+    peticion = type("Peticion", (), {"app": tc.app})()
+    generador = dependencia(peticion)  # type: ignore[operator]
+    abierta: dict[str, sqlite3.Connection] = {}
+    hilo = threading.Thread(target=lambda: abierta.setdefault("con", next(generador)))
+    hilo.start()
+    hilo.join()
+    abierta["con"].execute("SELECT 1").fetchone()
+    generador.close()

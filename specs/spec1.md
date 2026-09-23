@@ -216,6 +216,8 @@ src/backend/
 
 **RF-API-02** La API **solo lee** el grafo, con una excepción: `POST` de intenciones inserta una fila en `intencion`. Ninguna otra ruta escribe.
 
+> Ampliado por spec2, RF2-API-06: la conexión de cada petición puede abrirse y cerrarse en hilos distintos.
+
 > Ampliado por spec2, RF2-PROC-03: la API puede crear el esquema al arrancar, pero no migra.
 
 **RF-API-03** Endpoints de la v1:

@@ -509,8 +509,12 @@ app = FastAPI(
 
 
 def leer(request: Request) -> Iterator[sqlite3.Connection]:
-    """Conexion de SOLO LECTURA. El motor rechaza cualquier escritura por aqui."""
-    con = db.conectar(request.app.state.cfg.db_path, solo_lectura=True)
+    """Conexion de SOLO LECTURA. El motor rechaza cualquier escritura por aqui.
+
+    Una por peticion, y entre hilos: FastAPI puede crearla en un hilo de su threadpool y
+    cerrarla en otro (RF2-API-06).
+    """
+    con = db.conectar(request.app.state.cfg.db_path, solo_lectura=True, entre_hilos=True)
     try:
         yield con
     finally:
@@ -519,7 +523,7 @@ def leer(request: Request) -> Iterator[sqlite3.Connection]:
 
 def escribir_intencion(request: Request) -> Iterator[sqlite3.Connection]:
     """La unica excepcion a la regla de solo lectura (RF-API-02)."""
-    con = db.conectar(request.app.state.cfg.db_path)
+    con = db.conectar(request.app.state.cfg.db_path, entre_hilos=True)
     try:
         yield con
     finally:

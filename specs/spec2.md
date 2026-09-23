@@ -252,6 +252,10 @@ Hallazgo 19 (seis endpoints devuelven `dict` sin esquema) y los errores de pyrig
 
 **RF2-API-04** *Amplía RF-API-04.* La API valida la forma de cada payload con un modelo por tipo de intención (`crear_novela`, `relanzar`, `resolver_parada`). Un payload mal formado, como un `desde_capitulo` que no es un entero o una `accion` fuera de la lista, es `422` con el campo y el motivo, nunca un `500`.
 
+**RF2-API-06** *Amplía RF-API-02.* Cada petición abre su propia conexión y la cierra al terminar, y esa conexión **puede abrirse, usarse y cerrarse en hilos distintos**: FastAPI corre las dependencias síncronas (`leer`, `escribir_intencion`) en su threadpool, y la creación y el cierre de una misma dependencia pueden caer en hilos diferentes. La conexión de la API se abre con `check_same_thread=False`. Nunca se comparte entre peticiones, así que no hay dos hilos usándola a la vez.
+
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** La encontró el frontend: con varias consultas a la vez la API respondía 500 a ratos (`SQLite objects created in a thread can only be used in that same thread`). Se descartó pasar las dependencias a `async def`, que movería las consultas síncronas de SQLite al bucle de eventos y bloquearía el resto de peticiones mientras corren. El worker no cambia: sus conexiones siguen atadas a su hilo.
+
 **Tipos.** `pyright` en modo estricto pasa en cero sobre `src/backend` sin los tests, con el entorno virtual del proyecto (`venvPath`/`venv` en `pyproject.toml`; sin eso pyright no veía pydantic ni FastAPI y todo modelo salía «sin tipo»). El JSON leído de la base se tipa con dos ayudas compartidas, `como_dict` y `como_lista`. El comando único de verificación (`pytest`, `ruff check`, `pyright`) está en `src/backend/README.md`.
 
 > **Decisión del plan, mantenida.** Sin CI: el proyecto no tiene ninguna y montarla es otra decisión. Los tests quedan fuera del modo estricto: comprueban comportamiento, y tiparlos a fondo no añade garantías sobre el código que ejercitan.
