@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -249,6 +250,15 @@ def test_la_atribucion_cruzada_dentro_de_un_solo_segmento_contradice() -> None:
     vigente = "la capitana Vela lleva el traje rojo y el ingeniero Soto lleva el traje gris"
     assert not s_extraccion._parte_de_un_compuesto(vigente, "la capitana Vela; lleva el traje gris")
     assert s_extraccion._parte_de_un_compuesto(vigente, "la capitana Vela lleva el traje rojo")
+
+
+def test_la_skill_distingue_un_uso_de_un_calculo_propio() -> None:
+    """RF3-PAS-07, parada 9: una cuenta propia con una cifra parecida no usa el hecho."""
+    skill = (Path(__file__).resolve().parents[3] / ".claude" / "skills" / "extraccion"
+             / "SKILL.md").read_text(encoding="utf-8")
+    assert "tal como consta" in skill
+    assert "no es un uso" in skill
+    assert "`dedujo`" in skill
 
 
 def test_partir_el_compuesto_con_supersede_a_no_contradice() -> None:
