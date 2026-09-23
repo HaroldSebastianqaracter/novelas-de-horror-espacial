@@ -115,7 +115,11 @@ Una funcionalidad no importa del interior de otra. Lo común baja a `compartido/
 
 **RF-FE-DAT-01 — El `GET` es la verdad.** Toda pantalla se pinta desde consultas: `/novelas`, `/novelas/{id}/ejecucion`, `/estructura`, `/paradas` y `/capitulos/{n}`. No hay estado de cliente que duplique datos del servidor. El estado propio del cliente (qué diálogo está abierto, el borrador del brief) se queda en su componente.
 
-**RF-FE-DAT-02 — El SSE invalida, no rellena.** Con una novela abierta, el frontend escucha `/novelas/{id}/eventos`. Cada evento invalida la ejecución y, si el evento lo indica, la estructura o las paradas. Ningún evento escribe datos en la caché.
+**RF-FE-DAT-02 — El SSE invalida, no rellena.** Con una novela abierta, el frontend escucha `/novelas/{id}/eventos`. **Cada evento invalida todas las consultas de esa novela** (ejecución, estructura, paradas y capítulos), agrupando los que lleguen en menos de medio segundo. Ningún evento escribe datos en la caché. El stream se lee con `fetch` y un lector propio de `text/event-stream`, que manda `Last-Event-ID` al reconectar.
+
+> **Decisión de la spec.** Se descartaron dos alternativas.
+> - **`EventSource`:** la API emite cada evento con su nombre (`event: fase_cambiada`), y `EventSource` solo entrega los eventos con nombre a quien se ha suscrito a ese nombre concreto. Habría que mantener en el cliente la lista de los veinte tipos que emite el backend, y uno nuevo se perdería en silencio.
+> - **Invalidar por tipo de evento:** tiene el mismo problema de la lista. Reconsultar las cuatro cosas de una novela cada vez que pasa algo es barato: los eventos llegan cada varios segundos como mucho.
 
 **RF-FE-DAT-03 — Sondeo de respaldo.** La ejecución de una novela activa (`planificando`, `escaletando` o `generando`) se reconsulta cada 5 s aunque no llegue ningún evento. El tablero general se reconsulta cada 15 s.
 
@@ -181,14 +185,14 @@ Mientras se arrastra, las zonas sin intención se ven bloqueadas. Al soltar, la 
 
 Con `error`, muestra `ultimo_error` y ofrece `arrancar` para reintentar.
 
-**RF-FE-NOV-02 — Planificación.** Mientras no hay capítulos en `/estructura`, se muestra una barra de pasos: arquitecto → mundo → elenco → estructura → puerta 1 → escaleta → puerta 2. El paso activo sale de `ejecucion.fase`.
+**RF-FE-NOV-02 — Planificación.** Mientras no hay capítulos en `/estructura`, o la fase es de planificación, se muestra una barra de pasos: arquitecto → mundo → elenco → estructura → puerta 1 → escaleta → puerta 2. El paso activo sale de `ejecucion.fase`. Si la ejecución está detenida, parada o en error dentro de un paso, ese paso lo dice.
 
 **RF-FE-NOV-03 — Capítulos.** Con estructura, los capítulos se reparten en tres columnas:
 
 | Columna | Regla |
 | --- | --- |
-| Pendiente | Capítulo sin completar que no es el `capitulo_actual` |
-| En curso | `capitulo_actual`, solo con la ejecución activa |
+| Pendiente | Capítulo `planificado` que no es el `capitulo_actual` |
+| En curso | `capitulo_actual`, si no está completado. Con la ejecución detenida, parada o en error, la tarjeta dice en qué subfase se quedó. Con la fase `puerta_5`, una tarjeta de «revisión final» de la novela entera |
 | Cerrado | `estado = completado` |
 
 La tarjeta en curso muestra la subfase (paquete → redacción → extracción → puerta 3 → puerta 4) desde `ejecucion.fase` y el intento. Un capítulo no existe para el lector hasta que pasa la puerta 4 (RF-PIPE-08), así que la tarjeta en curso no enlaza a texto. Las tarjetas cerradas enlazan al lector. Las tarjetas de capítulo no se arrastran.

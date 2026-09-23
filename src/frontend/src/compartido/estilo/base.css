@@ -12,7 +12,7 @@ body {
   line-height: var(--interlineado-base);
 }
 
-h1, h2, h3 { margin: 0; font-weight: var(--peso-fuerte); letter-spacing: var(--tracking-titulo); }
+h1, h2, h3, h4 { margin: 0; font-weight: var(--peso-fuerte); letter-spacing: var(--tracking-titulo); }
 h1 { font-size: var(--texto-xl); }
 h2 { font-size: var(--texto-lg); }
 h3 { font-size: var(--texto-md); }

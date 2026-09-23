@@ -3,7 +3,7 @@
  * contrato rompe la compilación aquí antes que en una pantalla (RF-FE-API-03).
  * Títulos inventados; ningún nombre de persona real.
  */
-import type { Ejecucion, NovelaResumen } from "../tipos";
+import type { Capitulo, Ejecucion, NovelaDetalle, NovelaResumen } from "../tipos";
 
 const hace = (minutos: number) => new Date(Date.now() - minutos * 60_000).toISOString();
 
@@ -25,12 +25,73 @@ export const ejecuciones: Record<number, Ejecucion> = {
   6: { novela_id: 6, estado: "completada_con_avisos", fase: null, capitulo_actual: null, intento_actual: 1, capitulos_completados: 10, total_capitulos: 10, parada_abierta_id: null, ultimo_error: null, actualizado_en: hace(19000) },
 };
 
+const OBJETIVOS = [
+  "La tripulación descubre que la baliza de socorro emite desde dentro de la nave.",
+  "Revisar la bodega once sin despertar a lo que respira en el conducto.",
+  "Restablecer el soporte vital antes de que se agote el turno de guardia.",
+  "Convencer a la capitana de que el registro del ordenador miente.",
+  "Sellar el módulo de cultivos con alguien todavía dentro.",
+  "Encontrar el traje que falta en el inventario.",
+];
+
+function capitulos(total: number, completados: number): Capitulo[] {
+  return Array.from({ length: total }, (_, i) => ({
+    numero: i + 1,
+    estado: i < completados ? "completado" : "planificado",
+    objetivo: OBJETIVOS[i % OBJETIVOS.length] ?? null,
+    resumen: null,
+    escenas: [],
+  }));
+}
+
+/** Capítulos por novela: la 1 todavía no tiene estructura. */
+export const capitulosDe: Record<number, Capitulo[]> = {
+  1: [],
+  2: capitulos(8, 3),
+  3: capitulos(10, 5),
+  4: capitulos(6, 2),
+  5: capitulos(10, 4),
+  6: capitulos(10, 10),
+};
+
+const RESTRICCIONES: Record<string, string> = {
+  longitud_objetivo_palabras: "12500",
+  longitud_capitulo_palabras: "1000-1500",
+  capitulos: "10",
+  publico: "Adulto; terror con tensión, sin violencia gráfica",
+  pov_por_defecto: "tercera_limitada",
+  tiempo_verbal: "pasado",
+};
+
+export function detalleDe(id: number): NovelaDetalle | undefined {
+  const resumen = novelas.find((n) => n.id === id);
+  if (!resumen) return undefined;
+  const planificada = (capitulosDe[id]?.length ?? 0) > 0;
+  return {
+    novela: {
+      id,
+      titulo: resumen.titulo,
+      genero: resumen.genero,
+      creado_en: resumen.creado_en,
+      subgenero_dominante: resumen.subgenero_dominante ?? null,
+      logline: planificada
+        ? "Una tripulación de carguero descubre que la señal que persigue no viene de fuera, sino de su propia bodega."
+        : null,
+      premisa: planificada ? "El miedo a lo que se lleva dentro, puesto en una nave que no se puede abandonar." : null,
+    },
+    restricciones: RESTRICCIONES,
+    estilo: null,
+  };
+}
+
 const novelasIniciales = structuredClone(novelas);
 const ejecucionesIniciales = structuredClone(ejecuciones);
+const capitulosIniciales = structuredClone(capitulosDe);
 
 /** Deshace lo que las intenciones simuladas cambiaron. Los tests lo llaman entre caso y caso. */
 export function restaurarDatos() {
   novelas.splice(0, novelas.length, ...structuredClone(novelasIniciales));
   for (const id of Object.keys(ejecuciones)) delete ejecuciones[Number(id)];
   Object.assign(ejecuciones, structuredClone(ejecucionesIniciales));
+  Object.assign(capitulosDe, structuredClone(capitulosIniciales));
 }

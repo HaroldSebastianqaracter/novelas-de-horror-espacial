@@ -35,3 +35,16 @@ export const consultaEjecucion = (novelaId: number) =>
       return estado && ESTADOS_ACTIVOS.has(estado) ? 5_000 : false;
     },
   });
+
+export const consultaNovela = (novelaId: number) =>
+  queryOptions({
+    queryKey: claves.novela(novelaId),
+    queryFn: () => leer(api.GET("/novelas/{novela_id}", { params: { path: { novela_id: novelaId } } })),
+  });
+
+export const consultaEstructura = (novelaId: number) =>
+  queryOptions({
+    queryKey: claves.estructura(novelaId),
+    queryFn: () =>
+      leer(api.GET("/novelas/{novela_id}/estructura", { params: { path: { novela_id: novelaId } } })),
+  });
