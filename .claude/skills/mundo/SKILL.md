@@ -15,7 +15,7 @@ Terminas cuando **toda regla que la trama vaya a usar está escrita**, incluidos
 
 **Los sistemas tecnológicos**, con `capacidades`, `costes`, `limites` y `acceso`. Los tres primeros son obligatorios y no admiten vaguedad. Un sistema **duro** es el que el lector entiende y que por eso puede resolver conflictos; uno **blando** solo genera asombro y no puede resolver nada. Es la entidad que más agujeros de guion produce cuando está infraespecificada.
 
-**Los lugares**, al menos tres, cada uno con su descripción canónica y los sistemas críticos de los que depende. Piensa en la geografía como algo que el lector tiene que aprender: una nave hereda todas las técnicas de la casa encantada, con la diferencia de que no hay puerta al exterior.
+**Los lugares**, al menos tres, cada uno con su descripción canónica y los sistemas críticos de los que depende. Si un lugar está dentro de otro de tu lista (una sala dentro de un anillo, una cabina dentro de un módulo), dilo en `dentro_de` con el nombre exacto del contenedor: para la continuidad, un objeto que pasa del anillo a una sala del propio anillo no se ha movido. Piensa en la geografía como algo que el lector tiene que aprender: una nave hereda todas las técnicas de la casa encantada, con la diferencia de que no hay puerta al exterior.
 
 **Las facciones**: grupos con objetivos y recursos propios, distintos de los de cualquiera de sus miembros. La tripulación es una; la corporación que los mandó, otra.
 

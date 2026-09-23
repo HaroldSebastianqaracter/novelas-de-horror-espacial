@@ -77,6 +77,7 @@ classDiagram
     +tipo
     +descripcion
     +sistemasCriticos
+    +dentroDe
   }
   class LineaDeTiempo {
     +origen
@@ -237,6 +238,7 @@ classDiagram
 
   Mundo "1" --> "*" SistemaTecnologico : rigeCon
   Mundo "1" --> "*" Lugar : contiene
+  Lugar "0..1" --> "*" Lugar : incluye
   LineaDeTiempo "1" --> "*" Evento : registra
   Evento "*" --> "0..1" Escena : dramatizadoEn
 
@@ -318,7 +320,9 @@ Si la novela es un regalo, fija también la **dedicatoria** de la portada.
 **SistemaTecnologico** — El conjunto explícito de reglas de la tecnología de la obra: qué permite, qué cuesta usarla, dónde están sus límites y quién tiene acceso. `dureza` distingue el sistema **duro** (entendido por el lector y por tanto utilizable para resolver conflictos) del **blando** (solo genera asombro y no puede resolver nada). Es la entidad que más agujeros de guion produce cuando está infraespecificada: si una regla no está escrita, la fase de redacción la improvisa de forma distinta cada vez.
 `nombre` · `capacidades` · `costes` · `limites` · `acceso` · `dureza`
 
-**Lugar** — El escenario concreto de una escena: una cubierta, un módulo, una esclusa, una superficie planetaria. Tiene descripción canónica. Quién o qué está allí en un momento dado **se deriva** del reparto de la última escena ocurrida ahí; no es un atributo que se sobrescriba.
+**Lugar** — El escenario concreto de una escena: una cubierta, un módulo, una esclusa, una superficie planetaria. Tiene descripción canónica. Quién o qué está allí en un momento dado **se deriva** del reparto de la última escena ocurrida ahí; no es un atributo que se sobrescriba. Un lugar puede estar **dentro de** otro (la sala de lechos dentro del anillo de habitación); para la continuidad, un lugar y los que contiene son el mismo sitio.
+
+> **Decisión entrevistada, 23 de septiembre de 2026.** La primera pasada con Claude Code real paró por un objeto «movido sin traslado» del anillo de habitación a una sala que está dentro del anillo. Se añade la relación `dentroDe` (RF2-PER-13 y RF2-PIPE-26 de spec2). Se descartó deducirla del nombre de los lugares, que es frágil.
 `nombre` · `tipo` · `descripcion` · `sistemasCriticos`
 
 **EstiloNarrativo** — Cómo suena la novela al leerla: registro, ritmo de prosa, densidad sensorial, distancia psíquica por defecto, tics prohibidos y convenciones de formato. Se define una vez para toda la obra y se mantiene constante en cada escena, sin importar quién la haya escrito.

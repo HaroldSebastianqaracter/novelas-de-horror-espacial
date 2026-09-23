@@ -133,7 +133,7 @@ def test_cerrar_los_hilos_en_el_orden_en_que_se_abrieron_es_aviso(
     }
 
 
-# --- Escritura: columnas comprobadas y NULL explicito ---------------------------------------------
+# --- Escritura: columnas comprobadas y NULL explicito --------------------------------------------
 
 
 def test_insertar_una_columna_desconocida_es_un_error_antes_de_llegar_a_sqlite(
@@ -177,7 +177,7 @@ def test_un_evento_puede_llevar_en_su_payload_una_clave_tipo(
     assert json.loads(fila["payload"]) == {"tipo": "continuidad", "novela_id": 99}
 
 
-# --- RF2-PIPE-20: un resumen largo se recorta, no tira la extraccion ------------------------------
+# --- RF2-PIPE-20: un resumen largo se recorta, no tira la extraccion -----------------------------
 
 
 def test_un_resumen_largo_se_recorta_por_la_ultima_frase_completa() -> None:
@@ -213,3 +213,31 @@ def test_una_extraccion_con_el_resumen_largo_entra_recortada_y_la_traza_lo_dice(
         "SELECT payload FROM traza_evento WHERE tipo = 'resumen_recortado'"
     )]
     assert eventos and eventos[0]["palabras"] == {"resumen": 210}
+
+
+# --- RF2-PER-13: el mundo declara que lugar esta dentro de cual ----------------------------------
+
+
+def test_el_mundo_rechaza_contenedores_desconocidos_y_ciclos() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    from compartido.puerto import demo
+    from tareas.mundo.esquemas import SalidaMundo
+
+    base = demo.mundo("", "mundo")
+    bien = dict(base, lugares=[dict(base["lugares"][0]),
+                               dict(base["lugares"][1], dentro_de=base["lugares"][0]["nombre"]),
+                               dict(base["lugares"][2])])
+    assert SalidaMundo.model_validate(bien).lugares[1].dentro_de
+
+    desconocido = dict(base, lugares=[dict(base["lugares"][0], dentro_de="Otra estacion"),
+                                      *base["lugares"][1:]])
+    with pytest.raises(ValidationError, match="no existe"):
+        SalidaMundo.model_validate(desconocido)
+
+    a, b = base["lugares"][0]["nombre"], base["lugares"][1]["nombre"]
+    ciclo = dict(base, lugares=[dict(base["lugares"][0], dentro_de=b),
+                                dict(base["lugares"][1], dentro_de=a), base["lugares"][2]])
+    with pytest.raises(ValidationError, match="ciclo"):
+        SalidaMundo.model_validate(ciclo)

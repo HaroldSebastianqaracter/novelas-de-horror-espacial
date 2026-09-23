@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 
-from compartido.grafo import Resolvedor, insertar, lectura
+from compartido.grafo import Resolvedor, actualizar, insertar, lectura
 
 from .esquemas import SalidaMundo
 
@@ -85,6 +85,14 @@ def aplicar(con: sqlite3.Connection, novela_id: int, salida: SalidaMundo) -> Non
             tipo=lugar.tipo, descripcion=lugar.descripcion, sistemas_criticos=criticos,
         )
         resolvedor.registrar("lugar", lugar.nombre, lid)
+
+    # Los contenedores, cuando ya existen todos los lugares (RF2-PER-13).
+    for lugar in salida.lugares:
+        if lugar.dentro_de:
+            hijo = resolvedor.id_de("lugar", lugar.nombre)
+            if hijo is not None:
+                actualizar(con, "lugar", hijo,
+                           dentro_de_id=resolvedor.id_de("lugar", lugar.dentro_de))
 
     for f in salida.facciones:
         fid = insertar(

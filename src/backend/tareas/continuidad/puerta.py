@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
+from collections.abc import Callable
 from typing import Any
 
 from compartido.grafo import lectura, normalizar
@@ -144,7 +145,7 @@ WHERE e.novela_id = ? AND c.numero = ?
 # cronologia interna, y dos sucesos con el mismo ordinal si son a la vez.
 _SQL_UBICUIDAD = """
 SELECT p.nombre AS personaje, ev1.fecha_interna, ev1.orden_interno,
-       l1.nombre AS lugar_a, l2.nombre AS lugar_b,
+       l1.nombre AS lugar_a, l2.nombre AS lugar_b, l1.id AS lugar_a_id, l2.id AS lugar_b_id,
        e1.id AS escena_a, e2.id AS escena_b, c1.numero AS capitulo
 FROM escena_personaje sp1
 JOIN escena_personaje sp2 ON sp2.personaje_id = sp1.personaje_id
@@ -167,7 +168,8 @@ WHERE e1.novela_id = ? AND c1.numero = ?
 # --- 5. Objeto sin traslado ----------------------------------------------------------------
 _SQL_OBJETO = """
 SELECT o.nombre AS objeto, l.nombre AS lugar_escena, lu.nombre AS ultima_ubicacion,
-       e.id AS escena_id, c.numero AS capitulo
+       e.id AS escena_id, c.numero AS capitulo, l.id AS lugar_escena_id,
+       lu.id AS ultima_ubicacion_id
 FROM escena_objeto eo
 JOIN objeto o    ON o.id = eo.objeto_id
 JOIN escena e    ON e.id = eo.escena_id
@@ -219,6 +221,29 @@ WHERE en.novela_id = ? AND c.numero = ? AND en.parada_id IS NULL
 """
 
 
+def _mismo_sitio(con: sqlite3.Connection, novela_id: int) -> Callable[[int, int], bool]:
+    """Dos lugares son el mismo sitio si son el mismo o uno contiene al otro (RF2-PIPE-26)."""
+    padre = {
+        int(f["id"]): (int(f["dentro_de_id"]) if f["dentro_de_id"] is not None else None)
+        for f in con.execute(
+            "SELECT id, dentro_de_id FROM lugar WHERE novela_id = ?", (novela_id,)
+        )
+    }
+
+    def contenedores(lugar: int) -> set[int]:
+        vistos = {lugar}
+        actual = padre.get(lugar)
+        while actual is not None and actual not in vistos:
+            vistos.add(actual)
+            actual = padre.get(actual)
+        return vistos
+
+    def mismo(a: int, b: int) -> bool:
+        return a in contenedores(b) or b in contenedores(a)
+
+    return mismo
+
+
 def evaluar(
     con: sqlite3.Connection,
     novela_id: int,
@@ -235,6 +260,7 @@ def evaluar(
     """
     conflictos: list[Conflicto] = []
     p = (novela_id, capitulo)
+    mismo_sitio = _mismo_sitio(con, novela_id)
 
     for f in _filas(con, _SQL_CONTRADICCION, p):
         conflictos.append(Conflicto(
@@ -276,6 +302,8 @@ def evaluar(
         ))
 
     for f in _filas(con, _SQL_UBICUIDAD, p):
+        if mismo_sitio(f["lugar_a_id"], f["lugar_b_id"]):
+            continue
         conflictos.append(Conflicto(
             comprobacion="presencia_imposible",
             descripcion=(
@@ -287,6 +315,8 @@ def evaluar(
         ))
 
     for f in _filas(con, _SQL_OBJETO, p):
+        if mismo_sitio(f["lugar_escena_id"], f["ultima_ubicacion_id"]):
+            continue
         conflictos.append(Conflicto(
             comprobacion="objeto_sin_traslado",
             descripcion=(

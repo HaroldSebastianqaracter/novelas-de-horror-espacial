@@ -295,3 +295,35 @@ def test_el_extractor_recibe_el_ultimo_orden_interno() -> None:
                                 techo=config.PRESUPUESTO_PAQUETE),
     )
     assert "El ultimo orden_interno registrado en la novela es 4" in paquete.render()
+
+
+# --- RF2-PIPE-26: un lugar y los que contiene son el mismo sitio -----------------------------
+
+
+def test_un_objeto_que_pasa_a_un_lugar_contenido_no_se_ha_movido(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """La baliza esta en el modulo de carga y aparece en la esclusa, que esta DENTRO."""
+    con, g = grafo
+    con.execute("UPDATE escena SET lugar_id = ? WHERE id = ?",
+                (g.lugares["Esclusa"], g.escenas[(2, 2)]))
+    con.execute("DELETE FROM estado_objeto WHERE escena_id = ?", (g.escenas[(2, 2)],))
+    con.execute("UPDATE lugar SET dentro_de_id = ? WHERE id = ?",
+                (g.lugares["Modulo de carga"], g.lugares["Esclusa"]))
+    assert "objeto_sin_traslado" not in comprobaciones(con, g)
+    # Sin la contencion, el mismo grafo si para: es la comprobacion la que cambia.
+    con.execute("UPDATE lugar SET dentro_de_id = NULL")
+    assert "objeto_sin_traslado" in comprobaciones(con, g)
+
+
+def test_estar_a_la_vez_en_un_lugar_y_en_otro_que_contiene_no_es_ubicuidad(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    con, g = grafo
+    for escena in ((2, 1), (2, 2)):  # Puente y Modulo de carga, en el mismo momento
+        con.execute("UPDATE evento SET orden_interno = 30 WHERE escena_id = ?",
+                    (g.escenas[escena],))
+    assert "presencia_imposible" in comprobaciones(con, g)
+    con.execute("UPDATE lugar SET dentro_de_id = ? WHERE id = ?",
+                (g.lugares["Puente"], g.lugares["Modulo de carga"]))
+    assert "presencia_imposible" not in comprobaciones(con, g)

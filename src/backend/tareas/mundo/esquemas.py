@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, model_validator
 
+from compartido.grafo import normalizar
 from compartido.tipos import Dureza, nombres_repetidos
 
 
@@ -27,6 +28,10 @@ class LugarSalida(BaseModel):
     tipo: str = ""
     descripcion: str = Field(min_length=10)
     sistemas_criticos: list[str] = Field(default_factory=list[str])
+    dentro_de: str = Field(
+        default="",
+        description="Nombre de otro lugar de esta lista que lo contiene (RF2-PER-13), o vacio",
+    )
 
 
 class FaccionSalida(BaseModel):
@@ -88,4 +93,23 @@ class SalidaMundo(BaseModel):
                     f"Hay {que} cuyo nombre solo difiere en tildes o mayusculas: "
                     + ", ".join(repetidos)
                 )
+        return self
+
+    @model_validator(mode="after")
+    def _contenedores_validos(self) -> SalidaMundo:
+        # RF2-PER-13: `dentro_de` nombra otro lugar de la lista, y la jerarquia no tiene ciclos.
+        padre = {
+            normalizar(x.nombre): normalizar(x.dentro_de) for x in self.lugares if x.dentro_de
+        }
+        nombres = {normalizar(x.nombre) for x in self.lugares}
+        for hijo, contenedor in padre.items():
+            if contenedor not in nombres:
+                raise ValueError(f"El lugar '{hijo}' esta dentro de '{contenedor}', que no existe.")
+            vistos = {hijo}
+            actual: str | None = contenedor
+            while actual is not None:
+                if actual in vistos:
+                    raise ValueError(f"Los lugares forman un ciclo de contencion en '{hijo}'.")
+                vistos.add(actual)
+                actual = padre.get(actual)
         return self
