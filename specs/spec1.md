@@ -442,6 +442,8 @@ Cualquier conflicto (no aviso) hace **rollback** de la transacción del capítul
 
 > Ampliado por spec2, RF2-PIPE-27 (el conocimiento circula entre capítulos dentro de la facción) y RF2-PIPE-28 (un objeto viaja con su poseedor).
 
+> Ampliado por spec2, RF2-PIPE-29: un cambio de valor en un atributo que es conducta es aviso.
+
 **RF-PIPE-13 — Puerta 4, oficio.** Con la puerta 3 limpia, en dos partes y en este orden:
 
 1. **Mecánica (`T`, código).** Búsquedas dirigidas sobre la prosa del capítulo: ocurrencias de `EstiloNarrativo.ticsProhibidos` (lista exacta del canon), palabras filtro (lista fija en `config.py`: vio, oyó, sintió, notó, se dio cuenta, empezó a, pudo ver y sus flexiones), adverbios en `-mente` en atribuciones de diálogo, verbos de habla expresivos. **Falla** solo si hay alguna ocurrencia de `ticsProhibidos`; el resto son avisos que van en el informe para el juez y para el redactor.

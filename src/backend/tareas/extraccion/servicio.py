@@ -259,6 +259,14 @@ def aplicar(
         if eid is None:
             descartes.anotar("hechos", "escena_desconocida")
             continue
+        if h.conducta:
+            # Ser conducta es del atributo, no del valor: se marca aunque el hecho sea una
+            # reafirmacion que no crea fila (RF2-PIPE-29).
+            con.execute(
+                "INSERT OR IGNORE INTO atributo_conducta (novela_id, escena_id, sujeto_clave, "
+                "atributo_clave) VALUES (?,?,?,?)",
+                (novela_id, eid, normalizar(h.sujeto_ref), normalizar(h.atributo)),
+            )
         # Reafirmar el valor vigente no es un hecho nuevo (RF2-PIPE-19): el conocimiento y los
         # usos de la escena apuntan al hecho ya establecido. Si cada reafirmacion creara una
         # fila, un uso posterior quedaria enganchado a una fila que nadie sabe, y la puerta 3

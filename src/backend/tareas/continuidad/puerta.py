@@ -42,7 +42,12 @@ SELECT n.id AS hecho_nuevo_id, n.atributo, n.valor AS valor_nuevo, n.cita AS cit
        n.sujeto_tipo, n.sujeto_nombre, n.escena_id AS escena_nueva,
        v.id AS hecho_previo_id, v.valor AS valor_previo, v.cita AS cita_previa,
        v.escena_id AS escena_previa, opr.capitulo_numero AS capitulo_previo,
-       onu.capitulo_numero AS capitulo_nuevo
+       onu.capitulo_numero AS capitulo_nuevo,
+       EXISTS (SELECT 1 FROM atributo_conducta ac
+               JOIN escena_ordinal oa ON oa.escena_id = ac.escena_id
+               WHERE ac.novela_id = n.novela_id AND ac.sujeto_clave = n.sujeto_clave
+                 AND ac.atributo_clave = n.atributo_clave
+                 AND oa.ordinal <= onu.ordinal) AS es_conducta
 FROM hecho_vigente n
 JOIN hecho_vigente v
   ON v.novela_id = n.novela_id
@@ -315,11 +320,14 @@ def evaluar(
     mismo_sitio = _mismo_sitio(con, novela_id)
 
     for f in _filas(con, _SQL_CONTRADICCION, p):
+        # Romper un habito es un recurso, no un error: aviso (RF2-PIPE-29).
+        conducta = bool(f.pop("es_conducta"))
         conflictos.append(Conflicto(
-            comprobacion="continuidad_factual",
+            comprobacion="continuidad_factual", aviso=conducta,
             descripcion=(
                 f"'{f['sujeto_nombre']}' tiene '{f['atributo']}' = '{f['valor_nuevo']}', pero en "
                 f"el capitulo {f['capitulo_previo']} quedo establecido como '{f['valor_previo']}'."
+                + (" Es una conducta: puede ser un habito roto a proposito." if conducta else "")
             ),
             escena_id=f["escena_nueva"], capitulo=capitulo, datos=f,
         ))

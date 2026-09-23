@@ -38,6 +38,13 @@ class HechoExtraido(BaseModel):
     sujeto_ref: str = Field(min_length=1, description="Nombre de la entidad del paquete")
     atributo: str = Field(min_length=2, description="Reutiliza los atributos que ya existen")
     valor: str = Field(min_length=1)
+    conducta: bool = Field(
+        default=False,
+        description=(
+            "true si el atributo es un habito, un ritual o una manera de hacer del sujeto "
+            "(algo que hace siempre), no un rasgo (RF2-PIPE-29)"
+        ),
+    )
     categoria: CategoriaHecho = "otro"
     cita: str = Field(default="", description="Fragmento literal de la prosa que lo fija")
     supersede_a: str = Field(

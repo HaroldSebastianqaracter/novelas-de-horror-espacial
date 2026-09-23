@@ -297,3 +297,28 @@ def test_un_uso_apunta_al_hecho_vigente_en_su_escena_no_al_ultimo_del_capitulo()
         " WHERE c.numero = 2 AND e.orden = 1 AND h.atributo = 'olor'"
     )]
     assert valores == ["metal frio y algo dulce"]
+
+
+def test_un_habito_roto_a_proposito_avisa_y_la_demo_sigue() -> None:
+    """RF2-PIPE-29: el extractor marca el ritual como conducta en el capitulo 1 y en el 2 lo
+    registra con otro valor sin sustituirlo. Es aviso; la marca queda como estado."""
+
+    def extraccion(entrada: str, agente: str) -> dict[str, Any]:
+        salida = demo.extraccion(entrada, agente)
+        valor = {1: "silba antes de abrir", 2: "no silbo"}.get(demo._capitulo(entrada))
+        if valor:
+            salida["hechos"].append({
+                "escena_orden": 1, "sujeto_tipo": "personaje", "sujeto_ref": demo.PERSONAJES[0],
+                "atributo": "ritual de entrada", "valor": valor, "categoria": "otro",
+                "cita": "", "conducta": demo._capitulo(entrada) == 1,
+            })
+        return salida
+
+    con, novela_id, final = _correr(extraccion)
+    assert final == "completada", fallo.paradas_abiertas(con, novela_id)
+    assert _uno(con, "SELECT COUNT(*) FROM atributo_conducta") == 1
+    detalles = [json.loads(f[0]) for f in con.execute(
+        "SELECT detalle FROM resultado_puerta WHERE novela_id = ? AND puerta = 3", (novela_id,)
+    )]
+    avisos = {c["comprobacion"] for d in detalles for c in d["conflictos"] if c["aviso"]}
+    assert "continuidad_factual" in avisos

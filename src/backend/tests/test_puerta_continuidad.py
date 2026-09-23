@@ -393,3 +393,20 @@ def test_un_objeto_que_lleva_alguien_viaja_con_el(grafo: tuple[sqlite3.Connectio
     con.execute("UPDATE escena SET pov_id = ? WHERE id = ?",
                 (g.personajes["Ibarra"], g.escenas[(2, 2)]))
     assert "objeto_sin_traslado" in comprobaciones(con, g)
+
+
+# --- RF2-PIPE-29: romper un habito es aviso, no conflicto ------------------------------------
+
+
+def test_cambiar_el_valor_de_una_conducta_es_aviso(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    con, g = grafo
+    hecho(con, g, (1, 1), "Ibarra", "ritual de entrada", "cuenta hasta cuatro", cita="cuatro")
+    hecho(con, g, (2, 1), "Ibarra", "ritual de entrada", "no conto", cita="no conto")
+    assert "continuidad_factual" in comprobaciones(con, g)
+    con.execute(
+        "INSERT INTO atributo_conducta (novela_id, escena_id, sujeto_clave, atributo_clave) "
+        "VALUES (?, ?, 'ibarra', 'ritual de entrada')", (g.novela_id, g.escenas[(1, 1)]),
+    )
+    assert "continuidad_factual" not in comprobaciones(con, g)
+    avisos = {c.comprobacion for c in puerta.evaluar(con, g.novela_id, 2).conflictos if c.aviso}
+    assert "continuidad_factual" in avisos

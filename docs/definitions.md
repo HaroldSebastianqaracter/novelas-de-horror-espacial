@@ -400,6 +400,10 @@ Un hecho **no se modifica nunca**. Retirarlo del canon, cuando el autor acepta u
 
 **UsoDeConocimiento** — Que un personaje **actúe** sobre un hecho en una escena, lo supiera desde antes o no. Es distinto de `EstadoDeConocimiento`, que registra cuándo lo adquirió.
 
+**Conducta** — Un atributo de un sujeto que es un hábito, un ritual o una manera de hacer (algo que hace siempre), no un rasgo. Romperlo en una escena es un suceso, no una contradicción: la continuidad lo trata como aviso.
+
+> **Decisión entrevistada, 23 de septiembre de 2026.** La primera pasada con Claude Code real paró por un ritual roto a propósito («no contó hasta cuatro») tomado por contradicción. Se añade la marca de conducta sobre el atributo (RF2-PIPE-29 de spec2). Se descartó el catálogo completo de mutabilidad por ahora: es la idea guardada, más sólida y más grande.
+
 > **Decisión sin entrevistar, 22 de septiembre de 2026.** Se añade porque detectar que alguien actúa sobre lo que todavía no ha recibido exige las dos listas y no una. Con solo la adquisición no hay nada contra lo que comparar: hace falta saber que en una escena alguien usó un dato para poder preguntar si ya lo tenía. Sin esta entidad, la comprobación de conocimiento no adquirido no se puede escribir como consulta.
 
 **UsoDeHecho** — Que una escena **use** un hecho sin establecerlo. Tiene dos vías: `reafirma`, cuando el texto vuelve a decir lo que ya consta, y `menciona`, cuando el valor exacto de un hecho (un nombre, una fecha, una distancia, una cifra) aparece en la prosa. Junto con el hecho, el conocimiento y los usos de conocimiento, responde a la pregunta «qué capítulos dependen de este dato».
