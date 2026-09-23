@@ -11,6 +11,7 @@ import json
 import sqlite3
 from typing import Any
 
+from compartido import politica
 from compartido.brief import describir_intensidad, linea_destinatario
 from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
 from compartido.grafo import insertar, lectura
@@ -41,6 +42,11 @@ def _instrucciones(con: sqlite3.Connection, novela_id: int, capitulo: int) -> st
     if tics:
         lineas += ["", "TICS PROHIBIDOS (una sola aparicion devuelve el capitulo entero):"]
         lineas.extend(f"- {t}" for t in tics)
+    # spec3, RF3-GRD-03: lo que la puerta 4 va a buscar, para no descubrirlo fallando.
+    vetadas = [r.termino for r in politica.reglas(con, novela_id) if r.origen != "brief"]
+    if vetadas:
+        lineas += ["", "PALABRAS VETADAS (una sola aparicion devuelve el capitulo entero): "
+                   + ", ".join(vetadas) + "."]
     brief = lectura.brief(con, novela_id)
     if brief is not None:
         # RF3-PER-03: el protagonista es una persona real y la novela es su regalo.

@@ -26,7 +26,9 @@ from compartido.texto import formas
 #: Cambia si cambia la normalizacion (aqui o en compartido/texto.py): entra en la huella.
 VERSION_NORMALIZACION = "texto-1"
 NIVELES = ("atmosferico", "tension", "intenso")
-_PALABRA = re.compile(r"[^\W_]+", re.UNICODE)
+#: Letras y cifras, y las marcas que se combinan con ellas: en NFD, «á» son dos caracteres y la
+#: tilde (Mn) no es `\w` (validador de 66542ef).
+_PALABRA = re.compile(r"(?:[^\W_]|[\u0300-\u036f])+", re.UNICODE)
 _CONTEXTO = 40
 
 
@@ -67,7 +69,15 @@ def reglas(con: sqlite3.Connection, novela_id: int) -> list[Regla]:
     ]
     if brief is not None:
         salida += [Regla(v, "brief") for v in brief.vetados]
-    return salida
+    # «Sangre» y «sangre» son el mismo termino: uno solo, el primero (global antes que novela).
+    vistos: set[str] = set()
+    unicas: list[Regla] = []
+    for r in salida:
+        clave = normalizar(r.termino)
+        if clave not in vistos:
+            vistos.add(clave)
+            unicas.append(r)
+    return unicas
 
 
 def huella(aplicadas: list[Regla]) -> str:
@@ -134,8 +144,11 @@ def registrar(
     con: sqlite3.Connection, novela_id: int, capitulo: int, intento: int, texto: str,
     hallazgos: list[dict[str, object]], politica: str, *, accion: str,
 ) -> None:
-    """Una fila de `decision_politica` por hallazgo (RF3-GRD-04). Quien llama abre la
-    transaccion: el worker es el unico escritor."""
+    """Una fila de `decision_politica` por hallazgo (RF3-GRD-04).
+
+    Quien llama la mete en la misma transaccion que lo que hace con el capitulo (revertirlo o
+    abrir la parada): si el worker cae antes, no queda escrita una accion que no ocurrio.
+    """
     huella_texto = hashlib.sha256(texto.encode("utf-8")).hexdigest()
     con.executemany(
         """

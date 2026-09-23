@@ -64,6 +64,8 @@ Ejecutar el código del agente en un entorno aislado (contenedor, microVM) para 
 **Guardrails** — `D`
 Políticas o filtros que restringen qué acciones y salidas puede producir un agente, antes de que actúe. Es un control preventivo: su evidencia viene de observar que efectivamente bloquea lo que debe bloquear.
 
+En storyMaker, el guardrail de términos vetados (spec3, 3.5) es `T`: una búsqueda determinista por palabras completas sobre la prosa, con la normalización compartida del brief, que devuelve el capítulo al redactor y deja cada decisión en `decision_politica`. Su punto ciego es el de toda lista: una forma que no está, un sinónimo o una perífrasis pasan, y los temas vetados que no se dicen con esas palabras son del juez.
+
 **Human-in-the-loop review** — `I`
 Una persona aprueba, rechaza o edita las acciones de alta consecuencia del agente, y la decisión se realimenta como señal de entrenamiento.
 

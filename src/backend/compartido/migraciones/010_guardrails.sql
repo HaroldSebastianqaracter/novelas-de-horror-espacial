@@ -13,7 +13,7 @@ CREATE TABLE termino_vetado (
     -- Expresiones, en JSON, dentro de las cuales el termino no cuenta.
     excepciones TEXT NOT NULL DEFAULT '[]',
     CHECK (hasta_nivel IN ('atmosferico', 'tension', 'intenso')),
-    CHECK (json_valid(excepciones))
+    CHECK (json_valid(excepciones) AND json_type(excepciones) = 'array')
 );
 
 CREATE UNIQUE INDEX ux_termino_vetado ON termino_vetado (COALESCE(novela_id, 0), termino);
@@ -44,7 +44,7 @@ CREATE INDEX ix_decision_politica_novela ON decision_politica (novela_id, capitu
 -- tienen otro sentido. Cada forma que importa es su fila: la busqueda solo trata el plural.
 INSERT INTO termino_vetado (termino, hasta_nivel, excepciones) VALUES
     -- Contenido sexual: ningun nivel lo admite.
-    ('sexo', 'intenso', '[]'),
+    ('sexo', 'intenso', '["sexo del embrion", "sexo del feto", "sexo de la criatura"]'),
     ('sexual', 'intenso', '[]'),
     ('sexuales', 'intenso', '[]'),
     ('orgasmo', 'intenso', '[]'),
@@ -53,11 +53,20 @@ INSERT INTO termino_vetado (termino, hasta_nivel, excepciones) VALUES
     ('pornografia', 'intenso', '[]'),
     ('pornografico', 'intenso', '[]'),
     -- Atmosferico: sin sangre, sin cadaveres, sin heridas descritas.
-    ('sangre', 'atmosferico', '["a sangre fria", "sangre fria", "de sangre caliente", "sangre fria de"]'),
+    ('sangre', 'atmosferico', '["a sangre fria", "sangre fria", "de sangre caliente", "helo la sangre", "helaba la sangre", "hiela la sangre", "helada la sangre", "analisis de sangre", "transfusion de sangre", "muestra de sangre", "misma sangre", "sangre se le subio", "grupo de sangre"]'),
     ('sangrar', 'atmosferico', '[]'),
     ('sangraba', 'atmosferico', '[]'),
     ('sangraban', 'atmosferico', '[]'),
     ('sangrando', 'atmosferico', '[]'),
+    ('sangro', 'atmosferico', '[]'),
+    ('sangraron', 'atmosferico', '[]'),
+    ('desangro', 'atmosferico', '[]'),
+    ('desangraron', 'atmosferico', '[]'),
+    ('desangrandose', 'atmosferico', '[]'),
+    ('desangrado', 'atmosferico', '[]'),
+    ('desangrada', 'atmosferico', '[]'),
+    ('sanguinolento', 'atmosferico', '[]'),
+    ('sanguinolenta', 'atmosferico', '[]'),
     ('sangrienta', 'atmosferico', '[]'),
     ('sangriento', 'atmosferico', '[]'),
     ('ensangrentado', 'atmosferico', '[]'),
@@ -66,23 +75,39 @@ INSERT INTO termino_vetado (termino, hasta_nivel, excepciones) VALUES
     ('degollado', 'atmosferico', '[]'),
     ('degollada', 'atmosferico', '[]'),
     ('degollar', 'atmosferico', '[]'),
+    ('degollo', 'atmosferico', '[]'),
+    ('degollaron', 'atmosferico', '[]'),
     -- Tension: sin tortura, sin mutilacion, sin visceras.
-    ('tortura', 'tension', '[]'),
+    ('tortura', 'tension', '["es una tortura", "era una tortura", "fue una tortura", "sera una tortura", "una tortura de espera", "tortura china"]'),
     ('torturar', 'tension', '[]'),
     ('torturado', 'tension', '[]'),
     ('torturada', 'tension', '[]'),
     ('torturaba', 'tension', '[]'),
+    ('torturo', 'tension', '[]'),
+    ('torturaron', 'tension', '[]'),
+    ('torturando', 'tension', '[]'),
+    ('torturador', 'tension', '[]'),
+    ('torturadores', 'tension', '[]'),
     ('mutilado', 'tension', '[]'),
     ('mutilada', 'tension', '[]'),
     ('mutilacion', 'tension', '[]'),
+    ('mutilar', 'tension', '[]'),
+    ('mutilo', 'tension', '[]'),
+    ('mutilaron', 'tension', '[]'),
     ('desmembrado', 'tension', '[]'),
     ('desmembrada', 'tension', '[]'),
     ('desmembrar', 'tension', '[]'),
+    ('desmembro', 'tension', '[]'),
+    ('desmembraron', 'tension', '[]'),
     ('decapitado', 'tension', '[]'),
     ('decapitada', 'tension', '[]'),
     ('decapitar', 'tension', '[]'),
+    ('decapito', 'tension', '[]'),
+    ('decapitaron', 'tension', '[]'),
     ('visceras', 'tension', '[]'),
     ('destripado', 'tension', '[]'),
     ('destripada', 'tension', '[]'),
     ('destripar', 'tension', '[]'),
+    ('destripo', 'tension', '[]'),
+    ('destriparon', 'tension', '[]'),
     ('evisceracion', 'tension', '[]');

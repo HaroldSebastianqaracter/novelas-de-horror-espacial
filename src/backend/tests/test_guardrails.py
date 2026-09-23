@@ -93,8 +93,8 @@ def test_la_posicion_es_la_del_texto_original() -> None:
 
 
 @pytest.mark.parametrize("texto", [
-    "La tripulación esperaba.",            # subcadena de «tripa»
-    "Era el sexto turno.",                 # subcadena de «sexo»
+    "La tripulación esperaba.",            # empieza como «tripa» y es otra palabra
+    "Era el sexto turno.",                 # se parece a «sexo» y es otra palabra
     "Lo hizo a sangre fría.",              # excepcion de «sangre»
 ])
 def test_lo_que_no_es_el_termino_no_casa(texto: str) -> None:
@@ -158,3 +158,99 @@ def test_agotados_los_intentos_para_y_el_registro_sobrevive_a_la_reversion() -> 
     with transaccion(con):
         fallo.revertir_grafo(con, nid, 1, motivo="prueba")
     assert contar(con, "SELECT COUNT(*) FROM decision_politica WHERE novela_id = ?", nid) == 3
+
+
+# --- Validador de 66542ef -------------------------------------------------------------------------
+
+
+def test_un_vetado_o_una_prosa_en_nfd_casan_igual() -> None:
+    """En NFD la tilde es otro caracter (Mn): la palabra no se puede partir por ella."""
+    import unicodedata
+
+    con, ruta = nueva_bd()
+    nid = crear(con, ruta, intensidad="atmosferico",
+                vetados=[unicodedata.normalize("NFD", "arañas")])
+    assert _terminos(con, nid, "Las arañas bajaban.") == [unicodedata.normalize("NFD", "arañas")]
+    texto = unicodedata.normalize("NFD", "Había un cadáver al fondo.")
+    [h] = [h for h in politica.buscar(texto, politica.reglas(con, nid))
+           if h.regla.termino == "cadaver"]
+    assert texto[h.inicio:h.fin] == h.forma == unicodedata.normalize("NFD", "cadáver")
+
+
+@pytest.mark.parametrize("texto", [
+    "La herida sangró toda la noche.",     # preterito, el tiempo de la narracion
+    "Se desangró en la esclusa.",
+    "Lo torturaron durante horas.",
+])
+def test_el_preterito_esta_en_la_lista(texto: str) -> None:
+    con, _, nid = _novela("atmosferico")
+    assert _terminos(con, nid, texto)
+
+
+@pytest.mark.parametrize(("intensidad", "texto"), [
+    ("atmosferico", "Se le heló la sangre al oír el golpe."),
+    ("atmosferico", "Pidió un análisis de sangre al médico de a bordo."),
+    ("intenso", "El escáner no podía decir el sexo del embrión."),
+    ("tension", "Esta espera es una tortura."),
+])
+def test_los_usos_corrientes_no_paran(intensidad: str, texto: str) -> None:
+    con, _, nid = _novela(intensidad)
+    assert _terminos(con, nid, texto) == []
+
+
+@pytest.mark.parametrize("texto", [
+    "Una sangrecita de mentira.",          # «sangre» dentro de otra palabra
+    "El acuerdo tripartito.",              # «tripa» dentro de otra palabra
+])
+def test_una_subcadena_no_casa(texto: str) -> None:
+    con, _, nid = _novela("atmosferico")
+    con.execute("INSERT INTO termino_vetado (novela_id, termino) VALUES (?, 'tripa')", (nid,))
+    assert _terminos(con, nid, texto) == []
+
+
+def test_la_huella_cambia_con_las_excepciones() -> None:
+    a = [politica.Regla("sangre", "global", ("a sangre fria",))]
+    b = [politica.Regla("sangre", "global", ())]
+    assert politica.huella(a) != politica.huella(b)
+
+
+def test_un_mismo_termino_con_otra_grafia_no_se_duplica() -> None:
+    con, _, nid = _novela("atmosferico")
+    con.execute("INSERT INTO termino_vetado (novela_id, termino) VALUES (?, 'Sangre')", (nid,))
+    assert _terminos(con, nid, "Hubo sangre.") == ["sangre"]
+
+
+def test_la_accion_parar_solo_queda_si_la_parada_se_abre(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Registrar y parar van en la misma transaccion: si la parada no llega a abrirse, el
+    registro no dice que se paro."""
+    con, ruta, nid = _novela("tension")
+    puerto = puerto_falso(con)
+    puerto.registrar("redaccion", _redactor(99))
+
+    def falla(*_: Any, **__: Any) -> int:
+        raise RuntimeError("el worker cae al abrir la parada")
+
+    monkeypatch.setattr(fallo, "abrir_parada", falla)
+    ctx = pipeline.Contexto(con=con, puerto=puerto, cfg=cfg_de(ruta), novela_id=nid)
+    with pytest.raises(RuntimeError):
+        pipeline.avanzar(ctx)
+    acciones = [f[0] for f in con.execute(
+        "SELECT accion FROM decision_politica WHERE novela_id = ? ORDER BY intento", (nid,))]
+    assert acciones == ["reintentar", "reintentar"]
+
+
+def test_el_redactor_recibe_las_palabras_vetadas() -> None:
+    import config
+    from compartido.contexto import Presupuesto
+    from tareas.redaccion import servicio as s_redaccion
+
+    con, ruta, nid = _novela("tension")
+    pipeline.planificar(pipeline.Contexto(con=con, puerto=puerto_falso(con), cfg=cfg_de(ruta),
+                                          novela_id=nid))
+    pipeline.escaletar(pipeline.Contexto(con=con, puerto=puerto_falso(con), cfg=cfg_de(ruta),
+                                         novela_id=nid))
+    render = s_redaccion.paquete(con, nid, 1, presupuesto=Presupuesto(
+        bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE)).render()
+    linea = next(x for x in render.splitlines() if x.startswith("PALABRAS VETADAS"))
+    assert "tortura" in linea and "sexo" in linea
+    assert "sangre" not in linea.split(":", 1)[1]   # tension admite la sangre

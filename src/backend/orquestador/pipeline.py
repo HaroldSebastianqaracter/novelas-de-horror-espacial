@@ -36,6 +36,7 @@ import logging
 import sqlite3
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from functools import partial
 from typing import Any
 
 from pydantic import BaseModel, ValidationError
@@ -495,7 +496,6 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
             oficio = p_oficio.combinar(mecanica, juicio)
             pasa_oficio = oficio.pasa
             _registrar_puerta(ctx, oficio, capitulo=numero, intento=intento)
-            _registrar_politica(ctx, mecanica, numero, intento, texto_completo)
 
             if pasa_oficio:
                 with transaccion(ctx.con):
@@ -510,11 +510,15 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                 else [{"criterio": c.comprobacion, "sugerencia": c.descripcion,
                        "evidencia": "", "principio": "38"} for c in mecanica.bloqueantes]
             )
+            ultimo = intento == ctx.cfg_max_intentos
             with transaccion(ctx.con):
                 fallo.revertir_grafo(ctx.con, ctx.novela_id, numero, motivo="oficio")
+                if not ultimo:
+                    _registrar_politica(ctx, mecanica, numero, intento, texto_completo,
+                                        "reintentar")
             a_medias = False
 
-            if intento == ctx.cfg_max_intentos:
+            if ultimo:
                 informe: dict[str, Any] = {
                     "motivo": (
                         f"Tres intentos sin pasar la puerta de oficio en el capitulo {numero}. "
@@ -524,7 +528,11 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                     "mecanica": mecanica.informe(),
                     "criterios_incumplidos": ctx.eventos_criterios,
                 }
-                _abrir_parada(ctx, "oficio", informe, capitulo=numero, intento=intento)
+                _abrir_parada(
+                    ctx, "oficio", informe, capitulo=numero, intento=intento,
+                    antes=partial(_registrar_politica, ctx, mecanica, numero, intento,
+                                  texto_completo, "parar"),
+                )
                 return
     finally:
         if a_medias:
@@ -552,14 +560,14 @@ def _segunda_opinion(
 
 
 def _registrar_politica(
-    ctx: Contexto, mecanica: Any, numero: int, intento: int, texto: str
+    ctx: Contexto, mecanica: Any, numero: int, intento: int, texto: str, accion: str
 ) -> None:
-    """Cada termino vetado que encontro la puerta 4, con lo que se hizo (spec3, RF3-GRD-04)."""
+    """Cada termino vetado que encontro la puerta 4, con lo que se hizo (spec3, RF3-GRD-04).
+
+    Corre dentro de la transaccion que revierte el capitulo o abre la parada: si el worker cae
+    antes, no queda escrita una accion que no ocurrio (validador de 66542ef)."""
     for c in mecanica.conflictos:
-        if c.comprobacion != "termino_vetado":
-            continue
-        accion = "parar" if intento >= ctx.cfg_max_intentos else "reintentar"
-        with transaccion(ctx.con):
+        if c.comprobacion == "termino_vetado":
             politica.registrar(ctx.con, ctx.novela_id, numero, intento, texto,
                                c.datos["hallazgos"], c.datos["politica"], accion=accion)
 
