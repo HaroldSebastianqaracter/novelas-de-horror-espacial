@@ -444,8 +444,15 @@ def test_la_firma_distingue_lo_que_acompana_de_un_nombre(
     ("Del Soto", "Del grita.", "[DESTINATARIO] grita."),
     # ...pero en minuscula en la prosa no es el nombre.
     ("Van Ferrer", "Ellos van al puente del sector.", "Ellos van al puente del sector."),
-    # Una particula en minuscula en el brief no es el nombre.
+    # Una particula en minuscula en el brief no es el nombre...
     ("Ludo van Berk", "Ellos van. Berk grita.", "Ellos van. [DESTINATARIO] grita."),
+    # ...salvo que lo abra, o que el brief este todo en minuscula (sexta revision).
+    ("van Ferrer", "Van grita. Ellos van.", "[DESTINATARIO] grita. Ellos van."),
+    ("van ferrer", "Van grita. Ferrer calla.", "[DESTINATARIO] grita. [DESTINATARIO] calla."),
+    ("marta ibáñez", "marta_ibanez grita.", "[DESTINATARIO]_[DESTINATARIO] grita."),
+    # Un nombre de una palabra que es particula casa solo en mayuscula, entero incluido.
+    ("Van", "Van grita. Ellos van.", "[DESTINATARIO] grita. Ellos van."),
+    ("van", "Van grita. Ellos van.", "[DESTINATARIO] grita. Ellos van."),
     # El brief con las partes pegadas en camelCase.
     ("MartaIbáñez", "Marta grita. Ibáñez calla.", "[DESTINATARIO] grita. [DESTINATARIO] calla."),
     ("MARTAIbáñez", "Marta grita. Ibáñez calla.", "[DESTINATARIO] grita. [DESTINATARIO] calla."),
@@ -467,8 +474,12 @@ def test_quinta_revision_del_seudonimizador(destinatario: str, prosa: str, esper
     # Una palabra de dedicatoria que abre la firma en mayuscula casa solo en mayuscula.
     ("Feliz cumpleaños, Andrés", "Qué feliz estaba. Andrés llega.",
      "Qué feliz estaba. [QUIEN_REGALA] llega."),
-    ("Un beso muy fuerte de tu hermano Andrés", "Muy fuerte, dijo Andrés.",
-     "Muy fuerte, dijo [QUIEN_REGALA]."),
+    # Validador (sexta revision): cualquier palabra en minuscula de la firma, este o no en la
+    # lista, casa solo en mayuscula.
+    ("Un abrazo enorme de tu hermano Andrés", "Una nave enorme. Andrés llega.",
+     "Una nave enorme. [QUIEN_REGALA] llega."),
+    ("Con cariño, tu hermano que te quiere, Andrés", "Nadie te quiere aquí.",
+     "Nadie te quiere aquí."),
 ])
 def test_la_firma_no_ensucia_la_prosa_con_su_dedicatoria(
     regala: str, prosa: str, esperado: str

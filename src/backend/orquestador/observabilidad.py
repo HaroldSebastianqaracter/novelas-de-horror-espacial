@@ -117,7 +117,7 @@ _ACOMPANAN_A_LA_FIRMA = frozenset({
     "hijos", "amigo", "amiga", "amigos", "amigas", "novio", "novia", "esposo", "esposa",
     "marido", "mujer", "familia", "querido", "querida", "queridos", "queridas", "carino",
     "amor", "beso", "besos", "abrazo", "abrazos", "feliz", "felicidades", "cumpleanos",
-    "parte", "regalo", "siempre", "navidad", "aniversario", "boda", "muy", "fuerte",
+    "parte", "regalo", "siempre", "navidad", "aniversario", "boda",
 })
 #: Lo que abre una firma y se escribe en mayuscula solo por ir delante («Tus padres…»,
 #: «Con todo…»).
@@ -214,6 +214,9 @@ def _partes_del_nombre(nombre: str, *, firma: bool) -> dict[str, bool]:
     """
     plegado, posiciones, suaves = _plegar(nombre)
     primera_letra = next((k for k, x in enumerate(plegado) if x.isalpha()), -1)
+    # Un brief tecleado todo en minuscula no distingue el nombre de lo que lo acompana: ahi la
+    # minuscula no descarta nada (validador de db16cdc: «van ferrer»).
+    con_mayusculas = any(_mayuscula(c) for c in nombre)
     cortes = sorted({
         0, len(plegado), *suaves,
         *(k for k in range(1, len(plegado))
@@ -229,11 +232,24 @@ def _partes_del_nombre(nombre: str, *, firma: bool) -> dict[str, bool]:
                     p = m.group()
                     if len(p) < 3:
                         continue
-                    if firma and m.start() == primera_letra and p in _ENCABEZAN_LA_FIRMA:
+                    primera = m.start() == primera_letra
+                    if firma and primera and p in _ENCABEZAN_LA_FIRMA:
                         continue
-                    dudosa = p in _PARTICULAS or (firma and p in _ACOMPANAN_A_LA_FIRMA)
-                    if dudosa and not _mayuscula(nombre[posiciones[m.start()]]):
-                        continue
+                    minuscula = con_mayusculas and not _mayuscula(nombre[posiciones[m.start()]])
+                    if p in _PARTICULAS:
+                        # «Maria de los Angeles»: la particula en minuscula no es el nombre,
+                        # salvo que lo abra («van Ferrer»).
+                        if minuscula and not primera:
+                            continue
+                        dudosa = True
+                    elif firma and p in _ACOMPANAN_A_LA_FIRMA:
+                        if minuscula:
+                            continue
+                        dudosa = True
+                    else:
+                        # En la firma, cualquier otra palabra en minuscula («un abrazo enorme»)
+                        # puede no ser el nombre: casa, pero solo en mayuscula.
+                        dudosa = firma and minuscula
                     partes[p] = partes.get(p, False) or (entera and not dudosa)
     return partes
 
