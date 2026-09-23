@@ -410,3 +410,25 @@ def test_cambiar_el_valor_de_una_conducta_es_aviso(grafo: tuple[sqlite3.Connecti
     assert "continuidad_factual" not in comprobaciones(con, g)
     avisos = {c.comprobacion for c in puerta.evaluar(con, g.novela_id, 2).conflictos if c.aviso}
     assert "continuidad_factual" in avisos
+
+
+# --- RF2-PIPE-30: quien actua en una escena esta en ella ----------------------------------------
+
+
+def test_quien_actua_en_la_escena_esta_en_ella_aunque_no_estuviera_en_el_reparto(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """Un dato se fija en la 2.1, donde la escaleta no puso a Reyes, y Reyes lo usa ALLI."""
+    con, g = grafo
+    nuevo = hecho(con, g, (2, 1), "Kowalski", "pozo", "metro diez", cita="metro diez")
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)", (g.novela_id, g.personajes["Reyes"], nuevo, g.escenas[(2, 2)]),
+    )
+    assert "conocimiento_no_adquirido" in comprobaciones(con, g)
+    # Si Reyes actua en la 2.1 (aqui, un estado registrado alli), estaba cuando se dijo.
+    con.execute(
+        "INSERT INTO estado_personaje (novela_id, personaje_id, escena_id, condicion) "
+        "VALUES (?,?,?, 'vivo')", (g.novela_id, g.personajes["Reyes"], g.escenas[(2, 1)]),
+    )
+    assert "conocimiento_no_adquirido" not in comprobaciones(con, g)

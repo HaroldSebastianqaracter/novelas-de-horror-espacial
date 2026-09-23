@@ -97,7 +97,13 @@ WHERE u.novela_id = ? AND c.numero = ?
           AND oh.ordinal <= ou.ordinal
           AND (eh.pov_id = u.personaje_id OR EXISTS (
                 SELECT 1 FROM escena_personaje sp
-                WHERE sp.escena_id = eh.id AND sp.personaje_id = u.personaje_id)))
+                WHERE sp.escena_id = eh.id AND sp.personaje_id = u.personaje_id)
+            -- Quien actua en la escena esta en ella aunque la escaleta no lo pusiera
+            -- (RF2-PIPE-30).
+            OR EXISTS (SELECT 1 FROM uso_conocimiento ua
+                       WHERE ua.escena_id = eh.id AND ua.personaje_id = u.personaje_id)
+            OR EXISTS (SELECT 1 FROM estado_personaje ep
+                       WHERE ep.escena_id = eh.id AND ep.personaje_id = u.personaje_id)))
   AND NOT EXISTS (
         SELECT 1 FROM personaje otro
         WHERE otro.faccion_id = p.faccion_id AND otro.id <> p.id
