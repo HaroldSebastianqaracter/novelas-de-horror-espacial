@@ -71,7 +71,7 @@ Todas llevan su callout `> **Decisión sin entrevistar.**` con las alternativas 
 
 ## Lo que falta
 
-- **Integrar en `pruebas`:** lo decide el autor. La migración nueva es la **010**. A las 5 de la mañana `pruebas` seguía en `134e453`, con la 009 como última; si otra sesión crea antes otra 010, hay que renumerar la de guardrails.
+- **Integrar en `pruebas`:** lo decide el autor. La migración nueva es la **010**. Al cerrar la noche, `pruebas` seguía en `134e453`, con la 009 como última; si otra sesión crea antes otra 010, hay que renumerar la de guardrails.
 - **La 010 se editó en su sitio durante la noche**, antes de integrarse en ningún lado. Solo afecta a bases migradas con `66542ef` (las temporales de los tests y la copia del scratchpad), no a las del autor.
 - **Bloque 6, juez de personalización:** que los rasgos y recuerdos del encargo se integren con naturalidad (U3-2) y que la prosa respete la intensidad más allá de las palabras.
 - **La puerta 4 no ve la facción del elenco frente a la prosa** (b2, C13 del banco).
