@@ -302,11 +302,25 @@ def _hecho_contradictorio(con: sqlite3.Connection, b: Base) -> None:
     _hecho(con, b, (3, 1), "Idris", "color de pelo", "rubio largo")
 
 
+def _constatar(con: sqlite3.Connection, b: Base, escena: tuple[int, int], *quienes: str) -> None:
+    """Las presencias que registra el extractor de RF3-PAS-09 al leer la prosa."""
+    for quien in quienes:
+        con.execute("INSERT INTO presencia_escena (novela_id, escena_id, personaje_id) "
+                    "VALUES (?,?,?)", (b.novela_id, b.escenas[escena], b.personajes[quien]))
+
+
 def _muerto_que_vuelve(con: sqlite3.Connection, b: Base) -> None:
+    # Sin presencias constatadas, como una base extraida antes de RF3-PAS-09: cuenta el reparto.
     insertar(con, "estado_personaje", novela_id=b.novela_id, personaje_id=b.personajes["Reyes"],
              escena_id=b.escenas[(2, 2)], condicion="muerto")
     con.execute("INSERT INTO escena_personaje (escena_id, personaje_id) VALUES (?,?)",
                 (b.escenas[(3, 1)], b.personajes["Reyes"]))
+
+
+def _muerto_que_la_prosa_trae(con: sqlite3.Connection, b: Base) -> None:
+    _muerto_que_vuelve(con, b)
+    _constatar(con, b, (3, 1), "Idris", "Vaan", "Reyes")
+    _constatar(con, b, (3, 2), "Idris", "Vaan")
 
 
 def _conocimiento_no_recibido(con: sqlite3.Connection, b: Base) -> None:
@@ -426,10 +440,17 @@ def _faccion_contra_la_prosa(con: sqlite3.Connection, b: Base) -> None:
 
 
 def _reparto_desfasado(con: sqlite3.Connection, b: Base) -> None:
-    # Mismo grafo que C02, pero la prosa no lo trae: la escaleta lo planifico antes de su muerte
-    # y el redactor lo dejo fuera (en la 4.4 de la pasada real, tres del reparto ya se habian
-    # ido). La puerta lee el reparto, no lo que constata el extractor.
+    # El muerto sigue en el reparto, pero la prosa no lo trae: la escaleta lo planifico antes de
+    # su muerte y el redactor lo dejo fuera (en la 4.4 de la pasada real, tres del reparto ya se
+    # habian ido). El extractor constata quien esta, y eso es lo que lee la puerta (RF3-PAS-11).
     _muerto_que_vuelve(con, b)
+    _constatar(con, b, (3, 1), "Idris", "Vaan")
+    _constatar(con, b, (3, 2), "Idris", "Vaan")
+
+
+def _muerto_que_el_extractor_no_ve(con: sqlite3.Connection, b: Base) -> None:
+    # Mismo grafo que L08, pero la prosa si lo traia y el extractor no lo registro.
+    _reparto_desfasado(con, b)
 
 
 def _sin_cambios(con: sqlite3.Connection, b: Base) -> None:
@@ -441,8 +462,16 @@ CASOS: list[Caso] = [
          "Un rasgo fisico del capitulo 1 cambia sin sustitucion",
          _hecho_contradictorio, Esperado(frozenset({"continuidad_factual"}))),
     Caso("C02", "personaje", "contradiccion",
-         "Un personaje muerto en el capitulo 2 vuelve al reparto",
+         "Un personaje muerto en el capitulo 2 vuelve al reparto, sin presencias constatadas",
          _muerto_que_vuelve, Esperado(frozenset({"presencia_imposible"}))),
+    Caso("C15", "personaje", "contradiccion",
+         "Un personaje muerto en el capitulo 2 sale en la prosa y el extractor lo constata",
+         _muerto_que_la_prosa_trae, Esperado(frozenset({"presencia_imposible"}))),
+    Caso("C16", "personaje", "contradiccion",
+         "Un personaje muerto sale en la prosa y el extractor no lo registra",
+         _muerto_que_el_extractor_no_ve, Esperado(),
+         punto_ciego="Con presencias constatadas, la muerte y la ubicuidad leen al extractor: "
+                     "una presencia que se le escapa no para (RF3-PAS-11, fila 38f)"),
     Caso("C03", "conocimiento", "contradiccion",
          "Alguien actua sobre un hecho que nunca recibio",
          _conocimiento_no_recibido, Esperado(frozenset({"conocimiento_no_adquirido"}))),
@@ -508,9 +537,7 @@ CASOS: list[Caso] = [
          _presencia_real_fuera_del_reparto, Esperado()),
     Caso("L08", "control", "limpio",
          "Un muerto sigue en el reparto planificado, pero la prosa no lo trae",
-         _reparto_desfasado, Esperado(frozenset({"presencia_imposible"})),
-         punto_ciego="Falso positivo: la presencia imposible lee el reparto de la escaleta, no "
-                     "lo que constata el extractor (fila 50)"),
+         _reparto_desfasado, Esperado()),
     Caso("L07", "control", "limpio", "El mismo hecho dicho con otras palabras",
          _reformulacion, Esperado(frozenset({"continuidad_factual"})),
          punto_ciego="Falso positivo conocido: una reformulacion parece otro valor "

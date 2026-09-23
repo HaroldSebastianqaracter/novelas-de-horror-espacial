@@ -267,6 +267,78 @@ def test_la_muerte_no_impide_una_analepsis(grafo: tuple[sqlite3.Connection, Graf
     assert "presencia_imposible" not in comprobaciones(con, g)
 
 
+# --- spec3 RF3-PAS-11: la muerte y la ubicuidad leen quien esta segun la prosa -----------------
+
+
+def _constatar(con: sqlite3.Connection, g: Grafo, escena: tuple[int, int], *quienes: str) -> None:
+    for quien in quienes:
+        con.execute(
+            "INSERT INTO presencia_escena (novela_id, escena_id, personaje_id) VALUES (?,?,?)",
+            (g.novela_id, g.escenas[escena], g.personajes[quien]),
+        )
+
+
+def test_un_muerto_que_sigue_en_el_reparto_y_la_prosa_no_trae_no_para(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """La escaleta lo planifico antes de su muerte; el extractor constata que no esta."""
+    con, g = grafo
+    _condicion(con, g, (1, 2), "muerto")
+    for orden in (1, 2):
+        _constatar(con, g, (2, orden), "Kowalski")
+    assert "presencia_imposible" not in comprobaciones(con, g)
+
+
+def test_un_muerto_que_la_prosa_trae_para_aunque_no_este_en_el_reparto(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    con, g = grafo
+    _condicion(con, g, (1, 2), "muerto")
+    con.execute("DELETE FROM escena_personaje WHERE personaje_id = ?", (g.personajes["Ibarra"],))
+    _constatar(con, g, (2, 1), "Kowalski", "Ibarra")
+    assert "presencia_imposible" in comprobaciones(con, g)
+
+
+def test_repetir_la_muerte_no_trae_al_muerto(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    """Encontrar el cadaver vuelve a registrar la muerte en la escena, y eso no es estar."""
+    con, g = grafo
+    _condicion(con, g, (1, 2), "muerto")
+    _condicion(con, g, (2, 1), "muerto")
+    for orden in (1, 2):
+        _constatar(con, g, (2, orden), "Kowalski")
+    assert "presencia_imposible" not in comprobaciones(con, g)
+
+
+def test_sin_presencias_constatadas_cuenta_el_reparto(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """Una escena extraida antes de RF3-PAS-09 no tiene presencias: el reparto es lo que hay.
+    Basta con que la escena tenga una para que mande lo constatado."""
+    con, g = grafo
+    _condicion(con, g, (1, 2), "muerto")
+    _constatar(con, g, (2, 1), "Kowalski")
+    assert "presencia_imposible" in comprobaciones(con, g)  # la 2.2 sigue con su reparto
+    _constatar(con, g, (2, 2), "Kowalski")
+    assert "presencia_imposible" not in comprobaciones(con, g)
+
+
+def test_la_ubicuidad_lee_quien_esta_segun_la_prosa(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    con, g = grafo
+    con.execute("UPDATE escena SET pov_id = ? WHERE id = ?",
+                (g.personajes["Reyes"], g.escenas[(2, 2)]))
+    for orden in (1, 2):
+        con.execute("UPDATE evento SET orden_interno = 30 WHERE escena_id = ?",
+                    (g.escenas[(2, orden)],))
+    assert "presencia_imposible" in comprobaciones(con, g)  # el reparto de las dos escenas
+    _constatar(con, g, (2, 1), "Kowalski", "Ibarra")
+    _constatar(con, g, (2, 2), "Reyes")
+    assert "presencia_imposible" not in comprobaciones(con, g)
+    _constatar(con, g, (2, 2), "Ibarra")
+    assert "presencia_imposible" in comprobaciones(con, g)
+
+
 def test_un_hecho_revocado_no_contradice(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
     con, g = grafo
     hecho(con, g, (2, 1), "Ibarra", "color de ojos", "azules")
