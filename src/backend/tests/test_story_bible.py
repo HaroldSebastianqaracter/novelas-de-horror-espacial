@@ -142,6 +142,20 @@ def test_un_valor_corto_sin_cifras_no_se_busca_y_una_cifra_si() -> None:
     assert con.execute("SELECT cita FROM hecho_uso").fetchone()[0] == "12"
 
 
+def test_un_valor_ya_sustituido_no_se_busca_como_mencion() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    viejo = _hecho_literal(con, g, (1, 1), "12 metros", categoria="distancia")
+    insertar_hecho(
+        con, novela_id=g.novela_id, escena_id=g.escenas[(1, 2)], sujeto_tipo="mundo",
+        sujeto_id=None, sujeto_nombre="Estacion Tesalia", atributo="dato 12 metros",
+        valor="15 metros", categoria="distancia", cita=None, supersede_a=viejo,
+    )
+    assert s_extraccion.registrar_menciones(
+        con, g.novela_id, {1: g.escenas[(2, 1)]}, {1: "Antes estaba a 12 metros."}
+    ) == 0
+
+
 def test_revertir_un_capitulo_borra_sus_usos() -> None:
     con, novela_id, _ = _demo()
     with transaccion(con):
@@ -273,6 +287,32 @@ def test_la_edad_entra_en_la_huella_de_la_puerta_1_solo_con_brief() -> None:
     assert vigencia.huella(con, sin_brief, 1) == antes
 
 
+def test_una_novela_con_brief_anterior_al_bloque_3_conserva_su_puerta_1() -> None:
+    """Hallazgo 1 del validador: sin edades, la huella es la que registro el codigo del bloque 2,
+    y la puerta no exige una edad que el elenco de entonces no declaraba."""
+    import hashlib
+
+    from tests.test_personalizacion import LECTURAS_PUERTA_1_ANTES_DE_SPEC3
+
+    lecturas_del_bloque_2 = (
+        *LECTURAS_PUERTA_1_ANTES_DE_SPEC3,
+        "SELECT contenido FROM brief WHERE novela_id = :n",
+        "SELECT id, nombre_clave FROM personaje WHERE novela_id = :n ORDER BY id",
+        "SELECT dedicatoria FROM novela WHERE id = :n",
+    )
+    con, novela_id = planificada()
+    con.execute("UPDATE personaje SET edad = NULL WHERE novela_id = ?", (novela_id,))
+    filas: list[list[Any]] = []
+    for sql in lecturas_del_bloque_2:
+        filas.extend([list(f) for f in con.execute(sql, {"n": novela_id}).fetchall()])
+        filas.append(["--"])
+    esperada = hashlib.sha256(
+        json.dumps(filas, ensure_ascii=False, default=str, separators=(",", ":")).encode()
+    ).hexdigest()
+    assert vigencia.huella(con, novela_id, 1) == esperada
+    assert "edad_del_destinatario" not in comprobaciones(p_estructura.evaluar(con, novela_id))
+
+
 def test_el_redactor_ve_la_edad_de_cada_personaje() -> None:
     con, ruta = nueva_bd()
     novela_id = crear(con, ruta, capitulos=3)
@@ -332,11 +372,10 @@ def test_puerta_3_un_suceso_posterior_no_cae_en_un_dia_anterior() -> None:
     assert {c.escena_id for c in conflictos} == {g.escenas[(2, 1)]}
 
 
-def test_puerta_3_un_recuerdo_colocado_antes_no_puede_caer_despues() -> None:
+def test_puerta_3_un_suceso_colocado_antes_no_puede_caer_despues() -> None:
     """El capitulo 2 coloca un suceso antes de todo lo escrito, pero en un dia posterior."""
     con, _ = nueva_bd()
     g = fabrica.novela_minima(con)
-    con.execute("UPDATE escena SET analepsis = 1 WHERE id = ?", (g.escenas[(2, 1)],))
     con.execute("UPDATE evento SET orden_interno = 0, dia = 10 WHERE escena_id = ?",
                 (g.escenas[(2, 1)],))
     conflictos = _dia_contra_orden(con, g, 2)
@@ -345,6 +384,34 @@ def test_puerta_3_un_recuerdo_colocado_antes_no_puede_caer_despues() -> None:
     con_el_anterior = [c for c in conflictos if c.datos["capitulo_evento"] == 1]
     assert len(con_el_anterior) == 2
     assert {c.escena_id for c in con_el_anterior} == {g.escenas[(2, 1)]}
+
+
+def test_puerta_3_un_recuerdo_no_choca_con_los_antecedentes_del_mundo() -> None:
+    """Hallazgo 2 del validador: el extractor no ve el orden negativo de los antecedentes, asi
+    que una analepsis anterior a ellos chocaba siempre. Como en `coherencia_temporal`, las
+    analepsis y los antecedentes quedan fuera."""
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    con.execute(
+        "INSERT INTO evento (novela_id, linea_de_tiempo_id, fecha_interna, dia, orden_interno,"
+        " descripcion, dramatizado) VALUES (?, ?, 'hace ocho meses', -240, -1, 'Se calla', 0)",
+        (g.novela_id, g.linea_id),
+    )
+    con.execute("UPDATE escena SET analepsis = 1 WHERE id = ?", (g.escenas[(2, 1)],))
+    con.execute("UPDATE evento SET orden_interno = 5, dia = -300 WHERE escena_id = ?",
+                (g.escenas[(2, 1)],))
+    assert _dia_contra_orden(con, g, 2) == []
+
+
+def test_puerta_3_dos_sucesos_simultaneos_caen_el_mismo_dia() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    con.execute("UPDATE evento SET orden_interno = 3, dia = 3 WHERE escena_id = ?",
+                (g.escenas[(2, 1)],))
+    con.execute("UPDATE evento SET orden_interno = 3, dia = 9 WHERE escena_id = ?",
+                (g.escenas[(2, 2)],))
+    conflictos = _dia_contra_orden(con, g, 2)
+    assert len(conflictos) == 1 and "simultaneos" in conflictos[0].descripcion
 
 
 def test_romper_el_dia_en_la_demo_para_el_pipeline() -> None:
@@ -424,6 +491,19 @@ def test_una_version_nueva_solo_si_el_texto_cambia() -> None:
     # La version anterior conserva su texto aunque el capitulo ya no lo tenga.
     assert (lectura.version(con, novela_id, 1) or {})["capitulos"][1]["texto"] == original
     assert "version_desfasada" not in _nombres(verificar_integridad(con))
+
+
+def test_la_integridad_ve_una_version_con_titulo_o_capitulos_desfasados() -> None:
+    """Hallazgo 4 del validador: no bastaba con que cada capitulo vigente estuviera en ella."""
+    con, novela_id, _ = _demo()
+    con.execute("UPDATE novela SET titulo = 'Otro titulo' WHERE id = ?", (novela_id,))
+    assert "version_desfasada" in _nombres(verificar_integridad(con))
+    con.execute("UPDATE novela SET titulo = (SELECT titulo FROM novela_version WHERE numero = 1)"
+                " WHERE id = ?", (novela_id,))
+    assert "version_desfasada" not in _nombres(verificar_integridad(con))
+    # Una escaleta rehecha con un capitulo menos: la version conserva uno que ya no existe.
+    con.execute("DELETE FROM capitulo WHERE novela_id = ? AND numero = 3", (novela_id,))
+    assert "version_desfasada" in _nombres(verificar_integridad(con))
 
 
 def test_relanzar_y_completar_con_el_mismo_texto_no_crea_version() -> None:

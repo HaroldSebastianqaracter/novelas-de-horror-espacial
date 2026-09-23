@@ -426,24 +426,35 @@ _COMPROBACIONES: tuple[tuple[str, str, str], ...] = (
     ),
     (
         "version_desfasada",
-        "Una novela completada tiene version, y la ultima tiene el texto vigente de cada "
-        "capitulo (RF3-BIB-14)",
+        "Una novela completada tiene version, y la ultima tiene exactamente sus capitulos "
+        "vigentes, su titulo y su dedicatoria (RF3-BIB-14)",
         """
+        WITH ultima AS (
+          SELECT v.novela_id, v.id, v.titulo, v.dedicatoria FROM novela_version v
+          WHERE v.numero = (SELECT MAX(v2.numero) FROM novela_version v2
+                            WHERE v2.novela_id = v.novela_id)
+        ),
+        vigente AS (
+          SELECT c.novela_id, c.numero, cc.texto FROM capitulo c
+          JOIN capitulo_compilado cc ON cc.capitulo_id = c.id AND cc.estado = 'vigente'
+        )
         SELECT x.novela_id
         FROM ejecucion x
+        JOIN novela n ON n.id = x.novela_id
+        LEFT JOIN ultima u ON u.novela_id = x.novela_id
         WHERE x.estado IN ('completada', 'completada_con_avisos')
           AND (
-            NOT EXISTS (SELECT 1 FROM novela_version v WHERE v.novela_id = x.novela_id)
+            u.id IS NULL
+            OR u.titulo IS NOT n.titulo OR u.dedicatoria IS NOT n.dedicatoria
             OR EXISTS (
-              SELECT 1 FROM capitulo c
-              JOIN capitulo_compilado cc ON cc.capitulo_id = c.id AND cc.estado = 'vigente'
-              WHERE c.novela_id = x.novela_id
-                AND NOT EXISTS (
-                  SELECT 1 FROM novela_version_capitulo vc
-                  WHERE vc.numero = c.numero AND vc.texto = cc.texto
-                    AND vc.version_id = (SELECT v.id FROM novela_version v
-                                         WHERE v.novela_id = x.novela_id
-                                         ORDER BY v.numero DESC LIMIT 1))))
+              SELECT 1 FROM vigente g WHERE g.novela_id = x.novela_id
+                AND NOT EXISTS (SELECT 1 FROM novela_version_capitulo vc
+                                WHERE vc.version_id = u.id AND vc.numero = g.numero
+                                  AND vc.texto = g.texto))
+            OR EXISTS (
+              SELECT 1 FROM novela_version_capitulo vc WHERE vc.version_id = u.id
+                AND NOT EXISTS (SELECT 1 FROM vigente g
+                                WHERE g.novela_id = x.novela_id AND g.numero = vc.numero)))
         """,
     ),
     (

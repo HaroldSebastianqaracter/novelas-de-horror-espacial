@@ -52,8 +52,7 @@ _LECTURAS: dict[int, tuple[str, ...]] = {
 _LECTURAS_DEL_ENCARGO: dict[int, tuple[str, ...]] = {
     1: (
         "SELECT contenido FROM brief WHERE novela_id = :n",
-        # La edad, por `edad_del_destinatario` (RF3-BIB-06).
-        "SELECT id, nombre_clave, edad FROM personaje WHERE novela_id = :n ORDER BY id",
+        "SELECT id, nombre_clave FROM personaje WHERE novela_id = :n ORDER BY id",
         "SELECT dedicatoria FROM novela WHERE id = :n",
     ),
     2: (
@@ -66,6 +65,14 @@ _LECTURAS_DEL_ENCARGO: dict[int, tuple[str, ...]] = {
     ),
 }
 
+#: La edad de los personajes, por `edad_del_destinatario` (spec3, RF3-BIB-06). Solo cuenta si la
+#: novela tiene brief Y edades: una novela con brief anterior al bloque 3 no tiene ninguna, y
+#: su huella tiene que seguir siendo la que registro su puerta 1, o perderia la vigencia al
+#: migrar y quedaria atascada.
+_LECTURAS_DE_EDAD: dict[int, tuple[str, ...]] = {
+    1: ("SELECT id, edad FROM personaje WHERE novela_id = :n ORDER BY id",),
+}
+
 PUERTAS_CON_VIGENCIA = frozenset(_LECTURAS)
 
 
@@ -76,6 +83,10 @@ def huella(con: sqlite3.Connection, novela_id: int, puerta: int) -> str | None:
         return None
     if con.execute("SELECT 1 FROM brief WHERE novela_id = ?", (novela_id,)).fetchone():
         consultas = (*consultas, *_LECTURAS_DEL_ENCARGO.get(puerta, ()))
+        if con.execute(
+            "SELECT 1 FROM personaje WHERE novela_id = ? AND edad IS NOT NULL", (novela_id,)
+        ).fetchone():
+            consultas = (*consultas, *_LECTURAS_DE_EDAD.get(puerta, ()))
     filas: list[list[Any]] = []
     for sql in consultas:
         filas.extend([list(f) for f in con.execute(sql, {"n": novela_id}).fetchall()])

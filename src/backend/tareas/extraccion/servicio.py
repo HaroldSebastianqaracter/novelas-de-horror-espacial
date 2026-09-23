@@ -467,6 +467,7 @@ FROM hecho_vigente h
 JOIN escena_ordinal o ON o.escena_id = h.escena_id
 WHERE h.novela_id = ?
   AND (h.categoria IN ('nombre', 'fecha', 'distancia') OR h.valor GLOB '*[0-9]*')
+  AND NOT EXISTS (SELECT 1 FROM hecho_vigente s WHERE s.supersede_a = h.id)
 """
 _LETRAS_MINIMAS = 3
 

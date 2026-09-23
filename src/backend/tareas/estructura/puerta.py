@@ -179,8 +179,10 @@ def _encargo(con: sqlite3.Connection, novela_id: int) -> list[Conflicto]:
         "SELECT rol_narrativo, edad FROM personaje WHERE novela_id = ? AND nombre_clave = ?",
         (novela_id, normalizar(nombre)),
     ).fetchone()
-    # RF3-BIB-06: el protagonista tiene la edad del destinatario (decision entrevistada).
-    if fila is not None and fila["edad"] != brief.destinatario.edad:
+    # RF3-BIB-06: el protagonista tiene la edad del destinatario (decision entrevistada). Sin
+    # edad es una novela anterior al bloque 3: el elenco de entonces no la declaraba, y exigirla
+    # la rechazaria para siempre.
+    if fila is not None and fila["edad"] is not None and fila["edad"] != brief.destinatario.edad:
         salida.append(Conflicto(
             comprobacion="edad_del_destinatario",
             descripcion=(

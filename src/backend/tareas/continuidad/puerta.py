@@ -214,8 +214,13 @@ WHERE a.capitulo = ? AND a.analepsis = 0
 
 # --- 6b. El dia y el orden no se contradicen (RF3-BIB-09) ---------------------------------
 # Dos datos que declara el extractor, comparados entre si: si un evento va antes en orden
-# interno, no puede caer en un dia posterior. Al menos uno de los dos es de este capitulo; los
-# antecedentes del mundo (sin escena) tambien cuentan como el otro.
+# interno, no puede caer en un dia posterior, y dos sucesos simultaneos (mismo orden) caen el
+# mismo dia. Al menos uno de los dos es de este capitulo.
+#
+# Como en `coherencia_temporal`, solo se comparan eventos dramatizados fuera de una analepsis.
+# Los antecedentes del mundo llevan un orden negativo que el extractor no ve, y el orden de un
+# recuerdo respecto a sucesos de capitulos lejanos tampoco: compararlos daba choques que el
+# extractor no podia evitar. Esos pares los comprueba Lean (bloque 9) por el dia.
 _SQL_DIA_CONTRA_ORDEN = """
 SELECT a.id AS evento_id, a.descripcion, a.dia, a.orden_interno, a.escena_id,
        b.id AS otro_id, b.descripcion AS otra_descripcion, b.dia AS otro_dia,
@@ -223,13 +228,17 @@ SELECT a.id AS evento_id, a.descripcion, a.dia, a.orden_interno, a.escena_id,
        oa.capitulo_numero AS capitulo_evento
 FROM evento a
 JOIN evento b ON b.novela_id = a.novela_id AND b.id <> a.id
-LEFT JOIN escena_ordinal oa ON oa.escena_id = a.escena_id
-LEFT JOIN escena_ordinal ob ON ob.escena_id = b.escena_id
+JOIN escena ea ON ea.id = a.escena_id AND ea.analepsis = 0
+JOIN escena eb ON eb.id = b.escena_id AND eb.analepsis = 0
+JOIN escena_ordinal oa ON oa.escena_id = a.escena_id
+JOIN escena_ordinal ob ON ob.escena_id = b.escena_id
 WHERE a.novela_id = :novela
   AND (oa.capitulo_numero = :capitulo OR ob.capitulo_numero = :capitulo)
+  AND a.dramatizado = 1 AND b.dramatizado = 1
   AND a.dia IS NOT NULL AND b.dia IS NOT NULL
   AND a.orden_interno IS NOT NULL AND b.orden_interno IS NOT NULL
-  AND b.orden_interno < a.orden_interno AND b.dia > a.dia
+  AND ((b.orden_interno < a.orden_interno AND b.dia > a.dia)
+       OR (b.orden_interno = a.orden_interno AND b.dia <> a.dia AND b.id < a.id))
 """
 
 _SQL_ENTIDADES = """
@@ -361,9 +370,14 @@ def evaluar(
     for f in [dict(x) for x in con.execute(
         _SQL_DIA_CONTRA_ORDEN, {"novela": novela_id, "capitulo": capitulo}
     ).fetchall()]:
+        simultaneos = f["orden_interno"] == f["otro_orden"]
         conflictos.append(Conflicto(
             comprobacion="dia_contra_orden",
             descripcion=(
+                f"«{f['descripcion'][:60]}» y «{f['otra_descripcion'][:60]}» son simultaneos "
+                f"(orden {f['orden_interno']}) y caen en dias distintos ({f['dia']} y "
+                f"{f['otro_dia']})."
+                if simultaneos else
                 f"«{f['descripcion'][:60]}» va despues en la cronologia (orden "
                 f"{f['orden_interno']}) que «{f['otra_descripcion'][:60]}» (orden "
                 f"{f['otro_orden']}), pero cae en el dia {f['dia']}, antes que el dia "
