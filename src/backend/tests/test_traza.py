@@ -221,15 +221,11 @@ def test_el_puerto_retira_las_herramientas_y_los_mcp() -> None:
     assert "--tools" in argv and "--allowedTools" in argv and "--strict-mcp-config" in argv
 
 
-def test_una_llamada_legitima_con_salida_estructurada_usa_dos_turnos_y_pasa() -> None:
-    puerto, _ = _puerto(claude_falso.sobre({"x": 1}, num_turns=2))
+@pytest.mark.parametrize("turnos", [2, 3])
+def test_el_numero_de_turnos_no_es_uso_de_herramientas(turnos: int) -> None:
+    """Las dos cifras salieron de llamadas reales sin herramientas (CLI 2.1.274)."""
+    puerto, _ = _puerto(claude_falso.sobre({"x": 1}, num_turns=turnos))
     assert puerto.invocar("arquitecto", "entrada", {"type": "object"}).salida == {"x": 1}
-
-
-def test_mas_turnos_de_los_que_pide_la_salida_estructurada_es_un_error() -> None:
-    puerto, _ = _puerto(claude_falso.sobre({"x": 1}, num_turns=3))
-    with pytest.raises(AgenteUsoHerramientas, match="3 turnos"):
-        puerto.invocar("arquitecto", "entrada", {"type": "object"})
 
 
 def test_un_permiso_denegado_es_un_error_y_no_se_reintenta() -> None:

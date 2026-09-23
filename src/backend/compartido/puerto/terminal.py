@@ -57,9 +57,6 @@ SKILLS_PROHIBIDAS = frozenset({"verificacion"})
 
 INTERVALO_SONDEO_S = 0.25
 
-#: Turnos de una llamada legitima: la respuesta y la salida estructurada de --json-schema,
-#: que consume uno (verificado contra el CLI 2.1.274: num_turns = 2 sin ninguna herramienta).
-TURNOS_ESPERADOS = 2
 
 
 def _estimar_tokens(texto: str) -> int:
@@ -109,9 +106,8 @@ def _uso_de_herramientas(sobre: dict[str, Any]) -> str:
     if denegados:
         nombres = sorted({str(como_dict(d).get("tool_name", "?")) for d in denegados})
         return f"permisos denegados para {', '.join(nombres) or len(denegados)}"
-    turnos = int(sobre.get("num_turns") or 0)
-    if turnos > TURNOS_ESPERADOS:
-        return f"{turnos} turnos, cuando una respuesta sin herramientas usa {TURNOS_ESPERADOS}"
+    # `num_turns` no sirve de senal: una llamada real sin herramientas ha dado 2 y 3, segun
+    # como el CLI reintente la salida estructurada (RF2-PUERTO-10). Se guarda en la traza.
     return ""
 
 
