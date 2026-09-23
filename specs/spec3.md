@@ -187,13 +187,13 @@ Las comprobaciones del encargo solo corren en novelas con brief: una novela sin 
 
 **RF3-PER-06 — Demo.** `demo.py --brief fichero.json` crea la novela desde un brief. `ejemplos/brief-ejemplo.json` pasa a ser un brief personalizado completo.
 
-**RF3-ESC-01 — Escala del examen.** Diez capítulos de 1.000 a 1.500 palabras por defecto. La escala sale de RF3-PER-01 y la vigilan comprobaciones que ya existen (presupuesto y longitud por capítulo de la puerta 2) más `numero_de_capitulos`. La longitud **real** de cada capítulo escrito es del bloque 6.
+**RF3-ESC-01 — Escala del examen.** Diez capítulos de 1.000 a 1.500 palabras por defecto. La escala sale de RF3-PER-01 y la vigilan comprobaciones que ya existen (presupuesto y longitud por capítulo de la puerta 2) más `numero_de_capitulos`. La longitud **real** de cada capítulo escrito es del bloque 6 (RF3-VAL-02).
 
 ### Lo que el bloque 2 deja para después
 
 - Que la prosa respete la intensidad: el guardrail por nivel (bloque 5) y la rúbrica del juez (bloque 6).
-- Que cada elemento personal aparezca en la prosa y de forma natural (bloque 6).
-- Los nombres escritos exactamente en la prosa (bloque 6).
+- Que cada elemento personal aparezca en la prosa y de forma natural (bloque 6; los allegados, RF3-VAL-03).
+- Los nombres escritos exactamente en la prosa (bloque 6, RF3-VAL-01).
 - Que las llamadas del entrevistador lleguen a Langfuse (bloque 4); hasta entonces viven en la transcripción.
 
 ---
@@ -387,6 +387,18 @@ El mapa de sustitución no sale nunca de la máquina. Una novela sin brief no ti
 - El diagnóstico del coste del extractor (spec3, RF3-PAS-01) se lee en estas trazas: turnos y coste por llamada.
 
 ---
+
+## 3.6 Bloque 6 — Validadores que faltan
+
+Tres errores de la prosa que el lector de un regalo ve y que ninguna puerta miraba: su nombre mal escrito, un allegado que la escaleta prometió y no sale, y un capítulo de longitud impropia. Los tres son deterministas y van en la parte mecánica de la puerta 4 (RF-PIPE-13), que corre antes del juez y, si falla, devuelve el capítulo al redactor con la descripción del fallo. Si falla tres veces, para.
+
+**RF3-VAL-01 — Los nombres del canon, escritos exactamente.** La comprobación `nombre_mal_escrito` falla si una palabra de la prosa con mayúscula es una palabra de un nombre del canon (personaje, lugar, objeto o facción, de tres letras o más y con mayúscula en el canon) salvo por las tildes o la eñe: «Sebastian» por «Sebastián», «Nunez» por «Núñez». Las mayúsculas no cuentan («NÚÑEZ» está bien escrito), y una palabra en minúscula no es un nombre. Al empezar frase solo se miran las palabras de seis letras o más: ahí va con mayúscula cualquier palabra, y «Más» y el apellido «Mas» solo se distinguen por la tilde. La descripción dice cada forma mal escrita, cuántas veces sale y cómo se escribe.
+
+**RF3-VAL-02 — La longitud real.** El aviso `longitud_real` sale si el capítulo escrito tiene menos o más palabras que el rango `longitud_capitulo_palabras` de la novela. Va al informe y al juez como los demás avisos de la mecánica.
+
+**RF3-VAL-03 — Los allegados planificados, en la prosa.** En una novela con brief, la comprobación `allegado_ausente` falla si la escaleta planificó un allegado en una escena del capítulo y la prosa del capítulo no lo nombra. Basta con una palabra de su nombre de tres letras o más, porque el redactor lo llama por el nombre de pila. La redacción de demostración nombra a los allegados que la escaleta le pide, para que la demo con brief siga pasando.
+
+> **Decisión sin entrevistar.** El nombre y el allegado devuelven el capítulo, y la longitud solo avisa. El nombre mal escrito del destinatario es el error más visible de un regalo, y el allegado que falta es una promesa del encargo incumplida; los dos se corrigen con una reescritura dirigida. La longitud, en cambio, no la percibe el lector como un error, el modelo no cuenta palabras, y reescribir un capítulo entero por eso arriesga meter errores de continuidad nuevos, que es lo contrario del objetivo del autor. Se descartó bloquear la longitud con un margen (por ejemplo, un 20 %) por lo mismo. Puntos ciegos: un nombre mal escrito al empezar frase con menos de seis letras, un nombre escrito con otra letra («Sevastián») y los rasgos y recuerdos del encargo, que no se pueden buscar por palabras y quedan para el juez de personalización del bloque 6.
 
 ## 3.10 Bloque 10 — Infraestructura de evals
 

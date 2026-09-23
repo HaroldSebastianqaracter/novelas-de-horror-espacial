@@ -310,6 +310,9 @@ def escaleta(entrada: str, agente: str) -> dict[str, Any]:
 
 
 def redaccion(entrada: str, agente: str) -> dict[str, Any]:
+    # Nombra a los allegados que la escaleta le pide integrar, como exige la puerta 4
+    # (spec3, RF3-VAL-03).
+    allegados = dict.fromkeys(re.findall(r"ALL\d+: ([^(;\n]+?) \(", entrada))
     cuerpo = (
         f"La compuerta cedio con un chasquido seco. {_reparto(entrada)[0]} apoyo el hombro y "
         "conto hasta tres. "
@@ -317,7 +320,7 @@ def redaccion(entrada: str, agente: str) -> dict[str, Any]:
         "Vaan la miraba desde el marco sin decir nada, con las manos quietas. "
         f"La esclusa quedaba a {DISTANCIA_A_LA_ESCLUSA} y nadie queria recorrerlos. "
         "—Pasa tu primero —dijo ella. Nadie se movio durante un rato largo."
-    )
+    ) + "".join(f" {nombre} esperaba al otro lado." for nombre in allegados)
     return {
         "escenas": [{"orden": o, "texto": cuerpo} for o in _ordenes(entrada)],
         "notas": "",
