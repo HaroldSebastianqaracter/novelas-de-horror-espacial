@@ -71,7 +71,7 @@ Todas llevan su callout `> **Decisión sin entrevistar.**` con las alternativas 
 
 ## Lo que falta
 
-- **Integrar en `pruebas`:** lo decide el autor. La migración nueva es la **010**: si otra sesión ha creado otra 010 en `pruebas`, hay que renumerar la de guardrails antes de integrar.
+- **Integrar en `pruebas`:** lo decide el autor. La migración nueva es la **010**. A las 5 de la mañana `pruebas` seguía en `134e453`, con la 009 como última; si otra sesión crea antes otra 010, hay que renumerar la de guardrails.
 - **La 010 se editó en su sitio durante la noche**, antes de integrarse en ningún lado. Solo afecta a bases migradas con `66542ef` (las temporales de los tests y la copia del scratchpad), no a las del autor.
 - **Bloque 6, juez de personalización:** que los rasgos y recuerdos del encargo se integren con naturalidad (U3-2) y que la prosa respete la intensidad más allá de las palabras.
 - **La puerta 4 no ve la facción del elenco frente a la prosa** (b2, C13 del banco).
@@ -84,4 +84,4 @@ El validador de `9cc7972` dejó colgados dos procesos pytest de un mutante suyo 
 
 ## Hashes
 
-`0f639c5` (plan), `786c4b0`, `e810d8f`, `88be175`, `9a8d864`, `a277d54`, `a65c01d`, `f452fe3`, `469d64d`, `97ceafd`, `66542ef`, `bfb95a3`, `9cc7972`, `8330dcf`, `5da56ac`, `1cd2630`, `f5deddc`, `a5d0355`, `778bc6a`.
+`0f639c5` (plan), `786c4b0`, `e810d8f`, `88be175`, `9a8d864`, `a277d54`, `a65c01d`, `f452fe3`, `469d64d`, `97ceafd`, `66542ef`, `bfb95a3`, `9cc7972`, `8330dcf`, `5da56ac`, `1cd2630`, `f5deddc`, `a5d0355`, `778bc6a`, `289ce17` (este resumen), `670e070`.
