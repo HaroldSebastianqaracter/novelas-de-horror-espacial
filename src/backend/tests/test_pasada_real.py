@@ -12,7 +12,6 @@ import sqlite3
 from typing import Any
 
 import pytest
-from pydantic import ValidationError
 
 from compartido.grafo import Resolvedor, clave_laxa, insertar_hecho
 from compartido.puerto import demo
@@ -42,21 +41,49 @@ def _salida(*valores: str) -> dict[str, Any]:
 # --- RF3-PAS-01: un hecho, un dato ---------------------------------------------------------------
 
 
-def test_un_valor_compuesto_se_rechaza_y_el_error_los_lista_todos() -> None:
-    with pytest.raises(ValidationError) as error:
-        SalidaExtraccion.model_validate(_salida("grises", COMPUESTO, COMPUESTO + " y mas"))
-    mensaje = str(error.value)
-    assert "«Trebo: dato 1» (12 palabras)" in mensaje
-    assert "«Trebo: dato 2» (14 palabras)" in mensaje
-    assert "«Trebo: dato 0»" not in mensaje
+def test_un_valor_largo_no_invalida_la_salida_y_queda_contado() -> None:
+    """La reanudacion de la pasada real acabo en `error`: el rechazo tiraba la extraccion entera
+    por tres valores de once palabras. Un limite blando no rechaza (como el resumen)."""
+    salida = SalidaExtraccion.model_validate(_salida("grises", COMPUESTO, COMPUESTO + " y mas"))
+    assert len(salida.hechos) == 3
+    assert [h.atributo for h in salida.valores_largos] == ["dato 1", "dato 2"]
 
 
-def test_diez_palabras_pasan_y_once_no() -> None:
+def test_diez_palabras_no_son_largas_y_once_si() -> None:
     assert PALABRAS_VALOR == 10
     diez = " ".join(["palabra"] * 10)
-    assert SalidaExtraccion.model_validate(_salida("doce por minuto", diez)).hechos[1].valor == diez
-    with pytest.raises(ValidationError, match="11 palabras"):
-        SalidaExtraccion.model_validate(_salida(diez + " mas"))
+    assert SalidaExtraccion.model_validate(_salida("doce por minuto", diez)).valores_largos == []
+    assert len(SalidaExtraccion.model_validate(_salida(diez + " mas")).valores_largos) == 1
+
+
+def test_un_valor_largo_entra_con_aviso_y_la_novela_sigue() -> None:
+    once = "constantes leidas en la grabacion del registro del dia mil ochocientos"
+
+    def extraccion(entrada: str, agente: str) -> dict[str, Any]:
+        salida = demo.extraccion(entrada, agente)
+        if demo._capitulo(entrada) == 2:
+            salida["hechos"].append({
+                "escena_orden": 1, "sujeto_tipo": "objeto", "sujeto_ref": demo.OBJETO,
+                "atributo": "contenido", "valor": once, "categoria": "otro",
+            })
+        return salida
+
+    con, ruta = nueva_bd()
+    novela_id = crear_novela(con)
+    puerto = puerto_falso(con)
+    puerto.registrar("extraccion", extraccion)
+    assert pipeline.avanzar(contexto(con, puerto, ruta, novela_id)) == "completada"
+    assert contar(con, "SELECT COUNT(*) FROM hecho WHERE valor = ?", once) == 1
+    detalle = json.loads(con.execute(
+        "SELECT detalle FROM resultado_puerta WHERE puerta = 3 AND capitulo = 2"
+    ).fetchone()[0])
+    avisos = [c for c in detalle["conflictos"] if c["comprobacion"] == "valor_compuesto"]
+    assert len(avisos) == 1 and avisos[0]["aviso"]
+    correcciones = [json.loads(f[0]).get("correcciones") for f in con.execute(
+        "SELECT payload FROM traza_evento WHERE tipo = 'extraccion_descartes' "
+        "AND json_extract(payload, '$.capitulo') = 2"
+    )]
+    assert correcciones[0]["valor_largo"] == 1
 
 
 def test_el_esquema_declara_el_limite_sin_patron() -> None:

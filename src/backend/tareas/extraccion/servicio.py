@@ -559,6 +559,9 @@ def aplicar(
         )
     if resolvedor.por_variante:
         descartes.correcciones["nombre_por_variante"] = len(resolvedor.por_variante)
+    # Un valor de mas de un dato entra igual: se cuenta aqui y la puerta 3 avisa (RF3-PAS-01).
+    if salida.valores_largos:
+        descartes.correcciones["valor_largo"] = len(salida.valores_largos)
 
     # --- Lo que la prosa usa sin que el extractor lo diga (RF3-BIB-01) ---------------------
     registrar_menciones(con, novela_id, escenas_por_orden, textos or {})

@@ -68,6 +68,12 @@ AGENTES: tuple[str, ...] = (
     "entrevistador",
 )
 
+#: Un hecho es un dato: su valor tiene como mucho estas palabras (spec3, RF3-PAS-01). En la
+#: primera pasada real, 57 de 94 valores pasaban de 8 y cualquier reformulacion parecia una
+#: contradiccion; los legitimos (una distancia, un nombre, una relacion) no pasaban de 7. Es un
+#: limite blando: pasarlo deja un aviso, no invalida la extraccion.
+PALABRAS_POR_DATO = 10
+
 TIPOS_EVENTO: tuple[str, ...] = (
     "intencion_recibida", "fase_cambiada", "agente_iniciado", "agente_terminado",
     "puerta_evaluada", "capitulo_completado", "parada", "parada_resuelta", "detenida",

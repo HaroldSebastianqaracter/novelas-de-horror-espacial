@@ -18,6 +18,7 @@ from typing import Any
 
 from compartido.grafo import clave_laxa, lectura, normalizar
 from compartido.puerta_base import Conflicto, ResultadoPuerta
+from compartido.tipos import PALABRAS_POR_DATO
 
 POSTURAS_QUE_HABILITAN = ("sabe", "cree", "sospecha", "cree_version_falsa")
 
@@ -275,6 +276,13 @@ WHERE a.novela_id = :novela
        OR (b.orden_interno = a.orden_interno AND b.dia <> a.dia AND b.id < a.id))
 """
 
+_SQL_HECHOS_DEL_CAPITULO = """
+SELECT h.id AS hecho_id, h.sujeto_nombre, h.atributo, h.valor, h.escena_id
+FROM hecho_vigente h
+JOIN escena_ordinal o ON o.escena_id = h.escena_id
+WHERE h.novela_id = ? AND o.capitulo_numero = ?
+"""
+
 _SQL_ENTIDADES = """
 SELECT en.nombre, en.contexto, en.escena_id, c.numero AS capitulo
 FROM entidad_no_reconocida en
@@ -425,6 +433,21 @@ def evaluar(
             ),
             capitulo=capitulo, datos=f,
         ))
+
+    # Un valor de mas de un dato no invalida la extraccion (RF3-PAS-01), pero se avisa: es el
+    # que mas tarde da contradicciones falsas.
+    for f in _filas(con, _SQL_HECHOS_DEL_CAPITULO, p):
+        palabras_valor = len(str(f["valor"]).split())
+        if palabras_valor > PALABRAS_POR_DATO:
+            conflictos.append(Conflicto(
+                comprobacion="valor_compuesto", aviso=True, capitulo=capitulo,
+                escena_id=f["escena_id"],
+                descripcion=(
+                    f"'{f['sujeto_nombre']}: {f['atributo']}' tiene un valor de "
+                    f"{palabras_valor} palabras: seguramente mezcla varios datos."
+                ),
+                datos=f,
+            ))
 
     # Un aviso por nombre nuevo (RF3-PAS-06): el que ya salio en un capitulo anterior, el autor
     # ya lo vio. En la primera pasada real, 50 avisos para 15 nombres tapaban los que importan.

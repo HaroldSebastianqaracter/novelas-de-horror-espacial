@@ -22,6 +22,7 @@ import re
 from pydantic import BaseModel, Field, model_validator
 
 from compartido.tipos import (
+    PALABRAS_POR_DATO,
     CategoriaHecho,
     CondicionPersonaje,
     EstadoHilo,
@@ -31,10 +32,9 @@ from compartido.tipos import (
     SujetoTipo,
 )
 
-#: Un hecho es un dato (spec3, RF3-PAS-01). En la primera pasada real, 57 de 94 valores pasaban
-#: de 8 palabras y cualquier reformulacion parecia una contradiccion; los legitimos (una
-#: distancia, un nombre, una relacion) no pasaban de 7.
-PALABRAS_VALOR = 10
+#: Un hecho es un dato (spec3, RF3-PAS-01). Vive en compartido porque la puerta 3 avisa de los
+#: valores que lo pasan, y una tarea no importa de otra.
+PALABRAS_VALOR = PALABRAS_POR_DATO
 
 
 class HechoExtraido(BaseModel):
@@ -48,7 +48,8 @@ class HechoExtraido(BaseModel):
                     "varios, son varios hechos con atributos distintos",
         # Sin `pattern` en el esquema: Claude Code lo valida con reintentos internos de la
         # salida estructurada, y en la reanudacion de la pasada real la extraccion subio a tres
-        # turnos y 1,75 $. El limite lo dice la descripcion y lo hace cumplir `SalidaExtraccion`.
+        # turnos y 1,75 $. El limite lo dice la descripcion y es BLANDO: `valores_largos` los
+        # cuenta y la puerta 3 avisa, pero nada rechaza (rechazar llevo la novela a `error`).
     )
     conducta: bool = Field(
         default=False,
@@ -198,21 +199,16 @@ class SalidaExtraccion(BaseModel):
         min_length=10, description=f"Una frase, hasta {PALABRAS_RESUMEN_BREVE} palabras"
     )
 
-    @model_validator(mode="after")
-    def _un_dato_por_hecho(self) -> SalidaExtraccion:
-        # Todos los valores largos a la vez: el puerto repite una sola vez con el error, y un
-        # error por hecho obligaria a una repeticion por cada uno (RF3-PAS-01).
-        largos = [h for h in self.hechos if len(h.valor.split()) > PALABRAS_VALOR]
-        if largos:
-            raise ValueError(
-                f"Un hecho es UN dato, con un valor de {PALABRAS_VALOR} palabras como mucho. "
-                "Parte cada uno de estos en varios hechos, con un atributo distinto para cada "
-                "dato: " + "; ".join(
-                    f"«{h.sujeto_ref}: {h.atributo}» ({len(h.valor.split())} palabras)"
-                    for h in largos
-                )
-            )
-        return self
+    @property
+    def valores_largos(self) -> list[HechoExtraido]:
+        """Los hechos cuyo valor pasa del limite de un dato (RF3-PAS-01).
+
+        No invalidan la salida: se registran y dejan un aviso. Rechazarlos tiraba una
+        extraccion entera, con decenas de hechos validos, por tres valores de once palabras,
+        y en la reanudacion de la pasada real llevo la novela a `error` tras los dos intentos.
+        Es la misma leccion que la del resumen (RF2-PIPE-20): un limite blando no rechaza.
+        """
+        return [h for h in self.hechos if len(h.valor.split()) > PALABRAS_VALOR]
 
     @model_validator(mode="after")
     def _resumenes_dentro_de_limite(self) -> SalidaExtraccion:
