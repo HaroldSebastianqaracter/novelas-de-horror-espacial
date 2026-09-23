@@ -165,7 +165,7 @@ def construir(modelo: str, *, permitir_hash: bool = False) -> Embedder:
     for backend, nombre in orden:
         try:
             return clases[backend](nombre)
-        except Exception as exc:  # noqa: BLE001 - se prueba el siguiente backend
+        except Exception as exc:  # se prueba el siguiente backend
             ultimo = exc
 
     if permitir_hash:

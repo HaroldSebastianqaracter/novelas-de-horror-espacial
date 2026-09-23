@@ -536,7 +536,7 @@ def _revertir_a_medias(ctx: Contexto, numero: int) -> None:
     try:
         with transaccion(ctx.con):
             fallo.revertir_grafo(ctx.con, ctx.novela_id, numero, motivo="salida_anomala")
-    except Exception:  # noqa: BLE001 - no debe tapar la excepcion que nos trajo aqui
+    except Exception:  # no debe tapar la excepcion que nos trajo aqui
         log.exception("No se pudo revertir el capitulo %s a medias", numero)
 
 
@@ -597,7 +597,7 @@ def _recuperar(ctx: Contexto, numero: int) -> list[Any]:
         return ctx.indice.recuperar(  # type: ignore[union-attr]
             ctx.novela_id, consulta, hasta_capitulo=numero, lugares=lugares, limite=8
         )
-    except Exception as exc:  # noqa: BLE001 - el indice es prescindible, pero se avisa
+    except Exception as exc:  # el indice es prescindible, pero se avisa
         emitir_traza(ctx, "indice_fallo", operacion="recuperar", capitulo=numero,
                      error=f"{type(exc).__name__}: {exc}")
         return []
@@ -609,7 +609,7 @@ def _indexar(ctx: Contexto, numero: int) -> None:
     try:
         with transaccion(ctx.con):
             ctx.indice.indexar_capitulo(ctx.novela_id, numero)  # type: ignore[union-attr]
-    except Exception as exc:  # noqa: BLE001 - el indice es prescindible, pero se avisa
+    except Exception as exc:  # el indice es prescindible, pero se avisa
         emitir_traza(ctx, "indice_fallo", operacion="indexar", capitulo=numero,
                      error=f"{type(exc).__name__}: {exc}")
 

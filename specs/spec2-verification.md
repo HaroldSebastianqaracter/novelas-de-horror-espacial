@@ -38,6 +38,9 @@ Actualizado el 23 de septiembre de 2026. Las rutas de evidencia son relativas a 
 | 24 | Una señal de terminar para el pipeline aunque llegue entre dos llamadas | 6 | Integration testing | `T` | Solo prueba la señal antes de la primera llamada y en el puerto; no envía una señal real al proceso | **Sí** | `tests/test_traza.py::test_una_senal_entre_llamadas_para_sin_llamar_a_ningun_agente`, `::test_parar_por_intencion_solo_corta_una_llamada`; `tests/test_auditoria.py::test_hallazgo_18_…` | implementado |
 | 25 | El índice sabe con qué modelo se construyó y se rehace si cambia; sin modelo no hay hash de repuesto | 7 | Integration testing | `T` | Mismo nombre de modelo con otra versión de pesos: no se detecta | No: registro + test de reconstrucción | `tests/test_indice.py::test_cambiar_de_modelo_rehace_el_indice_con_la_dimension_nueva`, `::test_sin_modelo_no_hay_hash_de_repuesto` | implementado |
 | 26 | Todo fallo del índice es un aviso en la traza, y toda reversión lo purga | 7 | Integration testing | `T` | Solo los fallos de carga del modelo; un fallo a mitad de una consulta sigue el mismo camino pero no tiene test propio | No | `tests/test_indice.py::test_si_el_modelo_no_carga_el_pipeline_sigue_y_la_traza_lo_avisa`, `::test_revertir_saca_del_indice_lo_que_deja_de_ser_vigente` | implementado |
+| 27 | El orden global de escena no colisiona | 9 | Unit testing + trigger | `T` | Un capítulo con más de 999.999 escenas se rechaza en vez de ordenarse: es un límite, no un orden | No: trigger + test | `tests/test_deuda.py::test_el_ordinal_de_escena_no_colisiona_con_capitulos_largos`, migración 003 | implementado |
+| 28 | La puerta 5 avisa del pago sin siembra, del cierre fuera de orden y de la latencia por tramo continuo, sin bloquear | 9 | Unit testing | `T` | Comprueba que el pago y el cierre **existen** en orden, no que satisfagan | No | `tests/test_deuda.py` (sección puerta 5) | implementado |
+| 29 | `insertar` y `actualizar` solo escriben columnas que existen | 9 | Unit testing | `T` | Valida nombres de columna, no el tipo del valor | No | `tests/test_deuda.py::test_insertar_una_columna_desconocida_es_un_error_antes_de_llegar_a_sqlite`, `::test_actualizar_puede_poner_una_columna_a_null` | implementado |
 
 ## Riesgos aceptados
 
@@ -45,6 +48,7 @@ Actualizado el 23 de septiembre de 2026. Las rutas de evidencia son relativas a 
 | --- | --- | --- | --- |
 | U2-1 | La estimación de tokens no se desvía del recuento real | Sigue sin tokenizador de referencia | Es U4 de spec1, con su mismo atenuante |
 | U2-2 | El desempate por similitud de RF-CTX-08 mejora algo | No hay golden set que lo mida | El orden determinista con desempate por `id` es reproducible; se revisa cuando exista el golden set de la fase 7 |
+| U2-3 | La estructura entera cabe en una sola llamada al escaletador | La escaleta por actos de RF-PIPE-06 no se implementa: el escaletador recibe texto, no un paquete con presupuesto | Las novelas de prueba son cortas; si la estructura no cabe, la llamada falla y la ejecución acaba en `error`, visible, no en una escaleta truncada |
 
 ## Validadores solitarios
 

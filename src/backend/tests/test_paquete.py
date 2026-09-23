@@ -185,7 +185,7 @@ def test_si_lo_obligatorio_del_juez_no_cabe_hay_parada_de_presupuesto_y_se_revie
 # --- Lo que se lee del grafo (RF2-CTX-11) --------------------------------------------------------
 
 
-def _grafo():  # noqa: ANN202
+def _grafo():
     con, _ = nueva_bd()
     con.execute("BEGIN")
     g = novela_minima(con)

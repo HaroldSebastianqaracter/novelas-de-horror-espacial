@@ -99,7 +99,7 @@ class Indice:
         try:
             self._cargar_extension()
             self.disponible = True
-        except Exception as exc:  # noqa: BLE001 - se guarda el motivo y se avisa al usarlo
+        except Exception as exc:  # se guarda el motivo y se avisa al usarlo
             self.fallo = f"sqlite-vec no carga: {exc}"
         self._registrar_disponible()
 

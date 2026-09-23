@@ -38,7 +38,7 @@ def _filas_totales(ruta: Path) -> dict[str, int]:
         con.close()
 
 
-def _esperar(condicion, segundos: float = 5.0) -> bool:  # noqa: ANN001
+def _esperar(condicion, segundos: float = 5.0) -> bool:
     limite = time.monotonic() + segundos
     while time.monotonic() < limite:
         if condicion():
@@ -104,7 +104,7 @@ db.preparar(r"{ruta}").close()
     con = db.conectar(ruta)
     versiones = [f[0] for f in con.execute("SELECT version FROM esquema_version ORDER BY 1")]
     # Cada version una sola vez, hasta la ultima: nadie la aplico dos veces.
-    assert versiones == [db.VERSION_ESQUEMA, *(m.numero for m in db._migraciones())]  # noqa: SLF001
+    assert versiones == [db.VERSION_ESQUEMA, *(m.numero for m in db._migraciones())]
     assert versiones[-1] == db.version_objetivo()
 
 
@@ -196,7 +196,7 @@ def test_aplicar_una_version_ya_aplicada_no_hace_nada() -> None:
     con, _ = nueva_bd()
     assert db.crear_esquema(con) is False
     esquema = db.RUTA_ESQUEMA.read_text(encoding="utf-8")
-    assert db._aplicar_version(con, db.VERSION_ESQUEMA, esquema) is False  # noqa: SLF001
+    assert db._aplicar_version(con, db.VERSION_ESQUEMA, esquema) is False
     assert not con.in_transaction
 
 

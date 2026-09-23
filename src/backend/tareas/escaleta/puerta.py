@@ -40,22 +40,18 @@ def evaluar(con: sqlite3.Connection, novela_id: int) -> ResultadoPuerta:
 
     for e in escenas:
         donde = f"{e['capitulo']}.{e['orden']}"
-        if not e["pov_id"]:
+        # «Sin POV declarado» no se comprueba: escena.pov_id es NOT NULL y el esquema de la
+        # escaleta lo exige, asi que nunca podria disparar (RF2-PIPE-07).
+        en_reparto = con.execute(
+            "SELECT 1 FROM escena_personaje WHERE escena_id = ? AND personaje_id = ?",
+            (e["id"], e["pov_id"]),
+        ).fetchone()
+        if en_reparto is None:
             conflictos.append(Conflicto(
-                comprobacion="pov_declarado", capitulo=e["capitulo"], escena_id=e["id"],
-                descripcion=f"La escena {donde} no declara POV.",
+                comprobacion="pov_fuera_del_reparto", capitulo=e["capitulo"],
+                escena_id=e["id"],
+                descripcion=f"El POV de la escena {donde} no esta en su reparto.",
             ))
-        else:
-            en_reparto = con.execute(
-                "SELECT 1 FROM escena_personaje WHERE escena_id = ? AND personaje_id = ?",
-                (e["id"], e["pov_id"]),
-            ).fetchone()
-            if en_reparto is None:
-                conflictos.append(Conflicto(
-                    comprobacion="pov_fuera_del_reparto", capitulo=e["capitulo"],
-                    escena_id=e["id"],
-                    descripcion=f"El POV de la escena {donde} no esta en su reparto.",
-                ))
 
         if normalizar_valor(e["valor_inicial"] or "") == normalizar_valor(e["valor_final"] or ""):
             conflictos.append(Conflicto(

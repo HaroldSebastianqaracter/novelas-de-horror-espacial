@@ -20,7 +20,7 @@ from orquestador import cola, fallo, pipeline, vigencia
 from tests.entorno import cfg_de, contar, contexto, crear_novela, nueva_bd, puerto_falso
 
 
-def _falla(puerta: int):  # noqa: ANN202 - sustituto de un evaluar de puerta
+def _falla(puerta: int):  # sustituto de un evaluar de puerta
     def evaluar(*_: object) -> ResultadoPuerta:
         return ResultadoPuerta(
             puerta=puerta, conflictos=[Conflicto("forzado", f"la puerta {puerta} falla")]
@@ -193,7 +193,7 @@ def test_aceptar_retcon_revierte_desde_el_capitulo_de_la_parada_y_no_desde_el_1(
     def contradice(entrada: str, agente: str) -> dict:
         # Desde el capitulo 2 el olor es otro: contradice al 1 hasta que el autor lo revoca.
         salida = agentes_falsos.extraccion(entrada, agente)
-        if agentes_falsos._capitulo(entrada) >= 2:  # noqa: SLF001
+        if agentes_falsos._capitulo(entrada) >= 2:
             salida["hechos"][0]["valor"] = "aire limpio y sin olor"
         return salida
 
@@ -306,7 +306,7 @@ def test_el_retcon_es_un_registro_y_relanzar_desde_antes_lo_deshace(w: worker.Wo
 
     def contradice(entrada: str, agente: str) -> dict:
         salida = agentes_falsos.extraccion(entrada, agente)
-        if agentes_falsos._capitulo(entrada) >= 3:  # noqa: SLF001
+        if agentes_falsos._capitulo(entrada) >= 3:
             salida["hechos"][0]["valor"] = "aire limpio y sin olor"
         return salida
 

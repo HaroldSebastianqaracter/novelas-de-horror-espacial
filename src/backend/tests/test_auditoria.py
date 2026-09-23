@@ -37,7 +37,7 @@ from tests.fabrica import hecho, novela_minima
 RAIZ = Path(__file__).resolve().parents[1]
 
 
-def _falla(puerta: int):  # noqa: ANN202 - sustituto de un evaluar de puerta
+def _falla(puerta: int):  # sustituto de un evaluar de puerta
     def evaluar(*_: object) -> ResultadoPuerta:
         return ResultadoPuerta(puerta=puerta, conflictos=[Conflicto("forzado", "falla forzada")])
 
@@ -356,7 +356,7 @@ def test_hallazgo_11_un_uso_sobre_un_hecho_que_no_existe_deja_aviso() -> None:
     assert any("conocimiento_sin_comprobar" in d for d in detalles)
 
 
-def _puerto_terminal(respuesta: dict):  # noqa: ANN202
+def _puerto_terminal(respuesta: dict):
     from compartido.puerto import PuertoTerminal
     from tests import claude_falso
 

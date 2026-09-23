@@ -102,6 +102,8 @@ Son consultas sobre las entidades de estado de [definitions.md](definitions.md).
 | Integridad de POV | `Escena` (`pov`), `Novela` (`povPorDefecto`) | Escena sin POV declarado, o cambio de conciencia focal dentro de una misma escena. | Ve el POV **declarado**, no el ejercido. La prosa puede deslizarse a otra conciencia con el campo correcto. |
 | Presupuesto | `Restriccion` (`valor`) | Longitud de acto, capítulo o escena fuera del rango fijado; desviación de la longitud objetivo. | Mide extensión, no densidad. Un capítulo en rango puede no contener nada. |
 
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** «Siembras sin pago» e «Hilos sin cerrar» se describen arriba como **fallos**, y en la v2 la puerta 5, que es donde se comprueban, **avisa y no bloquea**. No es una contradicción sino un orden: llegado a la puerta 5 el manuscrito existe, y lo que encuentra se arregla revisando, que es el trabajo del revisor, fuera de la v2. Bloquear ahí solo impediría leer un manuscrito que ya está escrito. Desde la v2 comprueba también el pago sin siembra previa, el cierre de hilos fuera de orden y la latencia como tramo continuo. Cuando exista el revisor, estas comprobaciones pasarán a condicionar su trabajo. Detalle en [specs/spec2.md](../specs/spec2.md), RF2-PIPE-15.
+
 ### Comprobable ejecutando — `T`
 
 | Método | Aplicación al dominio |

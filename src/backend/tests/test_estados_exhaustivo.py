@@ -104,7 +104,7 @@ def _abstraccion(con: sqlite3.Connection) -> tuple[Any, ...]:
     return (
         str(e["estado"]),
         tuple(sorted(str(p["tipo"]) for p in abiertas)),
-        not pipeline._fase_pendiente_de_planificacion(  # noqa: SLF001
+        not pipeline._fase_pendiente_de_planificacion(
             pipeline.Contexto(con=con, puerto=None, cfg=None, novela_id=NOVELA)  # type: ignore[arg-type]
         ),
         vigencia.puerta_vigente(con, NOVELA, 1),
@@ -173,9 +173,9 @@ class Explorador:
                 informe: dict[str, Any] = {"motivo": "forzado"}
                 if r.capitulo == "continuidad":
                     informe["conflictos"] = [{"datos": {"hecho_previo_id": 1}}]
-                pipeline._abrir_parada(ctx, r.capitulo, informe, capitulo=numero)  # noqa: SLF001
+                pipeline._abrir_parada(ctx, r.capitulo, informe, capitulo=numero)
             with transaccion(ctx.con):
-                pipeline._cerrar_capitulo(ctx, numero)  # noqa: SLF001
+                pipeline._cerrar_capitulo(ctx, numero)
 
         return generar
 
@@ -191,13 +191,13 @@ class Explorador:
             if suceso == "recuperar":
                 w.recuperar()
             elif suceso == "parar":
-                w._parar(intencion)  # noqa: SLF001
+                w._parar(intencion)
             elif suceso == "arrancar":
-                w._arrancar(intencion)  # noqa: SLF001
+                w._arrancar(intencion)
             elif suceso.startswith("relanzar_"):
-                w._relanzar(intencion)  # noqa: SLF001
+                w._relanzar(intencion)
             else:
-                w._resolver_parada(intencion)  # noqa: SLF001
+                w._resolver_parada(intencion)
         except Caida:
             pass
         finally:
@@ -317,13 +317,13 @@ def test_el_recorrido_detecta_un_avanzar_que_se_salta_la_puerta_1(
     crear_novela(con)
     explorador = Explorador(monkeypatch, profundidad=3)
     real = pipeline.vigencia
-    original = explorador._preparar  # noqa: SLF001
+    original = explorador._preparar
 
     def preparar_con_mutante(w: worker.Worker, r: Resultados) -> None:
         original(w, r)
         monkeypatch.setattr(pipeline, "vigencia", VigenciaCiega)
 
-    explorador._preparar = preparar_con_mutante  # type: ignore[method-assign]  # noqa: SLF001
+    explorador._preparar = preparar_con_mutante  # type: ignore[method-assign]
     explorador.explorar(_foto(con))
     assert pipeline.vigencia is real
     assert any("generar_capitulo" in v and "puerta 1" in v for v in explorador.violaciones)

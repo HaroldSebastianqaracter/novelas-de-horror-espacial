@@ -164,7 +164,7 @@ class Worker:
                 continue
             try:
                 self.atender(intencion)
-            except Exception as exc:  # noqa: BLE001 - el worker no puede morir por una intencion
+            except Exception as exc:  # el worker no puede morir por una intencion
                 log.exception("Fallo atendiendo la intencion %s", intencion.id)
                 cola.cerrar(self.con, intencion.id, "rechazada", motivo=str(exc)[:500])
                 if intencion.novela_id:
@@ -374,7 +374,7 @@ class Worker:
         try:
             final = pipeline.avanzar(ctx)
             log.info("Novela %s: %s", novela_id, final)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             log.exception("Fallo no controlado en la novela %s", novela_id)
             self._marcar_error(novela_id, exc)
         finally:
@@ -388,7 +388,7 @@ class Worker:
             with transaccion(self.con):
                 estados.transicion(self.con, novela_id, "error", fase=None, error=detalle)
                 emitir_evento(self.con, novela_id, "error", mensaje=str(exc)[:500])
-        except Exception:  # noqa: BLE001 - ya estabamos en el camino de error
+        except Exception:  # ya estabamos en el camino de error
             log.exception("No se pudo registrar el error de la novela %s", novela_id)
 
 
@@ -413,7 +413,7 @@ def main() -> int:
     return 0
 
 
-def _manejador(worker: Worker):  # noqa: ANN202 - firma impuesta por signal
+def _manejador(worker: Worker):  # firma impuesta por signal
     def manejar(_num: int, _frame: FrameType | None) -> None:
         worker.detener()
 

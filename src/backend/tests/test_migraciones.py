@@ -19,7 +19,7 @@ from compartido import db
 def _base_v1() -> sqlite3.Connection:
     """Una base como la dejaba spec1: solo esquema.sql, sin ninguna migracion."""
     con = db.conectar(Path(tempfile.mkdtemp()) / "novela.db")
-    db._aplicar_version(  # noqa: SLF001
+    db._aplicar_version(
         con, db.VERSION_ESQUEMA, db.RUTA_ESQUEMA.read_text(encoding="utf-8")
     )
     assert db.version_actual(con) == 1
@@ -81,8 +81,8 @@ def test_una_base_del_esquema_1_migra_a_la_2_y_conserva_los_datos() -> None:
     ids = _poblar(con)
     antes = _filas(con)
 
-    assert db.migrar(con) == [2]
-    assert db.version_actual(con) == db.version_objetivo() == 2
+    assert db.migrar(con) == [m.numero for m in db._migraciones()]
+    assert db.version_actual(con) == db.version_objetivo()
 
     despues = _filas(con)
     datos = [t for t in antes if t != "esquema_version"]

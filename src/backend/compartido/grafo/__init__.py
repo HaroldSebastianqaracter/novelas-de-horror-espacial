@@ -2,6 +2,7 @@
 
 from . import lectura
 from .escritura import (
+    NULO,
     TABLAS_CON_NOMBRE_CLAVE,
     NombreDesconocido,
     Resolvedor,
@@ -14,6 +15,7 @@ from .escritura import (
 )
 
 __all__ = [
+    "NULO",
     "TABLAS_CON_NOMBRE_CLAVE",
     "NombreDesconocido",
     "Resolvedor",

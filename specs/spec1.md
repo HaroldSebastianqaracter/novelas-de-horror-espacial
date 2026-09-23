@@ -361,6 +361,8 @@ Si falla, la ejecución pasa a `parada` con un informe de tipo `estructura`. La 
 
 **RF-PIPE-06** Escaleta: el escaletador recibe estructura y canon (RF-CTX-06) y devuelve `Capitulo`, `Secuencia`, `Escena` (con `pov`, `objetivo`, `conflicto`, `resultado`, `valorInicial`, `valorFinal`, `tension`, `ganchoSalida`, `lugar`, `reparto`, `longitud_prevista`), `Beat` y `Secuela`. Puede correr en **varias llamadas, una por acto**, si el paquete de toda la estructura no cabe en el presupuesto; el orquestador decide (RF-CTX-03) y cada llamada recibe la escaleta de los actos anteriores en forma de resumen.
 
+> Sin implementar en la v2 (riesgo aceptado U2-3 de spec2): la escaleta va en una sola llamada.
+
 **RF-PIPE-07 — Puerta 2, determinista.** Sobre toda la escaleta:
 
 | Comprobación | Falla si |
@@ -374,6 +376,8 @@ Si falla, la ejecución pasa a `parada` con un informe de tipo `estructura`. La 
 | Secuencia | Alguna secuencia con menos de 3 o más de 8 escenas — **aviso**, no fallo |
 
 Si falla, se reintenta la escaleta una vez con el informe adjunto; el segundo fallo pasa a `parada` con informe `escaleta`.
+
+> Ampliado por spec2, RF2-PIPE-07: la comprobación «POV declarado» desaparece por redundante con el esquema.
 
 ### 3.6 Pipeline: bucle de capítulo
 
@@ -452,6 +456,8 @@ Si alguna parte falla, el orquestador **vuelve a redacción** del mismo capítul
 > Sustituido por spec2, RF2-PIPE-08.
 
 **RF-PIPE-15 — Puerta 5, determinista y no bloqueante.** Tras el último capítulo, el orquestador genera un informe con: siembras cuyo estado final no es `pagada` ni `abandonada`; hilos cuyo estado final no es `resuelto` ni `abierto_deliberado`; hilos que pasaron más de `N` capítulos en `latente` (`N` configurable, defecto 6). La ejecución termina en `completada` si el informe está vacío y en `completada_con_avisos` si no. La curva de tensión (`D`) y las reglas de la amenaza (`I`) no se evalúan en la v1.
+
+> Ampliado por spec2, RF2-PIPE-15: pago sin siembra previa, cierre fuera de orden y latencia como tramo continuo.
 
 ### 3.7 Gestión de contexto
 

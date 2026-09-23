@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import unicodedata
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from typing import Any
 
 _TILDE_DE_LA_ENE = chr(0x0303)  # la virgulilla combinante de la ene
@@ -36,6 +36,34 @@ def normalizar(nombre: str) -> str:
             continue
         salida.append(c)
     return " ".join(unicodedata.normalize("NFC", "".join(salida)).split())
+
+
+class _Nulo:
+    """Marcador para poner una columna a NULL con `actualizar`: None significa «no tocar»."""
+
+    def __repr__(self) -> str:
+        return "NULO"
+
+
+NULO: Any = _Nulo()
+
+
+def _columnas(con: sqlite3.Connection, tabla: str) -> set[str]:
+    """Las columnas de una tabla existente. Una tabla desconocida es un error aqui, no SQL."""
+    existe = con.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", (tabla,)
+    ).fetchone()
+    if existe is None:
+        raise ValueError(f"No existe la tabla '{tabla}'.")
+    return {str(f[1]) for f in con.execute(f"PRAGMA table_info({tabla})").fetchall()}
+
+
+def _comprobar_columnas(con: sqlite3.Connection, tabla: str, nombres: Iterable[str]) -> None:
+    desconocidas = sorted(set(nombres) - _columnas(con, tabla))
+    if desconocidas:
+        raise ValueError(
+            f"La tabla '{tabla}' no tiene la columna {', '.join(repr(c) for c in desconocidas)}."
+        )
 
 
 def _serializar(valor: Any) -> Any:
@@ -61,6 +89,8 @@ def insertar(con: sqlite3.Connection, tabla: str, **campos: Any) -> int:
     if tabla in TABLAS_CON_NOMBRE_CLAVE and campos.get("nombre"):
         campos.setdefault("nombre_clave", normalizar(str(campos["nombre"])))
     limpios = {k: _serializar(v) for k, v in campos.items() if v is not None}
+    # Los nombres de columna se interpolan en el SQL: solo los que la tabla tiene de verdad.
+    _comprobar_columnas(con, tabla, limpios)
     columnas = ", ".join(limpios)
     huecos = ", ".join("?" * len(limpios))
     cur = con.execute(
@@ -70,9 +100,13 @@ def insertar(con: sqlite3.Connection, tabla: str, **campos: Any) -> int:
 
 
 def actualizar(con: sqlite3.Connection, tabla: str, id_fila: int, **campos: Any) -> None:
-    limpios = {k: _serializar(v) for k, v in campos.items() if v is not None}
+    """Actualiza una fila. None significa «no tocar»; para poner NULL se pasa `NULO`."""
+    limpios = {
+        k: (None if v is NULO else _serializar(v)) for k, v in campos.items() if v is not None
+    }
     if not limpios:
         return
+    _comprobar_columnas(con, tabla, limpios)
     asignaciones = ", ".join(f"{k} = ?" for k in limpios)
     con.execute(f"UPDATE {tabla} SET {asignaciones} WHERE id = ?",
                 [*limpios.values(), id_fila])
@@ -176,13 +210,14 @@ def anotar_entidades_no_reconocidas(
         )
 
 
-def emitir_evento(*args: Any, **payload: Any) -> int:
+def emitir_evento(
+    con: sqlite3.Connection, novela_id: int | None, tipo: str, /, **payload: Any
+) -> int:
     """Escribe un evento de traza. El SSE lo lee de aqui; el GET sigue siendo la verdad.
 
-    La firma va por posicion —(con, novela_id, tipo)— a proposito: el payload es libre y un
-    evento cuyo payload lleve una clave `tipo` o `novela_id` chocaria con los parametros.
+    Los tres primeros parametros son solo posicionales: el payload es libre, y un evento cuyo
+    payload lleve una clave `tipo` o `novela_id` no puede chocar con ellos.
     """
-    con, novela_id, tipo = args
     return insertar(
         con, "traza_evento", novela_id=novela_id, tipo=tipo,
         payload=json.dumps(payload, ensure_ascii=False, default=str),

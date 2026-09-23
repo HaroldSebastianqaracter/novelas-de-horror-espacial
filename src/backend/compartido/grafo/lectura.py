@@ -339,7 +339,8 @@ def siembras_vivas(
 
 def hilos(con: sqlite3.Connection, novela_id: int) -> list[dict[str, Any]]:
     return _filas(con.execute(
-        "SELECT * FROM hilo_vigente WHERE novela_id = ? ORDER BY tipo DESC", (novela_id,)
+        "SELECT * FROM hilo_vigente WHERE novela_id = ? "
+        "ORDER BY tipo = 'principal' DESC, hilo_id", (novela_id,)
     ))
 
 

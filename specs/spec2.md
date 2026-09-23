@@ -253,7 +253,17 @@ Hallazgo 19 (seis endpoints devuelven `dict` sin esquema) y los errores de pyrig
 
 ### 3.9 Fase 9 — Deuda menor
 
-*Pendiente: se escribe al empezar la fase.*
+Hallazgos 25 y 26 y las «cosas que chirrían» del informe. Cada punto que cambia comportamiento lleva su línea; la limpieza, no.
+
+**RF2-PER-12** *Sustituye a la definición del ordinal de escena de spec1.* El orden global de escena deja de ser `capítulo × 1000 + orden`, que colisionaba en cuanto un capítulo pasaba de 999 escenas: pasa a `capítulo × 1.000.000 + orden`, y un trigger rechaza una escena con `orden` fuera de 1 a 999.999, de modo que la colisión es imposible y no solo improbable (migración 003).
+
+**RF2-PIPE-15** *Amplía RF-PIPE-15.* La puerta 5 añade dos avisos: **pago sin siembra previa** (una siembra pagada que nunca se registró plantada) y **cierre fuera de orden** (dos hilos que se cierran en el mismo orden en que se abrieron, en vez del inverso). Un hilo latente se mide como **tramo continuo** de capítulos en `latente`, no como distancia entre su primer y su último registro latente, que sumaba tramos separados. La puerta 5 **sigue sin bloquear** en la v2: llegado a ella el manuscrito existe, y lo que encuentra se arregla revisando, que es trabajo del revisor, fuera de la v2 (validators.md lo recoge).
+
+**RF2-PIPE-07** *Amplía RF-PIPE-07.* La comprobación «escena sin POV declarado» de la puerta 2 desaparece: `escena.pov_id` es `NOT NULL` y el esquema de la escaleta lo exige, así que nunca podía disparar. Queda «POV fuera del reparto», que es la que sí puede fallar.
+
+**Limpieza sin cambio de comportamiento.** Los hilos se leen con el principal primero. `insertar` y `actualizar` validan los nombres de columna contra `PRAGMA table_info` (una tabla o una columna desconocida es un error en Python, no SQL interpolado), y `actualizar` admite poner una columna a NULL con el marcador `NULO`. `emitir_evento` declara `(con, novela_id, tipo, /, **payload)` con parámetros solo posicionales, en vez de recibir `*args`: un payload con una clave `tipo` ya no choca con el parámetro. Se quitan los `noqa` que ruff marca como sobrantes.
+
+**Lo que spec1 pedía y sigue sin hacerse**, escrito para que no sea un hueco: la escaleta por actos cuando el paquete no cabe (RF-PIPE-06) no se implementa, porque el escaletador recibe texto y no un paquete con presupuesto; si la estructura no cabe en una llamada, hoy falla la llamada. Es un riesgo aceptado mientras las novelas de prueba sean cortas (U2-3 en spec2-verification).
 
 ### 3.10 Fase 10 — Demostración
 
