@@ -1,0 +1,2017 @@
+{
+ "descripcion": "Los hechos de los cinco intentos del capitulo 2 en la pasada real, en orden. Cada intento es otra prosa, asi que el recall anotado no les aplica; si las contradicciones falsas contra los `vigentes` del capitulo 2. El primero es anterior a RF2-PIPE-23 (el extractor no veia el valor vigente).",
+ "intentos": [
+  {
+   "llamada": 15,
+   "hechos": [
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+     "atributo": "estado del sector 5",
+     "valor": "tramo recto, el único sitio del anillo donde el suelo no sube; el aire sale de abajo y templa los tobillos; huele a ocho meses de cosas secadas allí",
+     "categoria": "ubicacion",
+     "cita": "porque era el único sitio del anillo donde el suelo no subía"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "rendimiento",
+     "valor": "trabaja al cuarenta y dos por ciento",
+     "categoria": "otro",
+     "cita": "la que trabaja al cuarenta y dos por ciento no está muerta, está forzada"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "planta atmosférica CL-4",
+     "atributo": "estado de los lechos",
+     "valor": "cuatro cubas; dos con bridas ciegas de hace años, el lecho 2 forzado al 42%",
+     "categoria": "otro",
+     "cita": "Esa planta tiene cuatro cubas y dos con bridas ciegas de hace años"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Malla-3",
+     "atributo": "raciones de a bordo",
+     "valor": "bolsa caliente, cuchara plegable, doscientas kilocalorías",
+     "categoria": "otro",
+     "cita": "doscientas kilocalorías que sabían a lo mismo"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Renzo Vilar",
+     "atributo": "funcion",
+     "valor": "lleva el registro de la cuadrilla y sella la hora de cada entrada",
+     "categoria": "otro",
+     "cita": "Vilar selló la hora sin que nadie se lo pidiera"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Neguib Sarr",
+     "atributo": "funcion",
+     "valor": "inventario de almacén: cerámica, bridas, juntas de collarín, sin firma propia",
+     "categoria": "otro",
+     "cita": "Sarr, almacén."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "funcion",
+     "valor": "purga de la línea de servicio del tramo tres al seis, junto a Aldama",
+     "categoria": "otro",
+     "cita": "Otxoa y yo, agua y metano: purga de la línea de servicio, del tramo tres al seis"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "tos",
+     "valor": "tose entre frases, toda la mañana",
+     "categoria": "fisico",
+     "cita": "Tosió entre dos frases, como toda la mañana."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "cuenta en voz baja",
+     "valor": "cuenta hacia atrás desde treinta y ocho por lo bajo",
+     "categoria": "otro",
+     "cita": "contó por lo bajo, treinta y ocho, treinta y siete"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Tabla del censo de siete coma tres",
+     "atributo": "coste de rehidratar el lecho 2",
+     "valor": "veinte litros de agua de ciento ochenta disponibles",
+     "categoria": "otro",
+     "cita": "Veinte de ciento ochenta"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Consola de control, sector 1",
+     "atributo": "estado del reposabrazos",
+     "valor": "silla atornillada con la espuma del reposabrazos derecho comida y moldeada con la forma del antebrazo de Suau",
+     "categoria": "fisico",
+     "cita": "en el sitio exacto donde la espuma tenía forma de antebrazo"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "total de personas a bordo",
+     "valor": "once cuerpos: cinco del turno y seis de la cuadrilla, más Aldama",
+     "categoria": "otro",
+     "cita": "Once cuerpos."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "autonomia con once personas",
+     "valor": "ciento veinte horas contando la reserva embotellada; sesenta y una horas-persona; cinco días",
+     "categoria": "otro",
+     "cita": "Se sostiene a once durante ciento veinte horas contando la reserva embotellada"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "autonomia con cinco personas",
+     "valor": "cuarenta días",
+     "categoria": "otro",
+     "cita": "Cinco respiran cuarenta."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Tabla del censo de siete coma tres",
+     "atributo": "reparto plano entre once",
+     "valor": "siete coma tres entre once son cero coma sesenta y seis por persona",
+     "categoria": "otro",
+     "cita": "Siete coma tres entre once son cero coma sesenta y seis."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "amenaza",
+     "sujeto_ref": "la de la novela",
+     "atributo": "fisiologia de la asfixia",
+     "valor": "con dos tercios de aliento, once minutos hasta la confusión; doce respiraciones por minuto despierto, diez dormido",
+     "categoria": "regla",
+     "cita": "once minutos hasta la confusión"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Nevenka Suau",
+     "atributo": "metodo declarado",
+     "valor": "retirar del censo; reduce a cero coma cinco el caudal del turno asignado a personal no incorporado",
+     "categoria": "regla",
+     "cita": "Se reduce el caudal del turno asignado a personal no incorporado. Queda en cero coma cinco."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Nevenka Suau",
+     "atributo": "composicion de su turno",
+     "valor": "Trebo, Perdomo, Larraz, Hoyos y ella misma",
+     "categoria": "relacion",
+     "cita": "Trebo. Perdomo. Larraz. Hoyos. Yo."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Malla-3",
+     "atributo": "tamano de la cuadrilla",
+     "valor": "siete de fuera, incluida Aldama",
+     "categoria": "otro",
+     "cita": "Y los siete de fuera."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Orden de misión con umbral de censo",
+     "atributo": "objetivo de la mision",
+     "valor": "reactivación y certificación, lo que incluye la planta atmosférica",
+     "categoria": "regla",
+     "cita": "Reactivación y certificación. Eso incluye la planta atmosférica."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Ximena Perdomo",
+     "atributo": "papel en el sector siete",
+     "valor": "confirmó las constantes cuando se intentó el reparto por descanso",
+     "categoria": "otro",
+     "cita": "en el sector siete lo intentamos con descanso. Yo confirmé las constantes."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Ossian Trebo",
+     "atributo": "condicion de apertura del sector 4",
+     "valor": "veinte minutos, entran tres, cierra estén dentro o fuera",
+     "categoria": "regla",
+     "cita": "Veinte minutos. Sector cuatro. Entran tres."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "condiciones ambientales",
+     "valor": "treinta y un grados y ochenta por ciento de humedad; huele a fruta pasada y cloro; zumbido continuo de bombas",
+     "categoria": "fisico",
+     "cita": "Treinta y un grados, ochenta por ciento"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "pestillo y mamparo",
+     "valor": "pestillo de leva doble que no se puede trabar desde dentro; el mamparo tarda once segundos con tres de aviso",
+     "categoria": "regla",
+     "cita": "el mamparo tardaba once segundos con tres de aviso"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "disposicion de las cubas",
+     "valor": "cuatro cubas en dos filas; dos con bridas ciegas y la pintura de aviso ilegible",
+     "categoria": "fisico",
+     "cita": "Cuatro cubas en dos filas."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "estado de la esponja cerámica",
+     "valor": "color equivocado; la cuba cede por la costura de la esponja",
+     "categoria": "fisico",
+     "cita": "la esponja cerámica tenía el color equivocado"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "resultado de la rehidratacion",
+     "valor": "veinte litros; presión cae de 0,8 a 0,6 a 0,4; sube a 0,9 y a 1,0 sujetando la retención y revienta",
+     "categoria": "otro",
+     "cita": "No subió. Bajó a cero coma cuatro",
+     "supersede_a": "rendimiento"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "rastro bajo la brida inferior",
+     "valor": "un reguero de dos milímetros del color de la esponja que baja por el tornillo hasta el suelo y hasta la rejilla del retorno",
+     "categoria": "fisico",
+     "cita": "era de dos milímetros, y era del color de la esponja"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Matriz madre del anillo",
+     "atributo": "uso en el lecho 2",
+     "valor": "puesta en línea por la válvula de cruce para dar sustrato vivo; si fuera avería agarraría y subiría a 1,2 en tres minutos",
+     "categoria": "regla",
+     "cita": "Si es avería, agarra. Si agarra, sube a uno coma dos en tres minutos."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "reserva del sector",
+     "valor": "perdida entera por el registro superior tras reventar la cuba",
+     "categoria": "otro",
+     "cita": "Reserva del cuatro. Se ha ido entera por el registro."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "quemadura de las manos",
+     "valor": "guante derecho fundido en la línea del volante; piel de un rosa que no es de primer grado; no podrá sujetar nada en tres semanas",
+     "categoria": "fisico",
+     "cita": "No podría sujetar una llave en tres semanas."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "edad",
+     "valor": "sesenta y un años",
+     "categoria": "otro",
+     "cita": "tiene sesenta y un años"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "retardo del Reparto",
+     "valor": "once minutos de retardo hasta el sector más lejano; reactivarlo cuesta una clave de operadora con cincuenta y un minutos de señal",
+     "categoria": "regla",
+     "cita": "Y reactivarlo cuesta una clave de operadora con cincuenta y un minutos de señal."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "primera asignacion de Aldama",
+     "valor": "0,9 puesto médico del sector cinco; 0,5 almacén; 0,5 tramo tres; 0,4 consola, por funciones y sin nombres propios",
+     "categoria": "otro",
+     "cita": "Cuatro líneas y ningún nombre propio en ninguna."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "margen de responsable",
+     "valor": "la casilla solo admite una persona; Aldama firma «Aldama, I.» con sello de hora 02:58:11",
+     "categoria": "regla",
+     "cita": "La casilla no admitía una facción, admitía una persona"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "funcion",
+     "valor": "responsable de cuadrilla Malla-3 y administradora del caudal a mano, válvula por válvula",
+     "categoria": "otro",
+     "cita": "Primera asignación de caudal firmada por la responsable de cuadrilla Malla-3"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+     "atributo": "estado del sector 7",
+     "valor": "cuatro grados, la brida sigue puesta y nadie entra desde el día mil ochocientos noventa; allí están los planos del casco y la bodega fría",
+     "categoria": "ubicacion",
+     "cita": "Ahí no entra nadie desde el día mil ochocientos noventa."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Ximena Perdomo",
+     "atributo": "pronostico sobre Otxoa",
+     "valor": "con 0,9 no se cura, se mantiene; saturación a ochenta y ocho en dos días, antes de la infección",
+     "categoria": "otro",
+     "cita": "Con cero coma nueve no se cura, se mantiene."
+    }
+   ]
+  },
+  {
+   "llamada": 17,
+   "hechos": [
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+     "atributo": "estado del sector 5",
+     "valor": "único tramo del anillo con banco corrido y luz entera",
+     "cita": "se sirvió en el sector 5, que era el único tramo del anillo con banco corrido y luz entera",
+     "categoria": "ubicacion"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "regimen de turnos ordenado",
+     "valor": "turnos de cuatro horas y nada de cuatro horas seguidas",
+     "cita": "Turnos de cuatro horas y nada de cuatro horas seguidas",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "regla de firma de turnos",
+     "valor": "todos los turnos los firma ella",
+     "cita": "—Lo firmo yo.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "faccion",
+     "sujeto_ref": "Malla-3",
+     "atributo": "reserva embotellada de la cuadrilla",
+     "valor": "sesenta y una horas-persona, día y medio a efectos prácticos",
+     "cita": "Nuestras botellas son sesenta y una horas-persona",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "carga de trabajo asumida",
+     "valor": "tramo doble de inventario de válvulas, del uno al cinco y del seis al ocho, sin relevo",
+     "cita": "Me llevo el inventario del uno al cinco y también del seis al ocho",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "muletilla",
+     "valor": "copiado, copiado",
+     "cita": "—No lo hace falta. Copiado, copiado.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "motivo declarado del tramo doble",
+     "valor": "si carga ella el doble, no hay que poner el nombre de nadie en el otro tramo",
+     "cita": "si cargo yo el doble, no hay que poner el nombre de nadie en el otro tramo. Es más limpio.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Renzo Vilar",
+     "atributo": "metodo de registro",
+     "valor": "tableta con sello de hora y pregunta por el alcance de cada firma",
+     "cita": "—Anotado —dijo Vilar, y la tableta hizo el chasquido del sello—. Trece cero seis.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Neguib Sarr",
+     "atributo": "cometido asignado",
+     "valor": "lleva el tablero de posiciones, sin firma",
+     "cita": "—Llevas las posiciones. Sin firma.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "tesis sobre las restas",
+     "valor": "aceptar una sola resta acepta la serie entera, porque la segunda ya no se discute, se deduce",
+     "cita": "Uno empieza aceptando una resta... La serie entera. Porque la segunda ya no hay que discutirla, se deduce.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "sintoma fisico",
+     "valor": "tos recurrente entre frases",
+     "cita": "Kaminski tosió entre dos palabras",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "lectura de Kaminski sobre el lecho 2",
+     "valor": "está fuera de la cuba, eso es una avería, y las averías se reparan",
+     "cita": "El lecho 2 está fuera de la cuba, eso es una avería, y las averías se reparan.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "caudal disponible",
+     "valor": "7,3 personas-equivalentes, refrescado cada treinta segundos",
+     "cita": "La cifra de arriba a la izquierda se refrescó mientras Aldama entraba: 7,3.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Consola de control, sector 1",
+     "atributo": "estado de la silla de operadora",
+     "valor": "silla atornillada con el reposabrazos derecho comido hasta la espuma",
+     "cita": "Suau estaba en la silla atornillada, con el codo derecho en el reposabrazos comido hasta la espuma",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "mundo",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "deficit de caudal con once a bordo",
+     "valor": "treinta y cuatro por ciento",
+     "cita": "El déficit no es de un diez por ciento, es de un treinta y cuatro.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "sistema_tecnologico",
+     "sujeto_ref": "planta atmosférica CL-4",
+     "atributo": "margen en deficit del treinta y cuatro por ciento",
+     "valor": "veintiséis horas hasta el punto irreversible y luego cinco días de degradación",
+     "cita": "Veintiséis horas hasta el punto en que ya no se puede revertir con ninguna decisión. Y luego cinco días de degradación.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "sistema_tecnologico",
+     "sujeto_ref": "planta atmosférica CL-4",
+     "atributo": "capacidad segun numero de respirantes",
+     "valor": "nueve personas se apagan en cinco días, todas sin excepción; cinco personas respiran cuarenta",
+     "cita": "Nueve personas respirando de esta planta se apagan en cinco días, todas, sin excepción... Cinco personas respiran cuarenta.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Nevenka Suau",
+     "atributo": "justificacion del descarte",
+     "valor": "se procedió por descarte y por orden; sin ello habría once cadáveres a bordo y una certificación limpia",
+     "cita": "Se procedió por descarte y por orden. Se retiraron del censo.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "metodo declarado",
+     "valor": "administrar sin descartar, rebajar parejo y sostener mientras abre una vía reactivando el lecho 2",
+     "cita": "Administro sin descartar —dijo—. Se rebaja parejo, todos por debajo de lo cómodo",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Ximena Perdomo",
+     "atributo": "testimonio del sector siete",
+     "valor": "estuvo delante cuando ocurrió",
+     "cita": "Yo estuve delante.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "mundo",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "reduccion impuesta al caudal de la cuadrilla",
+     "valor": "quince por ciento, efecto en once minutos en el sector más lejano, compensado con reserva embotellada propia",
+     "cita": "Se reduce el caudal del turno de la cuadrilla de mantenimiento en un quince por ciento, efecto en once minutos en el sector más lejano.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Nevenka Suau",
+     "atributo": "orden sobre los recien llegados",
+     "valor": "los siete de fuera se acomodan al reparto vigente hasta nueva orden",
+     "cita": "Los siete de fuera se acomodan al reparto vigente hasta nueva orden.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Ossian Trebo",
+     "atributo": "condiciones de apertura del sector 4",
+     "valor": "veinte minutos, entran tres, cierra el mamparo a los veinte estén dentro o no",
+     "cita": "Veinte minutos. Entran tres. El mamparo lo cierro yo a los veinte, estén dentro o no.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "estado del pestillo del mamparo",
+     "valor": "tiene juego desde el año pasado, hay que empujar con la cadera a la vez que se tira; aviso de tres segundos y cierre de once",
+     "cita": "el pestillo tiene juego desde el año pasado, hay que empujar con la cadera a la vez que se tira, y el aviso son tres segundos y el cierre once",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "ambiente interior",
+     "valor": "treinta y un grados y ochenta de humedad, olor dulzón a fruta pasada y cloro, zumbido de bombas",
+     "cita": "Treinta y un grados y ochenta de humedad",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "disposicion de las cubas",
+     "valor": "cuatro cubas en dos filas, dos con bridas ciegas puestas hace años y la pintura del contorno intacta",
+     "cita": "Cuatro cubas en dos filas. Dos con las bridas ciegas puestas hacía años, la pintura del contorno intacta.",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "estado de la matriz",
+     "valor": "salida por la brida y bajada por el flanco hasta el suelo en lámina de dos milímetros, gris verdosa y mate, metida en el retorno",
+     "cita": "la matriz había salido por la brida y bajado por el flanco hasta el suelo en una lámina de dos milímetros, gris verdosa, mate",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "causa del fallo de estanqueidad",
+     "valor": "junta del cuello comida por dentro y brida deformada, el asiento no cierra contra nada",
+     "cita": "La junta del cuello está comida por dentro. Esto es de dos.",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "resultado del intento de reactivacion",
+     "valor": "el cuello de la brida se abrió por la costura vieja, salió agua de proceso y la esponja cerámica deshecha en barro claro",
+     "cita": "El cuello de la brida se abrió por la costura vieja y salió agua de proceso a temperatura de trabajo",
+     "categoria": "fisico",
+     "supersede_a": "estado de la matriz"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "reserva de agua del sector",
+     "valor": "perdida por el retorno en menos de un minuto",
+     "cita": "La reserva del sector se perdió por el retorno en menos de un minuto",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "deduccion sobre los ocho muertos",
+     "valor": "si esto no es una avería, ninguno de los ocho se murió por accidente",
+     "cita": "Si esto no es una avería, entonces ninguno de los ocho se murió por accidente.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "caudal disponible",
+     "valor": "6,9 personas-equivalentes, refrescado cada treinta segundos",
+     "cita": "la cifra de la consola seguía refrescándose cada treinta segundos y ahora era 6,9",
+     "categoria": "otro",
+     "supersede_a": "caudal disponible"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "extension del libro",
+     "valor": "ciento y pico páginas",
+     "cita": "las páginas del libro de caudal eran ciento y pico",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "mundo",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "regimen de reparto vigente",
+     "valor": "reparto manual válvula por válvula, protocolo desconectado a las veintiuna cuarenta, toda asignación con firma",
+     "cita": "El reparto pasa a manual —dijo—. Válvula por válvula.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "mundo",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "condicion para revertir la desconexion",
+     "valor": "solo con clave de operadora, con cincuenta y un minutos de retardo por sentido",
+     "cita": "una desconexión solo se revierte con clave de operadora, cincuenta y un minutos de retardo por sentido",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "parte sanitario",
+     "valor": "quemaduras de segundo grado en ambas palmas, no puede trabajar, saturación noventa y seis, doce por minuto",
+     "cita": "Otxoa: quemaduras de segundo en ambas palmas, no puede trabajar",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "amenaza",
+     "sujeto_ref": "la de la novela",
+     "atributo": "consumo en reposo",
+     "valor": "el que no carga respira lo mismo; en reposo se consume igual que trabajando o casi",
+     "cita": "Tenéis que saber que el que no carga respira lo mismo.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "primera entrada bajo firma de Aldama",
+     "valor": "veintiuna cincuenta y dos: sector 5 caudal íntegro y atención sanitaria continuada; tramo del anillo sectores 6 a 8, reducción del veinte por ciento hasta relevo; reparto manual; Aldama",
+     "cita": "Veintiuna cincuenta y dos. Sector 5, caudal íntegro, atención sanitaria continuada. Tramo del anillo, sectores 6 a 8, reducción del veinte por ciento hasta relevo. Reparto manual. Aldama.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Renzo Vilar",
+     "atributo": "sello de la primera entrada",
+     "valor": "veintiuna cincuenta y dos, treinta y un segundos, primera entrada bajo firma de Iria Aldama",
+     "cita": "Veintiuna cincuenta y dos, treinta y un segundos. Primera entrada bajo firma de Iria Aldama",
+     "categoria": "fecha"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "personal afectado por la reduccion del anillo",
+     "valor": "Sarr y Kaminski trabajan en el tramo reducido, pero no escribió sus nombres",
+     "cita": "los que trabajaban en ese tramo eran Sarr y Kaminski, y el lápiz escribió tramo del anillo y no escribió Sarr ni escribió Kaminski",
+     "categoria": "otro"
+    }
+   ]
+  },
+  {
+   "llamada": 19,
+   "hechos": [
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+     "atributo": "estado del sector 5",
+     "valor": "único tramo con mesa abatible y luz entera; olor a ropa secada muchas veces en el mismo sitio",
+     "categoria": "ubicacion",
+     "cita": "La comida se repartió en el sector 5, que era el único tramo del anillo con mesa abatible y con luz entera."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "reparto de comida del dia",
+     "valor": "ocho raciones en bandeja de plancha",
+     "categoria": "otro",
+     "cita": "Ocho raciones en bandeja de plancha, todavía tibias del calentador"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "conducta con su racion",
+     "valor": "deja la bandeja intacta en el borde de la mesa y no come",
+     "categoria": "otro",
+     "cita": "Kaminski cogió su bandeja, la miró y la dejó en el borde de la mesa, a la izquierda, con el gesto de quien aparta una herramienta que ya ha usado."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "salud respiratoria",
+     "valor": "tose de forma corta y repetida, entre frases",
+     "categoria": "fisico",
+     "cita": "Tosió una vez, corto"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "argumento sobre la serie",
+     "valor": "si se admite una resta se admite la serie entera; una serie no se discute en el término tercero sino en el primero",
+     "categoria": "regla",
+     "cita": "Si le admitimos uno, le hemos admitido la serie entera, porque una serie no se discute en el término tercero, se discute en el primero."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "diagnostico de Kaminski",
+     "valor": "es una avería: tiene pieza, horas, nombre y procedimiento",
+     "categoria": "otro",
+     "cita": "El lecho 2 es una avería. Una avería tiene pieza y tiene horas."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "plan de trabajo del primer turno",
+     "valor": "turno corto y todos con tarea propia para no depender del reparto de Cerro Quince: Otxoa inventario de botella de los sectores uno al tres con presión real, Sarr midiendo retorno en rejilla cada veinte metros, Vilar catálogo de repuesto, Kaminski planta atmosférica desde el lado del sector uno sin entrar en el cuatro",
+     "categoria": "otro",
+     "cita": "Turno corto y todos con tarea propia. No dependemos de su reparto para movernos."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "regimen de relevos de la cuadrilla",
+     "valor": "relevo a las cuatro horas",
+     "categoria": "regla",
+     "cita": "—Relevo a las cuatro horas."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "motivo declarado para doblar recorrido",
+     "valor": "una pasada larga con la misma botella gasta un solo filtro y así nadie tiene que escribir el nombre de quién va al seis",
+     "categoria": "otro",
+     "cita": "Y así no tienes que escribir el nombre de quién va al seis."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Renzo Vilar",
+     "atributo": "metodo de registro",
+     "valor": "lleva tableta y sella cada turno asignado con hora y firma, a nombre de quien ordena",
+     "categoria": "otro",
+     "cita": "Cada turno que asignes conviene que lleve hora y firma."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Neguib Sarr",
+     "atributo": "peticion de mando propio",
+     "valor": "pide llevar solo el bloque de medición con firma, calculando posiciones desde fuera mientras Otxoa entra",
+     "categoria": "otro",
+     "cita": "Dame ese bloque con firma."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Consola de control, sector 1",
+     "atributo": "olor y ambiente",
+     "valor": "a plástico caliente de fuente de alimentación y a polvo cocido en los disipadores",
+     "categoria": "otro",
+     "cita": "La consola olía distinto que el anillo: a plástico caliente de fuente de alimentación y a polvo cocido en los disipadores."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Consola de control, sector 1",
+     "atributo": "estado de la silla atornillada",
+     "valor": "reposabrazos derecho comido hasta la espuma",
+     "categoria": "otro",
+     "cita": "el codo derecho en el reposabrazos comido hasta la espuma"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "reclamacion de autoridad sobre el reparto",
+     "valor": "declara que el reparto lo lleva ella porque su orden de misión incluye verificación de planta atmosférica y el reparto es parte de la planta",
+     "categoria": "regla",
+     "cita": "La planta es mía a efectos de intervención, y el reparto es parte de la planta."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "aritmetica de supervivencia segun la tabla",
+     "valor": "once cuerpos y capacidad siete coma tres: nueve respiran cinco días, cinco respiran cuarenta días",
+     "categoria": "otro",
+     "cita": "Nueve respiran cinco días [...] Cinco respiran cuarenta días."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "reserva embotellada",
+     "valor": "sesenta y una horas-persona",
+     "categoria": "otro",
+     "cita": "Consumo por persona-equivalente, reserva embotellada, sesenta y una horas-persona."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "margen del carguero de ruta",
+     "valor": "cuarenta días",
+     "categoria": "fecha",
+     "cita": "Cuarenta días es el margen del carguero de ruta."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "composicion nominal del turno",
+     "valor": "Trebo, Perdomo, Landa, Ferrer y Suau",
+     "categoria": "relacion",
+     "cita": "Están Trebo, Perdomo, Landa, Ferrer y yo. Somos el turno de Cerro Quince"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "conteo de los de fuera segun Suau",
+     "valor": "siete, cuando la cuadrilla de Aldama son seis",
+     "categoria": "otro",
+     "cita": "Ustedes son los siete de fuera."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Nevenka Suau",
+     "atributo": "condicion para apartarse",
+     "valor": "que Aldama escriba en la casilla los litros por persona y por turno y de qué lecho los saca; entonces firma debajo y se aparta",
+     "categoria": "regla",
+     "cita": "Escriba la cifra aquí, en esta casilla, y yo firmo debajo y me aparto."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Nevenka Suau",
+     "atributo": "reduccion de caudal a la cuadrilla",
+     "valor": "quince por ciento al turno de cuadrilla durante el ciclo de trabajo, compensado en el sector 5",
+     "categoria": "otro",
+     "cita": "Se reduce el caudal del turno de cuadrilla en un quince por ciento durante el ciclo de trabajo"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "retardo interno entre decision y efecto",
+     "valor": "once minutos hasta el sector más lejano",
+     "categoria": "distancia",
+     "cita": "Once minutos de retardo entre decisión y efecto en el sector más lejano."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "amenaza",
+     "sujeto_ref": "la de la novela",
+     "atributo": "efecto de bajar el caudal a quien carga peso",
+     "valor": "a los tres minutos tiene presión en los oídos y no sabe por qué",
+     "categoria": "otro",
+     "cita": "Si le bajas el caudal a alguien que carga peso, a los tres minutos tiene presión en los oídos y no sabe por qué."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "caudal disponible",
+     "valor": "7,3 personas-equivalentes, refrescado cada treinta segundos",
+     "categoria": "otro",
+     "cita": "Arriba a la izquierda, la cifra se refrescó. 7,3."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Ossian Trebo",
+     "atributo": "condiciones de apertura del sector 4",
+     "valor": "veinte minutos, entran tres, y cierra al cumplirse estén donde estén",
+     "categoria": "regla",
+     "cita": "Veinte minutos [...] Entran tres. A los veinte cierro, estén donde estén."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "estado del pestillo",
+     "valor": "doble uña con la de arriba vencida desde el año pasado; si la puerta se va sola no se para a medio camino y se cierra en once segundos con aviso de tres",
+     "categoria": "otro",
+     "cita": "Se cierra en once segundos con aviso de tres. No se pone nada en la guía."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "condiciones ambientales",
+     "valor": "treinta y un grados y ochenta por ciento de humedad; olor dulzón a fruta pasada y a cloro",
+     "categoria": "fisico",
+     "cita": "Treinta y un grados y ochenta de humedad"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "disposicion de las cubas",
+     "valor": "cuatro cubas en dos filas, dos con las bridas ciegas puestas hacía años",
+     "categoria": "otro",
+     "cita": "Cuatro cubas en dos filas. Dos con las bridas ciegas puestas hacía años"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "estado de la cuba",
+     "valor": "desbordada: la matriz ha crecido fuera y ha bajado por el tornillo hasta el suelo, de forzarla al ciento veinte durante meses",
+     "categoria": "fisico",
+     "cita": "La cuba está desbordada. La matriz ha crecido fuera y ha bajado por el tornillo hasta el suelo."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "comportamiento en el cebado",
+     "valor": "la aguja sube a dos coma uno y cae lentamente; no sostiene presión aunque junta y cuerpo de cuba están enteros",
+     "categoria": "otro",
+     "cita": "Dos coma uno y caída lenta, como un neumático con el valle abierto."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "estado tras el cebado",
+     "valor": "reventado por la junta inferior con desgarro húmedo y chorro de vapor; manómetro a cero",
+     "categoria": "fisico",
+     "cita": "A los veintiséis el lecho 2 reventó por la junta inferior.",
+     "supersede_a": "estado de la cuba"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "reserva del sector tras la rotura",
+     "valor": "vaciada; la barra del panel bajó sin escalones",
+     "categoria": "otro",
+     "cita": "la reserva del sector se vació en una barra que bajó sin escalones"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "destino de la matriz",
+     "valor": "ha bajado por el tornillo, ha encontrado la rejilla del retorno y entra por ella sin interrupción",
+     "categoria": "otro",
+     "cita": "encontrado la rejilla del retorno y entraba por ella sin interrupción, como se mete un cable por un pasamuros"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "conclusion sobre el lecho 2",
+     "valor": "no se ha roto, se ha ido: no sostiene presión porque no hay nada que la sostenga",
+     "categoria": "otro",
+     "cita": "Esto no se ha roto. Esto se ha ido.",
+     "supersede_a": "diagnostico de Kaminski"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "numero de ausentes segun Kaminski",
+     "valor": "ocho que faltan, y si el lecho 2 no es avería ninguno murió de un accidente",
+     "categoria": "otro",
+     "cita": "entonces ninguno de los ocho que faltan se murió de un accidente"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "postura ante el trabajo de riesgo",
+     "valor": "sujeta el volante con la mano pese a la orden de usar trinquete porque el trinquete patina por encima de tres",
+     "categoria": "otro",
+     "cita": "El trinquete patina en cuanto suba de tres. [...] Esto es de dos. Tú dale."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "lesion en las manos",
+     "valor": "quemadura de segundo grado en las dos palmas, ampolla en ocho dedos; no podrá agarrar en tres semanas; curada con gasa por falta de apósito de silicona",
+     "categoria": "fisico",
+     "cita": "Quemadura de segundo grado en las dos palmas, ampolla en ocho dedos. No puede agarrar."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "frecuencia respiratoria en reposo con dolor",
+     "valor": "dieciséis o diecisiete por minuto, consume más que el día anterior",
+     "categoria": "otro",
+     "cita": "en reposo con dolor respira más. Dieciséis, diecisiete por minuto."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+     "atributo": "estado del sector 7",
+     "valor": "sellado, con asignación de caudal cero",
+     "categoria": "ubicacion",
+     "cita": "Sector 7 sellado: cero."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "reparto firmado del ciclo 1",
+     "valor": "sector 5 dotación de trabajo menos doce por ciento durante carga; sector 6 dotación médica más nueve por ciento sostenido; resto sin variación; revisión a las seis horas",
+     "categoria": "otro",
+     "cita": "Sector 5, dotación de trabajo, menos doce por ciento durante carga. Sector 6, dotación médica, más nueve por ciento sostenido."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "columna de firma",
+     "valor": "vacía desde el día ciento doce hasta que Aldama escribe su nombre como responsable de cuadrilla Malla-3",
+     "categoria": "otro",
+     "cita": "la columna estaba vacía desde el día ciento doce, puso su nombre"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Renzo Vilar",
+     "atributo": "sello de la entrada del reparto",
+     "valor": "veintitrés dieciocho, treinta y un segundos",
+     "categoria": "fecha",
+     "cita": "Veintitrés dieciocho, treinta y un segundos."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Nevenka Suau",
+     "atributo": "correccion al porcentaje de Aldama",
+     "valor": "con doce por ciento llega si se les quita la segunda pasada; ella lo tuvo en quince tres semanas y fue de más",
+     "categoria": "otro",
+     "cita": "Con doce llega, si les quita la segunda pasada. Yo lo tuve en quince tres semanas y fue de más."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "formula con la que se justifica",
+     "valor": "administrar no es elegir: lo que escribe es la transcripción de lo que ya estaba decidido por la planta y por el retardo de once minutos",
+     "categoria": "otro",
+     "cita": "Administrar no es elegir, se dijo"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "orden sobre los planos de casco",
+     "valor": "manda a Perdomo a la bodega fría del siete a primera hora a por los planos de estructura, no los de servicio, para buscar una salida",
+     "categoria": "otro",
+     "cita": "Mañana a primera hora, bodega fría del siete. Necesito los planos de casco, los de estructura, no los de servicio."
+    }
+   ]
+  },
+  {
+   "llamada": 21,
+   "hechos": [
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+     "atributo": "forma del sector 5",
+     "valor": "tramo que no es recto pero lo parece durante cuatro metros",
+     "categoria": "fisico",
+     "cita": "Comieron en el tramo recto del sector 5, que no es recto pero lo parece durante cuatro metros"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+     "atributo": "estado de la cocina del anillo",
+     "valor": "no se usa porque pide caudal; se cocina con hornillo de campaña de la Malla-3",
+     "categoria": "otro",
+     "cita": "calentadas con el hornillo de campaña porque la cocina del anillo pedía caudal y el caudal lo daba otra"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "regla impuesta a la cuadrilla",
+     "valor": "no pedir nada a la consola de la estación: todo lo que gasten sale de lo suyo",
+     "categoria": "regla",
+     "cita": "No pedimos nada a su consola. Nada. Todo lo que gastemos sale de lo nuestro."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "asignacion de tareas del primer dia",
+     "valor": "Otxoa y Sarr purga de las tres bocas del tramo cinco al siete con caída de presión; Kaminski curva del lecho uno hora a hora; Vilar inventario de botellas",
+     "categoria": "otro",
+     "cita": "Dos por conducto —dijo—. Otxoa y Sarr, tramo del cinco al siete, purga de las tres bocas"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+     "atributo": "coste de guante de la purga",
+     "valor": "cuarenta minutos de guante por boca; las tres bocas son doce horas para una sola persona",
+     "categoria": "otro",
+     "cita": "Cuarenta minutos de guante por boca"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "tos",
+     "valor": "tose entre las palabras, como hace siempre, partiendo la frase en dos",
+     "categoria": "fisico",
+     "cita": "Tosió entre las palabras, como hacía siempre, partiendo la frase en dos."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "tesis sobre el lecho dos",
+     "valor": "un lecho al cuarenta y dos por ciento no es un lecho muerto sino sucio; la cuba dos se puede devolver a línea",
+     "categoria": "regla",
+     "cita": "un lecho al cuarenta y dos por ciento no es un lecho muerto, es un lecho sucio. La cuba dos se puede devolver a línea."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "lema de método",
+     "valor": "mira el caudal, no la alarma",
+     "categoria": "regla",
+     "cita": "Mira el caudal, no la alarma"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+     "atributo": "autoria del censo de las paredes",
+     "valor": "lo escribió alguien de pie, con rotulador, un número detrás de otro: once, nueve, siete",
+     "categoria": "otro",
+     "cita": "Los números de la pared los escribió alguien de pie, con rotulador, uno detrás de otro."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "muletilla",
+     "valor": "copiado, copiado",
+     "categoria": "otro",
+     "cita": "—Copiado, copiado."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "argumento para trabajar sola",
+     "valor": "doce horas de guante para una en vez de veinticuatro para dos, y así no hay que poner el nombre de nadie en el segundo turno",
+     "categoria": "otro",
+     "cita": "Y así no hay que poner el nombre de nadie en el segundo turno. Jefa. Es aritmética, no es heroísmo."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Renzo Vilar",
+     "atributo": "exigencia de registro",
+     "valor": "que cada turno lleve arriba el nombre de quien lo ordenó, con hora",
+     "categoria": "regla",
+     "cita": "conviene que cada turno tenga arriba el nombre de quien lo ordenó. Con hora."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Neguib Sarr",
+     "atributo": "experiencia declarada",
+     "valor": "lleva dos años haciendo el reparto de la purga con Aldama delante",
+     "categoria": "otro",
+     "cita": "—Llevas dos años haciéndolo conmigo delante."
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Neguib Sarr",
+     "atributo": "muletilla",
+     "valor": "en teoría",
+     "categoria": "otro",
+     "cita": "En teoría llevo dos años haciendo exactamente esto."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Consola de control, sector 1",
+     "atributo": "estado de la silla",
+     "valor": "silla atornillada con el reposabrazos derecho comido, mostrando la espuma",
+     "categoria": "fisico",
+     "cita": "el reposabrazos derecho mostraba la espuma"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "reclamacion de autoridad",
+     "valor": "mientras dure la intervención, la planta atmosférica está bajo responsabilidad de la cuadrilla y el reparto del caudal lo lleva Aldama, por procedimiento estándar de la operadora",
+     "categoria": "regla",
+     "cita": "la planta atmosférica está bajo responsabilidad de la cuadrilla y el reparto del caudal lo llevo yo"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "deficit de caudal",
+     "valor": "tres coma siete personas-equivalentes, sostenido, con censo activo once y capacidad siete coma tres",
+     "categoria": "otro",
+     "cita": "Censo activo once. Capacidad siete coma tres. Déficit tres coma siete personas-equivalentes, sostenido."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "planta atmosférica CL-4",
+     "atributo": "modo de fallo",
+     "valor": "no se agota, se satura: sube el dióxido en el retorno y baja el rendimiento del lecho uno, y cuanto peor va el lecho más sube el dióxido; es una pendiente, no un escalón",
+     "categoria": "regla",
+     "cita": "La planta no se agota: se satura."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "planta atmosférica CL-4",
+     "atributo": "plazos segun numero de cuerpos",
+     "valor": "once cuerpos: déficit medible en veintiséis horas y cinco días de vida; cinco cuerpos: cuarenta días",
+     "categoria": "otro",
+     "cita": "Once cuerpos: la planta entra en déficit medible en veintiséis horas y a partir de ahí se cuentan días. Cinco."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "intento de escalonamiento",
+     "valor": "se probó el día ciento treinta: baja el equivalente un cuatro por ciento y gana medio día",
+     "categoria": "otro",
+     "cita": "—Un cuatro. Se probó el día ciento treinta. Se procede a escalonar y se gana medio día."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "plan declarado",
+     "valor": "administrar el caudal por sector y hora sin descartar, sostener a los once bajo el umbral con racionamiento de actividad y en paralelo abrir el lecho dos",
+     "categoria": "otro",
+     "cita": "Reparto el caudal por sector y por hora, sostengo a los once por debajo del umbral con racionamiento de actividad, y en paralelo abrimos el lecho dos."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Matriz madre del anillo",
+     "atributo": "tiempo de rehacerse una matriz",
+     "valor": "treinta y un días",
+     "categoria": "otro",
+     "cita": "los treinta y un días que tarda una matriz en rehacerse"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "experiencia",
+     "valor": "once años de planta",
+     "categoria": "otro",
+     "cita": "Once años de planta y lo que tenía era eso"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Ximena Perdomo",
+     "atributo": "vivencia de la asfixia",
+     "valor": "estuvo presente; dice que no duele, que te da igual y te sientas, y que a las cuatro horas ya no te levantas",
+     "categoria": "otro",
+     "cita": "no es eso, es que te da igual, te da igual y te sientas. —Se paró—. Yo estaba. Yo."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Nevenka Suau",
+     "atributo": "recorte aplicado a la cuadrilla",
+     "valor": "reduce un doce por ciento el caudal asignado al turno de conducto de la cuadrilla, sectores cinco a siete, durante la ventana de trabajo",
+     "categoria": "otro",
+     "cita": "Se reduce el caudal asignado un doce por ciento durante la ventana de trabajo."
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "nombres de los cinco supervivientes del turno",
+     "valor": "Trebo, Perdomo, Almiral, Cuesta y Suau",
+     "categoria": "nombre",
+     "cita": "—Trebo, Perdomo, Almiral, Cuesta y yo"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Nevenka Suau",
+     "atributo": "lapsus sobre el numero de la cuadrilla",
+     "valor": "dice «los siete de fuera» y se corrige a seis cuando Aldama la rectifica",
+     "categoria": "otro",
+     "cita": "—Y los siete de fuera.\n—Somos seis."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Ossian Trebo",
+     "atributo": "condicion de apertura del sector 4",
+     "valor": "veinte minutos desde que entre el último, y luego cierra con gente dentro o sin gente dentro",
+     "categoria": "regla",
+     "cita": "—Veinte minutos —dijo—. Desde que entre el último. Luego cierro, con gente dentro o sin gente dentro."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "ambiente",
+     "valor": "treinta y un grados, ochenta de humedad y olor dulzón a fruta pasada y cloro",
+     "categoria": "fisico",
+     "cita": "Treinta y un grados, ochenta de humedad, y ese olor: dulzón, fruta pasada y cloro"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "disposicion de las cubas",
+     "valor": "cuatro cubas de esponja cerámica en dos filas, dos de ellas con bridas ciegas puestas hace años y la pintura de las tuercas intacta",
+     "categoria": "fisico",
+     "cita": "Cuatro cubas de esponja cerámica en dos filas. Dos con las bridas ciegas puestas hacía años, la pintura de las tuercas intacta."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "procedimiento de prueba",
+     "valor": "válvula de cuba, línea de rehidratación, veinte litros; con la matriz madre en línea debería sellar y subir presión en cuatro minutos",
+     "categoria": "otro",
+     "cita": "Válvula de cuba, línea de rehidratación, veinte litros."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "estado de la matriz",
+     "valor": "la matriz ha salido de la cuba por la brida baja, bajada en lámina delgada y uniforme, sin bulto, del color del óxido, y se extiende tres palmos en la rejilla del retorno metiéndose hacia el aire del anillo",
+     "categoria": "fisico",
+     "cita": "la matriz había salido de la cuba. Había bajado por el metal en una lámina delgada, sin bulto, uniforme"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "estado de la brida baja",
+     "valor": "abierta por el lado ciego a ochenta y seis de presión; el lecho no sube porque no tiene qué llenar",
+     "categoria": "fisico",
+     "cita": "A ochenta y seis la brida baja se abrió por el lado ciego con un golpe corto."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "lesion en las manos",
+     "valor": "quemadura de contacto en ambas palmas por sujetar el vástago desnudo de la línea de vapor: dos ampollas largas iguales, una en cada mano, con la forma del vástago",
+     "categoria": "fisico",
+     "cita": "se estaba levantando en dos ampollas largas que seguían la forma del vástago, una en cada mano, iguales"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "perdida de reserva del sector",
+     "valor": "ciento diez litros de aire embotellado de la purga y veinte litros de agua potable",
+     "categoria": "otro",
+     "cita": "Ciento diez litros de aire embotellado en la purga y veinte de agua potable."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "deduccion sobre los ocho ausentes",
+     "valor": "si el lecho dos no es una avería, ninguno de los ocho que faltan se murió por accidente",
+     "categoria": "otro",
+     "cita": "Si el lecho dos no es una avería, entonces ninguno de los ocho que faltan se murió por accidente."
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "aviso de cierre del mamparo",
+     "valor": "aviso de tres segundos antes de correr",
+     "categoria": "otro",
+     "cita": "El mamparo empezó su aviso de tres segundos."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "pronostico de la lesion",
+     "valor": "sin función de prensión, ocho días mínimo, y a nadie le crece piel nueva con este aire",
+     "categoria": "otro",
+     "cita": "quemadura de contacto en ambas palmas, sin función de prensión, ocho días mínimo",
+     "supersede_a": ""
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Ximena Perdomo",
+     "atributo": "familia",
+     "valor": "tuvo una hermana soldadora",
+     "categoria": "relacion",
+     "cita": "luego dijo que ella había tenido una hermana soldadora"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "retardo del reparto manual",
+     "valor": "once minutos entre decisión y efecto en el sector más lejano",
+     "categoria": "otro",
+     "cita": "Once minutos de retardo entre decisión y efecto en el sector más lejano."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "formato del impreso",
+     "valor": "veintiocho renglones rayados de fábrica por hoja y una columna estrecha al margen izquierdo para las iniciales del responsable",
+     "categoria": "fisico",
+     "cita": "Debajo de la primera línea había veintiocho renglones vacíos, rayados de fábrica"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "primera asignacion firmada por la cuadrilla",
+     "valor": "turno de noche: sector 2 más nueve por ciento por lesionada en reposo, sector 5 menos seis por ciento con dos operarios en trabajo ligero, sector 1 sin variación; responsable I. Aldama",
+     "categoria": "otro",
+     "cita": "Sector 2, más nueve por ciento, lesionada en reposo. Sector 5, menos seis por ciento, dos operarios en trabajo ligero. Sector 1, sin variación."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "caligrafia",
+     "valor": "caligrafía de inventario, mayúsculas, sin adjetivos, la misma con la que lleva once años anotando presiones de línea",
+     "categoria": "otro",
+     "cita": "La caligrafía de inventario, mayúsculas, sin adjetivos"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Renzo Vilar",
+     "atributo": "sello de la primera entrada",
+     "valor": "veintidós cincuenta y nueve, doce segundos, sellado como primera entrada de la serie a nombre de la cuadrilla",
+     "categoria": "fecha",
+     "cita": "—Veintidós cincuenta y nueve, doce segundos —dijo—. Sellado. Primera entrada de la serie a nombre de la cuadrilla."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "temperatura de la bodega fria del sector siete",
+     "valor": "cuatro grados, desde siempre",
+     "categoria": "fisico",
+     "cita": "—Está a cuatro grados —dijo Perdomo—. Está a cuatro grados desde siempre."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "orden a Perdomo",
+     "valor": "bajar mañana a primera hora a la bodega fría del siete y sacar todos los planos de casco: estructura, gantry y eje",
+     "categoria": "otro",
+     "cita": "baja a la bodega fría del siete y me sacas los planos de casco. Todos. Estructura, gantry, eje."
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "caudal disponible",
+     "valor": "7,3 personas-equivalentes, refrescado cada treinta segundos",
+     "categoria": "otro",
+     "cita": "Arriba a la izquierda la cifra se refrescó. 7,3."
+    }
+   ]
+  },
+  {
+   "llamada": 23,
+   "hechos": [
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+     "atributo": "estado del sector 5",
+     "valor": "el sector que menos huele; se come en la rejilla con la espalda contra el mamparo",
+     "cita": "Comieron en el sector 5, que era el que menos olía, sentados en la rejilla con la espalda contra el mamparo.",
+     "categoria": "ubicacion"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "mundo",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "racion del turno",
+     "valor": "pasta de proteína en bolsa templada al calor del retorno y medio vaso de agua contada",
+     "cita": "Raciones del turno: pasta de proteína en bolsa templada al calor del retorno, medio vaso de agua contada.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "conducta con la racion",
+     "valor": "coge la suya, la deja sobre la rodilla y no la abre; la abandona con el pliegue de fábrica intacto",
+     "cita": "Kaminski cogió la suya, la dejó sobre la rodilla y no la abrió.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "sintoma fisico",
+     "valor": "tos recurrente que le corta las frases",
+     "cita": "Tosió entre cláusulas de una frase que no llegó a decir.",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "reparto de tareas del primer dia",
+     "valor": "Otxoa y Sarr al censo real de los ocho sectores y estado de mamparos; Vilar al inventario del almacén contra catálogo empezando por esponja cerámica; Kaminski a medir los dos lechos vivos con instrumento propio",
+     "cita": "Otxoa y Sarr, censo real de los ocho sectores y estado de mamparos. Vilar, inventario del almacén contra catálogo, empezando por esponja cerámica. Kaminski, planta atmosférica",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "regla de autonomia frente al turno",
+     "valor": "no pedirle nada a Suau; trabajar solo con lo que ha traído la cuadrilla",
+     "cita": "Nada de pedirle nada a Suau. De momento trabajamos con lo que hemos traído.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "mundo",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "origen del agua de las bolsas de la cuadrilla",
+     "valor": "de los depósitos de la estación",
+     "cita": "—Y el agua de las bolsas, ¿de dónde sale?\n—De sus depósitos.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "otro",
+     "sujeto_ref": "Turno de inventario del anillo",
+     "atributo": "consumo de guante por sector",
+     "valor": "cuarenta minutos de guante por sector",
+     "cita": "Cuarenta minutos de guante por sector.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+     "atributo": "dotacion de personal para el recorrido",
+     "valor": "el anillo es de dos personas",
+     "cita": "—El anillo es de dos.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "oferta de carga",
+     "valor": "hacer el anillo sola, cargando doble, del uno al ocho ida y vuelta dos veces, cantándolo por canal",
+     "cita": "Yo lo hago solo. Cargo doble y no hace falta nombrar a nadie para el segundo puesto.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "norma de relevo",
+     "valor": "relevo a las dos horas, no se discute",
+     "cita": "Relevo a las dos horas. No se discute.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Renzo Vilar",
+     "atributo": "metodo de registro",
+     "valor": "tableta encendida sobre las rodillas, sella la hora de cada orden y pregunta quién ordena qué",
+     "cita": "No hay relevo si no lo apuntáis",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "autoria de la asignacion del doble a Otxoa",
+     "valor": "se la asigna ella, no es iniciativa propia de Otxoa",
+     "cita": "—Se lo asigno yo —dijo Aldama.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Neguib Sarr",
+     "atributo": "tarea que reclama",
+     "valor": "el censo de los ocho sectores con firma propia y el cálculo de posiciones, consumo por tramo y previsión de reserva a papel y lápiz",
+     "cita": "Y yo llevo el cálculo de posiciones —dijo Sarr, deprisa—. Consumo por tramo, previsión de reserva. Papel y lápiz.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 1,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "tic fisico",
+     "valor": "cierra la bolsa vacía con el pulgar, dos pliegues exactos",
+     "cita": "Cerró la bolsa vacía con el pulgar, dos pliegues, exactos",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "caudal disponible",
+     "valor": "7,3 personas-equivalentes, refrescado cada treinta segundos",
+     "cita": "La cifra de arriba a la izquierda se refrescó mientras Aldama entraba: 7,3. Treinta segundos después, otra vez 7,3.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Consola de control, sector 1",
+     "atributo": "estado de la silla",
+     "valor": "silla atornillada con el reposabrazos comido hasta la espuma",
+     "cita": "Suau estaba en la silla atornillada, la mano derecha sobre el reposabrazos comido hasta la espuma.",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "alcance de su orden de mision",
+     "valor": "la hace responsable de la instalación durante la intervención, planta incluida",
+     "cita": "Mi orden de misión me hace responsable de la instalación durante la intervención. Eso incluye la planta.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "mundo",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "distancia a la autoridad firmante",
+     "valor": "nueve días y cincuenta y un minutos",
+     "cita": "Su orden de misión la firma una autoridad que está a nueve días y a cincuenta y un minutos.",
+     "categoria": "distancia"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "mundo",
+     "sujeto_ref": "planta atmosférica CL-4",
+     "atributo": "plazo de entrada en deficit con once respirando",
+     "valor": "déficit a las veintiséis horas",
+     "cita": "Con once respirando, la planta entra en déficit a las veintiséis horas",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "mundo",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "reserva embotellada",
+     "valor": "sesenta y una horas-persona",
+     "cita": "a partir de ahí se consume reserva embotellada: sesenta y una horas-persona",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "mundo",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "aritmetica de supervivencia",
+     "valor": "once respiran cinco días y luego no respira ninguno; cinco respiran cuarenta días",
+     "cita": "Cinco días —dijo Suau—. Nueve de ustedes, si prefiere contarlo así, respiran cinco días y luego no respira ninguno. Cinco respiran cuarenta.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "plan alternativo al descarte",
+     "valor": "administrar sin descartar: rebajar caudal por tramos, rotar sectores muertos, sueño de baja actividad y bajar el consumo medio por cabeza",
+     "cita": "Administrar sin descartar. Rebajar caudal por tramos, rotar los sectores muertos, meter a la gente en sueño de baja actividad, bajar el consumo medio por cabeza hasta que la suma entre.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "amenaza",
+     "sujeto_ref": "la de la novela",
+     "atributo": "consumo por cabeza segun actividad",
+     "valor": "doce por minuto en reposo, dieciséis en trabajo ligero; saturación noventa y cuatro los de fuera, ochenta y uno los del turno",
+     "cita": "Doce por minuto en reposo, dieciséis en trabajo ligero, saturación en noventa y cuatro los de fuera, ochenta y uno los nuestros.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "anotacion de Suau del dia dos",
+     "valor": "se reduce asignación de sectores 5 y 6, turno de tarde, a ochenta por ciento de nominal; se procede por prioridad de función",
+     "cita": "Se reduce asignación de sectores 5 y 6, turno de tarde, a ochenta por ciento de nominal. Se procede por prioridad de función.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Nevenka Suau",
+     "atributo": "letra y postura al escribir",
+     "valor": "letra administrativa, sin apoyar la muñeca",
+     "cita": "escribió tres líneas con letra administrativa, sin apoyar la muñeca",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "mundo",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "plazo de respuesta de un recurso a la Autoridad",
+     "valor": "dos horas, y a una pregunta distinta",
+     "cita": "Puede recurrirlo a la Autoridad; tendrá respuesta en dos horas, a una pregunta distinta.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "mundo",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "composicion nominal del turno",
+     "valor": "Perdomo, Trebo, Bazterra, Iglesias y Suau",
+     "cita": "Perdomo, Trebo, Bazterra, Iglesias y yo",
+     "categoria": "nombre"
+    },
+    {
+     "escena_orden": 2,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Nevenka Suau",
+     "atributo": "forma de contar a los de fuera",
+     "valor": "los llama los siete de fuera, no seis",
+     "cita": "Los siete de fuera pueden organizarse como prefieran dentro de su asignación.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Ossian Trebo",
+     "atributo": "ritual de apertura",
+     "valor": "cuenta hasta cuatro, mete la llave y la gira una vuelta entera",
+     "cita": "Trebo contó hasta cuatro, metió la llave y la giró una vuelta entera.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Ossian Trebo",
+     "atributo": "condiciones de apertura del sector 4",
+     "valor": "veinte minutos exactos, aviso de tres segundos y mamparo que tarda once; cierra estén dentro o fuera",
+     "cita": "Veinte minutos. —Miró el reloj del mamparo, no a ellos—. Desde ahora. A los veinte cierro, estén dentro o fuera. El aviso es de tres segundos y el mamparo tarda once.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "advertencias de seguridad de Trebo",
+     "valor": "retorno propio, rejilla del fondo levantada desde antes, no pisar el fondo, no meter mano bajo la brida ciega de las cubas tres y cuatro y no tocar con piel lo que baje por la brida del dos",
+     "cita": "El cuatro tiene retorno propio y la rejilla del fondo está levantada desde antes. No pisen el fondo.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "ambiente interior",
+     "valor": "treinta y un grados y ochenta por ciento de humedad; olor dulce a fruta pasada y cloro con algo debajo que no es vegetal",
+     "cita": "Dentro había treinta y un grados y ochenta por ciento de humedad",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "disposicion de las cubas",
+     "valor": "cuatro cubas de esponja cerámica en dos filas, dos con las bridas ciegas puestas hacía años y la pintura de brida ya mate",
+     "cita": "Cuatro cubas de esponja cerámica en dos filas. Dos con las bridas ciegas puestas hacía años, la pintura de brida ya mate.",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "estado al abrir el sector 4",
+     "valor": "tapa alta y una película pálida de dos milímetros que baja del labio, cruza la brida y se mete por la rejilla hasta el retorno",
+     "cita": "El lecho 2 tenía la tapa alta y del labio bajaba una película pálida, de dos milímetros, brillante como el interior de una boca",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Doré Kaminski",
+     "atributo": "estado del equipo de guantes",
+     "valor": "guante derecho con la costura del pulgar abierta",
+     "cita": "se puso el guante izquierdo y se quedó mirando el derecho, que tenía la costura del pulgar abierta",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "diagnostico de Kaminski",
+     "valor": "matriz fuera de cuba; se limpia y se rehidrata con veinte litros y treinta y un días",
+     "cita": "Matriz fuera de cuba —dijo—. Eso se limpia y se rehidrata. Veinte litros y treinta y un días.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "comportamiento en la prueba de presion",
+     "valor": "la aguja sube a un tercio y se queda temblando; con medio bar más llega a la mitad y cae entera; pierde aguas abajo",
+     "cita": "La aguja del lecho 2 subió hasta el tercio y se quedó, temblando, como si empujara contra una mano.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Lecho 2 de la sala de lechos",
+     "atributo": "estado tras la prueba",
+     "valor": "reventado por la junta del labio, con lengua de vapor dulce hasta media altura de la sala",
+     "cita": "La cuba reventó por la junta del labio.",
+     "categoria": "fisico",
+     "supersede_a": "estado al abrir el sector 4"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Sala de lechos, sector 4",
+     "atributo": "efecto de la rotura sobre el caudal",
+     "valor": "el manómetro del sector cae a cero y sigue cayendo en la reserva",
+     "cita": "El manómetro del sector cayó a cero y siguió cayendo en la reserva.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 3,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "maniobra en la valvula de aislamiento",
+     "valor": "sostiene el volante de mano cerrado contra el resorte con las dos manos sin llave, a treinta y un grados y con tres minutos de vapor de purga encima",
+     "cita": "Se había arrodillado sobre la rejilla y había cogido el volante con las dos manos, sin llave, y lo estaba forzando contra el resorte.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Iria Aldama",
+     "atributo": "regimen de reparto que impone",
+     "valor": "reparto manual válvula por válvula, con once minutos de retardo al sector más lejano",
+     "cita": "Reparto manual desde ahora. Válvula por válvula. Once minutos de retardo al sector más lejano.",
+     "categoria": "regla"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "formato de la pagina",
+     "valor": "margen izquierdo de dos centímetros con la palabra «responsable» impresa arriba en gris; treinta y dos renglones por hoja",
+     "cita": "una columna estrecha, de dos centímetros, con la palabra «responsable» impresa arriba en gris",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "parte medico de las quemaduras",
+     "valor": "quemadura de segundo grado en ambas palmas, sin sensibilidad en tres dedos de la izquierda",
+     "cita": "Quemadura de segundo en ambas palmas, sin sensibilidad en tres dedos de la izquierda.",
+     "categoria": "fisico"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Bea Otxoa",
+     "atributo": "tratamiento prescrito",
+     "valor": "reposo, manguito continuo y aire de recuperación por encima del nominal, diecinueve por minuto las primeras veinte horas; un quince por ciento sobre el nominal de un adulto en reposo",
+     "cita": "Necesita reposo, manguito continuo y aire de recuperación por encima del nominal, diecinueve por minuto al menos las primeras veinte horas.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "caudal disponible",
+     "valor": "7,3 personas-equivalentes, refrescado cada treinta segundos",
+     "cita": "seguía siendo 7,3, arriba a la izquierda, refrescado cada treinta segundos",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "objeto",
+     "sujeto_ref": "Libro de caudal de la consola",
+     "atributo": "primera entrada firmada por Aldama",
+     "valor": "sector 6 a Otxoa al ciento quince por ciento; sectores 5 y 7, turno de trabajo, al noventa; responsable I. Aldama",
+     "cita": "Sector 6 al ciento quince —dijo en voz alta, y escribió—. Sectores 5 y 7, turno de trabajo, al noventa.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "amenaza",
+     "sujeto_ref": "la de la novela",
+     "atributo": "efecto del noventa por ciento de nominal",
+     "valor": "trabajo pesado con hipoxia leve, viable doce horas",
+     "cita": "Noventa es trabajo pesado con hipoxia leve —dijo Perdomo—. Es viable. Es viable doce horas.",
+     "categoria": "otro"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "personaje",
+     "sujeto_ref": "Renzo Vilar",
+     "atributo": "sello de la primera entrada de caudal",
+     "valor": "diecinueve cero siete, doce segundos; primera entrada de caudal firmada por la responsable de cuadrilla",
+     "cita": "Diecinueve cero siete, doce segundos. Primera entrada de caudal firmada por la responsable de cuadrilla. Queda registrada.",
+     "categoria": "fecha"
+    },
+    {
+     "escena_orden": 4,
+     "sujeto_tipo": "lugar",
+     "sujeto_ref": "Cerro Quince",
+     "atributo": "estado de la bodega fria del sector 7",
+     "valor": "a cuatro grados, con la brida puesta; nadie baja desde el día mil ochocientos noventa; guarda los planos del casco en papel",
+     "cita": "La bodega está a cuatro grados y la brida sigue puesta —dijo—. Nadie baja ahí desde el día mil ochocientos noventa.",
+     "categoria": "ubicacion"
+    }
+   ]
+  }
+ ]
+}

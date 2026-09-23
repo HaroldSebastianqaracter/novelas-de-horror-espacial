@@ -1,0 +1,1316 @@
+{
+ "descripcion": "Capitulo 1 de la primera pasada real con Claude Code (23-09-2026, novela_real.db), anotado a mano. `entrada` es el paquete exacto que recibio el extractor en la extraccion aceptada, congelado: una pasada contra el extractor real mide la skill y el modelo, no los cambios del paquete. `vigentes` es lo que valia cada sujeto y atributo antes del capitulo, para contar las contradicciones falsas. `salida_de_referencia` es lo que devolvio el extractor real aquella vez: da la linea base sin gastar nada. Solo se anota lo que la prosa afirma sin ambiguedad; donde el sujeto es discutible se anotan solo las claves.",
+ "capitulo": 1,
+ "llamada_de_referencia": 12,
+ "entrada": "## TU ENCARGO\n\nExtrae del capitulo 1 todo lo que el texto afirma. Refierete a cada elemento por el numero de escena en que aparece.\nEl ultimo orden_interno registrado en la novela es -1: todo evento dramatizado lleva el suyo y continua la escala desde ahi (dos sucesos simultaneos comparten orden; uno anterior en la cronologia, como un recuerdo, lleva uno menor).\n\n## ENTIDADES QUE EXISTEN\n\nUsa EXACTAMENTE estos nombres. Lo que no este aqui va a entidades_no_reconocidas.\nPersonajes: Iria Aldama, Bea Otxoa, Neguib Sarr, Nevenka Suau, Ossian Trebo, Renzo Vilar, Ximena Perdomo\nLugares: Gantry de repostaje y muelle exterior, Anillo de habitación, sectores 1 a 8, Consola de control, sector 1\nObjetos: Orden de misión con umbral de censo, Tabla del censo de siete coma tres, Libro de caudal de la consola, Llave de anillo de Trebo, Matriz madre del anillo\nAmenaza: la de la novela (sujeto_tipo 'amenaza')\n\n## SIEMBRAS E HILOS VIVOS\n\nSiembras (marca si el capitulo las planta, las riega o las paga):\n- [sembrada] En el primer recorrido del anillo, un sector con la escarcha derretida y calor residual: alguien respiraba ahí hasta hace horas.\n- [sembrada] Una cláusula de umbral de censo mencionada de pasada por la operadora en la comunicación inicial, leída como jerga administrativa.\n- [sembrada] Sarr pide desde el principio una tarea con firma propia y Aldama se la niega por rutina.\n- [sembrada] Ocho placas de identidad en la bodega fría del sector 7, dos de ellas sin retirar.\n- [sembrada] La lámina del casco tiene un ángulo muerto en el eje, comentado como defecto de mantenimiento pendiente.\n- [sembrada] Otxoa carga el doble que nadie y rechaza el relevo alegando que ya descansó.\n- [sembrada] Vilar toma notas de todo con sello de hora desde el minuto uno y pregunta quién firma cada orden.\n- [sembrada] Kaminski se salta su propia ración en la primera comida como si fuera una costumbre vieja.\n- [sembrada] La llave de Trebo tiene una muesca por cada apertura y hay seis muescas seguidas del mismo día.\n- [sembrada] Suau conoce el nombre de pila de cada uno de sus cinco y no usa nunca el de los demás.\nHilos (refierete a cada uno por su numero; marca si el capitulo lo abre, lo complica, lo deja latente o lo resuelve):\n- Hilo 1 [principal, abierto]: Aldama quiere sacar a sus seis completos de una estación cuyo aire solo alcanza para una fracción, sin firmar ninguna baja; cada intento de evitar la elección le obliga a hacerla antes y peor.\n- Hilo 2 [subtrama, abierto]: Suau ha mantenido vivos a cinco durante ocho meses descartando y exige que Aldama acepte su método o se aparte; su pregunta es si un turno que se conserva descartando sigue siendo un turno.\n- Hilo 3 [subtrama, abierto]: Perdomo quiere que alguien de fuera escriba lo que pasó en el sector 7 el día 1.890, creyendo que contarlo la convierte en testigo y no en parte.\n- Hilo 4 [subtrama, abierto]: Kaminski sostiene que admitir una sola resta admite la serie entera y se empeña en devolver el lecho 2 a su cuba para probar que hay avería y no veredicto; encarna la verdad que Aldama niega, y su coherencia se paga con el hecho de que él es quien menos pierde al negarse.\n- Hilo 5 [subtrama, abierto]: Otxoa cree que el reparto se esquiva con trabajo y cuerpo, y ofrece su resistencia como precio para que nadie tenga que ser nombrado; debe aprender que puede ser salvada sin haberlo pagado antes.\n- Hilo 6 [subtrama, abierto]: Sarr quiere el puesto de responsabilidad creyendo que el problema es quién elige, mientras Vilar maniobra para colocarse fuera de la lista de prescindibles; la aritmética cambia de manos pero no de naturaleza.\n- Hilo 7 [subtrama, abierto]: Trebo sostiene que la llave no decide, solo cierra, y mantiene el sector 4 sellado contra todos; el mundo le demuestra que el umbral que guarda ya dejó a seis del lado malo.\n\n## PROSA DEL CAPITULO\n\n### Escena 1 — POV Iria Aldama, en Gantry de repostaje y muelle exterior\n\nEl gantry estaba tres grados fuera de línea y se notaba en las rodillas. Aldama avanzó por la rejilla con la llave dinamométrica colgada del arnés, y bajo las botas Berila IV giraba blanco y sin detalle, sin un accidente donde apoyar la vista. En el casco solo su respiración. Nueve días de vuelo y era lo único cercano que había oído.\n\n—Cerro Quince no responde al protocolo de acoplamiento —dijo Otxoa por el canal—. Tercera llamada. Copiado, copiado, nada.\n\n—De momento seguimos —dijo Aldama.\n\nSacó la orden de misión del bolsillo del muslo y la leyó en voz alta, como se leen estas cosas, para que quedara en el canal y nadie preguntara después. Reactivación de suministro de metano y agua. Instalación en reserva desde hace ocho meses. Cuadrilla de seis, contrato por objetivo. Verificación de planta atmosférica y certificación de reactivable.\n\n—Correcto —dijo la operadora, con el retardo encima de cada sílaba—. Añadan a la lectura la cláusula doce: la certificación queda condicionada al umbral de censo de la instalación, siete coma tres personas-equivalentes, computadas cuadrilla incluida.\n\n—Repita la doce.\n\nLa señal se cortó a mitad de la segunda palabra. Quedó el siseo de portadora y luego ni eso.\n\nVilar ya tenía la tableta fuera del bolsillo.\n\n—Hora de recepción —dijo—. Once cuarenta y dos, cuarenta y cuatro segundos. Lo sello, Iria, por si acaso. A efectos prácticos conviene saber quién firma una orden con condicionantes. Yo diría, si me permitís, que la Operadora entiende una cosa y nosotros estamos entendiendo otra.\n\n—Firma la Autoridad de ruta —dijo Aldama—. Como siempre.\n\n—Como siempre, claro. Lo dejo sellado igualmente.\n\nUmbral de censo. La palabra se le quedó puesta encima como una herramienta que no era del juego. Podía pedir aclaración: cincuenta y un minutos por sentido, dos horas para una frase que ya nadie respondería a la pregunta que ella iba a hacer. Miró el guante derecho. El calefactor daba veintidós minutos en sombra y llevaba once.\n\n—Entramos y reparamos —dijo—. Recorrido del anillo primero, del uno al ocho, y matriz madre en el cuatro. Cuarenta minutos de guante para el acoplamiento.\n\nSarr se adelantó medio paso en la rejilla, por el lado sin barandilla, y ella le puso la mano en el pecho sin mirarlo.\n\n—Lo que yo haría —dijo Sarr— es partir la cuadrilla. Dos al anillo, dos a la consola. En teoría eso nos ahorra... bueno, nos ahorra una hora. Y si me das la consola con firma propia, yo la levanto y tú no pierdes...\n\n—Vas conmigo. Sin firma. Es rutina, Sarr.\n\n—En teoría todo es rutina hasta que.\n\n—Hasta nada. Otxoa, collarín.\n\n—Collarín dentro. Presión igualada. —Un golpe sordo en el mamparo, dos—. Copiado, copiado.\n\nEl visor de la escotilla tenía escarcha en los bordes y un semicírculo limpio en el centro, barrido con algo ancho y plano. Desde dentro. Aldama apoyó el guante encima, en el mismo sitio, y no dijo nada por el canal.\n\nEntró la primera.\n\nEl aire de la esclusa le llegó antes que el ruido. Estaba caliente. Se quitó el casco medio giro para probarlo, como se prueba una atmósfera dudosa, y lo que entró no fue polvo ni frío de instalación cerrada ocho meses.\n\nOlía a gente.\n\n### Escena 2 — POV Iria Aldama, en Anillo de habitación, sectores 1 a 8\n\nEl anillo subía. Metro veinte de ancho, curva continua, y el suelo siempre un poco por encima de la bota delante, sin terminar nunca de subir. Bajo la rejilla corría el retorno y el aire salía templando los tobillos.\n\n—Sector uno, muerto —cantó Otxoa—. Sector dos, muerto. Luces de emergencia al veinte por ciento.\n\nAldama iba leyendo las paredes. A la altura del hombro, con rotulador de inventario, había números tachados y vueltos a escribir. El sector 2 tenía un once tachado, un nueve tachado, un siete. El sector 3 solo un cinco, escrito tres veces encima de sí mismo hasta reventar el trazo.\n\n—Censo por sector —dijo Sarr—. A mano. Eso en teoría no se hace desde hace... o sea, eso es de manual antiguo, de cuando no había transpondedor.\n\n—Sigue.\n\nEn el sector 3 la escarcha de los mamparos estaba derretida. No salpicada: derretida entera, con el agua corrida hacia la junta inferior y vuelta a helar en un labio fino. Aldama se quitó el guante derecho y puso el dorso de la mano en la chapa. Templada. Puso la palma en la rejilla del suelo. Templada también, y más arriba de lo que templa una bomba.\n\n—Calor residual —dijo Otxoa—. Esto es de hace horas, no de hace meses.\n\n—De momento no toquéis nada. —Se puso el guante. Se lo ajustó dos veces, y a la segunda no hacía falta—. Al cuatro. La matriz madre está en el cuatro.\n\nEl hombre estaba de pie delante del mamparo del sector 4, quieto, con las manos vacías a los costados, como si llevara allí desde antes que ellos aterrizaran. Mono de plantilla, chapa al cuello. En la mano derecha, cuando la levantó, una llave de anillo larga, de cabeza cuadrada, gastada en el filo.\n\n—Por ahí no se pasa.\n\n—Cuadrilla de mantenimiento Malla-3 —dijo Aldama—. Venimos a reactivar suministro. Necesito acceso al cuatro.\n\nContó. Uno, dos, tres, cuatro.\n\n—Está cerrado desde antes.\n\n—Desde antes de qué.\n\nCuatro otra vez. El hombre metió la llave en el cuadrado del mamparo y la giró media vuelta. El pestillo entró con un chasquido seco que corrió por la curva del pasillo y volvió.\n\n—Trebo —dijo—. Sector cuatro, no.\n\n—Hay una matriz madre ahí dentro y sin ella no hay reactivación. —Aldama se puso a medio metro. Él no retrocedió ni se tensó; se quedó igual, y eso fue peor—. Usted está decidiendo quién entra.\n\n—No. —Cuatro—. La llave no decide. La llave cierra. Yo no he elegido nada.\n\n—Jefa —dijo Otxoa, muy bajo, por el canal interno—. Esto es de dos. O de seis.\n\n—De momento de nadie. Atrás.\n\nAldama no miró la cara de Trebo. Miró la llave, porque la llave estaba a la altura de su vista y porque el pulgar de él la sostenía torcida, dejando el canto libre. En el canto había muescas. Cortas, hechas con punta de destornillador, en grupos. Las contó dos veces para no equivocarse, y no se equivocó: once en total. Las seis últimas estaban más juntas que las otras, con el metal levantado igual en todas, con el mismo brillo sin oxidar.\n\nSeis muescas del mismo día.\n\n—¿Cuántos quedan del turno? —preguntó Sarr, y lo preguntó rápido, de más, como preguntaba todo.\n\nCuatro.\n\n—Cinco —dijo Trebo.\n\nAldama sumó por dentro y no dijo el resultado. Cinco del turno y seis de cuadrilla eran once, y once era un número que la orden de misión no había mencionado y la operadora sí, de otra manera, con otras palabras, justo antes de cortar.\n\n—A la consola —dijo—. Sector uno. Quiero números antes que discusión.\n\n### Escena 3 — POV Iria Aldama, en Consola de control, sector 1\n\nLa consola tenía tres pantallas y dos estaban quemadas. En la del centro, por debajo de lo que se mostrara encima, había fijada en fantasma una tabla de prioridades del Reparto con columnas y nombres ilegibles, grabada en el fósforo por meses de no apagarse. La silla estaba atornillada y el reposabrazos derecho comido hasta la espuma.\n\nAldama abrió el libro de caudal esperando una curva de bomba. Un fallo mecánico tiene forma de escalón: funciona, deja de funcionar, se repara.\n\nArriba a la izquierda, refrescada cada treinta segundos, la única cifra que importaba.\n\nCaudal disponible, personas-equivalentes: 7,3.\n\nY la curva de ocho meses debajo, sin un solo escalón. Bajando en rampa limpia desde once coma cuatro. Eso no es una avería. Una avería se rompe. Esto se había gastado.\n\n—No es la bomba —dijo—. Los lechos. Dos desmontados hace cuatro años y uno al cuarenta y dos por ciento. La planta no fabrica aire, lo recupera, y recupera para siete coma tres.\n\n—Iria, por mi parte —dijo Vilar, sin levantar la vista de la tableta—, eso es una partida de repuesto, no un impedimento de certificación. La exposición sería...\n\n—Somos seis. Ellos son cinco.\n\nVilar dejó de escribir.\n\nLa mujer entró sin ruido y puso una hoja plastificada sobre la mesa, junto al libro, cuadrando el borde con el borde. Mono limpio. Manguito en la muñeca izquierda.\n\n—Se ha mantenido el censo activo por debajo del umbral desde el día ciento doce —dijo. Hablaba bajo—. Suau, turno de Cerro Quince. Usted es la responsable de la cuadrilla.\n\n—Aldama.\n\n—Función y chapa bastan. —Giró la tabla hacia ella con dos dedos—. Siete coma tres. Es lo que sostiene. Se procede por prioridad de función y horas de vida útil estimadas. Su cuadrilla aún no está incorporada al reparto.\n\nEn la columna de la derecha había seis casillas vacías, esperando.\n\n—Tenéis que saber una cosa. —Otra voz, desde el vano, deprisa—. Doce por minuto, saturación en ochenta y uno, once minutos hasta confusión. Eso es lo que pasa. Perdomo, sanitaria. Yo... —Se detuvo en el yo, como si la palabra pesara más que las constantes—. El día mil ochocientos noventa, en el sector siete. Hace falta alguien de fuera que lo escriba. Que lo escriba con su nombre, no el mío. Tenéis que saber lo del sector siete.\n\n—Perdomo —dijo Suau, más bajo todavía—. Se procede por orden.\n\n—Alguien de fuera. Alguien de fuera.\n\nAldama no contestó a ninguna de las dos. Sacó la orden de misión del bolsillo del muslo, la desdobló sobre el libro de caudal y buscó la cláusula doce, que once cuarenta y dos de la mañana había sido jerga.\n\nEstaba calculada. No decía «umbral de la instalación». Decía la cifra, siete coma tres, y debajo, en la misma línea, el desglose: capacidad real de la planta atmosférica CL-4 con un lecho al cuarenta y dos por ciento. Alguien había hecho la resta en una oficina, a nueve días de allí, antes de embarcarlos.\n\nOnce cuerpos. La habían enviado sabiendo.\n\nDobló el papel por la misma raya. Las manos le fueron exactas, y tardaron un poco de más.\n\n—Vilar, recoge. Repliegue al muelle, ahora.\n\n—Yo diría que conviene no precipitar...\n\n—Ahora.\n\nPerdomo le cortó el paso en el vano, sin tocarla.\n\n—La cláusula que le leyeron por radio. —Ráfaga, y luego parada—. ¿Sabe ya lo que significa?\n\n### Escena 4 — POV Iria Aldama, en Gantry de repostaje y muelle exterior\n\nBajaron el anillo en sentido contrario, contra la curva, que era el sentido en que el pasillo por fin descendía.\n\n—Otxoa, presuriza el acoplamiento y precalienta el collarín. Cuarenta minutos de guante, no más. Sarr, cascos y botellas en la esclusa. Todos dentro de la Malla-3 y nos vamos.\n\n—Copiado, copiado.\n\nEn la esclusa el aire seguía caliente y seguía oliendo a gente, y ahora ella sabía a cuánta. Otxoa metió la llave en el panel del collarín y subió la carga con el pulgar, sin esperar a la secuencia lenta.\n\n—Está frío de ocho meses —dijo—. Va a costar.\n\n—Súbelo.\n\nEl collarín cebó, mantuvo doce segundos y reventó por la junta superior con un golpe hueco que se oyó en el suelo antes que en el aire. La presión se fue por la brida. Los indicadores del mamparo bajaron a cero y se quedaron ahí.\n\nOtxoa metió la mano hasta el codo, la sacó y se miró el guante.\n\n—Junta partida en tres sitios y el asiento comido. —Contó por lo bajo, treinta y ocho, treinta y siete—. Esa puerta está muerta, jefa. No hay repuesto y no se suelda desde este lado.\n\nEl visor de la escotilla, al otro lado, con su semicírculo limpio. Y la Malla-3 detrás, con seis asientos, al final de setenta metros de estructura que ahora no llevaban a ninguna parte.\n\nTrebo había bajado también. Estaba en el vano, entre ellos y el pasillo, con las manos vacías a los costados.\n\nSuau llegó después, sin prisa, con la tabla plastificada contra el pecho. La tendió.\n\n—Once personas. Capacidad siete coma tres. —Bajó el volumen—. Se lleva ocho meses haciendo esto. Funciona. Se elige pronto y no se titubea, y quien se retira del censo se retira antes de que el déficit lo decida por todos. Acepte el método o apártese del reparto, responsable de cuadrilla. Es lo que sostiene.\n\n—Se retira del censo —repitió Aldama.\n\n—Se retira del censo.\n\nAldama no cogió la tabla. Dejó las manos donde estaban, en el arnés, y se oyó hablar con esa sintaxis larga que le salía cuando no estaba diciendo del todo la verdad, porque todavía no tenía vía y aun así iba a prometerla.\n\n—Mi cuadrilla ha entrado completa esta mañana con una orden que no admite bajas, y saldrá completa, con los seis, sin que yo reste a nadie ni deje que lo haga una tabla que no he firmado. De momento no se retira nadie.\n\n—De momento —dijo Suau.\n\nAldama empezó a contar cabezas por costumbre, como se cuenta antes de cerrar una esclusa. Otxoa, Vilar, Sarr, los dos del turno de proa. Cinco. Y se paró, porque faltaba una y llevaba toda la mañana sin sumarla.\n\nSeis. Ella también respiraba de la misma cuenta.\n\n—Iria. —Suau lo dijo mirándola solo a ella, y no usó el nombre de ningún otro en toda la frase—. La aritmética no cambia porque usted no la escriba.\n\n—El cuatro —dijo Aldama—. Abrimos el sector cuatro y sacamos la matriz madre. Otxoa, herramienta de corte.",
+ "escenas": {
+  "1": "El gantry estaba tres grados fuera de línea y se notaba en las rodillas. Aldama avanzó por la rejilla con la llave dinamométrica colgada del arnés, y bajo las botas Berila IV giraba blanco y sin detalle, sin un accidente donde apoyar la vista. En el casco solo su respiración. Nueve días de vuelo y era lo único cercano que había oído.\n\n—Cerro Quince no responde al protocolo de acoplamiento —dijo Otxoa por el canal—. Tercera llamada. Copiado, copiado, nada.\n\n—De momento seguimos —dijo Aldama.\n\nSacó la orden de misión del bolsillo del muslo y la leyó en voz alta, como se leen estas cosas, para que quedara en el canal y nadie preguntara después. Reactivación de suministro de metano y agua. Instalación en reserva desde hace ocho meses. Cuadrilla de seis, contrato por objetivo. Verificación de planta atmosférica y certificación de reactivable.\n\n—Correcto —dijo la operadora, con el retardo encima de cada sílaba—. Añadan a la lectura la cláusula doce: la certificación queda condicionada al umbral de censo de la instalación, siete coma tres personas-equivalentes, computadas cuadrilla incluida.\n\n—Repita la doce.\n\nLa señal se cortó a mitad de la segunda palabra. Quedó el siseo de portadora y luego ni eso.\n\nVilar ya tenía la tableta fuera del bolsillo.\n\n—Hora de recepción —dijo—. Once cuarenta y dos, cuarenta y cuatro segundos. Lo sello, Iria, por si acaso. A efectos prácticos conviene saber quién firma una orden con condicionantes. Yo diría, si me permitís, que la Operadora entiende una cosa y nosotros estamos entendiendo otra.\n\n—Firma la Autoridad de ruta —dijo Aldama—. Como siempre.\n\n—Como siempre, claro. Lo dejo sellado igualmente.\n\nUmbral de censo. La palabra se le quedó puesta encima como una herramienta que no era del juego. Podía pedir aclaración: cincuenta y un minutos por sentido, dos horas para una frase que ya nadie respondería a la pregunta que ella iba a hacer. Miró el guante derecho. El calefactor daba veintidós minutos en sombra y llevaba once.\n\n—Entramos y reparamos —dijo—. Recorrido del anillo primero, del uno al ocho, y matriz madre en el cuatro. Cuarenta minutos de guante para el acoplamiento.\n\nSarr se adelantó medio paso en la rejilla, por el lado sin barandilla, y ella le puso la mano en el pecho sin mirarlo.\n\n—Lo que yo haría —dijo Sarr— es partir la cuadrilla. Dos al anillo, dos a la consola. En teoría eso nos ahorra... bueno, nos ahorra una hora. Y si me das la consola con firma propia, yo la levanto y tú no pierdes...\n\n—Vas conmigo. Sin firma. Es rutina, Sarr.\n\n—En teoría todo es rutina hasta que.\n\n—Hasta nada. Otxoa, collarín.\n\n—Collarín dentro. Presión igualada. —Un golpe sordo en el mamparo, dos—. Copiado, copiado.\n\nEl visor de la escotilla tenía escarcha en los bordes y un semicírculo limpio en el centro, barrido con algo ancho y plano. Desde dentro. Aldama apoyó el guante encima, en el mismo sitio, y no dijo nada por el canal.\n\nEntró la primera.\n\nEl aire de la esclusa le llegó antes que el ruido. Estaba caliente. Se quitó el casco medio giro para probarlo, como se prueba una atmósfera dudosa, y lo que entró no fue polvo ni frío de instalación cerrada ocho meses.\n\nOlía a gente.",
+  "2": "El anillo subía. Metro veinte de ancho, curva continua, y el suelo siempre un poco por encima de la bota delante, sin terminar nunca de subir. Bajo la rejilla corría el retorno y el aire salía templando los tobillos.\n\n—Sector uno, muerto —cantó Otxoa—. Sector dos, muerto. Luces de emergencia al veinte por ciento.\n\nAldama iba leyendo las paredes. A la altura del hombro, con rotulador de inventario, había números tachados y vueltos a escribir. El sector 2 tenía un once tachado, un nueve tachado, un siete. El sector 3 solo un cinco, escrito tres veces encima de sí mismo hasta reventar el trazo.\n\n—Censo por sector —dijo Sarr—. A mano. Eso en teoría no se hace desde hace... o sea, eso es de manual antiguo, de cuando no había transpondedor.\n\n—Sigue.\n\nEn el sector 3 la escarcha de los mamparos estaba derretida. No salpicada: derretida entera, con el agua corrida hacia la junta inferior y vuelta a helar en un labio fino. Aldama se quitó el guante derecho y puso el dorso de la mano en la chapa. Templada. Puso la palma en la rejilla del suelo. Templada también, y más arriba de lo que templa una bomba.\n\n—Calor residual —dijo Otxoa—. Esto es de hace horas, no de hace meses.\n\n—De momento no toquéis nada. —Se puso el guante. Se lo ajustó dos veces, y a la segunda no hacía falta—. Al cuatro. La matriz madre está en el cuatro.\n\nEl hombre estaba de pie delante del mamparo del sector 4, quieto, con las manos vacías a los costados, como si llevara allí desde antes que ellos aterrizaran. Mono de plantilla, chapa al cuello. En la mano derecha, cuando la levantó, una llave de anillo larga, de cabeza cuadrada, gastada en el filo.\n\n—Por ahí no se pasa.\n\n—Cuadrilla de mantenimiento Malla-3 —dijo Aldama—. Venimos a reactivar suministro. Necesito acceso al cuatro.\n\nContó. Uno, dos, tres, cuatro.\n\n—Está cerrado desde antes.\n\n—Desde antes de qué.\n\nCuatro otra vez. El hombre metió la llave en el cuadrado del mamparo y la giró media vuelta. El pestillo entró con un chasquido seco que corrió por la curva del pasillo y volvió.\n\n—Trebo —dijo—. Sector cuatro, no.\n\n—Hay una matriz madre ahí dentro y sin ella no hay reactivación. —Aldama se puso a medio metro. Él no retrocedió ni se tensó; se quedó igual, y eso fue peor—. Usted está decidiendo quién entra.\n\n—No. —Cuatro—. La llave no decide. La llave cierra. Yo no he elegido nada.\n\n—Jefa —dijo Otxoa, muy bajo, por el canal interno—. Esto es de dos. O de seis.\n\n—De momento de nadie. Atrás.\n\nAldama no miró la cara de Trebo. Miró la llave, porque la llave estaba a la altura de su vista y porque el pulgar de él la sostenía torcida, dejando el canto libre. En el canto había muescas. Cortas, hechas con punta de destornillador, en grupos. Las contó dos veces para no equivocarse, y no se equivocó: once en total. Las seis últimas estaban más juntas que las otras, con el metal levantado igual en todas, con el mismo brillo sin oxidar.\n\nSeis muescas del mismo día.\n\n—¿Cuántos quedan del turno? —preguntó Sarr, y lo preguntó rápido, de más, como preguntaba todo.\n\nCuatro.\n\n—Cinco —dijo Trebo.\n\nAldama sumó por dentro y no dijo el resultado. Cinco del turno y seis de cuadrilla eran once, y once era un número que la orden de misión no había mencionado y la operadora sí, de otra manera, con otras palabras, justo antes de cortar.\n\n—A la consola —dijo—. Sector uno. Quiero números antes que discusión.",
+  "3": "La consola tenía tres pantallas y dos estaban quemadas. En la del centro, por debajo de lo que se mostrara encima, había fijada en fantasma una tabla de prioridades del Reparto con columnas y nombres ilegibles, grabada en el fósforo por meses de no apagarse. La silla estaba atornillada y el reposabrazos derecho comido hasta la espuma.\n\nAldama abrió el libro de caudal esperando una curva de bomba. Un fallo mecánico tiene forma de escalón: funciona, deja de funcionar, se repara.\n\nArriba a la izquierda, refrescada cada treinta segundos, la única cifra que importaba.\n\nCaudal disponible, personas-equivalentes: 7,3.\n\nY la curva de ocho meses debajo, sin un solo escalón. Bajando en rampa limpia desde once coma cuatro. Eso no es una avería. Una avería se rompe. Esto se había gastado.\n\n—No es la bomba —dijo—. Los lechos. Dos desmontados hace cuatro años y uno al cuarenta y dos por ciento. La planta no fabrica aire, lo recupera, y recupera para siete coma tres.\n\n—Iria, por mi parte —dijo Vilar, sin levantar la vista de la tableta—, eso es una partida de repuesto, no un impedimento de certificación. La exposición sería...\n\n—Somos seis. Ellos son cinco.\n\nVilar dejó de escribir.\n\nLa mujer entró sin ruido y puso una hoja plastificada sobre la mesa, junto al libro, cuadrando el borde con el borde. Mono limpio. Manguito en la muñeca izquierda.\n\n—Se ha mantenido el censo activo por debajo del umbral desde el día ciento doce —dijo. Hablaba bajo—. Suau, turno de Cerro Quince. Usted es la responsable de la cuadrilla.\n\n—Aldama.\n\n—Función y chapa bastan. —Giró la tabla hacia ella con dos dedos—. Siete coma tres. Es lo que sostiene. Se procede por prioridad de función y horas de vida útil estimadas. Su cuadrilla aún no está incorporada al reparto.\n\nEn la columna de la derecha había seis casillas vacías, esperando.\n\n—Tenéis que saber una cosa. —Otra voz, desde el vano, deprisa—. Doce por minuto, saturación en ochenta y uno, once minutos hasta confusión. Eso es lo que pasa. Perdomo, sanitaria. Yo... —Se detuvo en el yo, como si la palabra pesara más que las constantes—. El día mil ochocientos noventa, en el sector siete. Hace falta alguien de fuera que lo escriba. Que lo escriba con su nombre, no el mío. Tenéis que saber lo del sector siete.\n\n—Perdomo —dijo Suau, más bajo todavía—. Se procede por orden.\n\n—Alguien de fuera. Alguien de fuera.\n\nAldama no contestó a ninguna de las dos. Sacó la orden de misión del bolsillo del muslo, la desdobló sobre el libro de caudal y buscó la cláusula doce, que once cuarenta y dos de la mañana había sido jerga.\n\nEstaba calculada. No decía «umbral de la instalación». Decía la cifra, siete coma tres, y debajo, en la misma línea, el desglose: capacidad real de la planta atmosférica CL-4 con un lecho al cuarenta y dos por ciento. Alguien había hecho la resta en una oficina, a nueve días de allí, antes de embarcarlos.\n\nOnce cuerpos. La habían enviado sabiendo.\n\nDobló el papel por la misma raya. Las manos le fueron exactas, y tardaron un poco de más.\n\n—Vilar, recoge. Repliegue al muelle, ahora.\n\n—Yo diría que conviene no precipitar...\n\n—Ahora.\n\nPerdomo le cortó el paso en el vano, sin tocarla.\n\n—La cláusula que le leyeron por radio. —Ráfaga, y luego parada—. ¿Sabe ya lo que significa?",
+  "4": "Bajaron el anillo en sentido contrario, contra la curva, que era el sentido en que el pasillo por fin descendía.\n\n—Otxoa, presuriza el acoplamiento y precalienta el collarín. Cuarenta minutos de guante, no más. Sarr, cascos y botellas en la esclusa. Todos dentro de la Malla-3 y nos vamos.\n\n—Copiado, copiado.\n\nEn la esclusa el aire seguía caliente y seguía oliendo a gente, y ahora ella sabía a cuánta. Otxoa metió la llave en el panel del collarín y subió la carga con el pulgar, sin esperar a la secuencia lenta.\n\n—Está frío de ocho meses —dijo—. Va a costar.\n\n—Súbelo.\n\nEl collarín cebó, mantuvo doce segundos y reventó por la junta superior con un golpe hueco que se oyó en el suelo antes que en el aire. La presión se fue por la brida. Los indicadores del mamparo bajaron a cero y se quedaron ahí.\n\nOtxoa metió la mano hasta el codo, la sacó y se miró el guante.\n\n—Junta partida en tres sitios y el asiento comido. —Contó por lo bajo, treinta y ocho, treinta y siete—. Esa puerta está muerta, jefa. No hay repuesto y no se suelda desde este lado.\n\nEl visor de la escotilla, al otro lado, con su semicírculo limpio. Y la Malla-3 detrás, con seis asientos, al final de setenta metros de estructura que ahora no llevaban a ninguna parte.\n\nTrebo había bajado también. Estaba en el vano, entre ellos y el pasillo, con las manos vacías a los costados.\n\nSuau llegó después, sin prisa, con la tabla plastificada contra el pecho. La tendió.\n\n—Once personas. Capacidad siete coma tres. —Bajó el volumen—. Se lleva ocho meses haciendo esto. Funciona. Se elige pronto y no se titubea, y quien se retira del censo se retira antes de que el déficit lo decida por todos. Acepte el método o apártese del reparto, responsable de cuadrilla. Es lo que sostiene.\n\n—Se retira del censo —repitió Aldama.\n\n—Se retira del censo.\n\nAldama no cogió la tabla. Dejó las manos donde estaban, en el arnés, y se oyó hablar con esa sintaxis larga que le salía cuando no estaba diciendo del todo la verdad, porque todavía no tenía vía y aun así iba a prometerla.\n\n—Mi cuadrilla ha entrado completa esta mañana con una orden que no admite bajas, y saldrá completa, con los seis, sin que yo reste a nadie ni deje que lo haga una tabla que no he firmado. De momento no se retira nadie.\n\n—De momento —dijo Suau.\n\nAldama empezó a contar cabezas por costumbre, como se cuenta antes de cerrar una esclusa. Otxoa, Vilar, Sarr, los dos del turno de proa. Cinco. Y se paró, porque faltaba una y llevaba toda la mañana sin sumarla.\n\nSeis. Ella también respiraba de la misma cuenta.\n\n—Iria. —Suau lo dijo mirándola solo a ella, y no usó el nombre de ningún otro en toda la frase—. La aritmética no cambia porque usted no la escriba.\n\n—El cuatro —dijo Aldama—. Abrimos el sector cuatro y sacamos la matriz madre. Otxoa, herramienta de corte."
+ },
+ "vigentes": [],
+ "salida_de_referencia": {
+  "resumen": "La cuadrilla de mantenimiento de seis personas dirigida por Iria Aldama llega tras nueve días de vuelo a la estación Cerro Quince, en órbita de Berila IV, para reactivar el suministro de metano y agua. La estación no responde al protocolo de acoplamiento. Al leer la orden de misión en el canal, la operadora añade la cláusula doce: la certificación queda condicionada a un umbral de censo de 7,3 personas-equivalentes, cuadrilla incluida; la señal se corta antes de la repetición. Vilar sella la hora. Dentro, la esclusa está caliente y huele a gente. En el recorrido del anillo hallan censos escritos a mano y tachados y un sector 3 con la escarcha derretida y calor de horas. Ossian Trebo bloquea el sector 4 con su llave de anillo, que tiene once muescas, seis del mismo día, y declara que quedan cinco del turno. En la consola, el libro de caudal muestra 7,3 personas-equivalentes bajando en rampa desde 11,4: dos lechos desmontados y uno al 42%. Suau presenta la tabla del reparto con seis casillas vacías; Perdomo pide que alguien de fuera escriba lo del sector 7 del día 1.890. Aldama descubre que la cláusula traía la resta ya hecha y ordena el repliegue, pero el collarín revienta y la puerta queda muerta: once personas, capacidad para 7,3. Aldama promete sacar a sus seis completos y ordena cortar el sector 4.",
+  "resumen_breve": "La cuadrilla de Aldama llega a Cerro Quince a reactivar el suministro, descubre que la estación solo sostiene a 7,3 de once personas y queda atrapada cuando el collarín revienta.",
+  "amenaza_revelacion": "encuentro",
+  "hechos": [
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "lugar",
+    "sujeto_ref": "Gantry de repostaje y muelle exterior",
+    "atributo": "alineacion",
+    "valor": "tres grados fuera de linea",
+    "categoria": "fisico",
+    "cita": "El gantry estaba tres grados fuera de línea y se notaba en las rodillas."
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "novela",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "estado de comunicacion inicial",
+    "valor": "no responde al protocolo de acoplamiento tras tres llamadas",
+    "categoria": "otro",
+    "cita": "Cerro Quince no responde al protocolo de acoplamiento —dijo Otxoa por el canal—. Tercera llamada."
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "personaje",
+    "sujeto_ref": "Iria Aldama",
+    "atributo": "funcion",
+    "valor": "responsable de la cuadrilla de mantenimiento Malla-3",
+    "categoria": "relacion",
+    "cita": "Cuadrilla de mantenimiento Malla-3 —dijo Aldama"
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Orden de misión con umbral de censo",
+    "atributo": "objetivo de la mision",
+    "valor": "reactivacion de suministro de metano y agua; verificacion de planta atmosferica y certificacion de reactivable",
+    "categoria": "regla",
+    "cita": "Reactivación de suministro de metano y agua."
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Orden de misión con umbral de censo",
+    "atributo": "tamano de cuadrilla",
+    "valor": "seis, contrato por objetivo",
+    "categoria": "otro",
+    "cita": "Cuadrilla de seis, contrato por objetivo."
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "novela",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "tiempo en reserva",
+    "valor": "ocho meses",
+    "categoria": "fecha",
+    "cita": "Instalación en reserva desde hace ocho meses."
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Orden de misión con umbral de censo",
+    "atributo": "clausula doce",
+    "valor": "la certificacion queda condicionada al umbral de censo de 7,3 personas-equivalentes, computadas cuadrilla incluida",
+    "categoria": "regla",
+    "cita": "la certificación queda condicionada al umbral de censo de la instalación, siete coma tres personas-equivalentes, computadas cuadrilla incluida"
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "mundo",
+    "sujeto_ref": "Berila IV",
+    "atributo": "aspecto",
+    "valor": "blanco y sin detalle, sin un accidente donde apoyar la vista",
+    "categoria": "fisico",
+    "cita": "bajo las botas Berila IV giraba blanco y sin detalle"
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "novela",
+    "sujeto_ref": "Malla-3",
+    "atributo": "duracion del vuelo de ida",
+    "valor": "nueve dias",
+    "categoria": "distancia",
+    "cita": "Nueve días de vuelo"
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "mundo",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "retardo de comunicacion",
+    "valor": "cincuenta y un minutos por sentido",
+    "categoria": "distancia",
+    "cita": "cincuenta y un minutos por sentido"
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Orden de misión con umbral de censo",
+    "atributo": "hora de recepcion sellada",
+    "valor": "once cuarenta y dos, cuarenta y cuatro segundos",
+    "categoria": "fecha",
+    "cita": "Hora de recepción —dijo—. Once cuarenta y dos, cuarenta y cuatro segundos."
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Orden de misión con umbral de censo",
+    "atributo": "firmante",
+    "valor": "la Autoridad de ruta",
+    "categoria": "otro",
+    "cita": "Firma la Autoridad de ruta —dijo Aldama—. Como siempre."
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Llave de anillo de Trebo",
+    "atributo": "autonomia del calefactor de guante",
+    "valor": "veintidos minutos en sombra",
+    "categoria": "otro",
+    "cita": "El calefactor daba veintidós minutos en sombra y llevaba once."
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "lugar",
+    "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+    "atributo": "ubicacion de la matriz madre",
+    "valor": "sector cuatro",
+    "categoria": "ubicacion",
+    "cita": "Recorrido del anillo primero, del uno al ocho, y matriz madre en el cuatro."
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "lugar",
+    "sujeto_ref": "Gantry de repostaje y muelle exterior",
+    "atributo": "estado del visor de la escotilla",
+    "valor": "escarcha en los bordes y un semicirculo limpio barrido desde dentro",
+    "categoria": "fisico",
+    "cita": "El visor de la escotilla tenía escarcha en los bordes y un semicírculo limpio en el centro, barrido con algo ancho y plano. Desde dentro."
+   },
+   {
+    "escena_orden": 1,
+    "sujeto_tipo": "lugar",
+    "sujeto_ref": "Gantry de repostaje y muelle exterior",
+    "atributo": "estado del aire de la esclusa",
+    "valor": "caliente y con olor a gente",
+    "categoria": "fisico",
+    "cita": "Olía a gente."
+   },
+   {
+    "escena_orden": 2,
+    "sujeto_tipo": "lugar",
+    "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+    "atributo": "dimensiones",
+    "valor": "metro veinte de ancho, curva continua siempre ascendente",
+    "categoria": "fisico",
+    "cita": "Metro veinte de ancho, curva continua"
+   },
+   {
+    "escena_orden": 2,
+    "sujeto_tipo": "lugar",
+    "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+    "atributo": "censo escrito a mano en las paredes",
+    "valor": "sector 2 con un once tachado, un nueve tachado y un siete; sector 3 con un cinco escrito tres veces",
+    "categoria": "otro",
+    "cita": "El sector 2 tenía un once tachado, un nueve tachado, un siete."
+   },
+   {
+    "escena_orden": 2,
+    "sujeto_tipo": "lugar",
+    "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+    "atributo": "estado de los sectores 1 y 2",
+    "valor": "muertos, luces de emergencia al veinte por ciento",
+    "categoria": "fisico",
+    "cita": "Sector uno, muerto —cantó Otxoa—. Sector dos, muerto."
+   },
+   {
+    "escena_orden": 2,
+    "sujeto_tipo": "lugar",
+    "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+    "atributo": "estado del sector 3",
+    "valor": "escarcha derretida entera, mamparo y rejilla templados, calor residual de horas",
+    "categoria": "fisico",
+    "cita": "Calor residual —dijo Otxoa—. Esto es de hace horas, no de hace meses."
+   },
+   {
+    "escena_orden": 2,
+    "sujeto_tipo": "personaje",
+    "sujeto_ref": "Ossian Trebo",
+    "atributo": "vestimenta",
+    "valor": "mono de plantilla con chapa al cuello",
+    "categoria": "fisico",
+    "cita": "Mono de plantilla, chapa al cuello."
+   },
+   {
+    "escena_orden": 2,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Llave de anillo de Trebo",
+    "atributo": "aspecto",
+    "valor": "llave de anillo larga, de cabeza cuadrada, gastada en el filo",
+    "categoria": "fisico",
+    "cita": "una llave de anillo larga, de cabeza cuadrada, gastada en el filo"
+   },
+   {
+    "escena_orden": 2,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Llave de anillo de Trebo",
+    "atributo": "muescas en el canto",
+    "valor": "once en total, las seis ultimas mas juntas y con el mismo brillo sin oxidar",
+    "categoria": "otro",
+    "cita": "once en total. Las seis últimas estaban más juntas que las otras"
+   },
+   {
+    "escena_orden": 2,
+    "sujeto_tipo": "lugar",
+    "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+    "atributo": "estado del sector 4",
+    "valor": "sellado con llave por Trebo, acceso prohibido",
+    "categoria": "ubicacion",
+    "cita": "Trebo —dijo—. Sector cuatro, no."
+   },
+   {
+    "escena_orden": 2,
+    "sujeto_tipo": "personaje",
+    "sujeto_ref": "Ossian Trebo",
+    "atributo": "postura sobre la llave",
+    "valor": "la llave no decide, la llave cierra; el no ha elegido nada",
+    "categoria": "regla",
+    "cita": "La llave no decide. La llave cierra. Yo no he elegido nada."
+   },
+   {
+    "escena_orden": 2,
+    "sujeto_tipo": "novela",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "supervivientes del turno",
+    "valor": "cinco",
+    "categoria": "otro",
+    "cita": "Cinco —dijo Trebo."
+   },
+   {
+    "escena_orden": 2,
+    "sujeto_tipo": "novela",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "total de personas a bordo",
+    "valor": "once: cinco del turno y seis de cuadrilla",
+    "categoria": "otro",
+    "cita": "Cinco del turno y seis de cuadrilla eran once"
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "lugar",
+    "sujeto_ref": "Consola de control, sector 1",
+    "atributo": "estado de las pantallas",
+    "valor": "tres pantallas, dos quemadas; la central con una tabla de prioridades del Reparto grabada en fantasma",
+    "categoria": "fisico",
+    "cita": "La consola tenía tres pantallas y dos estaban quemadas."
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Libro de caudal de la consola",
+    "atributo": "caudal disponible",
+    "valor": "7,3 personas-equivalentes, refrescado cada treinta segundos",
+    "categoria": "otro",
+    "cita": "Caudal disponible, personas-equivalentes: 7,3."
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Libro de caudal de la consola",
+    "atributo": "curva de ocho meses",
+    "valor": "rampa limpia sin escalon bajando desde once coma cuatro",
+    "categoria": "otro",
+    "cita": "Bajando en rampa limpia desde once coma cuatro."
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "sistema_tecnologico",
+    "sujeto_ref": "planta atmosférica CL-4",
+    "atributo": "estado de los lechos",
+    "valor": "dos desmontados hace cuatro anos y uno al cuarenta y dos por ciento",
+    "categoria": "fisico",
+    "cita": "Dos desmontados hace cuatro años y uno al cuarenta y dos por ciento."
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "sistema_tecnologico",
+    "sujeto_ref": "planta atmosférica CL-4",
+    "atributo": "funcionamiento",
+    "valor": "no fabrica aire, lo recupera, y recupera para siete coma tres",
+    "categoria": "regla",
+    "cita": "La planta no fabrica aire, lo recupera, y recupera para siete coma tres."
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "personaje",
+    "sujeto_ref": "Nevenka Suau",
+    "atributo": "funcion",
+    "valor": "turno de Cerro Quince, lleva el reparto",
+    "categoria": "relacion",
+    "cita": "Suau, turno de Cerro Quince."
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "personaje",
+    "sujeto_ref": "Nevenka Suau",
+    "atributo": "aspecto",
+    "valor": "mono limpio, manguito en la muneca izquierda",
+    "categoria": "fisico",
+    "cita": "Mono limpio. Manguito en la muñeca izquierda."
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Tabla del censo de siete coma tres",
+    "atributo": "metodo de reparto",
+    "valor": "se procede por prioridad de funcion y horas de vida util estimadas",
+    "categoria": "regla",
+    "cita": "Se procede por prioridad de función y horas de vida útil estimadas."
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Tabla del censo de siete coma tres",
+    "atributo": "estado de las casillas",
+    "valor": "seis casillas vacias en la columna derecha para la cuadrilla, aun no incorporada al reparto",
+    "categoria": "otro",
+    "cita": "En la columna de la derecha había seis casillas vacías, esperando."
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "novela",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "fecha de descenso bajo el umbral",
+    "valor": "censo activo por debajo del umbral desde el dia ciento doce",
+    "categoria": "fecha",
+    "cita": "Se ha mantenido el censo activo por debajo del umbral desde el día ciento doce"
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "personaje",
+    "sujeto_ref": "Ximena Perdomo",
+    "atributo": "funcion",
+    "valor": "sanitaria",
+    "categoria": "relacion",
+    "cita": "Perdomo, sanitaria."
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "amenaza",
+    "sujeto_ref": "la de la novela",
+    "atributo": "fisiologia de la asfixia",
+    "valor": "doce por minuto, saturacion en ochenta y uno, once minutos hasta confusion",
+    "categoria": "regla",
+    "cita": "Doce por minuto, saturación en ochenta y uno, once minutos hasta confusión."
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "novela",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "suceso del sector siete",
+    "valor": "ocurrio el dia mil ochocientos noventa; Perdomo quiere que alguien de fuera lo escriba con su nombre",
+    "categoria": "fecha",
+    "cita": "El día mil ochocientos noventa, en el sector siete."
+   },
+   {
+    "escena_orden": 3,
+    "sujeto_tipo": "objeto",
+    "sujeto_ref": "Orden de misión con umbral de censo",
+    "atributo": "desglose de la clausula doce",
+    "valor": "no dice umbral de la instalacion sino la cifra 7,3 con el desglose de capacidad real de la planta CL-4 con un lecho al cuarenta y dos por ciento",
+    "categoria": "regla",
+    "cita": "Decía la cifra, siete coma tres, y debajo, en la misma línea, el desglose"
+   },
+   {
+    "escena_orden": 4,
+    "sujeto_tipo": "lugar",
+    "sujeto_ref": "Gantry de repostaje y muelle exterior",
+    "atributo": "estado del collarin de acoplamiento",
+    "valor": "reventado por la junta superior, junta partida en tres sitios y asiento comido; sin repuesto y no se suelda desde este lado",
+    "categoria": "fisico",
+    "cita": "Junta partida en tres sitios y el asiento comido. Esa puerta está muerta, jefa."
+   },
+   {
+    "escena_orden": 4,
+    "sujeto_tipo": "lugar",
+    "sujeto_ref": "Gantry de repostaje y muelle exterior",
+    "atributo": "longitud de la estructura hasta la nave",
+    "valor": "setenta metros",
+    "categoria": "distancia",
+    "cita": "al final de setenta metros de estructura"
+   },
+   {
+    "escena_orden": 4,
+    "sujeto_tipo": "novela",
+    "sujeto_ref": "Malla-3",
+    "atributo": "capacidad",
+    "valor": "seis asientos",
+    "categoria": "fisico",
+    "cita": "Y la Malla-3 detrás, con seis asientos"
+   },
+   {
+    "escena_orden": 4,
+    "sujeto_tipo": "personaje",
+    "sujeto_ref": "Nevenka Suau",
+    "atributo": "metodo declarado",
+    "valor": "se elige pronto y no se titubea; quien se retira del censo se retira antes de que el deficit lo decida por todos",
+    "categoria": "regla",
+    "cita": "Se elige pronto y no se titubea, y quien se retira del censo se retira antes de que el déficit lo decida por todos."
+   },
+   {
+    "escena_orden": 4,
+    "sujeto_tipo": "personaje",
+    "sujeto_ref": "Iria Aldama",
+    "atributo": "promesa",
+    "valor": "sacar a los seis de su cuadrilla sin restar a nadie ni firmar bajas",
+    "categoria": "otro",
+    "cita": "saldrá completa, con los seis, sin que yo reste a nadie"
+   }
+  ],
+  "conocimiento": [
+   {
+    "escena_orden": 1,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Orden de misión con umbral de censo",
+    "atributo": "clausula doce",
+    "postura": "sabe",
+    "via": "presencio"
+   },
+   {
+    "escena_orden": 1,
+    "personaje_ref": "Renzo Vilar",
+    "sujeto_ref": "Orden de misión con umbral de censo",
+    "atributo": "clausula doce",
+    "postura": "sabe",
+    "via": "presencio"
+   },
+   {
+    "escena_orden": 1,
+    "personaje_ref": "Bea Otxoa",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "estado de comunicacion inicial",
+    "postura": "sabe",
+    "via": "presencio"
+   },
+   {
+    "escena_orden": 1,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Gantry de repostaje y muelle exterior",
+    "atributo": "estado del visor de la escotilla",
+    "postura": "sabe",
+    "via": "presencio"
+   },
+   {
+    "escena_orden": 1,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Gantry de repostaje y muelle exterior",
+    "atributo": "estado del aire de la esclusa",
+    "postura": "sabe",
+    "via": "presencio"
+   },
+   {
+    "escena_orden": 2,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+    "atributo": "estado del sector 3",
+    "postura": "sabe",
+    "via": "presencio"
+   },
+   {
+    "escena_orden": 2,
+    "personaje_ref": "Bea Otxoa",
+    "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+    "atributo": "estado del sector 3",
+    "postura": "sabe",
+    "via": "presencio"
+   },
+   {
+    "escena_orden": 2,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Llave de anillo de Trebo",
+    "atributo": "muescas en el canto",
+    "postura": "sabe",
+    "via": "presencio"
+   },
+   {
+    "escena_orden": 2,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "supervivientes del turno",
+    "postura": "sabe",
+    "via": "se_lo_contaron"
+   },
+   {
+    "escena_orden": 2,
+    "personaje_ref": "Neguib Sarr",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "supervivientes del turno",
+    "postura": "sabe",
+    "via": "se_lo_contaron"
+   },
+   {
+    "escena_orden": 2,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "total de personas a bordo",
+    "postura": "sabe",
+    "via": "dedujo"
+   },
+   {
+    "escena_orden": 3,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Libro de caudal de la consola",
+    "atributo": "caudal disponible",
+    "postura": "sabe",
+    "via": "presencio"
+   },
+   {
+    "escena_orden": 3,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "planta atmosférica CL-4",
+    "atributo": "estado de los lechos",
+    "postura": "sabe",
+    "via": "dedujo"
+   },
+   {
+    "escena_orden": 3,
+    "personaje_ref": "Renzo Vilar",
+    "sujeto_ref": "planta atmosférica CL-4",
+    "atributo": "funcionamiento",
+    "postura": "sabe",
+    "via": "se_lo_contaron"
+   },
+   {
+    "escena_orden": 3,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Tabla del censo de siete coma tres",
+    "atributo": "metodo de reparto",
+    "postura": "sabe",
+    "via": "se_lo_contaron"
+   },
+   {
+    "escena_orden": 3,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "suceso del sector siete",
+    "postura": "sospecha",
+    "via": "se_lo_contaron"
+   },
+   {
+    "escena_orden": 3,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Orden de misión con umbral de censo",
+    "atributo": "desglose de la clausula doce",
+    "postura": "sabe",
+    "via": "dedujo"
+   },
+   {
+    "escena_orden": 4,
+    "personaje_ref": "Bea Otxoa",
+    "sujeto_ref": "Gantry de repostaje y muelle exterior",
+    "atributo": "estado del collarin de acoplamiento",
+    "postura": "sabe",
+    "via": "presencio"
+   },
+   {
+    "escena_orden": 4,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Gantry de repostaje y muelle exterior",
+    "atributo": "estado del collarin de acoplamiento",
+    "postura": "sabe",
+    "via": "presencio"
+   },
+   {
+    "escena_orden": 4,
+    "personaje_ref": "Nevenka Suau",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "total de personas a bordo",
+    "postura": "sabe",
+    "via": "dedujo"
+   },
+   {
+    "escena_orden": 4,
+    "personaje_ref": "Nevenka Suau",
+    "sujeto_ref": "Iria Aldama",
+    "atributo": "funcion",
+    "postura": "sabe",
+    "via": "se_lo_contaron"
+   }
+  ],
+  "usos_de_conocimiento": [
+   {
+    "escena_orden": 1,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+    "atributo": "ubicacion de la matriz madre"
+   },
+   {
+    "escena_orden": 1,
+    "personaje_ref": "Renzo Vilar",
+    "sujeto_ref": "Orden de misión con umbral de censo",
+    "atributo": "hora de recepcion sellada"
+   },
+   {
+    "escena_orden": 2,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Llave de anillo de Trebo",
+    "atributo": "muescas en el canto"
+   },
+   {
+    "escena_orden": 2,
+    "personaje_ref": "Ossian Trebo",
+    "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+    "atributo": "estado del sector 4"
+   },
+   {
+    "escena_orden": 3,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Orden de misión con umbral de censo",
+    "atributo": "desglose de la clausula doce"
+   },
+   {
+    "escena_orden": 3,
+    "personaje_ref": "Nevenka Suau",
+    "sujeto_ref": "Tabla del censo de siete coma tres",
+    "atributo": "metodo de reparto"
+   },
+   {
+    "escena_orden": 3,
+    "personaje_ref": "Ximena Perdomo",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "suceso del sector siete"
+   },
+   {
+    "escena_orden": 4,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "total de personas a bordo"
+   },
+   {
+    "escena_orden": 4,
+    "personaje_ref": "Nevenka Suau",
+    "sujeto_ref": "Cerro Quince",
+    "atributo": "total de personas a bordo"
+   },
+   {
+    "escena_orden": 4,
+    "personaje_ref": "Iria Aldama",
+    "sujeto_ref": "Anillo de habitación, sectores 1 a 8",
+    "atributo": "ubicacion de la matriz madre"
+   }
+  ],
+  "estados_personaje": [
+   {
+    "escena_orden": 1,
+    "personaje_ref": "Iria Aldama",
+    "condicion": "vivo",
+    "salud_fisica": "con traje y guante calefactado, once de veintidos minutos consumidos",
+    "estado_psicologico": "inquieta por la clausula doce, decide no pedir aclaracion"
+   },
+   {
+    "escena_orden": 1,
+    "personaje_ref": "Neguib Sarr",
+    "condicion": "vivo",
+    "estado_psicologico": "ansioso por una tarea con firma propia; Aldama se la niega"
+   },
+   {
+    "escena_orden": 1,
+    "personaje_ref": "Renzo Vilar",
+    "condicion": "vivo",
+    "estado_psicologico": "cauto y procedimental, sella horas y pregunta quien firma"
+   },
+   {
+    "escena_orden": 1,
+    "personaje_ref": "Bea Otxoa",
+    "condicion": "vivo",
+    "estado_psicologico": "operativa, repite copiado"
+   },
+   {
+    "escena_orden": 2,
+    "personaje_ref": "Ossian Trebo",
+    "condicion": "vivo",
+    "salud_fisica": "de pie, manos vacias, sin tension",
+    "estado_psicologico": "inamovible, responde con pausas de cuatro tiempos",
+    "nivel_confianza": {
+     "Iria Aldama": "nulo"
+    }
+   },
+   {
+    "escena_orden": 2,
+    "personaje_ref": "Iria Aldama",
+    "condicion": "vivo",
+    "estado_psicologico": "contiene la suma de once y evita la discusion"
+   },
+   {
+    "escena_orden": 3,
+    "personaje_ref": "Nevenka Suau",
+    "condicion": "vivo",
+    "salud_fisica": "mono limpio, manguito en la muneca izquierda",
+    "estado_psicologico": "serena y metodica, habla bajo"
+   },
+   {
+    "escena_orden": 3,
+    "personaje_ref": "Ximena Perdomo",
+    "condicion": "vivo",
+    "estado_psicologico": "urgente y entrecortada, obsesionada con que alguien de fuera escriba lo del sector siete"
+   },
+   {
+    "escena_orden": 3,
+    "personaje_ref": "Iria Aldama",
+    "condicion": "vivo",
+    "estado_psicologico": "comprende que los enviaron sabiendo; ordena repliegue inmediato"
+   },
+   {
+    "escena_orden": 4,
+    "personaje_ref": "Bea Otxoa",
+    "condicion": "vivo",
+    "salud_fisica": "mete la mano hasta el codo en el collarin reventado",
+    "estado_psicologico": "cuenta por lo bajo, constata que la puerta esta muerta"
+   },
+   {
+    "escena_orden": 4,
+    "personaje_ref": "Iria Aldama",
+    "condicion": "vivo",
+    "estado_psicologico": "atrapada; promete sacar a sus seis sin tener via y decide abrir el sector cuatro",
+    "nivel_confianza": {
+     "Nevenka Suau": "rechazo del metodo"
+    }
+   },
+   {
+    "escena_orden": 4,
+    "personaje_ref": "Nevenka Suau",
+    "condicion": "vivo",
+    "estado_psicologico": "exige que Aldama acepte el metodo o se aparte; usa su nombre de pila"
+   },
+   {
+    "escena_orden": 4,
+    "personaje_ref": "Ossian Trebo",
+    "condicion": "vivo",
+    "estado_psicologico": "en el vano, entre la cuadrilla y el pasillo, manos vacias"
+   }
+  ],
+  "estados_objeto": [
+   {
+    "escena_orden": 1,
+    "objeto_ref": "Orden de misión con umbral de censo",
+    "ubicacion_ref": "Gantry de repostaje y muelle exterior",
+    "poseedor_ref": "Iria Aldama"
+   },
+   {
+    "escena_orden": 2,
+    "objeto_ref": "Llave de anillo de Trebo",
+    "ubicacion_ref": "Anillo de habitación, sectores 1 a 8",
+    "poseedor_ref": "Ossian Trebo"
+   },
+   {
+    "escena_orden": 2,
+    "objeto_ref": "Matriz madre del anillo",
+    "ubicacion_ref": "Anillo de habitación, sectores 1 a 8",
+    "poseedor_ref": ""
+   },
+   {
+    "escena_orden": 3,
+    "objeto_ref": "Libro de caudal de la consola",
+    "ubicacion_ref": "Consola de control, sector 1",
+    "poseedor_ref": "Iria Aldama"
+   },
+   {
+    "escena_orden": 3,
+    "objeto_ref": "Tabla del censo de siete coma tres",
+    "ubicacion_ref": "Consola de control, sector 1",
+    "poseedor_ref": "Nevenka Suau"
+   },
+   {
+    "escena_orden": 3,
+    "objeto_ref": "Orden de misión con umbral de censo",
+    "ubicacion_ref": "Consola de control, sector 1",
+    "poseedor_ref": "Iria Aldama"
+   },
+   {
+    "escena_orden": 4,
+    "objeto_ref": "Tabla del censo de siete coma tres",
+    "ubicacion_ref": "Gantry de repostaje y muelle exterior",
+    "poseedor_ref": "Nevenka Suau"
+   },
+   {
+    "escena_orden": 4,
+    "objeto_ref": "Orden de misión con umbral de censo",
+    "ubicacion_ref": "Gantry de repostaje y muelle exterior",
+    "poseedor_ref": "Iria Aldama"
+   }
+  ],
+  "eventos": [
+   {
+    "fecha_interna": "dia 112 de la reserva de Cerro Quince",
+    "descripcion": "El censo activo de la estacion queda por debajo del umbral de capacidad",
+    "tipo": "antecedente",
+    "dramatizado": false
+   },
+   {
+    "fecha_interna": "dia 1.890",
+    "descripcion": "Sucede algo en el sector siete que Perdomo quiere que alguien de fuera escriba",
+    "tipo": "antecedente",
+    "dramatizado": false
+   },
+   {
+    "fecha_interna": "dia 1, 11:42:44",
+    "descripcion": "La operadora lee la clausula doce con el umbral de censo de 7,3 personas-equivalentes y la senal se corta",
+    "escena_orden": 1,
+    "orden_interno": 0,
+    "tipo": "comunicacion"
+   },
+   {
+    "fecha_interna": "dia 1, manana",
+    "descripcion": "Aldama entra la primera por la esclusa y encuentra el aire caliente y con olor a gente",
+    "escena_orden": 1,
+    "orden_interno": 1,
+    "tipo": "descubrimiento"
+   },
+   {
+    "fecha_interna": "dia 1, manana",
+    "descripcion": "La cuadrilla recorre el anillo y halla el sector 3 con la escarcha derretida y calor residual de horas",
+    "escena_orden": 2,
+    "orden_interno": 2,
+    "tipo": "descubrimiento"
+   },
+   {
+    "fecha_interna": "dia 1, manana",
+    "descripcion": "Trebo bloquea el sector 4, lo cierra con llave y declara que quedan cinco del turno",
+    "escena_orden": 2,
+    "orden_interno": 3,
+    "tipo": "confrontacion"
+   },
+   {
+    "fecha_interna": "dia 1, manana",
+    "descripcion": "En la consola, Aldama lee el caudal de 7,3 personas-equivalentes y la rampa de ocho meses desde 11,4",
+    "escena_orden": 3,
+    "orden_interno": 4,
+    "tipo": "descubrimiento"
+   },
+   {
+    "fecha_interna": "dia 1, manana",
+    "descripcion": "Suau presenta la tabla del reparto con seis casillas vacias y Perdomo irrumpe pidiendo que se escriba lo del sector siete",
+    "escena_orden": 3,
+    "orden_interno": 5,
+    "tipo": "confrontacion"
+   },
+   {
+    "fecha_interna": "dia 1, manana",
+    "descripcion": "Aldama descubre que la clausula doce traia la resta ya calculada y ordena el repliegue",
+    "escena_orden": 3,
+    "orden_interno": 6,
+    "tipo": "revelacion"
+   },
+   {
+    "fecha_interna": "dia 1, mediodia",
+    "descripcion": "El collarin de acoplamiento revienta por la junta superior y la puerta al muelle queda inutilizable",
+    "escena_orden": 4,
+    "orden_interno": 7,
+    "tipo": "catastrofe"
+   },
+   {
+    "fecha_interna": "dia 1, mediodia",
+    "descripcion": "Suau exige a Aldama que acepte el metodo del reparto o se aparte; Aldama promete sacar a sus seis completos y ordena cortar el sector cuatro",
+    "escena_orden": 4,
+    "orden_interno": 8,
+    "tipo": "decision"
+   }
+  ],
+  "siembras": [
+   {
+    "escena_orden": 2,
+    "siembra_ref": "En el primer recorrido del anillo, un sector con la escarcha derretida y calor residual: alguien respiraba ahí hasta hace horas.",
+    "nuevo_estado": "sembrada"
+   },
+   {
+    "escena_orden": 1,
+    "siembra_ref": "Una cláusula de umbral de censo mencionada de pasada por la operadora en la comunicación inicial, leída como jerga administrativa.",
+    "nuevo_estado": "sembrada"
+   },
+   {
+    "escena_orden": 3,
+    "siembra_ref": "Una cláusula de umbral de censo mencionada de pasada por la operadora en la comunicación inicial, leída como jerga administrativa.",
+    "nuevo_estado": "pagada"
+   },
+   {
+    "escena_orden": 1,
+    "siembra_ref": "Sarr pide desde el principio una tarea con firma propia y Aldama se la niega por rutina.",
+    "nuevo_estado": "sembrada"
+   },
+   {
+    "escena_orden": 1,
+    "siembra_ref": "Vilar toma notas de todo con sello de hora desde el minuto uno y pregunta quién firma cada orden.",
+    "nuevo_estado": "sembrada"
+   },
+   {
+    "escena_orden": 2,
+    "siembra_ref": "La llave de Trebo tiene una muesca por cada apertura y hay seis muescas seguidas del mismo día.",
+    "nuevo_estado": "sembrada"
+   },
+   {
+    "escena_orden": 4,
+    "siembra_ref": "Suau conoce el nombre de pila de cada uno de sus cinco y no usa nunca el de los demás.",
+    "nuevo_estado": "sembrada"
+   },
+   {
+    "escena_orden": 1,
+    "elemento": "El visor de la escotilla exterior tiene un semicirculo limpio barrido desde dentro con algo ancho y plano",
+    "nuevo_estado": "sembrada"
+   },
+   {
+    "escena_orden": 2,
+    "elemento": "Censos escritos a mano en las paredes del anillo, tachados y reescritos a la baja sector por sector",
+    "nuevo_estado": "sembrada"
+   },
+   {
+    "escena_orden": 3,
+    "elemento": "Una tabla de prioridades del Reparto grabada en fantasma en el fosforo de la pantalla central por meses de no apagarse",
+    "nuevo_estado": "sembrada"
+   }
+  ],
+  "hilos": [
+   {
+    "escena_orden": 1,
+    "hilo": 1,
+    "nuevo_estado": "abierto"
+   },
+   {
+    "escena_orden": 3,
+    "hilo": 1,
+    "nuevo_estado": "complicando"
+   },
+   {
+    "escena_orden": 4,
+    "hilo": 1,
+    "nuevo_estado": "complicando"
+   },
+   {
+    "escena_orden": 3,
+    "hilo": 2,
+    "nuevo_estado": "abierto"
+   },
+   {
+    "escena_orden": 4,
+    "hilo": 2,
+    "nuevo_estado": "complicando"
+   },
+   {
+    "escena_orden": 3,
+    "hilo": 3,
+    "nuevo_estado": "abierto"
+   },
+   {
+    "escena_orden": 1,
+    "hilo": 6,
+    "nuevo_estado": "abierto"
+   },
+   {
+    "escena_orden": 2,
+    "hilo": 7,
+    "nuevo_estado": "abierto"
+   }
+  ],
+  "entidades_no_reconocidas": [
+   {
+    "escena_orden": 1,
+    "nombre": "Berila IV",
+    "contexto": "Planeta blanco y sin detalle sobre el que gira la estacion"
+   },
+   {
+    "escena_orden": 1,
+    "nombre": "Cerro Quince",
+    "contexto": "Nombre de la estacion que no responde al protocolo de acoplamiento"
+   },
+   {
+    "escena_orden": 1,
+    "nombre": "Malla-3",
+    "contexto": "Nave y designacion de la cuadrilla de mantenimiento de Aldama, con seis asientos"
+   },
+   {
+    "escena_orden": 1,
+    "nombre": "la operadora",
+    "contexto": "Voz que transmite la clausula doce por radio"
+   },
+   {
+    "escena_orden": 1,
+    "nombre": "Autoridad de ruta",
+    "contexto": "Organismo que firma la orden de mision"
+   },
+   {
+    "escena_orden": 3,
+    "nombre": "el Reparto",
+    "contexto": "Sistema de prioridades grabado en la pantalla y aplicado por Suau"
+   },
+   {
+    "escena_orden": 3,
+    "nombre": "planta atmosférica CL-4",
+    "contexto": "Modelo de la planta que recupera aire para 7,3 personas-equivalentes"
+   },
+   {
+    "escena_orden": 4,
+    "nombre": "los dos del turno de proa",
+    "contexto": "Miembros de la cuadrilla de Aldama contados en el recuento de cabezas"
+   }
+  ]
+ },
+ "esperado": {
+  "hechos": [
+   {
+    "escena_orden": 1,
+    "sujeto": "Gantry de repostaje",
+    "claves": [
+     [
+      "tres grados"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 1,
+    "sujeto": "Orden de misión con umbral de censo",
+    "claves": [
+     [
+      "metano"
+     ],
+     [
+      "agua"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 1,
+    "sujeto": "Orden de misión con umbral de censo",
+    "claves": [
+     [
+      "7,3",
+      "siete coma tres"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 2,
+    "sujeto": "Anillo de habitación",
+    "claves": [
+     [
+      "metro veinte"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 2,
+    "sujeto": "Anillo de habitación",
+    "claves": [
+     [
+      "once"
+     ],
+     [
+      "nueve"
+     ],
+     [
+      "siete"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 2,
+    "sujeto": "Anillo de habitación",
+    "claves": [
+     [
+      "derretid",
+      "templad",
+      "calor"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 2,
+    "sujeto": "Llave de anillo de Trebo",
+    "claves": [
+     [
+      "muesca"
+     ],
+     [
+      "once",
+      "11"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 3,
+    "sujeto": "Libro de caudal de la consola",
+    "claves": [
+     [
+      "7,3",
+      "siete coma tres"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 3,
+    "sujeto": "Libro de caudal de la consola",
+    "claves": [
+     [
+      "once coma cuatro",
+      "11,4"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 3,
+    "claves": [
+     [
+      "lecho"
+     ],
+     [
+      "cuarenta y dos",
+      "42"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 3,
+    "sujeto": "Tabla del censo de siete coma tres",
+    "claves": [
+     [
+      "funcion"
+     ],
+     [
+      "vida util"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 3,
+    "sujeto": "Ximena Perdomo",
+    "claves": [
+     [
+      "sanitari"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 3,
+    "sujeto": "Nevenka Suau",
+    "claves": [
+     [
+      "manguito"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 3,
+    "claves": [
+     [
+      "once minutos"
+     ],
+     [
+      "confusion"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 4,
+    "sujeto": "Gantry de repostaje",
+    "claves": [
+     [
+      "junta",
+      "collarin",
+      "acoplamiento"
+     ],
+     [
+      "partid",
+      "revent",
+      "muert"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 4,
+    "claves": [
+     [
+      "retira del censo"
+     ]
+    ]
+   }
+  ],
+  "conocimiento": [
+   {
+    "escena_orden": 1,
+    "personaje": "Iria Aldama",
+    "sujeto": "Orden de misión con umbral de censo"
+   },
+   {
+    "escena_orden": 3,
+    "personaje": "Iria Aldama",
+    "sujeto": "Tabla del censo de siete coma tres"
+   },
+   {
+    "escena_orden": 3,
+    "personaje": "Iria Aldama",
+    "sujeto": "Libro de caudal de la consola"
+   }
+  ],
+  "usos_de_conocimiento": [
+   {
+    "escena_orden": 3,
+    "personaje": "Iria Aldama",
+    "sujeto": "Orden de misión con umbral de censo"
+   }
+  ],
+  "estados_personaje": [],
+  "estados_objeto": [
+   {
+    "escena_orden": 2,
+    "objeto": "Llave de anillo de Trebo",
+    "ubicacion": "Anillo de habitación"
+   },
+   {
+    "escena_orden": 3,
+    "objeto": "Tabla del censo de siete coma tres",
+    "ubicacion": "Consola de control"
+   },
+   {
+    "escena_orden": 3,
+    "objeto": "Orden de misión con umbral de censo",
+    "ubicacion": "Consola de control"
+   },
+   {
+    "escena_orden": 4,
+    "objeto": "Tabla del censo de siete coma tres",
+    "ubicacion": "Gantry de repostaje"
+   }
+  ],
+  "eventos": [
+   {
+    "escena_orden": 1,
+    "claves": [
+     [
+      "orden",
+      "clausula",
+      "esclusa",
+      "escotilla",
+      "acoplamiento"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 2,
+    "claves": [
+     [
+      "trebo",
+      "mamparo",
+      "cerr",
+      "llave"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 3,
+    "claves": [
+     [
+      "suau",
+      "tabla",
+      "orden",
+      "clausula",
+      "perdomo"
+     ]
+    ]
+   },
+   {
+    "escena_orden": 4,
+    "claves": [
+     [
+      "collarin",
+      "junta",
+      "revent",
+      "acoplamiento"
+     ]
+    ]
+   }
+  ],
+  "entidades_no_reconocidas": [
+   {
+    "escena_orden": 1,
+    "nombre": "Berila"
+   },
+   {
+    "escena_orden": 1,
+    "nombre": "Cerro Quince"
+   },
+   {
+    "escena_orden": 1,
+    "nombre": "Autoridad de ruta"
+   },
+   {
+    "escena_orden": 2,
+    "nombre": "Malla-3"
+   },
+   {
+    "escena_orden": 3,
+    "nombre": "CL-4"
+   }
+  ]
+ }
+}
