@@ -20,8 +20,8 @@ import unicodedata
 
 from compartido import politica
 from compartido.grafo import lectura
+from compartido.grafo.escritura import normalizar
 from compartido.puerta_base import Conflicto, ResultadoPuerta
-from compartido.texto import contiene_termino
 from config import PALABRAS_FILTRO
 
 from .esquemas import SalidaOficio
@@ -87,11 +87,12 @@ def _terminos_vetados(
 # --- spec3 RF3-VAL-01: los nombres del canon, escritos exactamente ------------------------------
 
 _PALABRA_CON_POSICION = re.compile(r"[^\W\d_]+")
-#: Lo que abre una frase: ahi va mayuscula cualquier palabra, y «Mas» (apellido) y «Más» (al
-#: empezar) solo se distinguen por la tilde.
-_INICIO_DE_FRASE = re.compile(r"(?:^|[.!?¿¡:;«\"—\n])[\s«\"—]*$")
+#: Lo que abre una frase o un dialogo: ahi va mayuscula cualquier palabra, y «Cortes» (heridas)
+#: y el apellido «Cortés» solo se distinguen por la tilde.
+_INICIO_DE_FRASE = re.compile(r"(?:^|[.!?¿¡:;…\n])[\s«»\"“”‘’'\-–—*(\[]*$")
 _MINIMO_NOMBRE = 3
-_MINIMO_NOMBRE_AL_INICIO = 6
+#: Partes de un nombre que no lo identifican: «Pedro del Río» no se nombra con «del».
+_PARTICULAS = frozenset({"de", "del", "la", "las", "los", "el", "y", "e", "san", "santa"})
 
 
 def _plano(palabra: str) -> str:
@@ -115,17 +116,21 @@ def _partes_de_los_nombres(con: sqlite3.Connection, novela_id: int) -> dict[str,
 
 def _nombres_mal_escritos(
     con: sqlite3.Connection, novela_id: int, capitulo: int, texto: str
-) -> Conflicto | None:
+) -> list[Conflicto]:
     """Una palabra con mayuscula que es un nombre del canon salvo por las tildes o la ene.
 
-    «Sebastian» por «Sebastián», «Nunez» por «Núñez». Solo se miran las palabras con mayuscula,
-    y al empezar frase solo las de seis letras o mas: ahi «Más» y el apellido «Mas» no se
-    distinguen. Las mayusculas no cuentan: «NÚÑEZ» gritado esta bien escrito.
+    «Sebastian» por «Sebastián», «Nunez» por «Núñez». Solo se miran las palabras con mayuscula;
+    las mayusculas no cuentan («NÚÑEZ» gritado esta bien escrito). A mitad de frase, una palabra
+    con mayuscula es un nombre propio, y el capitulo vuelve al redactor (`nombre_mal_escrito`).
+    Al empezar frase o dialogo puede ser una palabra corriente («Cortes profundos», «Más tarde»),
+    y corregirla le pediria al redactor una falta: ahi es un aviso (`nombre_por_revisar`) para
+    el juez y el autor (validador de 469d64d).
     """
     partes = _partes_de_los_nombres(con, novela_id)
     if not partes:
-        return None
-    errores: dict[tuple[str, str], int] = {}
+        return []
+    seguros: dict[tuple[str, str], int] = {}
+    dudosos: dict[tuple[str, str], int] = {}
     for m in _PALABRA_CON_POSICION.finditer(texto):
         palabra = m.group(0)
         if not palabra[0].isupper() or len(palabra) < _MINIMO_NOMBRE:
@@ -133,21 +138,40 @@ def _nombres_mal_escritos(
         buenas = partes.get(_plano(palabra))
         if not buenas or palabra.casefold() in {b.casefold() for b in buenas}:
             continue
-        if (_INICIO_DE_FRASE.search(texto, 0, m.start())
-                and len(palabra) < _MINIMO_NOMBRE_AL_INICIO):
-            continue
-        clave = (palabra, sorted(buenas)[0])
-        errores[clave] = errores.get(clave, 0) + 1
-    if not errores:
-        return None
-    lista = "; ".join(f"«{mal}» ({n} vez/veces) se escribe «{bien}»"
-                      for (mal, bien), n in sorted(errores.items()))
-    return Conflicto(
-        comprobacion="nombre_mal_escrito", capitulo=capitulo,
-        descripcion=f"Nombres del canon mal escritos: {lista}.",
-        datos={"errores": [{"escrito": mal, "canon": bien, "veces": n}
-                           for (mal, bien), n in sorted(errores.items())]},
-    )
+        donde = dudosos if _INICIO_DE_FRASE.search(texto, 0, m.start()) else seguros
+        clave = (palabra, " o ".join(f"«{b}»" for b in sorted(buenas)))
+        donde[clave] = donde.get(clave, 0) + 1
+    salida: list[Conflicto] = []
+    if seguros:
+        salida.append(Conflicto(
+            comprobacion="nombre_mal_escrito", capitulo=capitulo,
+            descripcion="Nombres del canon mal escritos: " + _lista_de_nombres(seguros) + ".",
+            datos={"errores": _datos_de_nombres(seguros)},
+        ))
+    if dudosos:
+        salida.append(Conflicto(
+            comprobacion="nombre_por_revisar", aviso=True, capitulo=capitulo,
+            descripcion=(
+                "Al empezar frase, palabras que son un nombre del canon salvo por las tildes (o "
+                "una palabra corriente): " + _lista_de_nombres(dudosos) + "."
+            ),
+            datos={"errores": _datos_de_nombres(dudosos)},
+        ))
+    return salida
+
+
+def _veces(n: int) -> str:
+    return "1 vez" if n == 1 else f"{n} veces"
+
+
+def _lista_de_nombres(errores: dict[tuple[str, str], int]) -> str:
+    return "; ".join(f"«{mal}» ({_veces(n)}) se escribe {bien}"
+                     for (mal, bien), n in sorted(errores.items()))
+
+
+def _datos_de_nombres(errores: dict[tuple[str, str], int]) -> list[dict[str, object]]:
+    return [{"escrito": mal, "canon": bien, "veces": n}
+            for (mal, bien), n in sorted(errores.items())]
 
 
 # --- spec3 RF3-VAL-02: la longitud real ---------------------------------------------------------
@@ -177,13 +201,26 @@ def _longitud_real(
 # --- spec3 RF3-VAL-03: los allegados planificados, en la prosa ----------------------------------
 
 
+def _nombra(texto: str, nombre: str) -> bool:
+    """Si la prosa nombra a alguien: una palabra de su nombre, sin contar las particulas, escrita
+    con mayuscula. «La luz parpadeo» no nombra a Luz, ni «el tunel del sector» a Pedro del Rio."""
+    buscadas = {
+        normalizar(p) for p in _PALABRA_CON_POSICION.findall(nombre)
+        if len(p) >= _MINIMO_NOMBRE and normalizar(p) not in _PARTICULAS
+    } or {normalizar(nombre)}
+    return any(
+        m.group(0)[0].isupper() and normalizar(m.group(0)) in buscadas
+        for m in _PALABRA_CON_POSICION.finditer(texto)
+    )
+
+
 def _allegados_ausentes(
     con: sqlite3.Connection, novela_id: int, capitulo: int, texto: str
 ) -> list[Conflicto]:
     """Un allegado del encargo que la escaleta puso en este capitulo y la prosa no nombra.
 
-    Basta con una palabra de su nombre de tres letras o mas: el redactor lo llama por el nombre
-    de pila. Los rasgos y los recuerdos no se pueden buscar por palabras; son del juez.
+    Basta con una palabra de su nombre (`_nombra`): el redactor lo llama por el nombre de pila.
+    Los rasgos y los recuerdos no se pueden buscar por palabras; son del juez.
     """
     brief = lectura.brief(con, novela_id)
     if brief is None:
@@ -205,10 +242,7 @@ def _allegados_ausentes(
     salida: list[Conflicto] = []
     for codigo, orden in planificados:
         nombre = nombres.get(codigo)
-        if nombre is None:
-            continue
-        partes = [p for p in _PALABRA_CON_POSICION.findall(nombre) if len(p) >= _MINIMO_NOMBRE]
-        if any(contiene_termino(texto, p) for p in partes or [nombre]):
+        if nombre is None or _nombra(texto, nombre):
             continue
         salida.append(Conflicto(
             comprobacion="allegado_ausente", capitulo=capitulo,
@@ -279,11 +313,11 @@ def evaluar(
 
     for extra in (
         _terminos_vetados(con, novela_id, capitulo, texto),
-        _nombres_mal_escritos(con, novela_id, capitulo, texto),
         _longitud_real(con, novela_id, capitulo, texto),
     ):
         if extra is not None:
             conflictos.append(extra)
+    conflictos.extend(_nombres_mal_escritos(con, novela_id, capitulo, texto))
     conflictos.extend(_allegados_ausentes(con, novela_id, capitulo, texto))
 
     return ResultadoPuerta(puerta=4, conflictos=conflictos)

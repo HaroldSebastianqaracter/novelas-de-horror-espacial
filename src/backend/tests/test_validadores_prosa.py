@@ -38,15 +38,15 @@ def _mecanica(con: sqlite3.Connection, g: fabrica.Grafo, texto: str) -> dict[str
 # --- RF3-VAL-01 ---------------------------------------------------------------------------------
 
 
-def test_un_nombre_sin_su_tilde_devuelve_el_capitulo() -> None:
+def test_un_nombre_sin_su_tilde_a_mitad_de_frase_devuelve_el_capitulo() -> None:
     con, g = _con_personaje("Sebastián Núñez")
-    conflictos = _mecanica(con, g, "Sebastian abrio la escotilla. Luego hablo con Nunez y con "
-                                   "Núñez, que era el mismo.")
+    conflictos = _mecanica(con, g, "Luego hablo con Nunez y con Núñez, que era el mismo, y con "
+                                   "Sebastian.")
     c = conflictos["nombre_mal_escrito"]
     assert not c.aviso
     assert {(e["escrito"], e["canon"]) for e in c.datos["errores"]} == {
-        ("Sebastian", "Sebastián"), ("Nunez", "Núñez")}
-    assert "«Sebastian» (1 vez/veces) se escribe «Sebastián»" in c.descripcion
+        ("Nunez", "«Núñez»"), ("Sebastian", "«Sebastián»")}
+    assert "«Nunez» (1 vez) se escribe «Núñez»" in c.descripcion
 
 
 @pytest.mark.parametrize("texto", [
@@ -57,15 +57,36 @@ def test_un_nombre_sin_su_tilde_devuelve_el_capitulo() -> None:
 ])
 def test_lo_bien_escrito_no_para(texto: str) -> None:
     con, g = _con_personaje("Sebastián Núñez")
-    assert "nombre_mal_escrito" not in _mecanica(con, g, texto)
+    conflictos = _mecanica(con, g, texto)
+    assert "nombre_mal_escrito" not in conflictos and "nombre_por_revisar" not in conflictos
 
 
-def test_al_empezar_frase_una_palabra_corta_no_es_un_nombre_mal_escrito() -> None:
-    """«Más» al empezar frase y el apellido «Mas» solo se distinguen por la tilde."""
-    con, g = _con_personaje("Jordi Mas")
-    assert "nombre_mal_escrito" not in _mecanica(con, g, "Más tarde llego Mas. —Más aire.")
-    # A mitad de frase si se mira.
-    assert "nombre_mal_escrito" in _mecanica(con, g, "Llego Más con el casco.")
+@pytest.mark.parametrize(("nombre", "texto"), [
+    ("Jordi Mas", "Más tarde llego."),
+    ("Elena Cortés", "Elena grito. Cortes profundos le cruzaban los brazos."),
+    # Validador de 469d64d: aperturas que el primer patron no reconocia.
+    ("Jordi Mas", "Espero un rato… Más tarde llego."),
+    ("Jordi Mas", "“¿Vienes?” Más tarde lo supo."),
+    ("Jordi Mas", "- Más aire -dijo."),
+    ("Jordi Mas", "–Más aire –dijo."),
+    ("Jordi Mas", "Respiro. *Más cerca*, penso."),
+    ("Lucía Peña", "“Pena es lo que me das”, dijo."),
+])
+def test_al_empezar_frase_solo_avisa(nombre: str, texto: str) -> None:
+    """Ahi puede ser una palabra corriente, y «corregirla» le pediria al redactor una falta."""
+    con, g = _con_personaje(nombre)
+    conflictos = _mecanica(con, g, texto)
+    assert "nombre_mal_escrito" not in conflictos
+    assert conflictos["nombre_por_revisar"].aviso
+
+
+def test_dos_grafias_del_canon_se_ofrecen_las_dos() -> None:
+    con, g = _con_personaje("Ángel Ruiz")
+    insertar(con, "personaje", novela_id=g.novela_id, nombre="Angel Mora",
+             nombre_clave=normalizar("Angel Mora"), rol_narrativo="aliado", tipo_arco="plano")
+    conflictos = _mecanica(con, g, "Llego Ángel, y despues Angel, y luego ÁNGEL, y al final Àngel.")
+    [error] = conflictos["nombre_mal_escrito"].datos["errores"]
+    assert error == {"escrito": "Àngel", "canon": "«Angel» o «Ángel»", "veces": 1}
 
 
 # --- RF3-VAL-02 ---------------------------------------------------------------------------------
@@ -114,6 +135,20 @@ def test_un_allegado_planificado_que_la_prosa_no_nombra_vuelve_al_redactor() -> 
                    if i["agente"] == "redaccion" and demo._capitulo(i["entrada"]) == capitulo]
     assert len(redacciones) == 2
     assert "allegado_ausente" in redacciones[1]
+
+
+@pytest.mark.parametrize(("nombre", "texto", "nombrado"), [
+    ("Nala", "Nala ladro dos veces.", True),
+    ("Nala Pérez", "Pérez no contesto.", True),
+    # Validador de 469d64d: una particula o una palabra corriente no nombran a nadie.
+    ("Pedro del Río", "El tunel del sector seguia a oscuras.", False),
+    ("María de los Ángeles", "Los paneles fallaban.", False),
+    ("Luz", "La luz parpadeo.", False),
+    ("Luz", "Luz entro sin avisar.", True),
+    ("Abuela Carmen", "La abuela de alguien.", False),
+])
+def test_nombrar_a_un_allegado(nombre: str, texto: str, nombrado: bool) -> None:
+    assert p_oficio._nombra(texto, nombre) is nombrado
 
 
 def test_sin_brief_no_se_buscan_allegados() -> None:
