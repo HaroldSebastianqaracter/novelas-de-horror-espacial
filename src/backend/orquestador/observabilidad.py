@@ -85,26 +85,16 @@ def _iso(momento: object) -> str:
 # --- Seudonimizacion (RF3-OBS-07) ---------------------------------------------------------------
 
 
-_TILDE_DE_LA_ENE = chr(0x0303)
-
-
-def _sin_marcas(texto: str, *, conservar_ene: bool) -> str:
-    salida: list[str] = []
-    for c in unicodedata.normalize("NFD", texto):
-        if unicodedata.category(c) == "Mn":
-            if conservar_ene and c == _TILDE_DE_LA_ENE and salida and salida[-1] in "nN":
-                salida.append(c)
-            continue
-        salida.append(c)
-    return unicodedata.normalize("NFC", "".join(salida))
-
-
-#: Cada letra base casa con sus variantes acentuadas: el brief puede traer «Ramon» y la prosa
-#: «Ramón», o al reves. La ene casa con la ene con tilde: sustituir de mas es el lado seguro.
-_VARIANTES: dict[str, str] = {
-    "a": "aáàäâ", "e": "eéèëê", "i": "iíìïî", "o": "oóòöô", "u": "uúùüû", "n": "nñ", "c": "cç",
+#: Caracteres que no se ven y pueden partir un nombre sin que se note (guion blando, espacios de
+#: ancho cero): se ignoran al comparar.
+_INVISIBLES = frozenset({"­", "​", "‌", "‍", "⁠", "﻿"})
+_APOSTROFOS = frozenset({"'", "’", "‘", "`", "´"})
+#: Letras sin descomposicion Unicode que se leen como otra: «Łukasz» y «Lukasz» son el mismo
+#: nombre para quien lo lee.
+_ESPECIALES: dict[str, str] = {
+    "ł": "l", "ø": "o", "đ": "d", "ħ": "h", "ı": "i", "ŀ": "l", "ß": "ss", "æ": "ae",
+    "œ": "oe", "þ": "th", "ð": "d",
 }
-_APOSTROFOS = "'’‘`´"
 #: Particulas de un nombre compuesto que no identifican a nadie sueltas: «Maria de los Angeles»
 #: no convierte en etiqueta cada «los» del texto.
 _PARTICULAS = frozenset({
@@ -113,19 +103,37 @@ _PARTICULAS = frozenset({
 })
 
 
-def _patron_de(forma: str) -> str:
-    """La forma como expresion regular sin tildes, con variantes de apostrofo y de espacio."""
-    trozos: list[str] = []
-    for c in _sin_marcas(forma, conservar_ene=False).lower():
-        if c in _VARIANTES:
-            trozos.append(f"[{_VARIANTES[c]}]")
-        elif c in _APOSTROFOS:
-            trozos.append(f"[{re.escape(_APOSTROFOS)}]")
-        elif c.isspace():
-            trozos.append(r"\s+")
-        else:
-            trozos.append(re.escape(c))
-    return "".join(trozos)
+def _plegar_caracter(c: str) -> str:
+    """Un caracter sin marcas y en minusculas; vacio si no cuenta (invisibles, marcas sueltas)."""
+    if c in _INVISIBLES:
+        return ""
+    if c in _APOSTROFOS:
+        return "'"
+    base = "".join(
+        x for x in unicodedata.normalize("NFKD", c.lower()) if not unicodedata.combining(x)
+    )
+    return "".join(_ESPECIALES.get(x, x) for x in base)
+
+
+def _plegar(texto: str) -> tuple[str, list[int]]:
+    """El texto plegado y, para cada caracter plegado, su posicion en el original.
+
+    Plegar el texto entero, y no solo el nombre, es lo que hace que cualquier marca casen en
+    los dos lados: «João» en el brief y «Joao» o «João» en la prosa, «Dvořák», «Ştefan».
+    """
+    plegado: list[str] = []
+    posiciones: list[int] = []
+    for i, c in enumerate(texto):
+        for x in _plegar_caracter(c):
+            plegado.append(x)
+            posiciones.append(i)
+    return "".join(plegado), posiciones
+
+
+def _es_letra(c: str) -> bool:
+    # Un nombre pegado a un digito o a un guion bajo sigue siendo un nombre: «marta_ibanez»,
+    # «Marta2». Solo otra letra lo hace parte de una palabra mas larga.
+    return c.isalpha()
 
 
 class Seudonimizador:
@@ -133,13 +141,14 @@ class Seudonimizador:
 
     El destinatario y quien regala, completos y por partes de tres letras o mas que no sean
     particulas (la prosa dice «Marta», no «Marta Ibanez»); cada allegado, completo y por partes.
-    Como palabra completa, sin distinguir mayusculas, con o sin tildes en cualquiera de los dos
-    lados, y tambien en las claves de los diccionarios (`nivel_confianza` va por personaje). El
-    mapa no se envia nunca.
+    Como palabra completa (una letra delante o detras la hace otra palabra; un digito o un
+    guion bajo, no), sin distinguir mayusculas, sin marcas diacriticas en ningun lado, sin
+    caracteres invisibles, y tambien en las claves de los diccionarios (`nivel_confianza` va por
+    personaje). El mapa no se envia nunca.
     """
 
     def __init__(self, brief: Brief | None) -> None:
-        self._reglas: list[tuple[re.Pattern[str], str]] = []
+        self._formas: list[tuple[str, str]] = []
         if brief is None:
             return
         grupos: list[tuple[str, str]] = []
@@ -154,26 +163,53 @@ class Seudonimizador:
         # allegado que comparta apellido.
         asignadas: dict[str, str] = {}
         for etiqueta, nombre in grupos:
+            completo = " ".join(_plegar(nombre)[0].split())
+            # «O'Hara» entero antes que «Hara»: si no, la prosa deja «O'[X]».
             partes = [
-                p for p in re.split(r"[\s\-]+", nombre)
-                if len(base := _sin_marcas(p, conservar_ene=False).lower()) >= 3
-                and base not in _PARTICULAS
+                p for p in (*re.split(r"[\s\-]+", completo), *re.split(r"[\s\-']+", completo))
+                if len(p) >= 3 and p not in _PARTICULAS
             ]
-            for forma in (nombre, *partes):
-                asignadas.setdefault(_sin_marcas(forma, conservar_ene=False).lower(), etiqueta)
+            for forma in (completo, *partes):
+                if forma:
+                    asignadas.setdefault(forma, etiqueta)
         # Las formas largas antes que sus partes: «Marta Ibanez» entera, no «[X] Ibanez».
-        for forma in sorted(asignadas, key=len, reverse=True):
-            patron = re.compile(rf"(?<!\w){_patron_de(forma)}(?!\w)", re.IGNORECASE)
-            self._reglas.append((patron, asignadas[forma]))
+        self._formas = sorted(asignadas.items(), key=lambda par: len(par[0]), reverse=True)
 
     def texto(self, texto: str) -> str:
-        if not self._reglas:
+        if not self._formas or not texto:
             return texto
-        # En NFC: un texto con las tildes descompuestas casaria letra a letra con la marca suelta.
-        texto = unicodedata.normalize("NFC", texto)
-        for patron, etiqueta in self._reglas:
-            texto = patron.sub(etiqueta, texto)
-        return texto
+        plegado, posiciones = _plegar(texto)
+        # Varios espacios seguidos del texto casan con uno del nombre.
+        tramos: list[tuple[int, int, str]] = []
+        for forma, etiqueta in self._formas:
+            patron = r"\s+".join(re.escape(p) for p in forma.split(" "))
+            for m in re.finditer(patron, plegado):
+                ini, fin = m.start(), m.end()
+                if (ini > 0 and _es_letra(plegado[ini - 1])) or (
+                    fin < len(plegado) and _es_letra(plegado[fin])
+                ):
+                    continue
+                tramos.append((ini, fin, etiqueta))
+        if not tramos:
+            return texto
+        # Sin solapes, y ganando el mas largo: las formas ya van de mas larga a mas corta.
+        elegidos: list[tuple[int, int, str]] = []
+        ocupado = [False] * len(plegado)
+        for ini, fin, etiqueta in tramos:
+            if any(ocupado[ini:fin]):
+                continue
+            for k in range(ini, fin):
+                ocupado[k] = True
+            elegidos.append((ini, fin, etiqueta))
+        salida = texto
+        for ini, fin, etiqueta in sorted(elegidos, reverse=True):
+            desde = posiciones[ini]
+            hasta = posiciones[fin - 1] + 1
+            # Las marcas sueltas que siguen al ultimo caracter (texto en NFD) son del nombre.
+            while hasta < len(texto) and _plegar_caracter(texto[hasta]) == "":
+                hasta += 1
+            salida = salida[:desde] + etiqueta + salida[hasta:]
+        return unicodedata.normalize("NFC", salida)
 
     def valor(self, valor: Any) -> Any:
         if isinstance(valor, str):

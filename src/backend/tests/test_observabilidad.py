@@ -317,6 +317,40 @@ def test_texto_descompuesto_y_apostrofos_tipograficos() -> None:
     assert s.texto("La señora O’Hara llega.") == "La señora [DESTINATARIO] llega."
 
 
+@pytest.mark.parametrize(("destinatario", "prosa", "esperado"), [
+    # Validador (segundo rechazo): marcas que no son las del castellano, en los dos sentidos.
+    ("João Prado", "Joao entra.", "[DESTINATARIO] entra."),
+    ("Joao Prado", "João entra.", "[DESTINATARIO] entra."),
+    ("Antonin Dvořák", "Dvorak entra.", "[DESTINATARIO] entra."),
+    ("Ångel Ruiz", "Angel entra.", "[DESTINATARIO] entra."),
+    ("Nguyễn Thi", "Nguyen entra.", "[DESTINATARIO] entra."),
+    ("Ştefan Pop", "Ștefan entra.", "[DESTINATARIO] entra."),
+    ("Łukasz Nowak", "Lukasz entra.", "[DESTINATARIO] entra."),
+    ("Lukasz Nowak", "Łukasz entra.", "[DESTINATARIO] entra."),
+    # Un digito o un guion bajo no hacen de un nombre otra palabra.
+    ("Marta Ibáñez", "marta_ibanez entra.", "[DESTINATARIO]_[DESTINATARIO] entra."),
+    ("Marta Ibáñez", "Marta2 entra.", "[DESTINATARIO]2 entra."),
+    # Partes pegadas a un apostrofo, y el apellido entero con su apostrofo.
+    ("Lia D'Angelo", "Angelo entra.", "[DESTINATARIO] entra."),
+    ("Lia D'Angelo", "D’Angelo entra.", "[DESTINATARIO] entra."),
+    ("Sean O'Brien", "Brien entra.", "[DESTINATARIO] entra."),
+    # Caracteres que no se ven partiendo el nombre.
+    ("Marta Ibáñez", "Mar­ta entra.", "[DESTINATARIO] entra."),
+    ("Marta Ibáñez", "Mar​ta entra.", "[DESTINATARIO] entra."),
+])
+def test_el_nombre_no_se_escapa_por_marcas_fronteras_ni_invisibles(
+    destinatario: str, prosa: str, esperado: str
+) -> None:
+    s = obs.Seudonimizador(_brief_con(destinatario=destinatario, regala="Luis", allegado="Kiko"))
+    assert s.texto(prosa) == esperado
+
+
+def test_una_letra_pegada_sigue_haciendo_otra_palabra() -> None:
+    s = obs.Seudonimizador(_brief_con(destinatario="Marta Ibáñez", regala="Luis",
+                                      allegado="Kiko"))
+    assert s.texto("Martina y Luisa miran a Marta.") == "Martina y Luisa miran a [DESTINATARIO]."
+
+
 # --- RF3-OBS-08: cuando se envia, y que un fallo no toca nada ------------------------------------
 
 

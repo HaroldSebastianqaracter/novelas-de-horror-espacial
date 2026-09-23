@@ -358,7 +358,7 @@ Los identificadores son UUID deterministas (versión 5) de la **clave** de la no
 
 **RF3-OBS-06 — Las skills como prompts versionados.** Cada skill es un prompt de Langfuse llamado `storymaker-<agente>`. Su versión se identifica por la huella SHA-256 del texto que recibió el agente (etiqueta `sha-<12 primeros>`), que es el `sistema` guardado en la propia llamada. La primera vez que aparece una huella se crea la versión, y cada generación enlaza la suya. Cambiar una skill produce una versión nueva sin que nadie tenga que registrarla.
 
-**RF3-OBS-07 — Seudonimización (RGPD).** Antes de salir de la máquina, todo texto que se envía (entradas, salidas, metadatos y también las **claves** de los diccionarios, porque `nivel_confianza` va por personaje) sustituye, como palabra completa y sin distinguir mayúsculas, con las tildes ignoradas en los dos lados (el brief puede decir «Ramon» y la prosa «Ramón», o al revés), con el texto normalizado a NFC y con los apóstrofos rectos y tipográficos como iguales:
+**RF3-OBS-07 — Seudonimización (RGPD).** Antes de salir de la máquina, todo texto que se envía (entradas, salidas, metadatos y también las **claves** de los diccionarios, porque `nivel_confianza` va por personaje) sustituye los nombres del encargo. La comparación se hace sobre el texto entero **plegado**: sin distinguir mayúsculas; sin ninguna marca diacrítica, en los dos lados (el brief puede decir «Ramon» y la prosa «Ramón», o al revés, y lo mismo con «João», «Dvořák» o «Ştefan»); con las letras sin descomposición que se leen como otra («Łukasz» y «Lukasz», «ø», «ß»); sin los caracteres que no se ven (guion blando, espacios de ancho cero), y con los apóstrofos rectos y tipográficos como iguales. Un mapa de posiciones lleva cada acierto al texto original, y la salida sale en NFC. Se sustituye como palabra completa: solo otra letra, delante o detrás, hace de un nombre otra palabra («Martina» no es «Marta»); un dígito o un guion bajo, no («Marta2», «marta_ibanez»). Un apellido con apóstrofo cuenta entero y por la parte de después («O'Hara» y «Hara»):
 
 | Dato del brief | Etiqueta |
 | --- | --- |
@@ -367,6 +367,8 @@ Los identificadores son UUID deterministas (versión 5) de la **clave** de la no
 | Quien regala, completo y por partes | `[QUIEN_REGALA]` |
 
 El mapa de sustitución no sale nunca de la máquina. Una novela sin brief no tiene nada que sustituir.
+
+> **Decisión de la spec.** Tres puntos ciegos quedan aceptados, con su fila en el plan de verificación (44). Una parte de menos de tres letras («Li», «Bo») no se sustituye suelta: sustituirla tocaría cada sílaba igual de la prosa, y el nombre completo sí se cubre. Dos copias de una misma base comparten la clave de novela y, por tanto, identificadores en Langfuse: la segunda pisa a la primera, que es lo que se quiere al reenviar. Un nombre que también es palabra común («Luz», «Rosa») se sustituye de más, también cuando la prosa habla de la luz: sustituir de más es el lado seguro.
 
 > **Decisión de la spec.** Los rasgos y los recuerdos se envían tal cual. Son la materia que hay que poder leer para depurar la personalización, y sin los nombres no identifican a nadie por sí solos. Queda como riesgo aceptado (U3-3): un recuerdo muy concreto («el faro de su abuelo en Cabo de Gata») puede identificar a alguien combinado con otros datos.
 
