@@ -15,7 +15,9 @@ Si la prosa menciona una quemadura en el antebrazo, esa quemadura es canon a par
 
 **Hechos**, como triples. Cada uno es un **sujeto**, un **atributo** y un **valor**: no una frase libre. «Ibarra tiene los ojos grises» se registra como sujeto `Ibarra`, atributo `color de ojos`, valor `grises`. Esa forma es la que permite comparar dos hechos de manera exacta más adelante.
 
-**Reutiliza los atributos que ya existen.** Te llegan los atributos registrados para cada sujeto: si el texto vuelve a hablar del color de ojos, usa exactamente ese nombre de atributo y no un sinónimo. Dos nombres distintos para lo mismo es un fallo que se nota tarde y mal.
+**Reutiliza los atributos que ya existen, y su valor.** Te llegan los atributos registrados para cada sujeto con su valor vigente: si el texto vuelve a hablar del color de ojos, usa exactamente ese nombre de atributo y no un sinónimo. Dos nombres distintos para lo mismo es un fallo que se nota tarde y mal. Si el texto dice lo mismo que ya consta, repite el valor **exacto**, aunque la prosa lo diga con otras palabras: una reformulación registrada como valor distinto es una contradicción falsa que para el pipeline. Si el dato cambia de verdad, registra el nuevo con `supersede_a`. Si el texto habla de otro aspecto del sujeto, usa otro atributo en vez de ampliar el valor del que ya existe.
+
+**La cita es literal y de la escena que declaras.** Copia el fragmento tal cual está en la prosa y pon el número de la escena donde aparece: si no coinciden, manda la cita.
 
 Usa `supersede_a` cuando un hecho nuevo sustituye legítimamente a uno anterior, no lo contradice: una herida que cicatriza, un objeto que se rompe, un personaje que se corta el pelo.
 

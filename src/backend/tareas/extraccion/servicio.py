@@ -39,7 +39,7 @@ def paquete(
 ) -> Paquete:
     escenas = lectura.escenas_del_capitulo(con, novela_id, capitulo)
     canon = lectura.canon_del_capitulo(con, novela_id, capitulo)
-    atributos = lectura.atributos_por_sujeto(con, novela_id)
+    atributos = lectura.valores_vigentes(con, novela_id)
     siembras = lectura.siembras_vivas(con, novela_id, capitulo, margen=99)
 
     p = Paquete(agente=AGENTE, capitulo=capitulo)
@@ -85,10 +85,15 @@ def paquete(
         p.anadir_elementos(
             "hechos",
             [Elemento(
-                "Reutiliza estos nombres de atributo cuando el texto vuelva a hablar de lo mismo:",
+                "Atributos que ya existen, con su valor vigente. Si el texto vuelve a decir lo "
+                "mismo, repite el valor EXACTO. Si lo cambia, registra el nuevo con supersede_a "
+                "igual a ese atributo. Si habla de otro aspecto, usa otro atributo:",
                 True,
             )] + [
-                Elemento(f"- {sujeto}: {', '.join(lista)}", posicion=i + 1)
+                Elemento(
+                    f"- {sujeto}: " + "; ".join(f"{a} = {v}" for a, v in lista),
+                    posicion=i + 1,
+                )
                 for i, (sujeto, lista) in enumerate(ordenados)
             ],
             "ATRIBUTOS QUE YA EXISTEN",
@@ -138,6 +143,8 @@ class Descartes:
     def __init__(self) -> None:
         self.recuento: dict[str, dict[str, int]] = {}
         self.usos: list[dict[str, Any]] = []
+        #: Lo que se registro, pero no donde el extractor dijo (RF2-PIPE-24).
+        self.correcciones: dict[str, int] = {}
 
     def anotar(self, tipo: str, motivo: str) -> None:
         por_motivo = self.recuento.setdefault(tipo, {})
@@ -168,6 +175,7 @@ def aplicar(
     capitulo: int,
     salida: SalidaExtraccion,
     escenas_por_orden: dict[int, int],
+    textos: dict[int, str] | None = None,
 ) -> Descartes:
     """Registra en el grafo todo lo que el texto fijo. Append-only, con escena de origen.
 
@@ -213,9 +221,25 @@ def aplicar(
             (novela_id, normalizar(sujeto), normalizar(atributo)),
         ).fetchone()
 
+    # La cita manda sobre el numero de escena (RF2-PIPE-24): si solo esta, literal, en otra
+    # escena del capitulo, el hecho es de esa escena.
+    prosa = {orden: normalizar(t) for orden, t in (textos or {}).items()}
+
+    def orden_por_cita(declarada: int, cita: str) -> int:
+        clave = normalizar(cita)
+        if not clave or not prosa or clave in prosa.get(declarada, ""):
+            return declarada
+        otras = [o for o, t in prosa.items() if clave in t]
+        if len(otras) != 1:
+            return declarada
+        descartes.correcciones["escena_por_cita"] = (
+            descartes.correcciones.get("escena_por_cita", 0) + 1
+        )
+        return otras[0]
+
     hechos_nuevos: dict[tuple[str, str], int] = {}
     for h in salida.hechos:
-        eid = escena(h.escena_orden)
+        eid = escena(orden_por_cita(h.escena_orden, h.cita))
         if eid is None:
             descartes.anotar("hechos", "escena_desconocida")
             continue

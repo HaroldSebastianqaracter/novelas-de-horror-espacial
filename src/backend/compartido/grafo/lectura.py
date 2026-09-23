@@ -264,17 +264,28 @@ def hechos_del_reparto(
     ))
 
 
-def atributos_por_sujeto(
+def valores_vigentes(
     con: sqlite3.Connection, novela_id: int
-) -> dict[str, list[str]]:
-    """Atributos ya usados por cada sujeto, para que el extractor no invente sinonimos."""
-    salida: dict[str, list[str]] = {}
+) -> dict[str, list[tuple[str, str]]]:
+    """El valor que hoy fija cada sujeto y atributo (RF2-PIPE-23).
+
+    Vigente, sin sustituir y el mas reciente: lo que el extractor tiene que repetir igual si el
+    texto dice lo mismo, o sustituir a sabiendas si lo cambia.
+    """
+    salida: dict[str, list[tuple[str, str]]] = {}
     for f in con.execute(
-        "SELECT DISTINCT sujeto_nombre, atributo FROM hecho_vigente WHERE novela_id = ?"
-        " ORDER BY sujeto_nombre, atributo",
+        """
+        SELECT h.sujeto_nombre, h.atributo, h.valor FROM hecho_vigente h
+        WHERE h.novela_id = ?
+          AND NOT EXISTS (SELECT 1 FROM hecho_vigente s WHERE s.supersede_a = h.id)
+          AND h.id = (SELECT MAX(o.id) FROM hecho_vigente o
+                      WHERE o.novela_id = h.novela_id AND o.sujeto_clave = h.sujeto_clave
+                        AND o.atributo_clave = h.atributo_clave)
+        ORDER BY h.sujeto_nombre, h.atributo
+        """,
         (novela_id,),
     ):
-        salida.setdefault(f["sujeto_nombre"] or "", []).append(f["atributo"])
+        salida.setdefault(f["sujeto_nombre"] or "", []).append((f["atributo"], f["valor"]))
     return salida
 
 

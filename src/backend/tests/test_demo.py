@@ -204,3 +204,61 @@ def test_una_entidad_inventada_es_un_aviso_y_la_demo_sigue() -> None:
     avisos = {c["comprobacion"] for d in detalles for c in d["conflictos"] if c["aviso"]}
     assert "entidad_fuera_de_canon" in avisos
     assert _uno(con, "SELECT COUNT(*) FROM entidad_no_reconocida") == 1
+
+
+# --- RF2-PIPE-23 y RF2-PIPE-24: lo que la primera pasada real ensenyo -----------------------------
+
+
+def test_el_paquete_del_extractor_trae_el_valor_vigente(
+    demo_entera: tuple[sqlite3.Connection, int, str],
+) -> None:
+    """Con el valor delante, el extractor puede repetirlo igual en vez de reformularlo."""
+    import config
+    from compartido.contexto import Presupuesto
+    from tareas.extraccion import servicio
+
+    con, novela_id, _ = demo_entera
+    render = servicio.paquete(
+        con, novela_id, 2, {1: "texto", 2: "texto"}, presupuesto=Presupuesto(
+            bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE),
+    ).render()
+    assert "olor = metal frio y algo dulce" in render
+    # De la herida solo sale el ultimo eslabon de la cadena, no los sustituidos.
+    assert "herida en la mano = cicatriz rosada" in render
+    assert "corte abierto" not in render
+
+
+def test_la_cita_manda_sobre_el_numero_de_escena() -> None:
+    """El extractor dice escena 1, pero la frase solo esta en la 2: el hecho es de la 2."""
+    frase = "La baliza pesa tres kilos y medio."
+
+    def redaccion(entrada: str, agente: str) -> dict[str, Any]:
+        salida = demo.redaccion(entrada, agente)
+        if demo._capitulo(entrada) == 2:
+            salida["escenas"][1]["texto"] += " " + frase
+        return salida
+
+    def extraccion(entrada: str, agente: str) -> dict[str, Any]:
+        salida = demo.extraccion(entrada, agente)
+        if demo._capitulo(entrada) == 2:
+            salida["hechos"].append({
+                "escena_orden": 1, "sujeto_tipo": "objeto", "sujeto_ref": demo.OBJETO,
+                "atributo": "peso", "valor": "tres kilos y medio", "categoria": "fisico",
+                "cita": "pesa tres kilos y medio",
+            })
+        return salida
+
+    con, ruta = nueva_bd()
+    novela_id = crear_novela(con)
+    puerto = puerto_falso(con)
+    puerto.registrar("redaccion", redaccion)
+    puerto.registrar("extraccion", extraccion)
+    assert pipeline.avanzar(contexto(con, puerto, ruta, novela_id)) == "completada"
+    orden = con.execute(
+        "SELECT e.orden FROM hecho h JOIN escena e ON e.id = h.escena_id WHERE h.atributo = 'peso'"
+    ).fetchone()[0]
+    assert orden == 2
+    correcciones = [json.loads(f[0]).get("correcciones") for f in con.execute(
+        "SELECT payload FROM traza_evento WHERE tipo = 'extraccion_descartes'"
+    )]
+    assert {"escena_por_cita": 1} in correcciones

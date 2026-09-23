@@ -442,7 +442,7 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                         llamada_id=resultado_redaccion.llamada_id,
                     )
                     descartes = s_extraccion.aplicar(
-                        ctx.con, ctx.novela_id, numero, hechos, por_orden
+                        ctx.con, ctx.novela_id, numero, hechos, por_orden, textos
                     )
                     continuidad = p_continuidad.evaluar(
                         ctx.con, ctx.novela_id, numero, textos=textos,
@@ -525,9 +525,10 @@ def _trazar_descartes(
     ctx: Contexto, numero: int, intento: int, descartes: Any
 ) -> None:
     """Lo que el extractor dijo y no se pudo registrar, a la traza (RF2-PIPE-16)."""
-    if descartes is not None and descartes.total:
+    if descartes is not None and (descartes.total or descartes.correcciones):
         emitir_traza(ctx, "extraccion_descartes", capitulo=numero, intento=intento,
-                     recuento=descartes.recuento, usos=descartes.usos)
+                     recuento=descartes.recuento, usos=descartes.usos,
+                     correcciones=descartes.correcciones)
 
 
 def _paquete_o_parada(
