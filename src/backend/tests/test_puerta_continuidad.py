@@ -327,3 +327,69 @@ def test_estar_a_la_vez_en_un_lugar_y_en_otro_que_contiene_no_es_ubicuidad(
     con.execute("UPDATE lugar SET dentro_de_id = ? WHERE id = ?",
                 (g.lugares["Puente"], g.lugares["Modulo de carga"]))
     assert "presencia_imposible" not in comprobaciones(con, g)
+
+
+# --- RF2-PIPE-27: entre capitulos, lo que sabe la faccion lo sabe cada miembro ----------------
+
+
+def _misma_faccion(con: sqlite3.Connection, g: Grafo, *nombres: str) -> None:
+    from compartido.grafo import insertar
+
+    faccion = insertar(con, "faccion", novela_id=g.novela_id, nombre="La cuadrilla")
+    for nombre in nombres:
+        con.execute("UPDATE personaje SET faccion_id = ? WHERE id = ?",
+                    (faccion, g.personajes[nombre]))
+
+
+def _usa_reyes_los_ojos(con: sqlite3.Connection, g: Grafo, escena: tuple[int, int]) -> None:
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)",
+        (g.novela_id, g.personajes["Reyes"], g.hechos["ojos"], g.escenas[escena]),
+    )
+
+
+def test_lo_que_sabia_la_faccion_en_un_capitulo_anterior_lo_sabe_el_miembro(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """Los ojos se fijan en la escena 1.1, con Ibarra delante; Reyes los usa en el capitulo 2."""
+    con, g = grafo
+    _usa_reyes_los_ojos(con, g, (2, 1))
+    assert "conocimiento_no_adquirido" in comprobaciones(con, g)
+    _misma_faccion(con, g, "Reyes", "Ibarra")
+    assert "conocimiento_no_adquirido" not in comprobaciones(con, g)
+
+
+def test_dentro_del_mismo_capitulo_la_faccion_no_transmite(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """Un hecho fijado en la escena 2.1 con Ibarra delante no llega a Reyes en la 2.2."""
+    con, g = grafo
+    nuevo = hecho(con, g, (2, 1), "Kowalski", "cicatriz", "en la ceja", cita="la cicatriz")
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)", (g.novela_id, g.personajes["Reyes"], nuevo, g.escenas[(2, 2)]),
+    )
+    _misma_faccion(con, g, "Reyes", "Ibarra")
+    assert "conocimiento_no_adquirido" in comprobaciones(con, g)
+
+
+# --- RF2-PIPE-28: el objeto viaja con su poseedor ----------------------------------------------
+
+
+def test_un_objeto_que_lleva_alguien_viaja_con_el(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    """La baliza aparece en la esclusa sin traslado; si la llevaba Kowalski, que esta, no para."""
+    con, g = grafo
+    con.execute("UPDATE escena SET lugar_id = ? WHERE id = ?",
+                (g.lugares["Esclusa"], g.escenas[(2, 2)]))
+    con.execute("DELETE FROM estado_objeto WHERE escena_id = ?", (g.escenas[(2, 2)],))
+    assert "objeto_sin_traslado" in comprobaciones(con, g)
+    con.execute("UPDATE estado_objeto SET poseedor_id = ? WHERE objeto_id = ?",
+                (g.personajes["Kowalski"], g.objetos["Baliza"]))
+    assert "objeto_sin_traslado" not in comprobaciones(con, g)
+    # Si el poseedor no esta en la escena, vuelve a parar.
+    con.execute("DELETE FROM escena_personaje WHERE escena_id = ? AND personaje_id = ?",
+                (g.escenas[(2, 2)], g.personajes["Kowalski"]))
+    con.execute("UPDATE escena SET pov_id = ? WHERE id = ?",
+                (g.personajes["Ibarra"], g.escenas[(2, 2)]))
+    assert "objeto_sin_traslado" in comprobaciones(con, g)

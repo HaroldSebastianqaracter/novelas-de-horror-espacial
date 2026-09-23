@@ -365,8 +365,18 @@ def _usa_sin_haber_estado(entrada: str, agente: str) -> dict:
     return salida
 
 
+def _reyes_sin_faccion(entrada: str, agente: str) -> dict:
+    """Sin faccion, lo que sabe la cuadrilla no le llega entre capitulos (RF2-PIPE-27)."""
+    salida = agentes_falsos.elenco(entrada, agente)
+    for p in salida["personajes"]:
+        if p["nombre"] == agentes_falsos.PERSONAJES[2]:
+            p["faccion"] = ""
+    return salida
+
+
 def test_dar_por_sabido_registra_lo_contado_y_el_capitulo_pasa(w: worker.Worker) -> None:
     novela_id = crear_novela(w.con)
+    w.puerto.registrar("elenco", _reyes_sin_faccion)  # type: ignore[attr-defined]
     w.puerto.registrar("extraccion", _usa_sin_haber_estado)  # type: ignore[attr-defined]
     w._correr(novela_id)
     parada = fallo.paradas_abiertas(w.con, novela_id)[0]

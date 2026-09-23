@@ -62,10 +62,12 @@ WHERE n.novela_id = ?
         WHERE s.supersede_a = v.id AND os.ordinal <= onu.ordinal)
 """
 
-# --- 2. Conocimiento no adquirido (RF2-PIPE-21) --------------------------------------------
+# --- 2. Conocimiento no adquirido (RF2-PIPE-21, RF2-PIPE-27) -------------------------------
 # Un personaje usa informacion que todavia no ha recibido. Es la fuente numero uno de
 # errores de continuidad en obra larga. Recibirla es tener un estado de conocimiento que la
-# habilite o haber estado (reparto o POV) en la escena donde el texto la fijo: presenciarla.
+# habilite, haber estado (reparto o POV) en la escena donde el texto la fijo, o que otro
+# miembro de su faccion la supiera al terminar un capitulo anterior: entre capitulos, lo que
+# sabe la cuadrilla lo sabe cada uno de la cuadrilla.
 _SQL_CONOCIMIENTO = f"""
 SELECT u.id AS uso_id, p.nombre AS personaje, h.atributo, h.valor, h.sujeto_nombre,
        u.escena_id, c.numero AS capitulo, h.id AS hecho_id, p.id AS personaje_id
@@ -91,6 +93,22 @@ WHERE u.novela_id = ? AND c.numero = ?
           AND (eh.pov_id = u.personaje_id OR EXISTS (
                 SELECT 1 FROM escena_personaje sp
                 WHERE sp.escena_id = eh.id AND sp.personaje_id = u.personaje_id)))
+  AND NOT EXISTS (
+        SELECT 1 FROM personaje otro
+        WHERE otro.faccion_id = p.faccion_id AND otro.id <> p.id
+          AND (EXISTS (
+                SELECT 1 FROM estado_conocimiento ec2
+                JOIN escena_ordinal o2 ON o2.escena_id = ec2.escena_id
+                WHERE ec2.personaje_id = otro.id AND ec2.hecho_id = u.hecho_id
+                  AND ec2.postura IN {POSTURAS_QUE_HABILITAN}
+                  AND o2.capitulo_numero < ou.capitulo_numero)
+            OR EXISTS (
+                SELECT 1 FROM escena eh2
+                JOIN escena_ordinal oh2 ON oh2.escena_id = eh2.id
+                WHERE eh2.id = h.escena_id AND oh2.capitulo_numero < ou.capitulo_numero
+                  AND (eh2.pov_id = otro.id OR EXISTS (
+                        SELECT 1 FROM escena_personaje sp2
+                        WHERE sp2.escena_id = eh2.id AND sp2.personaje_id = otro.id)))))
 """
 
 # --- 3. Sorpresa imposible (aviso) --------------------------------------------------------
@@ -165,7 +183,9 @@ WHERE e1.novela_id = ? AND c1.numero = ?
   AND e1.id < e2.id
 """
 
-# --- 5. Objeto sin traslado ----------------------------------------------------------------
+# --- 5. Objeto sin traslado (RF2-PIPE-28) ---------------------------------------------------
+# Un objeto que lleva alguien viaja con el: si su poseedor esta en la escena, no hay traslado
+# que registrar.
 _SQL_OBJETO = """
 SELECT o.nombre AS objeto, l.nombre AS lugar_escena, lu.nombre AS ultima_ubicacion,
        e.id AS escena_id, c.numero AS capitulo, l.id AS lugar_escena_id,
@@ -187,6 +207,9 @@ WHERE e.novela_id = ? AND c.numero = ?
   AND ult.ubicacion_lugar_id <> e.lugar_id
   AND NOT EXISTS (SELECT 1 FROM estado_objeto nu
                   WHERE nu.objeto_id = eo.objeto_id AND nu.escena_id = e.id)
+  AND NOT (ult.poseedor_id IS NOT NULL AND (e.pov_id = ult.poseedor_id OR EXISTS (
+            SELECT 1 FROM escena_personaje sp
+            WHERE sp.escena_id = e.id AND sp.personaje_id = ult.poseedor_id)))
 """
 
 # --- 6. Coherencia temporal ----------------------------------------------------------------

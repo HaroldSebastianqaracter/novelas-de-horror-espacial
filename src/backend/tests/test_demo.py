@@ -135,10 +135,12 @@ def _contradice(s: dict[str, Any]) -> None:
 
 
 def _usa_sin_saber(s: dict[str, Any]) -> None:
-    # Reyes no estuvo en ninguna escena donde se fijo la voz de Idris (RF2-PIPE-21).
+    # La herida de Idris cambia en la escena 1 de este capitulo, sin Reyes delante, y Reyes la
+    # usa en la 2. Tiene que ser del MISMO capitulo: entre capitulos, lo que sabe su faccion
+    # lo sabe el (RF2-PIPE-27), y en la demo los tres son de la misma cuadrilla.
     s["usos_de_conocimiento"].append({
-        "escena_orden": 1, "personaje_ref": demo.PERSONAJES[2], "sujeto_ref": demo.PERSONAJES[0],
-        "atributo": "voz",
+        "escena_orden": 2, "personaje_ref": demo.PERSONAJES[2], "sujeto_ref": demo.PERSONAJES[0],
+        "atributo": "herida en la mano",
     })
 
 
