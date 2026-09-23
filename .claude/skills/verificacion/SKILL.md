@@ -45,10 +45,13 @@ Reglas de asignación:
 - Un invariante de orden en un flujo multi-agente es `model checking` (`A`), no un test de integración.
 - Contención (sandbox, guardrails, rollout progresivo) es `D`: la evidencia es observar que bloquea, no que el código exista.
 - Una propiedad puede llevar dos métodos cuando cada uno cubre una mitad distinta; escribe los dos.
+- **Escribe el punto ciego del método elegido**, no solo lo que detecta. Si no sabes qué se le escapa, no has entendido el método.
+- **Si el dato lo declara el mismo agente al que juzgas, un método no basta.** Una consulta sobre un campo autodeclarado mide obediencia al formato, no verdad: añade un segundo método que mire el texto.
+- Una propiedad que queda con un solo método se marca **validador solitario**. No es un error, es una deuda que hay que ver.
 
 Lo que no puedas verificar se etiqueta `U` con motivo y con qué lo hace tolerable (impacto bajo, reversible, detectable en producción). `U` es una decisión escrita, no un hueco.
 
-Criterio de fin: cero propiedades sin etiqueta.
+Criterio de fin: cero propiedades sin etiqueta y cero métodos sin punto ciego escrito.
 
 ### 4. Escribir el archivo
 
@@ -59,9 +62,9 @@ Plan de verificación de [`<spec>.md`](<spec>.md). Métodos y etiquetas según [
 
 ## Propiedades verificadas
 
-| # | Propiedad | Método | Tag | Evidencia | Estado |
-| --- | --- | --- | --- | --- | --- |
-| 1 | Un usuario sin sesión nunca recibe el cuerpo de un capítulo | Integration testing | `T` | `tests/api/test_chapters.py` | pendiente |
+| # | Propiedad | Método | Tag | Punto ciego | Evidencia | Estado |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Un usuario sin sesión nunca recibe el cuerpo de un capítulo | Integration testing | `T` | Solo cubre las rutas que la prueba enumera; una ruta nueva nace sin cubrir | `tests/api/test_chapters.py` | pendiente |
 
 ## Riesgos aceptados
 
@@ -70,7 +73,7 @@ Plan de verificación de [`<spec>.md`](<spec>.md). Métodos y etiquetas según [
 | 7 | La prosa mantiene la voz del narrador entre sesiones largas | No hay scorer fiable todavía | Revisión humana antes de publicar |
 ```
 
-**Evidencia** apunta a dónde vive la comprobación (archivo de test, suite de evals, dashboard, paso del pipeline) o `—` si aún no existe. **Estado** es `pendiente`, `implementado` o `fallando`.
+**Punto ciego** es lo que ese método no ve aunque pase. **Evidencia** apunta a dónde vive la comprobación (archivo de test, suite de evals, dashboard, paso del pipeline) o `—` si aún no existe. **Estado** es `pendiente`, `implementado` o `fallando`.
 
 ### 5. Cerrar
 
@@ -79,7 +82,8 @@ Revisa contra estas cuatro condiciones antes de darlo por hecho:
 1. Cada promesa de la spec está en la tabla.
 2. Cada fila lleva un método del catálogo, escrito con su nombre del catálogo.
 3. Cada `U` tiene motivo y atenuante.
-4. El plan entra en el mismo commit que la spec y el código, como manda `AGENTS.md`.
+4. Cada fila tiene punto ciego escrito, y las filas con un solo método están señaladas como validador solitario.
+5. El plan entra en el mismo commit que la spec y el código, como manda `AGENTS.md`.
 
 ## Al revisar un plan existente
 
@@ -88,3 +92,4 @@ No lo reescribas: dilo en tres frentes.
 - **Optimismo de etiqueta** — una fila marcada `T` cuya evidencia no existe, o marcada `A` cuando el tipo no garantiza esa propiedad.
 - **Propiedades que faltan** — la spec cambió y la tabla no.
 - **`U` disfrazado** — una propiedad que nadie comprueba pero aparece como verificada. Bájala a la tabla de riesgos aceptados.
+- **Verde ciego** — una fila en verde cuyo único método no puede ver el fallo que importa, casi siempre porque el dato que consulta lo produce el agente evaluado. Es el frente que se revisa **primero**: una fila roja se ve, una fila verde y ciega no.

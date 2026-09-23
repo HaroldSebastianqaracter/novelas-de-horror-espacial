@@ -90,17 +90,17 @@ Los métodos anteriores son genéricos. Esta sección los instancia sobre el dom
 
 Son consultas sobre las entidades de estado de [definitions.md](definitions.md). No requieren modelo: o el dato contradice al registro o no lo contradice.
 
-| Propiedad | Se comprueba sobre | Fallo que detecta |
-| --- | --- | --- |
-| Continuidad factual | `Hecho` (triple `sujeto`/`atributo`/`valor`, relación `establecidoEn`) | El texto afirma algo que contradice un hecho ya establecido: un nombre, una fecha, un rasgo físico, una distancia. |
-| Conocimiento no adquirido | `UsoDeConocimiento` contra `EstadoDeConocimiento` (`postura`, `via`, relación `desde`) | Un personaje actúa sobre información que todavía no ha recibido, o se sorprende de algo que ya sabía. Es la fuente número uno de errores en obra larga. |
-| Siembras sin pago | `EstadoSiembra` (`estado`) | Elemento plantado que llega al final sin recogerse, o pago que aparece sin siembra previa. |
-| Hilos sin cerrar | `EstadoHilo` (`estado`) | Hilo que termina la novela en `abierto` sin estar marcado como abierto deliberadamente; hilo `latente` más allá del umbral fijado; cierre en orden distinto al inverso de apertura. |
-| Presencia imposible | `Escena` (reparto), `Lugar` (`presenciaActual`), `EstadoObjeto` | Un personaje en dos lugares a la vez; un objeto que aparece sin traslado registrado desde su última ubicación. |
-| Coherencia temporal | `LineaDeTiempo`, `Evento` (`ordenInterno`) | Duraciones incompatibles, edades que no cuadran, sucesos fuera de orden. |
-| Escena sin cambio de valor | `Escena` (`valorInicial`, `valorFinal`) | La escena termina en la misma polaridad en que empezó: es relleno declarado. |
-| Integridad de POV | `Escena` (`pov`), `Novela` (`povPorDefecto`) | Escena sin POV declarado, o cambio de conciencia focal dentro de una misma escena. |
-| Presupuesto | `Restriccion` (`valor`) | Longitud de acto, capítulo o escena fuera del rango fijado; desviación de la longitud objetivo. |
+| Propiedad | Se comprueba sobre | Fallo que detecta | Punto ciego |
+| --- | --- | --- | --- |
+| Continuidad factual | `Hecho` (triple `sujeto`/`atributo`/`valor`, relación `establecidoEn`) | El texto afirma algo que contradice un hecho ya establecido: un nombre, una fecha, un rasgo físico, una distancia. | Solo ve los hechos que el extractor registró. Un dato que nadie extrajo no puede contradecir a nada, y la puerta da verde. |
+| Conocimiento no adquirido | `UsoDeConocimiento` contra `EstadoDeConocimiento` (`postura`, `via`, relación `desde`) | Un personaje actúa sobre información que todavía no ha recibido, o se sorprende de algo que ya sabía. Es la fuente número uno de errores en obra larga. | Depende de que el uso quede registrado. Un personaje que actúa sobre lo que sabe sin nombrarlo no deja rastro que consultar. |
+| Siembras sin pago | `EstadoSiembra` (`estado`) | Elemento plantado que llega al final sin recogerse, o pago que aparece sin siembra previa. | Comprueba que el pago **existe**, no que satisfaga. Un pago trivial cierra la siembra igual que uno bueno. |
+| Hilos sin cerrar | `EstadoHilo` (`estado`) | Hilo que termina la novela en `abierto` sin estar marcado como abierto deliberadamente; hilo `latente` más allá del umbral fijado; cierre en orden distinto al inverso de apertura. | El estado lo declara quien cierra el hilo. Un cierre nominal queda `cerrado` sin haber resuelto nada. |
+| Presencia imposible | `Escena` (reparto), `Lugar` (`presenciaActual`), `EstadoObjeto` | Un personaje en dos lugares a la vez; un objeto que aparece sin traslado registrado desde su última ubicación. | Solo cubre entidades con ubicación registrada. Un objeto que nunca se situó no puede estar mal situado. |
+| Coherencia temporal | `LineaDeTiempo`, `Evento` (`ordenInterno`) | Duraciones incompatibles, edades que no cuadran, sucesos fuera de orden. | Verifica el orden declarado, no la plausibilidad de lo que cabe en una duración. |
+| Escena sin cambio de valor | `Escena` (`valorInicial`, `valorFinal`) | La escena termina en la misma polaridad en que empezó: es relleno declarado. | **Los dos valores los declara el mismo agente al que se juzga.** Basta escribir polaridades distintas para que una escena plana pase. Es el validador solitario más frágil del catálogo. |
+| Integridad de POV | `Escena` (`pov`), `Novela` (`povPorDefecto`) | Escena sin POV declarado, o cambio de conciencia focal dentro de una misma escena. | Ve el POV **declarado**, no el ejercido. La prosa puede deslizarse a otra conciencia con el campo correcto. |
+| Presupuesto | `Restriccion` (`valor`) | Longitud de acto, capítulo o escena fuera del rango fijado; desviación de la longitud objetivo. | Mide extensión, no densidad. Un capítulo en rango puede no contener nada. |
 
 ### Comprobable ejecutando — `T`
 
@@ -144,16 +144,44 @@ Se nombran explícitamente en vez de dejarlos como supuesto silencioso:
 - **Originalidad frente al corpus de entrenamiento.** Se puede detectar el cliché conocido; no se puede garantizar que una imagen no sea el lugar común estadístico del modelo.
 - **Satisfacción del final.** Verificable en sus condiciones estructurales (hilos cerrados, siembras pagadas, clímax que responde la pregunta inicial), no en su efecto.
 
+## Puntos ciegos y validadores solitarios
+
+Ningún método es fiable por sí solo: cada uno tiene una fortaleza y una zona que no ve. Por eso un validador no se evalúa aislado, sino por lo que el conjunto deja sin cubrir.
+
+Tres reglas:
+
+**1. Todo método declara su punto ciego.** Un método sin punto ciego escrito no está entendido. La columna existe en la tabla determinista; en las demás secciones va como línea propia.
+
+**2. Una propiedad con un solo validador es una propiedad en riesgo.** Se marca como *validador solitario* y se revisa antes que ninguna otra, aunque su fila esté en verde. El orden de revisión no es el orden de ejecución: se ejecuta lo barato primero, se revisa lo ciego primero.
+
+**3. El dato autodeclarado no verifica.** Cuando la propiedad se comprueba sobre un campo que produce el mismo agente al que se juzga, el validador mide obediencia al formato, no verdad. Necesita un segundo método que mire el texto, no el metadato.
+
+Los tres puntos ciegos estructurales de este proyecto:
+
+| Punto ciego | Por qué | Qué lo tapa |
+| --- | --- | --- |
+| **Lo que el extractor no registró** | Todas las comprobaciones deterministas consultan el grafo. Una puerta no puede echar de menos un hecho que nadie escribió. El fallo entra aguas arriba y ninguna puerta lo nota. | Evals del extractor con golden dataset (`I`), antes que las de cualquier otro agente. |
+| **El metadato autodeclarado** | `valorInicial`/`valorFinal`, `pov` y `EstadoHilo.estado` los escribe el agente evaluado. La consulta es impecable y el dato puede ser mentira. | Un segundo método sobre el texto: juicio de función de escena (`I`) en la misma escena que la consulta aprobó. |
+| **La lista cerrada** | Las búsquedas dirigidas solo encuentran los tics que ya están en la lista. Un verde significa «ninguno de los conocidos», no «prosa limpia». | Muestreo humano periódico que alimente la lista, y la eval de cliché (`I`). |
+
 ## Cómo se usan juntos
 
 Los métodos de código (`A` y `T`) cubren el sistema que rodea a los agentes: determinista, verificable con las herramientas de siempre. Los métodos de proceso cubren la parte no determinista —lo que el agente decide hacer— donde la verificación pasa por muestreo (evals), juicio (inspección, multi-agente) y contención (sandbox, guardrails, rollout progresivo).
 
 La salida narrativa se reparte entre los dos mundos, y esa es la decisión de diseño que este documento fija: **todo lo que la ontología modela como estado se verifica con `A`, no con un modelo juez.** Preguntarle a un modelo si hay una contradicción de continuidad es caro, lento y poco fiable cuando la respuesta está en una consulta al grafo. El juicio se reserva para lo que de verdad lo necesita: voz, subtexto, función de escena y cliché.
 
+**Picaresca antes que juicio.** Antes de mandar una propiedad a un modelo juez, se busca el atajo determinista, aunque solo cubra una parte. Es la regla que produjo las mejores comprobaciones del catálogo: convertir la continuidad en una consulta al grafo en vez de en una pregunta; medir si una escena hace algo comparando dos campos en vez de leyéndola; cazar tics con una lista cerrada en vez de con crítica literaria; y romper un manuscrito correcto a propósito para saber si el validador sirve de algo. Una cobertura parcial y barata vale más que un juicio caro y variable, siempre que su punto ciego quede escrito.
+
 El orden importa. Las puertas deterministas van primero porque son baratas y su fallo invalida el trabajo posterior: no tiene sentido evaluar la prosa de una escena que contradice el canon. La secuencia concreta de puertas por etapa del pipeline vive en [architecture.md](architecture.md).
 
-Toda propiedad que importe debe terminar con una etiqueta asignada. Si no cae en `T`, `A`, `I` ni `D`, se marca `U` y se deja escrita como riesgo aceptado.
+Toda propiedad que importe debe terminar con una etiqueta asignada. Si no cae en `T`, `A`, `I` ni `D`, se marca `U` y se deja escrita como riesgo aceptado. Y toda propiedad que termine con un solo método debe terminar además con el punto ciego de ese método escrito al lado.
 
 > **Decisión sin entrevistar, 22 de septiembre de 2026.** Tres filas de la tabla determinista se apoyaban en atributos que [definitions.md](definitions.md) ha dejado de tener, y se han reapuntado a los registros que los sustituyen. El cambio de fondo está en las dos primeras: la continuidad factual se comprueba sobre un **triple** y no sobre un enunciado libre, y el conocimiento no adquirido necesita **dos** registros, el de lo que un personaje adquirió y el de lo que usó. Sin esa segunda lista la comprobación no se puede escribir como consulta, y quedaría como juicio: exactamente lo que este documento dice que no debe pasar.
 >
 > El plan de verificación concreto del backend, con su estado fila a fila, vive en [specs/spec1-verification.md](../specs/spec1-verification.md).
+
+> **Decisión sin entrevistar, 22 de septiembre de 2026.** Se añade la sección [Puntos ciegos y validadores solitarios](#puntos-ciegos-y-validadores-solitarios), la columna *Punto ciego* en la tabla determinista y el principio de picaresca. El catálogo nombraba lo que cada método **detecta** y nunca lo que se le **escapa**, de modo que una tabla de verificación podía quedar entera en verde con todas sus filas sostenidas por un único validador ciego: cobertura de etiquetado, no confianza. `U` no cubría este hueco, porque `U` es lo que **ningún** método ve, y un punto ciego es lo que un método concreto no ve pero otro sí podría ver.
+>
+> Se descartó abrir una sexta etiqueta de Trust Spec para la ceguera: la clasificación dice de dónde sale la evidencia, y el punto ciego es una propiedad del método, no una fuente distinta. Se descartó también fijar un mínimo de dos métodos por propiedad, porque obligaría a inventar verificación de relleno donde uno basta; en su lugar el segundo método solo es obligatorio cuando el dato lo declara el agente evaluado.
+>
+> El cambio afecta a la skill `verificacion`, que asignaba «el método más barato que dé evidencia real» sin preguntar qué se le escapa.
