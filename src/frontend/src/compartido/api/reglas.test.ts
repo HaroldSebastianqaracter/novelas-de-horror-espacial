@@ -1,8 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { haceTanto } from "../ui/Hace";
 import { capituloEnCurso, instanteDeApi } from "./reglas";
 
 describe("formato de la API", () => {
+  // Con la hora local en UTC, leer la fecha como local no se distinguiría de leerla como UTC.
+  const zonaPrevia = process.env.TZ;
+  beforeAll(() => {
+    process.env.TZ = "Europe/Madrid";
+  });
+  afterAll(() => {
+    if (zonaPrevia === undefined) delete process.env.TZ;
+    else process.env.TZ = zonaPrevia;
+  });
+
   it("una fecha sin zona es UTC, como la guarda SQLite", () => {
     expect(instanteDeApi("2026-09-23 15:44:20").toISOString()).toBe("2026-09-23T15:44:20.000Z");
     expect(instanteDeApi("2026-09-23T15:44:20").toISOString()).toBe("2026-09-23T15:44:20.000Z");

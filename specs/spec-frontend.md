@@ -303,9 +303,9 @@ Ninguno bloquea la v1. Cada uno retira un fichero de deuda de RF-FE-API-04:
 
 ## 6. Orden de implementación
 
-> Los siete pasos están hechos (23 de septiembre de 2026, un commit por paso). Queda pendiente lo que la verificación marca así: el test que compara los ficheros de deuda con Python (fila 2), la regla de lint de colores literales (fila 10), la revisión a mano (fila 11) y la demostración contra el backend real (fila 12).
+> Los siete pasos están hechos (23 de septiembre de 2026, un commit por paso). Queda pendiente lo que la verificación marca así: el test que compara los ficheros de deuda con Python (fila 2), la regla de lint de colores literales (fila 10) y la revisión a mano (fila 11).
 >
-> La demostración contra el backend real se hizo el 23-09 y añadió RF-FE-DAT-06. También destapó un fallo del backend que el frontend no puede corregir: la API responde `500` a ratos, porque la dependencia `leer` de `main.py` abre la conexión SQLite en un hilo del pool y la usa o la cierra en otro (`sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread`). Con varias consultas a la vez, como hace cada pantalla, salta en casi todas las cargas. El frontend lo absorbe porque reintenta los `5xx` (RF-FE-DAT-01), pero hay que corregirlo en el backend.
+> La demostración contra el backend real se hizo el 23-09 y añadió RF-FE-DAT-06. También destapó un fallo del backend que el frontend no puede corregir: la API responde `500` a ratos, porque la dependencia `leer` de `main.py` abre la conexión SQLite en un hilo del pool y la usa o la cierra en otro (`sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread`). Con varias consultas a la vez, como hace cada pantalla, salta en casi todas las cargas. El frontend lo absorbía porque reintenta los `5xx` (RF-FE-DAT-01). El backend lo corrigió en `1c5a319` (RF2-API-06), y repetida la demostración con ese cambio, la API no dio ningún `500`.
 
 1. Andamiaje, tokens, rutas, tipos generados y MSW.
 2. Tablero general, sin arrastre: columnas, tarjetas, sondeo.

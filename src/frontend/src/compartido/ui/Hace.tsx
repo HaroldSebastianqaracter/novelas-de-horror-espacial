@@ -25,6 +25,7 @@ export function useAhora(intervalo: number | null): number {
 export function Hace({ iso, className }: { iso: string; className?: string }) {
   const ahora = useAhora(30_000);
   const instante = instanteDeApi(iso);
+  if (Number.isNaN(instante.getTime())) return <span className={className}>{iso}</span>;
   return (
     <time className={className} dateTime={instante.toISOString()} title={instante.toLocaleString("es-ES")}>
       {haceTanto(iso, ahora)}

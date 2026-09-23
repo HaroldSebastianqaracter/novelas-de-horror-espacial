@@ -59,6 +59,7 @@ export function Tarjeta({ opciones = [], pendiente, rechazo, alDescartarRechazo,
   const idTitulo = fantasma ? undefined : `tarjeta-${novela.id}`;
   const ahora = useAhora(pendiente ? 5_000 : null);
   const sigueEnCola = pendiente !== undefined && ahora - pendiente.desde > UN_MINUTO;
+  const capituloParado = ejecucion ? capituloEnCurso(ejecucion) : null;
 
   return (
     <article
@@ -99,7 +100,7 @@ export function Tarjeta({ opciones = [], pendiente, rechazo, alDescartarRechazo,
       {estado === "parada" && (
         <p className="tarjeta__alerta">
           Parada{ejecucion?.parada_abierta_id ? ` P-${ejecucion.parada_abierta_id}` : ""}
-          {ejecucion && capituloEnCurso(ejecucion) ? ` · cap. ${capituloEnCurso(ejecucion)}` : ""} · esperando decisión
+          {capituloParado ? ` · cap. ${capituloParado}` : ""} · esperando decisión
         </p>
       )}
       {estado === "completada_con_avisos" && (

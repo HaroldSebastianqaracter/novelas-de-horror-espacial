@@ -24,7 +24,7 @@ export const ejecuciones: Record<number, Ejecucion> = {
   3: { novela_id: 3, estado: "generando", fase: "redaccion", capitulo_actual: 6, intento_actual: 2, capitulos_completados: 5, total_capitulos: 10, parada_abierta_id: null, ultimo_error: null, actualizado_en: hace(1) },
   4: { novela_id: 4, estado: "parada", fase: "puerta_3", capitulo_actual: 3, intento_actual: 1, capitulos_completados: 2, total_capitulos: 6, parada_abierta_id: 93, ultimo_error: null, actualizado_en: hace(45) },
   5: { novela_id: 5, estado: "error", fase: "extraccion", capitulo_actual: 5, intento_actual: 3, capitulos_completados: 4, total_capitulos: 10, parada_abierta_id: null, ultimo_error: "El puerto a Claude Code agotó sus dos reintentos: tiempo de espera superado.", actualizado_en: hace(300) },
-  6: { novela_id: 6, estado: "completada_con_avisos", fase: null, capitulo_actual: null, intento_actual: 1, capitulos_completados: 10, total_capitulos: 10, parada_abierta_id: null, ultimo_error: null, actualizado_en: hace(19000) },
+  6: { novela_id: 6, estado: "completada_con_avisos", fase: null, capitulo_actual: 11, intento_actual: 1, capitulos_completados: 10, total_capitulos: 10, parada_abierta_id: null, ultimo_error: null, actualizado_en: hace(19000) },
 };
 
 const OBJETIVOS = [
@@ -117,7 +117,7 @@ export const paradas: Record<number, Parada> = {
     capitulo: 3,
     intento: 1,
     resolucion: null,
-    creado_en: new Date(Date.now() - 45 * 60_000).toISOString(),
+    creado_en: hace(45),
     informe: {
       puerta: 3,
       veredicto: "falla",

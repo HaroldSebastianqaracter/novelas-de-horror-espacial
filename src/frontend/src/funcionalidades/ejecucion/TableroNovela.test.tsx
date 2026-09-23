@@ -65,7 +65,10 @@ describe("tablero de una novela (RF-FE-NOV)", () => {
     const usuario = userEvent.setup();
     renderizarEn("/novelas/6");
 
+    // Terminada, el cursor queda en el 11 de 10: no hay capítulo en curso ni se sugiere el 11 (RF-FE-DAT-06).
     await usuario.click(await screen.findByRole("button", { name: /Relanzar…/ }));
+    expect(screen.getByText("Capítulo", { selector: "dt" }).nextElementSibling).toHaveTextContent("—");
+    expect(screen.getByLabelText("Desde el capítulo")).toHaveValue("10");
     await usuario.selectOptions(screen.getByLabelText("Desde el capítulo"), "03");
     expect(screen.getByText("Se rehacen 8 capítulos ya cerrados, del 03 en adelante.")).toBeInTheDocument();
     await usuario.click(screen.getByRole("button", { name: "Relanzar" }));
