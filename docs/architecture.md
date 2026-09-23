@@ -120,7 +120,7 @@ Los números remiten a los principios numerados de [domain-knowledge.md](domain-
 
 - **El redactor carga con la capa 4 casi entera.** Es el agente con más oficio encima y en el que más caro sale equivocarse, lo que refuerza que la puerta 4 reintente en vez de dejar pasar.
 - **El extractor casi no tiene oficio.** Solo el principio 26, y de rebote. Confirma lo que ya dice la nota de arriba: no es una fase del oficio humano, es una consecuencia de que escriba un modelo sin memoria. Su dificultad es de exhaustividad, no de criterio.
-- **El revisor de continuidad no escribe ontología ni necesita juicio.** Su puerta es SQL (principio 5). La skill existe solo para redactar el informe cuando ya hay conflicto.
+- **El revisor de continuidad no escribe ontología ni decide.** Su puerta es SQL (principio 5). La skill redacta el informe cuando ya hay conflicto y da una segunda opinión de si cada uno parece real o un falso positivo, que va al informe de la parada y nunca la levanta (spec3, RF3-JUE-01).
 
 **Diez de estas once skills existen ya** en `.claude/skills/`: las nueve escritas junto con [specs/spec1.md](../specs/spec1.md) y la del **entrevistador**, que añade [specs/spec3.md](../specs/spec3.md). Falta la del **revisor**, que queda fuera de la primera versión. Además está `verificacion`, que es de desarrollo: sirve para construir este sistema y no forma parte de él, así que el puerto rechaza invocarla como agente.
 

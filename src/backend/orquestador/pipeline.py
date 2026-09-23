@@ -44,11 +44,13 @@ from compartido import politica
 from compartido.contexto import Paquete, Presupuesto, PresupuestoExcedido
 from compartido.db import transaccion
 from compartido.grafo import emitir_evento, lectura
-from compartido.puerto import AgenteInterrumpido, PuertoAgente
+from compartido.puerto import AgenteInterrumpido, ErrorDePuerto, PuertoAgente
 from config import MAX_INTENTOS_CAPITULO, Config
 from tareas.arquitecto import servicio as s_arquitecto
 from tareas.arquitecto.esquemas import SalidaArquitecto
 from tareas.continuidad import puerta as p_continuidad
+from tareas.continuidad import servicio as s_continuidad
+from tareas.continuidad.esquemas import SalidaContinuidad
 from tareas.elenco import servicio as s_elenco
 from tareas.elenco.esquemas import SalidaElenco
 from tareas.escaleta import puerta as p_escaleta
@@ -461,6 +463,8 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                 _registrar_puerta(ctx, rechazo.resultado, capitulo=numero, intento=intento)
                 informe = rechazo.resultado.informe()
                 informe["prosa_rechazada"] = textos
+                informe["segunda_opinion"] = _segunda_opinion(
+                    ctx, numero, intento, rechazo.resultado, textos)
                 _abrir_parada(ctx, "continuidad", informe, capitulo=numero, intento=intento)
                 return
 
@@ -525,6 +529,26 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
     finally:
         if a_medias:
             _revertir_a_medias(ctx, numero)
+
+
+def _segunda_opinion(
+    ctx: Contexto, numero: int, intento: int, resultado: Any, textos: dict[int, str]
+) -> dict[str, Any] | None:
+    """El revisor de continuidad explica la parada y opina si cada conflicto parece real
+    (spec3, RF3-JUE-01). Nunca la levanta: si la llamada falla, la parada se abre igual y la
+    traza dice por que. Una detencion pedida por el autor si se propaga."""
+    try:
+        paquete = s_continuidad.paquete(ctx.con, ctx.novela_id, numero, resultado, textos,
+                                        presupuesto=ctx.presupuesto)
+        salida, _ = _invocar(ctx, "continuidad", paquete, SalidaContinuidad,
+                             capitulo=numero, intento=intento)
+    except AgenteInterrumpido:
+        raise
+    except (ErrorDePuerto, PresupuestoExcedido, ValueError) as exc:
+        emitir_traza(ctx, "segunda_opinion_fallida", capitulo=numero, intento=intento,
+                     error=f"{type(exc).__name__}: {exc}"[:500])
+        return None
+    return salida.model_dump()
 
 
 def _registrar_politica(

@@ -885,9 +885,11 @@ CRITERIO_DE_LAS_CUENTAS = (
     "establecidos que te llegan («once a bordo: cinco del turno y seis de fuera» no admite «los "
     "siete de fuera»; un carguero que llega en treinta y una horas no admite un aviso con "
     "cuarenta de antelación) y cuadra dentro del capítulo (si eran diez y embarcan cuatro, "
-    "quedan seis, no siete). Una cifra que el personaje estima o recuerda mal a sabiendas, y "
-    "que la escena marca como tal, pasa. La evidencia es la cita de la prosa; la sugerencia "
-    "nombra el hecho o la cifra con la que no cuadra."
+    "quedan seis, no siete). Una cifra equivocada solo pasa si la propia escena la marca como "
+    "error del personaje: otro lo corrige, él mismo rectifica o el narrador lo señala. Que el "
+    "personaje pudiera mentir o redondear no basta si nada en el texto lo dice; en la duda, "
+    "falla. La evidencia es la cita de la prosa; la sugerencia nombra el hecho o la cifra con "
+    "la que no cuadra."
 )
 
 

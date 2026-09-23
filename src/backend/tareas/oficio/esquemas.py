@@ -66,14 +66,3 @@ class SalidaOficio(BaseModel):
     def pasa(self) -> bool:
         return not self.incumplidos
 
-
-class SalidaContinuidad(BaseModel):
-    """El revisor de continuidad solo redacta el informe: la puerta 3 ya es SQL.
-
-    Se invoca unicamente cuando la consulta YA encontro conflicto, para explicarlo en
-    lenguaje legible. No decide si hay conflicto.
-    """
-
-    resumen: str = Field(min_length=20)
-    explicacion_por_conflicto: list[str] = Field(default_factory=list[str])
-    sugerencia: str = ""

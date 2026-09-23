@@ -8,6 +8,7 @@ como estaba, y que la puerta 3 pare la generacion en vez de dejar pasar el confl
 
 from __future__ import annotations
 
+import json
 import sqlite3
 import tempfile
 from collections.abc import Iterator
@@ -162,6 +163,65 @@ def test_un_conflicto_de_continuidad_para_y_no_deja_rastro(entorno) -> None:
         (novela_id,),
     ).fetchone()[0] == 0
     assert db.verificar_integridad(con) == []
+
+
+def _parar_en_el_capitulo_2(puerto: PuertoFalso) -> None:
+    original = agentes_falsos.extraccion
+
+    def contradictorio(entrada: str, agente: str) -> dict:
+        salida = original(entrada, agente)
+        if "CAPITULO 2" in entrada or "capitulo 2" in entrada:
+            salida["hechos"][0]["valor"] = "aire limpio y sin olor"
+        return salida
+
+    puerto.registrar("extraccion", contradictorio)
+
+
+def test_la_parada_de_continuidad_lleva_una_segunda_opinion(entorno) -> None:
+    """spec3, RF3-JUE-01: el revisor explica y opina, y la parada sigue abierta."""
+    con, puerto, _ = entorno
+    novela_id = _crear_novela(con)
+    _parar_en_el_capitulo_2(puerto)
+    assert pipeline.avanzar(_contexto(entorno, novela_id)) == "parada"
+
+    [parada] = fallo.paradas_abiertas(con, novela_id)
+    informe = json.loads(parada["informe"])
+    opinion = informe["segunda_opinion"]
+    bloqueantes = [c for c in informe["conflictos"] if not c["aviso"]]
+    assert [o["conflicto"] for o in opinion["opiniones"]] == list(
+        range(1, len(bloqueantes) + 1))
+    [entrada] = [i["entrada"] for i in puerto.invocaciones if i["agente"] == "continuidad"]
+    assert "1. [continuidad_factual]" in entrada
+    assert "PROSA RECHAZADA DEL CAPITULO 2" in entrada
+
+
+def test_si_la_segunda_opinion_falla_la_parada_se_abre_igual(entorno) -> None:
+    from compartido.puerto import TiempoAgotado
+
+    con, puerto, _ = entorno
+    novela_id = _crear_novela(con)
+    _parar_en_el_capitulo_2(puerto)
+
+    def caido(entrada: str, agente: str) -> dict:
+        raise TiempoAgotado("sin respuesta")
+
+    puerto.registrar("continuidad", caido)
+    assert pipeline.avanzar(_contexto(entorno, novela_id)) == "parada"
+    [parada] = fallo.paradas_abiertas(con, novela_id)
+    assert parada["tipo"] == "continuidad"
+    assert json.loads(parada["informe"])["segunda_opinion"] is None
+    assert con.execute(
+        "SELECT COUNT(*) FROM traza_evento WHERE novela_id = ? AND tipo = "
+        "'segunda_opinion_fallida'", (novela_id,)).fetchone()[0] == 1
+
+
+def test_la_skill_de_continuidad_opina_y_no_levanta_la_parada() -> None:
+    skill = (config.raiz_repo() / ".claude" / "skills" / "continuidad" / "SKILL.md").read_text(
+        encoding="utf-8")
+    assert "**Una opinión por conflicto**" in skill
+    assert "`real`, `falso_positivo` o `dudoso`" in skill
+    assert "**No levantas la parada.**" in skill
+    assert "No decides si hay conflicto" not in skill
 
 
 def test_la_puerta_4_reintenta_y_escala_a_parada(entorno) -> None:

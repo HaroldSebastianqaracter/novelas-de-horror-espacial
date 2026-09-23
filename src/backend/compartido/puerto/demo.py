@@ -459,9 +459,14 @@ def oficio(entrada: str, agente: str) -> dict[str, Any]:
 
 
 def continuidad(entrada: str, agente: str) -> dict[str, Any]:
+    # Una opinion por conflicto numerado del paquete (spec3, RF3-JUE-01).
+    numeros = [int(n) for n in re.findall(r"^(\d+)\. \[", entrada, re.MULTILINE)]
     return {
         "resumen": "Hay un conflicto de continuidad en el capitulo.",
-        "explicacion_por_conflicto": ["El texto contradice un hecho establecido."],
+        "explicacion_por_conflicto": ["El texto contradice un hecho establecido."] * len(numeros),
+        "opiniones": [{"conflicto": n, "parece": "real",
+                       "motivo": "La prosa dice lo contrario de lo establecido."}
+                      for n in numeros],
         "sugerencia": "Reescribir el capitulo respetando lo establecido.",
     }
 
