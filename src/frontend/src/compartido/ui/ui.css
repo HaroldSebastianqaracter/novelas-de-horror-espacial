@@ -79,3 +79,5 @@
 .menu__opcion:hover, .menu__opcion:focus-visible { background: var(--color-superficie-activa); }
 .menu__opcion[aria-disabled="true"] { color: var(--color-texto-tenue); cursor: not-allowed; }
 .menu__motivo { font-size: var(--texto-xs); color: var(--color-texto-tenue); }
+.boton--alerta { color: var(--color-texto-invertido); background: var(--color-alerta); border-color: var(--color-alerta); }
+.boton--alerta:hover { background: var(--color-alerta-texto); border-color: var(--color-alerta-texto); }

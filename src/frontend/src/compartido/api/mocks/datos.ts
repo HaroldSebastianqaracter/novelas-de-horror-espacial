@@ -3,7 +3,7 @@
  * contrato rompe la compilación aquí antes que en una pantalla (RF-FE-API-03).
  * Títulos inventados; ningún nombre de persona real.
  */
-import type { Capitulo, Ejecucion, NovelaDetalle, NovelaResumen } from "../tipos";
+import type { Capitulo, Ejecucion, NovelaDetalle, NovelaResumen, Parada } from "../tipos";
 
 const hace = (minutos: number) => new Date(Date.now() - minutos * 60_000).toISOString();
 
@@ -84,9 +84,68 @@ export function detalleDe(id: number): NovelaDetalle | undefined {
   };
 }
 
+/** La parada abierta de la novela 4: continuidad, con un choque de hechos y uno de conocimiento. */
+export const paradas: Record<number, Parada> = {
+  93: {
+    id: 93,
+    tipo: "continuidad",
+    estado: "abierta",
+    capitulo: 3,
+    intento: 1,
+    resolucion: null,
+    creado_en: new Date(Date.now() - 45 * 60_000).toISOString(),
+    informe: {
+      puerta: 3,
+      veredicto: "falla",
+      conflictos: [
+        {
+          comprobacion: "continuidad_factual",
+          descripcion: "El traje de la ingeniera cambia de color entre el capítulo 1 y el 3 sin que el texto lo explique.",
+          aviso: false,
+          capitulo: 3,
+          escena_id: 31,
+          datos: {
+            hecho_nuevo_id: 412,
+            hecho_previo_id: 118,
+            sujeto_nombre: "traje de la ingeniera",
+            atributo: "color",
+            valor_nuevo: "naranja",
+            valor_previo: "gris",
+            cita_nueva: "El naranja del traje era lo único que se veía en la bodega.",
+            cita_previa: "Se enfundó el traje gris, todavía con el polvo de la última salida.",
+            capitulo_nuevo: 3,
+            capitulo_previo: 1,
+          },
+        },
+        {
+          comprobacion: "conocimiento_no_adquirido",
+          descripcion: "El piloto usa el código de la esclusa norte, pero ninguna escena cuenta que lo aprendiera.",
+          aviso: false,
+          capitulo: 3,
+          escena_id: 32,
+          datos: { personaje: "el piloto", hecho: "código de la esclusa norte", hecho_id: 97, personaje_id: 4 },
+        },
+        {
+          comprobacion: "palabras_filtro",
+          descripcion: "«De repente» aparece cuatro veces en la escena 2.",
+          aviso: true,
+          capitulo: 3,
+          escena_id: 32,
+          datos: {},
+        },
+      ],
+      prosa_rechazada: {
+        "1": "La bodega olía a óxido y a algo más dulce, algo que no debería estar ahí.\n\nEl naranja del traje era lo único que se veía en la bodega.",
+        "2": "De repente, el piloto tecleó el código de la esclusa norte sin mirar el panel.",
+      },
+    },
+  },
+};
+
 const novelasIniciales = structuredClone(novelas);
 const ejecucionesIniciales = structuredClone(ejecuciones);
 const capitulosIniciales = structuredClone(capitulosDe);
+const paradasIniciales = structuredClone(paradas);
 
 /** Deshace lo que las intenciones simuladas cambiaron. Los tests lo llaman entre caso y caso. */
 export function restaurarDatos() {
@@ -94,4 +153,5 @@ export function restaurarDatos() {
   for (const id of Object.keys(ejecuciones)) delete ejecuciones[Number(id)];
   Object.assign(ejecuciones, structuredClone(ejecucionesIniciales));
   Object.assign(capitulosDe, structuredClone(capitulosIniciales));
+  Object.assign(paradas, structuredClone(paradasIniciales));
 }

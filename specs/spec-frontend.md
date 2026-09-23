@@ -201,7 +201,15 @@ La tarjeta en curso muestra la subfase (paquete → redacción → extracción �
 
 ### 3.6 Alerta de parada
 
-**RF-FE-PAR-01 — Informe.** Muestra el tipo, el capítulo, el intento y el `informe` de `GET /paradas/{pid}`. El informe es un objeto sin esquema: sus claves conocidas se pintan con etiqueta legible y el resto como lista clave-valor, sin perder nada.
+**RF-FE-PAR-01 — Informe.** Muestra el tipo, el capítulo, el intento y el `informe` de `GET /paradas/{pid}`. El informe es un objeto sin esquema, así que el cliente reconoce unas pocas claves y el resto se muestra como lista clave-valor, sin perder nada:
+
+| Clave | Cómo se pinta |
+| --- | --- |
+| `motivo` | Párrafo de resumen |
+| `conflictos` | Una ficha por conflicto: la comprobación en lenguaje legible, la descripción, el capítulo y la escena, si es aviso o conflicto, y sus `datos` plegados. Si los datos traen `cita_nueva` y `cita_previa`, un **cara a cara**: «lo que dice el texto» frente a «lo que dice el canon», con sus valores y sus capítulos |
+| `prosa_rechazada` | La prosa del capítulo rechazado, escena a escena, plegada y con la tipografía de lectura |
+| `bloques` | Tabla de bloques y tamaños (presupuesto) |
+| Cualquier otra | Clave-valor, con los valores anidados como JSON legible |
 
 **RF-FE-PAR-02 — Acciones según el tipo.** Solo se ofrecen las acciones que admite el tipo de la parada (tabla de resoluciones en `reglas.ts`), cada una con una línea que explica su consecuencia:
 
@@ -211,7 +219,15 @@ La tarjeta en curso muestra la subfase (paquete → redacción → extracción �
 | `continuidad` | `relanzar`, `aceptar_retcon`, `dar_por_sabido` |
 | `oficio`, `presupuesto` | `relanzar` |
 
-`relanzar` pide `desde_capitulo`. Cada acción se envía como `resolver_parada` y sigue el ciclo de RF-FE-DAT-05. Una parada ya resuelta se muestra en modo lectura, con su `resolucion`.
+`relanzar` pide `desde_capitulo`, que por defecto es el capítulo de la parada. Cada acción se envía como `resolver_parada` y sigue el ciclo de RF-FE-DAT-05. Si se cierra `hecha`, se vuelve al tablero de la novela. Una parada ya resuelta se muestra en modo lectura, con su `resolucion` (`aceptar_retcon`, `dar_por_sabido`, `relanzado`, `rehecho`).
+
+**RF-FE-PAR-03 — Confirmar en dos pasos.** El primer clic en una acción la arma y dice qué va a pasar. El segundo, en el mismo botón («Confirmar: …»), la envía. Armar otra acción, o pulsar Escape, desarma la anterior.
+
+> **Decisión de la spec.** Todas las acciones de una parada borran o rehacen trabajo del pipeline, y algunas horas de generación. Un diálogo modal interrumpiría la lectura del informe, que es donde está la decisión. Armar la acción en el propio botón la deja a la vista y cuesta un clic más.
+
+**RF-FE-PAR-04 — Avisos de las acciones que el worker puede rechazar.** `aceptar_retcon` avisa, sin impedirlo, si ningún conflicto trae `hecho_previo_id` en sus datos. `dar_por_sabido` avisa si ningún conflicto es `conocimiento_no_adquirido`. En esos casos el worker va a rechazar la acción (RF2-FALLO-03, RF2-FALLO-07).
+
+> **Decisión de la spec.** Son avisos y no bloqueos, porque copian una regla del worker que puede cambiar. Si el cliente bloqueara y la regla se relajara, el autor no podría pedir una acción válida. Con un aviso, lo peor que pasa es un rechazo con su motivo.
 
 ### 3.7 Lector
 

@@ -4,8 +4,8 @@
  * de una novela a la vez. Los tests los sustituyen con `servidor.use(...)` cuando necesitan otro caso.
  */
 import { http, HttpResponse } from "msw";
-import type { Ejecucion, Estructura, Intencion, IntencionEncolada, NovelaDetalle, NovelaResumen, TipoIntencion } from "../tipos";
-import { capitulosDe, detalleDe, ejecuciones, novelas } from "./datos";
+import type { Ejecucion, Estructura, Intencion, IntencionEncolada, NovelaDetalle, NovelaResumen, Parada, TipoIntencion } from "../tipos";
+import { capitulosDe, detalleDe, ejecuciones, novelas, paradas } from "./datos";
 
 /** Lo que tarda el «worker» en atender una intención. */
 const ESPERA_MS = 2_500;
@@ -15,6 +15,7 @@ interface IntencionSimulada {
   id: number;
   tipo: TipoIntencion;
   novelaId: number | null;
+  payload: Record<string, unknown>;
   creada: number;
   cierre?: { estado: "hecha" | "rechazada"; motivo: string | null };
 }
@@ -48,6 +49,18 @@ function atender(i: IntencionSimulada): IntencionSimulada["cierre"] {
     } else {
       fijarEstado(id, "planificando", "arquitecto");
     }
+    return { estado: "hecha", motivo: null };
+  }
+  if (i.tipo === "resolver_parada" && id !== null) {
+    const parada = paradas[Number(i.payload.parada_id)];
+    if (!parada || parada.estado !== "abierta") return { estado: "rechazada", motivo: "la parada no esta abierta" };
+    const accion = String(i.payload.accion);
+    const e = ejecuciones[id];
+    parada.estado = "resuelta";
+    parada.resolucion = accion === "aceptar_retcon" || accion === "dar_por_sabido" ? accion : accion === "rehacer" ? "rehecho" : "relanzado";
+    if (e) Object.assign(e, { parada_abierta_id: null, intento_actual: 1 });
+    if (accion === "rehacer") fijarEstado(id, parada.tipo === "estructura" ? "planificando" : "escaletando", parada.tipo);
+    else fijarEstado(id, "generando", "paquete");
     return { estado: "hecha", motivo: null };
   }
   if (i.tipo === "parar" && id !== null) {
@@ -179,6 +192,11 @@ export const manejadores = [
     return HttpResponse.json<Estructura>({ actos: [], capitulos, hilos: [], puntos_de_giro: [], siembras: [] });
   }),
 
+  http.get("*/api/novelas/:id/paradas/:pid", ({ params }) => {
+    const parada = paradas[Number(params.pid)];
+    return parada ? HttpResponse.json<Parada>(parada) : noEncontrada("la parada");
+  }),
+
   http.get("*/api/novelas/:id/eventos", ({ params }) =>
     new HttpResponse(streamEventos(Number(params.id)), {
       headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
@@ -186,11 +204,12 @@ export const manejadores = [
   ),
 
   http.post("*/api/intenciones", async ({ request }) => {
-    const cuerpo = (await request.json()) as { tipo: TipoIntencion; novela_id?: number | null };
+    const cuerpo = (await request.json()) as { tipo: TipoIntencion; novela_id?: number | null; payload?: Record<string, unknown> };
     const intencion: IntencionSimulada = {
       id: siguienteIntencion++,
       tipo: cuerpo.tipo,
       novelaId: cuerpo.novela_id ?? null,
+      payload: cuerpo.payload ?? {},
       creada: Date.now(),
     };
     intenciones.set(intencion.id, intencion);

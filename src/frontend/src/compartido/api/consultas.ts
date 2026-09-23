@@ -12,6 +12,7 @@ export const claves = {
   ejecucion: (id: number) => ["novelas", id, "ejecucion"] as const,
   estructura: (id: number) => ["novelas", id, "estructura"] as const,
   paradas: (id: number) => ["novelas", id, "paradas"] as const,
+  parada: (id: number, pid: number) => ["novelas", id, "paradas", pid] as const,
   capitulo: (id: number, n: number) => ["novelas", id, "capitulos", n] as const,
   intencion: (id: number) => ["intenciones", id] as const,
 };
@@ -47,4 +48,15 @@ export const consultaEstructura = (novelaId: number) =>
     queryKey: claves.estructura(novelaId),
     queryFn: () =>
       leer(api.GET("/novelas/{novela_id}/estructura", { params: { path: { novela_id: novelaId } } })),
+  });
+
+export const consultaParada = (novelaId: number, paradaId: number) =>
+  queryOptions({
+    queryKey: claves.parada(novelaId, paradaId),
+    queryFn: () =>
+      leer(
+        api.GET("/novelas/{novela_id}/paradas/{parada_id}", {
+          params: { path: { novela_id: novelaId, parada_id: paradaId } },
+        }),
+      ),
   });
