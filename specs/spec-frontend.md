@@ -30,7 +30,7 @@ No entra, y por qué:
 | Despliegue | La v1 corre en local con el servidor de desarrollo, contra el backend en `127.0.0.1:8000` |
 | Cambio del lector (bloque 8) | Todavía no tiene spec en el backend |
 
-La referencia visual es el prototipo navegable de la **propuesta B, «papel técnico»** (`novelasv2-b/novelasv2-b/`, con sus decisiones en `DECISIONES.md`). La v1 reproduce sus pantallas y sus tokens. El comportamiento que el prototipo simula lo fija esta spec, y donde los dos difieren manda la spec.
+La referencia visual es el prototipo navegable de la **propuesta B, «papel técnico»** (`src/frontend/prototipo-b/`, con sus decisiones en `DECISIONES.md`). La v1 reproduce sus pantallas y sus tokens. El comportamiento que el prototipo simula lo fija esta spec, y donde los dos difieren manda la spec.
 
 ## 2. Decisiones de producto
 
