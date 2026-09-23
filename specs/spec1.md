@@ -399,9 +399,13 @@ Si falla, se reintenta la escaleta una vez con el informe adjunto; el segundo fa
 
 Las referencias (`*_ref`) son ids del canon que el paquete incluye; el extractor no inventa ids. Una `entidad_no_reconocida` no es un error de validación: es un dato para la puerta 3.
 
+> Ampliado por spec2, RF2-PIPE-10: `orden_interno` obligatorio en todo evento dramatizado y `condicion` obligatoria en todo estado de personaje.
+
 **RF-PIPE-11** Un `Hecho` se persiste como **triple**: `sujeto` (tipo de entidad e id), `atributo` (texto normalizado) y `valor` (texto), más `categoria` (`nombre`, `fisico`, `fecha`, `distancia`, `regla`, `relacion`, `ubicacion`, `otro`), `cita` (fragmento literal de la prosa) y `escena_id`. `enunciado` de la ontología se deriva como `sujeto · atributo · valor` para lectura.
 
 > **Decisión de la spec (21-09-2026).** definitions.md modela `Hecho` con `enunciado` libre. Con enunciados libres, «contradicción» no es una consulta sino una opinión, y la puerta 3 dejaría de ser `A`. El triple es lo mínimo que hace exacta la comparación: dos hechos vigentes con el mismo sujeto y atributo y distinto valor se contradicen, salvo que el nuevo declare `supersede_a` el antiguo (una herida que cicatriza no contradice la herida). Para que el extractor reutilice atributos en vez de crear sinónimos, el paquete le entrega los atributos ya existentes de cada sujeto del reparto. Es un cambio de ontología que hay que llevar a definitions.md tras entrevista.
+
+> Sustituido por spec2, RF2-PIPE-11.
 
 **RF-PIPE-12 — Puerta 3, determinista.** Sobre el grafo con los hechos del capítulo ya insertados dentro de la transacción abierta:
 
@@ -419,6 +423,8 @@ Las referencias (`*_ref`) son ids del canon que el paquete incluye; el extractor
 Cualquier conflicto (no aviso) hace **rollback** de la transacción del capítulo, conserva la traza y pasa la ejecución a `parada` con informe `continuidad` (RF-FALLO-02). La prosa que provocó el conflicto se guarda fuera de `escena_texto`, en el informe, para que el humano la lea.
 
 > **Decisión de la spec (21-09-2026).** Se añade `analepsis` como marca opcional de escena en la escaleta. Sin ella, la coherencia temporal no distingue un flashback de un error. Es una columna nueva sobre `Escena`; se lleva a definitions.md.
+
+> Sustituido por spec2, RF2-PIPE-12, en la contradicción factual y en la presencia imposible por muerte.
 
 **RF-PIPE-13 — Puerta 4, oficio.** Con la puerta 3 limpia, en dos partes y en este orden:
 
@@ -619,6 +625,8 @@ No reanuda solo: el autor decide con `arrancar`. Es la parte de la reanudación 
 **RF-PER-06** Todo el **estado** (`hecho`, `estado_conocimiento`, `estado_personaje`, `estado_objeto`, `evento`, `siembra_estado`, `hilo_estado`, `amenaza_revelacion`) es append-only y lleva `escena_id` de origen. Los atributos de la ontología que cambian durante la redacción (`Siembra.estado`, `HiloNarrativo.estado`, `Amenaza.nivelRevelacion`, `Lugar.presenciaActual`) **no son columnas** sobre las que se haga `UPDATE`: se derivan de la última fila de su tabla de estado o, en el caso de `presenciaActual`, del reparto de la última escena en ese lugar. Es lo que hace que revertir (RF-FALLO-04) sea borrar por escena de origen.
 
 > **Decisión de la spec (21-09-2026).** definitions.md modela esos cuatro como atributos. Mantenerlos como columnas mutables rompería la reanudación por borrado y haría que un `UPDATE` de prosa pudiera alterar estado sin rastro. Tablas de estado por entidad, con escena de origen, es la forma más coherente con «el registro de hechos es append-only». A llevar a definitions.md.
+
+> Sustituido por spec2, RF2-PER-06, en lo que toca al hecho: revocar es insertar en `hecho_revocacion`. Ampliado por RF2-PER-11: nombres únicos por novela.
 
 **RF-PER-07** Integridad comprobable en cualquier momento con una consulta única `verificar_integridad()` que devuelve violaciones de: todo `hecho` tiene `escena_id` de una escena existente; toda `siembra_estado = pagada` tiene escena posterior a la de siembra; ningún `estado_conocimiento` precede a la escena que establece su hecho; ningún capítulo `completado` sin `capitulo_compilado` vigente; ningún `capitulo_compilado` vigente para un capítulo no completado. Es la comprobación que usa RF-FALLO-06 y la que los tests de propiedades atacan.
 

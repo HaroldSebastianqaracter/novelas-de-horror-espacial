@@ -297,3 +297,51 @@ def test_arrancar_una_novela_completada_se_rechaza(w: worker.Worker) -> None:
     assert estado == "rechazada"
     assert "relanza" in (motivo or "")
     assert (lectura.ejecucion(w.con, novela_id) or {})["estado"].startswith("completada")
+
+
+def test_el_retcon_es_un_registro_y_relanzar_desde_antes_lo_deshace(w: worker.Worker) -> None:
+    """Revocar inserta en hecho_revocacion sin tocar el hecho (RF2-PER-06), y relanzar desde
+    antes del capitulo del retcon devuelve el hecho revocado al canon."""
+    novela_id = crear_novela(w.con)
+
+    def contradice(entrada: str, agente: str) -> dict:
+        salida = agentes_falsos.extraccion(entrada, agente)
+        if agentes_falsos._capitulo(entrada) >= 3:  # noqa: SLF001
+            salida["hechos"][0]["valor"] = "aire limpio y sin olor"
+        return salida
+
+    w.puerto.registrar("extraccion", contradice)  # type: ignore[attr-defined]
+    w._correr(novela_id)
+    parada = fallo.paradas_abiertas(w.con, novela_id)[0]
+    assert (parada["tipo"], parada["capitulo"]) == ("continuidad", 3)
+    revocables = fallo.hechos_a_revocar(w.con, int(parada["id"]))
+    valores = {
+        f["id"]: f["valor"] for f in w.con.execute("SELECT id, valor FROM hecho").fetchall()
+    }
+
+    w._resolver_parada(_intencion(w.con, "resolver_parada", novela_id, parada_id=parada["id"],
+                                  accion="aceptar_retcon"))
+    assert {
+        f["hecho_id"] for f in w.con.execute("SELECT hecho_id FROM hecho_revocacion")
+    } == revocables
+    # El hecho revocado sigue ahi, intacto: lo que cambia es que hay una revocacion.
+    assert all(
+        w.con.execute("SELECT valor FROM hecho WHERE id = ?", (h,)).fetchone()[0] == valores[h]
+        for h in revocables
+    )
+    assert (lectura.ejecucion(w.con, novela_id) or {})["estado"].startswith("completada")
+
+    del_capitulo_1 = w.con.execute(
+        "SELECT h.id FROM hecho h JOIN escena_ordinal eo ON eo.escena_id = h.escena_id "
+        "WHERE eo.capitulo_numero = 1"
+    ).fetchone()["id"]
+    assert del_capitulo_1 in revocables
+    w._relanzar(_intencion(w.con, "relanzar", novela_id, desde_capitulo=2))
+
+    # La revocacion era del capitulo 3: relanzar desde el 2 la deshace con todo lo demas.
+    assert w.con.execute("SELECT COUNT(*) FROM hecho_revocacion").fetchone()[0] == 0
+    # El hecho del capitulo 1 vuelve a ser canon, y el capitulo 3 vuelve a chocar con el.
+    assert fallo.paradas_abiertas(w.con, novela_id)[0]["capitulo"] == 3
+    assert del_capitulo_1 in fallo.hechos_a_revocar(
+        w.con, int(fallo.paradas_abiertas(w.con, novela_id)[0]["id"])
+    )

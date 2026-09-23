@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, model_validator
 
-from compartido.tipos import TipoHilo, TipoPuntoDeGiro
+from compartido.tipos import TipoHilo, TipoPuntoDeGiro, nombres_repetidos
 
 OBLIGATORIOS_HILO_PRINCIPAL: tuple[TipoPuntoDeGiro, ...] = (
     "incidente_incitador", "punto_medio", "climax", "resolucion",
@@ -87,4 +87,10 @@ class SalidaEstructura(BaseModel):
         for s in self.siembras:
             if s.hilo and s.hilo not in nombres:
                 raise ValueError(f"La siembra '{s.elemento}' cuelga de un hilo inexistente.")
+        repetidos = nombres_repetidos(o.nombre for o in self.objetos)
+        if repetidos:
+            raise ValueError(
+                "Hay objetos cuyo nombre solo difiere en tildes o mayusculas: "
+                + ", ".join(repetidos)
+            )
         return self

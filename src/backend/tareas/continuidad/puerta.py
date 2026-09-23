@@ -23,35 +23,40 @@ def _filas(con: sqlite3.Connection, sql: str, params: tuple[Any, ...]) -> list[d
     return [dict(f) for f in con.execute(sql, params).fetchall()]
 
 
-# --- 1. Continuidad factual ---------------------------------------------------------------
+# --- 1. Continuidad factual (RF2-PIPE-11, RF2-PIPE-12) --------------------------------------
 # Dos hechos vigentes del mismo sujeto y atributo con distinto valor se contradicen, salvo
-# que el posterior declare que sustituye al anterior (una herida que cicatriza no contradice
-# la herida).
+# que el anterior este SUSTITUIDO por otro hecho vigente de ordinal menor o igual al del
+# nuevo. Eso hace transitiva la cadena herida -> infectada -> cicatrizada: cada eslabon
+# sustituye al anterior y ninguno choca con los de atras.
+#
+# Todo se compara por las claves normalizadas que calcula `insertar_hecho`, nunca con LOWER(),
+# que en SQLite solo pliega ASCII: «Ámbar» y «ámbar» son el mismo valor.
+#
+# Cada par sale una sola vez: si los dos hechos estan en la misma escena, el de id mayor es el
+# «nuevo».
 _SQL_CONTRADICCION = """
 SELECT n.id AS hecho_nuevo_id, n.atributo, n.valor AS valor_nuevo, n.cita AS cita_nueva,
        n.sujeto_tipo, n.sujeto_nombre, n.escena_id AS escena_nueva,
        v.id AS hecho_previo_id, v.valor AS valor_previo, v.cita AS cita_previa,
-       v.escena_id AS escena_previa, cv.numero AS capitulo_previo, cn.numero AS capitulo_nuevo
-FROM hecho n
-JOIN hecho v
+       v.escena_id AS escena_previa, opr.capitulo_numero AS capitulo_previo,
+       onu.capitulo_numero AS capitulo_nuevo
+FROM hecho_vigente n
+JOIN hecho_vigente v
   ON v.novela_id = n.novela_id
  AND v.sujeto_tipo = n.sujeto_tipo
  AND IFNULL(v.sujeto_id, -1) = IFNULL(n.sujeto_id, -1)
- AND LOWER(TRIM(v.sujeto_nombre)) IS LOWER(TRIM(n.sujeto_nombre))
- AND LOWER(TRIM(v.atributo)) = LOWER(TRIM(n.atributo))
- AND v.id <> n.id
+ AND v.sujeto_clave = n.sujeto_clave
+ AND v.atributo_clave = n.atributo_clave
+ AND v.valor_clave <> n.valor_clave
 JOIN escena_ordinal onu ON onu.escena_id = n.escena_id
 JOIN escena_ordinal opr ON opr.escena_id = v.escena_id
-JOIN escena en ON en.id = n.escena_id
-JOIN capitulo cn ON cn.id = en.capitulo_id
-JOIN escena ev ON ev.id = v.escena_id
-JOIN capitulo cv ON cv.id = ev.capitulo_id
 WHERE n.novela_id = ?
-  AND n.vigente = 1 AND v.vigente = 1
-  AND LOWER(TRIM(n.valor)) <> LOWER(TRIM(v.valor))
-  AND opr.ordinal <= onu.ordinal
-  AND IFNULL(n.supersede_a, -1) <> v.id
-  AND cn.numero = ?
+  AND onu.capitulo_numero = ?
+  AND (opr.ordinal < onu.ordinal OR (opr.ordinal = onu.ordinal AND v.id < n.id))
+  AND NOT EXISTS (
+        SELECT 1 FROM hecho_vigente s
+        JOIN escena_ordinal os ON os.escena_id = s.escena_id
+        WHERE s.supersede_a = v.id AND os.ordinal <= onu.ordinal)
 """
 
 # --- 2. Conocimiento no adquirido ---------------------------------------------------------
@@ -62,7 +67,7 @@ SELECT u.id AS uso_id, p.nombre AS personaje, h.atributo, h.valor, h.sujeto_nomb
        u.escena_id, c.numero AS capitulo
 FROM uso_conocimiento u
 JOIN personaje p       ON p.id = u.personaje_id
-JOIN hecho h           ON h.id = u.hecho_id
+JOIN hecho_vigente h   ON h.id = u.hecho_id
 JOIN escena_ordinal ou ON ou.escena_id = u.escena_id
 JOIN escena e          ON e.id = u.escena_id
 JOIN capitulo c        ON c.id = e.capitulo_id
@@ -82,7 +87,7 @@ SELECT ec.id AS conocimiento_id, p.nombre AS personaje, h.atributo, ec.via,
        ec.escena_id, c.numero AS capitulo
 FROM estado_conocimiento ec
 JOIN personaje p       ON p.id = ec.personaje_id
-JOIN hecho h           ON h.id = ec.hecho_id
+JOIN hecho_vigente h   ON h.id = ec.hecho_id
 JOIN escena_ordinal oc ON oc.escena_id = ec.escena_id
 JOIN escena e          ON e.id = ec.escena_id
 JOIN capitulo c        ON c.id = e.capitulo_id
@@ -98,21 +103,26 @@ WHERE ec.novela_id = ? AND c.numero = ?
 """
 
 # --- 4a. Presencia imposible: personaje muerto que reaparece -------------------------------
+# La muerte es un dato cerrado, `estado_personaje.condicion`, y no una busqueda en el texto
+# libre de la salud: «casi muerto» no es una muerte y «fallecida» si. Cuenta la ULTIMA
+# condicion registrada antes de la escena, de modo que un desaparecido que vuelve no para.
 _SQL_MUERTO = """
-SELECT p.nombre AS personaje, ep.escena_id AS escena_muerte, cm.numero AS capitulo_muerte,
-       e.id AS escena_reaparicion, c.numero AS capitulo
+SELECT p.nombre AS personaje, ult.escena_id AS escena_muerte,
+       om.capitulo_numero AS capitulo_muerte, e.id AS escena_reaparicion, c.numero AS capitulo
 FROM escena_personaje sp
 JOIN personaje p       ON p.id = sp.personaje_id
 JOIN escena e          ON e.id = sp.escena_id
 JOIN capitulo c        ON c.id = e.capitulo_id
 JOIN escena_ordinal oe ON oe.escena_id = e.id
-JOIN estado_personaje ep ON ep.personaje_id = sp.personaje_id
-JOIN escena_ordinal om ON om.escena_id = ep.escena_id
-JOIN escena em         ON em.id = ep.escena_id
-JOIN capitulo cm       ON cm.id = em.capitulo_id
+JOIN estado_personaje ult ON ult.id = (
+        SELECT ep.id FROM estado_personaje ep
+        JOIN escena_ordinal o2 ON o2.escena_id = ep.escena_id
+        WHERE ep.personaje_id = sp.personaje_id AND ep.condicion IS NOT NULL
+          AND o2.ordinal < oe.ordinal
+        ORDER BY o2.ordinal DESC, ep.id DESC LIMIT 1)
+JOIN escena_ordinal om ON om.escena_id = ult.escena_id
 WHERE e.novela_id = ? AND c.numero = ?
-  AND LOWER(IFNULL(ep.salud_fisica,'')) LIKE '%muert%'
-  AND om.ordinal < oe.ordinal
+  AND ult.condicion = 'muerto'
   AND e.analepsis = 0
 """
 

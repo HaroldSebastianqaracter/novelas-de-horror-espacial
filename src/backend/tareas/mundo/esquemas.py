@@ -8,9 +8,9 @@ de agujeros de guion (definitions.md, principio 44).
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
-from compartido.tipos import Dureza
+from compartido.tipos import Dureza, nombres_repetidos
 
 
 class SistemaSalida(BaseModel):
@@ -74,3 +74,18 @@ class SalidaMundo(BaseModel):
     linea_de_tiempo_origen: str = Field(min_length=1)
     linea_de_tiempo_unidad: str = Field(min_length=1)
     eventos_previos: list[EventoPrevio] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _nombres_unicos(self) -> SalidaMundo:
+        for que, nombres in (
+            ("sistemas", [s.nombre for s in self.sistemas]),
+            ("lugares", [x.nombre for x in self.lugares]),
+            ("facciones", [f.nombre for f in self.facciones]),
+        ):
+            repetidos = nombres_repetidos(nombres)
+            if repetidos:
+                raise ValueError(
+                    f"Hay {que} cuyo nombre solo difiere en tildes o mayusculas: "
+                    + ", ".join(repetidos)
+                )
+        return self

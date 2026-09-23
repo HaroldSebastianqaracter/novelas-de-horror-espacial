@@ -18,13 +18,24 @@ import unicodedata
 from collections.abc import Mapping
 from typing import Any
 
+_TILDE_DE_LA_ENE = chr(0x0303)  # la virgulilla combinante de la ene
+
 
 def normalizar(nombre: str) -> str:
-    """Clave de comparacion de nombres: sin tildes, sin mayusculas, sin espacios de sobra."""
-    sin_tildes = "".join(
-        c for c in unicodedata.normalize("NFD", nombre) if unicodedata.category(c) != "Mn"
-    )
-    return " ".join(sin_tildes.lower().split())
+    """Clave de comparacion: sin tildes, sin mayusculas, sin espacios de sobra.
+
+    La ene se conserva: es una letra y no un acento, y «peña» y «pena» no son lo mismo. La
+    usan el resolvedor de nombres y las claves de los hechos (RF2-PIPE-11); como las claves se
+    guardan, cambiar esta funcion exige una migracion que las recalcule.
+    """
+    salida: list[str] = []
+    for c in unicodedata.normalize("NFD", nombre.lower()):
+        if unicodedata.category(c) == "Mn":
+            if c == _TILDE_DE_LA_ENE and salida and salida[-1] == "n":
+                salida.append(c)
+            continue
+        salida.append(c)
+    return " ".join(unicodedata.normalize("NFC", "".join(salida)).split())
 
 
 def _serializar(valor: Any) -> Any:
@@ -35,8 +46,20 @@ def _serializar(valor: Any) -> Any:
     return valor
 
 
+#: Entidades cuyo nombre es unico por novela una vez normalizado (RF2-PER-11).
+TABLAS_CON_NOMBRE_CLAVE: tuple[str, ...] = (
+    "personaje", "lugar", "objeto", "faccion", "sistema_tecnologico",
+)
+
+
 def insertar(con: sqlite3.Connection, tabla: str, **campos: Any) -> int:
-    """Inserta una fila y devuelve su id. Los dict y list se guardan como JSON."""
+    """Inserta una fila y devuelve su id. Los dict y list se guardan como JSON.
+
+    En las entidades con nombre rellena `nombre_clave`, que es lo que hace unico el nombre
+    por novela aunque el agente cambie una tilde o una mayuscula (RF2-PER-11).
+    """
+    if tabla in TABLAS_CON_NOMBRE_CLAVE and campos.get("nombre"):
+        campos.setdefault("nombre_clave", normalizar(str(campos["nombre"])))
     limpios = {k: _serializar(v) for k, v in campos.items() if v is not None}
     columnas = ", ".join(limpios)
     huecos = ", ".join("?" * len(limpios))
@@ -53,6 +76,26 @@ def actualizar(con: sqlite3.Connection, tabla: str, id_fila: int, **campos: Any)
     asignaciones = ", ".join(f"{k} = ?" for k in limpios)
     con.execute(f"UPDATE {tabla} SET {asignaciones} WHERE id = ?",
                 [*limpios.values(), id_fila])
+
+
+def insertar_hecho(
+    con: sqlite3.Connection,
+    *,
+    sujeto_nombre: str,
+    atributo: str,
+    valor: str,
+    **campos: Any,
+) -> int:
+    """La unica forma de insertar un hecho: calcula sus claves normalizadas (RF2-PIPE-11).
+
+    La puerta 3 compara estas claves y nunca el texto, asi que dos valores que solo difieren
+    en tildes o mayusculas son el mismo valor. Un trigger rechaza cualquier hecho sin claves.
+    """
+    return insertar(
+        con, "hecho", sujeto_nombre=sujeto_nombre, atributo=atributo, valor=valor,
+        sujeto_clave=normalizar(sujeto_nombre or ""), atributo_clave=normalizar(atributo),
+        valor_clave=normalizar(valor), **campos,
+    )
 
 
 class Resolvedor:

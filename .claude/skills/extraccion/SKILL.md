@@ -23,11 +23,11 @@ Usa `supersede_a` cuando un hecho nuevo sustituye legítimamente a uno anterior,
 
 **Usos de conocimiento**: qué personaje **actúa** sobre qué hecho en esta escena. Es distinto de adquirirlo y hay que registrarlo aunque el personaje ya lo supiera de antes. Si alguien decide algo basándose en una información, eso es un uso, y de ahí sale la comprobación de que nadie actúa sobre lo que todavía no ha recibido.
 
-**Estados de personaje**: cómo queda cada uno física y psicológicamente, y en quién confía. Si alguien muere, eso va aquí.
+**Estados de personaje**: cómo queda cada uno física y psicológicamente, y en quién confía. Cada estado lleva su `condicion`, que es un dato cerrado: `vivo`, `herido`, `incapacitado`, `muerto` o `desaparecido`. Si alguien muere, su `condicion` es `muerto`, se diga como se diga en la prosa (fallece, cae, deja de respirar); «casi muerto» es `herido` o `incapacitado`. Es lo que se consulta para saber si alguien puede volver a aparecer, así que no la dejes al azar. `salud_fisica` sigue siendo texto libre para el detalle.
 
 **Estados de objeto**: dónde queda cada objeto y quién lo tiene. La ubicación de los objetos es una de las fuentes de contradicción más frecuentes en obra larga.
 
-**Eventos** de la cronología interna, con su fecha y con un `orden_interno` creciente que sitúe el suceso respecto a los anteriores.
+**Eventos** de la cronología interna, con su fecha y con su `orden_interno`, que sitúa el suceso respecto a todos los anteriores de la novela. Todo evento dramatizado **lleva** `orden_interno`: sin él la salida se rechaza. Te llega el último valor registrado; continúa la escala desde ahí. Dos sucesos simultáneos comparten orden, y uno anterior en la cronología, como un recuerdo, lleva uno menor. Un evento que no ocurre en la página puede no llevarlo.
 
 **Siembras**: las que el capítulo riega o paga, y las nuevas que el texto planta aunque nadie las hubiera planificado.
 

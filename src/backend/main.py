@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import sqlite3
 from collections.abc import AsyncIterator, Iterator
 from contextlib import asynccontextmanager
@@ -33,6 +34,8 @@ from compartido.grafo import lectura
 from compartido.tipos import TipoIntencion
 
 KEEPALIVE_SEGUNDOS = 15
+
+log = logging.getLogger("api")
 
 
 # --- Esquemas de la API (RF-API-01) ----------------------------------------------------------
@@ -174,7 +177,14 @@ async def ciclo(app: FastAPI) -> AsyncIterator[None]:
     cfg: config.Config = getattr(app.state, "cfg", None) or _cargar_config()
     con = db.conectar(cfg.db_path)
     db.crear_esquema(con)
+    actual, objetivo = db.version_actual(con), db.version_objetivo()
     con.close()
+    if actual < objetivo:
+        log.warning(
+            "La base esta en la version %s del esquema y el codigo espera la %s. Arranca el "
+            "worker para que la migre; hasta entonces algunas lecturas fallaran.",
+            actual, objetivo,
+        )
     app.state.cfg = cfg
     yield
 
@@ -479,7 +489,9 @@ def ver_hechos(
     filas = con.execute(
         f"""
         SELECT h.id, h.sujeto_tipo, h.sujeto_nombre, h.atributo, h.valor, h.categoria,
-               h.vigente, c.numero AS capitulo_origen
+               NOT EXISTS (SELECT 1 FROM hecho_revocacion r WHERE r.hecho_id = h.id)
+                   AS vigente,
+               c.numero AS capitulo_origen
         FROM hecho h JOIN escena e ON e.id = h.escena_id
         JOIN capitulo c ON c.id = e.capitulo_id
         WHERE {donde} ORDER BY h.id LIMIT ? OFFSET ?

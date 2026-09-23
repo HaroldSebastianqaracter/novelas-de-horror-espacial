@@ -6,6 +6,7 @@ Son la traduccion de las listas cerradas de docs/definitions.md y docs/domain-kn
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import Literal
 
 # --- Ontologia ---------------------------------------------------------------------------
@@ -22,6 +23,8 @@ EstadoHilo = Literal["abierto", "complicando", "latente", "resuelto", "abierto_d
 EstadoSiembra = Literal["sembrada", "regada", "pagada", "abandonada"]
 NivelRevelacion = Literal["rastro", "efecto", "vislumbre", "encuentro", "confrontacion"]
 Postura = Literal["sabe", "cree", "sospecha", "ignora", "cree_version_falsa"]
+#: La muerte como dato cerrado, y no como busqueda en el texto libre de la salud (RF2-PIPE-12).
+CondicionPersonaje = Literal["vivo", "herido", "incapacitado", "muerto", "desaparecido"]
 Via = Literal["presencio", "se_lo_contaron", "dedujo", "le_mintieron"]
 CategoriaHecho = Literal[
     "nombre", "fisico", "fecha", "distancia", "regla", "relacion", "ubicacion", "otro",
@@ -67,3 +70,23 @@ TIPOS_EVENTO: tuple[str, ...] = (
     "puerta_evaluada", "capitulo_completado", "parada", "parada_resuelta", "detenida",
     "revertido", "rehecho", "completada", "error", "worker_recuperado", "paquete_recortado",
 )
+
+
+def nombres_repetidos(nombres: Iterable[str]) -> list[str]:
+    """Los nombres que coinciden con otro una vez normalizados (RF2-PER-11).
+
+    Lo usan los esquemas de mundo, elenco y estructura para que el agente corrija en su
+    reintento dos entidades que solo difieren en tildes o mayusculas, en vez de que la
+    escritura falle contra el indice unico.
+    """
+    from compartido.grafo.escritura import normalizar
+
+    vistos: dict[str, str] = {}
+    repetidos: list[str] = []
+    for nombre in nombres:
+        clave = normalizar(nombre)
+        if clave in vistos:
+            repetidos.append(f"'{vistos[clave]}' y '{nombre}'")
+        else:
+            vistos[clave] = nombre
+    return repetidos

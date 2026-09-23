@@ -14,7 +14,14 @@ from __future__ import annotations
 import sqlite3
 
 from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
-from compartido.grafo import Resolvedor, actualizar, insertar, lectura, normalizar
+from compartido.grafo import (
+    Resolvedor,
+    actualizar,
+    insertar,
+    insertar_hecho,
+    lectura,
+    normalizar,
+)
 
 from .esquemas import SalidaExtraccion
 
@@ -36,10 +43,14 @@ def paquete(
 
     p = Paquete(agente=AGENTE, capitulo=capitulo)
 
+    ultimo_orden = lectura.ultimo_orden_interno(con, novela_id)
     p.anadir(
         "instrucciones",
         f"Extrae del capitulo {capitulo} todo lo que el texto afirma. Refierete a cada "
-        "elemento por el numero de escena en que aparece.",
+        "elemento por el numero de escena en que aparece.\n"
+        f"El ultimo orden_interno registrado en la novela es {ultimo_orden}: todo evento "
+        "dramatizado lleva el suyo y continua la escala desde ahi (dos sucesos simultaneos "
+        "comparten orden; uno anterior en la cronologia, como un recuerdo, lleva uno menor).",
         "TU ENCARGO",
     )
 
@@ -127,26 +138,29 @@ def aplicar(
         return resolvedor.id_de(tabla, nombre)
 
     # --- Hechos, y el indice por (sujeto, atributo) que el conocimiento necesita ---------
+    def ultimo_hecho(sujeto: str, atributo: str) -> int | None:
+        """El hecho vigente mas reciente de ese sujeto y atributo, comparando por claves."""
+        fila = con.execute(
+            """
+            SELECT id FROM hecho_vigente
+            WHERE novela_id = ? AND sujeto_clave = ? AND atributo_clave = ?
+            ORDER BY id DESC LIMIT 1
+            """,
+            (novela_id, normalizar(sujeto), normalizar(atributo)),
+        ).fetchone()
+        return int(fila["id"]) if fila else None
+
     hechos_nuevos: dict[tuple[str, str], int] = {}
     for h in salida.hechos:
         eid = escena(h.escena_orden)
         if eid is None:
             continue
-        previo = con.execute(
-            """
-            SELECT id FROM hecho
-            WHERE novela_id = ? AND vigente = 1
-              AND LOWER(TRIM(sujeto_nombre)) = LOWER(TRIM(?))
-              AND LOWER(TRIM(atributo)) = LOWER(TRIM(?))
-            ORDER BY id DESC LIMIT 1
-            """,
-            (novela_id, h.sujeto_ref, h.supersede_a or h.atributo),
-        ).fetchone()
-        hid = insertar(
-            con, "hecho", novela_id=novela_id, escena_id=eid, sujeto_tipo=h.sujeto_tipo,
+        previo = ultimo_hecho(h.sujeto_ref, h.supersede_a) if h.supersede_a else None
+        hid = insertar_hecho(
+            con, novela_id=novela_id, escena_id=eid, sujeto_tipo=h.sujeto_tipo,
             sujeto_id=sujeto_id(h.sujeto_tipo, h.sujeto_ref), sujeto_nombre=h.sujeto_ref,
             atributo=h.atributo, valor=h.valor, categoria=h.categoria, cita=h.cita,
-            supersede_a=int(previo["id"]) if (previo and h.supersede_a) else None,
+            supersede_a=previo,
         )
         hechos_nuevos[(normalizar(h.sujeto_ref), normalizar(h.atributo))] = hid
 
@@ -154,16 +168,7 @@ def aplicar(
         clave = (normalizar(sujeto), normalizar(atributo))
         if clave in hechos_nuevos:
             return hechos_nuevos[clave]
-        fila = con.execute(
-            """
-            SELECT id FROM hecho WHERE novela_id = ? AND vigente = 1
-              AND LOWER(TRIM(sujeto_nombre)) = LOWER(TRIM(?))
-              AND LOWER(TRIM(atributo)) = LOWER(TRIM(?))
-            ORDER BY id DESC LIMIT 1
-            """,
-            (novela_id, sujeto, atributo),
-        ).fetchone()
-        return int(fila["id"]) if fila else None
+        return ultimo_hecho(sujeto, atributo)
 
     # --- Conocimiento adquirido y conocimiento usado -------------------------------------
     for c in salida.conocimiento:
@@ -199,8 +204,8 @@ def aplicar(
             continue
         insertar(
             con, "estado_personaje", novela_id=novela_id, personaje_id=pid, escena_id=eid,
-            salud_fisica=ep.salud_fisica, estado_psicologico=ep.estado_psicologico,
-            nivel_confianza=ep.nivel_confianza or None,
+            condicion=ep.condicion, salud_fisica=ep.salud_fisica,
+            estado_psicologico=ep.estado_psicologico, nivel_confianza=ep.nivel_confianza or None,
         )
 
     for eo in salida.estados_objeto:
@@ -218,16 +223,14 @@ def aplicar(
         "SELECT id FROM linea_de_tiempo WHERE novela_id = ?", (novela_id,)
     ).fetchone()
     if linea is not None:
-        base = int(con.execute(
-            "SELECT COALESCE(MAX(orden_interno), 0) FROM evento WHERE novela_id = ?",
-            (novela_id,),
-        ).fetchone()[0])
-        for i, ev in enumerate(salida.eventos, start=1):
+        # El orden interno lo pone el extractor, que es quien lee la prosa; nunca se inventa
+        # aqui (RF2-PIPE-10). Un evento no dramatizado puede no tenerlo.
+        for ev in salida.eventos:
             insertar(
                 con, "evento", novela_id=novela_id, linea_de_tiempo_id=int(linea["id"]),
                 escena_id=escena(ev.escena_orden), fecha_interna=ev.fecha_interna,
-                orden_interno=ev.orden_interno if ev.orden_interno is not None else base + i,
-                descripcion=ev.descripcion, tipo=ev.tipo, dramatizado=ev.dramatizado,
+                orden_interno=ev.orden_interno, descripcion=ev.descripcion, tipo=ev.tipo,
+                dramatizado=ev.dramatizado,
             )
 
     # --- Siembras ------------------------------------------------------------------------
@@ -237,11 +240,14 @@ def aplicar(
             continue
         fila = None
         if s.siembra_ref:
-            fila = con.execute(
-                "SELECT id, sembrada_en_escena_id FROM siembra WHERE novela_id = ? "
-                "AND LOWER(TRIM(elemento)) = LOWER(TRIM(?)) LIMIT 1",
-                (novela_id, s.siembra_ref),
-            ).fetchone()
+            clave = normalizar(s.siembra_ref)
+            fila = next(
+                (f for f in con.execute(
+                    "SELECT id, elemento, sembrada_en_escena_id FROM siembra "
+                    "WHERE novela_id = ? ORDER BY id", (novela_id,),
+                ).fetchall() if normalizar(f["elemento"]) == clave),
+                None,
+            )
         if fila is None:
             sid = insertar(
                 con, "siembra", novela_id=novela_id, elemento=s.elemento or s.siembra_ref,

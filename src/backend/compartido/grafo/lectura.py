@@ -223,7 +223,7 @@ lugares AS (
 #: Un hecho que otro hecho vigente sustituye ya no es el estado actual: el agente ve la herida
 #: cicatrizada, no la herida.
 _NO_SUSTITUIDO = (
-    "NOT EXISTS (SELECT 1 FROM hecho s WHERE s.supersede_a = h.id AND s.vigente = 1)"
+    "NOT EXISTS (SELECT 1 FROM hecho_vigente s WHERE s.supersede_a = h.id)"
 )
 
 
@@ -247,10 +247,10 @@ def hechos_del_reparto(
                           OR (h.sujeto_tipo = 'lugar'
                               AND h.sujeto_id IN (SELECT lugar_id FROM lugares))
                         THEN 1 ELSE 0 END AS obligatorio
-            FROM hecho h
+            FROM hecho_vigente h
             JOIN escena e   ON e.id = h.escena_id
             JOIN capitulo c ON c.id = e.capitulo_id
-            WHERE h.novela_id = :novela AND h.vigente = 1 AND c.numero < :capitulo
+            WHERE h.novela_id = :novela AND c.numero < :capitulo
               AND {_NO_SUSTITUIDO}
         )
         SELECT * FROM candidatos
@@ -269,7 +269,7 @@ def atributos_por_sujeto(
     """Atributos ya usados por cada sujeto, para que el extractor no invente sinonimos."""
     salida: dict[str, list[str]] = {}
     for f in con.execute(
-        "SELECT DISTINCT sujeto_nombre, atributo FROM hecho WHERE novela_id = ? AND vigente = 1"
+        "SELECT DISTINCT sujeto_nombre, atributo FROM hecho_vigente WHERE novela_id = ?"
         " ORDER BY sujeto_nombre, atributo",
         (novela_id,),
     ):
@@ -303,12 +303,20 @@ def conocimiento_del_reparto(
                u.postura, u.via, u.capitulo
         FROM ultima u
         JOIN personaje p ON p.id = u.personaje_id
-        JOIN hecho h     ON h.id = u.hecho_id
-        WHERE u.rn = 1 AND h.vigente = 1 AND {_NO_SUSTITUIDO}
+        JOIN hecho_vigente h ON h.id = u.hecho_id
+        WHERE u.rn = 1 AND {_NO_SUSTITUIDO}
         ORDER BY p.nombre, u.capitulo, h.id
         """,
         {"novela": novela_id, "capitulo": numero},
     ))
+
+
+def ultimo_orden_interno(con: sqlite3.Connection, novela_id: int) -> int:
+    """El mayor `orden_interno` registrado: el extractor continua la escala desde ahi."""
+    valor = con.execute(
+        "SELECT MAX(orden_interno) FROM evento WHERE novela_id = ?", (novela_id,)
+    ).fetchone()[0]
+    return int(valor) if valor is not None else 0
 
 
 def siembras_vivas(

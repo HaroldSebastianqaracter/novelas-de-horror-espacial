@@ -10,7 +10,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, model_validator
 
-from compartido.tipos import RolNarrativo, SubtipoArco, TipoArco
+from compartido.grafo.escritura import normalizar
+from compartido.tipos import RolNarrativo, SubtipoArco, TipoArco, nombres_repetidos
 
 
 class RelacionSalida(BaseModel):
@@ -60,9 +61,12 @@ class SalidaElenco(BaseModel):
         if not any(p.rol_narrativo == "oponente" for p in self.personajes):
             raise ValueError("Falta el oponente.")
 
-        nombres = [p.nombre.strip().lower() for p in self.personajes]
-        if len(set(nombres)) != len(nombres):
-            raise ValueError("Hay nombres de personaje repetidos.")
+        repetidos = nombres_repetidos(p.nombre for p in self.personajes)
+        if repetidos:
+            raise ValueError(
+                "Hay personajes cuyo nombre solo difiere en tildes o mayusculas: "
+                + ", ".join(repetidos)
+            )
 
         vistos: set[tuple[str, str]] = set()
         for p in self.personajes:
@@ -74,10 +78,10 @@ class SalidaElenco(BaseModel):
                 )
             vistos.add(clave)
 
-        conocidos = {p.nombre.strip().lower() for p in self.personajes}
+        conocidos = {normalizar(p.nombre) for p in self.personajes}
         for p in self.personajes:
             for r in p.relaciones:
-                if r.destino.strip().lower() not in conocidos:
+                if normalizar(r.destino) not in conocidos:
                     raise ValueError(
                         f"'{p.nombre}' se relaciona con '{r.destino}', que no esta en el elenco."
                     )

@@ -32,7 +32,7 @@ from tests.entorno import (
     puerto_falso,
     textos_vigentes_del_capitulo,
 )
-from tests.fabrica import novela_minima
+from tests.fabrica import hecho, novela_minima
 
 RAIZ = Path(__file__).resolve().parents[1]
 
@@ -229,55 +229,32 @@ def test_hallazgo_10_los_hechos_antiguos_del_reparto_entran_en_el_paquete() -> N
     g = novela_minima(con)
     con.execute("COMMIT")
     for i in range(250):
-        con.execute(
-            "INSERT INTO hecho (novela_id, escena_id, sujeto_tipo, sujeto_nombre, atributo, valor)"
-            " VALUES (?,?,'mundo','Estacion',?, 'v')",
-            (g.novela_id, g.escenas[(1, 2)], f"atributo {i}"),
-        )
+        hecho(con, g, (1, 2), "Estacion", f"atributo {i}", "v", sujeto_tipo="mundo")
     hechos = lectura.hechos_del_reparto(con, g.novela_id, 2)
     assert any(h["id"] == g.hechos["ojos"] for h in hechos)
 
 
 # --- Fase 5: puerta 3 sin falsos positivos ------------------------------------------------------
 
-_INSERTAR_HECHO = (
-    "INSERT INTO hecho (novela_id, escena_id, sujeto_tipo, sujeto_id, sujeto_nombre, atributo, "
-    "valor, categoria, supersede_a) VALUES (?,?,'personaje',?,?,?,?,'fisico',?)"
-)
-
-
-@pytest.mark.xfail(strict=True, reason="Hallazgo 7: la supersesion encadenada da conflicto")
 def test_hallazgo_07_una_cadena_de_supersesiones_no_es_contradiccion() -> None:
     con, _ = nueva_bd()
     con.execute("BEGIN")
     g = novela_minima(con)
     con.execute("COMMIT")
-    ibarra = g.personajes["Ibarra"]
-    azules = con.execute(
-        _INSERTAR_HECHO,
-        (g.novela_id, g.escenas[(2, 1)], ibarra, "Ibarra", "color de ojos", "azules",
-         g.hechos["ojos"]),
-    ).lastrowid
-    con.execute(
-        _INSERTAR_HECHO,
-        (g.novela_id, g.escenas[(2, 2)], ibarra, "Ibarra", "color de ojos", "verdes", azules),
-    )
+    azules = hecho(con, g, (2, 1), "Ibarra", "color de ojos", "azules",
+                   supersede_a=g.hechos["ojos"])
+    hecho(con, g, (2, 2), "Ibarra", "color de ojos", "verdes", supersede_a=azules)
     bloqueantes = p3.evaluar(con, g.novela_id, 2).bloqueantes
     assert not [c for c in bloqueantes if c.comprobacion == "continuidad_factual"]
 
 
-@pytest.mark.xfail(strict=True, reason="Hallazgo 8: LOWER() de SQLite no pliega tildes")
 def test_hallazgo_08_valores_que_solo_difieren_en_tildes_no_se_contradicen() -> None:
     con, _ = nueva_bd()
     con.execute("BEGIN")
     g = novela_minima(con)
     con.execute("COMMIT")
-    reyes = g.personajes["Reyes"]
     for escena, valor in (((1, 1), "Ámbar"), ((2, 1), "ámbar")):
-        con.execute(
-            _INSERTAR_HECHO,
-            (g.novela_id, g.escenas[escena], reyes, "Reyes", "color de pelo", valor, None),
-        )
+        hecho(con, g, escena, "Reyes", "color de pelo", valor)
     bloqueantes = p3.evaluar(con, g.novela_id, 2).bloqueantes
     assert not [c for c in bloqueantes if c.comprobacion == "continuidad_factual"]
 
@@ -305,3 +282,49 @@ def test_hallazgo_09_una_parada_de_oficio_deja_la_puerta_4_en_falla() -> None:
         con, "SELECT COUNT(*) FROM resultado_puerta WHERE novela_id = ? AND puerta = 4 "
         "AND veredicto = 'falla'", novela_id,
     ) >= 1
+
+
+def test_hallazgo_15_un_evento_dramatizado_sin_orden_interno_no_valida() -> None:
+    from pydantic import ValidationError
+
+    from tareas.extraccion.esquemas import EventoExtraido
+
+    with pytest.raises(ValidationError):
+        EventoExtraido(fecha_interna="dia 3", descripcion="Se abre la esclusa", dramatizado=True)
+
+
+def test_hallazgo_16_casi_muerto_no_es_muerto() -> None:
+    con, _ = nueva_bd()
+    con.execute("BEGIN")
+    g = novela_minima(con)
+    con.execute("COMMIT")
+    con.execute(
+        "INSERT INTO estado_personaje (novela_id, personaje_id, escena_id, salud_fisica) "
+        "VALUES (?,?,?, 'casi muerto, pero respira')",
+        (g.novela_id, g.personajes["Ibarra"], g.escenas[(1, 2)]),
+    )
+    bloqueantes = p3.evaluar(con, g.novela_id, 2).bloqueantes
+    assert not [c for c in bloqueantes if c.comprobacion == "presencia_imposible"]
+
+
+def test_hallazgo_20_dos_personajes_con_el_mismo_nombre_se_rechazan() -> None:
+    import sqlite3
+
+    from compartido.grafo import insertar
+
+    con, _ = nueva_bd()
+    novela_id = crear_novela(con)
+    insertar(con, "personaje", novela_id=novela_id, nombre="Reyes", rol_narrativo="aliado")
+    with pytest.raises(sqlite3.IntegrityError):
+        insertar(con, "personaje", novela_id=novela_id, nombre="reyes", rol_narrativo="espejo")
+
+
+def test_hallazgo_21_un_hecho_no_se_modifica_se_revoca() -> None:
+    import sqlite3
+
+    con, _ = nueva_bd()
+    con.execute("BEGIN")
+    g = novela_minima(con)
+    con.execute("COMMIT")
+    with pytest.raises(sqlite3.IntegrityError):
+        con.execute("UPDATE hecho SET vigente = 0 WHERE id = ?", (g.hechos["ojos"],))

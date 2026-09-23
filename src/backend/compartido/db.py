@@ -11,7 +11,9 @@ Reglas que este modulo impone (RF-PER-01, RF-API-05, RF2-WK-08, RF2-PROC-03):
 
 from __future__ import annotations
 
+import importlib.util
 import sqlite3
+import time
 from collections.abc import Callable, Collection, Iterator, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -66,8 +68,29 @@ def _aplicar_pragmas(con: sqlite3.Connection, solo_lectura: bool) -> None:
     if not solo_lectura:
         # journal_mode es persistente en el fichero; el lector no necesita fijarlo y en
         # modo=ro ni siquiera puede.
-        con.execute("PRAGMA journal_mode = WAL")
+        _activar_wal(con)
         con.execute("PRAGMA synchronous = NORMAL")
+
+
+def _activar_wal(con: sqlite3.Connection) -> None:
+    """Pone la base en WAL, reintentando si otro proceso la tiene ocupada.
+
+    Cambiar el modo de diario necesita un cerrojo exclusivo y SQLite no aplica ahi el
+    busy_timeout: con varios procesos abriendo a la vez una base recien creada (la API y el
+    worker arrancando juntos), uno recibia «database is locked». Como el modo es persistente,
+    si otro ya lo puso no hace falta volver a pedirlo.
+    """
+    limite = time.monotonic() + BUSY_TIMEOUT_MS / 1000
+    while True:
+        try:
+            if str(con.execute("PRAGMA journal_mode").fetchone()[0]).lower() == "wal":
+                return
+            con.execute("PRAGMA journal_mode = WAL")
+            return
+        except sqlite3.OperationalError as exc:
+            if "locked" not in str(exc).lower() or time.monotonic() > limite:
+                raise
+            time.sleep(0.05)
 
 
 def conectar(ruta: Path, *, solo_lectura: bool = False) -> sqlite3.Connection:
@@ -154,18 +177,54 @@ def version_actual(con: sqlite3.Connection) -> int:
     return int(valor) if valor is not None else 0
 
 
-def _migraciones_pendientes(desde: int) -> list[tuple[int, Path]]:
+@dataclass(frozen=True)
+class Migracion:
+    """Una version del esquema: su guion SQL, su paso en Python, o los dos.
+
+    Los dos ficheros de un mismo numero (`002_x.sql` y `002_x.py`) se aplican en la misma
+    transaccion, primero el SQL. El `.py` define `aplicar(con)`: es lo que hace falta cuando
+    una migracion tiene que calcular algo en Python, como las claves normalizadas.
+    """
+
+    numero: int
+    sql: Path | None = None
+    python: Path | None = None
+
+
+def _migraciones() -> list[Migracion]:
     if not DIR_MIGRACIONES.exists():
         return []
-    encontradas: list[tuple[int, Path]] = []
-    for fichero in sorted(DIR_MIGRACIONES.glob("*.sql")):
+    por_numero: dict[int, dict[str, Path]] = {}
+    for fichero in sorted(DIR_MIGRACIONES.iterdir()):
         cabeza = fichero.name.split("_", 1)[0]
-        if not cabeza.isdigit():
+        if not cabeza.isdigit() or fichero.suffix not in (".sql", ".py"):
             continue
-        numero = int(cabeza)
-        if numero > desde:
-            encontradas.append((numero, fichero))
-    return sorted(encontradas)
+        por_numero.setdefault(int(cabeza), {})[fichero.suffix] = fichero
+    return [
+        Migracion(numero=n, sql=f.get(".sql"), python=f.get(".py"))
+        for n, f in sorted(por_numero.items())
+    ]
+
+
+def _migraciones_pendientes(desde: int) -> list[Migracion]:
+    return [m for m in _migraciones() if m.numero > desde]
+
+
+def version_objetivo() -> int:
+    """La version a la que llega el esquema con todas las migraciones aplicadas."""
+    return max([VERSION_ESQUEMA, *(m.numero for m in _migraciones())])
+
+
+def _paso_python(ruta: Path) -> Callable[[sqlite3.Connection], None]:
+    spec = importlib.util.spec_from_file_location(f"migracion_{ruta.stem}", ruta)
+    if spec is None or spec.loader is None:
+        raise ErrorDeDatos(f"No se puede cargar la migracion {ruta.name}")
+    modulo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modulo)
+    aplicar = getattr(modulo, "aplicar", None)
+    if not callable(aplicar):
+        raise ErrorDeDatos(f"La migracion {ruta.name} no define aplicar(con).")
+    return aplicar  # type: ignore[no-any-return]
 
 
 def sentencias(sql: str) -> list[str]:
@@ -190,7 +249,10 @@ def sentencias(sql: str) -> list[str]:
 
 
 def _aplicar_version(
-    con: sqlite3.Connection, version: int, sql: str
+    con: sqlite3.Connection,
+    version: int,
+    sql: str,
+    paso: Callable[[sqlite3.Connection], None] | None = None,
 ) -> bool:
     """Aplica un guion y sella su version, todo o nada. Devuelve si lo aplico.
 
@@ -205,6 +267,8 @@ def _aplicar_version(
             return False
         for sentencia in sentencias(sql):
             con.execute(sentencia)
+        if paso is not None:
+            paso(con)
         con.execute(
             "INSERT OR REPLACE INTO esquema_version (version) VALUES (?)", (version,)
         )
@@ -216,23 +280,37 @@ def _aplicar_version(
 
 
 def crear_esquema(con: sqlite3.Connection) -> bool:
-    """Crea el esquema base si la base esta vacia. Idempotente y segura entre procesos.
+    """Lleva una base VACIA a la version actual. Idempotente y segura entre procesos.
 
-    Es la unica escritura que el worker hace antes de tomar su cerrojo, porque la tabla del
-    cerrojo vive en el esquema; y la unica que se le permite a la API (RF2-PROC-03).
+    Una base nueva nace completa: esquema base y todas las migraciones. Es la unica escritura
+    que el worker hace antes de tomar su cerrojo, porque la tabla del cerrojo vive en el
+    esquema; y la unica que se le permite a la API (RF2-PROC-03). Una base que ya existe no se
+    toca aqui: la migra el worker.
     """
-    if version_actual(con) >= VERSION_ESQUEMA:
+    if version_actual(con) > 0:
         return False
-    return _aplicar_version(con, VERSION_ESQUEMA, RUTA_ESQUEMA.read_text(encoding="utf-8"))
+    creada = _aplicar_version(con, VERSION_ESQUEMA, RUTA_ESQUEMA.read_text(encoding="utf-8"))
+    if creada:
+        _aplicar_migraciones(con)
+    return creada
+
+
+def _aplicar_migraciones(con: sqlite3.Connection) -> list[int]:
+    aplicadas: list[int] = []
+    for m in _migraciones_pendientes(version_actual(con)):
+        sql = m.sql.read_text(encoding="utf-8") if m.sql else ""
+        paso = _paso_python(m.python) if m.python else None
+        if _aplicar_version(con, m.numero, sql, paso):
+            aplicadas.append(m.numero)
+    return aplicadas
 
 
 def migrar(con: sqlite3.Connection) -> list[int]:
     """Aplica en orden las migraciones pendientes. Devuelve las que aplico este proceso."""
-    aplicadas: list[int] = []
-    for numero, fichero in _migraciones_pendientes(version_actual(con)):
-        if _aplicar_version(con, numero, fichero.read_text(encoding="utf-8")):
-            aplicadas.append(numero)
-    return aplicadas
+    if version_actual(con) == 0:
+        crear_esquema(con)
+        return []
+    return _aplicar_migraciones(con)
 
 
 def preparar(ruta: Path) -> sqlite3.Connection:

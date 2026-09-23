@@ -141,10 +141,10 @@ class Indice:
         hechos = [dict(f) for f in self.con.execute(
             """
             SELECT h.id, h.sujeto_nombre || ' ' || h.atributo || ': ' || h.valor AS texto
-            FROM hecho h
+            FROM hecho_vigente h
             JOIN escena e   ON e.id = h.escena_id
             JOIN capitulo c ON c.id = e.capitulo_id
-            WHERE h.novela_id = ? AND c.numero = ? AND h.vigente = 1
+            WHERE h.novela_id = ? AND c.numero = ?
               AND h.id NOT IN (SELECT hecho_id FROM vec_hecho)
             """,
             (novela_id, capitulo),
@@ -184,7 +184,7 @@ class Indice:
             (novela_id, desde_capitulo),
         )
         self.con.execute(
-            "DELETE FROM vec_hecho WHERE hecho_id NOT IN (SELECT id FROM hecho WHERE vigente = 1)"
+            "DELETE FROM vec_hecho WHERE hecho_id NOT IN (SELECT id FROM hecho_vigente)"
         )
 
     def reconstruir(self, novela_id: int) -> int:

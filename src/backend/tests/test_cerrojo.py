@@ -97,12 +97,15 @@ db.preparar(r"{ruta}").close()
     procesos = [
         subprocess.Popen([sys.executable, "-c", guion], cwd=RAIZ, stderr=subprocess.PIPE,
                          text=True)
-        for _ in range(4)
+        for _ in range(8)
     ]
     errores = [p.communicate(timeout=60)[1] for p in procesos]
     assert all(p.returncode == 0 for p in procesos), errores
     con = db.conectar(ruta)
-    assert [tuple(f) for f in con.execute("SELECT version FROM esquema_version")] == [(1,)]
+    versiones = [f[0] for f in con.execute("SELECT version FROM esquema_version ORDER BY 1")]
+    # Cada version una sola vez, hasta la ultima: nadie la aplico dos veces.
+    assert versiones == [db.VERSION_ESQUEMA, *(m.numero for m in db._migraciones())]  # noqa: SLF001
+    assert versiones[-1] == db.version_objetivo()
 
 
 # --- Fencing ----------------------------------------------------------------------------------

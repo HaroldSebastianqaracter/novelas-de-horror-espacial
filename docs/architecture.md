@@ -409,13 +409,15 @@ Un solo SQLite guarda las tres cosas: el grafo de estado, el texto y los vectore
 | --- | --- | --- |
 | **Canon** | `novela`, `restriccion`, `mundo`, `sistema_tecnologico`, `lugar`, `personaje`, `faccion`, `amenaza`, `objeto`, `linea_de_tiempo`, `tema`, `motivo`, `estilo_narrativo` | Cambia poco; cada cambio se versiona |
 | **Estructura** | `acto`, `capitulo`, `secuencia`, `escena`, `secuela`, `beat`, `punto_de_giro`, `hilo`, `siembra` | El plan de la obra. `siembra` va aquí porque la planifica el estructurador, aunque su `estado` se actualice durante la redacción; [definitions.md](definitions.md) la agrupa con el estado por esa segunda razón |
-| **Estado** | `hecho`, `estado_conocimiento`, `uso_conocimiento`, `estado_personaje`, `estado_objeto`, `evento`, `siembra_estado`, `hilo_estado`, `amenaza_revelacion`, `entidad_no_reconocida` | Append-only, **todas con su escena de origen**; es lo que consultan las puertas deterministas y lo que permite revertir borrando por escena |
+| **Estado** | `hecho`, `estado_conocimiento`, `uso_conocimiento`, `estado_personaje`, `estado_objeto`, `evento`, `siembra_estado`, `hilo_estado`, `amenaza_revelacion`, `entidad_no_reconocida`, `hecho_revocacion` | Append-only, **todas con su escena de origen** salvo la revocación, que es una decisión del autor y lleva el capítulo desde el que rige; es lo que consultan las puertas deterministas y lo que permite revertir borrando por escena. Un hecho no se modifica nunca: revocarlo es insertar una revocación, y un trigger lo hace cumplir |
 | **Texto** | `escena_texto` con versión, `capitulo_compilado` | Cada reescritura es una versión nueva, no un `UPDATE` |
 | **Vectores** | Tablas virtuales `vec0` sobre el texto de escena y sobre los hechos | Índice derivado, reconstruible |
 | **Traza** | `ejecucion`, `llamada_modelo`, `resultado_puerta`, `traza_evento` | Observabilidad: qué agente produjo qué y con qué contexto. `traza_evento` es lo que lee el stream |
 | **Cola y control** | `intencion`, `parada`, `worker_lock`, `esquema_version`, `indice_estado` | Infraestructura: la cola, las paradas abiertas, el cerrojo del escritor único |
 
-A las tablas de las entidades se añaden las de relación que la ontología modela como muchos a muchos: `escena_personaje`, `escena_objeto`, `escena_motivo`, `personaje_relacion`, `faccion_relacion` e `hilo_personaje`. Son cincuenta tablas en total, más tres vistas derivadas que dan el orden global de escena y el estado vigente de siembras e hilos.
+A las tablas de las entidades se añaden las de relación que la ontología modela como muchos a muchos: `escena_personaje`, `escena_objeto`, `escena_motivo`, `personaje_relacion`, `faccion_relacion` e `hilo_personaje`. Son cincuenta tablas en total, sin contar las `vec0` del índice, más cuatro vistas derivadas: el orden global de escena, el estado vigente de siembras e hilos, y los hechos vigentes, que son los que ninguna revocación retira.
+
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** La cifra decía cincuenta cuando eran cuarenta y nueve; con `hecho_revocacion` vuelven a ser cincuenta. La revocación pasa a ser una tabla porque `hecho.vigente` era la única columna mutable del estado append-only y un retcon no se deshacía al relanzar. El detalle está en [specs/spec2.md](../specs/spec2.md), RF2-PER-06, y en [definitions.md](definitions.md).
 
 ### Por qué SQLite encaja
 

@@ -263,7 +263,7 @@ def extraccion(entrada: str, agente: str) -> dict[str, Any]:
         }],
         "usos_de_conocimiento": [],
         "estados_personaje": [{
-            "escena_orden": primera, "personaje_ref": PERSONAJES[0],
+            "escena_orden": primera, "personaje_ref": PERSONAJES[0], "condicion": "vivo",
             "salud_fisica": "entera", "estado_psicologico": "alerta", "nivel_confianza": {},
         }],
         "estados_objeto": [{

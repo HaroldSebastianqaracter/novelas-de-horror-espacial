@@ -92,6 +92,7 @@ classDiagram
     +recursos
   }
   class EstadoPersonaje {
+    +condicion
     +saludFisica
     +estadoPsicologico
     +nivelConfianza
@@ -108,7 +109,10 @@ classDiagram
     +categoria
     +cita
     +supersedeA
-    +vigente
+  }
+  class RevocacionDeHecho {
+    +motivo
+    +capitulo
   }
   class UsoDeConocimiento {
   }
@@ -242,6 +246,7 @@ classDiagram
   EstadoDeConocimiento "*" --> "1" Escena : desde
   Hecho "*" --> "1" Escena : establecidoEn
   Hecho "0..1" --> "0..1" Hecho : supersede
+  RevocacionDeHecho "0..1" --> "1" Hecho : revoca
   Personaje "1" --> "*" UsoDeConocimiento : usa
   UsoDeConocimiento "*" --> "1" Hecho : sobre
   UsoDeConocimiento "*" --> "1" Escena : en
@@ -308,16 +313,25 @@ classDiagram
 **Facción** — Grupo organizado con objetivos y recursos propios, distintos de los de cualquiera de sus miembros: tripulación, corporación, culto, gobierno.
 `nombre` · `proposito` · `objetivos` · `recursos`
 
-**EstadoPersonaje** — Las variables dinámicas de un personaje en una escena concreta: cómo está física y psicológicamente y en quién confía. Es lo que permite modelar la evolución en vez de solo la definición fija.
-`saludFisica` · `estadoPsicologico` · `nivelConfianza`
+**EstadoPersonaje** — Las variables dinámicas de un personaje en una escena concreta: cómo está física y psicológicamente y en quién confía. Es lo que permite modelar la evolución en vez de solo la definición fija. `condicion` es la parte cerrada del estado físico —vivo, herido, incapacitado, muerto o desaparecido—; `saludFisica` es el detalle en texto libre.
+`condicion` · `saludFisica` · `estadoPsicologico` · `nivelConfianza`
+
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** Se añade `condicion` porque la comprobación de que un muerto no reaparece buscaba «muert» dentro de `saludFisica`: «casi muerto» paraba la generación y «fallecida» no. Una lista cerrada convierte la muerte en un dato que se consulta y no en un texto que se interpreta. Se descartó ampliar la búsqueda con más palabras, que solo cambia qué frases fallan. La condición la declara el extractor, así que la comprobación mide lo que él dice; la búsqueda del nombre del muerto en la prosa posterior es el segundo método que mira el texto ([validators.md](validators.md)).
 
 **EstadoDeConocimiento** — Qué postura tiene un personaje frente a un hecho concreto (lo sabe, lo cree, lo sospecha, lo ignora, cree una versión falsa), desde qué escena y por qué vía lo supo (presenció, se lo contaron, lo dedujo, le mintieron). Es la entidad que gobierna al mismo tiempo la coherencia y la tensión: un personaje no puede reaccionar a lo que aún no ha recibido, y la asimetría entre lo que sabe el lector y lo que sabe el personaje es lo que produce misterio, suspense o ironía dramática.
 `postura` · `via`
 
 **Hecho** — Una afirmación que el texto ya ha establecido y que no se puede contradecir: un nombre, una fecha, un rasgo físico, una distancia, una regla del mundo. Se guarda como **triple**: un sujeto, un atributo y un valor. «Ibarra tiene los ojos grises» se registra como sujeto Ibarra, atributo color de ojos, valor grises. Guarda además la cita literal que lo fija y la escena donde quedó establecido. Es el registro de continuidad de la obra.
 
-`supersedeA` señala el hecho anterior que este sustituye **legítimamente**: una herida que cicatriza, un objeto que se rompe. `vigente` permite revocar uno a mano sin borrarlo, dejando rastro de quién y por qué.
-`sujetoTipo` · `sujeto` · `atributo` · `valor` · `categoria` · `cita` · `supersedeA` · `vigente`
+`supersedeA` señala el hecho anterior que este sustituye **legítimamente**: una herida que cicatriza, un objeto que se rompe. Una cadena de sustituciones es legítima entera: herida, infectada, cicatrizada.
+`sujetoTipo` · `sujeto` · `atributo` · `valor` · `categoria` · `cita` · `supersedeA`
+
+Un hecho **no se modifica nunca**. Retirarlo del canon, cuando el autor acepta un retcon, es añadir una **RevocacionDeHecho** que dice cuál, por qué y desde qué capítulo; el hecho sigue ahí con su escena y su cita. Un hecho está vigente mientras ninguna revocación lo retire.
+
+**RevocacionDeHecho** — La decisión de retirar un hecho del canon, con su motivo y el capítulo desde el que rige. Es un registro y no un atributo del hecho: deshacer una revocación es borrarla, y relanzar desde un capítulo anterior a ella la deshace con el resto del estado.
+`motivo` · `capitulo`
+
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** Antes el hecho tenía un atributo `vigente` que se ponía a falso al revocarlo. Era la única columna mutable de un registro que se declara append-only, y por eso un retcon no se deshacía al relanzar. Se pasa a un registro aparte, derivando la vigencia, que es la misma decisión que ya se tomó para el estado de siembras, hilos y amenaza. Se descartó conservar el atributo y copiarlo al revertir, porque seguiría siendo un dato que cambia sin rastro de escena.
 
 > **Decisión sin entrevistar, 22 de septiembre de 2026.** Antes era un `enunciado` en texto libre. Se cambia porque con enunciados libres «contradicción» deja de ser una consulta y pasa a ser una opinión, y con ello la puerta 3 dejaría de ser determinista, que es lo que el principio 5 no permite. El triple es lo mínimo que hace exacta la comparación: dos hechos vigentes con el mismo sujeto y atributo y distinto valor se contradicen. El coste es que el extractor puede inventar sinónimos de atributo, y por eso el paquete le entrega los atributos que ya existen para cada sujeto.
 

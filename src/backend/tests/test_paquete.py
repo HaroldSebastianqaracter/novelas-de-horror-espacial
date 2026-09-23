@@ -33,7 +33,7 @@ from tests.entorno import (
     nueva_bd,
     puerto_falso,
 )
-from tests.fabrica import novela_minima
+from tests.fabrica import hecho, novela_minima
 
 BLOQUES = config.BLOQUES_POR_AGENTE["redaccion"]
 
@@ -195,17 +195,10 @@ def _grafo():  # noqa: ANN202
 
 def test_los_hechos_del_reparto_se_marcan_y_no_traen_sustituidos_ni_futuros() -> None:
     con, g = _grafo()
-    ibarra = g.personajes["Ibarra"]
     # El capitulo 1 sustituye los ojos grises por azules; el 2 dice verdes (futuro).
-    con.execute(
-        "INSERT INTO hecho (novela_id, escena_id, sujeto_tipo, sujeto_id, sujeto_nombre, "
-        "atributo, valor, supersede_a) VALUES (?,?,'personaje',?,'Ibarra','color de ojos',"
-        "'azules',?)", (g.novela_id, g.escenas[(1, 2)], ibarra, g.hechos["ojos"]),
-    )
-    con.execute(
-        "INSERT INTO hecho (novela_id, escena_id, sujeto_tipo, sujeto_nombre, atributo, valor)"
-        " VALUES (?,?,'mundo','Estacion','gravedad','media')", (g.novela_id, g.escenas[(1, 1)]),
-    )
+    hecho(con, g, (1, 2), "Ibarra", "color de ojos", "azules", supersede_a=g.hechos["ojos"])
+    hecho(con, g, (2, 1), "Ibarra", "color de ojos", "verdes")
+    hecho(con, g, (1, 1), "Estacion", "gravedad", "media", sujeto_tipo="mundo")
     hechos = lectura.hechos_del_reparto(con, g.novela_id, 2)
     valores = {(h["atributo"], h["valor"]): h["obligatorio"] for h in hechos}
     assert valores == {("color de ojos", "azules"): 1, ("gravedad", "media"): 0}

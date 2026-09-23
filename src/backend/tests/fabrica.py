@@ -10,6 +10,8 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass, field
 
+from compartido.grafo import insertar_hecho, normalizar
+
 
 @dataclass
 class Grafo:
@@ -28,6 +30,29 @@ class Grafo:
 
 def _id(cur: sqlite3.Cursor) -> int:
     return int(cur.lastrowid or 0)
+
+
+def hecho(
+    con: sqlite3.Connection,
+    g: Grafo,
+    escena: tuple[int, int],
+    sujeto: str,
+    atributo: str,
+    valor: str,
+    *,
+    sujeto_tipo: str = "personaje",
+    supersede_a: int | None = None,
+    cita: str = "",
+) -> int:
+    """Un hecho por la unica via que calcula sus claves (RF2-PIPE-11)."""
+    sujeto_id = g.personajes.get(sujeto) if sujeto_tipo == "personaje" else (
+        g.lugares.get(sujeto) if sujeto_tipo == "lugar" else None
+    )
+    return insertar_hecho(
+        con, novela_id=g.novela_id, escena_id=g.escenas[escena], sujeto_tipo=sujeto_tipo,
+        sujeto_id=sujeto_id, sujeto_nombre=sujeto, atributo=atributo, valor=valor,
+        categoria="fisico", cita=cita or None, supersede_a=supersede_a,
+    )
 
 
 def novela_minima(con: sqlite3.Connection) -> Grafo:
@@ -65,19 +90,22 @@ def novela_minima(con: sqlite3.Connection) -> Grafo:
 
     for nombre in ("Puente", "Modulo de carga", "Esclusa"):
         g.lugares[nombre] = _id(con.execute(
-            "INSERT INTO lugar (novela_id, mundo_id, nombre, descripcion) VALUES (?,?,?,?)",
-            (nid, mundo_id, nombre, f"{nombre} de la estacion."),
+            "INSERT INTO lugar (novela_id, mundo_id, nombre, nombre_clave, descripcion) "
+            "VALUES (?,?,?,?,?)",
+            (nid, mundo_id, nombre, normalizar(nombre), f"{nombre} de la estacion."),
         ))
 
     for nombre, rol in (("Kowalski", "protagonista"), ("Ibarra", "oponente"), ("Reyes", "aliado")):
         g.personajes[nombre] = _id(con.execute(
-            "INSERT INTO personaje (novela_id, nombre, rol_narrativo, tipo_arco) VALUES (?,?,?,?)",
-            (nid, nombre, rol, "positivo"),
+            "INSERT INTO personaje (novela_id, nombre, nombre_clave, rol_narrativo, tipo_arco) "
+            "VALUES (?,?,?,?,?)",
+            (nid, nombre, normalizar(nombre), rol, "positivo"),
         ))
 
     g.objetos["Baliza"] = _id(con.execute(
-        "INSERT INTO objeto (novela_id, nombre, funcion_narrativa) VALUES (?,?,?)",
-        (nid, "Baliza", "Prueba de que alguien estuvo antes"),
+        "INSERT INTO objeto (novela_id, nombre, nombre_clave, funcion_narrativa) "
+        "VALUES (?,?,?,?)",
+        (nid, "Baliza", "baliza", "Prueba de que alguien estuvo antes"),
     ))
 
     acto_id = _id(con.execute(
@@ -122,14 +150,9 @@ def novela_minima(con: sqlite3.Connection) -> Grafo:
     # Un hecho establecido en el capitulo 1, con quien lo sabe y quien lo usa despues.
     esc11 = g.escenas[(1, 1)]
     esc21 = g.escenas[(2, 1)]
-    g.hechos["ojos"] = _id(con.execute(
-        """
-        INSERT INTO hecho (novela_id, escena_id, sujeto_tipo, sujeto_id, sujeto_nombre,
-                           atributo, valor, categoria, cita)
-        VALUES (?,?,'personaje',?,?,'color de ojos','grises','fisico','tenia los ojos grises')
-        """,
-        (nid, esc11, g.personajes["Ibarra"], "Ibarra"),
-    ))
+    g.hechos["ojos"] = hecho(
+        con, g, (1, 1), "Ibarra", "color de ojos", "grises", cita="tenia los ojos grises"
+    )
     con.execute(
         "INSERT INTO estado_conocimiento (novela_id, personaje_id, hecho_id, escena_id, postura,"
         " via) VALUES (?,?,?,?, 'sabe','presencio')",

@@ -104,12 +104,16 @@ def aceptar_retcon(con: sqlite3.Connection, novela_id: int, parada_id: int) -> i
     ids = hechos_a_revocar(con, parada_id)
     if not ids:
         return 0
+    capitulo = con.execute("SELECT capitulo FROM parada WHERE id = ?", (parada_id,)).fetchone()
 
-    con.execute(
-        f"UPDATE hecho SET vigente = 0, motivo_no_vigente = 'retcon', parada_id = ? "
-        f"WHERE id IN ({','.join('?' * len(ids))})",
-        [parada_id, *ids],
-    )
+    # Revocar es INSERTAR, nunca un UPDATE sobre el hecho (RF2-PER-06): el hecho sigue ahi,
+    # con su escena y su cita, y la revocacion dice quien lo retiro, cuando y por que.
+    for hecho_id in sorted(ids):
+        con.execute(
+            "INSERT OR IGNORE INTO hecho_revocacion (novela_id, hecho_id, parada_id, capitulo, "
+            "motivo) SELECT novela_id, id, ?, ?, 'retcon' FROM hecho WHERE id = ?",
+            (parada_id, int(capitulo["capitulo"]), hecho_id),
+        )
 
     linea = con.execute(
         "SELECT id FROM linea_de_tiempo WHERE novela_id = ?", (novela_id,)
@@ -203,6 +207,13 @@ def revertir_grafo(
         "WHERE novela_id = ? AND numero >= ?",
         (novela_id, desde_capitulo),
     )
+    # Las revocaciones decididas despues de N se deshacen con el resto. La del retcon que se
+    # acepta en N se conserva: es el punto de partida de la regeneracion de N (RF2-PER-06).
+    cur = con.execute(
+        "DELETE FROM hecho_revocacion WHERE novela_id = ? AND capitulo > ?",
+        (novela_id, desde_capitulo),
+    )
+    borrado["hecho_revocacion"] = cur.rowcount
     emitir_evento(
         con, novela_id, "revertido", desde_capitulo=desde_capitulo, motivo=motivo,
         borrado=borrado,

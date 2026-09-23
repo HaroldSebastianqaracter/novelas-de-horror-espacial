@@ -19,7 +19,14 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, model_validator
 
-from compartido.tipos import CategoriaHecho, EstadoSiembra, NivelRevelacion, Postura, SujetoTipo
+from compartido.tipos import (
+    CategoriaHecho,
+    CondicionPersonaje,
+    EstadoSiembra,
+    NivelRevelacion,
+    Postura,
+    SujetoTipo,
+)
 
 
 class HechoExtraido(BaseModel):
@@ -56,6 +63,10 @@ class UsoConocimiento(BaseModel):
 class EstadoPersonajeExtraido(BaseModel):
     escena_orden: int = Field(ge=1)
     personaje_ref: str = Field(min_length=1)
+    condicion: CondicionPersonaje = Field(
+        description="Dato cerrado: vivo, herido, incapacitado, muerto o desaparecido. La puerta "
+                    "de continuidad lo consulta para saber si alguien puede reaparecer"
+    )
     salud_fisica: str = ""
     estado_psicologico: str = ""
     nivel_confianza: dict[str, str] = Field(default_factory=dict)
@@ -73,13 +84,23 @@ class EventoExtraido(BaseModel):
     fecha_interna: str = Field(min_length=1)
     orden_interno: int | None = Field(
         default=None,
-        description="Posicion del suceso en la cronologia interna, creciente. Es lo que hace "
-                    "exacta la comprobacion temporal: comparar fechas escritas en texto libre "
-                    "no lo es",
+        description="Posicion del suceso en la cronologia interna, creciente. OBLIGATORIO si "
+                    "el evento esta dramatizado: continua la escala desde el ultimo valor que "
+                    "trae el paquete. Es lo que hace exacta la comprobacion temporal",
     )
     descripcion: str = Field(min_length=5)
     tipo: str = ""
     dramatizado: bool = True
+
+    @model_validator(mode="after")
+    def _dramatizado_con_orden(self) -> EventoExtraido:
+        # Sin orden no hay ni ubicuidad ni retroceso temporal que comprobar, y autoasignarlo
+        # hacia crecer siempre la cronologia (RF2-PIPE-10).
+        if self.dramatizado and self.orden_interno is None:
+            raise ValueError(
+                f"El evento dramatizado «{self.descripcion[:60]}» no trae orden_interno."
+            )
+        return self
 
 
 class SiembraExtraida(BaseModel):

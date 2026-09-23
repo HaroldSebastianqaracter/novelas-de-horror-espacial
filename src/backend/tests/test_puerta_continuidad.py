@@ -16,7 +16,7 @@ import pytest
 
 from compartido import db
 from tareas.continuidad import puerta
-from tests.fabrica import Grafo, novela_minima
+from tests.fabrica import Grafo, hecho, novela_minima
 
 
 @pytest.fixture()
@@ -51,14 +51,7 @@ def test_grafo_correcto_pasa(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
 
 def test_detecta_contradiccion_factual(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
     con, g = grafo
-    con.execute(
-        """
-        INSERT INTO hecho (novela_id, escena_id, sujeto_tipo, sujeto_id, sujeto_nombre,
-                           atributo, valor, categoria, cita)
-        VALUES (?,?,'personaje',?,?,'color de ojos','azules','fisico','los ojos azules')
-        """,
-        (g.novela_id, g.escenas[(2, 1)], g.personajes["Ibarra"], "Ibarra"),
-    )
+    hecho(con, g, (2, 1), "Ibarra", "color de ojos", "azules", cita="los ojos azules")
     assert "continuidad_factual" in comprobaciones(con, g)
 
 
@@ -76,8 +69,8 @@ def test_detecta_conocimiento_no_adquirido(grafo: tuple[sqlite3.Connection, Graf
 def test_detecta_personaje_muerto_que_reaparece(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
     con, g = grafo
     con.execute(
-        "INSERT INTO estado_personaje (novela_id, personaje_id, escena_id, salud_fisica) "
-        "VALUES (?,?,?, 'muerta por descompresion')",
+        "INSERT INTO estado_personaje (novela_id, personaje_id, escena_id, condicion, "
+        "salud_fisica) VALUES (?,?,?, 'muerto', 'fallecida por descompresion')",
         (g.novela_id, g.personajes["Ibarra"], g.escenas[(1, 2)]),
     )
     assert "presencia_imposible" in comprobaciones(con, g)
@@ -138,14 +131,7 @@ def test_detecta_entidad_fuera_de_canon(grafo: tuple[sqlite3.Connection, Grafo])
 def test_supersede_no_es_contradiccion(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
     """Una herida que cicatriza no contradice la herida."""
     con, g = grafo
-    con.execute(
-        """
-        INSERT INTO hecho (novela_id, escena_id, sujeto_tipo, sujeto_id, sujeto_nombre,
-                           atributo, valor, categoria, cita, supersede_a)
-        VALUES (?,?,'personaje',?,?,'color de ojos','azules','fisico','los ojos azules',?)
-        """,
-        (g.novela_id, g.escenas[(2, 1)], g.personajes["Ibarra"], "Ibarra", g.hechos["ojos"]),
-    )
+    hecho(con, g, (2, 1), "Ibarra", "color de ojos", "azules", supersede_a=g.hechos["ojos"])
     assert "continuidad_factual" not in comprobaciones(con, g)
 
 
@@ -184,3 +170,112 @@ def test_puerta_no_depende_del_indice(grafo: tuple[sqlite3.Connection, Grafo]) -
     con.execute("COMMIT")
     con_indice = {c.comprobacion for c in puerta.evaluar(con, g.novela_id, 2).conflictos}
     assert sin_indice == con_indice
+
+
+# --- spec2, fase 5: sin falsos positivos ni puntos muertos --------------------------------
+
+
+def test_una_cadena_de_tres_supersesiones_no_es_contradiccion(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """grises -> azules -> verdes -> negros: cada eslabon sustituye al anterior."""
+    con, g = grafo
+    previo = g.hechos["ojos"]
+    for escena, valor in (((1, 2), "azules"), ((2, 1), "verdes"), ((2, 2), "negros")):
+        previo = hecho(con, g, escena, "Ibarra", "color de ojos", valor, supersede_a=previo)
+    assert "continuidad_factual" not in comprobaciones(con, g, 1)
+    assert "continuidad_factual" not in comprobaciones(con, g, 2)
+
+
+@pytest.mark.parametrize(
+    ("antes", "despues"),
+    [
+        ("Ámbar", "ámbar"), ("ÑANDÚ", "ñandú"), ("gris  claro ", "Gris claro"),
+        ("Pingüino", "pinguino"),
+    ],
+)
+def test_mayusculas_tildes_y_espacios_no_cambian_el_valor(
+    grafo: tuple[sqlite3.Connection, Grafo], antes: str, despues: str
+) -> None:
+    con, g = grafo
+    hecho(con, g, (1, 1), "Reyes", "color de pelo", antes)
+    hecho(con, g, (2, 1), "Reyes", "color de pelo", despues)
+    assert "continuidad_factual" not in comprobaciones(con, g)
+
+
+def test_la_ene_es_una_letra_y_si_distingue(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    con, g = grafo
+    hecho(con, g, (1, 1), "Reyes", "apodo", "Peña")
+    hecho(con, g, (2, 1), "Reyes", "apodo", "Pena")
+    assert "continuidad_factual" in comprobaciones(con, g)
+
+
+def test_cada_par_contradictorio_se_informa_una_vez(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """Dos valores nuevos en la misma escena chocan con el antiguo y entre si: tres pares."""
+    con, g = grafo
+    hecho(con, g, (2, 1), "Ibarra", "color de ojos", "azules")
+    hecho(con, g, (2, 1), "Ibarra", "color de ojos", "verdes")
+    pares = [
+        frozenset((c.datos["hecho_nuevo_id"], c.datos["hecho_previo_id"]))
+        for c in puerta.evaluar(con, g.novela_id, 2).bloqueantes
+        if c.comprobacion == "continuidad_factual"
+    ]
+    assert len(pares) == 3
+    assert len(set(pares)) == 3
+
+
+def _condicion(con: sqlite3.Connection, g: Grafo, escena: tuple[int, int], cual: str) -> None:
+    con.execute(
+        "INSERT INTO estado_personaje (novela_id, personaje_id, escena_id, condicion) "
+        "VALUES (?,?,?,?)", (g.novela_id, g.personajes["Ibarra"], g.escenas[escena], cual),
+    )
+
+
+def test_la_ultima_condicion_manda(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    """Un desaparecido que aparece vivo puede volver; uno que sigue muerto, no."""
+    con, g = grafo
+    _condicion(con, g, (1, 1), "desaparecido")
+    _condicion(con, g, (1, 2), "vivo")
+    assert "presencia_imposible" not in comprobaciones(con, g)
+
+    _condicion(con, g, (1, 2), "muerto")
+    assert "presencia_imposible" in comprobaciones(con, g)
+
+
+def test_la_muerte_no_impide_una_analepsis(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    con, g = grafo
+    _condicion(con, g, (1, 2), "muerto")
+    con.execute("UPDATE escena SET analepsis = 1 WHERE capitulo_id = ?", (g.capitulos[2],))
+    assert "presencia_imposible" not in comprobaciones(con, g)
+
+
+def test_un_hecho_revocado_no_contradice(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    con, g = grafo
+    hecho(con, g, (2, 1), "Ibarra", "color de ojos", "azules")
+    assert "continuidad_factual" in comprobaciones(con, g)
+    con.execute(
+        "INSERT INTO hecho_revocacion (novela_id, hecho_id, capitulo, motivo) "
+        "VALUES (?,?,2,'retcon')", (g.novela_id, g.hechos["ojos"]),
+    )
+    assert "continuidad_factual" not in comprobaciones(con, g)
+
+
+def test_el_extractor_recibe_el_ultimo_orden_interno() -> None:
+    """Para seguir la escala tiene que saber donde va (RF2-PIPE-10)."""
+    import config
+    from compartido.contexto import Presupuesto
+    from tareas.extraccion import servicio
+
+    ruta = Path(tempfile.mkdtemp()) / "novela.db"
+    con = db.preparar(ruta)
+    con.execute("BEGIN")
+    g = novela_minima(con)
+    con.execute("COMMIT")
+    paquete = servicio.paquete(
+        con, g.novela_id, 2, {1: "texto"},
+        presupuesto=Presupuesto(bloques=config.PRESUPUESTO_BLOQUES,
+                                techo=config.PRESUPUESTO_PAQUETE),
+    )
+    assert "El ultimo orden_interno registrado en la novela es 4" in paquete.render()
