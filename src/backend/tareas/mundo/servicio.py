@@ -115,9 +115,14 @@ def aplicar(con: sqlite3.Connection, novela_id: int, salida: SalidaMundo) -> Non
         con, "linea_de_tiempo", novela_id=novela_id,
         origen=salida.linea_de_tiempo_origen, unidad=salida.linea_de_tiempo_unidad,
     )
-    for orden, ev in enumerate(salida.eventos_previos, start=1):
+    # El orden interno de los antecedentes sale de su dia, no del orden de la lista: un previo
+    # mal colocado contradiria su propia fecha en `dia_contra_orden` (RF3-BIB-08). A igual dia,
+    # manda la lista.
+    previos = sorted(salida.eventos_previos, key=lambda ev: ev.dia)
+    for orden, ev in enumerate(previos, start=1):
         insertar(
             con, "evento", novela_id=novela_id, linea_de_tiempo_id=linea_id,
-            fecha_interna=ev.fecha_interna, orden_interno=-len(salida.eventos_previos) + orden - 1,
+            fecha_interna=ev.fecha_interna, dia=ev.dia,
+            orden_interno=-len(previos) + orden - 1,
             descripcion=ev.descripcion, tipo=ev.tipo, dramatizado=False,
         )

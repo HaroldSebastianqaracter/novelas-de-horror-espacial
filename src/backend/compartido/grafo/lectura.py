@@ -342,6 +342,14 @@ def ultimo_orden_interno(con: sqlite3.Connection, novela_id: int) -> int:
     return int(valor) if valor is not None else 0
 
 
+def ultimo_dia(con: sqlite3.Connection, novela_id: int) -> int:
+    """El mayor `dia` registrado (RF3-BIB-08); 0, el comienzo de la historia, si no hay."""
+    valor = con.execute(
+        "SELECT MAX(dia) FROM evento WHERE novela_id = ?", (novela_id,)
+    ).fetchone()[0]
+    return int(valor) if valor is not None else 0
+
+
 def siembras_vivas(
     con: sqlite3.Connection, novela_id: int, numero: int, margen: int = 3
 ) -> list[dict[str, Any]]:
@@ -431,3 +439,97 @@ def elementos_personales(
         "WHERE novela_id = ? AND (obligatorio = 1 OR ? = 0) ORDER BY id",
         (novela_id, 1 if solo_obligatorios else 0),
     ))
+
+
+# --- Huecos de la story bible (specs/spec3.md, 3.3) ------------------------------------------
+
+
+def usos_de_hecho(
+    con: sqlite3.Connection, novela_id: int, hecho_id: int
+) -> list[dict[str, Any]]:
+    """Donde se establece y donde se usa un hecho, en orden de escena (RF3-BIB-02)."""
+    return _filas(con.execute(
+        """
+        SELECT he.capitulo_numero AS capitulo, he.escena_orden, he.escena_id, he.via, he.cita
+        FROM hecho_escena he
+        JOIN escena_ordinal o ON o.escena_id = he.escena_id
+        WHERE he.novela_id = ? AND he.hecho_id = ?
+        ORDER BY o.ordinal, he.via
+        """,
+        (novela_id, hecho_id),
+    ))
+
+
+def capitulos_de_hecho(con: sqlite3.Connection, novela_id: int, hecho_id: int) -> list[int]:
+    """Los capitulos que establecen o usan el hecho: los que el bloque 8 regenerara."""
+    return sorted({int(u["capitulo"]) for u in usos_de_hecho(con, novela_id, hecho_id)})
+
+
+def cronologia(con: sqlite3.Connection, novela_id: int) -> list[dict[str, Any]]:
+    """Los eventos en orden de dia y de orden interno, con sus personajes (RF3-BIB-10).
+
+    Los eventos sin dia (anteriores al bloque 3 o no dramatizados sin fecha) van al final, en
+    orden interno: no hay con que colocarlos entre los demas.
+    """
+    eventos = _filas(con.execute(
+        """
+        SELECT evento_id, dia, orden_interno, fecha_interna, descripcion, tipo, dramatizado,
+               escena_id, capitulo_numero AS capitulo, escena_orden, lugar_id, lugar
+        FROM cronologia
+        WHERE novela_id = ?
+        ORDER BY dia IS NULL, dia, orden_interno IS NULL, orden_interno, evento_id
+        """,
+        (novela_id,),
+    ))
+    personajes: dict[int, list[str]] = {}
+    for f in con.execute(
+        """
+        SELECT cp.evento_id, cp.nombre FROM cronologia_personaje cp
+        JOIN evento ev ON ev.id = cp.evento_id
+        WHERE ev.novela_id = ? ORDER BY cp.nombre
+        """,
+        (novela_id,),
+    ):
+        personajes.setdefault(int(f["evento_id"]), []).append(str(f["nombre"]))
+    for ev in eventos:
+        ev["dramatizado"] = bool(ev["dramatizado"])
+        ev["personajes"] = personajes.get(int(ev["evento_id"]), [])
+    return eventos
+
+
+def versiones(con: sqlite3.Connection, novela_id: int) -> list[dict[str, Any]]:
+    """Las versiones publicadas, con los capitulos que cambiaron en cada una (RF3-BIB-11)."""
+    salida = _filas(con.execute(
+        "SELECT id, numero, motivo, detalle, titulo, dedicatoria, creado_en "
+        "FROM novela_version WHERE novela_id = ? ORDER BY numero",
+        (novela_id,),
+    ))
+    for v in salida:
+        v["capitulos_cambiados"] = [
+            int(f[0]) for f in con.execute(
+                "SELECT numero FROM novela_version_capitulo WHERE version_id = ? AND cambiado = 1 "
+                "ORDER BY numero",
+                (v.pop("id"),),
+            )
+        ]
+    return salida
+
+
+def version(con: sqlite3.Connection, novela_id: int, numero: int) -> dict[str, Any] | None:
+    """Una version con el texto de sus capitulos."""
+    v = _fila(con.execute(
+        "SELECT id, numero, motivo, detalle, titulo, dedicatoria, creado_en "
+        "FROM novela_version WHERE novela_id = ? AND numero = ?",
+        (novela_id, numero),
+    ).fetchone())
+    if v is None:
+        return None
+    v["capitulos"] = _filas(con.execute(
+        "SELECT numero, texto, palabras, cambiado FROM novela_version_capitulo "
+        "WHERE version_id = ? ORDER BY numero",
+        (v.pop("id"),),
+    ))
+    for c in v["capitulos"]:
+        c["cambiado"] = bool(c["cambiado"])
+    v["capitulos_cambiados"] = [c["numero"] for c in v["capitulos"] if c["cambiado"]]
+    return v

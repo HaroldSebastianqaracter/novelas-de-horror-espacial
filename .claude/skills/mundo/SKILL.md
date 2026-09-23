@@ -21,7 +21,7 @@ Terminas cuando **toda regla que la trama vaya a usar está escrita**, incluidos
 
 **La amenaza**, con al menos tres reglas. Cada regla lleva tres cosas: qué puede hacer, qué **no** puede hacer y qué la dispara.
 
-**La línea de tiempo** y los eventos previos a la novela: la historia del mundo que ya ocurrió.
+**La línea de tiempo** y los eventos previos a la novela: la historia del mundo que ya ocurrió. El origen de la línea de tiempo es el **día 0, el día en que empieza la historia**. Cada evento previo lleva su `dia`, en días desde ese origen: 0 o negativo, porque ya ocurrió (ocho meses antes son unos −240; diez años, unos −3650). Con esos días se calculan las edades y se ordena la cronología, así que ponlos aunque la fecha en texto sea vaga.
 
 ## Con qué criterio
 

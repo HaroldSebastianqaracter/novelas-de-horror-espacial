@@ -102,8 +102,10 @@ _SECCION_FACCIONES = "### Facciones"
 
 
 def _personaje(p: dict[str, Any]) -> str:
+    # RF3-BIB-07: la edad, para que la prosa no la contradiga. Nula en novelas anteriores.
+    edad = f", {p['edad']} años" if p.get("edad") is not None else ""
     return (
-        f"**{p['nombre']}** ({p['rol_narrativo']}). Desea {p['deseo']}. "
+        f"**{p['nombre']}** ({p['rol_narrativo']}{edad}). Desea {p['deseo']}. "
         f"Necesita {p['necesidad_interna']}. Defecto visible: {p['defecto']}. "
         f"Cree que {p['mentira']}.\nIdiolecto: {p['idiolecto']}"
         + (f"\nGuarda: {p['secreto']}" if p.get("secreto") else "")

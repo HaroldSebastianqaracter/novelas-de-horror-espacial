@@ -21,6 +21,7 @@ Un personaje lleva, y ninguno de estos campos es decorativo:
 - `defecto` — La conducta observable que de ahí se deriva.
 - `tipo_arco` — Positivo, plano o negativo. El negativo precisa además su subtipo.
 - `rol_narrativo` — Su función en la historia, no su oficio.
+- `edad` — Años cumplidos el día en que empieza la historia. Todos la llevan, también una inteligencia de a bordo (la de su activación) o una mascota. Con ella se comprueba que nadie actúa antes de nacer y que las edades no se contradicen.
 - `idiolecto` — Su huella verbal.
 - `posicion_tematica` — Qué responde este personaje a la pregunta central del tema.
 
@@ -46,7 +47,7 @@ Los tipos de arco no son etiquetas. El **positivo** abandona la mentira y abraza
 
 Cuando la entrada dice que la novela es un regalo:
 
-- **El destinatario es el protagonista**, con su nombre escrito exactamente como en la entrada y `rol_narrativo` `protagonista`. Su cadena fantasma → herida → mentira → defecto sale de sus rasgos reales: tiene que reconocerse en cómo actúa, no solo en cómo se llama.
+- **El destinatario es el protagonista**, con su nombre escrito exactamente como en la entrada, `rol_narrativo` `protagonista` y **la edad que dice la entrada**, ni un año más ni uno menos. Su cadena fantasma → herida → mentira → defecto sale de sus rasgos reales: tiene que reconocerse en cómo actúa, no solo en cómo se llama.
 - **Cada allegado de la lista es un personaje**, con su nombre exacto. Una mascota también: un personaje puede no hablar. Dale una función en la historia que respete lo que es para el destinatario.
 - **El destinatario sobrevive.** Diseña el arco para que el precio lo paguen otras cosas: una pérdida, una certeza, una relación.
 

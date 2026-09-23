@@ -50,10 +50,12 @@ Requisitos en [spec3.md](spec3.md), 3.2; verificación en [spec3-verification.md
 
 ### 3. Huecos de la story bible
 
-- [ ] Tabla **hecho → capítulos donde se usa**: hoy solo se guarda dónde se establece. Sin ella no se puede regenerar solo lo afectado por un cambio del lector.
-- [ ] Fechas de nacimiento o edades de los personajes, que el invariante de edad de Lean necesita.
-- [ ] Vista de **cronología**: evento, momento, personajes y lugar.
-- [ ] Entidad **versión de la novela**, con qué capítulos cambiaron respecto a la anterior.
+Requisitos en [spec3.md](spec3.md), 3.3; verificación en [spec3-verification.md](spec3-verification.md), filas 20 a 32.
+
+- [x] Tabla **hecho → capítulos donde se usa** (`hecho_uso` y la vista `hecho_escena`): lo que el extractor reafirma, el valor exacto que aparece en la prosa y el conocimiento de los personajes.
+- [x] Edad de cada personaje el día 0 y nacimiento derivado; el protagonista tiene la edad del destinatario (puerta 1).
+- [x] Vista de **cronología** con día numérico, orden, lugar y personajes; la puerta 3 comprueba que el día y el orden no se contradigan.
+- [x] Entidad **versión de la novela**, con copia del texto y qué capítulos cambiaron respecto a la anterior. Nace al completarse la novela.
 
 ### 4. Observabilidad con Langfuse
 

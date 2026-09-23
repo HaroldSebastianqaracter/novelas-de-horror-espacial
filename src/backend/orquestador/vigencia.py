@@ -52,7 +52,8 @@ _LECTURAS: dict[int, tuple[str, ...]] = {
 _LECTURAS_DEL_ENCARGO: dict[int, tuple[str, ...]] = {
     1: (
         "SELECT contenido FROM brief WHERE novela_id = :n",
-        "SELECT id, nombre_clave FROM personaje WHERE novela_id = :n ORDER BY id",
+        # La edad, por `edad_del_destinatario` (RF3-BIB-06).
+        "SELECT id, nombre_clave, edad FROM personaje WHERE novela_id = :n ORDER BY id",
         "SELECT dedicatoria FROM novela WHERE id = :n",
     ),
     2: (

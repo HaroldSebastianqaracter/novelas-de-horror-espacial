@@ -212,6 +212,26 @@ WHERE a.capitulo = ? AND a.analepsis = 0
         WHERE b.ordinal < a.ordinal AND b.analepsis = 0) > a.min_orden
 """
 
+# --- 6b. El dia y el orden no se contradicen (RF3-BIB-09) ---------------------------------
+# Dos datos que declara el extractor, comparados entre si: si un evento va antes en orden
+# interno, no puede caer en un dia posterior. Al menos uno de los dos es de este capitulo; los
+# antecedentes del mundo (sin escena) tambien cuentan como el otro.
+_SQL_DIA_CONTRA_ORDEN = """
+SELECT a.id AS evento_id, a.descripcion, a.dia, a.orden_interno, a.escena_id,
+       b.id AS otro_id, b.descripcion AS otra_descripcion, b.dia AS otro_dia,
+       b.orden_interno AS otro_orden, b.escena_id AS otra_escena_id,
+       oa.capitulo_numero AS capitulo_evento
+FROM evento a
+JOIN evento b ON b.novela_id = a.novela_id AND b.id <> a.id
+LEFT JOIN escena_ordinal oa ON oa.escena_id = a.escena_id
+LEFT JOIN escena_ordinal ob ON ob.escena_id = b.escena_id
+WHERE a.novela_id = :novela
+  AND (oa.capitulo_numero = :capitulo OR ob.capitulo_numero = :capitulo)
+  AND a.dia IS NOT NULL AND b.dia IS NOT NULL
+  AND a.orden_interno IS NOT NULL AND b.orden_interno IS NOT NULL
+  AND b.orden_interno < a.orden_interno AND b.dia > a.dia
+"""
+
 _SQL_ENTIDADES = """
 SELECT en.nombre, en.contexto, en.escena_id, c.numero AS capitulo
 FROM entidad_no_reconocida en
@@ -336,6 +356,25 @@ def evaluar(
             escena_id=f["escena_id"], capitulo=capitulo, datos=f,
         ))
 
+    # Cada par sale una vez: `a` es siempre el de orden mayor, asi que un par no se repite al
+    # reves. El recuerdo que el capitulo coloca antes de un suceso ya escrito tambien sale.
+    for f in [dict(x) for x in con.execute(
+        _SQL_DIA_CONTRA_ORDEN, {"novela": novela_id, "capitulo": capitulo}
+    ).fetchall()]:
+        conflictos.append(Conflicto(
+            comprobacion="dia_contra_orden",
+            descripcion=(
+                f"«{f['descripcion'][:60]}» va despues en la cronologia (orden "
+                f"{f['orden_interno']}) que «{f['otra_descripcion'][:60]}» (orden "
+                f"{f['otro_orden']}), pero cae en el dia {f['dia']}, antes que el dia "
+                f"{f['otro_dia']}."
+            ),
+            escena_id=(
+                f["escena_id"] if f["capitulo_evento"] == capitulo else f["otra_escena_id"]
+            ),
+            capitulo=capitulo, datos=f,
+        ))
+
     for f in _filas(con, _SQL_ENTIDADES, p):
         conflictos.append(Conflicto(
             # Aviso (RF2-PIPE-22): el redactor inventa detalles menores como cualquier
@@ -427,6 +466,14 @@ def _escenas(con: sqlite3.Connection, novela_id: int, capitulo: int) -> list[dic
     ).fetchall()]
 
 
+# Una reafirmacion tambien es el extractor diciendo algo de la entidad en la escena: antes se
+# descartaba sin rastro y dejaba un falso `nombre_sin_registro` (RF3-BIB-03).
+_REAFIRMA = """
+        UNION ALL SELECT 1 FROM hecho_uso u JOIN hecho h ON h.id = u.hecho_id
+                  WHERE u.escena_id = :e AND u.via = 'reafirma'
+                    AND h.sujeto_tipo = '{tipo}' AND h.sujeto_id = :id
+"""
+
 # Registros que cuentan como «el extractor dijo algo de esta entidad en esta escena».
 _REGISTROS: dict[str, str] = {
     "personaje": """
@@ -437,18 +484,18 @@ _REGISTROS: dict[str, str] = {
                   WHERE x.escena_id = :e AND x.personaje_id = :id
         UNION ALL SELECT 1 FROM uso_conocimiento x WHERE x.escena_id = :e AND x.personaje_id = :id
         UNION ALL SELECT 1 FROM estado_objeto x WHERE x.escena_id = :e AND x.poseedor_id = :id
-    """,
+    """ + _REAFIRMA.format(tipo="personaje"),
     "lugar": """
         SELECT 1 FROM hecho h WHERE h.escena_id = :e AND h.sujeto_tipo = 'lugar'
                                 AND h.sujeto_id = :id
         UNION ALL SELECT 1 FROM estado_objeto x
                   WHERE x.escena_id = :e AND x.ubicacion_lugar_id = :id
-    """,
+    """ + _REAFIRMA.format(tipo="lugar"),
     "objeto": """
         SELECT 1 FROM hecho h WHERE h.escena_id = :e AND h.sujeto_tipo = 'objeto'
                                 AND h.sujeto_id = :id
         UNION ALL SELECT 1 FROM estado_objeto x WHERE x.escena_id = :e AND x.objeto_id = :id
-    """,
+    """ + _REAFIRMA.format(tipo="objeto"),
 }
 
 
@@ -488,10 +535,17 @@ def _cifras_sin_hecho(
     cifras = _CIFRA.findall(texto)
     if not cifras:
         return None
+    # Un hecho de fecha o distancia que la escena establece, reafirma o menciona: la cifra ya
+    # esta en el canon (RF3-BIB-03).
     hay = con.execute(
-        "SELECT EXISTS (SELECT 1 FROM hecho WHERE escena_id = ? "
-        "AND categoria IN ('fecha', 'distancia'))",
-        (escena["id"],),
+        """
+        SELECT EXISTS (
+            SELECT 1 FROM hecho WHERE escena_id = :e AND categoria IN ('fecha', 'distancia')
+            UNION ALL
+            SELECT 1 FROM hecho_uso u JOIN hecho h ON h.id = u.hecho_id
+            WHERE u.escena_id = :e AND h.categoria IN ('fecha', 'distancia'))
+        """,
+        {"e": escena["id"]},
     ).fetchone()[0]
     if hay:
         return None

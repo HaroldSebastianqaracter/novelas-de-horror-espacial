@@ -17,7 +17,7 @@ import json
 import sqlite3
 from typing import Any
 
-from compartido.db import TABLAS_DE_ESTADO
+from compartido.db import TABLAS_DE_ESTADO, TABLAS_QUE_CUELGAN_DE_UN_HECHO
 from compartido.grafo import Resolvedor, emitir_evento, insertar, normalizar
 from compartido.tipos import como_dict, como_lista
 from compartido.vectores import purgar_descartes
@@ -222,7 +222,7 @@ def revertir_grafo(
     if escenas:
         huecos = ",".join("?" * len(escenas))
         # El conocimiento cuelga de hechos que estan a punto de desaparecer, asi que va antes.
-        for tabla in ("estado_conocimiento", "uso_conocimiento"):
+        for tabla in TABLAS_QUE_CUELGAN_DE_UN_HECHO:
             cur = con.execute(
                 f"DELETE FROM {tabla} WHERE escena_id IN ({huecos}) OR hecho_id IN "
                 f"(SELECT id FROM hecho WHERE escena_id IN ({huecos}))",
@@ -230,7 +230,7 @@ def revertir_grafo(
             )
             borrado[tabla] = cur.rowcount
         for tabla in TABLAS_DE_ESTADO:
-            if tabla in ("estado_conocimiento", "uso_conocimiento"):
+            if tabla in TABLAS_QUE_CUELGAN_DE_UN_HECHO:
                 continue
             cur = con.execute(f"DELETE FROM {tabla} WHERE escena_id IN ({huecos})", escenas)
             borrado[tabla] = cur.rowcount
@@ -373,6 +373,7 @@ FASE_DE_COMPROBACION = {
     "subgenero_exige_intensidad": "arquitecto",
     "destinatario_protagonista": "elenco",
     "allegado_en_elenco": "elenco",
+    "edad_del_destinatario": "elenco",
 }
 
 

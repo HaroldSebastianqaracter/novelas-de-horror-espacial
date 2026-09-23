@@ -91,6 +91,12 @@ class EventoExtraido(BaseModel):
                     "el evento esta dramatizado: continua la escala desde el ultimo valor que "
                     "trae el paquete. Es lo que hace exacta la comprobacion temporal",
     )
+    dia: int | None = Field(
+        default=None,
+        description="Dias desde el comienzo de la historia (dia 0), negativos antes. "
+                    "OBLIGATORIO si el evento esta dramatizado, como orden_interno, y creciente "
+                    "con el: un suceso posterior no puede caer en un dia anterior (RF3-BIB-08)",
+    )
     descripcion: str = Field(min_length=5)
     tipo: str = ""
     dramatizado: bool = True
@@ -98,10 +104,15 @@ class EventoExtraido(BaseModel):
     @model_validator(mode="after")
     def _dramatizado_con_orden(self) -> EventoExtraido:
         # Sin orden no hay ni ubicuidad ni retroceso temporal que comprobar, y autoasignarlo
-        # hacia crecer siempre la cronologia (RF2-PIPE-10).
+        # hacia crecer siempre la cronologia (RF2-PIPE-10). Sin dia, Lean no puede contar
+        # edades (RF3-BIB-08), y tampoco se inventa aqui.
         if self.dramatizado and self.orden_interno is None:
             raise ValueError(
                 f"El evento dramatizado «{self.descripcion[:60]}» no trae orden_interno."
+            )
+        if self.dramatizado and self.dia is None:
+            raise ValueError(
+                f"El evento dramatizado «{self.descripcion[:60]}» no trae dia."
             )
         return self
 

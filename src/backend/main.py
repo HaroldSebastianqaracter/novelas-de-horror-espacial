@@ -261,6 +261,7 @@ class PersonajeCanon(BaseModel):
     nombre: str
     rol: str | None = None
     rol_narrativo: str
+    edad: int | None = None
     deseo: str | None = None
     necesidad_interna: str | None = None
     fantasma: str | None = None
@@ -327,6 +328,7 @@ class EventoCanon(BaseModel):
     id: int
     escena_id: int | None = None
     fecha_interna: str
+    dia: int | None = None
     orden_interno: int | None = None
     descripcion: str
     tipo: str | None = None
@@ -414,6 +416,54 @@ class Llamada(BaseModel):
     salida_cruda: str | None = None
     tokens_entrada_por_bloque: dict[str, int] | None = None
     metadatos: dict[str, Any] | None = None
+
+
+class EventoCronologia(BaseModel):
+    """Un evento de la cronologia (spec3, RF3-BIB-10). Sin escena, es un antecedente."""
+
+    evento_id: int
+    dia: int | None = None
+    orden_interno: int | None = None
+    fecha_interna: str
+    descripcion: str
+    tipo: str | None = None
+    dramatizado: bool
+    capitulo: int | None = None
+    escena_orden: int | None = None
+    lugar: str | None = None
+    personajes: list[str] = Field(default_factory=list[str])
+
+
+class UsoHecho(BaseModel):
+    """Una escena que establece o usa un hecho (spec3, RF3-BIB-02)."""
+
+    capitulo: int
+    escena_orden: int
+    via: Literal["establece", "reafirma", "menciona", "conoce", "usa"]
+    cita: str | None = None
+
+
+class VersionResumen(BaseModel):
+    """Una version publicada de la novela (spec3, RF3-BIB-11)."""
+
+    numero: int
+    motivo: str
+    detalle: str | None = None
+    titulo: str
+    dedicatoria: str | None = None
+    creado_en: str
+    capitulos_cambiados: list[int]
+
+
+class CapituloVersion(BaseModel):
+    numero: int
+    texto: str
+    palabras: int
+    cambiado: bool
+
+
+class VersionNovela(VersionResumen):
+    capitulos: list[CapituloVersion]
 
 
 # --- Aplicacion ------------------------------------------------------------------------------
@@ -814,6 +864,43 @@ def ver_conocimiento(
     sql += " ORDER BY p.nombre, c.numero LIMIT ?"
     params.append(limite)
     return [ConocimientoVista.model_validate(dict(f)) for f in con.execute(sql, params)]
+
+
+@app.get("/novelas/{novela_id}/hechos/{hecho_id}/usos", response_model=list[UsoHecho])
+def ver_usos_de_hecho(novela_id: int, hecho_id: int, con: Con) -> list[UsoHecho]:
+    """Donde se establece y donde se usa un hecho (spec3, RF3-BIB-02)."""
+    _novela_o_404(con, novela_id)
+    if con.execute(
+        "SELECT 1 FROM hecho WHERE id = ? AND novela_id = ?", (hecho_id, novela_id)
+    ).fetchone() is None:
+        raise HTTPException(status_code=404, detail=f"No existe el hecho {hecho_id}")
+    return [UsoHecho.model_validate(u) for u in lectura.usos_de_hecho(con, novela_id, hecho_id)]
+
+
+@app.get("/novelas/{novela_id}/cronologia", response_model=list[EventoCronologia])
+def ver_cronologia(novela_id: int, con: Con) -> list[EventoCronologia]:
+    """Los eventos en orden de dia, con su lugar y sus personajes (spec3, RF3-BIB-10)."""
+    _novela_o_404(con, novela_id)
+    return [EventoCronologia.model_validate(e) for e in lectura.cronologia(con, novela_id)]
+
+
+# --- Versiones ------------------------------------------------------------------------------------
+
+
+@app.get("/novelas/{novela_id}/versiones", response_model=list[VersionResumen])
+def listar_versiones(novela_id: int, con: Con) -> list[VersionResumen]:
+    """Lo que ha leido el lector, version a version (spec3, RF3-BIB-11)."""
+    _novela_o_404(con, novela_id)
+    return [VersionResumen.model_validate(v) for v in lectura.versiones(con, novela_id)]
+
+
+@app.get("/novelas/{novela_id}/versiones/{numero}", response_model=VersionNovela)
+def ver_version(novela_id: int, numero: int, con: Con) -> VersionNovela:
+    _novela_o_404(con, novela_id)
+    v = lectura.version(con, novela_id, numero)
+    if v is None:
+        raise HTTPException(status_code=404, detail=f"No existe la version {numero}")
+    return VersionNovela.model_validate(v)
 
 
 # --- Paradas --------------------------------------------------------------------------------------

@@ -6,7 +6,8 @@ El modelo cubre tres cosas distintas y conviene no confundirlas:
 
 - **Canon** — lo que es verdad en la obra y cambia poco: `Novela`, `Mundo`, `SistemaTecnologico`, `Personaje`, `EstiloNarrativo`, y el `Encargo` con sus `ElementoPersonal`, que fija el comprador antes de empezar. Un cambio aquí se propaga hacia adelante sobre todo lo ya escrito.
 - **Estructura** — el plan de la historia: `Acto`, `Capitulo`, `Secuencia`, `Escena`, `Secuela`, `Beat`, `HiloNarrativo`, `PuntoDeGiro`.
-- **Estado** — lo que cambia escena a escena y hay que rastrear para no contradecirse: `EstadoPersonaje`, `EstadoDeConocimiento`, `UsoDeConocimiento`, `EstadoObjeto`, `Hecho`, `Siembra`, `Evento`, y los tres registros derivados `EstadoSiembra`, `EstadoHilo` y `RevelacionAmenaza`.
+- **Estado** — lo que cambia escena a escena y hay que rastrear para no contradecirse: `EstadoPersonaje`, `EstadoDeConocimiento`, `UsoDeConocimiento`, `UsoDeHecho`, `EstadoObjeto`, `Hecho`, `Siembra`, `Evento`, y los tres registros derivados `EstadoSiembra`, `EstadoHilo` y `RevelacionAmenaza`.
+- **Publicación** — lo que leyó el lector: `VersionNovela` y sus capítulos. No es estado: ninguna reversión la toca.
 
 El proceso de producción (borradores, tipos de pasada de revisión, lectores beta) **no** está aquí: es pipeline, y vive en [architecture.md](architecture.md).
 
@@ -85,6 +86,7 @@ classDiagram
   }
   class Evento {
     +fechaInterna
+    +dia
     +ordenInterno
     +descripcion
     +tipo
@@ -94,6 +96,7 @@ classDiagram
     +nombre
     +rol
     +rolNarrativo
+    +edad
     +deseo
     +necesidadInterna
     +fantasma
@@ -136,6 +139,22 @@ classDiagram
     +capitulo
   }
   class UsoDeConocimiento {
+  }
+  class UsoDeHecho {
+    +via
+    +cita
+  }
+  class VersionNovela {
+    +numero
+    +motivo
+    +detalle
+    +titulo
+    +dedicatoria
+  }
+  class CapituloDeVersion {
+    +numero
+    +texto
+    +cambiado
   }
   class Amenaza {
     +naturaleza
@@ -275,6 +294,10 @@ classDiagram
   Personaje "1" --> "*" UsoDeConocimiento : usa
   UsoDeConocimiento "*" --> "1" Hecho : sobre
   UsoDeConocimiento "*" --> "1" Escena : en
+  UsoDeHecho "*" --> "1" Hecho : sobre
+  UsoDeHecho "*" --> "1" Escena : en
+  Novela "1" --> "*" VersionNovela : publicadaComo
+  VersionNovela "1" --> "*" CapituloDeVersion : contiene
 
   Amenaza "1" --> "*" Escena : seManifiestaEn
   Amenaza "*" --> "*" Personaje : amenazaA
@@ -333,16 +356,20 @@ Si la novela es un regalo, fija también la **dedicatoria** de la portada.
 **LineaDeTiempo** — La cronología interna de la obra. Ordena dos capas: la historia previa del mundo y los días que cubre la novela.
 `origen` · `unidad`
 
-**Evento** — Un suceso situado en la línea de tiempo, con su fecha interna y su **orden interno**, que es un ordinal creciente. Es *append-only*: se añaden eventos, no se reescribe la historia sin una decisión explícita de retcon. Un evento puede estar dramatizado en una escena o haber ocurrido fuera de la página.
-`fechaInterna` · `ordenInterno` · `descripcion` · `tipo` · `dramatizado`
+**Evento** — Un suceso situado en la línea de tiempo, con su fecha interna, su **día** y su **orden interno**, que es un ordinal creciente. El día cuenta días enteros desde el comienzo de la historia, que es el día 0; los antecedentes del mundo son 0 o negativos. La fecha interna es texto para la prosa («la tercera noche»), el día es para contar y el orden es para comparar. Es *append-only*: se añaden eventos, no se reescribe la historia sin una decisión explícita de retcon. Un evento puede estar dramatizado en una escena o haber ocurrido fuera de la página.
+`fechaInterna` · `dia` · `ordenInterno` · `descripcion` · `tipo` · `dramatizado`
+
+> **Decisión entrevistada, 23 de septiembre de 2026.** Se añade `dia` porque el orden interno dice qué va antes, pero no cuánto: sin una cantidad no se puede comprobar una edad, que es uno de los invariantes que Lean tiene que demostrar. Se descartaron los años (no distinguen dos sucesos de la misma semana) y quedarse en el orden relativo. El día y el orden los declara el mismo agente, así que la puerta 3 los compara entre sí (`dia_contra_orden`, [validators.md](validators.md)). Requisitos en [specs/spec3.md](../specs/spec3.md), 3.3.
 
 > **Decisión sin entrevistar, 22 de septiembre de 2026.** `ordenInterno` se añade porque la fecha no basta para comprobar nada. La alternativa era comparar `fechaInterna` como texto, y se descarta porque falla de dos formas a la vez: no ordena de manera fiable dos fechas escritas en libre, y marca como simultáneo todo lo que comparte fecha, cuando dos escenas del mismo día en lugares distintos son lo normal. Con un ordinal, «antes» y «a la vez» pasan a ser comparaciones exactas, que es lo que la puerta 3 necesita para ser determinista.
 
 ### Personajes
 
 **Personaje** — Cualquier individuo con agencia. Separa lo que busca conscientemente (`deseo`) de lo que necesita resolver (`necesidadInterna`), y encadena el origen de su defecto: el suceso pasado que sigue operando (`fantasma`), el daño que dejó (`herida`), la creencia falsa con la que se protege (`mentira`) y la conducta observable que de ahí se deriva (`defecto`). `tipoArco` es positivo, plano o negativo; `subtipoArco` precisa el negativo (desilusión, caída, corrupción). `rolNarrativo` es su función en la historia, no su oficio: protagonista, oponente, aliado, falso aliado, mentor, heraldo, guardián del umbral, espejo.
-`posicionTematica` recoge qué responde este personaje a la pregunta central del tema.
-`nombre` · `rol` · `rolNarrativo` · `deseo` · `necesidadInterna` · `fantasma` · `herida` · `mentira` · `defecto` · `tipoArco` · `subtipoArco` · `idiolecto` · `secreto` · `posicionTematica`
+`posicionTematica` recoge qué responde este personaje a la pregunta central del tema. `edad` son los años cumplidos el día 0 de la historia; el nacimiento se deriva de ella, a mitad de año, para que una analepsis de una semana no le quite un año a nadie.
+`nombre` · `rol` · `rolNarrativo` · `edad` · `deseo` · `necesidadInterna` · `fantasma` · `herida` · `mentira` · `defecto` · `tipoArco` · `subtipoArco` · `idiolecto` · `secreto` · `posicionTematica`
+
+> **Decisión entrevistada, 23 de septiembre de 2026.** Se añade `edad` porque el invariante de edad coherente necesita un nacimiento para cada personaje, y se guarda la edad y no la fecha porque es lo que el diseñador de elenco sabe decir; la fecha es una fórmula que vive en una sola vista. En una novela que es un regalo, el protagonista tiene la edad del destinatario. Se descartaron que el elenco la eligiera con margen o libremente: el destinatario se reconoce mejor, y así es comprobable.
 
 > **Decisión sin entrevistar, 22 de septiembre de 2026.** `posicionTematica` existe para hacer comprobable el criterio de terminación del diseñador de elenco: que ningún personaje duplique la función de otro. Sin ella esa condición solo se puede juzgar leyendo. Con ella es una consulta, porque dos personajes con el mismo rol narrativo y la misma posición ante el tema son el mismo personaje escrito dos veces, que es la tercera prueba del principio 24.
 
@@ -374,6 +401,18 @@ Un hecho **no se modifica nunca**. Retirarlo del canon, cuando el autor acepta u
 **UsoDeConocimiento** — Que un personaje **actúe** sobre un hecho en una escena, lo supiera desde antes o no. Es distinto de `EstadoDeConocimiento`, que registra cuándo lo adquirió.
 
 > **Decisión sin entrevistar, 22 de septiembre de 2026.** Se añade porque detectar que alguien actúa sobre lo que todavía no ha recibido exige las dos listas y no una. Con solo la adquisición no hay nada contra lo que comparar: hace falta saber que en una escena alguien usó un dato para poder preguntar si ya lo tenía. Sin esta entidad, la comprobación de conocimiento no adquirido no se puede escribir como consulta.
+
+**UsoDeHecho** — Que una escena **use** un hecho sin establecerlo. Tiene dos vías: `reafirma`, cuando el texto vuelve a decir lo que ya consta, y `menciona`, cuando el valor exacto de un hecho (un nombre, una fecha, una distancia, una cifra) aparece en la prosa. Junto con el hecho, el conocimiento y los usos de conocimiento, responde a la pregunta «qué capítulos dependen de este dato».
+`via` · `cita`
+
+> **Decisión entrevistada, 23 de septiembre de 2026.** Se añade porque el hecho solo guardaba dónde se establece, y el cambio del lector necesita regenerar todos los capítulos que lo usan y ninguno más. Hay dos vías para que la tabla no dependa solo de lo que el extractor declara: la mención la busca el código en la prosa. Se descartaron registrar solo lo que dice el extractor (dato autodeclarado sin segundo método) y buscar solo en la prosa (no ve una paráfrasis). Peca de incluir de más: regenerar un capítulo de sobra cuesta dinero, dejarse uno rompe la continuidad.
+
+### Publicación
+
+**VersionNovela** — Lo que leyó el lector: el título, la dedicatoria y el texto de cada capítulo en el momento en que la novela se completó. Nace una versión cada vez que la novela se completa con un texto distinto del de la anterior: la primera, un relanzamiento que reescribe capítulos o un cambio que pide el lector. Cada **CapituloDeVersion** marca si `cambiado` respecto a la versión anterior, que es lo que lista la página de novedades.
+`numero` · `motivo` · `detalle` · `titulo` · `dedicatoria`
+
+> **Decisión entrevistada, 23 de septiembre de 2026.** Lo que el harness rehace por dentro (reintentos, paradas) no es una versión, porque el lector nunca lo vio. Se descartaron versionar cada parada resuelta y versionar solo a petición del autor. La versión copia el texto en vez de apuntar a los capítulos: rehacer la escaleta los borra, y una versión que apuntase a ellos perdería su texto.
 
 ### Amenaza y objetos
 
@@ -449,7 +488,8 @@ Un hecho **no se modifica nunca**. Retirarlo del canon, cuando el autor acepta u
 - **Personaje** pertenece a Facción, y se opone o se alía con otros Personaje
 - **Personaje** evoluciona en EstadoPersonaje (registrado en una Escena) y sabe EstadoDeConocimiento sobre un Hecho desde una Escena
 - **Personaje** usa un Hecho en una Escena mediante UsoDeConocimiento, sepa o no desde antes
-- **Hecho** queda establecido en una Escena y no puede contradecirse después; puede sustituir legítimamente a otro anterior
+- **Hecho** queda establecido en una Escena y no puede contradecirse después; puede sustituir legítimamente a otro anterior; otras Escenas lo usan mediante UsoDeHecho
+- **Novela** se publica como VersionNovela, que contiene un CapituloDeVersion por capítulo
 - **Amenaza** se manifiesta en Escena, amenaza a Personaje y encarna un Tema
 - **Objeto** aparece en Escena y evoluciona en EstadoObjeto
 - **Siembra** se siembra en una Escena y evoluciona en EstadoSiembra; puede pertenecer a un HiloNarrativo

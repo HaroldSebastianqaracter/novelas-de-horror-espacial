@@ -413,6 +413,40 @@ _COMPROBACIONES: tuple[tuple[str, str, str], ...] = (
         """,
     ),
     (
+        "uso_antes_del_hecho",
+        "Ningun uso de un hecho precede a la escena que lo establece (RF3-BIB-14)",
+        """
+        SELECT u.id AS hecho_uso_id, u.hecho_id, u.via
+        FROM hecho_uso u
+        JOIN hecho h           ON h.id = u.hecho_id
+        JOIN escena_ordinal ou ON ou.escena_id = u.escena_id
+        JOIN escena_ordinal oh ON oh.escena_id = h.escena_id
+        WHERE ou.ordinal <= oh.ordinal
+        """,
+    ),
+    (
+        "version_desfasada",
+        "Una novela completada tiene version, y la ultima tiene el texto vigente de cada "
+        "capitulo (RF3-BIB-14)",
+        """
+        SELECT x.novela_id
+        FROM ejecucion x
+        WHERE x.estado IN ('completada', 'completada_con_avisos')
+          AND (
+            NOT EXISTS (SELECT 1 FROM novela_version v WHERE v.novela_id = x.novela_id)
+            OR EXISTS (
+              SELECT 1 FROM capitulo c
+              JOIN capitulo_compilado cc ON cc.capitulo_id = c.id AND cc.estado = 'vigente'
+              WHERE c.novela_id = x.novela_id
+                AND NOT EXISTS (
+                  SELECT 1 FROM novela_version_capitulo vc
+                  WHERE vc.numero = c.numero AND vc.texto = cc.texto
+                    AND vc.version_id = (SELECT v.id FROM novela_version v
+                                         WHERE v.novela_id = x.novela_id
+                                         ORDER BY v.numero DESC LIMIT 1))))
+        """,
+    ),
+    (
         "escena_texto_multiple_vigente",
         "Cada escena tiene como mucho una version de texto vigente",
         """
@@ -430,8 +464,15 @@ _COMPROBACIONES: tuple[tuple[str, str, str], ...] = (
 #: borrar sus filas de aqui; `evento` va aparte porque su escena admite NULL (los antecedentes
 #: del mundo y los retcon no ocurren en ninguna escena).
 TABLAS_DE_ESTADO: tuple[str, ...] = (
-    "hecho", "estado_conocimiento", "uso_conocimiento", "estado_personaje", "estado_objeto",
-    "siembra_estado", "hilo_estado", "amenaza_revelacion", "entidad_no_reconocida",
+    "hecho", "estado_conocimiento", "uso_conocimiento", "hecho_uso", "estado_personaje",
+    "estado_objeto", "siembra_estado", "hilo_estado", "amenaza_revelacion",
+    "entidad_no_reconocida",
+)
+
+#: Las tablas de estado que cuelgan de un hecho: al revertir, caen tambien las filas de
+#: escenas anteriores que apuntan a un hecho que desaparece.
+TABLAS_QUE_CUELGAN_DE_UN_HECHO: tuple[str, ...] = (
+    "estado_conocimiento", "uso_conocimiento", "hecho_uso",
 )
 
 ESTADOS_ACTIVOS: tuple[str, ...] = ("planificando", "escaletando", "generando")

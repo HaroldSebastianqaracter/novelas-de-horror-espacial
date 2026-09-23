@@ -23,6 +23,11 @@ class PersonajeSalida(BaseModel):
     nombre: str = Field(min_length=2)
     rol: str = Field(default="", description="Su oficio a bordo, no su funcion narrativa")
     rol_narrativo: RolNarrativo
+    edad: int = Field(
+        ge=0, le=1000,
+        description="Anos cumplidos el dia 0 de la historia (RF3-BIB-04). Tambien una "
+                    "inteligencia de a bordo tiene edad: la de su activacion",
+    )
     deseo: str = Field(min_length=5, description="Objetivo externo y consciente")
     necesidad_interna: str = Field(min_length=5, description="Carencia que debe resolver")
     fantasma: str = Field(min_length=5, description="El suceso del pasado")

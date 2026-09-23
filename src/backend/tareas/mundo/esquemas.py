@@ -58,6 +58,11 @@ class AmenazaSalida(BaseModel):
 
 class EventoPrevio(BaseModel):
     fecha_interna: str = Field(min_length=1)
+    dia: int = Field(
+        le=0,
+        description="Dias desde el comienzo de la historia, que es el dia 0: un antecedente "
+                    "es 0 o negativo (RF3-BIB-08). Ocho meses antes son unos -240",
+    )
     descripcion: str = Field(min_length=5)
     tipo: str = ""
 

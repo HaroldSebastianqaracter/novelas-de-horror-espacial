@@ -58,7 +58,7 @@ La máquina de estados que implementa el código (`orquestador/estados.py`) est�
 
 ## 3. Esquema SQLite (núcleo de la story bible)
 
-La base tiene cincuenta tablas y varias vistas; esto es el núcleo que consultan las puertas. El inventario completo por grupos está en [architecture.md](../architecture.md), «Persistencia», y el DDL en `src/backend/compartido/esquema.sql` más las migraciones de `compartido/migraciones/`.
+La base tiene cincuenta y siete tablas y ocho vistas; esto es el núcleo que consultan las puertas. El inventario completo por grupos está en [architecture.md](../architecture.md), «Persistencia», y el DDL en `src/backend/compartido/esquema.sql` más las migraciones de `compartido/migraciones/`.
 
 ```mermaid
 erDiagram
@@ -75,11 +75,15 @@ erDiagram
   hecho ||--o| hecho_revocacion : revocado_por
   hecho ||--o{ estado_conocimiento : sabido_por
   hecho ||--o{ uso_conocimiento : usado_por
+  hecho ||--o{ hecho_uso : usado_en
+  escena ||--o{ hecho_uso : usa
   personaje ||--o{ estado_personaje : evoluciona
   escena ||--o{ evento : dramatiza
   linea_de_tiempo ||--o{ evento : ordena
   escena ||--o{ escena_texto : versiones
   capitulo ||--o{ capitulo_compilado : versiones
+  novela ||--o{ novela_version : publica
+  novela_version ||--o{ novela_version_capitulo : copia
 
   hecho {
     int id
@@ -104,11 +108,24 @@ erDiagram
     text condicion
     text salud_fisica
   }
+  hecho_uso {
+    int hecho_id
+    int escena_id
+    text via
+    text cita
+  }
   evento {
     int escena_id
     text fecha_interna
+    int dia
     int orden_interno
     int dramatizado
+  }
+  novela_version {
+    int numero
+    text motivo
+    text titulo
+    text dedicatoria
   }
   escena_texto {
     int escena_id
@@ -118,7 +135,7 @@ erDiagram
   }
 ```
 
-Tres reglas sostienen el esquema: **todo el estado es append-only y lleva su escena de origen** (revertir es borrar por escena), **el texto se versiona** y nunca se actualiza, y **lo que cambia se deriva en vistas** (`hecho_vigente`, `siembra_vigente`, `hilo_vigente`, `escena_ordinal`).
+Tres reglas sostienen el esquema: **todo el estado es append-only y lleva su escena de origen** (revertir es borrar por escena), **el texto se versiona** y nunca se actualiza, y **lo que cambia se deriva en vistas** (`hecho_vigente`, `siembra_vigente`, `hilo_vigente`, `escena_ordinal`, y desde el bloque 3 `hecho_escena`, `personaje_nacimiento`, `cronologia` y `cronologia_personaje`). Las versiones de la novela son la excepción deliberada: copian el texto, porque tienen que sobrevivir a que se rehaga la escaleta.
 
 ## 4. Validadores y su punto de ejecución
 
@@ -129,7 +146,7 @@ Tres reglas sostienen el esquema: **todo el estado es append-only y lleva su esc
 | Puerta 1: estructura (protagonista, oponente, hilo principal, giros obligatorios en orden, subtramas que cierran antes, final compatible) | Programático | Orquestador, tras el estructurador | Parada; se rehace la estructura |
 | Puerta 2: escaleta (cada escena cambia un valor, tiene conflicto y lugar, POV en el reparto, longitudes en rango) | Programático | Orquestador, tras la escaleta | Un reintento; después, parada y se rehace |
 | Guarda de vigencia de las puertas 1 y 2 | Programático | Al empezar cada capítulo | Error: no se genera un capítulo sin plan aprobado |
-| Puerta 3: continuidad (contradicción factual, conocimiento no adquirido, presencia imposible, objeto sin traslado, coherencia temporal, entidad fuera de canon) | Programático | Tramo 2, dentro de la transacción que inserta texto y hechos | ROLLBACK y parada |
+| Puerta 3: continuidad (contradicción factual, conocimiento no adquirido, presencia imposible, objeto sin traslado, coherencia temporal, día contra orden, entidad fuera de canon) | Programático | Tramo 2, dentro de la transacción que inserta texto y hechos | ROLLBACK y parada |
 | Búsquedas dirigidas sobre la prosa (nombre sin registro, cifra sin hecho, muerto nombrado) y descartes del extractor | Programático | Tramo 2, como avisos de la puerta 3 | Aviso en el informe |
 | Puerta 4, mecánica (tics prohibidos; palabras filtro, adverbios de atribución y verbos de habla como avisos) | Programático | Tras la puerta 3 limpia | El capítulo vuelve al writer |
 | Puerta 4, juicio de oficio (ocho criterios con evidencia) | Semántico (LLM-as-judge) | Tras la mecánica | El capítulo vuelve al writer; al tercer fallo, parada |

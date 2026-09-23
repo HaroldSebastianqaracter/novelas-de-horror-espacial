@@ -43,10 +43,17 @@ def contiene_termino(texto: str, termino: str) -> bool:
 
     «Laura» no aparece en «Laurana»; «la nave» aparece en «Las naves ardian».
     """
+    return aparece_en(palabras(texto), termino)
+
+
+def aparece_en(presentes: list[frozenset[str]], termino: str) -> bool:
+    """`contiene_termino` sobre un texto ya partido con `palabras`.
+
+    Para buscar muchos terminos en la misma prosa sin normalizarla cada vez (RF3-BIB-01).
+    """
     buscadas = palabras(termino)
     if not buscadas:
         return False
-    presentes = palabras(texto)
     n = len(buscadas)
     return any(
         all(presentes[i + k] & buscadas[k] for k in range(n))

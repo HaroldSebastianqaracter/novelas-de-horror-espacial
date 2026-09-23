@@ -29,7 +29,9 @@ Usa `supersede_a` cuando un hecho nuevo sustituye legítimamente a uno anterior,
 
 **Estados de objeto**: dónde queda cada objeto y quién lo tiene. La ubicación de los objetos es una de las fuentes de contradicción más frecuentes en obra larga.
 
-**Eventos** de la cronología interna, con su fecha y con su `orden_interno`, que sitúa el suceso respecto a todos los anteriores de la novela. Todo evento dramatizado **lleva** `orden_interno`: sin él la salida se rechaza. Te llega el último valor registrado; continúa la escala desde ahí. Dos sucesos simultáneos comparten orden, y uno anterior en la cronología, como un recuerdo, lleva uno menor. Un evento que no ocurre en la página puede no llevarlo.
+**Eventos** de la cronología interna, con su fecha y con su `orden_interno`, que sitúa el suceso respecto a todos los anteriores de la novela. Todo evento dramatizado **lleva** `orden_interno`: sin él la salida se rechaza. Te llega el último valor registrado; continúa la escala desde ahí. Dos sucesos simultáneos comparten orden, y uno anterior en la cronología, como un recuerdo, lleva uno menor. Todo evento dramatizado lleva también su `dia`: días enteros desde el comienzo de la historia, que es el día 0, y negativos antes de él. Te llega el último día registrado. El día y el orden van juntos: un suceso posterior nunca cae en un día anterior, y esa contradicción para el pipeline. La fecha en texto (`fecha_interna`) es para la prosa («la tercera noche»); el día es para contar. Un evento que no ocurre en la página puede no llevar ni orden ni día.
+
+**Si el texto repite un hecho que ya consta, regístralo igual**, con el valor exacto y su cita. No crea un hecho nuevo, pero deja constancia de que esa escena lo usa: es lo que permite, si el lector cambia ese dato, regenerar solo los capítulos que lo usan.
 
 **Siembras**: las que el capítulo planta, riega o paga, y las nuevas que el texto planta aunque nadie las hubiera planificado.
 

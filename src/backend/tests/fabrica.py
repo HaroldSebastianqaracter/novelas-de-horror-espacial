@@ -142,8 +142,8 @@ def novela_minima(con: sqlite3.Connection) -> Grafo:
                 )
             con.execute(
                 "INSERT INTO evento (novela_id, linea_de_tiempo_id, escena_id, fecha_interna,"
-                " orden_interno, descripcion, dramatizado) VALUES (?,?,?,?,?,?,1)",
-                (nid, g.linea_id, esc_id, f"dia {orden_global}", orden_global,
+                " dia, orden_interno, descripcion, dramatizado) VALUES (?,?,?,?,?,?,?,1)",
+                (nid, g.linea_id, esc_id, f"dia {orden_global}", orden_global, orden_global,
                  f"Sucesos de la escena {numero}.{orden}"),
             )
 

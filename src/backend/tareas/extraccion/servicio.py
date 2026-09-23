@@ -24,6 +24,7 @@ from compartido.grafo import (
     lectura,
     normalizar,
 )
+from compartido.texto import aparece_en, palabras
 
 from .esquemas import SalidaExtraccion
 
@@ -46,6 +47,7 @@ def paquete(
     p = Paquete(agente=AGENTE, capitulo=capitulo)
 
     ultimo_orden = lectura.ultimo_orden_interno(con, novela_id)
+    ultimo_dia = lectura.ultimo_dia(con, novela_id)
     brief = lectura.brief(con, novela_id)
     # RF3-PER-03: el protagonista es el destinatario del regalo, y su condicion es lo que
     # comprueba `destinatario_muere` en la puerta 3.
@@ -56,7 +58,10 @@ def paquete(
         "elemento por el numero de escena en que aparece.\n"
         f"El ultimo orden_interno registrado en la novela es {ultimo_orden}: todo evento "
         "dramatizado lleva el suyo y continua la escala desde ahi (dos sucesos simultaneos "
-        "comparten orden; uno anterior en la cronologia, como un recuerdo, lleva uno menor)."
+        "comparten orden; uno anterior en la cronologia, como un recuerdo, lleva uno menor).\n"
+        f"Cada evento dramatizado lleva tambien su dia: dias desde el comienzo de la historia, "
+        f"que es el dia 0. El ultimo dia registrado es {ultimo_dia}. Un suceso posterior nunca "
+        "cae en un dia anterior."
         + destinatario,
         "TU ENCARGO",
     )
@@ -219,7 +224,7 @@ def aplicar(
         """El hecho que hoy fija ese sujeto y atributo: vigente y sin sustituir."""
         return con.execute(
             """
-            SELECT h.id, h.valor_clave FROM hecho_vigente h
+            SELECT h.id, h.valor_clave, h.escena_id FROM hecho_vigente h
             WHERE h.novela_id = ? AND h.sujeto_clave = ? AND h.atributo_clave = ?
               AND NOT EXISTS (SELECT 1 FROM hecho_vigente s WHERE s.supersede_a = h.id)
             ORDER BY h.id DESC LIMIT 1
@@ -263,6 +268,14 @@ def aplicar(
         if vigente is not None and not h.supersede_a and (
             vigente["valor_clave"] == normalizar(h.valor)
         ):
+            # Pero la escena lo USA, y eso es lo que el bloque 8 necesita saber para regenerar
+            # solo lo afectado por un cambio (RF3-BIB-01). Antes se perdia sin rastro.
+            if int(vigente["escena_id"]) != eid:
+                con.execute(
+                    "INSERT OR IGNORE INTO hecho_uso (novela_id, hecho_id, escena_id, via, cita) "
+                    "VALUES (?, ?, ?, 'reafirma', ?)",
+                    (novela_id, int(vigente["id"]), eid, h.cita or None),
+                )
             continue
         previo = ultimo_hecho(h.sujeto_ref, h.supersede_a) if h.supersede_a else None
         insertar_hecho(
@@ -360,8 +373,8 @@ def aplicar(
             insertar(
                 con, "evento", novela_id=novela_id, linea_de_tiempo_id=int(linea["id"]),
                 escena_id=escena(ev.escena_orden), fecha_interna=ev.fecha_interna,
-                orden_interno=ev.orden_interno, descripcion=ev.descripcion, tipo=ev.tipo,
-                dramatizado=ev.dramatizado,
+                dia=ev.dia, orden_interno=ev.orden_interno, descripcion=ev.descripcion,
+                tipo=ev.tipo, dramatizado=ev.dramatizado,
             )
 
     # --- Siembras ------------------------------------------------------------------------
@@ -432,6 +445,9 @@ def aplicar(
             contexto=en.contexto,
         )
 
+    # --- Lo que la prosa usa sin que el extractor lo diga (RF3-BIB-01) ---------------------
+    registrar_menciones(con, novela_id, escenas_por_orden, textos or {})
+
     # --- Los dos resumenes con los que se construye el estado rodante ----------------------
     cap = lectura.capitulo(con, novela_id, capitulo)
     if cap is not None:
@@ -440,3 +456,60 @@ def aplicar(
             resumen=salida.resumen, resumen_breve=salida.resumen_breve,
         )
     return descartes
+
+
+#: Hechos cuyo valor es un literal que la prosa repite tal cual: un nombre, una fecha, una
+#: distancia o una cifra. «Castano corto» o «alta» aparecen en cualquier descripcion, y buscarlos
+#: llenaria la tabla de usos falsos.
+_SQL_BUSCABLES = """
+SELECT h.id, h.valor, o.ordinal
+FROM hecho_vigente h
+JOIN escena_ordinal o ON o.escena_id = h.escena_id
+WHERE h.novela_id = ?
+  AND (h.categoria IN ('nombre', 'fecha', 'distancia') OR h.valor GLOB '*[0-9]*')
+"""
+_LETRAS_MINIMAS = 3
+
+
+def _buscable(valor: str) -> bool:
+    return len(normalizar(valor)) >= _LETRAS_MINIMAS or any(c.isdigit() for c in valor)
+
+
+def registrar_menciones(
+    con: sqlite3.Connection,
+    novela_id: int,
+    escenas_por_orden: dict[int, int],
+    textos: dict[int, str],
+) -> int:
+    """La via `menciona` de `hecho_uso`: el valor exacto de un hecho vigente en una escena.
+
+    Es el segundo metodo que mira el texto (regla 3 de validators.md): la reafirmacion depende
+    de que el extractor repita el hecho, y esto no. Solo cuentan los hechos establecidos en una
+    escena ANTERIOR: la propia no es un uso, y una posterior todavia no existia. Devuelve cuantos
+    usos registro.
+    """
+    candidatos = [
+        (int(f["id"]), str(f["valor"]), int(f["ordinal"]))
+        for f in con.execute(_SQL_BUSCABLES, (novela_id,)).fetchall()
+        if _buscable(str(f["valor"]))
+    ]
+    if not candidatos:
+        return 0
+    registrados = 0
+    for orden, texto in textos.items():
+        eid = escenas_por_orden.get(int(orden))
+        if eid is None or not texto:
+            continue
+        ordinal = int(con.execute(
+            "SELECT ordinal FROM escena_ordinal WHERE escena_id = ?", (eid,)
+        ).fetchone()[0])
+        presentes = palabras(texto)
+        for hid, valor, ordinal_hecho in candidatos:
+            if ordinal_hecho < ordinal and aparece_en(presentes, valor):
+                cur = con.execute(
+                    "INSERT OR IGNORE INTO hecho_uso (novela_id, hecho_id, escena_id, via, cita) "
+                    "VALUES (?, ?, ?, 'menciona', ?)",
+                    (novela_id, hid, eid, valor),
+                )
+                registrados += cur.rowcount
+    return registrados

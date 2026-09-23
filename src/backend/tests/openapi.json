@@ -153,6 +153,34 @@
         "title": "CapituloTexto",
         "type": "object"
       },
+      "CapituloVersion": {
+        "properties": {
+          "cambiado": {
+            "title": "Cambiado",
+            "type": "boolean"
+          },
+          "numero": {
+            "title": "Numero",
+            "type": "integer"
+          },
+          "palabras": {
+            "title": "Palabras",
+            "type": "integer"
+          },
+          "texto": {
+            "title": "Texto",
+            "type": "string"
+          }
+        },
+        "required": [
+          "numero",
+          "texto",
+          "palabras",
+          "cambiado"
+        ],
+        "title": "CapituloVersion",
+        "type": "object"
+      },
       "ConocimientoVista": {
         "properties": {
           "atributo": {
@@ -503,6 +531,17 @@
             "title": "Descripcion",
             "type": "string"
           },
+          "dia": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dia"
+          },
           "dramatizado": {
             "title": "Dramatizado",
             "type": "boolean"
@@ -562,6 +601,108 @@
           "dramatizado"
         ],
         "title": "EventoCanon",
+        "type": "object"
+      },
+      "EventoCronologia": {
+        "description": "Un evento de la cronologia (spec3, RF3-BIB-10). Sin escena, es un antecedente.",
+        "properties": {
+          "capitulo": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capitulo"
+          },
+          "descripcion": {
+            "title": "Descripcion",
+            "type": "string"
+          },
+          "dia": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dia"
+          },
+          "dramatizado": {
+            "title": "Dramatizado",
+            "type": "boolean"
+          },
+          "escena_orden": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Escena Orden"
+          },
+          "evento_id": {
+            "title": "Evento Id",
+            "type": "integer"
+          },
+          "fecha_interna": {
+            "title": "Fecha Interna",
+            "type": "string"
+          },
+          "lugar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lugar"
+          },
+          "orden_interno": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Orden Interno"
+          },
+          "personajes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Personajes",
+            "type": "array"
+          },
+          "tipo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo"
+          }
+        },
+        "required": [
+          "evento_id",
+          "fecha_interna",
+          "descripcion",
+          "dramatizado"
+        ],
+        "title": "EventoCronologia",
         "type": "object"
       },
       "FaccionCanon": {
@@ -1488,6 +1629,17 @@
             ],
             "title": "Deseo"
           },
+          "edad": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edad"
+          },
           "entidad": {
             "const": "personajes",
             "default": "personajes",
@@ -1814,6 +1966,48 @@
         "title": "TemaCanon",
         "type": "object"
       },
+      "UsoHecho": {
+        "description": "Una escena que establece o usa un hecho (spec3, RF3-BIB-02).",
+        "properties": {
+          "capitulo": {
+            "title": "Capitulo",
+            "type": "integer"
+          },
+          "cita": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cita"
+          },
+          "escena_orden": {
+            "title": "Escena Orden",
+            "type": "integer"
+          },
+          "via": {
+            "enum": [
+              "establece",
+              "reafirma",
+              "menciona",
+              "conoce",
+              "usa"
+            ],
+            "title": "Via",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capitulo",
+          "escena_orden",
+          "via"
+        ],
+        "title": "UsoHecho",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -1912,6 +2106,131 @@
           "creado_en"
         ],
         "title": "VersionEscena",
+        "type": "object"
+      },
+      "VersionNovela": {
+        "properties": {
+          "capitulos": {
+            "items": {
+              "$ref": "#/components/schemas/CapituloVersion"
+            },
+            "title": "Capitulos",
+            "type": "array"
+          },
+          "capitulos_cambiados": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Capitulos Cambiados",
+            "type": "array"
+          },
+          "creado_en": {
+            "title": "Creado En",
+            "type": "string"
+          },
+          "dedicatoria": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dedicatoria"
+          },
+          "detalle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detalle"
+          },
+          "motivo": {
+            "title": "Motivo",
+            "type": "string"
+          },
+          "numero": {
+            "title": "Numero",
+            "type": "integer"
+          },
+          "titulo": {
+            "title": "Titulo",
+            "type": "string"
+          }
+        },
+        "required": [
+          "numero",
+          "motivo",
+          "titulo",
+          "creado_en",
+          "capitulos_cambiados",
+          "capitulos"
+        ],
+        "title": "VersionNovela",
+        "type": "object"
+      },
+      "VersionResumen": {
+        "description": "Una version publicada de la novela (spec3, RF3-BIB-11).",
+        "properties": {
+          "capitulos_cambiados": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Capitulos Cambiados",
+            "type": "array"
+          },
+          "creado_en": {
+            "title": "Creado En",
+            "type": "string"
+          },
+          "dedicatoria": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dedicatoria"
+          },
+          "detalle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detalle"
+          },
+          "motivo": {
+            "title": "Motivo",
+            "type": "string"
+          },
+          "numero": {
+            "title": "Numero",
+            "type": "integer"
+          },
+          "titulo": {
+            "title": "Titulo",
+            "type": "string"
+          }
+        },
+        "required": [
+          "numero",
+          "motivo",
+          "titulo",
+          "creado_en",
+          "capitulos_cambiados"
+        ],
+        "title": "VersionResumen",
         "type": "object"
       }
     }
@@ -2347,6 +2666,50 @@
         "summary": "Ver Conocimiento"
       }
     },
+    "/novelas/{novela_id}/cronologia": {
+      "get": {
+        "description": "Los eventos en orden de dia, con su lugar y sus personajes (spec3, RF3-BIB-10).",
+        "operationId": "ver_cronologia_novelas__novela_id__cronologia_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EventoCronologia"
+                  },
+                  "title": "Response Ver Cronologia Novelas  Novela Id  Cronologia Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Cronologia"
+      }
+    },
     "/novelas/{novela_id}/ejecucion": {
       "get": {
         "description": "El estado completo. Esta es la verdad; el stream solo avisa de que cambio.",
@@ -2576,6 +2939,59 @@
         "summary": "Ver Hechos"
       }
     },
+    "/novelas/{novela_id}/hechos/{hecho_id}/usos": {
+      "get": {
+        "description": "Donde se establece y donde se usa un hecho (spec3, RF3-BIB-02).",
+        "operationId": "ver_usos_de_hecho_novelas__novela_id__hechos__hecho_id__usos_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "hecho_id",
+            "required": true,
+            "schema": {
+              "title": "Hecho Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsoHecho"
+                  },
+                  "title": "Response Ver Usos De Hecho Novelas  Novela Id  Hechos  Hecho Id  Usos Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Usos De Hecho"
+      }
+    },
     "/novelas/{novela_id}/paradas": {
       "get": {
         "operationId": "listar_paradas_novelas__novela_id__paradas_get",
@@ -2731,6 +3147,98 @@
           }
         },
         "summary": "Ver Llamadas"
+      }
+    },
+    "/novelas/{novela_id}/versiones": {
+      "get": {
+        "description": "Lo que ha leido el lector, version a version (spec3, RF3-BIB-11).",
+        "operationId": "listar_versiones_novelas__novela_id__versiones_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VersionResumen"
+                  },
+                  "title": "Response Listar Versiones Novelas  Novela Id  Versiones Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Listar Versiones"
+      }
+    },
+    "/novelas/{novela_id}/versiones/{numero}": {
+      "get": {
+        "operationId": "ver_version_novelas__novela_id__versiones__numero__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "numero",
+            "required": true,
+            "schema": {
+              "title": "Numero",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionNovela"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Version"
       }
     }
   }

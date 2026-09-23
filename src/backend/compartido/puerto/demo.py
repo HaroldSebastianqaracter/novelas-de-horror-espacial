@@ -23,6 +23,9 @@ TICS = ["de repente", "sin previo aviso"]
 
 CAPITULOS = 3
 ESCENAS_POR_CAPITULO = 2
+#: Un valor que la prosa repite tal cual en cada escena: el extractor lo fija una vez y el
+#: resto de escenas lo usan por mencion (RF3-BIB-01).
+DISTANCIA_A_LA_ESCLUSA = "doce metros"
 
 
 def _ordenes(entrada: str) -> list[int]:
@@ -50,6 +53,12 @@ def _destinatario(entrada: str) -> str | None:
     """El nombre del destinatario si la novela es un regalo (la marca de compartido.brief)."""
     m = re.search(r"DESTINATARIO \(protagonista, nombre exacto\): (.+?) \(\d+ años", entrada)
     return m.group(1).strip() if m else None
+
+
+def _edad_destinatario(entrada: str) -> int | None:
+    """La edad del destinatario, que es la del protagonista (RF3-BIB-06)."""
+    m = re.search(r"DESTINATARIO \(protagonista, nombre exacto\): .+? \((\d+) años", entrada)
+    return int(m.group(1)) if m else None
 
 
 def _reparto(entrada: str) -> list[str]:
@@ -167,8 +176,8 @@ def mundo(entrada: str, agente: str) -> dict[str, Any]:
         "linea_de_tiempo_origen": "dia 0 del acoplamiento",
         "linea_de_tiempo_unidad": "dia",
         "eventos_previos": [{
-            "fecha_interna": "dia -240", "descripcion": "La estacion deja de responder.",
-            "tipo": "antecedente",
+            "fecha_interna": "dia -240", "dia": -240,
+            "descripcion": "La estacion deja de responder.", "tipo": "antecedente",
         }],
     }
 
@@ -184,24 +193,26 @@ def elenco(entrada: str, agente: str) -> dict[str, Any]:
         "idiolecto": "Frases cortas, vocabulario de taller",
     }
     prota, oponente, aliado = _reparto(entrada)
+    edad_prota = _edad_destinatario(entrada)
     personajes: list[dict[str, Any]] = [
         {**base, "nombre": prota, "rol": "soldadora", "rol_narrativo": "protagonista",
+         "edad": 38 if edad_prota is None else edad_prota,
          "tipo_arco": "positivo", "posicion_tematica": "Salvar el cuerpo es salvar a alguien",
          "faccion": "Cuadrilla Nueve", "secreto": "",
          "relaciones": [{"destino": oponente, "tipo": "se_opone_a"}]},
-        {**base, "nombre": oponente, "rol": "capataz", "rol_narrativo": "oponente",
+        {**base, "nombre": oponente, "rol": "capataz", "rol_narrativo": "oponente", "edad": 52,
          "tipo_arco": "negativo", "subtipo_arco": "caida",
          "posicion_tematica": "Un cuerpo sin voluntad ya no es nadie",
          "faccion": "Cuadrilla Nueve", "secreto": "Sabia lo del cargamento",
          "relaciones": []},
-        {**base, "nombre": aliado, "rol": "tecnica", "rol_narrativo": "aliado",
+        {**base, "nombre": aliado, "rol": "tecnica", "rol_narrativo": "aliado", "edad": 29,
          "tipo_arco": "plano", "posicion_tematica": "No hay respuesta, solo consecuencias",
          "faccion": "Cuadrilla Nueve", "secreto": "", "relaciones": []},
     ]
     # Con encargo, cada allegado obligatorio es un personaje (RF3-PER-03).
     for nombre, relacion in _allegados(entrada):
         personajes.append({
-            **base, "nombre": nombre, "rol": relacion, "rol_narrativo": "aliado",
+            **base, "nombre": nombre, "rol": relacion, "rol_narrativo": "aliado", "edad": 7,
             "tipo_arco": "plano", "posicion_tematica": f"Lo que {prota} no quiere perder: {nombre}",
             "faccion": "", "secreto": "", "relaciones": [],
         })
@@ -304,6 +315,7 @@ def redaccion(entrada: str, agente: str) -> dict[str, Any]:
         "conto hasta tres. "
         "El aire del otro lado olia a metal frio y a algo dulce que no supo nombrar. "
         "Vaan la miraba desde el marco sin decir nada, con las manos quietas. "
+        f"La esclusa quedaba a {DISTANCIA_A_LA_ESCLUSA} y nadie queria recorrerlos. "
         "—Pasa tu primero —dijo ella. Nadie se movio durante un rato largo."
     )
     return {
@@ -359,6 +371,12 @@ def extraccion(entrada: str, agente: str) -> dict[str, Any]:
         "personaje", idris, "herida en la mano", HERIDA_DE_IDRIS[indice],
         supersede="herida en la mano" if capitulo > 1 else "",
     ))
+    if capitulo == 1:
+        # Solo se fija una vez: las demas escenas lo usan por mencion, no por reafirmacion.
+        hechos.append({
+            **hecho("lugar", LUGARES[2], "distancia al puente", DISTANCIA_A_LA_ESCLUSA),
+            "categoria": "distancia",
+        })
 
     def sabe(personaje: str, via: str, postura: str = "sabe") -> dict[str, Any]:
         return {"escena_orden": primera, "personaje_ref": personaje, "sujeto_ref": LUGARES[0],
@@ -411,7 +429,7 @@ def extraccion(entrada: str, agente: str) -> dict[str, Any]:
             "ubicacion_ref": LUGARES[(capitulo + 2) % len(LUGARES)],
         }],
         "eventos": [{
-            "escena_orden": o, "fecha_interna": f"dia {capitulo}",
+            "escena_orden": o, "fecha_interna": f"dia {capitulo}", "dia": capitulo,
             "orden_interno": capitulo * 10 + o,
             "descripcion": f"Sucesos de la escena {o}", "dramatizado": True,
         } for o in ordenes],

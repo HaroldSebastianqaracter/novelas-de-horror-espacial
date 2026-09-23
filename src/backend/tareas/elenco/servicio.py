@@ -65,7 +65,8 @@ def paquete(con: sqlite3.Connection, novela_id: int) -> str:
         d = brief.destinatario
         lineas += [
             "", "LA NOVELA ES UN REGALO.", linea_destinatario(brief),
-            "Es el protagonista (rol_narrativo 'protagonista') y se llama exactamente asi. "
+            "Es el protagonista (rol_narrativo 'protagonista'), se llama exactamente asi y "
+            f"tiene exactamente {d.edad} años (edad = {d.edad}). "
             "Sus rasgos, que su cadena fantasma-herida-mentira-defecto tiene que respetar:",
         ]
         lineas.extend(f"- {e.texto}" for e in d.rasgos)
@@ -89,7 +90,8 @@ def aplicar(con: sqlite3.Connection, novela_id: int, salida: SalidaElenco) -> No
         pid = insertar(
             con, "personaje", novela_id=novela_id,
             faccion_id=resolvedor.id_de("faccion", p.faccion),
-            nombre=p.nombre, rol=p.rol, rol_narrativo=p.rol_narrativo, deseo=p.deseo,
+            nombre=p.nombre, rol=p.rol, rol_narrativo=p.rol_narrativo, edad=p.edad,
+            deseo=p.deseo,
             necesidad_interna=p.necesidad_interna, fantasma=p.fantasma, herida=p.herida,
             mentira=p.mentira, defecto=p.defecto, tipo_arco=p.tipo_arco,
             subtipo_arco=p.subtipo_arco, idiolecto=p.idiolecto, secreto=p.secreto,

@@ -70,7 +70,7 @@ from tareas.oficio.esquemas import SalidaOficio
 from tareas.redaccion import servicio as s_redaccion
 from tareas.redaccion.esquemas import SalidaRedaccion
 
-from . import cola, estados, fallo, vigencia
+from . import cola, estados, fallo, versiones, vigencia
 from .puerta_global import evaluar as evaluar_puerta_global
 
 log = logging.getLogger("orquestador")
@@ -674,6 +674,8 @@ def avanzar(ctx: Contexto) -> str:
             suceso = "terminado_limpio" if not global_.conflictos else "terminado_con_avisos"
             final = estados.transicion(ctx.con, ctx.novela_id, suceso, fase=None)
             emitir_evento(ctx.con, ctx.novela_id, "completada", avisos=len(global_.conflictos))
+            # Lo que leera el lector, en la misma transaccion que la completa (RF3-BIB-12).
+            versiones.publicar(ctx.con, ctx.novela_id)
         return final
 
     except Detenido:

@@ -176,9 +176,19 @@ def _encargo(con: sqlite3.Connection, novela_id: int) -> list[Conflicto]:
     nombre = brief.destinatario.nombre
 
     fila = con.execute(
-        "SELECT rol_narrativo FROM personaje WHERE novela_id = ? AND nombre_clave = ?",
+        "SELECT rol_narrativo, edad FROM personaje WHERE novela_id = ? AND nombre_clave = ?",
         (novela_id, normalizar(nombre)),
     ).fetchone()
+    # RF3-BIB-06: el protagonista tiene la edad del destinatario (decision entrevistada).
+    if fila is not None and fila["edad"] != brief.destinatario.edad:
+        salida.append(Conflicto(
+            comprobacion="edad_del_destinatario",
+            descripcion=(
+                f"«{nombre}» tiene {brief.destinatario.edad} años en el encargo y el elenco le "
+                f"da {fila['edad']}."
+            ),
+            datos={"brief": brief.destinatario.edad, "elenco": fila["edad"]},
+        ))
     if fila is None or fila["rol_narrativo"] != "protagonista":
         salida.append(Conflicto(
             comprobacion="destinatario_protagonista",
