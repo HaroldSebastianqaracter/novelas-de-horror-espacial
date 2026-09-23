@@ -494,3 +494,38 @@ def test_la_presencia_extraida_cuenta_para_la_faccion_y_el_poseedor(
     assert "objeto_sin_traslado" in comprobaciones(con, g)
     _presente(con, g, "Kowalski", (2, 2))
     assert "objeto_sin_traslado" not in comprobaciones(con, g)
+
+
+def test_la_presencia_extraida_cuenta_para_la_deduccion(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """Reyes deduce en la 2.2 un dato fijado en la 2.1: avisa, salvo que estuviera en la 2.1."""
+    con, g = grafo
+    nuevo = hecho(con, g, (2, 1), "Kowalski", "pozo", "metro diez", cita="metro diez")
+    con.execute(
+        "INSERT INTO estado_conocimiento (novela_id, personaje_id, hecho_id, escena_id, postura,"
+        " via) VALUES (?,?,?,?, 'sabe','dedujo')",
+        (g.novela_id, g.personajes["Reyes"], nuevo, g.escenas[(2, 2)]),
+    )
+
+    def avisos() -> set[str]:
+        return {c.comprobacion for c in puerta.evaluar(con, g.novela_id, 2).conflictos}
+
+    assert "deduccion_por_verificar" in avisos()
+    _presente(con, g, "Reyes", (2, 1))
+    assert "deduccion_por_verificar" not in avisos()
+
+
+def test_revertir_un_capitulo_borra_sus_presencias(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    from orquestador import fallo
+
+    con, g = grafo
+    for escena in ((1, 1), (2, 1), (2, 2)):
+        _presente(con, g, "Reyes", escena)
+    with db.transaccion(con):
+        borrado = fallo.revertir_grafo(con, g.novela_id, 2)
+    assert borrado["presencia_escena"] == 2
+    quedan = [f[0] for f in con.execute("SELECT escena_id FROM presencia_escena")]
+    assert quedan == [g.escenas[(1, 1)]]
