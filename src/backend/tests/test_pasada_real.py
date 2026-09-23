@@ -806,6 +806,13 @@ def test_el_redactor_y_el_extractor_reciben_los_nombres_menores_y_el_mundo(
     ("una mancha oscura en el casco", False),
     ("medio sumergido en el hielo", False),
     ("grises", False),
+    # Validador de a65c01d: cantidades que tambien sirven para las cuentas.
+    ("llega en 31h", True),
+    ("una docena de bombonas", True),
+    ("la mitad de la cuadrilla", True),
+    ("en menos de un minuto", True),
+    ("una hora de aire", True),
+    ("a la par del casco", False),
 ])
 def test_un_hecho_da_una_cantidad(valor: str, cifra: bool) -> None:
     from compartido.texto import tiene_cifra
@@ -820,24 +827,35 @@ def test_el_juez_recibe_los_hechos_con_cifras() -> None:
 
     con, _ = nueva_bd()
     g = fabrica.novela_minima(con)
+    ids: dict[str, int] = {}
     for escena, tipo, sujeto_id, sujeto, atributo, valor in (
         ((1, 1), "mundo", None, "Estacion", "personas a bordo", "once: cinco y seis"),
+        ((1, 1), "personaje", g.personajes["Kowalski"], "Kowalski", "raciones", "doce"),
+        ((1, 2), "personaje", g.personajes["Kowalski"], "Kowalski", "turnos", "tres"),
         ((2, 1), "personaje", g.personajes["Reyes"], "Reyes", "horas sin dormir", "treinta"),
         ((1, 2), "personaje", g.personajes["Reyes"], "Reyes", "voz", "grave"),
     ):
-        insertar_hecho(
+        ids[atributo] = insertar_hecho(
             con, novela_id=g.novela_id, escena_id=g.escenas[escena], sujeto_tipo=tipo,
             sujeto_id=sujeto_id, sujeto_nombre=sujeto, atributo=atributo, valor=valor,
             categoria="otro", cita=None, supersede_a=None,
         )
+    # Una cifra sustituida ya no es canon: con ella el juez daria un `falla` falso.
+    insertar_hecho(
+        con, novela_id=g.novela_id, escena_id=g.escenas[(1, 2)], sujeto_tipo="personaje",
+        sujeto_id=g.personajes["Kowalski"], sujeto_nombre="Kowalski", atributo="raciones",
+        valor="ninguna", categoria="otro", cita=None, supersede_a=ids["raciones"],
+    )
     paquete = s_oficio.paquete(con, g.novela_id, 2, "La prosa.", presupuesto=Presupuesto(
         bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE))
     hechos = next(b for b in paquete.bloques if b.nombre == "hechos")
     lineas = [e.texto for e in hechos.elementos if not e.obligatorio]
-    # El mundo primero; los del propio capitulo tambien, porque la cuenta puede descuadrar
-    # dentro de el; sin cifra, fuera.
+    # El mundo primero y despues del mas reciente al mas antiguo, que es lo que decide que
+    # sobrevive al recorte; los del propio capitulo tambien, porque la cuenta puede descuadrar
+    # dentro de el; sin cifra o sustituidos, fuera.
     assert lineas == ["- Estacion · personas a bordo: once: cinco y seis (cap. 1)",
-                      "- Reyes · horas sin dormir: treinta (cap. 2)"]
+                      "- Reyes · horas sin dormir: treinta (cap. 2)",
+                      "- Kowalski · turnos: tres (cap. 1)"]
     render = paquete.render()
     assert "HECHOS ESTABLECIDOS CON CIFRAS" in render
     assert "cuentas_cuadran" in render

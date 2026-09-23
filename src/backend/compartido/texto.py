@@ -34,16 +34,37 @@ NUMERALES = frozenset({
     "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos",
     "setecientos", "ochocientos", "novecientos", "mil", "millon", "millones", "medio",
 })
-#: Tambien son articulos o adjetivos: «una mancha» no es una cuenta.
+#: Tambien son articulos o adjetivos: «una mancha» no es una cuenta, pero «una hora» si.
 _NUMERALES_AMBIGUOS = frozenset({"un", "uno", "una", "medio"})
+#: Cantidades que no son numerales: «una docena», «la mitad», «miles». No entran «par» ni
+#: «cuarto», que casi siempre son otra cosa («a la par», el cuarto de maquinas).
+_CANTIDADES = frozenset({
+    "docena", "docenas", "decena", "decenas", "veintena", "centenar", "centenares", "cientos",
+    "miles", "millar", "millares", "mitad", "tercio", "tercios",
+})
+#: Tras un numeral ambiguo, la unidad dice que es una cantidad: «un minuto», «una persona».
+_UNIDADES = frozenset({
+    "segundo", "minuto", "hora", "dia", "noche", "semana", "mes", "año", "turno", "metro",
+    "kilometro", "litro", "kilo", "grado", "persona", "racion", "dosis", "tanque", "bombona",
+})
 
 
 def tiene_cifra(texto: str) -> bool:
-    """Si el texto da una cantidad: digitos o un numeral en letra que no sea tambien articulo."""
-    return any(
-        p.isdigit() or (p in NUMERALES and p not in _NUMERALES_AMBIGUOS)
-        for p in _PALABRA.findall(normalizar(texto))
-    )
+    """Si el texto da una cantidad (spec3, RF3-PAS-12).
+
+    Un digito en cualquier parte de la palabra («31h», «T-40h»), un numeral en letra, una
+    cantidad como «docena» o «mitad», o un numeral ambiguo («un», «una») seguido de una unidad.
+    """
+    palabras = _PALABRA.findall(normalizar(texto))
+    for i, p in enumerate(palabras):
+        if any(c.isdigit() for c in p) or p in _CANTIDADES:
+            return True
+        if p in NUMERALES and p not in _NUMERALES_AMBIGUOS:
+            return True
+        siguiente = palabras[i + 1] if i + 1 < len(palabras) else ""
+        if p in _NUMERALES_AMBIGUOS and formas(siguiente) & _UNIDADES:
+            return True
+    return False
 
 
 def formas(palabra: str) -> frozenset[str]:

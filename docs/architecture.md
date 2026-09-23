@@ -108,7 +108,7 @@ Cada agente se materializa como una **skill de Claude Code**: una carpeta en `.c
 | **Redactor** | `redaccion` | — (escribe prosa, no ontología) | 28, 29, 30, 31, 32, 33, 34, 35, 36, 37 · 40, 42, 49 |
 | **Extractor** | `extraccion` | `Hecho`, `EstadoDeConocimiento`, `EstadoObjeto`, `EstadoPersonaje`, `Evento` | 26 |
 | **Revisor de continuidad** | `continuidad` | — (solo lee) | 14, 26 · 44 |
-| **Revisor de oficio** | `oficio` | — (solo informa) | 10, 19, 25, 29, 31, 33, 38 · 55 |
+| **Revisor de oficio** | `oficio` | — (solo informa) | 10, 19, 25, 29, 31, 33, 38 · 48 · 55 |
 | **Revisor** | `revision` | — (reescribe prosa; el estado que altere la pasada estructural vuelve a pasar por el extractor) | 11, 13, 16, 17, 19, 26, 29, 32, 36, 38 |
 | **Entrevistador** | `entrevistador` | `Encargo`, `ElementoPersonal` | — (entiende respuestas y pregunta; no decide qué falta) |
 
@@ -468,7 +468,7 @@ Cinco puertas. Las deterministas van primero porque son baratas y su fallo inval
 | **1. Estructura** | Tras la estructura global | Los cuatro puntos de giro obligatorios del hilo principal, en orden; el protagonista tiene arco declarado y hay oponente; **para** si una subtrama cierra después del clímax; **avisa** si el anidamiento no es perfecto o el final no encaja con el subgénero. Que el clímax responda la pregunta dramática es la parte de juicio, y no se evalúa en la v1. Si la novela es un regalo: el destinatario es el protagonista con su nombre exacto, los allegados están en el elenco, la dedicatoria lo nombra y el subgénero cabe en la intensidad | `A` (+ `I` pendiente) |
 | **2. Escaleta** | Tras la escaleta | Toda escena tiene POV declarado y cambia un valor; ninguna escena carece de conflicto; presupuesto de longitud dentro de rango. Si la novela es un regalo: los capítulos del encargo, el destinatario como punto de vista de más de la mitad de las escenas y cada elemento personal obligatorio planificado en alguna | `A` |
 | **3. Continuidad** | Tras extraer los hechos del capítulo | Contradicción con el canon; conocimiento no adquirido; presencia imposible, en sus dos formas (personaje muerto que reaparece, y personaje en dos lugares en el mismo momento); objeto que aparece sin traslado registrado; coherencia temporal; entidad usada por el texto que no estaba en el paquete. Una sorpresa repetida avisa pero no para. Si la novela es un regalo, el destinatario no muere | `A` |
-| **4. Oficio** | Con la puerta 3 limpia | Voz constante, distancia psíquica modulada, subtexto en diálogo, emoción no nombrada, la escena se gana su lugar, cliché — principios 10, 19, 25, 29, 31, 33, 38 y 55 de [domain-knowledge.md](domain-knowledge.md) | `I` |
+| **4. Oficio** | Con la puerta 3 limpia | Voz constante, distancia psíquica modulada, subtexto en diálogo, emoción no nombrada, la escena se gana su lugar, cliché, tropos con causalidad y cuentas que cuadran con el canon (spec3, RF3-PAS-12) — principios 10, 19, 25, 29, 31, 33, 38, 48 y 55 de [domain-knowledge.md](domain-knowledge.md). La parte mecánica devuelve además el capítulo por un nombre mal escrito o un allegado ausente (spec3, 3.6) | `I` |
 | **5. Global** | Sobre el manuscrito completo | Siembras sin pagar e hilos sin cerrar (`A`); reglas de la amenaza respetadas de principio a fin (`I`, exige interpretar el texto); curva de tensión en lectura continua (`D`) — principios 6, 14, 16, 18 y 44 | `A` + `I` + `D` |
 
 ## Política de fallo

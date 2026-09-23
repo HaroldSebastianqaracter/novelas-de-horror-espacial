@@ -30,7 +30,7 @@ def paquete(
     instrucciones = [
         f"Juzga el capitulo {capitulo}. Ya ha pasado la continuidad de hechos, conocimiento "
         "y presencias: de la continuidad solo te toca comprobar las cuentas "
-        "(`cuentas_cuadran`), con los hechos con cifras que van al final.",
+        "(`cuentas_cuadran`), con la seccion HECHOS ESTABLECIDOS CON CIFRAS.",
         "",
         "ESTILO NARRATIVO DE LA OBRA (contra el que se mide la voz):",
         f"- Registro: {e.get('registro', '')}",
