@@ -3,7 +3,7 @@
  * guarda datos propios, solo la caché de lo que dice el servidor.
  */
 import { queryOptions } from "@tanstack/react-query";
-import { api, leer } from "./cliente";
+import { api, ErrorApi, leer } from "./cliente";
 import { comoEstadoEjecucion, ESTADOS_ACTIVOS } from "./reglas";
 
 export const claves = {
@@ -60,3 +60,18 @@ export const consultaParada = (novelaId: number, paradaId: number) =>
         }),
       ),
   });
+
+export const consultaCapitulo = (novelaId: number, numero: number) =>
+  queryOptions({
+    queryKey: claves.capitulo(novelaId, numero),
+    queryFn: () =>
+      leer(
+        api.GET("/novelas/{novela_id}/capitulos/{numero}", {
+          params: { path: { novela_id: novelaId, numero } },
+        }),
+      ),
+  });
+
+/** Un 4xx no mejora reintentando: se enseña ya. Los fallos de red y los 5xx, hasta tres veces. */
+export const reintentar = (intentos: number, error: Error) =>
+  !(error instanceof ErrorApi && error.estado >= 400 && error.estado < 500) && intentos < 3;

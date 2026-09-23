@@ -231,7 +231,9 @@ La tarjeta en curso muestra la subfase (paquete → redacción → extracción �
 
 ### 3.7 Lector
 
-**RF-FE-LEC-01** `/novelas/:id/capitulos/:n` muestra `GET /capitulos/{n}`: número, versión, palabras y texto, con la tipografía de lectura de los tokens y un ancho de línea cómodo. Tiene navegación al capítulo anterior y al siguiente cerrados.
+**RF-FE-LEC-01** `/novelas/:id/capitulos/:n` muestra `GET /capitulos/{n}`: número, versión, palabras y texto, con la tipografía de lectura de los tokens y un ancho de línea cómodo. El texto compilado une las escenas con `* * *` (`compilar` en `tareas/redaccion/servicio.py`): el lector las separa con un ornamento y parte los párrafos por las líneas en blanco. Tiene navegación al capítulo anterior y al siguiente cerrados.
+
+**RF-FE-LEC-02** Un capítulo que no está escrito (`404`) no es un error de red. El lector dice que todavía no existe, porque solo existe al pasar la puerta 4, y enlaza a la novela.
 
 ### 3.8 Crear novela: el brief
 

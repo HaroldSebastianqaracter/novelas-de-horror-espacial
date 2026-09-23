@@ -84,6 +84,28 @@ export function detalleDe(id: number): NovelaDetalle | undefined {
   };
 }
 
+const ESCENAS = [
+  [
+    "La bodega olía a óxido y a algo más dulce, algo que no debería estar ahí. La ingeniera se detuvo junto al contenedor once y escuchó.",
+    "Nada. Solo el zumbido del soporte vital y, debajo, muy debajo, un ritmo que no era el de las bombas.",
+  ],
+  [
+    "En el puente, el piloto repasaba el registro por tercera vez. Las horas no cuadraban: faltaban once minutos entre la última guardia y el aviso de la baliza.",
+    "—El ordenador no se equivoca —dijo la capitana, sin apartar la vista del casco.",
+    "—Entonces alguien le ha enseñado a mentir.",
+  ],
+  [
+    "Cuando volvieron a la bodega, el contenedor once estaba abierto desde dentro.",
+  ],
+];
+
+/** El texto compilado de un capítulo cerrado, con las escenas unidas como las une `compilar`. */
+export function textoDe(novelaId: number, numero: number): string | undefined {
+  const capitulo = capitulosDe[novelaId]?.find((c) => c.numero === numero);
+  if (capitulo?.estado !== "completado") return undefined;
+  return ESCENAS.map((parrafos) => parrafos.join("\n\n")).join("\n\n* * *\n\n");
+}
+
 /** La parada abierta de la novela 4: continuidad, con un choque de hechos y uno de conocimiento. */
 export const paradas: Record<number, Parada> = {
   93: {

@@ -4,8 +4,8 @@
  * de una novela a la vez. Los tests los sustituyen con `servidor.use(...)` cuando necesitan otro caso.
  */
 import { http, HttpResponse } from "msw";
-import type { Ejecucion, Estructura, Intencion, IntencionEncolada, NovelaDetalle, NovelaResumen, Parada, TipoIntencion } from "../tipos";
-import { capitulosDe, detalleDe, ejecuciones, novelas, paradas } from "./datos";
+import type { CapituloTexto, Ejecucion, Estructura, Intencion, IntencionEncolada, NovelaDetalle, NovelaResumen, Parada, TipoIntencion } from "../tipos";
+import { capitulosDe, detalleDe, ejecuciones, novelas, paradas, textoDe } from "./datos";
 
 /** Lo que tarda el «worker» en atender una intención. */
 const ESPERA_MS = 2_500;
@@ -190,6 +190,15 @@ export const manejadores = [
     const capitulos = capitulosDe[Number(params.id)];
     if (!capitulos) return noEncontrada("la novela");
     return HttpResponse.json<Estructura>({ actos: [], capitulos, hilos: [], puntos_de_giro: [], siembras: [] });
+  }),
+
+  http.get("*/api/novelas/:id/capitulos/:n", ({ params }) => {
+    const numero = Number(params.n);
+    const texto = textoDe(Number(params.id), numero);
+    if (texto === undefined) {
+      return HttpResponse.json({ detail: `El capitulo ${numero} no esta escrito` }, { status: 404 });
+    }
+    return HttpResponse.json<CapituloTexto>({ numero, version: 1, palabras: texto.split(/\s+/).length, texto });
   }),
 
   http.get("*/api/novelas/:id/paradas/:pid", ({ params }) => {
