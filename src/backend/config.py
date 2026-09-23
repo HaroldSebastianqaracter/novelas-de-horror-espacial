@@ -35,9 +35,10 @@ class ConfiguracionInvalida(Exception):
     """La configuracion del entorno no permite arrancar."""
 
 
-# --- Presupuesto de contexto (RF-CTX-01) -------------------------------------------------
+# --- Presupuesto de contexto (RF-CTX-01, RF2-CTX-12) --------------------------------------
 # Cifras PROVISIONALES. Se fijan midiendo un capitulo real; la traza guarda los tokens
-# estimados por bloque para poder hacerlo (RF-PUERTO-08).
+# estimados por bloque para poder hacerlo (RF-PUERTO-08). Estos son los valores POR DEFECTO:
+# el paquete los recibe de `Config`, nunca de aqui.
 PRESUPUESTO_BLOQUES: dict[str, int] = {
     "instrucciones": 8_000,
     "escaleta": 6_000,
@@ -48,12 +49,31 @@ PRESUPUESTO_BLOQUES: dict[str, int] = {
     "capitulo_anterior": 6_000,
     "recuperado": 4_000,
     "criterios_incumplidos": 2_000,
+    # La prosa del capitulo, que leen el extractor y el juez de oficio (no el redactor).
+    "prosa": 10_000,
 }
 
-PRESUPUESTO_PAQUETE = 74_000
+# Techo por llamada al modelo (NOVELAS_PRESUPUESTO_TOKENS) y lo que se reserva de el para la
+# salida del agente y la sobrecarga de Claude Code. El paquete dispone del resto.
+TECHO_POR_LLAMADA = 100_000
+RESERVA_SALIDA = 26_000
+PRESUPUESTO_PAQUETE = TECHO_POR_LLAMADA - RESERVA_SALIDA
+
+#: Que bloques puede llevar el paquete de cada agente. La suma de sus presupuestos no puede
+#: pasar del paquete: si pasara, un paquete lleno a tope no cabria nunca.
+BLOQUES_POR_AGENTE: dict[str, tuple[str, ...]] = {
+    "redaccion": (
+        "instrucciones", "escaleta", "canon", "hechos", "siembras", "estado_rodante",
+        "capitulo_anterior", "recuperado", "criterios_incumplidos",
+    ),
+    "extraccion": ("instrucciones", "canon", "hechos", "siembras", "prosa"),
+    "oficio": ("instrucciones", "canon", "escaleta", "prosa", "criterios_incumplidos"),
+}
 
 # Bloques que nunca se recortan, y orden en que caen los que si (RF-CTX-01).
-BLOQUES_FIJOS = frozenset({"instrucciones", "escaleta", "siembras", "criterios_incumplidos"})
+BLOQUES_FIJOS = frozenset(
+    {"instrucciones", "escaleta", "siembras", "criterios_incumplidos", "prosa"}
+)
 ORDEN_DE_RECORTE = ("capitulo_anterior", "recuperado", "estado_rodante", "canon", "hechos")
 
 # --- Puerta 4 mecanica (RF-PIPE-13) ------------------------------------------------------
@@ -121,7 +141,8 @@ class Config:
 
     @property
     def presupuesto_paquete(self) -> int:
-        return sum(self.presupuesto_bloques.values())
+        """Lo que puede ocupar un paquete: el techo por llamada menos la reserva (RF2-CTX-12)."""
+        return self.presupuesto_tokens - RESERVA_SALIDA
 
 
 def raiz_repo() -> Path:
@@ -146,13 +167,20 @@ def cargar() -> Config:
 
     falso_bruto = _env("PUERTO_FALSO_DIR")
 
+    presupuesto_tokens = _env_int("PRESUPUESTO_TOKENS", TECHO_POR_LLAMADA)
+    if presupuesto_tokens <= RESERVA_SALIDA:
+        raise ConfiguracionInvalida(
+            f"{PREFIJO}PRESUPUESTO_TOKENS={presupuesto_tokens} no deja sitio al paquete: "
+            f"{RESERVA_SALIDA} tokens se reservan para la salida del agente."
+        )
+
     return Config(
         db_path=Path(db_bruto).expanduser(),
         claude_bin=_env("CLAUDE_BIN", "claude") or "claude",
         skills_dir=skills_dir,
         poll_segundos=_env_int("POLL_SEGUNDOS", 2),
         timeout_agente_segundos=_env_int("TIMEOUT_AGENTE_SEGUNDOS", 1800),
-        presupuesto_tokens=_env_int("PRESUPUESTO_TOKENS", 100_000),
+        presupuesto_tokens=presupuesto_tokens,
         puerto=puerto,  # type: ignore[arg-type]
         puerto_falso_dir=Path(falso_bruto).expanduser() if falso_bruto else None,
         embedding_modelo=_env("EMBEDDING_MODELO", MODELO_EMBEDDING_PREFERIDO)

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import sqlite3
 
-from compartido.contexto import Paquete, ajustar
+from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
 from compartido.grafo import Resolvedor, actualizar, insertar, lectura, normalizar
 
 from .esquemas import SalidaExtraccion
@@ -22,7 +22,12 @@ AGENTE = "extraccion"
 
 
 def paquete(
-    con: sqlite3.Connection, novela_id: int, capitulo: int, textos: dict[int, str]
+    con: sqlite3.Connection,
+    novela_id: int,
+    capitulo: int,
+    textos: dict[int, str],
+    *,
+    presupuesto: Presupuesto,
 ) -> Paquete:
     escenas = lectura.escenas_del_capitulo(con, novela_id, capitulo)
     canon = lectura.canon_del_capitulo(con, novela_id, capitulo)
@@ -38,22 +43,42 @@ def paquete(
         "TU ENCARGO",
     )
 
-    inventario = ["Usa EXACTAMENTE estos nombres. Lo que no este aqui va a "
-                  "entidades_no_reconocidas."]
-    inventario.append("\nPersonajes: " + ", ".join(p_["nombre"] for p_ in canon["personajes"]))
-    inventario.append("Lugares: " + ", ".join(lugar["nombre"] for lugar in canon["lugares"]))
+    # El inventario de nombres es obligatorio entero: sin el, el extractor no puede referirse
+    # a nada del canon y todo acabaria en entidades no reconocidas.
+    inventario = [Elemento(
+        "Usa EXACTAMENTE estos nombres. Lo que no este aqui va a entidades_no_reconocidas.",
+        True,
+    )]
+    inventario.append(Elemento(
+        "Personajes: " + ", ".join(p_["nombre"] for p_ in canon["personajes"]), True
+    ))
+    inventario.append(Elemento(
+        "Lugares: " + ", ".join(lugar["nombre"] for lugar in canon["lugares"]), True
+    ))
     if canon["objetos"]:
-        inventario.append("Objetos: " + ", ".join(o["nombre"] for o in canon["objetos"]))
+        inventario.append(Elemento(
+            "Objetos: " + ", ".join(o["nombre"] for o in canon["objetos"]), True
+        ))
     if canon["amenaza"]:
-        inventario.append("Amenaza: la de la novela (sujeto_tipo 'amenaza')")
-    p.anadir("canon", "\n".join(inventario), "ENTIDADES QUE EXISTEN")
+        inventario.append(Elemento("Amenaza: la de la novela (sujeto_tipo 'amenaza')", True))
+    p.anadir_elementos("canon", inventario, "ENTIDADES QUE EXISTEN")
 
     if atributos:
-        p.anadir(
+        # Opcionales: ayudan a no inventar sinonimos, y se recortan primero los de sujetos que
+        # este capitulo no toca.
+        del_capitulo = {normalizar(x["nombre"]) for x in (*canon["personajes"], *canon["lugares"])}
+        ordenados = sorted(
+            atributos.items(), key=lambda par: normalizar(par[0]) not in del_capitulo
+        )
+        p.anadir_elementos(
             "hechos",
-            "Reutiliza estos nombres de atributo cuando el texto vuelva a hablar de lo "
-            "mismo:\n"
-            + "\n".join(f"- {sujeto}: {', '.join(lista)}" for sujeto, lista in atributos.items()),
+            [Elemento(
+                "Reutiliza estos nombres de atributo cuando el texto vuelva a hablar de lo mismo:",
+                True,
+            )] + [
+                Elemento(f"- {sujeto}: {', '.join(lista)}", posicion=i + 1)
+                for i, (sujeto, lista) in enumerate(ordenados)
+            ],
             "ATRIBUTOS QUE YA EXISTEN",
         )
 
@@ -74,9 +99,9 @@ def paquete(
             + (" (ANALEPSIS)" if e["analepsis"] else "")
             + f"\n\n{texto}"
         )
-    p.anadir("escaleta", "\n\n".join(cuerpo), "PROSA DEL CAPITULO")
+    p.anadir("prosa", "\n\n".join(cuerpo), "PROSA DEL CAPITULO")
 
-    return ajustar(p)
+    return ajustar(p, presupuesto)
 
 
 def aplicar(

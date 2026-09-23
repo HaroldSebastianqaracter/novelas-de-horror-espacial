@@ -460,13 +460,19 @@ Si alguna parte falla, el orquestador **vuelve a redacción** del mismo capítul
 
 Los 26.000 tokens restantes hasta el techo se reservan a la salida del agente y a la sobrecarga propia de Claude Code.
 
+> Sustituido por spec2, RF2-CTX-01, RF2-CTX-11 y RF2-CTX-12 en lo que toca al recorte y al presupuesto.
+
 > **Decisión de la spec (21-09-2026).** Las cifras son **provisionales**, como exige la pendiente de architecture.md, y viven en `config.py` como un solo diccionario. Se fijan tras medir un capítulo real; la traza guarda los tokens estimados de cada bloque para poder hacerlo (RF-PUERTO-08). Se añade `Siembra.capitulo_pago_previsto` opcional para que la selección de siembras sea una consulta y no un juicio; se lleva a definitions.md.
 
 **RF-CTX-02** El contador de tokens es una **estimación** determinista: `ceil(caracteres / 3,5) × 1,1`, en `compartido/contexto/tokens.py`, sustituible por un tokenizador real sin tocar el resto. El paquete registra la estimación por bloque.
 
 **RF-CTX-03** Si tras aplicar todos los recortes el paquete supera el total, **no se trunca el canon**: la ejecución pasa a `parada` con informe `presupuesto` que lista los bloques y sus tamaños. Superar el presupuesto es un fallo del orquestador, no del modelo.
 
+> Sustituido por spec2, RF2-CTX-03.
+
 **RF-CTX-04** El **estado rodante** es determinista y no requiere llamada de agente: la concatenación, en orden, del `resumen` completo de los últimos `K` capítulos (defecto 3) y del `resumen_breve` de todos los anteriores. Si supera su presupuesto, `K` baja hasta 1; si aún no cabe, los resúmenes breves de los capítulos más antiguos se agrupan por acto en una línea (`Acto I: …`, construida por concatenación). Lo que se pierde en la compresión sigue en el grafo: por eso el grafo existe.
+
+> Ampliado por spec2, RF2-CTX-01: la recompresión por actos no se implementa; el recorte por elementos quita primero los resúmenes más antiguos.
 
 > **Decisión de la spec (21-09-2026).** architecture.md dice que el estado rodante «se recomprime», sin decir quién. Hacerlo con un agente añadiría una llamada por capítulo y una fuente de deriva. Que el extractor produzca dos resúmenes por capítulo, y que la compresión sea elegir cuál usar, mantiene el estado rodante en código. El coste es una sinopsis menos fluida; se acepta porque el estado rodante es contexto, no prosa.
 

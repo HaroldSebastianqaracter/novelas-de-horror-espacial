@@ -16,7 +16,7 @@ from pathlib import Path
 import pytest
 
 import worker
-from compartido.contexto import Paquete, PresupuestoExcedido, ajustar
+from compartido.contexto import Paquete, Presupuesto, PresupuestoExcedido, ajustar
 from compartido.grafo import lectura
 from compartido.puerta_base import Conflicto, ResultadoPuerta
 from compartido.puerto import demo as agentes_falsos
@@ -187,13 +187,18 @@ def test_hallazgo_03_el_latido_sabe_si_perdio_el_cerrojo() -> None:
 # --- Fase 4: el paquete no pierde canon en silencio ---------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, reason="Hallazgo 4: el bloque de hechos desaparece sin excepcion")
 def test_hallazgo_04_el_bloque_de_hechos_no_desaparece_en_silencio() -> None:
+    """La reproduccion de la auditoria: 200 hechos y 700 posturas pasan de su presupuesto.
+
+    Antes el bloque era un solo parrafo y desaparecia entero sin excepcion. Ahora se quitan
+    los opcionales desde el final, lo obligatorio se queda entero y el recorte queda anotado.
+    """
+    import config
     from tareas.redaccion.servicio import _hechos
 
     hechos = [
         {"sujeto_nombre": f"Personaje{i % 6}", "atributo": f"atributo {i}", "valor": "x" * 40,
-         "capitulo_origen": i // 20}
+         "capitulo_origen": i // 20, "obligatorio": i < 50}
         for i in range(200)
     ]
     conocimiento = [
@@ -204,15 +209,20 @@ def test_hallazgo_04_el_bloque_de_hechos_no_desaparece_en_silencio() -> None:
     p = Paquete(agente="redaccion", capitulo=30)
     p.anadir("instrucciones", "estilo")
     p.anadir("escaleta", "escenas")
-    p.anadir("hechos", _hechos(hechos, conocimiento), "ESTADO ESTABLECIDO")
+    p.anadir_elementos("hechos", _hechos(hechos, conocimiento), "ESTADO ESTABLECIDO")
+    presupuesto = Presupuesto(
+        bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE
+    )
     try:
-        ajustado = ajustar(p)
+        ajustado = ajustar(p, presupuesto)
     except PresupuestoExcedido:
         return
-    assert "hechos" in ajustado.tokens_por_bloque
+    texto = ajustado.render()
+    assert all(f"atributo {i}:" in texto for i in range(50))
+    assert all(f"· a{i}:" in texto for i in range(700))
+    assert ajustado.recortes["hechos"]["elementos"] == 150
 
 
-@pytest.mark.xfail(strict=True, reason="Hallazgo 10: LIMIT 200 tira los hechos mas antiguos")
 def test_hallazgo_10_los_hechos_antiguos_del_reparto_entran_en_el_paquete() -> None:
     con, _ = nueva_bd()
     con.execute("BEGIN")

@@ -243,8 +243,8 @@ Con un techo de 100.000 tokens, el paquete no puede crecer con la novela: un man
 | --- | --- | --- |
 | Instrucciones del agente y `EstiloNarrativo` | Fijo y pequeño | No se recorta: es lo que garantiza la consistencia de voz |
 | Escaleta del capítulo actual | Fijo | No se recorta: es la tarea |
-| Canon filtrado (personajes, lugares, sistemas de este capítulo) | Acotado | Se recorta por relevancia al reparto y al lugar |
-| Hechos y conocimiento del reparto | Acotado | Se recorta a los personajes presentes, nunca al resto |
+| Canon filtrado (personajes, lugares, sistemas de este capítulo) | Acotado | Se recorta por relevancia al reparto y al lugar; el POV y los lugares de las escenas nunca |
+| Hechos y conocimiento del reparto | Acotado | Los del reparto y de los lugares de sus escenas nunca se recortan; si no caben, se para. Solo caen los de amenaza, mundo y novela, empezando por los más antiguos |
 | Siembras vivas en este tramo | Pequeño | No se recorta: es barato y su olvido es caro |
 | Estado rodante (sinopsis comprimida) | **Elástico** | Es el bloque que absorbe la presión: se recomprime a medida que la novela crece |
 | Texto del capítulo anterior | Elástico | Primero en caer; se sustituye por su resumen |
@@ -261,6 +261,9 @@ Dos consecuencias que conviene tener presentes:
 
 - **La compresión pierde información, y por eso el grafo existe.** Lo que se comprime es la narración de lo ocurrido, no los hechos: esos viven en el registro y se consultan íntegros. Si algo solo está en el estado rodante, tarde o temprano se pierde.
 - **Superar el presupuesto es un fallo del orquestador, no del modelo.** Si un paquete no cabe, la respuesta correcta es partir la unidad o recomprimir, nunca truncar el canon.
+- **Ningún recorte es silencioso.** Cada bloque es una lista de elementos enteros —un personaje, un hecho, un párrafo—, cada uno obligatorio u opcional. Recortar es quitar opcionales desde el final, nunca medio elemento, y cada recorte queda en la traza aunque el paquete quepa.
+
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** La auditoría encontró que el bloque de hechos se unía en un solo párrafo y el recorte, que cortaba por párrafos, lo vaciaba entero sin avisar: el redactor escribía sin los hechos establecidos y ninguna puerta lo notaba. Se pasa a elementos con marca de obligatorio y se descarta seguir recortando texto, porque ningún corte de texto sabe qué parte es imprescindible. Qué es obligatorio en cada bloque, y que el techo por llamada sale de la configuración, está en [specs/spec2.md](../specs/spec2.md), RF2-CTX-01 a RF2-CTX-12.
 
 ## Arquitectura de ejecución
 

@@ -40,7 +40,7 @@ from typing import Any
 
 from pydantic import BaseModel, ValidationError
 
-from compartido.contexto import PresupuestoExcedido
+from compartido.contexto import Paquete, Presupuesto, PresupuestoExcedido
 from compartido.db import transaccion
 from compartido.grafo import emitir_evento, lectura
 from compartido.puerto import AgenteInterrumpido, PuertoAgente
@@ -110,6 +110,13 @@ class Contexto:
     def cfg_max_intentos(self) -> int:
         return MAX_INTENTOS_CAPITULO
 
+    @property
+    def presupuesto(self) -> Presupuesto:
+        """El presupuesto de contexto, siempre desde la configuracion (RF2-CTX-12)."""
+        return Presupuesto(
+            bloques=self.cfg.presupuesto_bloques, techo=self.cfg.presupuesto_paquete
+        )
+
 
 # --- Invocacion con validacion ---------------------------------------------------------------
 
@@ -130,6 +137,11 @@ def _invocar[T: BaseModel](
     protagonista», «ninguna escena repite valor»— porque esas solo las ve Pydantic.
     """
     _comprobar_parada(ctx)
+    recortes = getattr(paquete, "recortes", None)
+    if recortes:
+        # Ningun recorte es silencioso, aunque el paquete quepa (RF2-CTX-03).
+        emitir_traza(ctx, "paquete_recortado", agente=agente, capitulo=capitulo,
+                     intento=intento, bloques=recortes)
     emitir_traza(ctx, "agente_iniciado", agente=agente, capitulo=capitulo, intento=intento)
 
     entrada = paquete.render() if hasattr(paquete, "render") else str(paquete)
@@ -371,15 +383,11 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
             criterios = ctx.eventos_criterios if intento > 1 else None
             recuperado = _recuperar(ctx, numero)
 
-            try:
-                paquete_redaccion = s_redaccion.paquete(
-                    ctx.con, ctx.novela_id, numero,
-                    criterios_incumplidos=criterios, recuperado=recuperado,
-                )
-            except PresupuestoExcedido as exc:
-                _abrir_parada(ctx, "presupuesto", exc.informe(), capitulo=numero,
-                              intento=intento)
-                return
+            paquete_redaccion = _paquete_o_parada(
+                ctx, numero, intento, s_redaccion.paquete,
+                ctx.con, ctx.novela_id, numero, presupuesto=ctx.presupuesto,
+                criterios_incumplidos=criterios, recuperado=recuperado,
+            )
 
             # --- Tramo 1: llamadas al agente, sin transaccion ----------------------------
             with transaccion(ctx.con):
@@ -394,7 +402,10 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
             with transaccion(ctx.con):
                 estados.fijar_fase(ctx.con, ctx.novela_id, "extraccion", capitulo=numero,
                                    intento=intento)
-            paquete_extraccion = s_extraccion.paquete(ctx.con, ctx.novela_id, numero, textos)
+            paquete_extraccion = _paquete_o_parada(
+                ctx, numero, intento, s_extraccion.paquete,
+                ctx.con, ctx.novela_id, numero, textos, presupuesto=ctx.presupuesto,
+            )
             hechos, _ = _invocar(
                 ctx, "extraccion", paquete_extraccion, SalidaExtraccion,
                 capitulo=numero, intento=intento,
@@ -433,8 +444,10 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                 with transaccion(ctx.con):
                     estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_4", capitulo=numero,
                                        intento=intento)
-                paquete_oficio = s_oficio.paquete(
-                    ctx.con, ctx.novela_id, numero, texto_completo, mecanica
+                paquete_oficio = _paquete_o_parada(
+                    ctx, numero, intento, s_oficio.paquete,
+                    ctx.con, ctx.novela_id, numero, texto_completo, mecanica,
+                    presupuesto=ctx.presupuesto,
                 )
                 juicio, _ = _invocar(
                     ctx, "oficio", paquete_oficio, SalidaOficio, capitulo=numero,
@@ -476,6 +489,22 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
     finally:
         if a_medias:
             _revertir_a_medias(ctx, numero)
+
+
+def _paquete_o_parada(
+    ctx: Contexto, numero: int, intento: int, fabricar: Callable[..., Paquete],
+    *args: Any, **kwargs: Any,
+) -> Paquete:
+    """Monta un paquete o, si lo obligatorio no cabe, abre una parada de presupuesto.
+
+    Vale para los tres paquetes del capitulo (RF2-CTX-03). Si ocurre despues del tramo 2, la
+    parada sale por el `finally` de `generar_capitulo`, que revierte el capitulo a medias.
+    """
+    try:
+        return fabricar(*args, **kwargs)
+    except PresupuestoExcedido as exc:
+        _abrir_parada(ctx, "presupuesto", exc.informe(), capitulo=numero, intento=intento)
+        raise  # inalcanzable: _abrir_parada lanza Parado
 
 
 def _revertir_a_medias(ctx: Contexto, numero: int) -> None:

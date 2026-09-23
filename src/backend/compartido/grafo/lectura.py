@@ -204,34 +204,62 @@ def canon_del_capitulo(
     }
 
 
+_REPARTO_Y_LUGARES = """
+WITH reparto AS (
+    SELECT DISTINCT ep.personaje_id
+    FROM escena_personaje ep
+    JOIN escena e2   ON e2.id = ep.escena_id
+    JOIN capitulo c2 ON c2.id = e2.capitulo_id
+    WHERE e2.novela_id = :novela AND c2.numero = :capitulo
+),
+lugares AS (
+    SELECT DISTINCT e3.lugar_id
+    FROM escena e3
+    JOIN capitulo c3 ON c3.id = e3.capitulo_id
+    WHERE e3.novela_id = :novela AND c3.numero = :capitulo
+)
+"""
+
+#: Un hecho que otro hecho vigente sustituye ya no es el estado actual: el agente ve la herida
+#: cicatrizada, no la herida.
+_NO_SUSTITUIDO = (
+    "NOT EXISTS (SELECT 1 FROM hecho s WHERE s.supersede_a = h.id AND s.vigente = 1)"
+)
+
+
 def hechos_del_reparto(
-    con: sqlite3.Connection, novela_id: int, numero: int, limite: int = 200
+    con: sqlite3.Connection, novela_id: int, numero: int
 ) -> list[dict[str, Any]]:
-    """Hechos vigentes de las entidades que este capitulo toca. Nunca el registro entero."""
+    """Hechos vigentes que este capitulo necesita, marcados como obligatorios u opcionales.
+
+    Sin limite de filas (RF2-CTX-11). Obligatorios: los de los personajes del reparto y los de
+    los lugares de sus escenas. Opcionales: los de amenaza, mundo y novela, del mas reciente al
+    mas antiguo, que es el orden en que se recortan desde el final. Solo los establecidos
+    antes de este capitulo y no sustituidos por otro.
+    """
     return _filas(con.execute(
-        """
-        SELECT h.id, h.sujeto_tipo, h.sujeto_nombre, h.atributo, h.valor, h.categoria,
-               c.numero AS capitulo_origen
-        FROM hecho h
-        JOIN escena e   ON e.id = h.escena_id
-        JOIN capitulo c ON c.id = e.capitulo_id
-        WHERE h.novela_id = ? AND h.vigente = 1
-          AND (
-            h.sujeto_id IN (
-                SELECT ep.personaje_id FROM escena_personaje ep
-                JOIN escena e2 ON e2.id = ep.escena_id
-                JOIN capitulo c2 ON c2.id = e2.capitulo_id
-                WHERE c2.numero = ? AND h.sujeto_tipo = 'personaje')
-            OR h.sujeto_id IN (
-                SELECT e3.lugar_id FROM escena e3
-                JOIN capitulo c3 ON c3.id = e3.capitulo_id
-                WHERE c3.numero = ? AND h.sujeto_tipo = 'lugar')
-            OR h.sujeto_tipo IN ('amenaza','mundo','novela')
-          )
-        ORDER BY c.numero DESC, h.id DESC
-        LIMIT ?
+        _REPARTO_Y_LUGARES + f"""
+        , candidatos AS (
+            SELECT h.id, h.sujeto_tipo, h.sujeto_nombre, h.atributo, h.valor, h.categoria,
+                   c.numero AS capitulo_origen,
+                   CASE WHEN (h.sujeto_tipo = 'personaje'
+                              AND h.sujeto_id IN (SELECT personaje_id FROM reparto))
+                          OR (h.sujeto_tipo = 'lugar'
+                              AND h.sujeto_id IN (SELECT lugar_id FROM lugares))
+                        THEN 1 ELSE 0 END AS obligatorio
+            FROM hecho h
+            JOIN escena e   ON e.id = h.escena_id
+            JOIN capitulo c ON c.id = e.capitulo_id
+            WHERE h.novela_id = :novela AND h.vigente = 1 AND c.numero < :capitulo
+              AND {_NO_SUSTITUIDO}
+        )
+        SELECT * FROM candidatos
+        WHERE obligatorio = 1 OR sujeto_tipo IN ('amenaza', 'mundo', 'novela')
+        ORDER BY obligatorio DESC,
+                 CASE WHEN obligatorio = 1 THEN sujeto_nombre END,
+                 capitulo_origen DESC, id DESC
         """,
-        (novela_id, numero, numero, limite),
+        {"novela": novela_id, "capitulo": numero},
     ))
 
 
@@ -252,24 +280,34 @@ def atributos_por_sujeto(
 def conocimiento_del_reparto(
     con: sqlite3.Connection, novela_id: int, numero: int
 ) -> list[dict[str, Any]]:
+    """La ULTIMA postura de cada personaje del reparto sobre cada hecho vigente (RF2-CTX-11).
+
+    Solo lo adquirido antes de este capitulo, y solo sobre hechos que siguen siendo el estado
+    actual: saber algo que ya no es verdad no es conocimiento que el redactor deba usar.
+    """
     return _filas(con.execute(
-        """
+        _REPARTO_Y_LUGARES + f"""
+        , ultima AS (
+            SELECT ec.personaje_id, ec.hecho_id, ec.postura, ec.via,
+                   eo.capitulo_numero AS capitulo,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY ec.personaje_id, ec.hecho_id
+                       ORDER BY eo.ordinal DESC, ec.id DESC
+                   ) AS rn
+            FROM estado_conocimiento ec
+            JOIN escena_ordinal eo ON eo.escena_id = ec.escena_id
+            WHERE ec.novela_id = :novela AND eo.capitulo_numero < :capitulo
+              AND ec.personaje_id IN (SELECT personaje_id FROM reparto)
+        )
         SELECT p.nombre AS personaje, h.sujeto_nombre, h.atributo, h.valor,
-               ec.postura, ec.via, c.numero AS capitulo
-        FROM estado_conocimiento ec
-        JOIN personaje p ON p.id = ec.personaje_id
-        JOIN hecho h     ON h.id = ec.hecho_id
-        JOIN escena e    ON e.id = ec.escena_id
-        JOIN capitulo c  ON c.id = e.capitulo_id
-        WHERE ec.novela_id = ?
-          AND ec.personaje_id IN (
-              SELECT ep.personaje_id FROM escena_personaje ep
-              JOIN escena e2 ON e2.id = ep.escena_id
-              JOIN capitulo c2 ON c2.id = e2.capitulo_id
-              WHERE c2.numero = ?)
-        ORDER BY p.nombre, c.numero
+               u.postura, u.via, u.capitulo
+        FROM ultima u
+        JOIN personaje p ON p.id = u.personaje_id
+        JOIN hecho h     ON h.id = u.hecho_id
+        WHERE u.rn = 1 AND h.vigente = 1 AND {_NO_SUSTITUIDO}
+        ORDER BY p.nombre, u.capitulo, h.id
         """,
-        (novela_id, numero),
+        {"novela": novela_id, "capitulo": numero},
     ))
 
 
@@ -298,11 +336,12 @@ def hilos(con: sqlite3.Connection, novela_id: int) -> list[dict[str, Any]]:
 
 def estado_rodante(
     con: sqlite3.Connection, novela_id: int, hasta_capitulo: int, completos: int = 3
-) -> str:
-    """Sinopsis de lo escrito hasta aqui (RF-CTX-04). Determinista, sin llamar a nadie.
+) -> list[dict[str, Any]]:
+    """Sinopsis de lo escrito hasta aqui (RF-CTX-04), un elemento por capitulo.
 
     Los ultimos `completos` capitulos van con su resumen entero; los anteriores, con su
-    resumen de una frase. La compresion es elegir cual de los dos se usa, no reescribir.
+    resumen de una frase. Determinista, sin llamar a nadie. Devuelve filas y no texto para que
+    el paquete pueda recortar por capitulos enteros, empezando por los mas antiguos.
     """
     filas = _filas(con.execute(
         """
@@ -312,15 +351,13 @@ def estado_rodante(
         """,
         (novela_id, hasta_capitulo),
     ))
-    if not filas:
-        return ""
     corte = max(0, len(filas) - completos)
-    partes: list[str] = []
+    salida: list[dict[str, Any]] = []
     for i, f in enumerate(filas):
         texto = f["resumen"] if i >= corte else f["resumen_breve"]
         if texto:
-            partes.append(f"Capitulo {f['numero']}: {texto}")
-    return "\n".join(partes)
+            salida.append({"numero": f["numero"], "texto": texto, "completo": i >= corte})
+    return salida
 
 
 def texto_capitulo(

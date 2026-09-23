@@ -11,7 +11,7 @@ import json
 import sqlite3
 from typing import Any
 
-from compartido.contexto import Paquete, ajustar
+from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
 from compartido.grafo import insertar, lectura
 
 from .esquemas import SalidaRedaccion
@@ -74,70 +74,99 @@ def _escaleta(escenas: list[dict[str, Any]]) -> str:
     return "\n\n".join(bloques)
 
 
-def _canon(canon: dict[str, list[dict[str, Any]]]) -> str:
-    partes: list[str] = []
+_SECCION_PERSONAJES = "### Personajes"
+_SECCION_LUGARES = "### Lugares"
+_SECCION_AMENAZA = "### La amenaza (sus reglas no se rompen nunca)"
+_SECCION_SISTEMAS = "### Sistemas tecnicos (sus limites no se rompen)"
+_SECCION_OBJETOS = "### Objetos"
+_SECCION_FACCIONES = "### Facciones"
 
-    if canon["personajes"]:
-        partes.append("### Personajes")
-        for p in canon["personajes"]:
-            partes.append(
-                f"**{p['nombre']}** ({p['rol_narrativo']}). Desea {p['deseo']}. "
-                f"Necesita {p['necesidad_interna']}. Defecto visible: {p['defecto']}. "
-                f"Cree que {p['mentira']}.\nIdiolecto: {p['idiolecto']}"
-                + (f"\nGuarda: {p['secreto']}" if p.get("secreto") else "")
-            )
-    if canon["lugares"]:
-        partes.append("### Lugares")
-        partes.extend(
-            f"**{lugar['nombre']}** ({lugar['tipo']}). {lugar['descripcion']}"
-            for lugar in canon["lugares"]
-        )
-    if canon["objetos"]:
-        partes.append("### Objetos")
-        partes.extend(
-            f"**{o['nombre']}**: {o['funcion_narrativa']}" for o in canon["objetos"]
-        )
-    if canon["sistemas"]:
-        partes.append("### Sistemas tecnicos (sus limites no se rompen)")
-        partes.extend(
+
+def _personaje(p: dict[str, Any]) -> str:
+    return (
+        f"**{p['nombre']}** ({p['rol_narrativo']}). Desea {p['deseo']}. "
+        f"Necesita {p['necesidad_interna']}. Defecto visible: {p['defecto']}. "
+        f"Cree que {p['mentira']}.\nIdiolecto: {p['idiolecto']}"
+        + (f"\nGuarda: {p['secreto']}" if p.get("secreto") else "")
+    )
+
+
+def _amenaza(a: dict[str, Any]) -> str:
+    try:
+        reglas = json.loads(a.get("reglas") or "[]")
+    except json.JSONDecodeError:
+        reglas = []
+    lineas = [str(a["naturaleza"])]
+    lineas.extend(
+        f"- Puede {r.get('capacidad', '')}. No puede {r.get('limite', '')}. "
+        f"Se activa con {r.get('activacion', '')}."
+        for r in reglas if isinstance(r, dict)
+    )
+    return "\n".join(lineas)
+
+
+def _canon(canon: dict[str, list[dict[str, Any]]]) -> list[Elemento]:
+    """El canon del capitulo como elementos, de mas a menos relevante (RF2-CTX-11).
+
+    Obligatorios: los personajes que son POV de alguna escena y los lugares de las escenas.
+    Opcionales, en el orden en que se recortarian desde el final: el resto del reparto por
+    apariciones, la amenaza, los sistemas, los objetos y las facciones.
+    """
+    pov = [p for p in canon["personajes"] if int(p.get("escenas_pov") or 0) > 0]
+    resto = [p for p in canon["personajes"] if int(p.get("escenas_pov") or 0) == 0]
+    elementos = [Elemento(_personaje(p), True, _SECCION_PERSONAJES) for p in pov]
+    elementos += [
+        Elemento(f"**{lugar['nombre']}** ({lugar['tipo']}). {lugar['descripcion']}", True,
+                 _SECCION_LUGARES)
+        for lugar in canon["lugares"]
+    ]
+    elementos += [Elemento(_personaje(p), False, _SECCION_PERSONAJES) for p in resto]
+    elementos += [Elemento(_amenaza(a), False, _SECCION_AMENAZA) for a in canon["amenaza"]]
+    elementos += [
+        Elemento(
             f"**{s['nombre']}**. Puede: {s['capacidades']}. Cuesta: {s['costes']}. "
-            f"Limites: {s['limites']}"
-            for s in canon["sistemas"]
+            f"Limites: {s['limites']}", False, _SECCION_SISTEMAS,
         )
-    for a in canon["amenaza"]:
-        try:
-            reglas = json.loads(a.get("reglas") or "[]")
-        except json.JSONDecodeError:
-            reglas = []
-        partes.append("### La amenaza (sus reglas no se rompen nunca)")
-        partes.append(a["naturaleza"])
-        partes.extend(
-            f"- Puede {r.get('capacidad', '')}. No puede {r.get('limite', '')}. "
-            f"Se activa con {r.get('activacion', '')}."
-            for r in reglas if isinstance(r, dict)
-        )
-    return "\n\n".join(partes)
+        for s in canon["sistemas"]
+    ]
+    elementos += [
+        Elemento(f"**{o['nombre']}**: {o['funcion_narrativa']}", False, _SECCION_OBJETOS)
+        for o in canon["objetos"]
+    ]
+    elementos += [
+        Elemento(f"**{f['nombre']}**: {f.get('proposito') or ''}", False, _SECCION_FACCIONES)
+        for f in canon["facciones"]
+    ]
+    return elementos
 
 
-def _hechos(hechos: list[dict[str, Any]], conocimiento: list[dict[str, Any]]) -> str:
-    partes: list[str] = []
-    if hechos:
-        partes.append("### Hechos ya establecidos (no los contradigas)")
-        partes.extend(
-            f"- {h['sujeto_nombre']} · {h['atributo']}: {h['valor']} (cap. "
-            f"{h['capitulo_origen']})"
-            for h in hechos
-        )
-    if conocimiento:
-        partes.append(
-            "### Quien sabe que (nadie puede actuar sobre lo que no ha recibido)"
-        )
-        partes.extend(
+_SECCION_HECHOS = "### Hechos ya establecidos (no los contradigas)"
+_SECCION_CONOCIMIENTO = "### Quien sabe que (nadie puede actuar sobre lo que no ha recibido)"
+
+
+def _hechos(hechos: list[dict[str, Any]], conocimiento: list[dict[str, Any]]) -> list[Elemento]:
+    """Hechos y conocimiento como elementos: obligatorios delante, opcionales al final.
+
+    El conocimiento del reparto es obligatorio entero (RF2-CTX-11), asi que lo unico que se
+    puede recortar son los hechos de amenaza, mundo y novela, empezando por los mas antiguos.
+    """
+    def linea(h: dict[str, Any]) -> str:
+        return (f"- {h['sujeto_nombre']} · {h['atributo']}: {h['valor']} "
+                f"(cap. {h['capitulo_origen']})")
+
+    elementos = [Elemento(linea(h), True, _SECCION_HECHOS) for h in hechos if h["obligatorio"]]
+    elementos += [
+        Elemento(
             f"- {c['personaje']} {c['postura']} que {c['sujeto_nombre']} · {c['atributo']}: "
-            f"{c['valor']} (desde cap. {c['capitulo']}, {c['via']})"
-            for c in conocimiento
+            f"{c['valor']} (desde cap. {c['capitulo']}, {c['via']})",
+            True, _SECCION_CONOCIMIENTO,
         )
-    return "\n".join(partes)
+        for c in conocimiento
+    ]
+    elementos += [
+        Elemento(linea(h), False, _SECCION_HECHOS) for h in hechos if not h["obligatorio"]
+    ]
+    return elementos
 
 
 def paquete(
@@ -145,10 +174,11 @@ def paquete(
     novela_id: int,
     capitulo: int,
     *,
+    presupuesto: Presupuesto,
     criterios_incumplidos: list[dict[str, str]] | None = None,
     recuperado: list[Any] | None = None,
 ) -> Paquete:
-    """Monta el paquete del capitulo y lo ajusta al presupuesto (RF-CTX-01)."""
+    """Monta el paquete del capitulo y lo ajusta al presupuesto (RF2-CTX-01)."""
     escenas = lectura.escenas_del_capitulo(con, novela_id, capitulo)
     canon = lectura.canon_del_capitulo(con, novela_id, capitulo)
     cap = lectura.capitulo(con, novela_id, capitulo) or {}
@@ -166,8 +196,8 @@ def paquete(
         "\n".join(cabecera) + "\n\n" + _escaleta(escenas),
         f"ESCALETA DEL CAPITULO {capitulo}",
     )
-    p.anadir("canon", _canon(canon), "CANON DE ESTE CAPITULO")
-    p.anadir(
+    p.anadir_elementos("canon", _canon(canon), "CANON DE ESTE CAPITULO", separador="\n\n")
+    p.anadir_elementos(
         "hechos",
         _hechos(
             lectura.hechos_del_reparto(con, novela_id, capitulo),
@@ -189,26 +219,39 @@ def paquete(
             "SIEMBRAS VIVAS",
         )
 
-    p.anadir(
+    # El estado rodante se lee en orden cronologico y se recorta por lo mas antiguo.
+    rodante = lectura.estado_rodante(con, novela_id, capitulo)
+    p.anadir_elementos(
         "estado_rodante",
-        lectura.estado_rodante(con, novela_id, capitulo),
+        [
+            Elemento(f"Capitulo {f['numero']}: {f['texto']}", posicion=f["numero"])
+            for f in reversed(rodante)
+        ],
         "LO QUE HA PASADO HASTA AQUI",
     )
     if capitulo > 1:
-        p.anadir(
+        # Primero en caer, y antes de perder parrafos se sustituye por su resumen (RF-CTX-01).
+        parrafos = [x for x in lectura.texto_capitulo(con, novela_id, capitulo - 1).split("\n\n")]
+        anterior = lectura.capitulo(con, novela_id, capitulo - 1) or {}
+        p.anadir_elementos(
             "capitulo_anterior",
-            lectura.texto_capitulo(con, novela_id, capitulo - 1),
+            [Elemento(x, posicion=i) for i, x in reversed(list(enumerate(parrafos)))],
             f"TEXTO DEL CAPITULO {capitulo - 1}",
+            separador="\n\n",
+            alternativa=[Elemento(
+                f"(Resumen: el texto completo no cabe.) {anterior.get('resumen') or ''}"
+            )] if anterior.get("resumen") else None,
         )
 
     if recuperado:
-        p.anadir(
+        p.anadir_elementos(
             "recuperado",
-            "\n\n".join(
-                f"[cap. {f.capitulo}, escena {f.orden}, {f.lugar}]\n{f.texto}"
+            [
+                Elemento(f"[cap. {f.capitulo}, escena {f.orden}, {f.lugar}]\n{f.texto}")
                 for f in recuperado
-            ),
+            ],
             "COMO SE DESCRIBIO ESTO ANTES (no lo repitas ni lo contradigas)",
+            separador="\n\n",
         )
 
     if criterios_incumplidos:
@@ -223,7 +266,7 @@ def paquete(
             "LO QUE FALLO EN EL INTENTO ANTERIOR. Reescribe desde la escaleta, no parchees",
         )
 
-    return ajustar(p)
+    return ajustar(p, presupuesto)
 
 
 def aplicar(

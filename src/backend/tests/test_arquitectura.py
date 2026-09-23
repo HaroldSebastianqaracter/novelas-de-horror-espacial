@@ -156,17 +156,22 @@ def test_el_worker_no_importa_fastapi() -> None:
 
 
 def test_el_paquete_cabe_en_el_techo_de_contexto() -> None:
-    """100.000 tokens por llamada es la restriccion que da forma al pipeline."""
+    """100.000 tokens por llamada es la restriccion que da forma al pipeline.
+
+    Cada agente declara que bloques puede llevar, y la suma de sus presupuestos no puede pasar
+    del paquete: si pasara, un paquete lleno a tope no cabria nunca (RF2-CTX-12).
+    """
     import config
 
-    suma = sum(config.PRESUPUESTO_BLOQUES.values())
-    assert suma == config.PRESUPUESTO_PAQUETE, (
-        f"El reparto por bloques suma {suma} y el total declarado es "
-        f"{config.PRESUPUESTO_PAQUETE}"
-    )
-    assert suma < 100_000, "El paquete no deja sitio para la salida del agente."
-    reserva = 100_000 - suma
-    assert reserva >= 20_000, f"Solo quedan {reserva} tokens para la salida del agente."
+    assert config.PRESUPUESTO_PAQUETE == config.TECHO_POR_LLAMADA - config.RESERVA_SALIDA
+    assert config.RESERVA_SALIDA >= 20_000, "No queda sitio para la salida del agente."
+    for agente, bloques in config.BLOQUES_POR_AGENTE.items():
+        desconocidos = set(bloques) - set(config.PRESUPUESTO_BLOQUES)
+        assert not desconocidos, f"{agente} usa bloques sin presupuesto: {desconocidos}"
+        suma = sum(config.PRESUPUESTO_BLOQUES[b] for b in bloques)
+        assert suma <= config.PRESUPUESTO_PAQUETE, (
+            f"Los bloques de {agente} suman {suma} y el paquete es {config.PRESUPUESTO_PAQUETE}"
+        )
 
 
 def test_los_bloques_fijos_no_estan_en_el_orden_de_recorte() -> None:

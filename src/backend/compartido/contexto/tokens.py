@@ -5,7 +5,8 @@ numero siempre, correr sin dependencias y ser barata, porque se llama una vez po
 por llamada. El margen del 10 % y los 26.000 tokens que el paquete deja libres absorben el
 error.
 
-Si algun dia hace falta precision, se sustituye esta funcion y nada mas cambia.
+Si algun dia hace falta precision, se sustituye esta funcion y nada mas cambia. El recorte
+no vive aqui: es por elementos enteros y lo hace `paquete.ajustar` (RF2-CTX-01).
 """
 
 from __future__ import annotations
@@ -19,23 +20,3 @@ def estimar(texto: str) -> int:
     if not texto:
         return 0
     return int(len(texto) / CARACTERES_POR_TOKEN * MARGEN) + 1
-
-
-def recortar_a(texto: str, tokens: int) -> str:
-    """Corta un texto para que quepa en ese presupuesto, por parrafos enteros.
-
-    Corta por parrafos y no por caracteres porque medio parrafo es peor que ninguno: el
-    agente lo leeria como una frase inacabada del canon.
-    """
-    if estimar(texto) <= tokens:
-        return texto
-    parrafos = texto.split("\n\n")
-    acumulado: list[str] = []
-    usados = 0
-    for p in parrafos:
-        coste = estimar(p) + 1
-        if usados + coste > tokens:
-            break
-        acumulado.append(p)
-        usados += coste
-    return "\n\n".join(acumulado)

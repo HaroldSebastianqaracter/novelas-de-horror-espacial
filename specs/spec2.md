@@ -155,7 +155,29 @@ La API sigue pudiendo **crear** el esquema al arrancar, como excepción escrita 
 
 ### 3.4 Fase 4 — El paquete no pierde canon en silencio
 
-*Pendiente: se escribe al empezar la fase.*
+Hallazgos 4 (el bloque de hechos y conocimiento desaparece entero), 10 (`LIMIT 200` tira los hechos más antiguos), 22 (conocimiento sin límite ni filtro de vigencia) y 24 (la configuración del presupuesto no se usa).
+
+**RF2-CTX-01** *Sustituye a RF-CTX-01 en lo que toca al recorte.* Todo bloque del paquete es una **lista de elementos**, cada uno marcado como *obligatorio* u *opcional* y ya ordenado por relevancia. Un bloque fijo es un único elemento obligatorio; uno elástico de texto (estado rodante, capítulo anterior) es una lista de párrafos opcionales; el canon, los hechos, el conocimiento y lo recuperado son una lista de entidades, hechos, posturas o fragmentos. El recorte **quita elementos opcionales desde el final** de la lista, primero para que cada bloque quepa en su presupuesto y después, en el orden de `ORDEN_DE_RECORTE`, para que quepa el paquete. Nunca corta a mitad de elemento ni vacía un bloque por ser «un párrafo». El orden en que un bloque se presenta al agente puede no ser el de relevancia (el estado rodante se lee en orden cronológico, y se recorta empezando por lo más antiguo).
+
+El bloque del capítulo anterior, como ya pedía spec1, **se sustituye por su resumen** antes de perder párrafos.
+
+**RF2-CTX-03** *Sustituye a RF-CTX-03.* Si los elementos obligatorios no caben, `PresupuestoExcedido` y parada de presupuesto, con los bloques y sus tamaños en el informe; vale para los paquetes del redactor, del extractor y del juez de oficio. **Todo recorte, aunque el paquete quepa, se registra en la traza** con el evento `paquete_recortado`, por bloque: cuántos elementos se quitaron, cuántos tokens y si el bloque se sustituyó por su alternativa.
+
+**RF2-CTX-11** *Requisito nuevo.* Qué es obligatorio:
+
+| Bloque | Obligatorio | Opcional, de más a menos relevante |
+| --- | --- | --- |
+| Canon | Los personajes que son POV de alguna escena del capítulo y los lugares de sus escenas | El resto del reparto por número de apariciones, la amenaza, los sistemas técnicos, los objetos y las facciones |
+| Hechos | Todos los hechos vigentes, establecidos antes del capítulo, de los personajes del reparto y de los lugares de sus escenas | Los hechos de amenaza, mundo y novela, del más reciente al más antiguo |
+| Conocimiento | La última postura de cada personaje del reparto sobre cada hecho vigente | — |
+
+Un hecho sustituido por otro vigente (`supersede_a`) no entra: el agente ve el valor actual, no la historia.
+
+**RF2-CTX-12** *Requisito nuevo.* El presupuesto sale de `Config`, que llega al paquete desde el contexto del orquestador; ningún módulo lee las constantes de `config.py` por su cuenta. `NOVELAS_PRESUPUESTO_TOKENS` fija el **techo por llamada**, y el paquete dispone de ese techo menos una reserva fija de 26.000 tokens para la salida del agente y la sobrecarga de Claude Code. Con el valor por defecto (100.000) el paquete tiene los 74.000 de spec1. Un techo que no deje sitio a la reserva es configuración inválida y el proceso no arranca.
+
+La prosa del capítulo es un bloque propio, `prosa`, fijo, en los paquetes del extractor y del juez de oficio; antes viajaba bajo el nombre `escaleta`. Cada agente declara qué bloques puede llevar, y la suma de sus presupuestos no pasa del paquete.
+
+> **Decisión de la spec (23-09-2026).** El plan dejaba sin fijar qué parte del canon es obligatoria; se toma la de spec1 («el POV nunca se recorta») y se añaden los lugares de las escenas, porque sus hechos ya son obligatorios y un hecho de un lugar sin el lugar no se entiende. Para `NOVELAS_PRESUPUESTO_TOKENS` se descartó eliminarla: el techo por llamada es la restricción que da forma al pipeline y tiene que poder bajarse para medir. La recompresión del estado rodante por actos que describía RF-CTX-04 no se implementa: el recorte por elementos quita primero los resúmenes breves más antiguos, que es lo que esa recompresión perdía, y queda registrado.
 
 ### 3.5 Fase 5 — Puerta 3 sin falsos positivos
 

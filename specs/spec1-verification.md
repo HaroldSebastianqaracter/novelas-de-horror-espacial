@@ -2,7 +2,7 @@
 
 Plan de verificación de [spec1.md](spec1.md). Métodos y etiquetas según [docs/validators.md](../docs/validators.md).
 
-Actualizado el 23 de septiembre de 2026. Suite: 89 tests en verde y 5 `xfail` estrictos, que son las reproducciones de la auditoría que aún no ha cerrado ninguna fase de spec2. Las rutas de evidencia son relativas a `src/backend/`.
+Actualizado el 23 de septiembre de 2026. Suite: 100 tests en verde y 3 `xfail` estrictos, que son las reproducciones de la auditoría que aún no ha cerrado ninguna fase de spec2. Las rutas de evidencia son relativas a `src/backend/`.
 
 > **Filas degradadas el 23 de septiembre de 2026.** La auditoría de ese día reprodujo fallos en siete filas que estaban en `implementado`: 11, 16, 17, 21, 25, 27 y 35. Pasan a `fallando` ya, y no cuando se arreglen, porque un plan que dice «implementado» sobre un fallo reproducido es justo lo que la sección siguiente llama la forma más común de mentir. Cada una vuelve a `implementado` en la fase de [spec2-plan.md](spec2-plan.md) que la corrige, y su propiedad endurecida vive en [spec2-verification.md](spec2-verification.md).
 
@@ -34,7 +34,7 @@ Actualizado el 23 de septiembre de 2026. Suite: 89 tests en verde y 5 `xfail` es
 | 18 | Un conflicto de continuidad para el pipeline y no deja texto vigente | Integration testing | `T` | `tests/test_pipeline.py::test_un_conflicto_de_continuidad_para_y_no_deja_rastro` | implementado |
 | 19 | La puerta 4 reintenta tres veces y escala a parada, con el criterio en el paquete | Integration testing | `T` | `tests/test_pipeline.py::test_la_puerta_4_reintenta_y_escala_a_parada` | implementado |
 | 20 | La máquina de estados no admite transiciones fuera de la tabla | Model checking + unit testing | `A` + `T` | `orquestador/estados.py::TRANSICIONES` y `::RESOLUCIONES`; recorrido exhaustivo en `tests/test_estados_exhaustivo.py`; rechazos en `tests/test_reanudacion.py`. Ampliada por spec2, fase 2 | implementado |
-| 21 | Ningún paquete supera el presupuesto; si no cabe, parada y no truncado | Property-based testing | `T` | `compartido/contexto/paquete.py::ajustar`. **Contradicha**: el bloque de hechos desaparece entero sin `PresupuestoExcedido`, y `LIMIT 200` tira los hechos más antiguos. Reproducción: `tests/test_auditoria.py::test_hallazgo_04_…`, `::test_hallazgo_10_…` | **fallando** |
+| 21 | Ningún paquete supera el presupuesto; si no cabe, parada y no truncado | Property-based testing | `T` | `compartido/contexto/paquete.py::ajustar`; `tests/test_paquete.py` (hypothesis, 300 ejemplos, y una mutación que la propiedad detecta); `tests/test_auditoria.py::test_hallazgo_04_…`, `::test_hallazgo_10_…`. Corregida por spec2, fase 4 | implementado |
 | 22 | El orden de recorte es el que fija la arquitectura y los bloques fijos no se tocan | Unit testing | `T` | `tests/test_arquitectura.py::test_los_bloques_fijos_no_estan_en_el_orden_de_recorte`, `::test_el_capitulo_anterior_cae_antes_que_el_canon` | implementado |
 | 23 | Revertir a N deja el grafo como al terminar N-1 | Property-based testing | `T` | `tests/test_pipeline.py::test_revertir_deja_el_grafo_como_estaba` | implementado |
 | 24 | Tras revertir se puede reanudar y la novela termina | Integration testing | `T` | `tests/test_pipeline.py::test_se_puede_reanudar_y_termina` | implementado |

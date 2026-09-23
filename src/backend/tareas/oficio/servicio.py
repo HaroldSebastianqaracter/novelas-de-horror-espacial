@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 
-from compartido.contexto import Paquete, ajustar
+from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
 from compartido.grafo import lectura
 from compartido.puerta_base import ResultadoPuerta
 
@@ -17,6 +17,8 @@ def paquete(
     capitulo: int,
     texto: str,
     mecanica: ResultadoPuerta | None = None,
+    *,
+    presupuesto: Presupuesto,
 ) -> Paquete:
     e = lectura.estilo(con, novela_id) or {}
     escenas = lectura.escenas_del_capitulo(con, novela_id, capitulo)
@@ -39,15 +41,19 @@ def paquete(
         instrucciones.append("- Tics prohibidos: " + "; ".join(tics))
     p.anadir("instrucciones", "\n".join(instrucciones), "TU ENCARGO Y EL ESTILO")
 
+    # La voz del POV es obligatoria; la del resto del reparto se recorta por apariciones.
     voces = [
-        f"- **{per['nombre']}**: {per['idiolecto']}"
+        Elemento(
+            f"- **{per['nombre']}**: {per['idiolecto']}",
+            obligatorio=int(per.get("escenas_pov") or 0) > 0,
+        )
         for per in canon["personajes"] if per.get("idiolecto")
     ]
     if voces:
-        p.anadir(
+        p.anadir_elementos(
             "canon",
-            "Al tapar las acotaciones se tiene que seguir sabiendo quien habla:\n"
-            + "\n".join(voces),
+            [Elemento("Al tapar las acotaciones se tiene que seguir sabiendo quien habla:",
+                      True), *voces],
             "VOZ DE CADA PERSONAJE",
         )
 
@@ -59,9 +65,10 @@ def paquete(
     ]
     p.anadir(
         "escaleta",
-        "Lo que cada escena tenia que conseguir:\n" + "\n".join(plan) + "\n\n---\n\n" + texto,
-        f"ESCALETA Y PROSA DEL CAPITULO {capitulo}",
+        "Lo que cada escena tenia que conseguir:\n" + "\n".join(plan),
+        f"ESCALETA DEL CAPITULO {capitulo}",
     )
+    p.anadir("prosa", texto, f"PROSA DEL CAPITULO {capitulo}")
 
     if mecanica is not None and mecanica.conflictos:
         p.anadir(
@@ -71,4 +78,4 @@ def paquete(
             "AVISOS DE LA PASADA MECANICA",
         )
 
-    return ajustar(p)
+    return ajustar(p, presupuesto)
