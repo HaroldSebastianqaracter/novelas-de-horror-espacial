@@ -83,6 +83,13 @@ class UsoConocimiento(BaseModel):
     atributo: str = Field(min_length=2)
 
 
+class PresenciaExtraida(BaseModel):
+    """Quien esta fisicamente en la escena segun la prosa (spec3, RF3-PAS-09)."""
+
+    escena_orden: int = Field(ge=1)
+    personaje_ref: str = Field(min_length=1)
+
+
 class EstadoPersonajeExtraido(BaseModel):
     escena_orden: int = Field(ge=1)
     personaje_ref: str = Field(min_length=1)
@@ -180,6 +187,11 @@ class SalidaExtraccion(BaseModel):
     hechos: list[HechoExtraido] = Field(default_factory=list[HechoExtraido])
     conocimiento: list[ConocimientoExtraido] = Field(default_factory=list[ConocimientoExtraido])
     usos_de_conocimiento: list[UsoConocimiento] = Field(default_factory=list[UsoConocimiento])
+    presencias: list[PresenciaExtraida] = Field(
+        default_factory=list[PresenciaExtraida],
+        description="Quien esta fisicamente en cada escena, aunque la escaleta no lo pusiera. "
+                    "Nombrar o recordar a alguien no es estar",
+    )
     estados_personaje: list[EstadoPersonajeExtraido] = Field(
         default_factory=list[EstadoPersonajeExtraido]
     )

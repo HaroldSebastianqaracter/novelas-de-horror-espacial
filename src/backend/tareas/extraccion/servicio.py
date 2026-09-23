@@ -525,6 +525,20 @@ def aplicar(
             estado_psicologico=ep.estado_psicologico, nivel_confianza=ep.nivel_confianza or None,
         )
 
+    # Quien esta en la escena aunque la escaleta no lo pusiera (spec3, RF3-PAS-09). La puerta
+    # 3 lo cuenta como presencia (RF2-PIPE-31); repetir el reparto no cambia nada.
+    for pr in salida.presencias:
+        eid, pid = escena(pr.escena_orden), resolvedor.id_de("personaje", pr.personaje_ref)
+        motivo = _motivo(eid, pid)
+        if motivo:
+            descartes.anotar("presencias", motivo)
+            continue
+        con.execute(
+            "INSERT OR IGNORE INTO presencia_escena (novela_id, escena_id, personaje_id) "
+            "VALUES (?,?,?)",
+            (novela_id, eid, pid),
+        )
+
     for eo in salida.estados_objeto:
         eid, oid = escena(eo.escena_orden), resolvedor.id_de("objeto", eo.objeto_ref)
         motivo = _motivo(eid, objeto=oid)

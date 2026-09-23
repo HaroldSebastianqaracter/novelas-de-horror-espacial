@@ -384,6 +384,57 @@ def test_solo_avisa_la_deduccion_de_lo_que_no_presencio(
     assert "deduccion_por_verificar" not in _puerta_3(con, g)[1]
 
 
+def _extraer_presencias(
+    con: sqlite3.Connection, g: fabrica.Grafo, *personajes: str
+) -> s_extraccion.Descartes:
+    """Una extraccion del capitulo 1 que solo registra quien estaba en la escena 1.1."""
+    salida = SalidaExtraccion.model_validate({
+        "presencias": [{"escena_orden": 1, "personaje_ref": p} for p in personajes],
+        "resumen": "La cuadrilla entra en el puente y encuentra la sala vacia.",
+        "resumen_breve": "Entran en el puente.",
+    })
+    return s_extraccion.aplicar(con, g.novela_id, 1, salida, {1: g.escenas[(1, 1)]})
+
+
+def test_una_presencia_registrada_habilita_lo_que_se_dijo_en_la_escena() -> None:
+    """RF3-PAS-09, parada 10: estaba en la escena del hecho aunque la escaleta no lo pusiera."""
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    _extraer_presencias(con, g, "Reyes")
+    assert contar(con, "SELECT COUNT(*) FROM presencia_escena WHERE personaje_id = ?",
+                  g.personajes["Reyes"]) == 1
+    _usar(con, g, "Reyes")
+    assert "conocimiento_no_adquirido" not in _puerta_3(con, g)[0]
+
+
+def test_sin_presencia_registrada_el_uso_sigue_parando() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    # Repetir a quien ya esta en el reparto no cambia nada.
+    _extraer_presencias(con, g, "Ibarra", "Ibarra")
+    _usar(con, g, "Reyes")
+    assert "conocimiento_no_adquirido" in _puerta_3(con, g)[0]
+
+
+def test_una_presencia_de_alguien_fuera_del_canon_se_descarta_con_su_motivo() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    descartes = _extraer_presencias(con, g, "Nadie Conocido")
+    assert contar(con, "SELECT COUNT(*) FROM presencia_escena") == 0
+    assert descartes.recuento["presencias"] == {"personaje_sin_resolver": 1}
+
+
+def test_la_skill_pide_las_presencias() -> None:
+    from compartido.puerto.terminal import PuertoTerminal
+    from config import raiz_repo
+
+    skill = PuertoTerminal(skills_dir=raiz_repo() / ".claude" / "skills").ruta_skill(
+        "extraccion").read_text(encoding="utf-8")
+    parrafo = skill.split("**Presencias**")[1].split("\n\n")[0]
+    assert "aunque la escaleta no lo pusiera" in parrafo
+    assert "Nombrar o recordar a alguien no es estar" in parrafo
+
+
 def test_partir_el_compuesto_con_supersede_a_no_contradice() -> None:
     """Lo que pide la marca [COMPUESTO]: cada dato en su hecho, sustituyendo al compuesto."""
     con, g, hid = _con_ambiente_compuesto()
