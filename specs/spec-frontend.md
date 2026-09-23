@@ -74,7 +74,7 @@ Una funcionalidad no importa del interior de otra. Lo común baja a `compartido/
 | Build | Vite 7 + React 19 + TypeScript 5 estricto | Next.js: no hay servidor que renderizar, el backend es otro proceso. Vite 8: ver la decisión de abajo |
 | Estado del servidor | TanStack Query | SWR: invalidación por clave menos expresiva. Un almacén global (Redux, Zustand) lo prohíbe la arquitectura |
 | Rutas | React Router | — |
-| Arrastre | dnd-kit, con sensor de teclado | HTML5 drag and drop: sin teclado ni táctil |
+| Arrastre | dnd-kit con sensor de ratón; teclado y táctil van por el menú de la tarjeta (RF-FE-TAB-05) | HTML5 drag and drop: sin control del fantasma ni de las zonas |
 | Ambiente 3D | `three` en un único componente cargado de forma perezosa | react-three-fiber: una sola pieza decorativa no justifica la capa |
 | Cliente HTTP | `openapi-fetch` sobre los tipos generados | Un cliente escrito a mano: duplicaría las rutas y sus parámetros |
 | Tests | Vitest 4 + Testing Library + MSW + axe | Vitest 3: tiene un aviso de seguridad abierto (GHSA-82fw-gwwq-j7x9) |
@@ -121,7 +121,9 @@ Una funcionalidad no importa del interior de otra. Lo común baja a `compartido/
 
 **RF-FE-DAT-04 — Reconexión.** Si el SSE se corta o la red cae, aparece un aviso no bloqueante («Enlace perdido, reintentando»). Al volver, se invalidan todas las consultas y el SSE se reabre con `Last-Event-ID`. Volver de una suspensión del equipo (`visibilitychange`) cuenta como reconexión.
 
-**RF-FE-DAT-05 — Ciclo de una intención.** `POST /intenciones` devuelve `202`, y el frontend consulta `GET /intenciones/{id}` cada segundo hasta que el estado sea `hecha`, `rechazada` o `interrumpida`, con un máximo de 60 s. Mientras tanto, lo que la pidió se ve como **pendiente**. Con `rechazada`, se muestra el `motivo` del worker. Si se agota el tiempo, se avisa y se invalida la ejecución, porque la intención puede seguir en cola.
+**RF-FE-DAT-05 — Ciclo de una intención.** `POST /intenciones` devuelve `202`, y el frontend consulta `GET /intenciones/{id}` hasta que el estado sea `hecha`, `rechazada` o `interrumpida`: cada segundo durante el primer minuto y cada 5 s después. Mientras tanto, lo que la pidió se ve como **pendiente**, y pasado el minuto el aviso cambia a «sigue en cola» sin dejar de consultar. Al cerrarse se invalidan la ejecución y el tablero. Con `rechazada` o `interrumpida` se muestra el motivo del worker en lenguaje legible (`otra_ejecucion_activa`, `worker_caido`) o tal cual si no se conoce. Las intenciones pendientes se guardan en `sessionStorage`, así que sobreviven a recargar la página.
+
+> **Decisión de la spec.** No hay tiempo máximo. El worker corre el pipeline dentro de su propio bucle, así que un `parar` espera a que el pipeline lo detecte (`hay_parada_pendiente`) y puede tardar lo que dure la llamada en curso al modelo. Mientras la intención siga `pendiente`, el `GET` dice que está en cola, y abandonarla sería contradecirlo. Se descartó el máximo de 60 s de la versión anterior de este requisito.
 
 ### 3.4 Tablero general
 
@@ -159,9 +161,13 @@ Una novela sin ejecución (`estado` nulo en `NovelaResumen`) cae en «En espera�
 
 Mientras se arrastra, las zonas sin intención se ven bloqueadas. Al soltar, la tarjeta vuelve a su columna marcada como pendiente (RF-FE-DAT-05) y se mueve cuando la ejecución lo confirma. Las tarjetas de «Terminada» y «Requiere atención» no se arrastran: se abren.
 
-**RF-FE-TAB-04 — Una obra a la vez.** Si ya hay una novela activa, la zona «Planificando» se ve bloqueada para las demás y lo explica. Aun así, si llega a encolarse un `arrancar`, el rechazo del worker se muestra como cualquier otro. El cliente avisa, pero quien decide es el worker.
+**RF-FE-TAB-04 — Una obra a la vez.** Si ya hay una novela activa, la zona «Planificando» se ve bloqueada para las demás y lo explica, y el menú desactiva «Arrancar» con el mismo motivo. Aun así, si llega a encolarse un `arrancar`, el rechazo del worker se muestra como cualquier otro.
 
-**RF-FE-TAB-05 — Alternativa sin arrastre.** Toda tarjeta tiene un menú con las mismas intenciones y se maneja por teclado (el sensor de dnd-kit más el menú).
+> **Decisión de la spec.** Aquí el bloqueo del cliente no es solo cortesía. Con otra novela corriendo, el worker ni siquiera recoge el `arrancar`, porque está dentro del pipeline de la otra. La intención se queda en cola horas y **arranca sola** cuando la otra termina. Casi nunca es lo que quiere quien la pidió, así que el cliente no la deja encolar. `otra_ejecucion_activa` solo lo devuelve el worker cuando la otra novela figura activa sin estar corriendo, por ejemplo tras una caída.
+
+**RF-FE-TAB-05 — Alternativa sin arrastre.** Toda tarjeta tiene un menú (⋯) con las mismas intenciones, más «Abrir». Es la vía del teclado y de la pantalla táctil. El menú se abre con Intro o Espacio, se recorre con las flechas y se cierra con Escape devolviendo el foco al botón.
+
+> **Decisión de la spec.** El arrastre es solo de ratón o lápiz. Se descartó el arrastre por teclado de dnd-kit, en el que las flechas mueven la tarjeta entre columnas: un menú con acciones nombradas («Arrancar», «Parar») dice lo que va a pasar y el arrastre por teclado no. En táctil, el arrastre compite con el desplazamiento horizontal del tablero.
 
 **RF-FE-TAB-06 — Tablero vacío.** Sin novelas, el tablero explica qué es y lleva a `/crear`.
 
@@ -243,7 +249,7 @@ La tarjeta en curso muestra la subfase (paquete → redacción → extracción �
 
 - Contraste AA en todo texto, con los valores ya medidos en `DECISIONES.md`.
 - Foco visible.
-- Todo manejable por teclado, incluido el arrastre (RF-FE-TAB-05).
+- Todo manejable por teclado, incluidas las intenciones que pide el arrastre, que tienen su menú (RF-FE-TAB-05).
 - `prefers-reduced-motion` respetado.
 - Los avisos de estado y de reconexión se anuncian por una región `aria-live`.
 

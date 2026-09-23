@@ -54,3 +54,28 @@
 [data-estado="completada"] .progreso__barra span { background: var(--color-confirmado); }
 [data-estado="completada_con_avisos"] .progreso__barra span { background: var(--color-aviso); }
 [data-estado="parada"] .progreso__barra span, [data-estado="error"] .progreso__barra span { background: var(--color-alerta); }
+
+.boton--mini { min-height: 28px; padding: 2px var(--espacio-3); font-size: var(--texto-xs); }
+
+/* Menú de acciones (⋯) */
+.menu { position: relative; }
+.menu__boton {
+  width: 28px; height: 28px; display: grid; place-items: center; padding: 0;
+  background: transparent; border: 0; border-radius: var(--radio-sm);
+  color: var(--color-texto-secundario); cursor: pointer; font: inherit; font-size: 16px; line-height: 1;
+}
+.menu__boton:hover, .menu__boton[aria-expanded="true"] { background: var(--color-superficie); color: var(--color-texto); }
+.menu__lista {
+  position: absolute; top: calc(100% + 4px); right: 0; z-index: var(--z-menu);
+  min-width: 14rem; margin: 0; padding: var(--espacio-1); list-style: none;
+  background: var(--color-superficie-elevada); border: var(--borde-fino) solid var(--color-borde);
+  border-radius: var(--radio-md); box-shadow: var(--sombra-elevada);
+}
+.menu__opcion {
+  display: grid; gap: 2px; width: 100%; padding: var(--espacio-2) var(--espacio-3); text-align: left;
+  background: transparent; border: 0; border-radius: var(--radio-sm);
+  font: inherit; font-size: var(--texto-sm); color: var(--color-texto); cursor: pointer;
+}
+.menu__opcion:hover, .menu__opcion:focus-visible { background: var(--color-superficie-activa); }
+.menu__opcion[aria-disabled="true"] { color: var(--color-texto-tenue); cursor: not-allowed; }
+.menu__motivo { font-size: var(--texto-xs); color: var(--color-texto-tenue); }

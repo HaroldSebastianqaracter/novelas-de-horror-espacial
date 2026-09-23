@@ -24,3 +24,13 @@ export const ejecuciones: Record<number, Ejecucion> = {
   5: { novela_id: 5, estado: "error", fase: "extraccion", capitulo_actual: 5, intento_actual: 3, capitulos_completados: 4, total_capitulos: 10, parada_abierta_id: null, ultimo_error: "El puerto a Claude Code agotó sus dos reintentos: tiempo de espera superado.", actualizado_en: hace(300) },
   6: { novela_id: 6, estado: "completada_con_avisos", fase: null, capitulo_actual: null, intento_actual: 1, capitulos_completados: 10, total_capitulos: 10, parada_abierta_id: null, ultimo_error: null, actualizado_en: hace(19000) },
 };
+
+const novelasIniciales = structuredClone(novelas);
+const ejecucionesIniciales = structuredClone(ejecuciones);
+
+/** Deshace lo que las intenciones simuladas cambiaron. Los tests lo llaman entre caso y caso. */
+export function restaurarDatos() {
+  novelas.splice(0, novelas.length, ...structuredClone(novelasIniciales));
+  for (const id of Object.keys(ejecuciones)) delete ejecuciones[Number(id)];
+  Object.assign(ejecuciones, structuredClone(ejecucionesIniciales));
+}

@@ -1,8 +1,10 @@
 import { Link } from "react-router";
+import { type Rechazo, type Seguimiento, UN_MINUTO } from "../../compartido/api/intenciones";
 import { comoFase } from "../../compartido/api/reglas";
 import type { Ejecucion, NovelaResumen } from "../../compartido/api/tipos";
 import { ChipEstado } from "../../compartido/ui/ChipEstado";
-import { Hace } from "../../compartido/ui/Hace";
+import { Hace, useAhora } from "../../compartido/ui/Hace";
+import { MenuAcciones, type OpcionMenu } from "../../compartido/ui/Menu";
 import { Progreso } from "../../compartido/ui/Progreso";
 import { ETIQUETA_FASE } from "../../compartido/ui/vocabulario";
 
@@ -16,6 +18,19 @@ export const tituloDe = (novela: NovelaResumen) => novela.titulo || "Sin título
 
 export const estadoDe = ({ novela, ejecucion }: NovelaEnTablero) => ejecucion?.estado ?? novela.estado;
 
+export const destinoDe = ({ novela, ejecucion }: NovelaEnTablero) =>
+  estadoDe({ novela, ejecucion }) === "parada" && ejecucion?.parada_abierta_id
+    ? `/novelas/${novela.id}/paradas/${ejecucion.parada_abierta_id}`
+    : `/novelas/${novela.id}`;
+
+export const ETIQUETA_INTENCION: Record<string, string> = {
+  arrancar: "Arrancar",
+  parar: "Parar",
+  relanzar: "Relanzar",
+  resolver_parada: "Resolver parada",
+  crear_novela: "Crear novela",
+};
+
 function lineaFase(ejecucion: Ejecucion | undefined, estado: string | null | undefined): string {
   if (!ejecucion?.fase) return estado === "configurada" || estado == null ? "Sin arrancar" : "Sin fase activa";
   const fase = comoFase(ejecucion.fase);
@@ -27,21 +42,30 @@ function lineaFase(ejecucion: Ejecucion | undefined, estado: string | null | und
 
 const recortar = (texto: string, max: number) => (texto.length > max ? `${texto.slice(0, max - 1)}…` : texto);
 
-/** Tarjeta de novela del tablero general (RF-FE-TAB-02). El arrastre y el menú llegan en el paso 3. */
-export function Tarjeta(props: NovelaEnTablero) {
-  const { novela, ejecucion } = props;
-  const estado = estadoDe(props);
-  const destino =
-    estado === "parada" && ejecucion?.parada_abierta_id
-      ? `/novelas/${novela.id}/paradas/${ejecucion.parada_abierta_id}`
-      : `/novelas/${novela.id}`;
-  const idTitulo = `tarjeta-${novela.id}`;
+interface Props extends NovelaEnTablero {
+  opciones?: readonly OpcionMenu[];
+  pendiente?: Seguimiento;
+  rechazo?: Rechazo;
+  alDescartarRechazo?: () => void;
+  /** Copia que sigue al puntero durante el arrastre: sin enlaces, ids ni menú. */
+  fantasma?: boolean;
+}
+
+/** Tarjeta de novela del tablero general (RF-FE-TAB-02). */
+export function Tarjeta({ opciones = [], pendiente, rechazo, alDescartarRechazo, fantasma, ...x }: Props) {
+  const { novela, ejecucion } = x;
+  const estado = estadoDe(x);
+  const idTitulo = fantasma ? undefined : `tarjeta-${novela.id}`;
+  const ahora = useAhora(pendiente ? 5_000 : null);
+  const sigueEnCola = pendiente !== undefined && ahora - pendiente.desde > UN_MINUTO;
 
   return (
     <article
-      className="tarjeta"
+      className={`tarjeta${fantasma ? " tarjeta--fantasma" : ""}`}
       data-estado={estado ?? "sin_ejecucion"}
       data-fase={ejecucion?.fase ?? undefined}
+      data-pendiente={pendiente?.tipo}
+      data-rechazada={rechazo ? true : undefined}
       aria-labelledby={idTitulo}
     >
       <div className="tarjeta__fila">
@@ -49,9 +73,13 @@ export function Tarjeta(props: NovelaEnTablero) {
         <Hace className="tarjeta__hace" iso={ejecucion?.actualizado_en ?? novela.creado_en} />
       </div>
       <h3 className="tarjeta__titulo" id={idTitulo}>
-        <Link className="tarjeta__enlace" to={destino}>
-          {tituloDe(novela)}
-        </Link>
+        {fantasma ? (
+          tituloDe(novela)
+        ) : (
+          <Link className="tarjeta__enlace" to={destinoDe(x)} draggable={false}>
+            {tituloDe(novela)}
+          </Link>
+        )}
       </h3>
       <div className="tarjeta__estado">
         <ChipEstado estado={estado} />
@@ -77,6 +105,28 @@ export function Tarjeta(props: NovelaEnTablero) {
         <p className="tarjeta__avisos">
           <span aria-hidden="true">▲ </span>Terminada con avisos no bloqueantes
         </p>
+      )}
+      {pendiente && (
+        <p className="tarjeta__pendiente" role="status">
+          <span className="cursor" aria-hidden="true" />
+          {ETIQUETA_INTENCION[pendiente.tipo] ?? pendiente.tipo} en cola ·{" "}
+          {sigueEnCola ? "sigue en cola, el worker la atenderá al terminar lo que está haciendo" : "esperando confirmación"}
+        </p>
+      )}
+      {rechazo && (
+        <div className="tarjeta__rechazo" role="alert">
+          <p>
+            <strong>{ETIQUETA_INTENCION[rechazo.tipo] ?? rechazo.tipo}: rechazada.</strong> {rechazo.motivo}
+          </p>
+          {alDescartarRechazo && (
+            <button type="button" className="boton boton--mini" onClick={alDescartarRechazo}>
+              Entendido
+            </button>
+          )}
+        </div>
+      )}
+      {!fantasma && opciones.length > 0 && (
+        <MenuAcciones className="tarjeta__menu" etiqueta={`Acciones: ${tituloDe(novela)}`} opciones={opciones} />
       )}
     </article>
   );

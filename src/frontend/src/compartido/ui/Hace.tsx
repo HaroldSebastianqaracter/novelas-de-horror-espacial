@@ -9,13 +9,20 @@ export function haceTanto(iso: string, ahora = Date.now()): string {
   return `hace ${Math.floor(s / 86400)} d`;
 }
 
-/** «hace 3 min», que se refresca solo cada 30 s. */
-export function Hace({ iso, className }: { iso: string; className?: string }) {
+/** La hora actual, refrescada cada `intervalo` ms; con `null`, no se refresca. */
+export function useAhora(intervalo: number | null): number {
   const [ahora, setAhora] = useState(() => Date.now());
   useEffect(() => {
-    const id = setInterval(() => setAhora(Date.now()), 30_000);
+    if (intervalo === null) return;
+    const id = setInterval(() => setAhora(Date.now()), intervalo);
     return () => clearInterval(id);
-  }, []);
+  }, [intervalo]);
+  return ahora;
+}
+
+/** «hace 3 min», que se refresca solo cada 30 s. */
+export function Hace({ iso, className }: { iso: string; className?: string }) {
+  const ahora = useAhora(30_000);
   return (
     <time className={className} dateTime={iso} title={new Date(iso).toLocaleString("es-ES")}>
       {haceTanto(iso, ahora)}
