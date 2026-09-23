@@ -4,6 +4,7 @@
  */
 import { queryOptions } from "@tanstack/react-query";
 import { api, leer } from "./cliente";
+import { comoEstadoEjecucion, ESTADOS_ACTIVOS } from "./reglas";
 
 export const claves = {
   novelas: ["novelas"] as const,
@@ -23,9 +24,14 @@ export const consultaNovelas = () =>
     refetchInterval: 15_000,
   });
 
+/** Una ejecución activa se reconsulta cada 5 s aunque no llegue ningún evento (RF-FE-DAT-03). */
 export const consultaEjecucion = (novelaId: number) =>
   queryOptions({
     queryKey: claves.ejecucion(novelaId),
     queryFn: () =>
       leer(api.GET("/novelas/{novela_id}/ejecucion", { params: { path: { novela_id: novelaId } } })),
+    refetchInterval: (consulta) => {
+      const estado = comoEstadoEjecucion(consulta.state.data?.estado);
+      return estado && ESTADOS_ACTIVOS.has(estado) ? 5_000 : false;
+    },
   });
