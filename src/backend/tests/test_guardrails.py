@@ -231,6 +231,15 @@ def test_el_veto_del_brief_no_hereda_las_excepciones_del_global() -> None:
     assert (h.regla.termino, h.regla.origen) == ("sangre", "brief")
 
 
+def test_el_brief_gana_tambien_a_la_novela() -> None:
+    con, ruta = nueva_bd()
+    nid = crear(con, ruta, intensidad="intenso", vetados=["bruma"])
+    con.execute("INSERT INTO termino_vetado (novela_id, termino, excepciones) "
+                "VALUES (?, 'Bruma', '[\"bruma ligera\"]')", (nid,))
+    [h] = politica.buscar("Una bruma ligera.", politica.reglas(con, nid))
+    assert h.regla.origen == "brief"
+
+
 def test_las_excepciones_tienen_que_ser_una_lista() -> None:
     import sqlite3 as sq
 

@@ -20,7 +20,7 @@ import httpx
 import pytest
 
 import config
-from compartido.grafo import insertar
+from compartido.grafo import insertar, lectura
 from orquestador import observabilidad as obs
 from orquestador import pipeline
 from tests.entorno import contar, contexto, crear_novela, nueva_bd, puerto_falso
@@ -210,10 +210,13 @@ def test_los_terminos_vetados_llegan_con_sus_hallazgos() -> None:
     """spec3, RF3-GRD-04: el registro del guardrail llega a Langfuse, no solo el score."""
     from compartido.puerta_base import Conflicto, ResultadoPuerta
 
-    con, _ = nueva_bd()
-    novela_id = crear_novela(con)
+    con, ruta = nueva_bd()
+    novela_id = crear(con, ruta)  # con brief: el fragmento lleva el nombre de la destinataria
+    brief = lectura.brief(con, novela_id)
+    assert brief is not None and brief.destinatario.nombre
+    nombre = brief.destinatario.nombre
     hallazgo = {"termino": "tortura", "origen": "global", "forma": "tortura",
-                "fragmento": "marcas de tortura en", "inicio": 10, "fin": 17}
+                "fragmento": f"{nombre} vio marcas de tortura", "inicio": 10, "fin": 17}
     ResultadoPuerta(puerta=4, conflictos=[Conflicto(
         comprobacion="termino_vetado", capitulo=1, descripcion="Terminos vetados.",
         datos={"politica": "abc", "hallazgos": [hallazgo]},
@@ -222,7 +225,10 @@ def test_los_terminos_vetados_llegan_con_sus_hallazgos() -> None:
     obs.Exportador(cliente).exportar(con, novela_id)
     [span] = cliente.de_tipo("span-create")
     [conflicto] = span["metadata"]["conflictos"]
-    assert conflicto["politica"] == {"politica": "abc", "hallazgos": [hallazgo]}
+    [llegado] = conflicto["politica"]["hallazgos"]
+    assert llegado["termino"] == "tortura" and conflicto["politica"]["politica"] == "abc"
+    assert nombre not in json.dumps(cliente.eventos, ensure_ascii=False)
+    assert "vio marcas de tortura" in llegado["fragmento"]
 
 
 def test_el_coste_es_el_del_puerto_y_nunca_parece_gratis() -> None:

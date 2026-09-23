@@ -102,6 +102,31 @@ def test_tras_dos_puntos_una_mayuscula_es_un_nombre() -> None:
     assert "nombre_mal_escrito" in _mecanica(con, g, "Llego tarde: Sebastian no estaba.")
 
 
+@pytest.mark.parametrize("texto", [
+    "Le dijo: «Tomas el primer turno».",
+    "Le dijo: —Tomas el primer turno.",
+])
+def test_tras_dos_puntos_que_abren_cita_o_dialogo_es_inicio_de_frase(texto: str) -> None:
+    """Validador de a5d0355: ahi va mayuscula, y «Tomas» puede ser el verbo."""
+    con, g = _con_personaje("Tomás Ruiz")
+    conflictos = _mecanica(con, g, texto)
+    assert "nombre_mal_escrito" not in conflictos and "nombre_por_revisar" in conflictos
+
+
+def test_el_nombre_del_destinatario_que_sale_en_minuscula_solo_avisa() -> None:
+    """Si la palabra sale en minuscula en el capitulo, es una palabra corriente."""
+    con, ruta = nueva_bd()
+    nid = crear(con, ruta)
+    pipeline.planificar(pipeline.Contexto(con=con, puerto=puerto_falso(con), cfg=cfg_de(ruta),
+                                          novela_id=nid))
+    brief = lectura.brief(con, nid)
+    assert brief is not None
+    sin_tilde = p_oficio._plano(brief.destinatario.nombre.split()[-1])
+    texto = f"{sin_tilde.capitalize()} de nuevo. Dijo {sin_tilde} sin pensar."
+    conflictos = {c.comprobacion for c in p_oficio.evaluar(con, nid, 1, texto).conflictos}
+    assert "nombre_mal_escrito" not in conflictos and "nombre_por_revisar" in conflictos
+
+
 def test_una_forma_que_devuelve_el_capitulo_cuenta_todas_sus_veces() -> None:
     con, g = _con_personaje("Sebastián Núñez")
     c = _mecanica(con, g, "Sebastian abrio. Luego miro a Sebastian.")["nombre_mal_escrito"]

@@ -117,6 +117,16 @@ def test_una_muestra_es_un_voto_aunque_repita_un_criterio() -> None:
     assert not juicio.pasa
 
 
+def test_una_muestra_que_dice_pasa_y_falla_vota_en_contra() -> None:
+    dudosa = _juicio("cliche")
+    pasa = next(v for v in _juicio().veredictos if v.criterio == "cliche")
+    dudosa = SalidaOficio(veredictos=[pasa, *dudosa.veredictos])
+    juicio, votos = p_oficio.votar([dudosa, dudosa, _juicio()])
+    assert votos["cliche"] == (2, 3) and not juicio.pasa
+    assert p_oficio.discrepan([dudosa, _juicio(), _juicio()])
+    assert not p_oficio.discrepan([dudosa, _juicio("cliche"), _juicio("cliche")])
+
+
 def test_la_evidencia_es_de_una_muestra_de_la_mayoria() -> None:
     juicio, _ = p_oficio.votar([_juicio(), _juicio("cliche"), _juicio("cliche")])
     assert juicio.incumplidos[0].evidencia == "cita de cliche"

@@ -247,16 +247,31 @@ def test_nada_de_lo_que_pase_en_la_opinion_pierde_la_parada(entorno, error: str)
     def falla(entrada: str, agente: str) -> dict:
         if error == "interrumpido":
             raise AgenteInterrumpido("senal de terminar")
-        if error == "inesperado":
-            raise RuntimeError("algo que nadie espera")
-        with transaccion(con):
-            cola.encolar(con, "parar", novela_id)
-        return agentes_falsos.continuidad(entrada, agente)
+        raise RuntimeError("algo que nadie espera")
 
-    puerto.registrar("continuidad", falla)
-    pipeline.avanzar(_contexto(entorno, novela_id))
+    if error == "detenido":
+        # El autor pide parar mientras la puerta 3 decide: la llamada al revisor lanza Detenido
+        # antes de invocarlo (validador de a5d0355: el caso anterior no pasaba por ahi).
+        ctx = _contexto(entorno, novela_id)
+
+        def vigilar() -> None:
+            if con.execute("SELECT COUNT(*) FROM parada").fetchone()[0]:
+                raise pipeline.Detenido()
+
+        ctx.vigilar = vigilar
+    else:
+        puerto.registrar("continuidad", falla)
+        ctx = _contexto(entorno, novela_id)
+    assert pipeline.avanzar(ctx) == "parada"
     [parada] = fallo.paradas_abiertas(con, novela_id)
     assert parada["tipo"] == "continuidad"
+    assert json.loads(parada["informe"])["segunda_opinion"] is None
+    [evento] = [json.loads(f[0]) for f in con.execute(
+        "SELECT payload FROM traza_evento WHERE novela_id = ? AND tipo = "
+        "'segunda_opinion_fallida'", (novela_id,))]
+    esperado = {"interrumpido": "AgenteInterrumpido", "inesperado": "RuntimeError",
+                "detenido": "Detenido"}[error]
+    assert evento["error"].startswith(esperado)
 
 
 def test_el_revisor_numera_como_el_informe() -> None:

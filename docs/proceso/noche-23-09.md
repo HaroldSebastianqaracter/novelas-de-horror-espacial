@@ -8,7 +8,7 @@ Ahora la puerta 4 caza lo que las cinco puertas dejaron pasar en la primera nove
 
 ## Lo hecho
 
-Cada paso se cerró con la spec en el mismo commit, `/verificar` en verde (601 tests al final, ruff y pyright limpios), un `validador-de-codigo` y sus correcciones.
+Cada paso se cerró con la spec en el mismo commit, `/verificar` en verde (606 tests al final, ruff y pyright limpios), un `validador-de-codigo` y sus correcciones.
 
 | Paso | Qué evita o caza en la prosa | Commits | Spec |
 | --- | --- | --- | --- |
@@ -19,7 +19,7 @@ Cada paso se cerró con la spec en el mismo commit, `/verificar` en verde (601 t
 | Guardrails | Lo que la intensidad no admite y lo que el comprador vetó: términos en SQLite, búsqueda por palabras completas, capítulo de vuelta al redactor y registro de cada decisión (también en Langfuse) | `66542ef`, `8330dcf`, `1cd2630` | spec3, 3.5 |
 | Segunda opinión en la parada | Que el autor tenga que leer el grafo para saber si una parada es real: el revisor de continuidad, que nunca se invocaba, opina por conflicto y no levanta la parada | `9cc7972` | spec3, RF3-JUE-01 |
 | El juez vota | Que el veredicto dependa de la llamada: tres muestras, dos más si discrepan, mayoría por criterio | `5da56ac` | spec3, RF3-JUE-02 |
-| Correcciones finales | Lo que encontraron los últimos validadores (ver abajo) | `f5deddc`, `a5d0355`, `778bc6a` | — |
+| Correcciones finales | Lo que encontraron los últimos validadores (ver abajo) | `f5deddc`, `a5d0355`, `778bc6a`, y el último, tras el validador final | — |
 
 **Lo que corrigieron los validadores** (no todo fue a la primera):
 - el veto del brief heredaba las excepciones de la lista global;

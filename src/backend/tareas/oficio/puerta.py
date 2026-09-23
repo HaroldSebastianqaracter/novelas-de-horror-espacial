@@ -89,8 +89,10 @@ def _terminos_vetados(
 _PALABRA_CON_POSICION = re.compile(r"[^\W\d_]+")
 #: Lo que abre una frase o un dialogo: ahi va mayuscula cualquier palabra, y «Cortes» (heridas)
 #: y el apellido «Cortés» solo se distinguen por la tilde. Tras «:» y «;» va minuscula, asi que
-#: una mayuscula ahi es un nombre propio.
-_INICIO_DE_FRASE = re.compile(r"(?:^|[.!?¿¡…\n])[\s«»\"“”‘’'\-–—*(\[]*$")
+#: una mayuscula ahi es un nombre propio; salvo tras dos puntos que abren una cita o un dialogo
+#: («Le dijo: —Tomas el primer turno»), que llevan mayuscula (validador de a5d0355).
+_INICIO_DE_FRASE = re.compile(
+    r"(?:^|[.!?¿¡…\n]|:\s*[«\"“‘'\-–—])[\s«»\"“”‘’'\-–—*(\[]*$")
 _MINIMO_NOMBRE = 3
 #: Partes de un nombre que no lo identifican: «Pedro del Río» no se nombra con «del».
 _PARTICULAS = frozenset({"de", "del", "la", "las", "los", "el", "y", "e", "san", "santa"})
