@@ -71,7 +71,8 @@ WHERE n.novela_id = ?
 # --- 2. Conocimiento no adquirido (RF2-PIPE-21, RF2-PIPE-27) -------------------------------
 # Un personaje usa informacion que todavia no ha recibido. Es la fuente numero uno de
 # errores de continuidad en obra larga. Recibirla es tener un estado de conocimiento que la
-# habilite, haber estado (reparto o POV) en la escena donde el texto la fijo, o que otro
+# habilite, haber estado en la escena donde el texto la fijo (la vista `presencia`: reparto,
+# POV, lo que constata el extractor o actuar en ella; RF2-PIPE-30, RF2-PIPE-31), o que otro
 # miembro de su faccion la supiera al terminar un capitulo anterior: entre capitulos, lo que
 # sabe la cuadrilla lo sabe cada uno de la cuadrilla.
 _SQL_CONOCIMIENTO = f"""
@@ -92,19 +93,10 @@ WHERE u.novela_id = ? AND c.numero = ?
           AND ec.postura IN {POSTURAS_QUE_HABILITAN}
           AND oc.ordinal <= ou.ordinal)
   AND NOT EXISTS (
-        SELECT 1 FROM escena eh
-        JOIN escena_ordinal oh ON oh.escena_id = eh.id
-        WHERE eh.id = h.escena_id
-          AND oh.ordinal <= ou.ordinal
-          AND (eh.pov_id = u.personaje_id OR EXISTS (
-                SELECT 1 FROM escena_personaje sp
-                WHERE sp.escena_id = eh.id AND sp.personaje_id = u.personaje_id)
-            -- Quien actua en la escena esta en ella aunque la escaleta no lo pusiera
-            -- (RF2-PIPE-30).
-            OR EXISTS (SELECT 1 FROM uso_conocimiento ua
-                       WHERE ua.escena_id = eh.id AND ua.personaje_id = u.personaje_id)
-            OR EXISTS (SELECT 1 FROM estado_personaje ep
-                       WHERE ep.escena_id = eh.id AND ep.personaje_id = u.personaje_id)))
+        SELECT 1 FROM presencia pr
+        JOIN escena_ordinal oh ON oh.escena_id = pr.escena_id
+        WHERE pr.escena_id = h.escena_id AND pr.personaje_id = u.personaje_id
+          AND oh.ordinal <= ou.ordinal)
   AND NOT EXISTS (
         SELECT 1 FROM personaje otro
         WHERE otro.faccion_id = p.faccion_id AND otro.id <> p.id
@@ -115,12 +107,10 @@ WHERE u.novela_id = ? AND c.numero = ?
                   AND ec2.postura IN {POSTURAS_QUE_HABILITAN}
                   AND o2.capitulo_numero < ou.capitulo_numero)
             OR EXISTS (
-                SELECT 1 FROM escena eh2
-                JOIN escena_ordinal oh2 ON oh2.escena_id = eh2.id
-                WHERE eh2.id = h.escena_id AND oh2.capitulo_numero < ou.capitulo_numero
-                  AND (eh2.pov_id = otro.id OR EXISTS (
-                        SELECT 1 FROM escena_personaje sp2
-                        WHERE sp2.escena_id = eh2.id AND sp2.personaje_id = otro.id)))))
+                SELECT 1 FROM presencia pr2
+                JOIN escena_ordinal oh2 ON oh2.escena_id = pr2.escena_id
+                WHERE pr2.escena_id = h.escena_id AND pr2.personaje_id = otro.id
+                  AND oh2.capitulo_numero < ou.capitulo_numero)))
 """
 
 # --- 3. Sorpresa imposible (aviso) --------------------------------------------------------
@@ -147,7 +137,8 @@ WHERE ec.novela_id = ? AND c.numero = ?
 # --- 3b. Deduccion por verificar (aviso, spec3 RF3-PAS-08) ----------------------------------
 # Un conocimiento por la via `dedujo` con una postura que habilita permite los usos siguientes
 # sin que nadie mire si la deduccion es plausible. Cuando el hecho se fijo en una escena en la
-# que el personaje no estaba (con la presencia de RF2-PIPE-30: POV, reparto o actuar en ella),
+# que el personaje no estaba (la vista `presencia`: POV, reparto, lo que constata el extractor
+# o actuar en ella; RF2-PIPE-30, RF2-PIPE-31),
 # esa deduccion es lo unico que evita la parada por conocimiento no adquirido: el autor la ve.
 # En la parada 9, una cifra que coincidia bastaba para tomar un calculo propio por el dato
 # registrado.
@@ -163,15 +154,8 @@ WHERE ec.novela_id = ? AND c.numero = ?
   AND ec.via = 'dedujo'
   AND ec.postura IN {POSTURAS_QUE_HABILITAN}
   AND NOT EXISTS (
-        SELECT 1 FROM escena eh
-        WHERE eh.id = h.escena_id
-          AND (eh.pov_id = ec.personaje_id
-            OR EXISTS (SELECT 1 FROM escena_personaje sp
-                       WHERE sp.escena_id = eh.id AND sp.personaje_id = ec.personaje_id)
-            OR EXISTS (SELECT 1 FROM uso_conocimiento ua
-                       WHERE ua.escena_id = eh.id AND ua.personaje_id = ec.personaje_id)
-            OR EXISTS (SELECT 1 FROM estado_personaje ep
-                       WHERE ep.escena_id = eh.id AND ep.personaje_id = ec.personaje_id)))
+        SELECT 1 FROM presencia pr
+        WHERE pr.escena_id = h.escena_id AND pr.personaje_id = ec.personaje_id)
 """
 
 # --- 4a. Presencia imposible: personaje muerto que reaparece -------------------------------
@@ -226,8 +210,8 @@ WHERE e1.novela_id = ? AND c1.numero = ?
 """
 
 # --- 5. Objeto sin traslado (RF2-PIPE-28) ---------------------------------------------------
-# Un objeto que lleva alguien viaja con el: si su poseedor esta en la escena, no hay traslado
-# que registrar.
+# Un objeto que lleva alguien viaja con el: si su poseedor esta en la escena (la vista
+# `presencia`, RF2-PIPE-31), no hay traslado que registrar.
 _SQL_OBJETO = """
 SELECT o.nombre AS objeto, l.nombre AS lugar_escena, lu.nombre AS ultima_ubicacion,
        e.id AS escena_id, c.numero AS capitulo, l.id AS lugar_escena_id,
@@ -249,9 +233,9 @@ WHERE e.novela_id = ? AND c.numero = ?
   AND ult.ubicacion_lugar_id <> e.lugar_id
   AND NOT EXISTS (SELECT 1 FROM estado_objeto nu
                   WHERE nu.objeto_id = eo.objeto_id AND nu.escena_id = e.id)
-  AND NOT (ult.poseedor_id IS NOT NULL AND (e.pov_id = ult.poseedor_id OR EXISTS (
-            SELECT 1 FROM escena_personaje sp
-            WHERE sp.escena_id = e.id AND sp.personaje_id = ult.poseedor_id)))
+  AND NOT (ult.poseedor_id IS NOT NULL AND EXISTS (
+            SELECT 1 FROM presencia pr
+            WHERE pr.escena_id = e.id AND pr.personaje_id = ult.poseedor_id))
 """
 
 # --- 6. Coherencia temporal ----------------------------------------------------------------

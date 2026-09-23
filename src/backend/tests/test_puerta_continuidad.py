@@ -432,3 +432,65 @@ def test_quien_actua_en_la_escena_esta_en_ella_aunque_no_estuviera_en_el_reparto
         "VALUES (?,?,?, 'vivo')", (g.novela_id, g.personajes["Reyes"], g.escenas[(2, 1)]),
     )
     assert "conocimiento_no_adquirido" not in comprobaciones(con, g)
+
+
+# --- RF2-PIPE-31: quien el extractor registra presente esta en la escena --------------------
+
+
+def _presente(con: sqlite3.Connection, g: Grafo, nombre: str, escena: tuple[int, int]) -> None:
+    con.execute(
+        "INSERT INTO presencia_escena (novela_id, escena_id, personaje_id) VALUES (?,?,?)",
+        (g.novela_id, g.escenas[escena], g.personajes[nombre]),
+    )
+
+
+def test_quien_el_extractor_registra_presente_esta_en_la_escena(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """Un dato se fija en la 2.1, donde la escaleta no puso a Reyes, y Reyes lo usa en la 2.2."""
+    con, g = grafo
+    nuevo = hecho(con, g, (2, 1), "Kowalski", "pozo", "metro diez", cita="metro diez")
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)", (g.novela_id, g.personajes["Reyes"], nuevo, g.escenas[(2, 2)]),
+    )
+    assert "conocimiento_no_adquirido" in comprobaciones(con, g)
+    # Presente en la 2.2, donde lo usa, no basta: tenia que estar cuando se fijo.
+    _presente(con, g, "Reyes", (2, 2))
+    assert "conocimiento_no_adquirido" in comprobaciones(con, g)
+    _presente(con, g, "Reyes", (2, 1))
+    assert "conocimiento_no_adquirido" not in comprobaciones(con, g)
+
+
+def test_la_presencia_extraida_cuenta_para_la_faccion_y_el_poseedor(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """La faccion transmite lo que un miembro presencio fuera del reparto; el objeto viaja con
+    un poseedor que esta en la escena sin que la escaleta lo pusiera."""
+    con, g = grafo
+    nuevo = hecho(con, g, (1, 1), "Kowalski", "cicatriz", "en la ceja", cita="la cicatriz")
+    con.execute("DELETE FROM escena_personaje WHERE escena_id = ? AND personaje_id = ?",
+                (g.escenas[(1, 1)], g.personajes["Ibarra"]))
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)", (g.novela_id, g.personajes["Reyes"], nuevo, g.escenas[(2, 1)]),
+    )
+    _misma_faccion(con, g, "Reyes", "Ibarra")
+    antes = comprobaciones(con, g)
+    _presente(con, g, "Ibarra", (1, 1))
+    despues = comprobaciones(con, g)
+    assert "conocimiento_no_adquirido" in antes
+    assert "conocimiento_no_adquirido" not in despues
+
+    con.execute("UPDATE escena SET lugar_id = ? WHERE id = ?",
+                (g.lugares["Esclusa"], g.escenas[(2, 2)]))
+    con.execute("DELETE FROM estado_objeto WHERE escena_id = ?", (g.escenas[(2, 2)],))
+    con.execute("UPDATE estado_objeto SET poseedor_id = ? WHERE objeto_id = ?",
+                (g.personajes["Kowalski"], g.objetos["Baliza"]))
+    con.execute("DELETE FROM escena_personaje WHERE escena_id = ? AND personaje_id = ?",
+                (g.escenas[(2, 2)], g.personajes["Kowalski"]))
+    con.execute("UPDATE escena SET pov_id = ? WHERE id = ?",
+                (g.personajes["Ibarra"], g.escenas[(2, 2)]))
+    assert "objeto_sin_traslado" in comprobaciones(con, g)
+    _presente(con, g, "Kowalski", (2, 2))
+    assert "objeto_sin_traslado" not in comprobaciones(con, g)

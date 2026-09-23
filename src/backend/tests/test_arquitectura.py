@@ -251,7 +251,7 @@ def test_el_estado_es_append_only_con_escena_de_origen() -> None:
     for tabla in (
         "hecho", "estado_conocimiento", "uso_conocimiento", "estado_personaje",
         "estado_objeto", "siembra_estado", "hilo_estado", "amenaza_revelacion",
-        "entidad_no_reconocida", "atributo_conducta",
+        "entidad_no_reconocida", "atributo_conducta", "presencia_escena",
     ):
         columnas = {f["name"] for f in con.execute(f"PRAGMA table_info({tabla})")}
         assert "escena_id" in columnas, f"{tabla} no registra su escena de origen"

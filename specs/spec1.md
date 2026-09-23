@@ -444,6 +444,8 @@ Cualquier conflicto (no aviso) hace **rollback** de la transacción del capítul
 
 > Ampliado por spec2, RF2-PIPE-27 (el conocimiento circula entre capítulos dentro de la facción) y RF2-PIPE-28 (un objeto viaja con su poseedor).
 
+> Ampliado por spec2, RF2-PIPE-31: estar en una escena incluye que el extractor registre allí al personaje, aunque la escaleta no lo pusiera.
+
 > Ampliado por spec2, RF2-PIPE-29: un cambio de valor en un atributo que es conducta es aviso.
 
 **RF-PIPE-13 — Puerta 4, oficio.** Con la puerta 3 limpia, en dos partes y en este orden:

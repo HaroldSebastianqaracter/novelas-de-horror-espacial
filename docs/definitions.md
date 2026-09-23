@@ -400,6 +400,10 @@ Un hecho **no se modifica nunca**. Retirarlo del canon, cuando el autor acepta u
 
 **UsoDeConocimiento** — Que un personaje **actúe** sobre un hecho en una escena, lo supiera desde antes o no. Es distinto de `EstadoDeConocimiento`, que registra cuándo lo adquirió.
 
+**Presencia** — Que un personaje esté físicamente en una escena. La escaleta la planifica (el reparto y el POV) y el extractor la constata en la prosa: quien aparece aunque nadie lo pusiera, quien actúa en ella. Nombrar o recordar a alguien no es estar. Estar cuando se fija un hecho es recibirlo.
+
+> **Decisión entrevistada, 23 de septiembre de 2026.** La pasada real paró dos veces porque el redactor sumó a una escena a alguien que la escaleta no puso, y la continuidad lo daba por ausente. La presencia deja de ser solo lo planificado (RF2-PIPE-31 de spec2). Se descartó contar como presente al sujeto de cada hecho, porque de alguien se puede hablar sin que esté delante.
+
 **Conducta** — Un atributo de un sujeto que es un hábito, un ritual o una manera de hacer (algo que hace siempre), no un rasgo. Romperlo en una escena es un suceso, no una contradicción: la continuidad lo trata como aviso.
 
 > **Decisión entrevistada, 23 de septiembre de 2026.** La primera pasada con Claude Code real paró por un ritual roto a propósito («no contó hasta cuatro») tomado por contradicción. Se añade la marca de conducta sobre el atributo (RF2-PIPE-29 de spec2). Se descartó el catálogo completo de mutabilidad por ahora: es la idea guardada, más sólida y más grande.
