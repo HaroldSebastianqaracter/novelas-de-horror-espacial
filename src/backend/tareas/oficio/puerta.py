@@ -22,9 +22,9 @@ from compartido import politica
 from compartido.grafo import lectura
 from compartido.grafo.escritura import normalizar
 from compartido.puerta_base import Conflicto, ResultadoPuerta
-from config import PALABRAS_FILTRO
+from config import CRITERIOS_OFICIO, PALABRAS_FILTRO
 
-from .esquemas import SalidaOficio
+from .esquemas import SalidaOficio, VeredictoCriterio
 
 # «dijo secamente», «respondio friamente»: el adverbio que sostiene un verbo debil.
 _ADVERBIO_ATRIBUCION = re.compile(
@@ -323,7 +323,36 @@ def evaluar(
     return ResultadoPuerta(puerta=4, conflictos=conflictos)
 
 
-def combinar(mecanica: ResultadoPuerta, juicio: SalidaOficio | None) -> ResultadoPuerta:
+def discrepan(juicios: list[SalidaOficio]) -> bool:
+    """Si alguna muestra da otro veredicto que las demas en algun criterio (RF3-JUE-02)."""
+    return any(
+        len({v.veredicto for j in juicios for v in j.veredictos if v.criterio == c}) > 1
+        for c in CRITERIOS_OFICIO
+    )
+
+
+def votar(juicios: list[SalidaOficio]) -> tuple[SalidaOficio, dict[str, tuple[int, int]]]:
+    """Un veredicto por criterio por mayoria de las muestras, y los votos (fallan, total).
+
+    Con empate falla: un `falla` cuesta una reescritura, dejar pasar un error cuesta la novela.
+    El veredicto que se devuelve es el de la primera muestra que coincide con la mayoria, para
+    que el redactor reciba una evidencia y una sugerencia reales.
+    """
+    elegidos: list[VeredictoCriterio] = []
+    votos: dict[str, tuple[int, int]] = {}
+    for c in CRITERIOS_OFICIO:
+        del_criterio = [v for j in juicios for v in j.veredictos if v.criterio == c]
+        fallan = sum(v.veredicto == "falla" for v in del_criterio)
+        votos[c] = (fallan, len(del_criterio))
+        gana = "falla" if fallan * 2 >= len(del_criterio) else "pasa"
+        elegidos.append(next(v for v in del_criterio if v.veredicto == gana))
+    return SalidaOficio(veredictos=elegidos), votos
+
+
+def combinar(
+    mecanica: ResultadoPuerta, juicio: SalidaOficio | None,
+    votos: dict[str, tuple[int, int]] | None = None,
+) -> ResultadoPuerta:
     """La puerta 4 entera en un solo resultado: mecanica y juicio (RF2-PIPE-13).
 
     Cada criterio que el juez da por `falla` es un conflicto, con su evidencia y su
@@ -343,13 +372,25 @@ def combinar(mecanica: ResultadoPuerta, juicio: SalidaOficio | None) -> Resultad
                 descripcion="La mecanica fallo: el juez de oficio no se invoco.",
             ))
     else:
+        votos = votos or {}
         conflictos.extend(
             Conflicto(
                 comprobacion=f"juicio:{v.criterio}",
                 descripcion=f"Principio {v.principio}. {v.sugerencia}".strip(),
                 datos={"criterio": v.criterio, "principio": v.principio,
-                       "evidencia": v.evidencia, "sugerencia": v.sugerencia},
+                       "evidencia": v.evidencia, "sugerencia": v.sugerencia,
+                       **({"votos": list(votos[v.criterio])} if v.criterio in votos else {})},
             )
             for v in juicio.incumplidos
         )
+        # Lo que el juez no tiene claro, a la vista aunque pase (RF3-JUE-02).
+        divididos = {c: (f, t) for c, (f, t) in votos.items() if 0 < f < t}
+        if divididos:
+            conflictos.append(Conflicto(
+                comprobacion="juicio_dividido", aviso=True,
+                descripcion="El juez no fue unanime: " + "; ".join(
+                    f"{c}, {f} de {t} muestras en contra" for c, (f, t) in divididos.items()
+                ) + ".",
+                datos={"votos": {c: list(ft) for c, ft in divididos.items()}},
+            ))
     return ResultadoPuerta(puerta=4, conflictos=conflictos)

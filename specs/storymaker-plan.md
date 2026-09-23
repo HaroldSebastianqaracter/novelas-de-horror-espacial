@@ -77,7 +77,7 @@ La novela real se completó el 23 de septiembre (4 capítulos, `completada_con_a
 - [ ] **Banco de contraejemplos para la puerta 3**: contradicciones conocidas metidas a propósito en una novela aprobada, con la cuenta de cuántas detecta cada comprobación. Mide los falsos negativos, que hoy pasan en silencio («siete de fuera» con una cuadrilla de seis). Con el puerto falso, sin coste. Va con el bloque 10.
 - [ ] **Ficha para el redactor** de los personajes fuera del reparto. El redactor mete personajes que la escaleta no puso (paradas 8 y 10, y otra vez en el capítulo 4), y hoy los escribe sin su ficha.
 - [x] **Juez de segunda opinión en la parada** (spec3, RF3-JUE-01; en la rama `noche-23-09`): un agente lee el conflicto de la puerta 3 y le dice al autor si parece un falso positivo y por qué. Nunca levanta una parada, porque la puerta 3 es SQL. Va con el bloque 6.
-- [ ] **Puerta 4 con puntuación por criterio y varianza**: varias muestras con la varianza como banda de confianza. Va con el bloque 6.
+- [x] **Puerta 4 con puntuación por criterio y varianza**: varias muestras con la varianza como banda de confianza. Hecho como votos por mayoría (spec3, RF3-JUE-02; en la rama `noche-23-09`).
 
 ### Plan de la noche del 23 al 24 de septiembre
 

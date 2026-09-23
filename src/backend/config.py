@@ -133,6 +133,11 @@ CRITERIOS_OFICIO: tuple[str, ...] = (
     "cuentas_cuadran",
 )
 
+# spec3, RF3-JUE-02: el juez de oficio vota. Tres muestras por intento y, si alguna discrepa
+# en algun criterio, dos mas; manda la mayoria.
+OFICIO_MUESTRAS = 3
+OFICIO_MUESTRAS_SI_DISCREPAN = 5
+
 # --- Embeddings (RF-CTX-10) ---------------------------------------------------------------
 # Multilingue a proposito: la novela es en castellano y los modelos pequenos mas citados
 # (bge-small-en, all-MiniLM-L6-v2, potion-base-8M) son de ingles.

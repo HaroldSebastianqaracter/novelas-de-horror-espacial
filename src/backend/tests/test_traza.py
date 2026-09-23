@@ -12,6 +12,7 @@ import sqlite3
 
 import pytest
 
+import config
 import worker
 from compartido.puerto import AgenteInterrumpido, AgenteUsoHerramientas, PuertoTerminal
 from compartido.puerto import demo as agentes_falsos
@@ -46,7 +47,7 @@ def test_un_juicio_en_contra_queda_registrado_con_su_evidencia() -> None:
         salida = agentes_falsos.oficio(entrada, agente)
         if "capitulo 1" in entrada.lower():
             intentos["n"] += 1
-            if intentos["n"] == 1:
+            if intentos["n"] <= config.OFICIO_MUESTRAS:  # las muestras del primer intento
                 salida["veredictos"][2] = {
                     "criterio": salida["veredictos"][2]["criterio"], "veredicto": "falla",
                     "evidencia": "Sintio miedo.", "sugerencia": "Muestralo en el cuerpo.",

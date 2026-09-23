@@ -13,6 +13,7 @@ from typing import Any
 
 import pytest
 
+import config
 from compartido.grafo import Resolvedor, clave_laxa, insertar_hecho
 from compartido.puerto import demo
 from orquestador import pipeline
@@ -917,7 +918,7 @@ def test_un_fallo_de_las_cuentas_vuelve_al_redactor_con_la_evidencia() -> None:
     def juez(entrada: str, agente: str) -> dict[str, Any]:
         salida = demo.oficio(entrada, agente)
         veces["n"] += 1
-        if veces["n"] == 1:
+        if veces["n"] <= config.OFICIO_MUESTRAS:  # las muestras del primer intento
             salida["veredictos"] = [
                 v if v["criterio"] != "cuentas_cuadran" else {
                     "criterio": "cuentas_cuadran", "veredicto": "falla",

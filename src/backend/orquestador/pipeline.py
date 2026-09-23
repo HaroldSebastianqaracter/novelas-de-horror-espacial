@@ -46,7 +46,12 @@ from compartido.contexto import Paquete, Presupuesto, PresupuestoExcedido
 from compartido.db import transaccion
 from compartido.grafo import emitir_evento, lectura
 from compartido.puerto import AgenteInterrumpido, ErrorDePuerto, PuertoAgente
-from config import MAX_INTENTOS_CAPITULO, Config
+from config import (
+    MAX_INTENTOS_CAPITULO,
+    OFICIO_MUESTRAS,
+    OFICIO_MUESTRAS_SI_DISCREPAN,
+    Config,
+)
 from tareas.arquitecto import servicio as s_arquitecto
 from tareas.arquitecto.esquemas import SalidaArquitecto
 from tareas.continuidad import puerta as p_continuidad
@@ -478,6 +483,7 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
             mecanica = p_oficio.evaluar(ctx.con, ctx.novela_id, numero, texto_completo)
 
             juicio: SalidaOficio | None = None
+            votos: dict[str, tuple[int, int]] | None = None
             if mecanica.pasa:
                 with transaccion(ctx.con):
                     estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_4", capitulo=numero,
@@ -487,13 +493,23 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                     ctx.con, ctx.novela_id, numero, texto_completo, mecanica,
                     presupuesto=ctx.presupuesto,
                 )
-                juicio, _ = _invocar(
-                    ctx, "oficio", paquete_oficio, SalidaOficio, capitulo=numero,
-                    intento=intento,
-                )
+                # El juez vota (spec3, RF3-JUE-02): con una muestra, el veredicto de un
+                # capitulo cambiaba de una llamada a otra.
+                juicios = [
+                    _invocar(ctx, "oficio", paquete_oficio, SalidaOficio, capitulo=numero,
+                             intento=intento)[0]
+                    for _ in range(OFICIO_MUESTRAS)
+                ]
+                if p_oficio.discrepan(juicios):
+                    juicios += [
+                        _invocar(ctx, "oficio", paquete_oficio, SalidaOficio, capitulo=numero,
+                                 intento=intento)[0]
+                        for _ in range(OFICIO_MUESTRAS_SI_DISCREPAN - len(juicios))
+                    ]
+                juicio, votos = p_oficio.votar(juicios)
 
             # La puerta 4 se registra entera, mecanica y juicio (RF2-PIPE-13).
-            oficio = p_oficio.combinar(mecanica, juicio)
+            oficio = p_oficio.combinar(mecanica, juicio, votos)
             pasa_oficio = oficio.pasa
             _registrar_puerta(ctx, oficio, capitulo=numero, intento=intento)
 

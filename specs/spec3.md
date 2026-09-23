@@ -436,6 +436,17 @@ Todo va al informe de la parada como `segunda_opinion`. La skill le da los falso
 
 > **Decisión sin entrevistar.** La opinión no levanta nunca la parada. La puerta 3 es SQL y exacta con lo que registró el extractor. El juez LLM es menos fiable (el verificador de ConStory-Bench: 88 % de precisión y 55 % de recall), y dejarle decidir cambiaría una parada visible por un silencio. En la primera novela real, las diez paradas fueron falsos positivos o casos discutibles. Al autor le ahorra leer el grafo: le dice dónde mirar. Coste: una llamada por parada, unos 0,25 $. Se descartó un agente nuevo, porque el revisor de continuidad ya existía con este encargo a medias.
 
+### El juez de oficio vota
+
+**RF3-JUE-02 — Tres muestras, y dos más si discrepan.** *Amplía RF-PIPE-13 de spec1.* El juez de oficio se invoca **tres veces** por intento con el mismo paquete (`OFICIO_MUESTRAS`). Si alguna muestra da otro veredicto que las demás en algún criterio, se piden **dos más** (`OFICIO_MUESTRAS_SI_DISCREPAN`, cinco en total). Cada criterio se decide por **mayoría**; con empate falla. El veredicto que llega al redactor es el de la primera muestra que coincide con la mayoría, con su evidencia y su sugerencia. Cada `juicio:<criterio>` que falla lleva sus votos (en contra y total), y si algún criterio no fue unánime, pase o falle, la puerta añade el aviso `juicio_dividido` con los votos: es lo que el juez no tiene claro, y el autor y Langfuse lo ven.
+
+> **Decisión sin entrevistar.** Lo motivó la medida real de RF3-PAS-12: el mismo capítulo 1 pasó `cuentas_cuadran` en una llamada y falló en la siguiente. La investigación de la noche proponía puntuar cada criterio con una nota, tomar la mediana y el rango, y parar al autor si el rango cruzaba el umbral. Se adaptó así:
+> - **Votos y no notas.** El esquema del juez es `pasa` o `falla`, y una escala necesita anclas y un umbral calibrado con fragmentos dorados del autor, que no hay.
+> - **Mayoría y no parada** cuando discrepan. Una parada por cada criterio dudoso pararía casi todos los capítulos, y el aviso ya deja la duda a la vista.
+> - **El empate falla.** Dejar pasar un error cuesta la novela; un `falla` de más cuesta una reescritura. Con cinco muestras no hay empate; solo puede darse si una muestra no trae un criterio, y el esquema lo impide.
+>
+> Coste: el juez pasa de una llamada por intento a tres, o cinco si discrepan (unos 0,25 $ cada una). La temperatura no se controla desde el CLI, así que la variación entre muestras es la del modelo. Queda pendiente calibrar con el autor si tres son pocas.
+
 ## 3.10 Bloque 10 — Infraestructura de evals
 
 La tabla definitiva se saca al final. Esta sección empieza por la pieza que mide la puerta 3.
