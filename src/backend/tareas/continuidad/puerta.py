@@ -158,33 +158,14 @@ WHERE ec.novela_id = ? AND c.numero = ?
         WHERE pr.escena_id = h.escena_id AND pr.personaje_id = ec.personaje_id)
 """
 
-# --- 4. Presencia imposible: quien esta segun la prosa (spec3, RF3-PAS-11) -----------------
-# La muerte y la ubicuidad preguntan si alguien esta en la escena, y el reparto no lo dice: lo
-# planifica la escaleta antes de la prosa, y en la novela real una escena conservaba en el
-# reparto a tres que ya se habian ido. Cuando el extractor ha constatado las presencias de una
-# escena (RF3-PAS-09), mandan ellas, con el POV y lo que alguien hace alli: un uso o un estado,
-# salvo el que repite su muerte, que no lo trae vivo. El reparto solo cuenta en una escena sin
-# ninguna presencia constatada, que es lo que dejaba el extractor antes de RF3-PAS-09.
-_ESTAR_SEGUN_LA_PROSA = """
-estar AS (
-    SELECT escena_id, personaje_id FROM presencia_escena
-    UNION SELECT id, pov_id FROM escena WHERE pov_id IS NOT NULL
-    UNION SELECT escena_id, personaje_id FROM uso_conocimiento
-    UNION SELECT escena_id, personaje_id FROM estado_personaje
-          WHERE condicion IS NULL OR condicion <> 'muerto'
-    UNION SELECT sp.escena_id, sp.personaje_id FROM escena_personaje sp
-          WHERE NOT EXISTS (SELECT 1 FROM presencia_escena pe WHERE pe.escena_id = sp.escena_id)
-)"""
-
 # --- 4a. Presencia imposible: personaje muerto que reaparece -------------------------------
 # La muerte es un dato cerrado, `estado_personaje.condicion`, y no una busqueda en el texto
 # libre de la salud: «casi muerto» no es una muerte y «fallecida» si. Cuenta la ULTIMA
 # condicion registrada antes de la escena, de modo que un desaparecido que vuelve no para.
-_SQL_MUERTO = f"""
-WITH {_ESTAR_SEGUN_LA_PROSA}
+_SQL_MUERTO = """
 SELECT p.nombre AS personaje, ult.escena_id AS escena_muerte,
        om.capitulo_numero AS capitulo_muerte, e.id AS escena_reaparicion, c.numero AS capitulo
-FROM estar sp
+FROM escena_personaje sp
 JOIN personaje p       ON p.id = sp.personaje_id
 JOIN escena e          ON e.id = sp.escena_id
 JOIN capitulo c        ON c.id = e.capitulo_id
@@ -206,13 +187,12 @@ WHERE e.novela_id = ? AND c.numero = ?
 # falso positivo en cuanto dos escenas del mismo dia ocurran en sitios distintos, que es lo
 # normal: dentro de un dia el tiempo pasa. El `orden_interno` es el ordinal estricto de la
 # cronologia interna, y dos sucesos con el mismo ordinal si son a la vez.
-_SQL_UBICUIDAD = f"""
-WITH {_ESTAR_SEGUN_LA_PROSA}
+_SQL_UBICUIDAD = """
 SELECT p.nombre AS personaje, ev1.fecha_interna, ev1.orden_interno,
        l1.nombre AS lugar_a, l2.nombre AS lugar_b, l1.id AS lugar_a_id, l2.id AS lugar_b_id,
        e1.id AS escena_a, e2.id AS escena_b, c1.numero AS capitulo
-FROM estar sp1
-JOIN estar sp2 ON sp2.personaje_id = sp1.personaje_id
+FROM escena_personaje sp1
+JOIN escena_personaje sp2 ON sp2.personaje_id = sp1.personaje_id
                          AND sp2.escena_id <> sp1.escena_id
 JOIN personaje p  ON p.id = sp1.personaje_id
 JOIN escena e1    ON e1.id = sp1.escena_id

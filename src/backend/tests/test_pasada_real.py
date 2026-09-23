@@ -425,14 +425,12 @@ def test_una_presencia_de_alguien_fuera_del_canon_se_descarta_con_su_motivo() ->
 
 
 #: La regla de RF3-PAS-09, entera: dos frases sueltas sobrevivian a invertirla (validador de
-#: 88d5814). La del cadaver es de RF3-PAS-11: la muerte lee estas presencias.
+#: 88d5814).
 REGLA_DE_LA_PRESENCIA = (
     "**Presencias**: quién está **físicamente** en cada escena, aunque la escaleta no lo "
     "pusiera. Registra a todo personaje del canon que la prosa muestra allí: el que habla, el "
     "que actúa, el que está callado al fondo. Nombrar o recordar a alguien no es estar, y "
-    "tampoco oírlo por un canal o verlo en una pantalla desde otro sitio. Un cadáver no es una "
-    "presencia: a un personaje muerto solo lo registras si la escena lo muestra hablando o "
-    "actuando. Con esto se sabe "
+    "tampoco oírlo por un canal o verlo en una pantalla desde otro sitio. Con esto se sabe "
     "quién oyó lo que se dijo en la escena: si alguien estaba y no lo registras, más adelante "
     "parecerá que usa lo que nunca recibió; si lo registras sin estar, parecerá que lo recibió."
 )
