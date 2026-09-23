@@ -187,16 +187,42 @@ def _parte_de_un_compuesto(vigente: str, nuevo: str) -> bool:
     `compartido/texto.py`), de tres palabras o mas, y que no vayan detras de un negador: «es
     vegetal» es un trozo de «que no es vegetal» y dice lo contrario.
 
-    Un valor nuevo con varios segmentos separados por «;» cuenta si CADA segmento es un trozo
-    asi. El extractor tambien se queda con el primero y el ultimo y se salta el del medio: en el
-    relanzamiento del capitulo 3, «sector 6 a Otxoa al ciento quince por ciento; responsable I.
-    Aldama» frente al vigente con los sectores 5 y 7 en medio abrio una parada.
+    El trozo cae dentro de un solo segmento del vigente (partido por «;»): uno que cruce el «;»
+    junta el final de un dato con el principio de otro.
+
+    El extractor tambien se queda con el primer y el ultimo segmento y se salta el del medio: en
+    el relanzamiento del capitulo 3, «sector 6 a Otxoa al ciento quince por ciento; responsable
+    I. Aldama» frente al vigente con los sectores 5 y 7 en medio abrio una parada. Un valor nuevo
+    con varios segmentos cuenta si cada uno es un segmento ENTERO del vigente, en el mismo orden
+    y sin repetir ninguno. Con trozos no basta: juntar trozos de datos distintos cambia a quien
+    se atribuye cada valor («sector 6 a Otxoa; turno de trabajo, al noventa» pone el sector 6 al
+    noventa), y eso contradice (validador de ac534bd).
     """
     if not _es_compuesto(vigente):
         return False
-    presentes = palabras(vigente)
+    originales = [palabras(s) for s in vigente.split(";") if s.strip()]
     segmentos = [s for s in nuevo.split(";") if s.strip()]
-    return bool(segmentos) and all(_trozo_de(presentes, s) for s in segmentos)
+    if len(segmentos) == 1:
+        return any(_trozo_de(o, segmentos[0]) for o in originales)
+    siguiente = 0
+    for segmento in segmentos:
+        encaje = next(
+            (j for j in range(siguiente, len(originales))
+             if _mismo_segmento(originales[j], segmento)),
+            None,
+        )
+        if encaje is None:
+            return False
+        siguiente = encaje + 1
+    return bool(segmentos)
+
+
+def _mismo_segmento(original: list[frozenset[str]], segmento: str) -> bool:
+    """Si `segmento` dice, palabra por palabra, lo mismo que un segmento entero del vigente."""
+    buscadas = palabras(segmento)
+    return len(buscadas) == len(original) and all(
+        o & b for o, b in zip(original, buscadas, strict=True)
+    )
 
 
 def _trozo_de(presentes: list[frozenset[str]], segmento: str) -> bool:

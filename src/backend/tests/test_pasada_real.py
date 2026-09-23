@@ -166,13 +166,36 @@ def test_cada_segmento_trozo_del_compuesto_es_una_reafirmacion() -> None:
     """El extractor se quedo con el primer y el ultimo segmento y se salto el del medio."""
     parte = s_extraccion._parte_de_un_compuesto
     assert parte(LIBRO, "sector 6 a Otxoa al ciento quince por ciento; responsable I. Aldama")
-    # Un segmento que no esta en el vigente, uno de menos de tres palabras o uno detras de un
-    # negador tumban el valor entero.
-    assert not parte(LIBRO, "sector 6 a Otxoa al ciento quince; responsable J. Perez")
+    assert parte(LIBRO, "sectores 5 y 7, turno de trabajo, al noventa; responsable I. Aldama")
+    # Con varios segmentos, cada uno es un segmento entero del vigente: uno que no esta, uno
+    # recortado o uno cambiado tumban el valor entero.
+    assert not parte(LIBRO, "sector 6 a Otxoa al ciento quince por ciento; responsable J. Perez")
     assert not parte(LIBRO, "sector 6 a Otxoa al ciento quince por ciento; Aldama")
     negado = "sala cerrada sin luz de emergencia; ruido de bombas bajo el suelo metalico"
     assert not parte(negado, "sala cerrada sin luz; luz de emergencia")
-    assert parte(negado, "sala cerrada sin luz; ruido de bombas")
+    assert not parte(negado, "sala cerrada sin luz; ruido de bombas")
+    # Un solo trozo sigue valiendo, pero dentro de un segmento y sin negador delante.
+    assert parte(negado, "ruido de bombas bajo el suelo")
+    assert not parte(negado, "luz de emergencia")
+
+
+@pytest.mark.parametrize("nuevo", [
+    # Validador de ac534bd: trozos de datos distintos juntos cambian a quien va cada valor.
+    "sector 6 a Otxoa; turno de trabajo, al noventa",
+    "sectores 5 y 7; al ciento quince por ciento",
+    # Segmentos fuera de orden, repetidos o que cruzan el «;» del vigente.
+    "responsable I. Aldama; sector 6 a Otxoa",
+    "sector 6 a Otxoa; sector 6 a Otxoa",
+    "por ciento sectores 5 y 7",
+])
+def test_recombinar_trozos_del_compuesto_sigue_contradiciendo(nuevo: str) -> None:
+    assert not s_extraccion._parte_de_un_compuesto(LIBRO, nuevo)
+
+
+def test_la_atribucion_cruzada_dentro_de_un_solo_segmento_contradice() -> None:
+    vigente = "la capitana Vela lleva el traje rojo y el ingeniero Soto lleva el traje gris"
+    assert not s_extraccion._parte_de_un_compuesto(vigente, "la capitana Vela; lleva el traje gris")
+    assert s_extraccion._parte_de_un_compuesto(vigente, "la capitana Vela lleva el traje rojo")
 
 
 def test_partir_el_compuesto_con_supersede_a_no_contradice() -> None:
