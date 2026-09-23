@@ -69,9 +69,17 @@ class ResultadoPuerta:
         *,
         capitulo: int | None = None,
         intento: int | None = None,
+        huella: str | None = None,
     ) -> None:
         """Deja constancia en resultado_puerta. La llama el orquestador, dentro de su
-        transaccion."""
+        transaccion.
+
+        `huella` es el resumen de lo que la puerta juzgo; con ella se sabe despues si el
+        veredicto sigue valiendo para el grafo actual (RF2-PIPE-00).
+        """
+        detalle = self.informe()
+        if huella is not None:
+            detalle["huella"] = huella
         con.execute(
             """
             INSERT INTO resultado_puerta (novela_id, puerta, capitulo, intento, veredicto, detalle)
@@ -79,6 +87,6 @@ class ResultadoPuerta:
             """,
             (
                 novela_id, self.puerta, capitulo, intento, self.veredicto,
-                json.dumps(self.informe(), ensure_ascii=False),
+                json.dumps(detalle, ensure_ascii=False),
             ),
         )

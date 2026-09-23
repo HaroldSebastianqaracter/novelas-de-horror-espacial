@@ -242,9 +242,10 @@ def crear_intencion(cuerpo: NuevaIntencion, con: ConEscritura) -> IntencionEncol
     elif cuerpo.tipo == "resolver_parada":
         if not cuerpo.payload.get("parada_id"):
             raise HTTPException(status_code=422, detail="Falta parada_id")
-        if cuerpo.payload.get("accion") not in ("relanzar", "aceptar_retcon"):
+        if cuerpo.payload.get("accion") not in ("relanzar", "aceptar_retcon", "rehacer"):
             raise HTTPException(
-                status_code=422, detail="accion debe ser 'relanzar' o 'aceptar_retcon'"
+                status_code=422,
+                detail="accion debe ser 'relanzar', 'aceptar_retcon' o 'rehacer'",
             )
 
     cur = con.execute(

@@ -20,7 +20,7 @@ from compartido.db import transaccion
 from compartido.grafo import emitir_evento, insertar, lectura
 from compartido.puerto import construir as construir_puerto
 from compartido.vectores import Indice
-from orquestador import cola, estados, fallo, pipeline
+from orquestador import cola, estados, fallo, pipeline, vigencia
 
 log = logging.getLogger("worker")
 
@@ -28,9 +28,10 @@ MAX_NOVELAS_POR_CICLO = 1
 
 
 class Worker:
-    def __init__(self, cfg: config.Config) -> None:
+    def __init__(self, cfg: config.Config, con: sqlite3.Connection | None = None) -> None:
         self.cfg = cfg
-        self.con: sqlite3.Connection = db.preparar(cfg.db_path)
+        # `con` solo lo pasan los tests que exploran la maquina de estados en memoria.
+        self.con: sqlite3.Connection = con if con is not None else db.preparar(cfg.db_path)
         self.puerto = construir_puerto(cfg, self.con)
         self.indice = Indice(
             self.con, modelo=cfg.embedding_modelo, activo=cfg.vectores_activos
@@ -196,10 +197,17 @@ class Worker:
             return
 
         ejecucion = lectura.ejecucion(self.con, novela_id) or {}
-        if str(ejecucion.get("estado")) == "parada":
+        estado = str(ejecucion.get("estado"))
+        if estado == "parada":
             cola.cerrar(
                 self.con, intencion.id, "rechazada",
                 motivo="hay una parada abierta: resuelvela o relanza",
+            )
+            return
+        if estado not in estados.ESTADOS_QUE_ADMITEN_ARRANCAR | estados.ESTADOS_ACTIVOS:
+            cola.cerrar(
+                self.con, intencion.id, "rechazada",
+                motivo=f"la novela esta {estado}: para rehacer capitulos, relanza",
             )
             return
 
@@ -227,24 +235,47 @@ class Worker:
         if novela_id is None or desde < 1:
             cola.cerrar(self.con, intencion.id, "rechazada", motivo="parametros invalidos")
             return
-
-        tope = lectura.ultimo_capitulo_completado(self.con, novela_id) + 1
-        if desde > tope:
-            cola.cerrar(
-                self.con, intencion.id, "rechazada",
-                motivo=f"no se puede relanzar desde {desde}: el ultimo completado es {tope - 1}",
-            )
+        motivo = self._motivo_para_no_relanzar(novela_id, desde, "relanzar")
+        if motivo:
+            cola.cerrar(self.con, intencion.id, "rechazada", motivo=motivo)
             return
 
         with transaccion(self.con):
             borrado = fallo.relanzar(self.con, novela_id, desde)
-        if self.indice.disponible:
-            with transaccion(self.con):
-                self.indice.purgar(novela_id, desde)
+        self._purgar_indice(novela_id, desde)
         cola.cerrar(self.con, intencion.id, "hecha", resultado={"borrado": borrado})
         self._correr(novela_id)
 
+    def _motivo_para_no_relanzar(self, novela_id: int, desde: int, suceso: str) -> str | None:
+        """Todo lo que impide relanzar, comprobado ANTES de tocar el grafo (RF2-WK-06)."""
+        estado, tipo = fallo._estado_y_parada(self.con, novela_id)  # noqa: SLF001
+        try:
+            estados.siguiente(estado, suceso, tipo_parada=tipo)
+        except estados.TransicionInvalida as exc:
+            return str(exc)
+        for puerta in (1, 2):
+            if not vigencia.puerta_vigente(self.con, novela_id, puerta):
+                return (
+                    f"la puerta {puerta} no esta vigente: no hay escaleta aprobada desde la que "
+                    "relanzar capitulos"
+                )
+        tope = lectura.ultimo_capitulo_completado(self.con, novela_id) + 1
+        if desde > tope:
+            return f"no se puede relanzar desde {desde}: el ultimo completado es {tope - 1}"
+        return None
+
+    def _purgar_indice(self, novela_id: int, desde: int) -> None:
+        if self.indice.disponible:
+            with transaccion(self.con):
+                self.indice.purgar(novela_id, desde)
+
     def _resolver_parada(self, intencion: cola.Intencion) -> None:
+        """Resuelve una parada con una accion de la tabla cerrada de RF2-FALLO-03.
+
+        Cualquier combinacion que no este en la tabla se rechaza con motivo y sin tocar nada:
+        una parada de estructura no se arregla relanzando capitulos, y un retcon sin hecho
+        que revocar repetiria el mismo conflicto.
+        """
         novela_id = intencion.novela_id
         p = intencion.payload
         parada_id = int(p.get("parada_id") or 0)
@@ -254,33 +285,57 @@ class Worker:
             cola.cerrar(self.con, intencion.id, "rechazada", motivo="parametros invalidos")
             return
 
-        abiertas = {int(x["id"]) for x in fallo.paradas_abiertas(self.con, novela_id)}
-        if parada_id not in abiertas:
+        parada = next(
+            (x for x in fallo.paradas_abiertas(self.con, novela_id) if int(x["id"]) == parada_id),
+            None,
+        )
+        if parada is None:
             cola.cerrar(self.con, intencion.id, "rechazada", motivo="la parada no esta abierta")
             return
 
-        if accion == "aceptar_retcon":
-            capitulo = int(
-                self.con.execute(
-                    "SELECT COALESCE(capitulo, 1) AS c FROM parada WHERE id = ?", (parada_id,)
-                ).fetchone()["c"]
+        tipo = str(parada["tipo"])
+        if accion not in estados.acciones_validas(tipo):
+            cola.cerrar(
+                self.con, intencion.id, "rechazada",
+                motivo=(
+                    f"una parada de {tipo} no se resuelve con '{accion}'. Acciones validas: "
+                    f"{', '.join(estados.acciones_validas(tipo))}"
+                ),
             )
+            return
+
+        if accion == "rehacer":
+            rehacer = fallo.rehacer_estructura if tipo == "estructura" else fallo.rehacer_escaleta
+            with transaccion(self.con):
+                destino = rehacer(self.con, novela_id, parada_id)
+            cola.cerrar(self.con, intencion.id, "hecha", resultado={"estado": destino})
+
+        elif accion == "aceptar_retcon":
+            capitulo = parada["capitulo"]
+            if capitulo is None or not fallo.hechos_a_revocar(self.con, parada_id):
+                cola.cerrar(
+                    self.con, intencion.id, "rechazada",
+                    motivo="ningun conflicto de la parada senala un hecho establecido que revocar",
+                )
+                return
             with transaccion(self.con):
                 revocados = fallo.aceptar_retcon(self.con, novela_id, parada_id)
-                fallo.relanzar(self.con, novela_id, capitulo)
-                fallo.cerrar_parada(self.con, novela_id, parada_id, "aceptar_retcon")
+                fallo.relanzar(self.con, novela_id, int(capitulo), suceso="aceptar_retcon")
+            self._purgar_indice(novela_id, int(capitulo))
             cola.cerrar(
                 self.con, intencion.id, "hecha", resultado={"hechos_revocados": revocados}
             )
-        elif accion == "relanzar":
-            desde = int(p.get("desde_capitulo") or 1)
+
+        else:  # relanzar
+            desde = int(p.get("desde_capitulo") or parada["capitulo"] or 1)
+            motivo = self._motivo_para_no_relanzar(novela_id, desde, "relanzar")
+            if motivo:
+                cola.cerrar(self.con, intencion.id, "rechazada", motivo=motivo)
+                return
             with transaccion(self.con):
                 fallo.relanzar(self.con, novela_id, desde)
-                fallo.cerrar_parada(self.con, novela_id, parada_id, "relanzar")
+            self._purgar_indice(novela_id, desde)
             cola.cerrar(self.con, intencion.id, "hecha")
-        else:
-            cola.cerrar(self.con, intencion.id, "rechazada", motivo=f"accion '{accion}' invalida")
-            return
 
         self._correr(novela_id)
 

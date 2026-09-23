@@ -244,6 +244,8 @@ src/backend/
 
 > **Decisión de la spec (21-09-2026).** Crear la novela también es una intención, no un `POST /novelas` que escriba. Mantiene intacta la regla del escritor único con su única excepción. El coste es que el cliente recibe un `202` y consulta la intención hasta obtener `novela_id`, con la latencia del polling del worker. Se acepta: el frontend ya tiene que tratar la reconexión como caso de primera clase, así que esperar dos segundos por un id no añade complejidad nueva.
 
+> Ampliado por spec2, RF2-FALLO-03: `accion` admite también `rehacer`.
+
 **RF-API-05** Toda lectura del grafo desde la API abre su propia conexión de solo lectura (`mode=ro` en la URI) con WAL y `busy_timeout`. Los endpoints son funciones síncronas (`def`), que FastAPI ejecuta en su pool de hilos, salvo el de SSE.
 
 > **Decisión de la spec (21-09-2026).** Cierra la pendiente «límites de `async`»: ninguna consulta del grafo corre en el bucle de eventos. El worker es síncrono entero. Solo el endpoint SSE es `async`, y lo único que hace es dormir y consultar la tabla de eventos.
@@ -305,6 +307,8 @@ stateDiagram-v2
 ```
 
 `relanzar N` se admite desde cualquier estado salvo `configurada`; el diagrama muestra los orígenes habituales.
+
+> Sustituido por spec2, RF2-WK-06.
 
 **RF-WK-07** El worker escribe una fila en `worker_lock` con su pid y renueva un latido cada ciclo. Al arrancar, si hay un latido de menos de tres ciclos de antigüedad de otro pid, aborta (RF-PROC-04).
 
@@ -546,6 +550,8 @@ Sin sesión persistente: cada invocación es nueva.
 
 **RF-FALLO-03** `resolver_parada` con `aceptar_retcon` (solo para `continuidad`): marca el hecho **antiguo** como `vigente = 0` con `motivo = retcon` y `parada_id`, inserta un `Evento` de tipo `retcon` no dramatizado, cierra la parada y vuelve a `generando` en el mismo capítulo, que se regenera entero. **No** se reutiliza la prosa rechazada: la regla de que un hecho no se borra por una pasada de prosa se respeta porque aquí quien lo retira es el humano, con rastro.
 
+> Sustituido por spec2, RF2-FALLO-03.
+
 **RF-FALLO-04** `resolver_parada` con `relanzar` y `relanzar` directo hacen lo mismo: **revertir el grafo** a como estaba al terminar el capítulo N-1 y continuar desde N. Revertir es determinista porque todo el estado es append-only con escena de origen (RF-PER-06):
 
 1. Borrar `hecho`, `estado_conocimiento`, `estado_personaje`, `estado_objeto`, `evento` (dramatizados), `siembra_estado`, `hilo_estado`, `amenaza_revelacion` cuya escena de origen pertenece a un capítulo ≥ N.
@@ -557,7 +563,11 @@ Sin sesión persistente: cada invocación es nueva.
 
 Todo en una transacción. La escaleta y el canon de planificación **no** se tocan: relanzar regenera prosa, no plan. Si N excede el último capítulo completado + 1, se rechaza la intención.
 
+> Sustituido por spec2, RF2-FALLO-03: la reversión se conserva y queda acotada a los tipos de parada que la admiten.
+
 **RF-FALLO-05** `relanzar` con `desde_capitulo = 1` regenera toda la prosa conservando plan y escaleta. No existe en la v1 una intención para rehacer la planificación: se crea otra novela.
+
+> Ampliado por spec2, RF2-FALLO-03: una parada de estructura o de escaleta se resuelve rehaciendo esa fase.
 
 **RF-FALLO-06** **Recuperación del worker caído.** Al arrancar, el worker:
 

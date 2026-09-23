@@ -1,8 +1,12 @@
-"""Maquina de estados de la ejecucion (RF-WK-05, RF-WK-06).
+"""Maquina de estados de la ejecucion (RF-WK-05, RF2-WK-06).
 
 Las transiciones que no aparecen aqui no existen y se rechazan. Tenerlas en una tabla y no
 repartidas por ifs es lo que permite comprobarlas de una vez, que es la forma barata de
 verificar un invariante de orden.
+
+Desde `parada` la salida depende del TIPO de la parada abierta (RF2-FALLO-03): una parada de
+estructura solo se resuelve rehaciendo la estructura, y relanzar capitulos sobre ella seria
+saltarse la puerta 1.
 """
 
 from __future__ import annotations
@@ -34,8 +38,6 @@ TRANSICIONES: dict[tuple[str, str], EstadoEjecucion] = {
     ("escaletando", "conflicto"): "parada",
     ("generando", "conflicto"): "parada",
 
-    ("parada", "resolver"): "generando",
-
     ("generando", "terminado_limpio"): "completada",
     ("generando", "terminado_con_avisos"): "completada_con_avisos",
 
@@ -45,13 +47,33 @@ TRANSICIONES: dict[tuple[str, str], EstadoEjecucion] = {
     ("parada", "error"): "error",
 }
 
-#: `relanzar N` se admite desde cualquier estado salvo `configurada`.
+#: (tipo de la parada abierta, accion de resolver_parada) -> estado de llegada (RF2-FALLO-03).
+#: `relanzar` directo sobre una parada tambien pasa por aqui.
+RESOLUCIONES: dict[tuple[str, str], EstadoEjecucion] = {
+    ("estructura", "rehacer"): "planificando",
+    ("escaleta", "rehacer"): "escaletando",
+    ("continuidad", "aceptar_retcon"): "generando",
+    ("continuidad", "relanzar"): "generando",
+    ("oficio", "relanzar"): "generando",
+    ("presupuesto", "relanzar"): "generando",
+}
+
+ACCIONES_DE_PARADA = frozenset(accion for _, accion in RESOLUCIONES)
+
+#: Desde donde se admite `relanzar N` fuera de una parada. Ademas hace falta que las puertas 1
+#: y 2 esten vigentes, cosa que comprueba el worker (RF2-WK-06).
 ESTADOS_QUE_ADMITEN_RELANZAR = frozenset({
-    "planificando", "escaletando", "generando", "parada", "detenida", "completada",
-    "completada_con_avisos", "error",
+    "detenida", "completada", "completada_con_avisos", "error",
 })
 
+#: `arrancar` solo tiene sentido si queda algo por hacer.
+ESTADOS_QUE_ADMITEN_ARRANCAR = frozenset({"configurada", "detenida", "error"})
+
 ESTADOS_ACTIVOS = frozenset({"planificando", "escaletando", "generando"})
+
+
+def acciones_validas(tipo_parada: str) -> list[str]:
+    return sorted(accion for tipo, accion in RESOLUCIONES if tipo == tipo_parada)
 
 
 class TransicionInvalida(Exception):
@@ -66,7 +88,16 @@ class Estado:
     intento_actual: int = 1
 
 
-def siguiente(desde: str, suceso: str) -> EstadoEjecucion:
+def siguiente(desde: str, suceso: str, *, tipo_parada: str | None = None) -> EstadoEjecucion:
+    if desde == "parada" and suceso in ACCIONES_DE_PARADA:
+        destino = RESOLUCIONES.get((str(tipo_parada), suceso))
+        if destino is None:
+            validas = acciones_validas(str(tipo_parada))
+            raise TransicionInvalida(
+                f"Una parada de tipo '{tipo_parada}' no se resuelve con '{suceso}'. "
+                f"Acciones validas: {', '.join(validas) or 'ninguna'}."
+            )
+        return destino
     if suceso == "relanzar":
         if desde not in ESTADOS_QUE_ADMITEN_RELANZAR:
             raise TransicionInvalida(f"No se puede relanzar desde '{desde}'.")
@@ -87,6 +118,7 @@ def transicion(
     intento: int | None = None,
     error: str | None = None,
     parada_id: int | None = None,
+    tipo_parada: str | None = None,
 ) -> EstadoEjecucion:
     """Aplica una transicion sobre la fila `ejecucion`. Corre dentro de una transaccion."""
     fila = con.execute(
@@ -95,7 +127,7 @@ def transicion(
     if fila is None:
         raise TransicionInvalida(f"La novela {novela_id} no tiene ejecucion.")
 
-    destino = siguiente(str(fila["estado"]), suceso)
+    destino = siguiente(str(fila["estado"]), suceso, tipo_parada=tipo_parada)
     con.execute(
         """
         UPDATE ejecucion

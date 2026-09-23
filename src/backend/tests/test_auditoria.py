@@ -110,7 +110,6 @@ pipeline.avanzar(contexto(con, puerto, r"{ruta}", novela_id))
 # --- Fase 2: reanudar nunca se salta una puerta -------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, reason="Hallazgo 1: resolver la parada salta puertas")
 def test_hallazgo_01_resolver_una_parada_de_estructura_no_se_salta_las_puertas(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -142,7 +141,6 @@ def test_hallazgo_01_resolver_una_parada_de_estructura_no_se_salta_las_puertas(
     assert not (estado.startswith("completada") and lectura.total_capitulos(w.con, novela_id) == 0)
 
 
-@pytest.mark.xfail(strict=True, reason="Hallazgo 2: la escaleta rechazada se queda en la base")
 def test_hallazgo_02_la_escaleta_rechazada_dos_veces_no_se_queda(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -155,7 +153,6 @@ def test_hallazgo_02_la_escaleta_rechazada_dos_veces_no_se_queda(
     assert lectura.total_capitulos(con, novela_id) == 0
 
 
-@pytest.mark.xfail(strict=True, reason="Hallazgo 12: aceptar_retcon vale para cualquier parada")
 def test_hallazgo_12_aceptar_retcon_sobre_una_parada_de_estructura_se_rechaza(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

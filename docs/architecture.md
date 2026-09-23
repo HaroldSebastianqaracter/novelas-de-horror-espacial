@@ -449,7 +449,15 @@ Cinco puertas. Las deterministas van primero porque son baratas y su fallo inval
 
 **La puerta 4 reintenta.** Un fallo de oficio devuelve el capítulo al redactor con el criterio incumplido. Tras tres intentos sin pasar, escala a parada: si el capítulo no se puede escribir bien, el problema probablemente está en la escaleta y no en la prosa.
 
+**Las puertas 1 y 2 rehacen su fase.** Una parada de estructura o de escaleta no se resuelve relanzando capítulos, porque no hay capítulos que relanzar: se resuelve **rehaciendo la fase**. Se borra lo que la puerta rechazó y el agente lo vuelve a producir con el informe de la puerta en su paquete; lo anterior a esa fase (premisa, mundo, elenco) se conserva, y la puerta se evalúa otra vez. Cada tipo de parada admite solo las acciones que tienen sentido para él, y cualquier otra se rechaza sin tocar nada.
+
+> **Decisión entrevistada, 23 de septiembre de 2026.** La auditoría de ese día encontró que resolver una parada de estructura o de escaleta dejaba la ejecución en `generando` sin haber pasado las puertas, y la novela acababa «completada» con cero capítulos. Se decidió con el autor que resolver una de esas paradas rehace la fase. Se descartaron dos alternativas: **abandonar la novela** y empezar otra, porque tira el mundo y el elenco, que la puerta no ha juzgado; y **permitir continuar con la fase rechazada**, porque es exactamente saltarse la puerta. El detalle, con la tabla de acciones por tipo de parada, está en [specs/spec2.md](../specs/spec2.md), RF2-FALLO-03.
+
 **Reanudación.** El estado es la unidad de reanudación, no el texto. Relanzar desde el capítulo N significa restaurar el grafo a como estaba al terminar N-1 y volver a ensamblar el paquete. Los hechos extraídos de capítulos posteriores se revierten con él.
+
+**Qué toca se deriva del grafo, no del estado.** Al reanudar, el orquestador no se fía de lo que diga la fila de la ejecución, que puede haberse quedado atrás tras una parada o una caída: mira qué fases están escritas y qué puertas siguen **vigentes**, es decir, cuyo último veredicto no fue un fallo y juzgó exactamente lo que hay ahora. Un capítulo no se genera nunca sin las puertas 1 y 2 vigentes, y eso se comprueba dos veces: por construcción, al derivar qué toca, y en ejecución, con un guardarraíl al empezar cada capítulo.
+
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** «Juzgó exactamente lo que hay ahora» se implementa con una huella del contenido que la puerta lee, guardada junto a su veredicto. Se descartaron las marcas de tiempo, que tienen resolución de segundo y no ordenan dos escrituras del mismo segundo, y los identificadores de fila, que no son comparables entre tablas distintas.
 
 ## Pasadas de revisión
 

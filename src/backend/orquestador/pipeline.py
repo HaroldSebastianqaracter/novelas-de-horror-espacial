@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -65,7 +66,7 @@ from tareas.oficio.esquemas import SalidaOficio
 from tareas.redaccion import servicio as s_redaccion
 from tareas.redaccion.esquemas import SalidaRedaccion
 
-from . import cola, estados, fallo
+from . import cola, estados, fallo, vigencia
 from .puerta_global import evaluar as evaluar_puerta_global
 
 log = logging.getLogger("orquestador")
@@ -84,6 +85,14 @@ class Parado(Exception):
         self.tipo = tipo
 
 
+class PuertasNoVigentes(Exception):
+    """Se intento generar un capitulo sin las puertas 1 y 2 vigentes (RF2-PIPE-00b).
+
+    No es una parada: si llega aqui, el orquestador ha derivado mal lo que tocaba, y eso es un
+    error del sistema que acaba en `error`, nunca en un capitulo.
+    """
+
+
 @dataclass
 class Contexto:
     con: sqlite3.Connection
@@ -91,8 +100,6 @@ class Contexto:
     cfg: Config
     novela_id: int
     indice: Any | None = None
-    #: Informe de la puerta 2 cuando hay que rehacer la escaleta.
-    eventos: list[str] = field(default_factory=list)
     #: Criterios de oficio incumplidos, que vuelven al redactor en el reintento.
     eventos_criterios: list[dict[str, Any]] = field(default_factory=list)
 
@@ -167,7 +174,10 @@ def _comprobar_parada(ctx: Contexto) -> None:
 def _registrar_puerta(ctx: Contexto, resultado: Any, capitulo: int | None = None,
                       intento: int | None = None) -> None:
     with transaccion(ctx.con):
-        resultado.registrar(ctx.con, ctx.novela_id, capitulo=capitulo, intento=intento)
+        resultado.registrar(
+            ctx.con, ctx.novela_id, capitulo=capitulo, intento=intento,
+            huella=vigencia.huella(ctx.con, ctx.novela_id, resultado.puerta),
+        )
         emitir_evento(
             ctx.con, ctx.novela_id, "puerta_evaluada", puerta=resultado.puerta,
             veredicto=resultado.veredicto, capitulo=capitulo,
@@ -176,8 +186,16 @@ def _registrar_puerta(ctx: Contexto, resultado: Any, capitulo: int | None = None
 
 
 def _abrir_parada(ctx: Contexto, tipo: str, informe: dict[str, Any],
-                  capitulo: int | None = None, intento: int | None = None) -> None:
+                  capitulo: int | None = None, intento: int | None = None,
+                  *, antes: Callable[[], None] | None = None) -> None:
+    """Abre la parada y lleva la ejecucion a `parada`, en una transaccion.
+
+    `antes` corre dentro de esa misma transaccion: es lo que permite borrar la escaleta
+    rechazada y abrir la parada de forma atomica (RF2-FALLO-03).
+    """
     with transaccion(ctx.con):
+        if antes is not None:
+            antes()
         parada_id = fallo.abrir_parada(
             ctx.con, ctx.novela_id, tipo, informe, capitulo=capitulo, intento=intento
         )
@@ -211,6 +229,13 @@ def planificar(ctx: Contexto) -> None:
         with transaccion(ctx.con):
             estados.fijar_fase(ctx.con, ctx.novela_id, agente)
         texto = servicio.paquete(ctx.con, ctx.novela_id)
+        if agente == "estructura":
+            rechazo = vigencia.informe_de_rechazo(ctx.con, ctx.novela_id, 1)
+            if rechazo:
+                texto += (
+                    "\n\n## LA ESTRUCTURA ANTERIOR NO PASO LA PUERTA 1, POR ESTO\n\n"
+                    + "\n".join(rechazo)
+                )
         salida, _ = _invocar(ctx, agente, texto, modelo)
         # Una transaccion por agente: su parte del canon entra entera o no entra.
         with transaccion(ctx.con):
@@ -243,20 +268,26 @@ def _fase_ya_hecha(ctx: Contexto, agente: str) -> bool:
 
 
 def escaletar(ctx: Contexto) -> None:
-    """Escaleta y puerta 2. Un fallo de puerta 2 se reintenta una vez con el informe."""
+    """Escaleta y puerta 2. Un fallo de puerta 2 se reintenta una vez con el informe.
+
+    La escaleta rechazada se borra siempre antes de seguir, tambien la segunda vez: se borra
+    en la misma transaccion que abre la parada, y el informe la lleva resumida para que el
+    autor pueda leer que se rechazo (RF2-FALLO-03).
+    """
     _asegurar_activa(ctx, "arrancar_escaleta")
     for intento in (1, 2):
-        if ctx.con.execute(
-            "SELECT 1 FROM capitulo WHERE novela_id = ?", (ctx.novela_id,)
-        ).fetchone() is None:
+        if lectura.total_capitulos(ctx.con, ctx.novela_id) == 0:
             with transaccion(ctx.con):
                 estados.fijar_fase(ctx.con, ctx.novela_id, "escaleta", intento=intento)
             texto = s_escaleta.paquete(ctx.con, ctx.novela_id)
-            if intento == 2 and ctx.eventos:
-                texto += "\n\n## LA ESCALETA ANTERIOR FALLO POR ESTO\n\n" + "\n".join(ctx.eventos)
+            rechazo = vigencia.informe_de_rechazo(ctx.con, ctx.novela_id, 2)
+            if rechazo:
+                texto += "\n\n## LA ESCALETA ANTERIOR FALLO POR ESTO\n\n" + "\n".join(rechazo)
             salida, _ = _invocar(ctx, "escaleta", texto, SalidaEscaleta, intento=intento)
             with transaccion(ctx.con):
                 s_escaleta.aplicar(ctx.con, ctx.novela_id, salida)
+                emitir_evento(ctx.con, ctx.novela_id, "fase_cambiada", fase="escaleta",
+                              hecho=True)
 
         with transaccion(ctx.con):
             estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_2", intento=intento)
@@ -269,13 +300,39 @@ def escaletar(ctx: Contexto) -> None:
                 )
             return
 
-        ctx.eventos = [str(c) for c in resultado.bloqueantes]
         if intento == 2:
-            _abrir_parada(ctx, "escaleta", resultado.informe(), intento=intento)
+            informe = resultado.informe()
+            informe["escaleta_rechazada"] = _resumen_escaleta(ctx)
+            _abrir_parada(ctx, "escaleta", informe, intento=intento,
+                          antes=lambda: _borrar_escaleta(ctx))
         # Se borra la escaleta fallida para que el segundo intento la rehaga entera.
         with transaccion(ctx.con):
-            ctx.con.execute("DELETE FROM capitulo WHERE novela_id = ?", (ctx.novela_id,))
-            ctx.con.execute("DELETE FROM secuencia WHERE novela_id = ?", (ctx.novela_id,))
+            _borrar_escaleta(ctx)
+
+
+def _borrar_escaleta(ctx: Contexto) -> None:
+    """Capitulos y secuencias; escenas, beats, secuelas y reparto caen en cascada."""
+    fallo.borrar_escaleta(ctx.con, ctx.novela_id)
+
+
+def _resumen_escaleta(ctx: Contexto) -> list[dict[str, Any]]:
+    """La escaleta rechazada, legible sin abrir la base de datos (RF-FALLO-02)."""
+    capitulos: list[dict[str, Any]] = []
+    for f in ctx.con.execute(
+        "SELECT numero, objetivo FROM capitulo WHERE novela_id = ? ORDER BY numero",
+        (ctx.novela_id,),
+    ).fetchall():
+        escenas = [
+            {
+                "orden": e["orden"], "pov": e["pov_nombre"], "lugar": e["lugar_nombre"],
+                "objetivo": e["objetivo"], "conflicto": e["conflicto"],
+                "valor": f"{e['valor_inicial']} -> {e['valor_final']}",
+                "longitud_prevista": e["longitud_prevista"],
+            }
+            for e in lectura.escenas_del_capitulo(ctx.con, ctx.novela_id, int(f["numero"]))
+        ]
+        capitulos.append({"numero": f["numero"], "objetivo": f["objetivo"], "escenas": escenas})
+    return capitulos
 
 
 # --- Bucle de capitulo -------------------------------------------------------------------------
@@ -289,6 +346,14 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
     salida invalida o cualquier excepcion. Sin eso, el texto y los hechos del tramo 2 se
     quedarian en el grafo de un capitulo que nadie termino.
     """
+    # Guardarrail (RF2-PIPE-00b): la misma propiedad que `avanzar` garantiza por
+    # construccion, comprobada aqui en ejecucion.
+    faltan = [p for p in (1, 2) if not vigencia.puerta_vigente(ctx.con, ctx.novela_id, p)]
+    if faltan:
+        raise PuertasNoVigentes(
+            f"El capitulo {numero} no puede generarse: la puerta "
+            f"{' y la '.join(str(p) for p in faltan)} no esta vigente."
+        )
     _asegurar_activa(ctx, "arrancar_generacion")
     # Verdadero desde que el tramo 2 confirma hasta que el capitulo se cierra o se revierte.
     a_medias = False
@@ -482,27 +547,24 @@ def _indexar(ctx: Contexto, numero: int) -> None:
 
 
 def avanzar(ctx: Contexto) -> str:
-    """Lleva la ejecucion tan lejos como pueda desde donde este. Devuelve su estado final."""
-    try:
-        ejecucion = lectura.ejecucion(ctx.con, ctx.novela_id) or {}
-        estado = str(ejecucion.get("estado", "configurada"))
+    """Lleva la ejecucion tan lejos como pueda desde donde este. Devuelve su estado final.
 
-        pendiente = estado in ("configurada", "detenida", "error", "planificando")
-        if pendiente and _fase_pendiente_de_planificacion(ctx):
+    Que toca se DERIVA DEL GRAFO, no del estado de `ejecucion` (RF2-PIPE-00): agentes de
+    planificacion que faltan, puerta 1 no vigente, escaleta ausente, puerta 2 no vigente,
+    capitulos pendientes y puerta 5, en ese orden. El estado puede mentir tras una parada o una
+    caida; el grafo, con la vigencia de cada puerta, no.
+    """
+    try:
+        nid = ctx.novela_id
+        if _fase_pendiente_de_planificacion(ctx) or not vigencia.puerta_vigente(ctx.con, nid, 1):
             planificar(ctx)
 
-        ejecucion = lectura.ejecucion(ctx.con, ctx.novela_id) or {}
-        estado = str(ejecucion.get("estado", ""))
-        if estado in ("escaletando", "detenida", "error"):
-            if lectura.total_capitulos(ctx.con, ctx.novela_id) == 0:
-                _asegurar_activa(ctx, "arrancar_escaleta")
-                escaletar(ctx)
-            elif estado != "generando":
-                _asegurar_activa(ctx, "arrancar_generacion")
+        if lectura.total_capitulos(ctx.con, nid) == 0 or not vigencia.puerta_vigente(
+            ctx.con, nid, 2
+        ):
+            escaletar(ctx)
 
-        ejecucion = lectura.ejecucion(ctx.con, ctx.novela_id) or {}
-        if str(ejecucion.get("estado", "")) != "generando":
-            _asegurar_activa(ctx, "arrancar_generacion")
+        _asegurar_activa(ctx, "arrancar_generacion")
 
         total = lectura.total_capitulos(ctx.con, ctx.novela_id)
         siguiente = lectura.ultimo_capitulo_completado(ctx.con, ctx.novela_id) + 1

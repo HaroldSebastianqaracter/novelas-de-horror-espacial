@@ -65,5 +65,5 @@ AGENTES: tuple[str, ...] = (
 TIPOS_EVENTO: tuple[str, ...] = (
     "intencion_recibida", "fase_cambiada", "agente_iniciado", "agente_terminado",
     "puerta_evaluada", "capitulo_completado", "parada", "parada_resuelta", "detenida",
-    "revertido", "completada", "error", "worker_recuperado",
+    "revertido", "rehecho", "completada", "error", "worker_recuperado",
 )

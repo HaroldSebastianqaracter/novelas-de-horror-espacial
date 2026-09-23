@@ -1,4 +1,4 @@
-"""Politica de fallo: paradas y reversion (RF-FALLO-01 a RF-FALLO-05).
+"""Politica de fallo: paradas, reversion y resolucion (RF-FALLO-01, RF2-FALLO-03).
 
 Dos ideas sostienen este modulo.
 
@@ -72,6 +72,28 @@ def paradas_abiertas(con: sqlite3.Connection, novela_id: int) -> list[dict[str, 
     ]
 
 
+def hechos_a_revocar(con: sqlite3.Connection, parada_id: int) -> set[int]:
+    """Los hechos establecidos con los que chocan los conflictos de una parada.
+
+    Si no hay ninguno, `aceptar_retcon` no tiene nada que revocar y el mismo conflicto se
+    repetiria al regenerar: por eso el worker la rechaza (RF2-FALLO-03).
+    """
+    fila = con.execute("SELECT informe FROM parada WHERE id = ?", (parada_id,)).fetchone()
+    if fila is None:
+        return set()
+    try:
+        informe = json.loads(fila["informe"] or "{}")
+    except json.JSONDecodeError:
+        return set()
+    ids: set[int] = set()
+    for conflicto in informe.get("conflictos", []):
+        datos = conflicto.get("datos") or {}
+        previo = datos.get("hecho_previo_id")
+        if previo:
+            ids.add(int(previo))
+    return ids
+
+
 def aceptar_retcon(con: sqlite3.Connection, novela_id: int, parada_id: int) -> int:
     """Revoca a mano los hechos que el conflicto senala, con rastro (RF-FALLO-03).
 
@@ -79,20 +101,7 @@ def aceptar_retcon(con: sqlite3.Connection, novela_id: int, parada_id: int) -> i
     borra una pasada: lo retira una persona, a conciencia, y queda registrado quien y por que.
     El capitulo se regenera entero; la prosa rechazada no se reutiliza.
     """
-    fila = con.execute("SELECT informe FROM parada WHERE id = ?", (parada_id,)).fetchone()
-    if fila is None:
-        return 0
-    try:
-        informe = json.loads(fila["informe"] or "{}")
-    except json.JSONDecodeError:
-        return 0
-
-    ids: set[int] = set()
-    for conflicto in informe.get("conflictos", []):
-        datos = conflicto.get("datos") or {}
-        previo = datos.get("hecho_previo_id")
-        if previo:
-            ids.add(int(previo))
+    ids = hechos_a_revocar(con, parada_id)
     if not ids:
         return 0
 
@@ -201,24 +210,38 @@ def revertir_grafo(
     return borrado
 
 
-def relanzar(con: sqlite3.Connection, novela_id: int, desde_capitulo: int) -> dict[str, int]:
+def _estado_y_parada(con: sqlite3.Connection, novela_id: int) -> tuple[str, str | None]:
+    """Estado de la ejecucion y, si esta en parada, el tipo de la parada abierta."""
+    estado = str(con.execute(
+        "SELECT estado FROM ejecucion WHERE novela_id = ?", (novela_id,)
+    ).fetchone()["estado"])
+    abiertas = paradas_abiertas(con, novela_id)
+    return estado, (str(abiertas[-1]["tipo"]) if abiertas else None)
+
+
+def relanzar(
+    con: sqlite3.Connection, novela_id: int, desde_capitulo: int, *, suceso: str = "relanzar"
+) -> dict[str, int]:
     """Revierte el grafo y deja la ejecucion lista para regenerar desde N (RF-FALLO-04).
 
-    Es lo que hacen `relanzar` y `resolver_parada`: ademas de `revertir_grafo`, cierra las
-    paradas abiertas y mueve el estado. Corre dentro de la transaccion del llamante.
+    Es lo que hacen `relanzar` y `resolver_parada` con `relanzar` o `aceptar_retcon`: ademas
+    de `revertir_grafo`, cierra las paradas abiertas y mueve el estado. La transicion se
+    valida ANTES de tocar nada: sobre una parada de estructura, por ejemplo, lanza
+    `TransicionInvalida` y el grafo queda intacto (RF2-FALLO-03). Corre dentro de la
+    transaccion del llamante.
     """
-    borrado = revertir_grafo(con, novela_id, desde_capitulo, motivo="relanzar")
+    estado_actual, tipo = _estado_y_parada(con, novela_id)
+    destino = estados.siguiente(estado_actual, suceso, tipo_parada=tipo)
 
+    borrado = revertir_grafo(con, novela_id, desde_capitulo, motivo=suceso)
+
+    resolucion = "aceptar_retcon" if suceso == "aceptar_retcon" else "relanzado"
     for parada in paradas_abiertas(con, novela_id):
-        cerrar_parada(con, novela_id, int(parada["id"]), "relanzado")
+        cerrar_parada(con, novela_id, int(parada["id"]), resolucion)
 
     # Revertir el grafo y dejar el estado diciendo «completada» seria mentir: el manuscrito
     # que justificaba ese estado acaba de descartarse. La ejecucion vuelve a generando, que es
     # justo lo que significa `relanzar`.
-    estado_actual = str(con.execute(
-        "SELECT estado FROM ejecucion WHERE novela_id = ?", (novela_id,)
-    ).fetchone()["estado"])
-    destino = estados.siguiente(estado_actual, "relanzar")
     con.execute(
         """
         UPDATE ejecucion SET estado = ?, fase = 'paquete', capitulo_actual = ?,
@@ -229,3 +252,58 @@ def relanzar(con: sqlite3.Connection, novela_id: int, desde_capitulo: int) -> di
         (destino, desde_capitulo, desde_capitulo - 1, novela_id),
     )
     return borrado
+
+
+# --- Rehacer una fase de planificacion (RF2-FALLO-03) ---------------------------------------
+
+
+def borrar_escaleta(con: sqlite3.Connection, novela_id: int) -> None:
+    """Capitulos y secuencias; escenas, beats, secuelas y reparto caen en cascada."""
+    con.execute("DELETE FROM capitulo WHERE novela_id = ?", (novela_id,))
+    con.execute("DELETE FROM secuencia WHERE novela_id = ?", (novela_id,))
+
+
+def _rehacer(con: sqlite3.Connection, novela_id: int, parada_id: int) -> str:
+    estado_actual, tipo = _estado_y_parada(con, novela_id)
+    destino = estados.siguiente(estado_actual, "rehacer", tipo_parada=tipo)
+    cerrar_parada(con, novela_id, parada_id, "rehacer")
+    con.execute(
+        """
+        UPDATE ejecucion SET estado = ?, fase = NULL, capitulo_actual = NULL,
+               intento_actual = 1, parada_abierta_id = NULL, ultimo_error = NULL,
+               actualizado_en = datetime('now')
+         WHERE novela_id = ?
+        """,
+        (destino, novela_id),
+    )
+    emitir_evento(con, novela_id, "rehecho", parada_id=parada_id, tipo=tipo, destino=destino)
+    return destino
+
+
+def rehacer_estructura(con: sqlite3.Connection, novela_id: int, parada_id: int) -> str:
+    """Borra lo que rechazo la puerta 1 y deja la ejecucion en `planificando`.
+
+    El estructurador vuelve a correr con el informe de la puerta 1 en su paquete; mundo,
+    elenco y premisa se conservan. Corre dentro de la transaccion del llamante.
+    """
+    _, tipo = _estado_y_parada(con, novela_id)
+    if tipo != "estructura":
+        estados.siguiente("parada", "rehacer", tipo_parada=tipo)  # lanza con el motivo
+    # La escaleta cuelga de los actos: si la hubiera, caeria con ellos.
+    borrar_escaleta(con, novela_id)
+    con.execute("DELETE FROM acto WHERE novela_id = ?", (novela_id,))
+    con.execute("DELETE FROM hilo WHERE novela_id = ?", (novela_id,))
+    con.execute(
+        "DELETE FROM siembra WHERE novela_id = ? AND origen = 'estructura'", (novela_id,)
+    )
+    con.execute("DELETE FROM objeto WHERE novela_id = ?", (novela_id,))
+    return _rehacer(con, novela_id, parada_id)
+
+
+def rehacer_escaleta(con: sqlite3.Connection, novela_id: int, parada_id: int) -> str:
+    """Borra la escaleta rechazada, si queda algo, y deja la ejecucion en `escaletando`."""
+    _, tipo = _estado_y_parada(con, novela_id)
+    if tipo != "escaleta":
+        estados.siguiente("parada", "rehacer", tipo_parada=tipo)
+    borrar_escaleta(con, novela_id)
+    return _rehacer(con, novela_id, parada_id)

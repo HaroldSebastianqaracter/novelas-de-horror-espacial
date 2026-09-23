@@ -220,7 +220,7 @@ def test_revertir_deja_el_grafo_como_estaba(entorno) -> None:
     assert foto() != antes
 
     with transaccion(con):
-        fallo.relanzar(con, novela_id, 2)
+        fallo.revertir_grafo(con, novela_id, 2)
 
     despues = foto()
     # El compilado no se borra, se descarta: es historia legible.
