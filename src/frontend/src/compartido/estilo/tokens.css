@@ -1,0 +1,138 @@
+/* ==========================================================================
+   novelasv2 · tokens de diseño · PROPUESTA B (papel técnico)
+   Solo variables. Mismos nombres de rol que la propuesta A: cambiar de
+   propuesta es cambiar este fichero y estilos.css; app.js no cambia.
+   Contrastes medidos (WCAG 2.x) en DECISIONES.md.
+   ========================================================================== */
+:root {
+  color-scheme: light;
+
+  /* ---- Color · superficies (papel) ---- */
+  --color-fondo: #f4f1ea;                 /* papel de manual técnico, cálido */
+  --color-superficie-hundida: #e6e1d6;    /* pista de barras de progreso */
+  --color-superficie: #ece8df;            /* columnas y zonas agrupadas */
+  --color-superficie-elevada: #fffdf9;    /* tarjetas, menús, diálogos, campos */
+  --color-superficie-activa: #f6f2e9;     /* hover */
+
+  /* ---- Color · líneas ---- */
+  --color-borde: #ddd6c8;                 /* separadores decorativos (no informativos) */
+  --color-borde-fuerte: #8c8475;          /* bordes de controles · 3,6:1 sobre tarjeta */
+  --color-borde-acento: #2b4c7e;          /* control activo, zona de soltar válida */
+
+  /* ---- Color · texto (tinta) ---- */
+  --color-texto: #1f1d1a;                 /* tinta principal · 14,9:1 */
+  --color-texto-secundario: #4f4a43;      /* metadatos · 7,8:1 */
+  --color-texto-tenue: #645d54;           /* códigos, pistas · ≥5,1:1 en superficie */
+  --color-texto-invertido: #ffffff;       /* texto sobre acento o alerta sólidos */
+
+  /* ---- Color · roles de estado ---- */
+  --color-acento: #2b4c7e;                /* azul cianotipo: acción principal, paso activo · 7,6:1 */
+  --color-acento-velo: #e8edf5;           /* relleno de zona válida, selección */
+  --color-confirmado: #2e6b36;            /* verde: confirmado por servidor, enlace, cerrado · 5,7:1 */
+  --color-confirmado-velo: #e5f0e3;
+  --color-aviso: #7a5300;                 /* ocre: avisos, rechazos, validación · 6,1:1. Siempre con ▲/✕ */
+  --color-aviso-velo: #faf1d9;
+  --color-alerta: #b3261e;                /* SOLO parada y error · 5,8:1 */
+  --color-alerta-texto: #8f1d17;          /* texto largo en zona de alerta · 7,7:1 */
+  --color-alerta-fondo: #fbeae7;          /* relleno del carril y de la alerta de parada */
+  --color-alerta-borde: #e3a39c;          /* borde decorativo de alerta */
+  --color-bloqueado-trama: rgba(100, 93, 84, 0.14); /* trama de zona de soltar inválida */
+
+  /* ---- Color · lector ---- */
+  --color-lectura-fondo: #fbf8f2;
+  --color-lectura-texto: #24211d;         /* 15,1:1 */
+  --color-lectura-tenue: #645d54;
+
+  /* ---- Color · herramienta del prototipo (oscura, fuera de la ficción) ---- */
+  --color-herramienta-fondo: #26251f;
+  --color-herramienta-texto: #ecebe6;
+  --color-herramienta-borde: #8a877f;
+
+  /* ---- Color · foco ---- */
+  --color-foco: #0b3d91;                  /* anillo de foco · 8,9:1 */
+
+  /* ---- Efectos (anulados en B: sin CRT ni halos) ---- */
+  --brillo-fosforo: none;
+  --brillo-fosforo-fuerte: none;
+  --brillo-alerta: none;
+  --brillo-confirmado: none;
+  --sombra-tarjeta: 0 1px 2px rgba(31, 29, 26, 0.06), 0 1px 1px rgba(31, 29, 26, 0.04);
+  --sombra-elevada: 0 8px 24px rgba(31, 29, 26, 0.12), 0 2px 6px rgba(31, 29, 26, 0.06);
+  --scanlines-opacidad: 0;
+  --scanlines-paso: 3px;
+  --vineta: none;
+
+  /* ---- Tipografía ---- */
+  --fuente-interfaz: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fuente-codigo: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --fuente-lectura: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+
+  --texto-2xs: 0.6875rem;   /* 11px · solo códigos decorativos */
+  --texto-xs: 0.75rem;      /* 12px · etiquetas */
+  --texto-sm: 0.8125rem;    /* 13px · metadatos */
+  --texto-base: 0.9375rem;  /* 15px · cuerpo de interfaz */
+  --texto-md: 1rem;         /* 16px · títulos de tarjeta */
+  --texto-lg: 1.25rem;      /* 20px · títulos de sección */
+  --texto-xl: 1.625rem;     /* 26px · título de pantalla */
+  --texto-lectura: 1.1875rem;
+
+  --interlineado-compacto: 1.25;
+  --interlineado-base: 1.5;
+  --interlineado-lectura: 1.7;
+
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-fuerte: 600;
+
+  --tracking-etiqueta: 0.02em;   /* sin mayúsculas espaciadas */
+  --tracking-titulo: -0.01em;
+
+  /* ---- Espaciado (escala de 4px) ---- */
+  --espacio-1: 4px;
+  --espacio-2: 8px;
+  --espacio-3: 12px;
+  --espacio-4: 16px;
+  --espacio-5: 24px;
+  --espacio-6: 32px;
+  --espacio-7: 48px;
+  --espacio-8: 64px;
+
+  /* ---- Radios (algo más suaves que A) ---- */
+  --radio-ninguno: 0;
+  --radio-sm: 6px;
+  --radio-md: 10px;
+  --radio-pildora: 999px;
+
+  /* ---- Bordes ---- */
+  --borde-fino: 1px;
+  --borde-medio: 2px;
+  --foco-grosor: 2px;
+  --foco-separacion: 2px;
+
+  /* ---- Movimiento ---- */
+  --duracion-instante: 80ms;
+  --duracion-rapida: 140ms;
+  --duracion-media: 220ms;
+  --duracion-lenta: 500ms;
+  --duracion-pulso: 2400ms;
+  --duracion-parpadeo: 1400ms;
+  --curva-estandar: cubic-bezier(0.2, 0, 0, 1);
+  --curva-salida: cubic-bezier(0.3, 0, 1, 1);
+
+  /* ---- Capas ---- */
+  --z-cabecera: 10;
+  --z-banner: 20;
+  --z-arrastre: 50;
+  --z-menu: 60;
+  --z-avisos: 70;
+  --z-crt: 90;
+  --z-herramienta: 100;
+
+  /* ---- Maquetación ---- */
+  --alto-cabecera: 56px;
+  --ancho-columna-min: 17rem;
+  --ancho-formulario: 42rem;
+  --ancho-lectura: 38rem;
+  --ancho-maximo: 96rem;
+  --ancho-panel-herramienta: 21rem;
+}

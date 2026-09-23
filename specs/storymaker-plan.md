@@ -92,7 +92,7 @@ El primer harness (historial anterior al 21 de septiembre) ya tenía Langfuse in
 - [ ] Portada con dedicatoria personalizada.
 - [ ] `.claude/mcp.json` con un browser MCP. El agente abre la lectura, navega y registra los errores visuales como fallos para el rol correspondiente. Su uso real se documenta en `/docs`.
 
-> **Decisión del plan.** HTML estático exportado a PDF, sin frontend React. El frontend no existe, el HTML es lo que el browser MCP puede inspeccionar, y el PDF cubre la entrega y `/ejemplos/novela-ejemplo.pdf`. Los cambios del lector se piden desde fuera del documento (CLI o formulario mínimo), que es la variante PDF del enunciado.
+> **Decisión del plan.** HTML estático exportado a PDF, sin frontend React. El frontend no existía al decidirlo, el HTML es lo que el browser MCP puede inspeccionar, y el PDF cubre la entrega y `/ejemplos/novela-ejemplo.pdf`. Los cambios del lector se piden desde fuera del documento (CLI o formulario mínimo), que es la variante PDF del enunciado. El frontend React que se decidió después (23 de septiembre) es un opcional y no cambia esta decisión.
 
 ### 8. Cambio del lector
 
@@ -137,6 +137,7 @@ El mecanismo se construye ahora; la tabla definitiva se saca al final.
 
 ## Opcionales (suman nota, después de lo obligatorio)
 
+- [ ] **Frontend web** en React: un tablero de novelas al estilo Jira, la alerta de parada, un lector de capítulos y el alta desde un brief. Requisitos en [spec-frontend.md](spec-frontend.md). No sustituye al bloque 7: la lectura de la entrega sigue siendo HTML con PDF.
 - [ ] **Servidor MCP** de solo lectura con FastMCP sobre la API que ya existe: `list_novels`, `get_chapter`, `list_versions`, `query_story_bible` y `download_novel`.
 - [ ] **Linters de prosa:** la parte mecánica de la puerta 4 ya es uno (palabras filtro, adverbios de atribución, verbos de habla); ampliarla con repeticiones, frases largas y fraseo típico de IA.
 - [ ] **Security report** en `/docs/security-report.md`, partiendo de la auditoría, de bandit y del `validador-de-codigo`.

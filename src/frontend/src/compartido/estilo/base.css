@@ -1,0 +1,45 @@
+/* Base común: reset mínimo y utilidades. Solo variables de tokens.css (RF-FE-VIS-01). */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--fuente-interfaz);
+  font-size: var(--texto-base);
+  line-height: var(--interlineado-base);
+}
+
+h1, h2, h3 { margin: 0; font-weight: var(--peso-fuerte); letter-spacing: var(--tracking-titulo); }
+h1 { font-size: var(--texto-xl); }
+h2 { font-size: var(--texto-lg); }
+h3 { font-size: var(--texto-md); }
+
+a { color: var(--color-acento); }
+
+:focus-visible {
+  outline: var(--foco-grosor) solid var(--color-foco);
+  outline-offset: var(--foco-separacion);
+}
+
+.pantalla { display: grid; gap: var(--espacio-4); }
+
+.etiqueta {
+  font-size: var(--texto-xs); color: var(--color-texto-tenue);
+  font-weight: var(--peso-medio); letter-spacing: var(--tracking-etiqueta);
+}
+.codigo {
+  font-family: var(--fuente-codigo); font-size: var(--texto-xs);
+  color: var(--color-texto-tenue); font-variant-numeric: tabular-nums;
+}
+
+.solo-lectores {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

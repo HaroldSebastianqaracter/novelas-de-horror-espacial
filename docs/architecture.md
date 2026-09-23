@@ -10,7 +10,7 @@ El proyecto es un monorepo con estas carpetas principales:
 - **`specs/`** — especificaciones del programa, una por `.md`.
 - **`docs/`** — definiciones del proyecto (este documento entre ellas).
 
-**`src/backend/` está implementado** en su primera versión, según [specs/spec1.md](../specs/spec1.md): persistencia, puerto a Claude Code, las nueve skills de agente, orquestador, worker, las cinco puertas y la API. `src/frontend/` sigue sin scaffolding. Ver sus respectivos `README.md`.
+**`src/backend/` está implementado** en su primera versión, según [specs/spec1.md](../specs/spec1.md): persistencia, puerto a Claude Code, las nueve skills de agente, orquestador, worker, las cinco puertas y la API. `src/frontend/` tiene su andamiaje (Vite, React, tipos generados y mocks) según [specs/spec-frontend.md](../specs/spec-frontend.md), con las pantallas en construcción. Ver sus respectivos `README.md`.
 
 ## El sistema
 
@@ -371,7 +371,7 @@ Ese puerto es la única abstracción real del backend: absorbe la decisión pend
 
 ## Arquitectura del frontend
 
-> **Decisión sin entrevistar.** Igual que la sección anterior. Además descansa sobre una decisión todavía abierta —**qué ve el frontend**—, así que aquí solo está el esqueleto: lo que se sostiene sea cual sea la respuesta.
+> **Decisión sin entrevistar.** Igual que la sección anterior. Se escribió cuando **qué ve el frontend** estaba todavía abierto, así que solo fija el esqueleto, lo que se sostiene sea cual sea la respuesta. La respuesta llegó el 23 de septiembre y está en [Qué ve el frontend y para qué sirve Three.js](#qué-ve-el-frontend-y-para-qué-sirve-threejs).
 
 **Agrupación por funcionalidad (*package by feature*), sin Feature-Sliced Design.** Una carpeta por funcionalidad, con sus componentes, sus hooks de datos y sus tipos dentro. Es el mismo criterio que en el backend: el corte sigue al trabajo, no a la técnica.
 
@@ -402,10 +402,13 @@ El pipeline corre solo durante horas y el frontend no lo controla (principio 1).
 
 FastAPI publica OpenAPI. El cliente TypeScript se genera desde ahí en vez de escribirse a mano: elimina de raíz el desajuste entre un esquema Pydantic que cambia y un frontend que sigue creyendo en el campo viejo.
 
-### Pendiente antes de poder cerrarla
+### Qué ve el frontend y para qué sirve Three.js
 
-- **Qué ve el frontend**: panel de control de un proceso, o sala de lectura del manuscrito. Las dos llevan a interfaces que no se parecen, y de ahí cuelga el reparto de pantallas.
-- **Three.js**: aparece en el stack sin una razón escrita. Si es para visualizar el grafo de canon, conviene contrastarlo con 2D antes de comprometerse: un grafo tridimensional se ocluye y cuesta leerlo. Si es para una pieza expresiva —la novela como objeto—, es una decisión de producto que debe declararse como tal.
+> **Decisión entrevistada, 23 de septiembre de 2026.** Cierra las dos pendientes que tenía esta sección. **El frontend es un panel de control**, no una sala de lectura: un tablero al estilo Jira con una tarjeta por novela y, dentro de cada novela, sus capítulos como tarjetas que avanzan. La lectura se queda en un lector sencillo de capítulos cerrados, porque la lectura de la entrega es el HTML estático con PDF del bloque 7 de [storymaker-plan.md](../specs/storymaker-plan.md). Se descartó la sala de lectura como pantalla principal: el pipeline corre horas y lo que el autor necesita ver es dónde está y cuándo le toca intervenir, sobre todo en las paradas.
+>
+> **Three.js es una pieza expresiva y está declarada como tal**: la estación dibujada como plano en la pantalla de crear novela, decorativa, cargada de forma perezosa y apagada con `prefers-reduced-motion`. Se descartó un grafo del canon en 3D, por la oclusión que ya advertía esta sección.
+>
+> Arrastrar una tarjeta **encola una intención** y la tarjeta se mueve cuando la ejecución lo confirma, que es aplicar al tablero la regla de arriba. Requisitos en [specs/spec-frontend.md](../specs/spec-frontend.md).
 
 ## Persistencia
 
@@ -535,4 +538,3 @@ Lo que la primera versión del backend resolvió, con el sitio donde está escri
 - **Fijar las cifras del presupuesto** midiendo contra un capítulo real. Hoy son provisionales y la traza ya guarda lo necesario para medirlas.
 - **La parte de juicio de las puertas 1 y 5**: que el clímax responda la pregunta dramática, que la prosa respete las reglas de la amenaza de principio a fin y la curva de tensión en lectura continua. Las tres exigen interpretar el texto.
 - **Evals de los agentes**, empezando por el extractor, que es la pieza frágil: es el único punto por el que el texto alimenta el grafo y ninguna puerta puede echar de menos un hecho que nadie registró.
-- **Qué ve el frontend**: panel de control o sala de lectura, y qué papel tiene Three.js. La estructura por funcionalidades está decidida; el reparto de pantallas no.
