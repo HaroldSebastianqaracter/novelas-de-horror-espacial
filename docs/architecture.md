@@ -334,6 +334,7 @@ src/backend/
 │   ├── puerto/          # el puerto a Claude Code, real y falso
 │   └── vectores/        # indice derivado: embeddings y recuperacion
 ├── orquestador/         # que fase toca, puertas, politica de fallo, reanudacion
+├── evals/               # medidas del sistema; nada de aqui corre dentro del pipeline
 └── tareas/              # una carpeta por agente
     ├── arquitecto/
     ├── mundo/
@@ -347,6 +348,8 @@ src/backend/
 ```
 
 > **Decisión sin entrevistar, 22 de septiembre de 2026.** El **orquestador está fuera de `compartido/`**, junto al worker. `compartido/` es infraestructura que usan todos; el orquestador solo lo usa el worker, y las tareas no lo tocan. Meterlo dentro habría engordado `compartido/` sin razón, que es la señal que este mismo documento identifica como corte mal hecho.
+
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** Las evals viven en **`evals/`**, fuera de `tareas/` y de `tests/`. No son un agente, y la lista de carpetas de `tareas/` es la de agentes. Tampoco son solo tests: el banco de contraejemplos de la puerta 3 tiene que poder correrse como comando para dar su tabla ([spec3](../specs/spec3.md), 3.10). Dependen del pipeline y de las puertas, y nada del pipeline depende de ellas.
 
 Dentro de cada tarea, siempre los mismos ficheros: `router.py` si se expone por HTTP, `esquemas.py`, `servicio.py`, `prompt.py`, `puerta.py`, y sus pruebas al lado.
 

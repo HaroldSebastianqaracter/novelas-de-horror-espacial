@@ -20,7 +20,7 @@ Versión 0.1 · 23 de septiembre de 2026
 | 7. Lectura | 3.7 | Pendiente |
 | 8. Cambio del lector | 3.8 | Pendiente |
 | 9. Validadores formales | 3.9 | Pendiente |
-| 10. Infraestructura de evals | 3.10 | Pendiente |
+| 10. Infraestructura de evals | [3.10](#310-bloque-10--infraestructura-de-evals) | Empezada: el banco de contraejemplos de la puerta 3 |
 | Mejoras tras la primera pasada real | [3.11](#311-lo-que-enseñó-la-primera-pasada-real) | Escrita: 3 de los 6 frentes (extractor, resumen y nombres menores) |
 
 ---
@@ -385,6 +385,55 @@ El mapa de sustitución no sale nunca de la máquina. Una novela sin brief no ti
 - Enviar el audit log del policy engine (bloque 5) y las evals (bloque 10) como scores y datasets.
 - Comparar versiones de prompts en la iteración de tuning, que es donde se usa lo que este bloque registra.
 - El diagnóstico del coste del extractor (spec3, RF3-PAS-01) se lee en estas trazas: turnos y coste por llamada.
+
+---
+
+## 3.10 Bloque 10 — Infraestructura de evals
+
+La tabla definitiva se saca al final. Esta sección empieza por la pieza que mide la puerta 3.
+
+### El banco de contraejemplos de la puerta 3
+
+La puerta 3 se ha afinado parada a parada quitando falsos positivos, y cada arreglo afloja algo: la reafirmación por trozos, las presencias, la deducción. Los falsos negativos no paran nada, así que nadie los ve. En la primera novela real completa, las diez paradas fueron falsos positivos o casos discutibles. En cambio, las cinco puertas dejaron pasar contradicciones reales de la prosa final:
+- «los siete de fuera» con una cuadrilla de seis;
+- un censo que pierde a tres personas;
+- un plazo de cuarenta horas para un carguero que llega en treinta y una;
+- un personaje al que el elenco pone en una facción y la prosa trata siempre como de otra.
+
+La idea de medirlo metiendo errores a propósito viene de FlawedFictions (arXiv 2504.11900) y de ConStory-Bench (arXiv 2603.05890).
+
+**RF3-BAN-01 — La base.** Una novela de demo completa hecha con el puerto falso (tres capítulos aprobados), creada una vez. Cada caso trabaja sobre una copia hecha con la API de backup: ningún caso ve lo que cambió otro, y no cuesta nada.
+
+**RF3-BAN-02 — Los casos.** Cada caso lleva:
+- un identificador;
+- un subtipo: factual, personaje, conocimiento, objeto, espacio, tiempo, estado, aritmética, pertenencia o control;
+- la verdad: contradicción o caso limpio;
+- una mutación del grafo del último capítulo;
+- lo que la puerta hace hoy: los bloqueantes que salen y los avisos que tienen que salir.
+
+La mutación deja el grafo como lo habría dejado el extractor ante una prosa con ese error. Si el extractor no lo habría registrado, como una cifra dicha solo en un diálogo, lo deja sin tocar. Una contradicción que hoy no para, o un caso limpio que para, lleva su **punto ciego**: por qué pasa, con su fila del plan de verificación. Algunos casos van por pares, con el mismo grafo y distinta verdad, para dejar a la vista lo que la puerta no puede distinguir: la presencia inflada frente a la presencia real fuera del reparto, y el muerto que vuelve frente al reparto desfasado.
+
+**RF3-BAN-03 — La medida.** El **recall** es la parte de las contradicciones que paran la novela. Los **falsos positivos** son la parte de los casos limpios que la paran. Las dos se dan también por subtipo, y los avisos se cuentan aparte. La línea base del 23 de septiembre (13 contradicciones y 8 limpios) da un recall del 54 % y un 25 % de falsos positivos.
+
+**RF3-BAN-04 — Regresión en los dos sentidos.** Un test fija lo que la puerta hace hoy con cada caso. Si un cambio hace que deje de detectar una contradicción, o que empiece a parar un caso limpio, el test falla. Entonces el banco se actualiza a conciencia y deja su entrada en el registro de iteraciones. Mejorar la puerta también obliga a tocar el banco, y así la mejora queda medida.
+
+**RF3-BAN-05 — El informe.** `banco_contraejemplos.py`, desde `src/backend`, imprime:
+- la tabla de casos, con el subtipo, la verdad, lo esperado, los bloqueantes y avisos que salen y si el caso es conforme;
+- las dos métricas;
+- el desglose por subtipo.
+
+Sale con código 1 si algún caso se desvía de lo esperado. Solo trabaja sobre bases temporales.
+
+> **Decisión de la spec.** Las mutaciones son del grafo y no de la prosa. La puerta 3 es SQL sobre el grafo, y medir lo que el extractor registra de una prosa es otra eval (fila 34), que cuesta dinero. Por eso lo que el extractor no registra se modela no registrando nada: una contradicción así cuenta como falso negativo de la puerta, aunque la raíz esté en la extracción.
+>
+> ConStory-Bench reparte sus 19 subtipos de error en tres grupos:
+> - los que una consulta sobre un grafo puede detectar: fechas, duraciones, simultaneidad, elementos abandonados, geografía, apariencia y cantidades;
+> - los que necesitan un juez;
+> - los de estilo.
+>
+> El banco empieza por los primeros, que es donde el paper sitúa la mayoría de los fallos de los modelos. Ahí quedan dos huecos sin comprobación hoy: las duraciones declaradas frente a los días transcurridos y la topología de la estación.
+
+> **Decisión sin entrevistar.** El banco vive en un paquete nuevo, `evals/`, junto a `tareas/`, `orquestador/` y `compartido/`. No es un agente ni corre dentro del pipeline, y ahí irá el resto del bloque 10: el ejecutor de briefs y la tabla de resultados. Se descartó ponerlo en `tests/`, porque el informe tiene que poder correrse como comando y no solo como test.
 
 ---
 
