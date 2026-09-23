@@ -246,28 +246,102 @@ def redaccion(entrada: str, agente: str) -> dict[str, Any]:
     }
 
 
+#: Cinco atributos por sujeto, repetidos igual en cada capitulo: la puerta 3 tiene pares que
+#: comparar aunque ninguno choque (RF2-DEMO-01).
+RASGOS_DEL_PUENTE = (
+    ("olor", "metal frio y algo dulce"), ("luz", "ambar intermitente"),
+    ("sonido", "zumbido de los reles"), ("estado de la consola", "apagada salvo navegacion"),
+    ("suelo", "rejilla con escarcha"),
+)
+RASGOS_DE_IDRIS = (
+    ("color de pelo", "castano corto"), ("estatura", "alta"), ("voz", "ronca"),
+    ("mano dominante", "izquierda"),
+)
+#: La quinta, una cadena de tres supersesiones: cada capitulo sustituye al anterior.
+HERIDA_DE_IDRIS = ("corte abierto", "corte infectado", "cicatriz rosada")
+SIEMBRA = "El sellante de casco de dos componentes"
+ESTADOS_DE_LA_SIEMBRA = ("sembrada", "regada", "pagada")
+REVELACION = ("rastro", "efecto", "vislumbre")
+
+
 def extraccion(entrada: str, agente: str) -> dict[str, Any]:
+    """Una extraccion que ejercita cada comprobacion de la puerta 3 sin disparar ninguna.
+
+    Por capitulo: los mismos cinco rasgos de dos sujetos, una herida que evoluciona por
+    supersesion, conocimiento que se adquiere y se usa despues, una sorpresa repetida (que es
+    aviso), el objeto que se traslada con su traslado registrado, eventos con orden interno,
+    la siembra que se planta, se riega y se paga, y dos hilos que se abren y se cierran en
+    orden inverso. En el ultimo capitulo muere un personaje que no vuelve a aparecer.
+    """
     ordenes = _ordenes(entrada) or [1]
     capitulo = _capitulo(entrada)
-    primera = ordenes[0]
+    indice = min(max(capitulo, 1), CAPITULOS) - 1
+    primera, ultima = ordenes[0], ordenes[-1]
+    idris, vaan, reyes = PERSONAJES
+
+    def hecho(sujeto_tipo: str, sujeto: str, atributo: str, valor: str,
+              supersede: str = "") -> dict[str, Any]:
+        return {
+            "escena_orden": primera, "sujeto_tipo": sujeto_tipo, "sujeto_ref": sujeto,
+            "atributo": atributo, "valor": valor, "categoria": "fisico",
+            "cita": f"{atributo}: {valor}", "supersede_a": supersede,
+        }
+
+    hechos = [hecho("lugar", LUGARES[0], a, v) for a, v in RASGOS_DEL_PUENTE]
+    hechos += [hecho("personaje", idris, a, v) for a, v in RASGOS_DE_IDRIS]
+    hechos.append(hecho(
+        "personaje", idris, "herida en la mano", HERIDA_DE_IDRIS[indice],
+        supersede="herida en la mano" if capitulo > 1 else "",
+    ))
+
+    def sabe(personaje: str, via: str, postura: str = "sabe") -> dict[str, Any]:
+        return {"escena_orden": primera, "personaje_ref": personaje, "sujeto_ref": LUGARES[0],
+                "atributo": "olor", "postura": postura, "via": via}
+
+    def usa(personaje: str) -> dict[str, Any]:
+        return {"escena_orden": ultima, "personaje_ref": personaje,
+                "sujeto_ref": LUGARES[0], "atributo": "olor"}
+
+    conocimiento: list[dict[str, Any]] = []
+    usos: list[dict[str, Any]] = []
+    if capitulo == 1:
+        conocimiento.append(sabe(idris, "presencio"))
+    elif capitulo == 2:
+        # Idris vuelve a «enterarse» de lo que ya sabia: sorpresa imposible, que es aviso.
+        conocimiento += [sabe(vaan, "se_lo_contaron", "cree"), sabe(idris, "presencio")]
+        usos.append(usa(idris))
+    else:
+        usos.append(usa(vaan))
+
+    estados: list[dict[str, Any]] = [{
+        "escena_orden": primera, "personaje_ref": idris, "condicion": "herido",
+        "salud_fisica": HERIDA_DE_IDRIS[indice], "estado_psicologico": "alerta",
+        "nivel_confianza": {},
+    }]
+    if capitulo == CAPITULOS:
+        estados.append({
+            "escena_orden": ultima, "personaje_ref": reyes, "condicion": "muerto",
+            "salud_fisica": "sin constantes", "estado_psicologico": "", "nivel_confianza": {},
+        })
+
+    hilos: list[dict[str, Any]] = []
+    if capitulo == 1:
+        hilos = [{"escena_orden": primera, "hilo": 1, "nuevo_estado": "abierto"},
+                 {"escena_orden": ultima, "hilo": 2, "nuevo_estado": "abierto"}]
+    elif capitulo == 2:
+        hilos = [{"escena_orden": primera, "hilo": 2, "nuevo_estado": "complicando"}]
+    elif capitulo == CAPITULOS:
+        # Se cierra primero lo ultimo que se abrio.
+        hilos = [{"escena_orden": primera, "hilo": 2, "nuevo_estado": "resuelto"},
+                 {"escena_orden": ultima, "hilo": 1, "nuevo_estado": "resuelto"}]
+
     return {
-        "hechos": [{
-            "escena_orden": primera, "sujeto_tipo": "lugar", "sujeto_ref": LUGARES[0],
-            "atributo": "olor", "valor": "metal frio y algo dulce", "categoria": "fisico",
-            "cita": "olia a metal frio", "supersede_a": "",
-        }],
-        "conocimiento": [{
-            "escena_orden": primera, "personaje_ref": PERSONAJES[0],
-            "sujeto_ref": LUGARES[0], "atributo": "olor", "postura": "sabe",
-            "via": "presencio",
-        }],
-        "usos_de_conocimiento": [],
-        "estados_personaje": [{
-            "escena_orden": primera, "personaje_ref": PERSONAJES[0], "condicion": "vivo",
-            "salud_fisica": "entera", "estado_psicologico": "alerta", "nivel_confianza": {},
-        }],
+        "hechos": hechos,
+        "conocimiento": conocimiento,
+        "usos_de_conocimiento": usos,
+        "estados_personaje": estados,
         "estados_objeto": [{
-            "escena_orden": ordenes[-1], "objeto_ref": OBJETO, "poseedor_ref": "",
+            "escena_orden": ultima, "objeto_ref": OBJETO, "poseedor_ref": "",
             "ubicacion_ref": LUGARES[(capitulo + 2) % len(LUGARES)],
         }],
         "eventos": [{
@@ -275,8 +349,12 @@ def extraccion(entrada: str, agente: str) -> dict[str, Any]:
             "orden_interno": capitulo * 10 + o,
             "descripcion": f"Sucesos de la escena {o}", "dramatizado": True,
         } for o in ordenes],
-        "siembras": [],
-        "amenaza_revelacion": "rastro" if capitulo == 1 else None,
+        "siembras": [{
+            "escena_orden": primera, "siembra_ref": SIEMBRA,
+            "nuevo_estado": ESTADOS_DE_LA_SIEMBRA[indice],
+        }],
+        "hilos": hilos,
+        "amenaza_revelacion": REVELACION[indice],
         "entidades_no_reconocidas": [],
         "resumen": (
             f"En el capitulo {capitulo} la cuadrilla fuerza una compuerta y encuentra la "

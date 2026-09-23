@@ -1,0 +1,39 @@
+{
+  "descripcion": "Capitulo 1 de la novela de la demo, escrito y anotado a mano. Las escenas siguen la escaleta de la demo: la 1 en la Esclusa, la 2 en el Puente con la Baliza. Cada registro esperado es algo que la prosa afirma sin ambiguedad; lo que el texto solo sugiere no se anota.",
+  "capitulo": 1,
+  "escenas": {
+    "1": "La esclusa tenía las dos compuertas selladas y una luz roja que parpadeaba sobre el panel de presión. Idris se quitó el guante: llevaba la mano izquierda vendada por un corte que todavía sangraba. Vaan llegó tarde, con el casco bajo el brazo y el pelo gris pegado a la frente.\n\n—Reyes dice que la baliza lleva tres días muda —le contó Vaan—. Nadie la ha tocado desde que la dejamos en el módulo de carga.\n\nIdris no lo sabía. Pensó en el capitán Oyelaran, del que ya nadie hablaba, y en la última orden que dio antes de desaparecer. Cuando la presión se igualó, la compuerta interior se abrió con un silbido largo y los dos cruzaron sin mirarse.",
+    "2": "El puente olía a metal frío y a algo dulce que Idris no supo nombrar. Todas las consolas estaban apagadas salvo la de navegación, que proyectaba un resplandor ámbar sobre la rejilla del suelo.\n\nVaan encontró la baliza encajada bajo el asiento del piloto, con la carcasa abollada. La sacó con las dos manos y la dejó sobre la consola.\n\n—Alguien la ha traído hasta aquí —dijo.\n\nIdris se acordó de lo que Vaan le había contado en la esclusa: la baliza estaba en el módulo de carga. Si ahora estaba en el puente, alguien la había movido. Vaan pulsó el botón de prueba. La baliza emitió un solo pitido y volvió a callar."
+  },
+  "esperado": {
+    "hechos": [
+      {"escena_orden": 1, "sujeto": "Esclusa", "claves": [["luz"], ["roja"]]},
+      {"escena_orden": 1, "sujeto": "Idris", "claves": [["corte", "herida"]]},
+      {"escena_orden": 1, "sujeto": "Vaan", "claves": [["pelo", "cabello"], ["gris", "cano"]]},
+      {"escena_orden": 1, "sujeto": "Baliza", "claves": [["muda", "silencio", "sin señal", "no emite", "callada"]]},
+      {"escena_orden": 2, "sujeto": "Puente", "claves": [["metal"], ["dulce"]]},
+      {"escena_orden": 2, "sujeto": "Puente", "claves": [["apagad"], ["navegacion"]]},
+      {"escena_orden": 2, "sujeto": "Puente", "claves": [["ambar"]]},
+      {"escena_orden": 2, "sujeto": "Baliza", "claves": [["abollad"]]}
+    ],
+    "conocimiento": [
+      {"escena_orden": 1, "personaje": "Idris", "sujeto": "Baliza"}
+    ],
+    "usos_de_conocimiento": [
+      {"escena_orden": 2, "personaje": "Idris", "sujeto": "Baliza"}
+    ],
+    "estados_personaje": [
+      {"escena_orden": 1, "personaje": "Idris", "condicion": "herido"}
+    ],
+    "estados_objeto": [
+      {"escena_orden": 2, "objeto": "Baliza", "ubicacion": "Puente"}
+    ],
+    "eventos": [
+      {"escena_orden": 1, "claves": [["compuerta", "esclusa"]]},
+      {"escena_orden": 2, "claves": [["baliza"]]}
+    ],
+    "entidades_no_reconocidas": [
+      {"escena_orden": 1, "nombre": "Oyelaran"}
+    ]
+  }
+}

@@ -94,12 +94,22 @@ def paquete(
             "ATRIBUTOS QUE YA EXISTEN",
         )
 
+    hilos = lectura.hilos(con, novela_id)
+    vivos: list[str] = []
     if siembras:
-        p.anadir(
-            "siembras",
-            "\n".join(f"- [{s['estado']}] {s['elemento']}" for s in siembras),
-            "SIEMBRAS VIVAS (marca si el capitulo las riega o las paga)",
+        vivos.append("Siembras (marca si el capitulo las planta, las riega o las paga):")
+        vivos.extend(f"- [{s['estado']}] {s['elemento']}" for s in siembras)
+    if hilos:
+        vivos.append(
+            "Hilos (refierete a cada uno por su numero; marca si el capitulo lo abre, lo "
+            "complica, lo deja latente o lo resuelve):"
         )
+        vivos.extend(
+            f"- Hilo {i} [{h['tipo']}, {h['estado']}]: {h['conflicto_central']}"
+            for i, h in enumerate(hilos, start=1)
+        )
+    if vivos:
+        p.anadir("siembras", "\n".join(vivos), "SIEMBRAS E HILOS VIVOS")
 
     cuerpo: list[str] = []
     for e in escenas:
@@ -191,11 +201,34 @@ def aplicar(
         ).fetchone()
         return int(fila["id"]) if fila else None
 
+    def valor_vigente(sujeto: str, atributo: str) -> sqlite3.Row | None:
+        """El hecho que hoy fija ese sujeto y atributo: vigente y sin sustituir."""
+        return con.execute(
+            """
+            SELECT h.id, h.valor_clave FROM hecho_vigente h
+            WHERE h.novela_id = ? AND h.sujeto_clave = ? AND h.atributo_clave = ?
+              AND NOT EXISTS (SELECT 1 FROM hecho_vigente s WHERE s.supersede_a = h.id)
+            ORDER BY h.id DESC LIMIT 1
+            """,
+            (novela_id, normalizar(sujeto), normalizar(atributo)),
+        ).fetchone()
+
     hechos_nuevos: dict[tuple[str, str], int] = {}
     for h in salida.hechos:
         eid = escena(h.escena_orden)
         if eid is None:
             descartes.anotar("hechos", "escena_desconocida")
+            continue
+        # Reafirmar el valor vigente no es un hecho nuevo (RF2-PIPE-19): el conocimiento y los
+        # usos de la escena apuntan al hecho ya establecido. Si cada reafirmacion creara una
+        # fila, un uso posterior quedaria enganchado a una fila que nadie sabe, y la puerta 3
+        # veria conocimiento no adquirido donde no lo hay. Un valor antiguo ya sustituido si
+        # entra como fila nueva: es justo lo que la puerta tiene que comparar.
+        vigente = valor_vigente(h.sujeto_ref, h.atributo)
+        if vigente is not None and not h.supersede_a and (
+            vigente["valor_clave"] == normalizar(h.valor)
+        ):
+            hechos_nuevos[(normalizar(h.sujeto_ref), normalizar(h.atributo))] = int(vigente["id"])
             continue
         previo = ultimo_hecho(h.sujeto_ref, h.supersede_a) if h.supersede_a else None
         hid = insertar_hecho(
@@ -315,6 +348,21 @@ def aplicar(
         insertar(
             con, "siembra_estado", novela_id=novela_id, siembra_id=sid, escena_id=eid,
             estado=s.nuevo_estado,
+        )
+
+    # --- Hilos (RF2-PIPE-18): el numero es el de la lista que traia el paquete ------------
+    hilo_por_numero = {
+        i: int(h["hilo_id"]) for i, h in enumerate(lectura.hilos(con, novela_id), start=1)
+    }
+    for hx in salida.hilos:
+        eid = escena(hx.escena_orden)
+        hilo_id = hilo_por_numero.get(hx.hilo)
+        if eid is None or hilo_id is None:
+            descartes.anotar("hilos", "escena_desconocida" if eid is None else "hilo_desconocido")
+            continue
+        insertar(
+            con, "hilo_estado", novela_id=novela_id, hilo_id=hilo_id, escena_id=eid,
+            estado=hx.nuevo_estado,
         )
 
     # --- Revelacion de la amenaza ---------------------------------------------------------

@@ -117,12 +117,16 @@ lo que la sustituye.
 .venv\Scripts\python.exe -m pyright
 ```
 
-`pyright` va en modo estricto sobre todo el backend salvo los tests. Dos extras que no corren
+`pyright` va en modo estricto sobre todo el backend salvo los tests. Tres extras que no corren
 por defecto:
 
 ```bat
 rem El golden set de recuperacion, con el modelo de embeddings real (tiene que estar en la cache).
 .venv\Scripts\python.exe -m pytest -q -m modelo
+
+rem Las evals del extractor contra el capitulo anotado, con Claude Code de verdad: cuesta
+rem dinero, asi que solo con la aprobacion del autor.
+.venv\Scripts\python.exe -m pytest -q -s -m agente
 
 rem Regenerar el snapshot del contrato OpenAPI tras un cambio de la API hecho a proposito.
 rem Revisa el diff de tests\openapi.json antes de commitear.

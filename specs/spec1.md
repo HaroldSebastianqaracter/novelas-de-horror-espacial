@@ -453,6 +453,8 @@ Si alguna parte falla, el orquestador **vuelve a redacción** del mismo capítul
 6. Emite el evento `capitulo_completado`.
 7. Confirma.
 
+> Ampliado por spec2, RF2-PIPE-18: los estados de los hilos los declara el extractor.
+
 > Sustituido por spec2, RF2-PIPE-08.
 
 **RF-PIPE-15 — Puerta 5, determinista y no bloqueante.** Tras el último capítulo, el orquestador genera un informe con: siembras cuyo estado final no es `pagada` ni `abandonada`; hilos cuyo estado final no es `resuelto` ni `abierto_deliberado`; hilos que pasaron más de `N` capítulos en `latente` (`N` configurable, defecto 6). La ejecución termina en `completada` si el informe está vacío y en `completada_con_avisos` si no. La curva de tensión (`D`) y las reglas de la amenaza (`I`) no se evalúan en la v1.

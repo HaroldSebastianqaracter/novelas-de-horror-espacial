@@ -29,7 +29,9 @@ Usa `supersede_a` cuando un hecho nuevo sustituye legítimamente a uno anterior,
 
 **Eventos** de la cronología interna, con su fecha y con su `orden_interno`, que sitúa el suceso respecto a todos los anteriores de la novela. Todo evento dramatizado **lleva** `orden_interno`: sin él la salida se rechaza. Te llega el último valor registrado; continúa la escala desde ahí. Dos sucesos simultáneos comparten orden, y uno anterior en la cronología, como un recuerdo, lleva uno menor. Un evento que no ocurre en la página puede no llevarlo.
 
-**Siembras**: las que el capítulo riega o paga, y las nuevas que el texto planta aunque nadie las hubiera planificado.
+**Siembras**: las que el capítulo planta, riega o paga, y las nuevas que el texto planta aunque nadie las hubiera planificado.
+
+**Hilos**: los que el capítulo abre, complica, deja latentes o resuelve. Te llegan numerados en la lista de hilos vivos, con su estado actual; refiérete a cada uno por su número y registra solo los que cambian de estado en la prosa. Un hilo que el texto deja abierto a propósito, sin intención de cerrarlo, es `abierto_deliberado`.
 
 **El nivel de revelación de la amenaza**, si ha avanzado un peldaño.
 

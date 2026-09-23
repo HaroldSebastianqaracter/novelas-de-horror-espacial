@@ -84,10 +84,12 @@ Los agentes son el punto donde se encuentran los otros tres documentos de `docs/
 | **Estructurador** | `Acto`, `HiloNarrativo`, `PuntoDeGiro`, `Siembra` inicial y los `Objeto` que la trama necesita | Los hilos abren y cierran en orden, y el clímax responde la pregunta dramática |
 | **Escaletador** | `Capitulo`, `Secuencia`, `Escena` con POV, objetivo, conflicto y valor en juego | Ninguna escena tiene `valorInicial` igual a `valorFinal` |
 | **Redactor** | La prosa de las escenas de un capítulo | El capítulo está escrito entero, sin marcadores pendientes |
-| **Extractor** | `Hecho`, `EstadoDeConocimiento`, `EstadoObjeto`, `EstadoPersonaje`, `Evento` | Todo lo que el texto afirma está registrado en el grafo |
+| **Extractor** | `Hecho`, `EstadoDeConocimiento`, `UsoDeConocimiento`, `EstadoObjeto`, `EstadoPersonaje`, `Evento`, `EstadoSiembra`, `EstadoHilo`, `RevelacionAmenaza` | Todo lo que el texto afirma está registrado en el grafo |
 | **Revisor de continuidad** | Informe de conflictos contra el canon | No hay contradicciones, o las hay y el pipeline para |
 | **Revisor de oficio** | Informe de voz, subtexto, función de escena y cliché | Cada criterio tiene veredicto contra su principio de [domain-knowledge.md](domain-knowledge.md) |
 | **Revisor** | El manuscrito revisado: las cuatro [pasadas globales](#pasadas-de-revisión), en orden | Las cuatro pasadas han corrido sin mezclarse y toda escena tocada ha vuelto a pasar la puerta 3 |
+
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** La fila del extractor nombraba solo cinco registros, pero ya escribía los usos de conocimiento, las siembras y la revelación de la amenaza. Y nadie escribía `EstadoHilo`: todo hilo acababa la novela abierto y la puerta 5 avisaba siempre. Se le asigna al extractor, que es quien lee la prosa y ya registra las siembras (RF2-PIPE-18 de spec2). Se descartó derivarlo de los puntos de giro de la escaleta, que dicen lo planificado y no lo que la prosa hizo.
 
 `Restriccion` no la escribe ningún agente: la fija el usuario desde el frontend al configurar la obra (longitud objetivo, público, política de contenido) y entra al pipeline como dato de entrada. El arquitecto la lee; no la inventa.
 

@@ -22,6 +22,7 @@ from pydantic import BaseModel, Field, model_validator
 from compartido.tipos import (
     CategoriaHecho,
     CondicionPersonaje,
+    EstadoHilo,
     EstadoSiembra,
     NivelRevelacion,
     Postura,
@@ -118,6 +119,14 @@ class SiembraExtraida(BaseModel):
         return self
 
 
+class HiloExtraido(BaseModel):
+    """Un hilo que el capitulo abre, complica, deja latente o resuelve (RF2-PIPE-18)."""
+
+    escena_orden: int = Field(ge=1)
+    hilo: int = Field(ge=1, description="Numero del hilo en la lista de HILOS VIVOS del paquete")
+    nuevo_estado: EstadoHilo
+
+
 class EntidadNoReconocida(BaseModel):
     escena_orden: int = Field(ge=1)
     nombre: str = Field(min_length=1)
@@ -136,6 +145,7 @@ class SalidaExtraccion(BaseModel):
     estados_objeto: list[EstadoObjetoExtraido] = Field(default_factory=list[EstadoObjetoExtraido])
     eventos: list[EventoExtraido] = Field(default_factory=list[EventoExtraido])
     siembras: list[SiembraExtraida] = Field(default_factory=list[SiembraExtraida])
+    hilos: list[HiloExtraido] = Field(default_factory=list[HiloExtraido])
     amenaza_revelacion: NivelRevelacion | None = None
     entidades_no_reconocidas: list[EntidadNoReconocida] = Field(
         default_factory=list[EntidadNoReconocida]

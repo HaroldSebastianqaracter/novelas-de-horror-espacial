@@ -307,7 +307,10 @@ def test_el_retcon_es_un_registro_y_relanzar_desde_antes_lo_deshace(w: worker.Wo
     def contradice(entrada: str, agente: str) -> dict:
         salida = agentes_falsos.extraccion(entrada, agente)
         if agentes_falsos._capitulo(entrada) >= 3:
-            salida["hechos"][0]["valor"] = "aire limpio y sin olor"
+            # Un rasgo sin conocimiento ni usos asociados: el conflicto es solo factual.
+            for h in salida["hechos"]:
+                if h["atributo"] == "voz":
+                    h["valor"] = "aguda y rota"
         return salida
 
     w.puerto.registrar("extraccion", contradice)  # type: ignore[attr-defined]
@@ -333,7 +336,7 @@ def test_el_retcon_es_un_registro_y_relanzar_desde_antes_lo_deshace(w: worker.Wo
 
     del_capitulo_1 = w.con.execute(
         "SELECT h.id FROM hecho h JOIN escena_ordinal eo ON eo.escena_id = h.escena_id "
-        "WHERE eo.capitulo_numero = 1"
+        "WHERE eo.capitulo_numero = 1 AND h.atributo = 'voz'"
     ).fetchone()["id"]
     assert del_capitulo_1 in revocables
     w._relanzar(_intencion(w.con, "relanzar", novela_id, desde_capitulo=2))

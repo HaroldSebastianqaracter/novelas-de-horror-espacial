@@ -2,7 +2,7 @@
 
 Plan de verificación de [spec1.md](spec1.md). Métodos y etiquetas según [docs/validators.md](../docs/validators.md).
 
-Actualizado el 23 de septiembre de 2026. Suite: 169 tests en verde y 1 marcado `modelo`; `ruff` limpio y `pyright` estricto en cero sobre `src/backend` sin los tests. Las rutas de evidencia son relativas a `src/backend/`.
+Actualizado el 23 de septiembre de 2026. Suite: 198 tests en verde, 1 marcado `modelo` y 1 marcado `agente`; `ruff` limpio y `pyright` estricto en cero sobre `src/backend` sin los tests. Las rutas de evidencia son relativas a `src/backend/`.
 
 > **Filas degradadas el 23 de septiembre de 2026.** La auditoría de ese día reprodujo fallos en siete filas que estaban en `implementado`: 11, 16, 17, 21, 25, 27 y 35. Pasan a `fallando` ya, y no cuando se arreglen, porque un plan que dice «implementado» sobre un fallo reproducido es justo lo que la sección siguiente llama la forma más común de mentir. Cada una vuelve a `implementado` en la fase de [spec2-plan.md](spec2-plan.md) que la corrige, y su propiedad endurecida vive en [spec2-verification.md](spec2-verification.md).
 
@@ -51,10 +51,10 @@ Actualizado el 23 de septiembre de 2026. Suite: 169 tests en verde y 1 marcado `
 | 35 | El worker caído a mitad de capítulo reanuda desde el último capítulo íntegro | Integration testing con una caída real del proceso (antes `D`) | `T` | `tests/test_auditoria.py::test_hallazgo_06_…`: el subproceso sale con `os._exit` durante el oficio y `recuperar()` revierte. Corregida por spec2, fase 1 | implementado |
 | 36 | El SSE recupera con `Last-Event-ID` sin huecos ni duplicados | Integration testing | `T` | `main.py::stream_eventos`. Sin prueba | **pendiente** |
 | 37 | La salida de cada agente cumple sus criterios de terminación | Evals por skill | `T`, `I` con juez | Sin conjunto de referencia | **pendiente** |
-| 38 | El extractor captura los hechos que un manuscrito de referencia fija | Evals con golden dataset | `I` | Sin dataset anotado | **pendiente** |
+| 38 | El extractor captura los hechos que un manuscrito de referencia fija | Evals con golden dataset | `I` | Capítulo anotado a mano y puntuador determinista de recall por tipo de registro en `tests/test_evals_extraccion.py` (fila 32 de spec2). La pasada contra el extractor real está marcada `agente` y sin ejecutar: cuesta dinero y espera la aprobación del autor | **pendiente** |
 | 39 | El juez de oficio acierta contra escenas con veredicto conocido | Evals | `I` | Sin conjunto de referencia | **pendiente** |
 | 40 | Ningún secreto en el repositorio ni en la base de datos | SAST | `A` | Sin escaneo automático | **pendiente** |
-| 41 | Pipeline completo con Claude Code real sobre una novela corta | Demonstration | `D` | Probados por separado el puerto y el arquitecto. Falta la pasada entera | **pendiente** |
+| 41 | Pipeline completo con Claude Code real sobre una novela corta | Demonstration | `D` | Probados por separado el puerto y el arquitecto. La pasada entera queda preparada y sin ejecutar, a la espera de la aprobación del autor (fila 20 de spec2) | **pendiente** |
 
 ## Riesgos aceptados
 
