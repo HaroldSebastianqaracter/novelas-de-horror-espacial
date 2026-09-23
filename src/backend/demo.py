@@ -4,6 +4,7 @@ No sustituye al worker ni a la API: encola intenciones igual que haria el fronte
 va leyendo el estado. Sirve para ver el pipeline correr sin montar nada mas.
 
     python demo.py            # crear una novela, arrancarla y ver como avanza
+    python demo.py --brief ../../ejemplos/brief-ejemplo.json  # una novela personalizada
     python demo.py --arrancar # arrancar la que ya existe, sin crear otra
     python demo.py --ver      # solo mirar
 """
@@ -19,8 +20,10 @@ from pathlib import Path
 
 import config
 from compartido import db
+from compartido.brief import Brief, analizar
 from compartido.db import transaccion
 from compartido.grafo import lectura
+from compartido.tipos import como_dict
 from orquestador import cola, fallo
 
 SEMILLA = (
@@ -44,15 +47,39 @@ def _abrir(ruta: Path) -> sqlite3.Connection:
     return con
 
 
-def crear(ruta: Path, titulo: str) -> int:
+def leer_brief(fichero: Path) -> Brief:
+    """Admite la intencion entera (como ejemplos/brief-ejemplo.json), su payload o el brief."""
+    datos = como_dict(json.loads(fichero.read_text(encoding="utf-8")))
+    if "payload" in datos:
+        datos = como_dict(datos["payload"])
+    if "brief" in datos:
+        datos = como_dict(datos["brief"])
+    return Brief.model_validate(datos)
+
+
+def crear(ruta: Path, titulo: str, brief: Brief | None = None) -> int:
+    if brief is not None:
+        analisis = analizar(brief)
+        if not analisis.completo:
+            print("El brief no esta completo:", file=sys.stderr)
+            for f in analisis.faltantes:
+                print(f"  - falta {f}", file=sys.stderr)
+            for c in analisis.contradicciones:
+                print(f"  - {c.mensaje}", file=sys.stderr)
+            return 0
     con = _abrir(ruta)
     try:
         with transaccion(con):
-            intencion_id = cola.encolar(
-                con, "crear_novela", None,
-                titulo=titulo, genero="terror_espacial", semilla_premisa=SEMILLA,
-                restricciones=RESTRICCIONES,
-            )
+            if brief is not None:
+                intencion_id = cola.encolar(
+                    con, "crear_novela", None, brief=brief.model_dump(mode="json"),
+                )
+            else:
+                intencion_id = cola.encolar(
+                    con, "crear_novela", None,
+                    titulo=titulo, genero="terror_espacial", semilla_premisa=SEMILLA,
+                    restricciones=RESTRICCIONES,
+                )
         print(f"Intencion {intencion_id}: crear_novela. Esperando al worker...")
 
         for _ in range(120):
@@ -204,6 +231,10 @@ def main() -> int:
     )
     parser.add_argument("--leer", type=int, default=None, metavar="N")
     parser.add_argument("--segundos", type=int, default=3600, help="cuanto tiempo mirar")
+    parser.add_argument(
+        "--brief", type=Path, default=None, metavar="FICHERO",
+        help="crear una novela personalizada desde un brief (RF3-PER-06)",
+    )
     args = parser.parse_args()
 
     try:
@@ -251,7 +282,8 @@ def main() -> int:
         return 0
 
     if not args.ver:
-        novela_id = crear(ruta, args.titulo)
+        brief = leer_brief(args.brief) if args.brief is not None else None
+        novela_id = crear(ruta, args.titulo, brief)
         if not novela_id:
             return 1
         arrancar(ruta, novela_id)

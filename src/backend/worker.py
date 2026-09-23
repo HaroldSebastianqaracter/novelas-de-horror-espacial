@@ -14,8 +14,11 @@ import time
 from types import FrameType
 from typing import Any
 
+from pydantic import ValidationError
+
 import config
 from compartido import db
+from compartido.brief import Brief, BriefIncompleto, elementos, restricciones_derivadas
 from compartido.db import transaccion
 from compartido.grafo import emitir_evento, insertar, lectura
 from compartido.puerto import construir as construir_puerto
@@ -195,21 +198,50 @@ class Worker:
 
     def _crear_novela(self, intencion: cola.Intencion) -> None:
         p = intencion.payload
+        brief: Brief | None = None
+        if p.get("brief") is not None:
+            # La API ya lo valido, pero el worker no se fia de que la intencion viniera de
+            # la API: tambien la puede escribir la entrevista o un script (RF3-BRF-04).
+            try:
+                brief = Brief.model_validate(p["brief"]).con_codigos()
+                brief.validar_completo()
+            except (ValidationError, BriefIncompleto) as exc:
+                cola.cerrar(self.con, intencion.id, "rechazada", motivo=str(exc)[:500])
+                return
+
+        restricciones = (
+            restricciones_derivadas(brief) if brief is not None
+            else {k: str(v) for k, v in como_dict(p.get("restricciones")).items()}
+        )
         with transaccion(self.con):
             novela_id = insertar(
                 self.con, "novela",
-                titulo=p.get("titulo") or "Sin titulo",
+                # Con brief, el titulo lo propone el arquitecto (RF3-PER-01).
+                titulo=p.get("titulo") or ("" if brief is not None else "Sin titulo"),
                 genero=p.get("genero") or "terror_espacial",
                 semilla_premisa=p.get("semilla_premisa"),
             )
-            for tipo, valor in como_dict(p.get("restricciones")).items():
-                insertar(
-                    self.con, "restriccion", novela_id=novela_id, tipo=tipo, valor=str(valor)
-                )
+            for tipo, valor in restricciones.items():
+                insertar(self.con, "restriccion", novela_id=novela_id, tipo=tipo, valor=valor)
+            if brief is not None:
+                self._guardar_brief(novela_id, brief, como_dict(p.get("entrevista")))
             insertar(self.con, "ejecucion", novela_id=novela_id, estado="configurada")
             emitir_evento(self.con, novela_id, "fase_cambiada", fase="configurada")
         cola.cerrar(self.con, intencion.id, "hecha", resultado={"novela_id": novela_id})
         log.info("Novela %s creada.", novela_id)
+
+    def _guardar_brief(
+        self, novela_id: int, brief: Brief, entrevista: dict[str, Any]
+    ) -> None:
+        """RF3-PER-02: el brief, sus elementos personales y la transcripcion de la entrevista."""
+        insertar(self.con, "brief", novela_id=novela_id, contenido=brief.model_dump_json())
+        for codigo, tipo, texto, obligatorio, origen, cita in elementos(brief):
+            insertar(
+                self.con, "elemento_personal", novela_id=novela_id, codigo=codigo, tipo=tipo,
+                texto=texto, obligatorio=obligatorio, origen=origen, cita=cita or None,
+            )
+        if entrevista:
+            insertar(self.con, "entrevista", novela_id=novela_id, transcripcion=entrevista)
 
     def _arrancar(self, intencion: cola.Intencion) -> None:
         novela_id = intencion.novela_id

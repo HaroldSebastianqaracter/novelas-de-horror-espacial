@@ -4,7 +4,7 @@ Modelo de clases y relaciones del universo narrativo de la novela de terror espa
 
 El modelo cubre tres cosas distintas y conviene no confundirlas:
 
-- **Canon** — lo que es verdad en la obra y cambia poco: `Novela`, `Mundo`, `SistemaTecnologico`, `Personaje`, `EstiloNarrativo`. Un cambio aquí se propaga hacia adelante sobre todo lo ya escrito.
+- **Canon** — lo que es verdad en la obra y cambia poco: `Novela`, `Mundo`, `SistemaTecnologico`, `Personaje`, `EstiloNarrativo`, y el `Encargo` con sus `ElementoPersonal`, que fija el comprador antes de empezar. Un cambio aquí se propaga hacia adelante sobre todo lo ya escrito.
 - **Estructura** — el plan de la historia: `Acto`, `Capitulo`, `Secuencia`, `Escena`, `Secuela`, `Beat`, `HiloNarrativo`, `PuntoDeGiro`.
 - **Estado** — lo que cambia escena a escena y hay que rastrear para no contradecirse: `EstadoPersonaje`, `EstadoDeConocimiento`, `UsoDeConocimiento`, `EstadoObjeto`, `Hecho`, `Siembra`, `Evento`, y los tres registros derivados `EstadoSiembra`, `EstadoHilo` y `RevelacionAmenaza`.
 
@@ -32,10 +32,30 @@ classDiagram
     +longitudObjetivo
     +povPorDefecto
     +tiempoVerbal
+    +dedicatoria
   }
   class Restriccion {
     +tipo
     +valor
+  }
+  class Encargo {
+    +destinatario
+    +ocasion
+    +quienRegala
+    +mensajeDedicatoria
+    +intensidad
+    +tono
+    +subgenero
+    +capitulos
+    +vetados
+  }
+  class ElementoPersonal {
+    +codigo
+    +tipo
+    +texto
+    +obligatorio
+    +origen
+    +cita
   }
   class Mundo {
     +nombre
@@ -203,6 +223,9 @@ classDiagram
   }
 
   Novela "1" --> "*" Restriccion : sujetaA
+  Novela "1" --> "0..1" Encargo : personalizadaPor
+  Encargo "1" --> "*" ElementoPersonal : aporta
+  Escena "*" --> "*" ElementoPersonal : integra
   Novela "1" --> "1" Mundo : ambientadaEn
   Novela "1" --> "*" Acto : contiene
   Novela "1" --> "*" Tema : explora
@@ -275,10 +298,19 @@ classDiagram
 ### Canon
 
 **Novela** — La obra completa y contenedor raíz de la ontología. Además del título y el género fija la **premisa** (la proposición causal que la obra demuestra), el **logline** (una frase con protagonista, objetivo y antagonismo), la **pregunta dramática** que el clímax responde, el subgénero dominante, el tipo de final, la longitud objetivo y los valores por defecto de punto de vista y tiempo verbal.
-`titulo` · `genero` · `subgeneroDominante` · `premisa` · `logline` · `preguntaDramatica` · `temaCentral` · `tipoFinal` · `longitudObjetivo` · `povPorDefecto` · `tiempoVerbal`
+Si la novela es un regalo, fija también la **dedicatoria** de la portada.
+`titulo` · `genero` · `subgeneroDominante` · `premisa` · `logline` · `preguntaDramatica` · `temaCentral` · `tipoFinal` · `longitudObjetivo` · `povPorDefecto` · `tiempoVerbal` · `dedicatoria`
 
 **Restricción** — Requisito no narrativo impuesto a la obra: público objetivo, presupuesto de palabras por acto o capítulo, política de contenido, obligaciones de continuidad con entregas anteriores.
 `tipo` · `valor`
+
+**Encargo** — Para quién es la novela y qué quiere quien la regala. El **destinatario** (nombre, edad, pronombres y rasgos) es el protagonista de la historia; la **intensidad** del terror tiene una edad mínima; los **vetados** son palabras o temas que no pueden aparecer. Lo fija el comprador en la entrevista y ningún agente lo inventa: de él se derivan las restricciones de la obra, y del destinatario sale el personaje protagonista con su nombre exacto. Una novela sin encargo es una novela sin personalizar.
+`destinatario` · `ocasion` · `quienRegala` · `mensajeDedicatoria` · `intensidad` · `tono` · `subgenero` · `capitulos` · `vetados`
+
+**ElementoPersonal** — Un rasgo, un recuerdo o un allegado (persona o mascota) del destinatario que la novela tiene que incorporar. Lleva un **código** estable (`REC1`, `ALL2`) por el que la escaleta dice en qué escenas se integra. `origen` distingue lo que el comprador dijo en la entrevista de lo extraído de un texto libre que aportó, y `cita` guarda el fragmento literal del que sale, para que ningún dato del regalo sea una invención.
+`codigo` · `tipo` · `texto` · `obligatorio` · `origen` · `cita`
+
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** El encargo entra en la ontología porque los agentes lo leen y producen entidades a partir de él (el protagonista, la dedicatoria, qué escena integra qué recuerdo), y una puerta no puede comprobar lo que el modelo no nombra. Se descartó guardarlo solo como restricciones sueltas: una restricción es un par tipo-valor y no puede decir que un recuerdo concreto tiene que aparecer en una escena concreta. Las cuatro decisiones de producto que lo condicionan (el destinatario es el protagonista, tres niveles de intensidad, el destinatario nunca muere, entrevista por CLI) están en [specs/spec3.md](../specs/spec3.md), 3.2. Afecta a [architecture.md](architecture.md) (el entrevistador y las tablas nuevas) y a [validators.md](validators.md) (comprobaciones deterministas del encargo).
 
 **Mundo** — La realidad del universo de la obra: geografía, historia, culturas y las leyes físicas o sociales que definen lo posible. Es canon duro: cambiarlo obliga a revisar todo lo escrito después.
 `nombre` · `geografia` · `historia` · `culturas` · `reglasFisicas`
@@ -402,7 +434,8 @@ Un hecho **no se modifica nunca**. Retirarlo del canon, cuando el autor acepta u
 
 ## Relaciones clave
 
-- **Novela** contiene Acto, Tema, Motivo e HiloNarrativo; define Amenaza; tiene un EstiloNarrativo y una LineaDeTiempo; está sujeta a Restricción
+- **Novela** contiene Acto, Tema, Motivo e HiloNarrativo; define Amenaza; tiene un EstiloNarrativo y una LineaDeTiempo; está sujeta a Restricción; puede estar personalizada por un Encargo
+- **Encargo** aporta ElementoPersonal; una Escena integra ElementoPersonal; el Personaje protagonista representa al destinatario del Encargo
 - **Mundo** rige con SistemaTecnologico y contiene Lugar
 - **LineaDeTiempo** registra Evento; un Evento puede estar dramatizado en una Escena
 - **Acto** contiene Capítulo y agrupa Secuencia → Escena → Beat

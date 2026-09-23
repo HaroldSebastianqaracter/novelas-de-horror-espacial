@@ -26,10 +26,11 @@ from typing import Annotated, Any, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError, model_validator
 
 import config
 from compartido import db
+from compartido.brief import Brief
 from compartido.grafo import lectura
 from compartido.tipos import TipoIntencion
 
@@ -48,10 +49,26 @@ class Error(BaseModel):
 
 
 class CrearNovela(BaseModel):
-    titulo: str = Field(min_length=1)
+    """Con `brief`, la novela es personalizada y sus restricciones salen de el (RF3-PER-01);
+    el titulo lo propone el arquitecto. Sin brief, es el payload de spec1 y el titulo es
+    obligatorio (RF3-PER-05)."""
+
+    titulo: str = ""
     genero: str = "terror_espacial"
     semilla_premisa: str = ""
     restricciones: dict[str, str] = Field(default_factory=dict[str, str])
+    brief: Brief | None = None
+    entrevista: dict[str, Any] | None = None
+
+    @model_validator(mode="after")
+    def _brief_completo_o_titulo(self) -> CrearNovela:
+        if self.brief is None:
+            if not self.titulo.strip():
+                raise ValueError("Sin brief, el titulo es obligatorio.")
+        else:
+            # Un brief con faltantes o contradicciones no llega al worker (RF3-BRF-04).
+            self.brief.validar_completo()
+        return self
 
 
 class PayloadRelanzar(BaseModel):

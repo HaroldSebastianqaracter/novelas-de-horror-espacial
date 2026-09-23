@@ -8,9 +8,12 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from compartido.tipos import como_lista
+
+if TYPE_CHECKING:
+    from compartido.brief import Brief
 
 
 def _fila(f: sqlite3.Row | None) -> dict[str, Any] | None:
@@ -394,3 +397,29 @@ def texto_capitulo(
         (novela_id, numero),
     ).fetchone()
     return "" if fila is None else str(fila["texto"])
+
+
+# --- Personalizacion (specs/spec3.md, 3.2) ---------------------------------------------------
+
+
+def brief(con: sqlite3.Connection, novela_id: int) -> Brief | None:
+    """El brief de la novela, o None si se creo sin personalizar (RF3-PER-05)."""
+    # Import aqui y no arriba: compartido.brief usa compartido.texto, que usa la
+    # normalizacion de este mismo paquete, y el import de modulo cerraria un ciclo.
+    from compartido.brief import Brief
+
+    fila = con.execute(
+        "SELECT contenido FROM brief WHERE novela_id = ?", (novela_id,)
+    ).fetchone()
+    return None if fila is None else Brief.model_validate_json(str(fila["contenido"]))
+
+
+def elementos_personales(
+    con: sqlite3.Connection, novela_id: int, *, solo_obligatorios: bool = False
+) -> list[dict[str, Any]]:
+    """Los rasgos, recuerdos y allegados del destinatario, en el orden del brief."""
+    return _filas(con.execute(
+        "SELECT id, codigo, tipo, texto, obligatorio, origen FROM elemento_personal "
+        "WHERE novela_id = ? AND (obligatorio = 1 OR ? = 0) ORDER BY id",
+        (novela_id, 1 if solo_obligatorios else 0),
+    ))

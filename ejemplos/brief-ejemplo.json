@@ -1,16 +1,33 @@
 {
   "tipo": "crear_novela",
   "payload": {
-    "titulo": "Cerro Quince",
-    "genero": "terror_espacial",
-    "semilla_premisa": "Una cuadrilla de mantenimiento llega a una estacion de reabastecimiento que lleva ocho meses sin responder.",
-    "restricciones": {
-      "longitud_objetivo_palabras": "9000",
-      "longitud_capitulo_palabras": "1500-3500",
-      "publico": "adulto",
-      "politica_contenido": "violencia explicita permitida, sin contenido sexual",
-      "pov_por_defecto": "tercera_limitada",
-      "tiempo_verbal": "pasado"
+    "brief": {
+      "destinatario": {
+        "nombre": "Marta Ibáñez",
+        "edad": 34,
+        "pronombres": "ella",
+        "rasgos": [
+          {"texto": "Ingeniera de telecomunicaciones que desmonta cualquier aparato para entenderlo"},
+          {"texto": "Terca: nunca deja un problema a medias"},
+          {"texto": "Se muerde el labio cuando algo no le cuadra"}
+        ]
+      },
+      "recuerdos": [
+        {"texto": "De niña pasaba los veranos en el faro de su abuelo en Cabo de Gata, contando los destellos para dormirse"},
+        {"texto": "Aprendió código morse con una linterna para hablar con su hermano de ventana a ventana"},
+        {"texto": "Colecciona postales de lugares a los que todavía no ha ido"}
+      ],
+      "allegados": [
+        {"nombre": "Nala", "relacion": "su perra", "rasgos": ["galga", "miedosa con los truenos"]},
+        {"nombre": "Andrés", "relacion": "su hermano", "rasgos": ["bromista", "vive lejos"]}
+      ],
+      "ocasion": "cumpleanos",
+      "quien_regala": "Andrés",
+      "mensaje_dedicatoria": "Para que sigas contando destellos cuando yo no esté cerca.",
+      "intensidad": "tension",
+      "tono": "emotivo",
+      "capitulos": 10,
+      "vetados": ["arañas"]
     }
   }
 }

@@ -339,6 +339,8 @@ stateDiagram-v2
 
 `Restriccion` no la escribe ningún agente: entra desde la intención y el arquitecto la lee.
 
+> Refinado por spec3, RF3-PER-01: una novela con brief deriva estas restricciones del brief en vez de recibirlas.
+
 **RF-PIPE-03** Planificación: el worker invoca en orden **arquitecto → constructor de mundo → diseñador de elenco → estructurador**, una vez cada uno. Cada uno recibe un paquete con la salida de los anteriores (RF-CTX-06) y devuelve un JSON que valida el `esquemas.py` de su tarea. La salida validada se escribe en el grafo **en una transacción por agente**. Un fallo de validación reintenta la llamada una vez con el error adjunto; el segundo fallo pasa la ejecución a `error`.
 
 **RF-PIPE-04** Salida obligatoria de cada agente de planificación, en términos de la ontología:
