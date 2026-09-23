@@ -319,6 +319,7 @@ def test_texto_descompuesto_y_apostrofos_tipograficos() -> None:
 
 @pytest.mark.parametrize(("destinatario", "prosa", "esperado"), [
     # Validador (segundo rechazo): marcas que no son las del castellano, en los dos sentidos.
+    # Algunos casos ya pasaban antes y quedan como guarda de regresion.
     ("João Prado", "Joao entra.", "[DESTINATARIO] entra."),
     ("Joao Prado", "João entra.", "[DESTINATARIO] entra."),
     ("Antonin Dvořák", "Dvorak entra.", "[DESTINATARIO] entra."),
@@ -343,6 +344,77 @@ def test_el_nombre_no_se_escapa_por_marcas_fronteras_ni_invisibles(
 ) -> None:
     s = obs.Seudonimizador(_brief_con(destinatario=destinatario, regala="Luis", allegado="Kiko"))
     assert s.texto(prosa) == esperado
+
+
+@pytest.mark.parametrize(("regala", "prosa", "esperado"), [
+    # Validador (tercer rechazo): la firma de quien regala es texto libre, con puntuacion.
+    ("Andrés, tu hermano", "Con cariño de Andrés.", "Con cariño de [QUIEN_REGALA]."),
+    ("Tus padres (Lucía y Andrés)", "Lucía y Andrés te quieren.",
+     "[QUIEN_REGALA] y [QUIEN_REGALA] te quieren."),
+    ("Andrés/Lucía", "Andrés llega.", "[QUIEN_REGALA] llega."),
+    ("Andrés.", "Andrés llega.", "[QUIEN_REGALA] llega."),
+    ("Ana‐Belén Soto", "Belén llega.", "[QUIEN_REGALA] llega."),
+    ("Ana–Belén Soto", "Belén llega.", "[QUIEN_REGALA] llega."),
+])
+def test_el_nombre_del_brief_se_trocea_por_cualquier_puntuacion(
+    regala: str, prosa: str, esperado: str
+) -> None:
+    s = obs.Seudonimizador(_brief_con(destinatario="Marta Ibáñez", regala=regala,
+                                      allegado="Kiko"))
+    assert s.texto(prosa) == esperado
+
+
+def test_lo_que_acompana_a_la_firma_no_se_sustituye_suelto() -> None:
+    s = obs.Seudonimizador(_brief_con(destinatario="Marta Ibáñez", regala="Andrés, tu hermano",
+                                      allegado="Kiko"))
+    assert s.texto("Tu hermano Andrés.") == "Tu hermano [QUIEN_REGALA]."
+
+
+@pytest.mark.parametrize(("destinatario", "prosa", "esperado"), [
+    # Marcas bidi en el brief, tal como llegan al pegar un nombre desde un contacto.
+    ("‎Marta Ibáñez‎", "Marta Ibáñez despierta. Marta grita.",
+     "[DESTINATARIO] despierta. [DESTINATARIO] grita."),
+    ("‪Marta Ibáñez‬", "Marta grita.", "[DESTINATARIO] grita."),
+    # Lo que no se ve partiendo el nombre en la prosa: bidi, CGJ, selector de variante, U+2062.
+    ("Marta Ibáñez", "Mar‎ta grita.", "[DESTINATARIO] grita."),
+    ("Marta Ibáñez", "Mar͏ta grita.", "[DESTINATARIO] grita."),
+    ("Marta Ibáñez", "Mar️ta grita.", "[DESTINATARIO] grita."),
+    ("Marta Ibáñez", "Mar⁢ta grita.", "[DESTINATARIO] grita."),
+    # Apostrofos que Unicode clasifica como letra.
+    ("Sean O'Hara", "OʼHara entra.", "[DESTINATARIO] entra."),
+    ("Sean OʼHara", "Hara entra.", "[DESTINATARIO] entra."),
+    # Un invisible o un cambio a mayuscula entre dos partes pegadas.
+    ("Marta Ibáñez", "Marta​Ibáñez entra.", "[DESTINATARIO][DESTINATARIO] entra."),
+    ("Marta Ibáñez", "MartaIbáñez entra.", "[DESTINATARIO][DESTINATARIO] entra."),
+    ("Marta Ibáñez", "regaloParaMarta entra.", "regaloPara[DESTINATARIO] entra."),
+    # Mayusculas matematicas y de tipo letra.
+    ("Marta Ibáñez", "\U0001d40carta y ℳarta.", "[DESTINATARIO] y [DESTINATARIO]."),
+])
+def test_ni_lo_que_no_se_ve_ni_las_letras_raras_dejan_pasar_el_nombre(
+    destinatario: str, prosa: str, esperado: str
+) -> None:
+    s = obs.Seudonimizador(_brief_con(destinatario=destinatario, regala="Luis", allegado="Kiko"))
+    assert s.texto(prosa) == esperado
+
+
+def test_un_caracter_que_pliega_a_varios_no_corrompe_la_salida() -> None:
+    s = obs.Seudonimizador(_brief_con(destinatario="Anna Pérez", regala="Luis",
+                                      allegado="Clara"))
+    assert s.texto("Ann℀lara llega.") == "[DESTINATARIO][ALLEGADO_1] llega."
+
+
+def test_dos_claves_con_la_misma_etiqueta_no_se_pisan() -> None:
+    s = obs.Seudonimizador(_brief_con(destinatario="Marta Ibáñez", regala="Luis",
+                                      allegado="Kiko"))
+    assert s.valor({"Marta": "alta", "Ibáñez": "baja"}) == {
+        "[DESTINATARIO]": "alta", "[DESTINATARIO] #2": "baja",
+    }
+
+
+def test_las_partes_de_un_allegado_tambien_se_sustituyen() -> None:
+    s = obs.Seudonimizador(_brief_con(destinatario="Marta Ibáñez", regala="Luis",
+                                      allegado="Kiko Soler"))
+    assert s.texto("Soler y Kiko.") == "[ALLEGADO_1] y [ALLEGADO_1]."
 
 
 def test_una_letra_pegada_sigue_haciendo_otra_palabra() -> None:
