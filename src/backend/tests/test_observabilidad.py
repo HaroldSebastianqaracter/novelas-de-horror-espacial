@@ -384,7 +384,8 @@ def test_lo_que_acompana_a_la_firma_no_se_sustituye_suelto() -> None:
     ("Sean O'Hara", "OʼHara entra.", "[DESTINATARIO] entra."),
     ("Sean OʼHara", "Hara entra.", "[DESTINATARIO] entra."),
     # Un invisible o un cambio a mayuscula entre dos partes pegadas.
-    ("Marta Ibáñez", "Marta​Ibáñez entra.", "[DESTINATARIO][DESTINATARIO] entra."),
+    # El invisible entre las dos se conserva: no es del nombre.
+    ("Marta Ibáñez", "Marta​Ibáñez entra.", "[DESTINATARIO]​[DESTINATARIO] entra."),
     ("Marta Ibáñez", "MartaIbáñez entra.", "[DESTINATARIO][DESTINATARIO] entra."),
     ("Marta Ibáñez", "regaloParaMarta entra.", "regaloPara[DESTINATARIO] entra."),
     # Mayusculas matematicas y de tipo letra.
@@ -395,6 +396,54 @@ def test_ni_lo_que_no_se_ve_ni_las_letras_raras_dejan_pasar_el_nombre(
 ) -> None:
     s = obs.Seudonimizador(_brief_con(destinatario=destinatario, regala="Luis", allegado="Kiko"))
     assert s.texto(prosa) == esperado
+
+
+@pytest.mark.parametrize(("destinatario", "prosa", "esperado"), [
+    # Validador (cuarto rechazo): la lista de la firma dejaba pasar nombres de pila reales.
+    ("Tia Soto", "Tia grita.", "[DESTINATARIO] grita."),
+    ("Una Ferrer", "Una grita.", "[DESTINATARIO] grita."),
+    ("Primo Vidal", "Primo grita.", "[DESTINATARIO] grita."),
+    ("Rosa Amigo", "Amigo grita.", "[DESTINATARIO] grita."),
+    # Un caracter de formato en el brief separa dos partes, o va dentro de una.
+    ("Marta​Ibáñez", "Marta grita. Ibáñez calla.", "[DESTINATARIO] grita. [DESTINATARIO] calla."),
+    ("Mar­ta Soto", "Marta grita.", "[DESTINATARIO] grita."),
+    # Mayusculas seguidas de una parte capitalizada.
+    ("Marta Ibáñez", "MARTAIbáñez grita.", "[DESTINATARIO][DESTINATARIO] grita."),
+    ("Marta Ibáñez", "regaloPARAMarta grita.", "regaloPARA[DESTINATARIO] grita."),
+    # Un simbolo que pliega a letras pegado al nombre, y un relleno dentro.
+    ("Marta Ibáñez", "Marta™ grita. №Marta.", "[DESTINATARIO]™ grita. №[DESTINATARIO]."),
+    ("Marta Ibáñez", "Marㅤta grita.", "[DESTINATARIO] grita."),
+    # El cierre de un aislamiento bidi no es del nombre.
+    ("Marta Ibáñez", "⁨Marta⁩ grita.", "⁨[DESTINATARIO]⁩ grita."),
+])
+def test_cuarta_revision_del_seudonimizador(destinatario: str, prosa: str, esperado: str) -> None:
+    s = obs.Seudonimizador(_brief_con(destinatario=destinatario, regala="Luis", allegado="Kiko"))
+    assert s.texto(prosa) == esperado
+
+
+@pytest.mark.parametrize(("regala", "prosa", "esperado"), [
+    # Lo que acompana a la firma, en minuscula, no se sustituye suelto.
+    ("Con todo mi cariño, Andrés", "Con todo el cariño, Andrés.",
+     "Con todo el cariño, [QUIEN_REGALA]."),
+    ("De parte de Andrés, feliz cumpleaños", "Feliz cumpleaños de parte de Andrés.",
+     "Feliz cumpleaños de parte de [QUIEN_REGALA]."),
+    # En mayuscula puede ser un nombre: se sustituye.
+    ("Tía Rosa", "Tía llega.", "[QUIEN_REGALA] llega."),
+])
+def test_la_firma_distingue_lo_que_acompana_de_un_nombre(
+    regala: str, prosa: str, esperado: str
+) -> None:
+    s = obs.Seudonimizador(_brief_con(destinatario="Marta Ibáñez", regala=regala,
+                                      allegado="Kiko"))
+    assert s.texto(prosa) == esperado
+
+
+def test_muchos_aciertos_no_se_funden_mal() -> None:
+    """Validador: la fusion de solapes era cuadratica; ahora cada tramo mira a sus vecinos."""
+    s = obs.Seudonimizador(_brief_con(destinatario="Marta Ibáñez", regala="Luis",
+                                      allegado="Kiko"))
+    texto = "Marta y Kiko miran a Luis. " * 3000
+    assert s.texto(texto) == "[DESTINATARIO] y [ALLEGADO_1] miran a [QUIEN_REGALA]. " * 3000
 
 
 def test_un_caracter_que_pliega_a_varios_no_corrompe_la_salida() -> None:

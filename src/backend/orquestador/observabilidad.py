@@ -15,6 +15,7 @@ fallo y lo deja en la traza como `langfuse_fallo`.
 
 from __future__ import annotations
 
+import bisect
 import hashlib
 import json
 import re
@@ -94,17 +95,34 @@ _ESPECIALES: dict[str, str] = {
     "ł": "l", "ø": "o", "đ": "d", "ħ": "h", "ı": "i", "ŀ": "l", "æ": "ae", "œ": "oe",
     "þ": "th", "ð": "d",
 }
-#: Palabras de un nombre o de una firma que sueltas no identifican a nadie: las particulas de
-#: un nombre compuesto («Maria de los Angeles» no convierte en etiqueta cada «los» del texto) y
-#: lo que acompana a un nombre en `quien_regala` («Andres, tu hermano»).
-_NO_IDENTIFICAN = frozenset({
+#: Rellenos que se ven como un hueco y Unicode clasifica como letra: se tratan como lo que no
+#: se ve.
+_RELLENOS = frozenset({"ᅟ", "ᅠ", "ㅤ", "ﾠ", "⠀"})
+#: Particulas de un nombre compuesto: «Maria de los Angeles» no convierte en etiqueta cada
+#: «los» del texto. Es la unica lista que se aplica a todos los nombres del brief.
+_PARTICULAS = frozenset({
     "de", "del", "la", "las", "los", "el", "y", "da", "das", "do", "dos", "di", "van", "von",
-    "der", "den", "le", "les", "tus", "mis", "sus", "con", "para", "por", "que", "una", "uno",
-    "unos", "unas", "todos", "todas", "tu", "mi", "su", "hermano", "hermana", "hermanos",
-    "hermanas", "padre", "madre", "padres", "abuelo", "abuela", "abuelos", "tio", "tia",
-    "tios", "primo", "prima", "primos", "hijo", "hija", "hijos", "amigo", "amiga", "amigos",
-    "amigas", "novio", "novia", "esposo", "esposa", "marido", "mujer", "familia", "querido",
-    "querida", "queridos",
+    "der", "den", "le",
+})
+#: Lo que acompana a un nombre en la firma de `quien_regala` («Andres, tu hermano», «con todo
+#: mi carino»). Solo cuenta escrito en minuscula: en mayuscula puede ser un nombre («Tia»,
+#: «Prima»), y sustituir de mas es el lado seguro.
+_ACOMPANAN_A_LA_FIRMA = frozenset({
+    "tus", "mis", "sus", "con", "para", "por", "que", "una", "uno", "unos", "unas", "les",
+    "todo", "toda", "todos", "todas", "mucho", "mucha", "muchos", "muchas", "tuyo", "tuya",
+    "tuyos", "tuyas", "nuestro", "nuestra", "nuestros", "nuestras", "vuestro", "vuestra",
+    "hermano", "hermana", "hermanos", "hermanas", "padre", "madre", "padres", "abuelo",
+    "abuela", "abuelos", "tio", "tia", "tios", "primo", "prima", "primos", "hijo", "hija",
+    "hijos", "amigo", "amiga", "amigos", "amigas", "novio", "novia", "esposo", "esposa",
+    "marido", "mujer", "familia", "querido", "querida", "queridos", "queridas", "carino",
+    "amor", "beso", "besos", "abrazo", "abrazos", "feliz", "felicidades", "cumpleanos",
+    "parte", "regalo", "siempre", "navidad", "aniversario", "boda",
+})
+#: Lo que abre una firma y se escribe en mayuscula solo por ir delante («Tus padres…»,
+#: «Con todo…»).
+_ENCABEZAN_LA_FIRMA = frozenset({
+    "tus", "mis", "sus", "con", "para", "por", "nuestro", "nuestra", "nuestros", "nuestras",
+    "vuestro", "vuestra",
 })
 #: Letras de un nombre del brief, con los apostrofos de dentro («o'hara») o sin ellos.
 _TOKEN_CON_APOSTROFO = re.compile(r"[^\W\d_]+(?:'[^\W\d_]+)*")
@@ -121,6 +139,8 @@ def _plegar_caracter(c: str) -> str:
     """Un caracter sin marcas y en minusculas; vacio si no se ve."""
     if c in _APOSTROFOS:
         return "'"
+    if c in _RELLENOS:
+        return ""
     # NFKD antes de bajar a minusculas: «𝐌» o «ℳ» no tienen minuscula hasta ser «M».
     base = unicodedata.normalize("NFKD", unicodedata.normalize("NFKD", c).casefold())
     return "".join(
@@ -129,41 +149,74 @@ def _plegar_caracter(c: str) -> str:
 
 
 def _plegar(texto: str) -> tuple[str, list[int], set[int]]:
-    """El texto plegado; para cada caracter plegado, su posicion en el original; y donde habia
-    un caracter de formato quitado, que puede separar dos palabras («Marta​Ibanez»).
+    """El texto plegado; para cada caracter plegado, su posicion en el original; y las
+    fronteras suaves, donde puede acabar una palabra aunque haya letras a los dos lados.
 
     Plegar el texto entero, y no solo el nombre, es lo que hace que cualquier marca casen en
-    los dos lados: «João» en el brief y «Joao» o «João» en la prosa, «Dvořák», «Ştefan».
+    los dos lados: «João» en el brief y «Joao» o «João» en la prosa, «Dvořák», «Ştefan». Una
+    frontera suave es un caracter de formato o un relleno quitado («Marta​Ibanez»), o un
+    simbolo que pliega a letras («™», «№»): separa, pero tambien puede estar dentro de un
+    nombre, y por eso no impide casarlo.
     """
     plegado: list[str] = []
     posiciones: list[int] = []
     suaves: set[int] = set()
-    formato_antes = False
+    suave_antes = False
     for i, c in enumerate(texto):
         trozo = _plegar_caracter(c)
         if not trozo:
-            formato_antes = formato_antes or unicodedata.category(c) == "Cf"
+            suave_antes = suave_antes or unicodedata.category(c) == "Cf" or c in _RELLENOS
             continue
-        if formato_antes:
+        simbolo = not unicodedata.category(c).startswith("L") and any(
+            x.isalpha() for x in trozo
+        )
+        if suave_antes or simbolo:
             suaves.add(len(plegado))
-            formato_antes = False
         for x in trozo:
             plegado.append(x)
             posiciones.append(i)
+        suave_antes = simbolo
     return "".join(plegado), posiciones, suaves
+
+
+def _partes_del_nombre(nombre: str, *, firma: bool) -> list[str]:
+    """Las partes de un nombre del brief que lo identifican, plegadas.
+
+    Se trocea por cualquier caracter que no sea letra, y tambien por una frontera suave; como
+    una frontera suave tambien puede ir dentro de una parte («Mar­ta» con guion blando), se
+    toman las dos lecturas. En la firma de `quien_regala`, lo que acompana al nombre no cuenta.
+    """
+    plegado, posiciones, suaves = _plegar(nombre)
+    primera_letra = next((k for k, x in enumerate(plegado) if x.isalpha()), -1)
+    cortes = sorted({0, len(plegado), *suaves})
+    tramos = [(0, len(plegado)), *zip(cortes, cortes[1:], strict=False)]
+    partes: list[str] = []
+    for desde, hasta in tramos:
+        for patron in (_TOKEN_CON_APOSTROFO, _TOKEN):
+            for m in patron.finditer(plegado, desde, hasta):
+                p = m.group()
+                if len(p) < 3 or p in _PARTICULAS:
+                    continue
+                if firma:
+                    mayuscula = nombre[posiciones[m.start()]].isupper()
+                    if p in _ACOMPANAN_A_LA_FIRMA and not mayuscula:
+                        continue
+                    if m.start() == primera_letra and p in _ENCABEZAN_LA_FIRMA:
+                        continue
+                partes.append(p)
+    return partes
 
 
 class Seudonimizador:
     """Sustituye los nombres del encargo por etiquetas antes de que salgan de la maquina.
 
     El destinatario, quien regala y cada allegado, completos y por partes de tres letras o mas
-    que identifiquen a alguien (ni particulas ni «tu hermano»). El nombre del brief se trocea
-    por cualquier caracter que no sea letra. Se compara sobre el texto plegado (sin marcas, sin
-    lo que no se ve, sin distinguir mayusculas) y como palabra completa: una letra pegada la
-    hace otra palabra, salvo que medie un caracter de formato o un cambio de minuscula a
-    mayuscula («regaloParaMarta»); un digito o un guion bajo no la hacen otra palabra. Tambien
-    en las claves de los diccionarios (`nivel_confianza` va por personaje). El mapa no se envia
-    nunca.
+    que no sean particulas; en la firma de quien regala, tampoco lo que acompana al nombre en
+    minuscula («tu hermano»). Se compara sobre el texto plegado (sin marcas, sin lo que no se
+    ve, sin distinguir mayusculas) y como palabra completa: una letra pegada la hace otra
+    palabra, salvo que medie una frontera suave o un paso a mayuscula («regaloParaMarta»,
+    «MARTAIbanez»); un digito o un guion bajo no la hacen otra palabra. Tambien en las claves
+    de los diccionarios (`nivel_confianza` va por personaje). El mapa no se envia nunca.
     """
 
     def __init__(self, brief: Brief | None) -> None:
@@ -182,13 +235,8 @@ class Seudonimizador:
         # allegado que comparta apellido.
         asignadas: dict[str, str] = {}
         for etiqueta, nombre in grupos:
-            plegado = _plegar(nombre)[0]
-            completo = " ".join(plegado.split())
-            # «O'Hara» entero antes que «Hara»: si no, la prosa deja «O'[X]».
-            partes = [
-                p for p in (*_TOKEN_CON_APOSTROFO.findall(plegado), *_TOKEN.findall(plegado))
-                if len(p) >= 3 and p not in _NO_IDENTIFICAN
-            ]
+            completo = " ".join(_plegar(nombre)[0].split())
+            partes = _partes_del_nombre(nombre, firma=etiqueta == "[QUIEN_REGALA]")
             for forma in (completo, *partes):
                 if forma:
                     asignadas.setdefault(forma, etiqueta)
@@ -206,7 +254,13 @@ class Seudonimizador:
             if not (plegado[k - 1].isalpha() and plegado[k].isalpha()):
                 return True
             antes, despues = posiciones[k - 1], posiciones[k]
-            return antes != despues and texto[antes].islower() and texto[despues].isupper()
+            if antes == despues or not texto[despues].isupper():
+                return False
+            if texto[antes].islower():
+                return True
+            # «MARTAIbanez»: la mayuscula que abre una palabra capitalizada.
+            siguiente = posiciones[k + 1] if k + 1 < len(plegado) else despues
+            return siguiente != despues and texto[siguiente].islower()
 
         # Varios espacios seguidos del texto casan con uno del nombre.
         tramos: list[tuple[int, int, str]] = []
@@ -222,26 +276,32 @@ class Seudonimizador:
         # En coordenadas del texto original, ganando el mas largo (las formas ya van de mas
         # larga a mas corta). Un tramo contenido en otro ya elegido sobra; dos que se solapan
         # solo en parte (un caracter que pliega a varios, «℀») se funden: descartar uno dejaria
-        # a la vista el trozo que no cubre el otro.
+        # a la vista el trozo que no cubre el otro. Los elegidos van ordenados y sin solapes,
+        # asi que cada tramo nuevo solo mira a sus vecinos.
         elegidos: list[tuple[int, int, str]] = []
+        inicios: list[int] = []
         for ini, fin, etiqueta in tramos:
             desde = posiciones[ini]
             hasta = posiciones[fin - 1] + 1
             # Las marcas sueltas que siguen al ultimo caracter (texto en NFD) son del nombre.
-            while hasta < len(texto) and _plegar_caracter(texto[hasta]) == "":
+            while hasta < len(texto) and unicodedata.category(texto[hasta]) in {"Mn", "Me"}:
                 hasta += 1
-            if any(d <= desde and hasta <= h for d, h, _ in elegidos):
+            j = bisect.bisect_right(inicios, desde)
+            if j > 0 and elegidos[j - 1][1] >= hasta:
                 continue
-            solapados = [t for t in elegidos if t[0] < hasta and desde < t[1]]
-            for t in solapados:
-                elegidos.remove(t)
-            partes = sorted([*solapados, (desde, hasta, etiqueta)])
-            elegidos.append((
+            lo = j - 1 if j > 0 and elegidos[j - 1][1] > desde else j
+            hi = j
+            while hi < len(elegidos) and elegidos[hi][0] < hasta:
+                hi += 1
+            partes = sorted([*elegidos[lo:hi], (desde, hasta, etiqueta)])
+            fundido = (
                 min(t[0] for t in partes), max(t[1] for t in partes),
                 "".join(dict.fromkeys(t[2] for t in partes)),
-            ))
+            )
+            elegidos[lo:hi] = [fundido]
+            inicios[lo:hi] = [fundido[0]]
         salida = texto
-        for desde, hasta, etiqueta in sorted(elegidos, reverse=True):
+        for desde, hasta, etiqueta in reversed(elegidos):
             salida = salida[:desde] + etiqueta + salida[hasta:]
         return unicodedata.normalize("NFC", salida)
 
