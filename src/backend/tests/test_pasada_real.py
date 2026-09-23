@@ -442,8 +442,9 @@ def test_la_skill_pide_las_presencias() -> None:
 
     skill = PuertoTerminal(skills_dir=raiz_repo() / ".claude" / "skills").ruta_skill(
         "extraccion").read_text(encoding="utf-8")
-    parrafos = [p for p in skill.split("\n\n") if p.startswith("**Presencias**")]
-    assert parrafos == [REGLA_DE_LA_PRESENCIA]
+    # La seccion entera, hasta la siguiente: un parrafo anadido que la contradiga tambien falla.
+    seccion = "**Presencias**" + skill.split("**Presencias**")[1].split("**Estados de objeto**")[0]
+    assert seccion.strip() == REGLA_DE_LA_PRESENCIA
     # La descripcion de la skill dice que tambien produce presencias.
     assert "presencias" in skill.split("---")[1]
 
@@ -456,10 +457,14 @@ def test_el_extractor_recibe_a_los_personajes_fuera_del_reparto() -> None:
 
     con, _ = nueva_bd()
     g = fabrica.novela_minima(con)
-    render = s_extraccion.paquete(
+    paquete = s_extraccion.paquete(
         con, g.novela_id, 2, {1: "texto", 2: "texto"}, presupuesto=Presupuesto(
             bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE),
-    ).render()
+    )
+    # Obligatoria, como el resto del inventario: un recorte no puede quitarla.
+    canon = next(b for b in paquete.bloques if b.nombre == "canon")
+    assert any(e.obligatorio for e in canon.elementos if e.texto.startswith("Otros personajes"))
+    render = paquete.render()
     linea = next(x for x in render.splitlines() if x.startswith("Otros personajes"))
     assert linea.endswith(": Reyes")
     reparto = next(x for x in render.splitlines() if x.startswith("Personajes: "))
