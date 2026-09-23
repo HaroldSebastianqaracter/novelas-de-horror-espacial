@@ -314,6 +314,32 @@ La «prueba pequeña» que pasó sin fallos corrió con el puerto falso y un sol
 
 **RF2-DEMO-01** *Requisito nuevo.* Los generadores de `compartido/puerto/demo.py` producen, con el puerto falso, al menos: cinco atributos por sujeto, una cadena de tres supersesiones, conocimiento adquirido y usado después, una sorpresa repetida (aviso), una muerte registrada con `condicion`, un objeto que se traslada con su traslado registrado, una siembra plantada, regada y pagada, y dos hilos que se abren y se cierran en orden inverso. El test de la demo comprueba que **cada comprobación de la puerta 3 se evaluó con datos**, no solo que la demo termina, y además rompe la demo a propósito, una comprobación cada vez, para ver que esa comprobación para el pipeline.
 
-**Pasada con Claude Code real** (fila 41 de spec1): queda preparada y **sin ejecutar**, porque cuesta dinero y requiere la aprobación del autor. **Evals del extractor** (fila 38): un capítulo anotado a mano y un puntuador determinista de cobertura (recall por tipo de registro, sin juez), probados con salidas sintéticas; la pasada contra el extractor real va marcada `agente` y no corre por defecto, por el mismo motivo. Está en `tests/test_evals_extraccion.py`, con el dataset en `tests/datos/`: planifica con el puerto falso, redacta el capítulo anotado y solo la extracción va a Claude Code.
+**Pasada con Claude Code real** (fila 41 de spec1): ejecutada el 23 de septiembre de 2026 con la aprobación del autor y parada por decisión suya en el capítulo 3 de 4. Detalle en «Resultado de la pasada real», al final de esta sección. **Evals del extractor** (fila 38): un capítulo anotado a mano y un puntuador determinista de cobertura (recall por tipo de registro, sin juez), probados con salidas sintéticas; la pasada contra el extractor real va marcada `agente` y no corre por defecto, por el mismo motivo. Está en `tests/test_evals_extraccion.py`, con el dataset en `tests/datos/`: planifica con el puerto falso, redacta el capítulo anotado y solo la extracción va a Claude Code.
 
 > **Decisión de la spec (23-09-2026).** Un registro esperado casa si coinciden escena y referencias y aparece en el registro una de las alternativas de cada grupo de claves; el nombre del atributo es libre, porque lo que se mide es si el hecho se capturó y no cómo se llamó. Los umbrales de la pasada real son 0,8 de recall total y 0,75 en hechos, que son lo que compara la puerta 3; con 15 registros esperados, cada uno que falta pesa casi siete puntos. Se descartó un juez que valorase la salida: la regla 3 de validators.md pide agotar lo determinista antes, y aquí basta. Se descartó también medir precisión: lo que el extractor inventa lo frenan el inventario cerrado de nombres y la puerta 3, y lo que se escapa sin registrar no lo ve ninguna otra pieza.
+
+#### Resultado de la pasada real (23-09-2026)
+
+La novela de `demo.py` (unas 9.000 palabras, que el estructurador real repartió en 4 capítulos), con Claude Code 2.1.274 y el modelo por defecto de la cuenta (Opus 5; el puerto no fija `--model`), sobre una base aparte (`src/backend/novela_real.db`, fuera del control de versiones). 26 llamadas y 11,57 $. La planificación, las puertas 1 y 2 y los **capítulos 1 y 2 completos** pasaron; el autor paró en el capítulo 3 para decidir con calma los huecos que quedan abiertos.
+
+Lo que encontró, en el orden en que apareció:
+
+| Qué | Tipo | Resolución |
+| --- | --- | --- |
+| El guardarraíl de herramientas contaba turnos, y una llamada legítima dio 3 | Error del código | RF2-PUERTO-10 corregido: solo `permission_denials` |
+| Un resumen de 205 palabras tiraba una extracción entera | Error del código | RF2-PIPE-20: se recorta |
+| Personajes presentes en la escena donde se fija el dato, dados por ignorantes | Diseño | RF2-PIPE-21, entrevistado |
+| Detalles menores inventados por el redactor paraban el pipeline | Diseño | RF2-PIPE-22, entrevistado: aviso |
+| El mismo dato reformulado, tomado por contradicción | Error del código | RF2-PIPE-23: el extractor ve el valor vigente |
+| Un hecho atribuido a una escena donde no está su cita | Error del modelo, corregible | RF2-PIPE-24: manda la cita |
+| Un uso resuelto con el último hecho del capítulo, no con el de su escena | Error del código | RF2-PIPE-25 |
+| Conocimiento que un personaje verosímilmente supo entre capítulos | Diseño | RF2-FALLO-07, entrevistado: `dar_por_sabido` |
+| Un objeto en una sala del anillo, «movido» desde el anillo | Diseño | RF2-PER-13 y RF2-PIPE-26, entrevistados |
+
+**Huecos abiertos**, los tres del capítulo 3, pendientes de decisión del autor (U2-4 a U2-6 en spec2-verification):
+
+- **Un hábito roto se registra como contradicción.** «Cuenta hasta cuatro y gira la llave» (capítulo 2) frente a «no contó hasta cuatro; cerró» (capítulo 3): romper el ritual es una señal dramática buscada, y el extractor la guardó como nuevo valor del hábito en vez de como suceso. Es la idea de mutabilidad de atributos guardada en `src/frontend/README.md`.
+- **El conocimiento de grupo.** Cada miembro de la cuadrilla que usa algo que la cuadrilla sabe abre una parada nueva; `dar_por_sabido` lo resuelve uno a uno.
+- **Los objetos de información.** Una orden de misión, casi seguro digital, «no se ha trasladado» del gantry a la consola: el modelo trata todo objeto como algo físico con una sola ubicación.
+
+Lo que la pasada enseña, más allá de cada caso: la puerta 3 es correcta sobre lo registrado, y casi todo lo que la hizo parar en falso vino de la distancia entre lo que la prosa dice y lo que el extractor registra. Cada regeneración de un capítulo trajo falsos positivos nuevos, porque la prosa cambia. El dataset de evals del extractor (fila 32 de spec2-verification) dio 15/15 sobre un capítulo corto y explícito; la pasada real muestra que ese número era optimista, como ya advertía.
