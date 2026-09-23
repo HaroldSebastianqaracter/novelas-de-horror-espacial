@@ -90,6 +90,24 @@ ninguna credencial ni la pasa al subproceso.
 | `NOVELAS_POLL_SEGUNDOS` | no | `2` | Cada cuánto sondea el worker |
 | `NOVELAS_TIMEOUT_AGENTE_SEGUNDOS` | no | `1800` | Máximo por llamada |
 | `NOVELAS_VECTORES` | no | `1` | `0` desactiva el índice |
+| `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` | no | — | Claves de Langfuse; sin ellas no se envía nada |
+| `LANGFUSE_HOST` | no | `https://cloud.langfuse.com` | Región UE de Langfuse Cloud |
+
+Todas se pueden poner en `src/backend/.env` (copia de `.env.example`, no se commitea), que se
+carga solo al arrancar; una variable fijada en la consola manda sobre la del fichero.
+
+## Langfuse
+
+Con las claves en `.env`, el worker envía cada novela a Langfuse al cerrar cada unidad de
+trabajo, con los nombres del encargo seudonimizados (spec3, 3.4). Para comprobar las claves o
+exportar una novela escrita antes:
+
+```bat
+.venv\Scripts\python.exe exportar_langfuse.py --comprobar
+.venv\Scripts\python.exe exportar_langfuse.py --novela 1
+```
+
+El comando abre la base en solo lectura: se puede lanzar con el worker en marcha.
 
 ## Cómo está cortado
 
@@ -97,7 +115,8 @@ ninguna credencial ni la pasa al subproceso.
 main.py          el borde HTTP. Solo lee; actuar es encolar una intencion
 worker.py        el unico proceso que escribe
 demo.py          lanzador de prueba
-config.py        unico sitio donde se lee el entorno
+exportar_langfuse.py  exporta novelas enteras a Langfuse, en solo lectura
+config.py        unico sitio donde se lee el entorno (y el .env)
 compartido/      infraestructura y canon: db, grafo, contexto, puerto, vectores
 orquestador/     que fase toca, puertas, politica de fallo, reversion
 tareas/          una carpeta por agente, con su esquema, su servicio y su puerta

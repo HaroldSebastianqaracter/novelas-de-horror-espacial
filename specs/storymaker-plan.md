@@ -35,7 +35,7 @@ En orden de dependencias: cada bloque se apoya en los anteriores.
 - [x] `docs/proceso/` con el formato del examen: spec inicial, trade-offs, explainers, diagramas, registro de iteraciones, red-team log y herramientas. Resume y enlaza los cuatro documentos de `docs/`; no los duplica.
 - [x] Registro de iteraciones al día: la auditoría, las fases de spec2, las evals del extractor y la primera llamada real.
 - [x] Por qué se reinició el proyecto el 21 de septiembre (petición de la profesora), en `spec-inicial.md` y en la entrada 0 del registro.
-- [ ] Hacer que el backend cargue un `.env` por su cuenta (hoy solo lee el entorno del proceso). Es un cambio en `src/` con su spec; encaja en el bloque 4, que trae las claves de Langfuse.
+- [x] El backend carga `src/backend/.env` por su cuenta, sin pisar el entorno (bloque 4, spec3 RF3-OBS-02).
 
 ### 2. Personalización del terror
 
@@ -74,12 +74,15 @@ Va pronto porque el tuning y el coste necesitan datos acumulados.
 
 El primer harness (historial anterior al 21 de septiembre) ya tenía Langfuse integrado. Conviene mirarlo antes de empezar: commits `2280640`, `cf3ba67` y `b87775d`. Deja una lección medida: Langfuse declaraba menos de la cuarta parte del coste real porque solo anotaba a los subagentes. Aquí el coste se registra desde el puerto, llamada a llamada.
 
-- [ ] Una traza por novela, agrupada en una sesión por novela que incluya la entrevista y las regeneraciones.
-- [ ] Un span por rol y por tool, con nombre identificable.
-- [ ] Tokens, coste y latencia por llamada, capítulo y novela, desde el puerto (el CLI ya devuelve `usage` y `total_cost_usd`).
-- [ ] Todos los validadores como scores, a partir de `resultado_puerta`.
-- [ ] Las `SKILL.md` registradas como **prompts versionados**, y cada llamada enlazada a su versión.
-- [ ] Claves solo en `.env`, con su entrada en `.env.example`.
+Requisitos en [spec3.md](spec3.md), 3.4; verificación en [spec3-verification.md](spec3-verification.md), filas 39 a 47. Langfuse Cloud (UE), con el encargo seudonimizado; envía el worker al cerrar cada unidad y `exportar_langfuse.py` exporta novelas enteras.
+
+- [x] Una **sesión por novela** con una traza por unidad (entrevista, planificación, cada capítulo, cierre). Se cambió «una traza por novela» porque una novela cruza horas y reinicios; está justificado en la spec.
+- [x] Una generación por llamada con su rol (planner, writer, editor, extractor) y un span por evaluación de puerta.
+- [x] Tokens, coste, turnos, modelo y latencia por llamada, desde el puerto; una llamada sin coste sale como aviso, nunca como gratis.
+- [x] Todos los validadores como scores: por puerta, sus recuentos y cada comprobación que falla o avisa.
+- [x] Las `SKILL.md` como **prompts versionados** por la huella de su texto, y cada llamada enlazada a su versión.
+- [x] Claves solo en `.env`, con su entrada en `.env.example`.
+- [ ] **El autor pone las claves** en `src/backend/.env` (nunca en el chat) y se comprueba con `python exportar_langfuse.py --comprobar` y `--novela 1` (fila 47).
 
 ### 5. Guardrails
 

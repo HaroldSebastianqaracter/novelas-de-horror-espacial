@@ -14,7 +14,7 @@ Versión 0.1 · 23 de septiembre de 2026
 | --- | --- | --- |
 | 2. Personalización del terror | [3.2](#32-bloque-2--personalización-del-terror) | Escrita |
 | 3. Huecos de la story bible | [3.3](#33-bloque-3--huecos-de-la-story-bible) | Escrita |
-| 4. Observabilidad con Langfuse | 3.4 | Pendiente |
+| 4. Observabilidad con Langfuse | [3.4](#34-bloque-4--observabilidad-con-langfuse) | Escrita |
 | 5. Guardrails | 3.5 | Pendiente |
 | 6. Validadores que faltan | 3.6 | Pendiente |
 | 7. Lectura | 3.7 | Pendiente |
@@ -301,6 +301,88 @@ Como `coherencia_temporal`, solo compara eventos **dramatizados fuera de una ana
 - Regenerar los capítulos de un hecho cambiado, y la página de novedades (bloque 8).
 - Generar el fichero de Lean desde la cronología y las edades (bloque 9).
 - La lectura en HTML y PDF de una versión (bloque 7).
+
+---
+
+## 3.4 Bloque 4 — Observabilidad con Langfuse
+
+Cada llamada a un agente ya queda en `llamada_modelo` con su entrada, su salida, sus tokens y el coste que declara Claude Code, y cada puerta deja su veredicto en `resultado_puerta`. Este bloque lleva esos datos a Langfuse, para ver una novela entera, su coste y sus validadores en un solo sitio, y para comparar versiones de las skills cuando llegue la iteración de tuning.
+
+> **Decisión entrevistada, 23 de septiembre de 2026.** Tres decisiones:
+>
+> 1. **Langfuse Cloud, región UE.** Se descartaron el autoalojado con Docker (hay que levantarlo y mantenerlo, también en la demo) y reutilizar otro proyecto.
+> 2. **Se envía todo, con el encargo seudonimizado.** Entradas y salidas de cada llamada, pero el nombre del destinatario, los allegados y quien regala se sustituyen por etiquetas antes de salir de la máquina. Se descartaron enviar solo métricas (en Langfuse no se podría leer qué recibió cada agente) y enviarlo todo tal cual (datos personales reales a un tercero).
+> 3. **Envía el worker al cerrar cada unidad de trabajo**, y un comando exporta novelas enteras. Se descartaron enviar solo a mano (hay que acordarse) y enviar cada llamada en directo (mete la red en el camino del pipeline).
+
+> **Lección del primer harness.** Langfuse declaraba menos de la cuarta parte del coste real, porque solo anotaba lo que se le contaba desde fuera (commit `2280640`). Otros dos fallos de entonces: un modelo sin precio que salía gratis (`cf3ba67`) e identificadores que chocaban entre novelas (`b87775d`). Aquí la fuente es la base, el coste es el que declara el puerto llamada a llamada, y los identificadores salen de las filas de la base.
+
+```mermaid
+graph LR
+  P["Puerto<br/>(cada llamada)"] --> L["llamada_modelo<br/>entrada, salida, tokens, coste"]
+  G["Puertas 1 a 5"] --> R["resultado_puerta"]
+  E["Entrevista"] --> T["entrevista<br/>(métricas de sus llamadas)"]
+  L & R & T --> X["Exportador<br/>(worker, al cerrar una unidad)"]
+  X -- "seudonimiza el encargo" --> S["[DESTINATARIO], [ALLEGADO_1]…"]
+  S --> LF["Langfuse Cloud (UE)<br/>sesión = novela"]
+```
+
+### Configuración
+
+**RF3-OBS-01 — Claves.** `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` y `LANGFUSE_HOST` (por defecto `https://cloud.langfuse.com`, la región UE). Sin las dos claves, el exportador está desactivado y nada más cambia: el pipeline, los tests y la demo corren igual. Con el puerto falso tampoco se exporta, aunque haya claves: una demo o un test no gasta nada y solo ensuciaría el proyecto del autor. Las claves solo viven en `src/backend/.env`, que no se commitea; `.env.example` lleva las variables vacías.
+
+**RF3-OBS-02 — El `.env` se carga solo.** `config.py` lee `src/backend/.env` si existe, antes de leer el entorno. Una variable ya fijada en el entorno del proceso manda sobre la del fichero. Cierra el punto pendiente del bloque 1 del plan.
+
+### Qué se envía
+
+**RF3-OBS-03 — La base es la única fuente.** El exportador lee `llamada_modelo` (solo llamadas terminadas), `resultado_puerta` y `entrevista`, y no depende de nada que el pipeline recuerde en memoria. El coste de cada llamada es el `total_cost_usd` que devolvió Claude Code. Una llamada terminada sin coste se envía con nivel `WARNING` y la marca `coste_desconocido`: parecer gratis es peor que no contarlo.
+
+**RF3-OBS-04 — Estructura.**
+
+| En Langfuse | Qué es | Identificador |
+| --- | --- | --- |
+| Sesión | La novela entera | `storymaker-novela-<clave>` |
+| Traza | Una unidad de trabajo: `entrevista`, `planificacion`, `capitulo-<n>` o `cierre` (la puerta 5), con la fecha de su primera fila en la base | Derivado de la clave y la unidad |
+| Generación | Una llamada a un agente, con su rol (planner, writer, editor, extractor o entrevistador), intento, estado, turnos, modelo, tokens, coste y latencia | Derivado de la fila de `llamada_modelo` |
+| Span | Una evaluación de puerta, con sus conflictos | Derivado de la fila de `resultado_puerta` |
+| Score | Los validadores (RF3-OBS-05) | Derivado de la fila y del nombre del score |
+
+Los identificadores son UUID deterministas (versión 5) de la **clave** de la novela y de la fila de origen: reenviar lo mismo actualiza, no duplica. La clave es el id de la novela más una huella de su fecha de creación, porque cada base (`novela.db`, `novela_real.db`, las temporales) tiene su novela 1, y con el id solo se pisarían. El sobre de cada evento lleva un identificador nuevo en cada envío, para que Langfuse no descarte como repetida una actualización. Las llamadas de la entrevista solo guardan métricas en la transcripción, así que en Langfuse van sin texto.
+
+> **Decisión de la spec.** El plan decía «una traza por novela». Se usa **una sesión por novela y una traza por unidad**: una novela dura horas, cruza reinicios del worker y suma cientos de llamadas, y una sola traza así no se puede leer. La sesión es la vista de la novela entera; la traza, la de un capítulo.
+
+**RF3-OBS-05 — Los validadores como scores.** Por cada evaluación de puerta:
+
+- `puerta_<n>`, booleano: 1 si no falla.
+- `puerta_<n>_bloqueantes` y `puerta_<n>_avisos`, numéricos.
+- Por cada comprobación que falla o avisa, un score booleano a 0 con su nombre (`continuidad_factual`, `dia_contra_orden`…), para poder filtrar por comprobación.
+
+**RF3-OBS-06 — Las skills como prompts versionados.** Cada skill es un prompt de Langfuse llamado `storymaker-<agente>`. Su versión se identifica por la huella SHA-256 del texto que recibió el agente (etiqueta `sha-<12 primeros>`), que es el `sistema` guardado en la propia llamada. La primera vez que aparece una huella se crea la versión, y cada generación enlaza la suya. Cambiar una skill produce una versión nueva sin que nadie tenga que registrarla.
+
+**RF3-OBS-07 — Seudonimización (RGPD).** Antes de salir de la máquina, todo texto que se envía (entradas, salidas, metadatos y también las **claves** de los diccionarios, porque `nivel_confianza` va por personaje) sustituye, como palabra completa y sin distinguir mayúsculas, con las tildes ignoradas en los dos lados (el brief puede decir «Ramon» y la prosa «Ramón», o al revés), con el texto normalizado a NFC y con los apóstrofos rectos y tipográficos como iguales:
+
+| Dato del brief | Etiqueta |
+| --- | --- |
+| Nombre del destinatario, completo y cada una de sus partes de tres letras o más que no sean partículas («de los» de «María de los Ángeles» no se sustituye suelto) | `[DESTINATARIO]` |
+| Nombre de cada allegado | `[ALLEGADO_1]`, `[ALLEGADO_2]`… |
+| Quien regala, completo y por partes | `[QUIEN_REGALA]` |
+
+El mapa de sustitución no sale nunca de la máquina. Una novela sin brief no tiene nada que sustituir.
+
+> **Decisión de la spec.** Los rasgos y los recuerdos se envían tal cual. Son la materia que hay que poder leer para depurar la personalización, y sin los nombres no identifican a nadie por sí solos. Queda como riesgo aceptado (U3-3): un recuerdo muy concreto («el faro de su abuelo en Cabo de Gata») puede identificar a alguien combinado con otros datos.
+
+### Cuándo se envía
+
+**RF3-OBS-08 — El worker, al cerrar una unidad.** El worker exporta lo nuevo de la novela al terminar la planificación, la escaleta, cada capítulo, al abrir una parada y al completar la novela. Envía dentro de su proceso, con un tiempo máximo por petición. Lo enviado queda en `langfuse_envio` (tabla, fila; migración 008), que solo escribe el worker, y se envía una sola vez. Si Langfuse falla o rechaza parte del lote, se emite el evento `langfuse_fallo` en la traza, no se marca nada de ese lote y se reintenta en el siguiente envío. Un fallo de Langfuse nunca para ni revierte el pipeline. Sí puede retrasarlo un poco: con Langfuse caído, cada envío espera como mucho el tiempo máximo por operación (5 segundos para conectar, 10 para el resto) antes de rendirse. El latido del cerrojo va en su propio hilo y no se ve afectado.
+
+**RF3-OBS-09 — El comando.** `python exportar_langfuse.py --novela <id>` (o `--todas`) exporta una novela entera desde la base, por ejemplo la de la pasada real. Abre la base en solo lectura y no marca nada: como los identificadores son deterministas, repetirlo no duplica. `--comprobar` hace una petición mínima y dice si las claves y el host funcionan.
+
+**RF3-OBS-10 — El modelo de cada llamada.** El puerto guarda también `modelUsage` en los metadatos de la llamada, que es donde Claude Code dice qué modelo contestó y cuánto costó cada uno. La generación lleva ese modelo.
+
+### Lo que el bloque 4 deja para después
+
+- Enviar el audit log del policy engine (bloque 5) y las evals (bloque 10) como scores y datasets.
+- Comparar versiones de prompts en la iteración de tuning, que es donde se usa lo que este bloque registra.
+- El diagnóstico del coste del extractor (spec3, RF3-PAS-01) se lee en estas trazas: turnos y coste por llamada.
 
 ---
 

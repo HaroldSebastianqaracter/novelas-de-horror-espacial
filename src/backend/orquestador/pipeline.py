@@ -109,6 +109,8 @@ class Contexto:
     vigilar: Callable[[], None] | None = None
     #: Criterios de oficio incumplidos, que vuelven al redactor en el reintento.
     eventos_criterios: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
+    #: Exportador a Langfuse (spec3, RF3-OBS-08), o None si no hay claves.
+    exportador: Any | None = None
 
     @property
     def cfg_max_intentos(self) -> int:
@@ -640,6 +642,23 @@ def _indexar(ctx: Contexto, numero: int) -> None:
 # --- Recorrido completo -------------------------------------------------------------------------
 
 
+def exportar_a_langfuse(ctx: Contexto) -> None:
+    """Envia a Langfuse lo nuevo de la novela (RF3-OBS-08). Nunca lanza.
+
+    Un fallo de Langfuse no para, ni revierte, ni cambia el estado de nada: queda en la traza
+    como `langfuse_fallo` y lo no enviado se reintenta en el siguiente envio.
+    """
+    if ctx.exportador is None:
+        return
+    try:
+        ctx.exportador.exportar(ctx.con, ctx.novela_id)
+    except Exception as exc:  # el exportador es prescindible, pero se avisa
+        try:
+            emitir_traza(ctx, "langfuse_fallo", error=f"{type(exc).__name__}: {exc}"[:500])
+        except Exception:  # ni siquiera la traza: el pipeline sigue
+            log.warning("No se pudo anotar el fallo de Langfuse", exc_info=True)
+
+
 def avanzar(ctx: Contexto) -> str:
     """Lleva la ejecucion tan lejos como pueda desde donde este. Devuelve su estado final.
 
@@ -647,16 +666,28 @@ def avanzar(ctx: Contexto) -> str:
     planificacion que faltan, puerta 1 no vigente, escaleta ausente, puerta 2 no vigente,
     capitulos pendientes y puerta 5, en ese orden. El estado puede mentir tras una parada o una
     caida; el grafo, con la vigencia de cada puerta, no.
+
+    Al cerrar cada unidad (planificacion, escaleta, capitulo) y al salir por cualquier via,
+    envia a Langfuse lo nuevo (RF3-OBS-08).
     """
+    try:
+        return _avanzar(ctx)
+    finally:
+        exportar_a_langfuse(ctx)
+
+
+def _avanzar(ctx: Contexto) -> str:
     try:
         nid = ctx.novela_id
         if _fase_pendiente_de_planificacion(ctx) or not vigencia.puerta_vigente(ctx.con, nid, 1):
             planificar(ctx)
+            exportar_a_langfuse(ctx)
 
         if lectura.total_capitulos(ctx.con, nid) == 0 or not vigencia.puerta_vigente(
             ctx.con, nid, 2
         ):
             escaletar(ctx)
+            exportar_a_langfuse(ctx)
 
         _asegurar_activa(ctx, "arrancar_generacion")
 
@@ -664,6 +695,7 @@ def avanzar(ctx: Contexto) -> str:
         siguiente = lectura.ultimo_capitulo_completado(ctx.con, ctx.novela_id) + 1
         while siguiente <= total:
             generar_capitulo(ctx, siguiente)
+            exportar_a_langfuse(ctx)
             siguiente = lectura.ultimo_capitulo_completado(ctx.con, ctx.novela_id) + 1
 
         with transaccion(ctx.con):

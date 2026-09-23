@@ -42,6 +42,8 @@ Un párrafo por concepto del curso aplicado en el proyecto: qué es, en una fras
 
 **Evals con golden set.** Medir un agente contra un conjunto de referencia con resultado conocido. Aquí el extractor se mide contra un capítulo anotado a mano con un puntuador determinista de recall: 15 de 15 con Claude Code real.
 
+**Observabilidad con Langfuse.** Ver cada llamada, su coste y cada validador de una ejecución larga en un solo sitio. Aquí la fuente es la base y no un registro aparte: el exportador (`orquestador/observabilidad.py`) lee `llamada_modelo` y `resultado_puerta` y los manda como generaciones, spans y scores, con una sesión por novela e identificadores deterministas, para que reenviar no duplique. El coste es el que declara Claude Code en cada llamada, y los nombres del encargo se seudonimizan antes de salir. La lección viene del primer harness, donde Langfuse declaraba menos de la cuarta parte del coste real.
+
 ## Pendientes para la entrega
 
-Se escriben cuando se apliquen, con el mismo formato: **observabilidad con Langfuse**, **hooks** de validación y de policy, **guardrail de palabras prohibidas**, **validación visual con browser MCP**, **verificación formal con Lean 4**, **especificación con TLA+ y TLC**, y **revisión humana** frente a LLM-as-judge.
+Se escriben cuando se apliquen, con el mismo formato: **hooks** de validación y de policy, **guardrail de palabras prohibidas**, **validación visual con browser MCP**, **verificación formal con Lean 4**, **especificación con TLA+ y TLC**, y **revisión humana** frente a LLM-as-judge.

@@ -310,8 +310,10 @@ class PuertoTerminal:
                 resultado_txt = str(sobre.get("result", "") or "")
                 metadatos = {
                     k: sobre.get(k)
+                    # `modelUsage`: que modelo contesto y cuanto costo cada uno (RF3-OBS-10).
                     for k in ("subtype", "stop_reason", "num_turns", "total_cost_usd",
-                              "session_id", "permission_denials", "usage", "terminal_reason")
+                              "session_id", "permission_denials", "usage", "modelUsage",
+                              "terminal_reason")
                     if k in sobre
                 }
 

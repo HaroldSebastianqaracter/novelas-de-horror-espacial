@@ -58,7 +58,7 @@ La máquina de estados que implementa el código (`orquestador/estados.py`) est�
 
 ## 3. Esquema SQLite (núcleo de la story bible)
 
-La base tiene cincuenta y siete tablas y ocho vistas; esto es el núcleo que consultan las puertas. El inventario completo por grupos está en [architecture.md](../architecture.md), «Persistencia», y el DDL en `src/backend/compartido/esquema.sql` más las migraciones de `compartido/migraciones/`.
+La base tiene cincuenta y nueve tablas y ocho vistas; esto es el núcleo que consultan las puertas. El inventario completo por grupos está en [architecture.md](../architecture.md), «Persistencia», y el DDL en `src/backend/compartido/esquema.sql` más las migraciones de `compartido/migraciones/`.
 
 ```mermaid
 erDiagram

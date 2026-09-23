@@ -9,6 +9,31 @@ from typing import Literal
 
 PREFIJO = "NOVELAS_"
 
+#: El `.env` del backend (spec3, RF3-OBS-02). No se commitea: guarda las claves de Langfuse.
+RUTA_DOTENV = Path(__file__).resolve().parent / ".env"
+
+#: Region UE de Langfuse Cloud (decision entrevistada, spec3 3.4).
+LANGFUSE_HOST_POR_DEFECTO = "https://cloud.langfuse.com"
+
+
+def cargar_dotenv(ruta: Path = RUTA_DOTENV) -> None:
+    """Lleva al entorno las variables de `ruta`, sin pisar las que ya estan fijadas.
+
+    Formato minimo de `.env`: `NOMBRE=valor` por linea, comentarios con `#` y comillas
+    opcionales. Se descarto depender de python-dotenv para veinte lineas.
+    """
+    if not ruta.is_file():
+        return
+    for linea in ruta.read_text(encoding="utf-8").splitlines():
+        linea = linea.strip()
+        if not linea or linea.startswith("#") or "=" not in linea:
+            continue
+        nombre, valor = (parte.strip() for parte in linea.split("=", 1))
+        if len(valor) >= 2 and valor[0] == valor[-1] and valor[0] in "\"'":
+            valor = valor[1:-1]
+        if nombre:
+            os.environ.setdefault(nombre, valor)
+
 
 def _env(nombre: str, defecto: str | None = None) -> str | None:
     return os.environ.get(PREFIJO + nombre, defecto)
@@ -138,6 +163,14 @@ class Config:
     embedding_modelo: str
     vectores_activos: bool
     presupuesto_bloques: dict[str, int] = field(default_factory=lambda: dict(PRESUPUESTO_BLOQUES))
+    #: Langfuse (spec3, RF3-OBS-01). Sin las dos claves, el exportador esta desactivado.
+    langfuse_public_key: str | None = None
+    langfuse_secret_key: str | None = field(default=None, repr=False)
+    langfuse_host: str = LANGFUSE_HOST_POR_DEFECTO
+
+    @property
+    def langfuse_activo(self) -> bool:
+        return bool(self.langfuse_public_key and self.langfuse_secret_key)
 
     @property
     def presupuesto_paquete(self) -> int:
@@ -152,6 +185,7 @@ def raiz_repo() -> Path:
 
 def cargar() -> Config:
     """Lee el entorno y devuelve la configuracion. Lanza ConfiguracionInvalida si falta algo."""
+    cargar_dotenv()
     db_bruto = _env("DB_PATH")
     if not db_bruto:
         raise ConfiguracionInvalida(
@@ -186,4 +220,8 @@ def cargar() -> Config:
         embedding_modelo=_env("EMBEDDING_MODELO", MODELO_EMBEDDING_PREFERIDO)
         or MODELO_EMBEDDING_PREFERIDO,
         vectores_activos=_env_bool("VECTORES", True),
+        # Sin prefijo: son los nombres que documenta Langfuse, y asi se reconocen en el .env.
+        langfuse_public_key=os.environ.get("LANGFUSE_PUBLIC_KEY") or None,
+        langfuse_secret_key=os.environ.get("LANGFUSE_SECRET_KEY") or None,
+        langfuse_host=(os.environ.get("LANGFUSE_HOST") or LANGFUSE_HOST_POR_DEFECTO).rstrip("/"),
     )

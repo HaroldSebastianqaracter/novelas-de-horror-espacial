@@ -24,7 +24,7 @@ from compartido.grafo import emitir_evento, insertar, lectura
 from compartido.puerto import construir as construir_puerto
 from compartido.tipos import como_dict
 from compartido.vectores import Indice
-from orquestador import cola, estados, fallo, pipeline, vigencia
+from orquestador import cola, estados, fallo, observabilidad, pipeline, vigencia
 
 log = logging.getLogger("worker")
 
@@ -39,6 +39,8 @@ class Worker:
         # La unica escritura antes del cerrojo: la tabla del cerrojo vive en el esquema.
         db.crear_esquema(self.con)
         self.puerto = construir_puerto(cfg, self.con)
+        # Langfuse (spec3, RF3-OBS-08): None sin claves, y entonces nada cambia.
+        self.exportador = observabilidad.exportador_desde(cfg)
         self._indice: Indice | None = None
         self.latido: cola.Latido | None = None
         self.parar = False
@@ -421,7 +423,7 @@ class Worker:
         self._novela_en_curso = novela_id
         ctx = pipeline.Contexto(
             con=self.con, puerto=self.puerto, cfg=self.cfg, novela_id=novela_id,
-            indice=self.indice, vigilar=self.vigilar,
+            indice=self.indice, vigilar=self.vigilar, exportador=self.exportador,
         )
         try:
             final = pipeline.avanzar(ctx)

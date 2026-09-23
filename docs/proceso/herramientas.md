@@ -29,6 +29,7 @@ Una por agente del pipeline. El puerto lee la `SKILL.md` y se la entrega a Claud
 | `writing-for-agents` | Skill (usuario) | `~/.claude/skills/` | Guía para escribir documentos que consume un agente | Aplicada a `validador-de-codigo` y a `CLAUDE.md` |
 | `find-skills` | Skill (usuario) | `~/.claude/skills/` | Buscar skills del ecosistema para una tarea | En la auditoría del 23 de septiembre encontró candidatas para Python, SQLite y RAG (`python-code-review`, `sqlite-database-expert`, `rag-eval`). **No se instaló ninguna**: el control de permisos bloqueó instalar código de terceros sin verificar |
 | `grillme` | Skill (usuario) | `~/.claude/skills/` | Entrevista corta antes de decidir en `docs/` | Las decisiones marcadas como «entrevistadas» en los documentos |
+| Langfuse Cloud (UE) | Servicio de observabilidad | `orquestador/observabilidad.py` y `exportar_langfuse.py` | Ver cada llamada, su coste, sus turnos y cada validador de una novela, y versionar las skills como prompts | Bloque 4 (spec3, 3.4). Se usa su API HTTP con `httpx`, sin el SDK. Pendiente de que el autor ponga sus claves en `src/backend/.env` |
 
 ## Comandos del proyecto (`.claude/commands/`)
 
