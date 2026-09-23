@@ -173,7 +173,7 @@ El bloque del capítulo anterior, como ya pedía spec1, **se sustituye por su re
 | Bloque | Obligatorio | Opcional, de más a menos relevante |
 | --- | --- | --- |
 | Canon | Los personajes que son POV de alguna escena del capítulo y los lugares de sus escenas | El resto del reparto por número de apariciones, la amenaza, los sistemas técnicos, los objetos y las facciones |
-| Hechos | Todos los hechos vigentes, establecidos antes del capítulo, de los personajes del reparto y de los lugares de sus escenas | Los hechos de amenaza, mundo y novela, del más reciente al más antiguo |
+| Hechos | Todos los hechos vigentes, establecidos antes del capítulo, de los personajes del reparto y de los lugares de sus escenas | Los hechos de amenaza, mundo y novela, del más reciente al más antiguo. Detrás, los de los objetos del capítulo y las facciones del reparto, y al final los de los personajes que ya salieron sin estar en el reparto (spec3, RF3-PAS-10) |
 | Conocimiento | La última postura de cada personaje del reparto sobre cada hecho vigente | — |
 
 Un hecho sustituido por otro vigente (`supersede_a`) no entra: el agente ve el valor actual, no la historia.

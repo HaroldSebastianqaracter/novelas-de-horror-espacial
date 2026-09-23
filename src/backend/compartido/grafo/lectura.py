@@ -279,11 +279,12 @@ def hechos_del_reparto(
     """Hechos vigentes que este capitulo necesita, marcados como obligatorios u opcionales.
 
     Sin limite de filas (RF2-CTX-11). Obligatorios: los de los personajes del reparto y los de
-    los lugares de sus escenas. Opcionales, del mas reciente al mas antiguo, que es el orden en
-    que se recortan desde el final: los de amenaza, mundo y novela, y (spec3, RF3-PAS-10) los
-    de los objetos del capitulo, las facciones del reparto y los personajes que ya salieron sin
-    estar en este reparto, que el redactor puede traer. Solo los establecidos antes de este
-    capitulo y no sustituidos por otro.
+    los lugares de sus escenas. Los opcionales se recortan desde el final, asi que van por
+    prioridad y, dentro de cada una, del mas reciente al mas antiguo (spec3, RF3-PAS-10):
+    primero los de amenaza, mundo y novela, que son los de las cuentas; despues los de los
+    objetos del capitulo y las facciones del reparto; y al final los de los personajes que ya
+    salieron sin estar en este reparto, que el redactor puede traer o no. Solo los establecidos
+    antes de este capitulo y no sustituidos por otro.
     """
     return _filas(con.execute(
         _REPARTO_Y_LUGARES + f"""
@@ -320,6 +321,10 @@ def hechos_del_reparto(
            OR (sujeto_tipo = 'personaje' AND sujeto_id IN (SELECT personaje_id FROM vistos))
         ORDER BY obligatorio DESC,
                  CASE WHEN obligatorio = 1 THEN sujeto_nombre END,
+                 CASE WHEN obligatorio = 1 THEN 0
+                      WHEN sujeto_tipo IN ('amenaza', 'mundo', 'novela') THEN 0
+                      WHEN sujeto_tipo IN ('objeto', 'faccion') THEN 1
+                      ELSE 2 END,
                  capitulo_origen DESC, id DESC
         """,
         {"novela": novela_id, "capitulo": numero},

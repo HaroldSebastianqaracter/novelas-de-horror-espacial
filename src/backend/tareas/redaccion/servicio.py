@@ -174,7 +174,9 @@ def _hechos(hechos: list[dict[str, Any]], conocimiento: list[dict[str, Any]]) ->
     """Hechos y conocimiento como elementos: obligatorios delante, opcionales al final.
 
     El conocimiento del reparto es obligatorio entero (RF2-CTX-11), asi que lo unico que se
-    puede recortar son los hechos de amenaza, mundo y novela, empezando por los mas antiguos.
+    puede recortar son los hechos opcionales, en el orden de `lectura.hechos_del_reparto`: los
+    de quien esta fuera del reparto, despues los de objetos y facciones, y los de amenaza, mundo
+    y novela al final, cada grupo empezando por los mas antiguos.
     """
     def linea(h: dict[str, Any]) -> str:
         return (f"- {h['sujeto_nombre']} · {h['atributo']}: {h['valor']} "

@@ -531,6 +531,10 @@ def test_el_redactor_conoce_a_quien_ya_salio_fuera_del_reparto() -> None:
     assert [e.texto.split("**")[1] for e in otros] == ["Reyes"]
     # Opcional: se recorta antes que el reparto.
     assert not any(e.obligatorio for e in otros)
+    # Del mas reciente al mas antiguo: el recorte empieza por quien salio hace mas. El
+    # capitulo 3 no tiene reparto, asi que todos estan fuera de el.
+    assert [p["nombre"] for p in lectura.personajes_fuera_del_reparto(con, g.novela_id, 3)] \
+        == ["Ibarra", "Kowalski", "Reyes"]
 
 
 def test_el_redactor_recibe_los_hechos_de_objetos_facciones_y_de_quien_ya_salio() -> None:
@@ -544,14 +548,23 @@ def test_el_redactor_recibe_los_hechos_de_objetos_facciones_y_de_quien_ya_salio(
                 (faccion, g.personajes["Kowalski"]))
     con.execute("INSERT INTO escena_objeto (escena_id, objeto_id) VALUES (?,?)",
                 (g.escenas[(2, 1)], g.objetos["Baliza"]))
-    # Un objeto que este capitulo no toca no entra.
+    # Un objeto que este capitulo no toca no entra, aunque saliera en otro.
     llave = con.execute("INSERT INTO objeto (novela_id, nombre, nombre_clave, funcion_narrativa) "
                         "VALUES (?, 'Llave', 'llave', 'Abre')", (g.novela_id,)).lastrowid
+    con.execute("INSERT INTO escena_objeto (escena_id, objeto_id) VALUES (?,?)",
+                (g.escenas[(1, 1)], llave))
+    # Ni la faccion de quien no esta en el reparto.
+    fuera = con.execute(
+        "INSERT INTO faccion (novela_id, nombre, nombre_clave, proposito) "
+        "VALUES (?, 'Fuera', 'fuera', 'Reparar')", (g.novela_id,)).lastrowid
+    con.execute("UPDATE personaje SET faccion_id = ? WHERE id = ?",
+                (fuera, g.personajes["Reyes"]))
     for tipo, sujeto_id, sujeto, atributo, valor in (
         ("personaje", g.personajes["Reyes"], "Reyes", "voz", "grave"),
         ("objeto", g.objetos["Baliza"], "Baliza", "bateria", "doce horas"),
         ("faccion", faccion, "Turno", "personas", "cinco"),
         ("objeto", llave, "Llave", "color", "roja"),
+        ("faccion", fuera, "Fuera", "personas", "seis"),
     ):
         insertar_hecho(
             con, novela_id=g.novela_id, escena_id=g.escenas[(1, 1)], sujeto_tipo=tipo,
@@ -565,6 +578,32 @@ def test_el_redactor_recibe_los_hechos_de_objetos_facciones_y_de_quien_ya_salio(
     assert hechos[("Baliza", "bateria")] == 0
     assert hechos[("Turno", "personas")] == 0
     assert ("Llave", "color") not in hechos
+    assert ("Fuera", "personas") not in hechos
+
+
+def test_los_hechos_de_mundo_se_recortan_los_ultimos() -> None:
+    """Mezclados por recencia, los detalles de quien no esta en el reparto sacaban del paquete
+    el censo del capitulo 1, que es lo que necesita la regla de las cuentas (validador de
+    e810d8f)."""
+    from compartido.grafo import lectura
+
+    con, g = _con_reyes_visto_en_el_capitulo_1()
+    con.execute("INSERT INTO escena_objeto (escena_id, objeto_id) VALUES (?,?)",
+                (g.escenas[(2, 1)], g.objetos["Baliza"]))
+    for escena, tipo, sujeto_id, sujeto, atributo in (
+        ((1, 1), "mundo", None, "Estacion", "personas a bordo"),
+        ((1, 2), "objeto", g.objetos["Baliza"], "Baliza", "bateria"),
+        ((1, 2), "personaje", g.personajes["Reyes"], "Reyes", "voz"),
+    ):
+        insertar_hecho(
+            con, novela_id=g.novela_id, escena_id=g.escenas[escena], sujeto_tipo=tipo,
+            sujeto_id=sujeto_id, sujeto_nombre=sujeto, atributo=atributo, valor="once",
+            categoria="otro", cita=None, supersede_a=None,
+        )
+    opcionales = [h["sujeto_nombre"] for h in lectura.hechos_del_reparto(con, g.novela_id, 2)
+                  if not h["obligatorio"]]
+    # El recorte quita desde el final: el mundo, aunque sea el mas antiguo, es lo ultimo.
+    assert opcionales == ["Estacion", "Baliza", "Reyes"]
 
 
 #: Las dos reglas de RF3-PAS-10 en la skill del redactor, enteras.
@@ -577,7 +616,8 @@ REGLAS_DEL_REDACTOR = (
     "- **No traes a nadie de fuera de la escaleta sin su ficha.** Si una escena necesita a "
     "alguien que la escaleta no puso, que sea uno de los otros personajes que ya han salido, "
     "como dicen su ficha y sus hechos, y no otro. Quien está en una escena oye lo que se dice "
-    "en ella."
+    "en ella. Lo que sabía de antes no viene en tu paquete: en la escena actúa sobre lo que oye "
+    "allí."
 )
 
 
