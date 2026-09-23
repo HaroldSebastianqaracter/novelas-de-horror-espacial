@@ -68,6 +68,45 @@ Requisitos en [spec3.md](spec3.md), 3.11; verificación en [spec3-verification.m
 - [ ] Modelo por agente: la extracción es el 48 % del coste y todo corre con Opus. Hace falta medir el extractor con Sonnet contra el golden set (con coste).
 - [ ] Los tres huecos de la parada 6: conocimiento por facción (RF2-PIPE-27), el objeto que viaja con su poseedor (RF2-PIPE-28) y los hábitos como conducta (RF2-PIPE-29). Decididos por el autor; los implementa la sesión que hizo la pasada, en spec2.
 
+### Mejoras tras la primera novela completa
+
+La novela real se completó el 23 de septiembre (4 capítulos, `completada_con_avisos`, 24,80 $), con diez paradas por el camino. Los fallos se cruzaron con cinco ideas de una investigación sobre sistemas parecidos (FlawedFictions, ConStory-Bench, Graphiti, DOME, autonovel, BookNLP). Tres sirven para lo que ha fallado de verdad.
+
+> **Decisión entrevistada, 23 de septiembre de 2026.** Se adoptan el banco de contraejemplos y la ficha para el redactor como trabajo inmediato, y el juez de segunda opinión y la puerta 4 con varianza dentro del bloque 6. Se descartan por ahora la validez temporal de los hechos (ninguna parada fue temporal, y toca el esquema y todas las lecturas de hechos vigentes) y el casado de entidades con LLM (los nombres menores ya dejaron un solo aviso por capítulo).
+
+- [ ] **Banco de contraejemplos para la puerta 3**: contradicciones conocidas metidas a propósito en una novela aprobada, con la cuenta de cuántas detecta cada comprobación. Mide los falsos negativos, que hoy pasan en silencio («siete de fuera» con una cuadrilla de seis). Con el puerto falso, sin coste. Va con el bloque 10.
+- [ ] **Ficha para el redactor** de los personajes fuera del reparto. El redactor mete personajes que la escaleta no puso (paradas 8 y 10, y otra vez en el capítulo 4), y hoy los escribe sin su ficha.
+- [ ] **Juez de segunda opinión en la parada**: un agente lee el conflicto de la puerta 3 y le dice al autor si parece un falso positivo y por qué. Nunca levanta una parada, porque la puerta 3 es SQL. Va con el bloque 6.
+- [ ] **Puerta 4 con puntuación por criterio y varianza**: varias muestras con la varianza como banda de confianza. Va con el bloque 6.
+
+### Plan de la noche del 23 al 24 de septiembre
+
+El autor duerme unas diez horas y no va a revisar nada. Este es el plan para trabajar sin su feedback.
+
+**Dónde:** la rama `noche-23-09`, en el worktree `../novelasv2-noche`, que sale de `pruebas` en `134e453`. Nada se integra en `pruebas` durante la noche, porque ahí trabajan otras sesiones. El autor decide por la mañana qué entra.
+
+**Orden.** Cada paso se cierra como pide [CLAUDE.md](../CLAUDE.md): primero la spec, luego el código, `/verificar`, el `validador-de-codigo`, las correcciones y el registro de iteraciones, todo antes de pasar al siguiente.
+
+1. Banco de contraejemplos de la puerta 3 (spec3, 3.10).
+2. Ficha para el redactor (spec3, 3.11).
+3. Bloque 5, guardrails (spec3, 3.5).
+4. Bloque 6, validadores deterministas: nombres exactos, longitud real y elementos obligatorios del brief.
+5. Bloque 6, juez de segunda opinión en la parada y puerta 4 por criterio, las dos con el puerto falso.
+
+**Decisiones sin el autor.** Las de producto que salgan (sobre todo en guardrails) se toman con el criterio más prudente y se marcan en su documento con `> **Decisión sin entrevistar.**` y las alternativas descartadas, para que el autor las revise por la mañana.
+
+**Lo que no se hace nunca esta noche:**
+- ejecutar Claude Code real, es decir, `NOVELAS_PUERTO=terminal` o `pytest -m agente`; no hay aprobación, así que solo el puerto falso;
+- tocar `novela.db` o `novela_real.db`, salvo lectura sobre una copia hecha con la API de backup;
+- integrar en `pruebas`, hacer merge o abrir un PR a `main`, o tocar `novelasv2-b/`;
+- parar procesos Python por patrón.
+
+**Otras sesiones.**
+- `novelasv2-b8` busca información: la taxonomía de ConStory-Bench para el banco, prácticas de guardrails y rúbricas de juez con varianza. Solo informa por mensaje.
+- `novelasv2-1d` contrasta con la prosa las presencias del capítulo 4 y saca de `novela_real.db`, sobre una copia, los fallos reales de la pasada que sirvan de casos para el banco.
+
+**Por la mañana:** un resumen en [docs/proceso/noche-23-09.md](../docs/proceso/noche-23-09.md), con lo hecho, lo que falta, las decisiones sin entrevistar y los hashes de la rama.
+
 ### 4. Observabilidad con Langfuse
 
 Va pronto porque el tuning y el coste necesitan datos acumulados.
