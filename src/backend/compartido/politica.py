@@ -69,15 +69,16 @@ def reglas(con: sqlite3.Connection, novela_id: int) -> list[Regla]:
     ]
     if brief is not None:
         salida += [Regla(v, "brief") for v in brief.vetados]
-    # «Sangre» y «sangre» son el mismo termino: uno solo, el primero (global antes que novela).
-    vistos: set[str] = set()
-    unicas: list[Regla] = []
+    # «Sangre» y «sangre» son el mismo termino: se queda uno. Gana el brief, que veta todo uso y
+    # no tiene excepciones; despues la novela y al final la global (validador de 8330dcf: con la
+    # global delante, «a sangre fria» pasaba aunque el comprador habia vetado «sangre»).
+    prioridad = {"brief": 0, "novela": 1, "global": 2}
+    elegidas: dict[str, Regla] = {}
     for r in salida:
         clave = normalizar(r.termino)
-        if clave not in vistos:
-            vistos.add(clave)
-            unicas.append(r)
-    return unicas
+        if clave not in elegidas or prioridad[r.origen] < prioridad[elegidas[clave].origen]:
+            elegidas[clave] = r
+    return [r for r in salida if elegidas[normalizar(r.termino)] is r]
 
 
 def huella(aplicadas: list[Regla]) -> str:

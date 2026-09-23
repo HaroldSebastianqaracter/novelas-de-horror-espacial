@@ -88,8 +88,9 @@ def _terminos_vetados(
 
 _PALABRA_CON_POSICION = re.compile(r"[^\W\d_]+")
 #: Lo que abre una frase o un dialogo: ahi va mayuscula cualquier palabra, y «Cortes» (heridas)
-#: y el apellido «Cortés» solo se distinguen por la tilde.
-_INICIO_DE_FRASE = re.compile(r"(?:^|[.!?¿¡:;…\n])[\s«»\"“”‘’'\-–—*(\[]*$")
+#: y el apellido «Cortés» solo se distinguen por la tilde. Tras «:» y «;» va minuscula, asi que
+#: una mayuscula ahi es un nombre propio.
+_INICIO_DE_FRASE = re.compile(r"(?:^|[.!?¿¡…\n])[\s«»\"“”‘’'\-–—*(\[]*$")
 _MINIMO_NOMBRE = 3
 #: Partes de un nombre que no lo identifican: «Pedro del Río» no se nombra con «del».
 _PARTICULAS = frozenset({"de", "del", "la", "las", "los", "el", "y", "e", "san", "santa"})
@@ -124,11 +125,16 @@ def _nombres_mal_escritos(
     con mayuscula es un nombre propio, y el capitulo vuelve al redactor (`nombre_mal_escrito`).
     Al empezar frase o dialogo puede ser una palabra corriente («Cortes profundos», «Más tarde»),
     y corregirla le pediria al redactor una falta: ahi es un aviso (`nombre_por_revisar`) para
-    el juez y el autor (validador de 469d64d).
+    el juez y el autor (validador de 469d64d). Salvo el nombre del destinatario y de sus
+    allegados, el error mas visible de un regalo: si la palabra no sale nunca en minuscula en el
+    capitulo, no es una palabra corriente, y tambien devuelve el capitulo (validador de
+    bfb95a3). Una forma que ya devuelve el capitulo cuenta todas sus apariciones.
     """
     partes = _partes_de_los_nombres(con, novela_id)
     if not partes:
         return []
+    del_regalo = _partes_del_regalo(con, novela_id)
+    en_minuscula = {_plano(p) for p in _PALABRA_CON_POSICION.findall(texto) if p[0].islower()}
     seguros: dict[tuple[str, str], int] = {}
     dudosos: dict[tuple[str, str], int] = {}
     for m in _PALABRA_CON_POSICION.finditer(texto):
@@ -138,9 +144,13 @@ def _nombres_mal_escritos(
         buenas = partes.get(_plano(palabra))
         if not buenas or palabra.casefold() in {b.casefold() for b in buenas}:
             continue
-        donde = dudosos if _INICIO_DE_FRASE.search(texto, 0, m.start()) else seguros
+        al_empezar = bool(_INICIO_DE_FRASE.search(texto, 0, m.start()))
+        corriente = _plano(palabra) not in del_regalo or _plano(palabra) in en_minuscula
+        donde = dudosos if al_empezar and corriente else seguros
         clave = (palabra, " o ".join(f"«{b}»" for b in sorted(buenas)))
         donde[clave] = donde.get(clave, 0) + 1
+    for clave in [c for c in dudosos if c in seguros]:
+        seguros[clave] += dudosos.pop(clave)
     salida: list[Conflicto] = []
     if seguros:
         salida.append(Conflicto(
@@ -158,6 +168,17 @@ def _nombres_mal_escritos(
             datos={"errores": _datos_de_nombres(dudosos)},
         ))
     return salida
+
+
+def _partes_del_regalo(con: sqlite3.Connection, novela_id: int) -> set[str]:
+    """Las palabras del nombre del destinatario y de sus allegados, en clave plana."""
+    brief = lectura.brief(con, novela_id)
+    if brief is None:
+        return set()
+    nombres = [n for n in (brief.destinatario.nombre, *(a.nombre for a in brief.allegados))
+               if n]
+    return {_plano(p) for n in nombres for p in _PALABRA_CON_POSICION.findall(n)
+            if len(p) >= _MINIMO_NOMBRE}
 
 
 def _veces(n: int) -> str:

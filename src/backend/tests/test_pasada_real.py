@@ -814,6 +814,9 @@ def test_el_redactor_y_el_extractor_reciben_los_nombres_menores_y_el_mundo(
     ("en menos de un minuto", True),
     ("una hora de aire", True),
     ("a la par del casco", False),
+    ("media hora de aire", True),
+    ("un cuarto de hora", True),
+    ("el cuarto de maquinas", False),
 ])
 def test_un_hecho_da_una_cantidad(valor: str, cifra: bool) -> None:
     from compartido.texto import tiene_cifra

@@ -35,7 +35,7 @@ NUMERALES = frozenset({
     "setecientos", "ochocientos", "novecientos", "mil", "millon", "millones", "medio",
 })
 #: Tambien son articulos o adjetivos: «una mancha» no es una cuenta, pero «una hora» si.
-_NUMERALES_AMBIGUOS = frozenset({"un", "uno", "una", "medio"})
+_NUMERALES_AMBIGUOS = frozenset({"un", "uno", "una", "medio", "media"})
 #: Cantidades que no son numerales: «una docena», «la mitad», «miles». No entran «par» ni
 #: «cuarto», que casi siempre son otra cosa («a la par», el cuarto de maquinas).
 _CANTIDADES = frozenset({
@@ -63,6 +63,10 @@ def tiene_cifra(texto: str) -> bool:
             return True
         siguiente = palabras[i + 1] if i + 1 < len(palabras) else ""
         if p in _NUMERALES_AMBIGUOS and formas(siguiente) & _UNIDADES:
+            return True
+        # «un cuarto de hora»: el cuarto de maquinas no es una cantidad.
+        if p == "cuarto" and palabras[i + 1:i + 2] == ["de"] and \
+                formas(palabras[i + 2] if i + 2 < len(palabras) else "") & _UNIDADES:
             return True
     return False
 

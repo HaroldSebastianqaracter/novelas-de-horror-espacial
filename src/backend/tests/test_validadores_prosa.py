@@ -13,7 +13,7 @@ from typing import Any
 
 import pytest
 
-from compartido.grafo import insertar, normalizar
+from compartido.grafo import insertar, lectura, normalizar
 from compartido.puerto import demo
 from orquestador import pipeline
 from tareas.oficio import puerta as p_oficio
@@ -78,6 +78,35 @@ def test_al_empezar_frase_solo_avisa(nombre: str, texto: str) -> None:
     conflictos = _mecanica(con, g, texto)
     assert "nombre_mal_escrito" not in conflictos
     assert conflictos["nombre_por_revisar"].aviso
+
+
+def test_el_nombre_del_destinatario_al_empezar_frase_si_devuelve_el_capitulo() -> None:
+    """Validador de bfb95a3: es el error mas visible del regalo. Si la palabra no sale nunca en
+    minuscula en el capitulo, no es una palabra corriente."""
+    con, ruta = nueva_bd()
+    nid = crear(con, ruta)  # la destinataria del brief de ejemplo lleva tilde y eñe
+    pipeline.planificar(pipeline.Contexto(con=con, puerto=puerto_falso(con), cfg=cfg_de(ruta),
+                                          novela_id=nid))
+    brief = lectura.brief(con, nid)
+    assert brief is not None
+    nombre = brief.destinatario.nombre.split()[-1]
+    sin_tilde = p_oficio._plano(nombre).capitalize()
+    assert sin_tilde != nombre
+    r = {c.comprobacion: c for c in p_oficio.evaluar(
+        con, nid, 1, f"—{sin_tilde}, ven —dijo ella. Luego se fue.").conflictos}
+    assert "nombre_mal_escrito" in r
+
+
+def test_tras_dos_puntos_una_mayuscula_es_un_nombre() -> None:
+    con, g = _con_personaje("Sebastián Núñez")
+    assert "nombre_mal_escrito" in _mecanica(con, g, "Llego tarde: Sebastian no estaba.")
+
+
+def test_una_forma_que_devuelve_el_capitulo_cuenta_todas_sus_veces() -> None:
+    con, g = _con_personaje("Sebastián Núñez")
+    c = _mecanica(con, g, "Sebastian abrio. Luego miro a Sebastian.")["nombre_mal_escrito"]
+    assert c.datos["errores"][0]["veces"] == 2
+    assert "nombre_por_revisar" not in _mecanica(con, g, "Sebastian abrio. Luego miro a Sebastian.")
 
 
 def test_dos_grafias_del_canon_se_ofrecen_las_dos() -> None:

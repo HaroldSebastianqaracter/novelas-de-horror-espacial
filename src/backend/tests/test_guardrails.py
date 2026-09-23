@@ -215,9 +215,47 @@ def test_la_huella_cambia_con_las_excepciones() -> None:
 
 
 def test_un_mismo_termino_con_otra_grafia_no_se_duplica() -> None:
+    """Uno solo, y gana el mas estricto: el de la novela no tiene las excepciones del global."""
     con, _, nid = _novela("atmosferico")
     con.execute("INSERT INTO termino_vetado (novela_id, termino) VALUES (?, 'Sangre')", (nid,))
-    assert _terminos(con, nid, "Hubo sangre.") == ["sangre"]
+    assert _terminos(con, nid, "Hubo sangre.") == ["Sangre"]
+    assert _terminos(con, nid, "Lo hizo a sangre fría.") == ["Sangre"]
+
+
+def test_el_veto_del_brief_no_hereda_las_excepciones_del_global() -> None:
+    """Validador de 8330dcf: con la regla global delante, «a sangre fria» pasaba aunque el
+    comprador habia vetado «sangre»."""
+    con, ruta = nueva_bd()
+    nid = crear(con, ruta, intensidad="atmosferico", vetados=["sangre"])
+    [h] = politica.buscar("Lo mato a sangre fria.", politica.reglas(con, nid))
+    assert (h.regla.termino, h.regla.origen) == ("sangre", "brief")
+
+
+def test_las_excepciones_tienen_que_ser_una_lista() -> None:
+    import sqlite3 as sq
+
+    con, _, nid = _novela("tension")
+    with pytest.raises(sq.IntegrityError):
+        con.execute("INSERT INTO termino_vetado (novela_id, termino, excepciones) "
+                    "VALUES (?, 'bruma', '\"a bruma\"')", (nid,))
+
+
+@pytest.mark.parametrize("texto", [
+    "Los torturaban cada noche.", "Se desangraba despacio.", "Lo descuartizaron.",
+    "Le vio las entrañas.",
+])
+def test_mas_formas_de_la_lista(texto: str) -> None:
+    con, _, nid = _novela("atmosferico")
+    assert _terminos(con, nid, texto)
+
+
+@pytest.mark.parametrize("texto", [
+    "La sangre se le heló en las venas.", "Lo llevaba en la sangre.",
+    "Era una auténtica tortura.",
+])
+def test_mas_usos_corrientes(texto: str) -> None:
+    con, _, nid = _novela("atmosferico")
+    assert _terminos(con, nid, texto) == []
 
 
 def test_la_accion_parar_solo_queda_si_la_parada_se_abre(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -254,3 +292,4 @@ def test_el_redactor_recibe_las_palabras_vetadas() -> None:
     linea = next(x for x in render.splitlines() if x.startswith("PALABRAS VETADAS"))
     assert "tortura" in linea and "sexo" in linea
     assert "sangre" not in linea.split(":", 1)[1]   # tension admite la sangre
+    assert "arañas" not in linea                    # los del brief van en su propia linea
