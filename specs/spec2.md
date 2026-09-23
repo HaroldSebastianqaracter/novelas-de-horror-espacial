@@ -138,6 +138,8 @@ Una puerta está **vigente** si su último registro en `resultado_puerta` no es 
 
 > **Decisión de la spec (23-09-2026).** El plan pedía que el registro fuera «posterior a la última escritura de lo que juzga». Se implementa con una huella del contenido y no con marcas de tiempo, porque `datetime('now')` tiene resolución de segundo y dos escrituras del mismo segundo no se ordenan; ni con ids, porque los de tablas distintas no son comparables. La huella además es más estricta: una puerta que juzgó otra versión de la escaleta deja de estar vigente aunque la reescritura fuera anterior al registro.
 
+> Ampliado por spec3, RF3-PER-07: en una novela con brief, la huella de las puertas 1 y 2 incluye también lo que leen del encargo.
+
 **RF2-PIPE-00b** *Guardarraíl.* `generar_capitulo` se niega a empezar si las puertas 1 y 2 no están vigentes, con un error que lleva la ejecución a `error` y no a un capítulo. Es la misma propiedad que RF2-PIPE-00, comprobada en ejecución y no solo por construcción.
 
 ### 3.3 Fase 3 — Un solo escritor

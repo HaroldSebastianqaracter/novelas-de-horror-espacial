@@ -364,15 +364,51 @@ def _rehacer(con: sqlite3.Connection, novela_id: int, parada_id: int) -> str:
     return destino
 
 
+#: Que fase de la planificacion produce lo que juzga cada comprobacion del encargo en la
+#: puerta 1 (spec3, RF3-PER-04). Rehacer solo el estructurador no arregla una dedicatoria mal
+#: escrita ni un protagonista equivocado: hay que volver a quien los escribio.
+FASE_DE_COMPROBACION = {
+    "dedicatoria_nombra_al_destinatario": "arquitecto",
+    "subgenero_del_brief": "arquitecto",
+    "subgenero_exige_intensidad": "arquitecto",
+    "destinatario_protagonista": "elenco",
+    "allegado_en_elenco": "elenco",
+}
+
+
+def fase_a_rehacer(con: sqlite3.Connection, novela_id: int) -> str:
+    """La fase mas temprana que hay que repetir segun el ultimo rechazo de la puerta 1."""
+    fila = con.execute(
+        "SELECT detalle FROM resultado_puerta WHERE novela_id = ? AND puerta = 1 "
+        "ORDER BY id DESC LIMIT 1", (novela_id,),
+    ).fetchone()
+    try:
+        detalle = como_dict(json.loads(fila["detalle"] or "{}")) if fila else {}
+    except json.JSONDecodeError:
+        detalle = {}
+    fases = {
+        FASE_DE_COMPROBACION.get(str(c.get("comprobacion")), "estructura")
+        for c in map(como_dict, como_lista(detalle.get("conflictos")))
+        if not c.get("aviso")
+    }
+    for fase in ("arquitecto", "elenco"):
+        if fase in fases:
+            return fase
+    return "estructura"
+
+
 def rehacer_estructura(con: sqlite3.Connection, novela_id: int, parada_id: int) -> str:
     """Borra lo que rechazo la puerta 1 y deja la ejecucion en `planificando`.
 
-    El estructurador vuelve a correr con el informe de la puerta 1 en su paquete; mundo,
-    elenco y premisa se conservan. Corre dentro de la transaccion del llamante.
+    Normalmente solo vuelve a correr el estructurador, con el informe de la puerta 1 en su
+    paquete. Si lo rechazado es del arquitecto (dedicatoria, subgenero) o del elenco
+    (protagonista, allegados), se borra desde esa fase y la planificacion se repite desde ahi
+    (spec3, RF3-PER-04). Corre dentro de la transaccion del llamante.
     """
     _, tipo = estado_y_parada(con, novela_id)
     if tipo != "estructura":
         estados.siguiente("parada", "rehacer", tipo_parada=tipo)  # lanza con el motivo
+    fase = fase_a_rehacer(con, novela_id)
     # La escaleta cuelga de los actos: si la hubiera, caeria con ellos.
     borrar_escaleta(con, novela_id)
     con.execute("DELETE FROM acto WHERE novela_id = ?", (novela_id,))
@@ -381,6 +417,15 @@ def rehacer_estructura(con: sqlite3.Connection, novela_id: int, parada_id: int) 
         "DELETE FROM siembra WHERE novela_id = ? AND origen = 'estructura'", (novela_id,)
     )
     con.execute("DELETE FROM objeto WHERE novela_id = ?", (novela_id,))
+    if fase in ("elenco", "arquitecto"):
+        con.execute("DELETE FROM personaje WHERE novela_id = ?", (novela_id,))
+    if fase == "arquitecto":
+        # El mundo se construyo sobre la premisa que el arquitecto va a rehacer.
+        for tabla in ("faccion", "amenaza", "linea_de_tiempo", "mundo", "motivo", "tema",
+                      "estilo_narrativo"):
+            con.execute(f"DELETE FROM {tabla} WHERE novela_id = ?", (novela_id,))
+        con.execute("UPDATE novela SET dedicatoria = NULL WHERE id = ?", (novela_id,))
+    emitir_evento(con, novela_id, "rehecho_desde", fase=fase)
     return _rehacer(con, novela_id, parada_id)
 
 

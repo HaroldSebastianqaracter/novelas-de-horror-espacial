@@ -18,7 +18,8 @@ import re
 
 from compartido.grafo.escritura import normalizar
 
-_PALABRA = re.compile(r"[^\W\d_]+", re.UNICODE)
+# Letras y cifras: «41» tambien es una palabra, y una cita con la edad tiene que casar.
+_PALABRA = re.compile(r"[^\W_]+", re.UNICODE)
 _MINIMO = 2
 
 

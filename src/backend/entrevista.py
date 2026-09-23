@@ -141,11 +141,21 @@ def entrevistar(
         respuesta = leer(pregunta + "\n> ")
         turnos.append({"pregunta": pregunta, "campo": campo_preguntado, "respuesta": respuesta})
 
+    if analizar(brief).completo:
+        # El ultimo turno completo el encargo: falta solo que el comprador lo confirme.
+        escribir("\nAsi queda el encargo:\n" + _resumen(brief))
+        confirmacion = leer("¿Lo confirmas? (s/n) ").strip().lower()
+        turnos.append({"pregunta": "confirmacion", "respuesta": confirmacion})
+        if confirmacion in AFIRMATIVAS:
+            return ResultadoEntrevista(brief, True, True, transcripcion)
+        escribir(f"No se ha confirmado y ya van {max_turnos} turnos: no se crea ninguna novela.")
+        return ResultadoEntrevista(brief, True, False, transcripcion)
+
     escribir(
         f"La entrevista ha llegado a {max_turnos} turnos sin completar el encargo. No se crea "
         "ninguna novela; falta: " + ", ".join(analizar(brief).pendientes())
     )
-    return ResultadoEntrevista(brief, analizar(brief).completo, False, transcripcion)
+    return ResultadoEntrevista(brief, False, False, transcripcion)
 
 
 def encolar(ruta: Path, brief: Brief, transcripcion: dict[str, Any]) -> int:

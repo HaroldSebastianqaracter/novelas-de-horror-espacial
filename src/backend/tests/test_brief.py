@@ -176,6 +176,10 @@ def test_la_api_rechaza_un_brief_contradictorio_con_el_motivo(cliente: TestClien
     r = cliente.post("/intenciones", json={"tipo": "crear_novela", "payload": {"brief": brief}})
     assert r.status_code == 422
     assert "intensidad" in r.json()["mensaje"]
+    # RF3-PER-05: las dos listas, estructuradas, para que el cliente sepa que preguntar.
+    detalle = json.loads(r.json()["detalle"])
+    assert detalle["faltantes"] == []
+    assert [c["codigo"] for c in detalle["contradicciones"]] == ["edad_bajo_intensidad"]
 
 
 def test_la_api_rechaza_un_brief_incompleto(cliente: TestClient) -> None:
@@ -251,3 +255,27 @@ def test_una_novela_tiene_al_menos_tres_capitulos() -> None:
     """Tres actos necesitan tres capitulos: con menos, la puerta 2 para siempre."""
     with pytest.raises(ValueError, match="capitulos"):
         con_cambios(capitulos=2)
+
+
+def test_un_nombre_en_blanco_no_llega_al_worker(cliente: TestClient) -> None:
+    brief = brief_ejemplo()
+    brief["destinatario"]["nombre"] = "   "
+    r = cliente.post("/intenciones", json={"tipo": "crear_novela", "payload": {"brief": brief}})
+    assert r.status_code == 422
+
+
+def test_codigos_repetidos_no_llegan_al_worker(cliente: TestClient) -> None:
+    brief = brief_ejemplo()
+    brief["recuerdos"][0]["codigo"] = "RAS1"
+    brief["destinatario"]["rasgos"][0]["codigo"] = "RAS1"
+    r = cliente.post("/intenciones", json={"tipo": "crear_novela", "payload": {"brief": brief}})
+    assert r.status_code == 422
+    assert "repetidos" in r.json()["mensaje"]
+
+
+def test_un_codigo_puesto_a_mano_no_se_repite_al_asignar_los_demas() -> None:
+    datos = brief_ejemplo()
+    datos["recuerdos"][0]["codigo"] = "RAS1"
+    b = Brief.model_validate(datos).con_codigos()
+    todos = [e.codigo for e in [*b.destinatario.rasgos, *b.recuerdos, *b.allegados]]
+    assert len(todos) == len(set(todos))

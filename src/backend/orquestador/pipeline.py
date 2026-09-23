@@ -265,13 +265,15 @@ def planificar(ctx: Contexto) -> None:
         with transaccion(ctx.con):
             estados.fijar_fase(ctx.con, ctx.novela_id, agente)
         texto = servicio.paquete(ctx.con, ctx.novela_id)
-        if agente == "estructura":
-            rechazo = vigencia.informe_de_rechazo(ctx.con, ctx.novela_id, 1)
-            if rechazo:
-                texto += (
-                    "\n\n## LA ESTRUCTURA ANTERIOR NO PASO LA PUERTA 1, POR ESTO\n\n"
-                    + "\n".join(rechazo)
-                )
+        rechazo = vigencia.informe_de_rechazo(ctx.con, ctx.novela_id, 1)
+        if rechazo:
+            # Quien vuelve a correr tras un rechazo de la puerta 1 lo recibe: el estructurador
+            # siempre, y el arquitecto o el elenco cuando lo rechazado era suyo (spec3, RF3-PER-04).
+            titulo = (
+                "LA ESTRUCTURA ANTERIOR NO PASO LA PUERTA 1, POR ESTO" if agente == "estructura"
+                else "LA PLANIFICACION ANTERIOR NO PASO LA PUERTA 1, POR ESTO"
+            )
+            texto += f"\n\n## {titulo}\n\n" + "\n".join(rechazo)
         salida, _ = _invocar(ctx, agente, texto, modelo)
         # Una transaccion por agente: su parte del canon entra entera o no entra.
         with transaccion(ctx.con):

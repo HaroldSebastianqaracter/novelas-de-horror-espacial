@@ -25,10 +25,19 @@ CampoBrief = Literal[
 
 class Actualizacion(BaseModel):
     """Un dato que el comprador ha dado. En las listas (rasgos, recuerdos, vetados,
-    allegados) cada actualizacion anade un elemento; en el resto, fija el valor."""
+    allegados) cada actualizacion anade o quita un elemento; en el resto, fija el valor."""
 
     campo: CampoBrief
-    valor: str = Field(min_length=1, max_length=500)
+    operacion: Literal["anadir", "quitar"] = Field(
+        default="anadir",
+        description="Solo en las listas: 'quitar' retira el elemento que el comprador nombra "
+                    "(un vetado que ya no quiere, un recuerdo que sobra)",
+    )
+    valor: str = Field(
+        min_length=1, max_length=500,
+        description="En los campos de texto, las palabras literales del comprador. En la edad "
+                    "y los capitulos, el numero. En los enumerados, el valor exacto",
+    )
     cita: str = Field(
         min_length=1, max_length=500,
         description="Fragmento literal de la respuesta del comprador del que sale el valor",

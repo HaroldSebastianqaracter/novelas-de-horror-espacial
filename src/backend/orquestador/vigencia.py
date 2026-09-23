@@ -29,11 +29,8 @@ _LECTURAS: dict[int, tuple[str, ...]] = {
         "SELECT id, tipo, conflicto_central FROM hilo WHERE novela_id = :n ORDER BY id",
         "SELECT g.id, g.hilo_id, g.tipo, g.posicion FROM punto_de_giro g "
         "JOIN hilo h ON h.id = g.hilo_id WHERE h.novela_id = :n ORDER BY g.id",
-        "SELECT id, rol_narrativo, tipo_arco, nombre_clave FROM personaje "
-        "WHERE novela_id = :n ORDER BY id",
-        "SELECT subgenero_dominante, tipo_final, dedicatoria FROM novela WHERE id = :n",
-        # El encargo (spec3, RF3-PER-04): la puerta 1 comprueba al destinatario y a sus allegados.
-        "SELECT contenido FROM brief WHERE novela_id = :n",
+        "SELECT id, rol_narrativo, tipo_arco FROM personaje WHERE novela_id = :n ORDER BY id",
+        "SELECT subgenero_dominante, tipo_final FROM novela WHERE id = :n",
     ),
     2: (
         "SELECT id, numero FROM acto WHERE novela_id = :n ORDER BY id",
@@ -46,11 +43,25 @@ _LECTURAS: dict[int, tuple[str, ...]] = {
         "SELECT ep.escena_id, ep.personaje_id FROM escena_personaje ep "
         "JOIN escena e ON e.id = ep.escena_id WHERE e.novela_id = :n ORDER BY ep.id",
         "SELECT tipo, valor FROM restriccion WHERE novela_id = :n ORDER BY tipo",
-        # Los elementos personales y donde los planifica la escaleta (spec3, RF3-PER-04).
+    ),
+}
+
+#: Lo que ademas leen las puertas cuando la novela es un regalo (spec3, RF3-PER-07). Va aparte
+#: y solo cuenta si hay brief: asi la huella de una novela sin personalizar es exactamente la de
+#: antes, y ninguna novela ya generada pierde la vigencia de sus puertas al migrar.
+_LECTURAS_DEL_ENCARGO: dict[int, tuple[str, ...]] = {
+    1: (
+        "SELECT contenido FROM brief WHERE novela_id = :n",
+        "SELECT id, nombre_clave FROM personaje WHERE novela_id = :n ORDER BY id",
+        "SELECT dedicatoria FROM novela WHERE id = :n",
+    ),
+    2: (
+        "SELECT contenido FROM brief WHERE novela_id = :n",
+        # El POV del destinatario se busca por su nombre: la puerta 2 tambien lee el elenco.
+        "SELECT id, nombre_clave FROM personaje WHERE novela_id = :n ORDER BY id",
         "SELECT id, codigo, obligatorio FROM elemento_personal WHERE novela_id = :n ORDER BY id",
         "SELECT ee.escena_id, ee.elemento_id FROM escena_elemento ee "
         "JOIN escena e ON e.id = ee.escena_id WHERE e.novela_id = :n ORDER BY ee.id",
-        "SELECT contenido FROM brief WHERE novela_id = :n",
     ),
 }
 
@@ -62,6 +73,8 @@ def huella(con: sqlite3.Connection, novela_id: int, puerta: int) -> str | None:
     consultas = _LECTURAS.get(puerta)
     if consultas is None:
         return None
+    if con.execute("SELECT 1 FROM brief WHERE novela_id = ?", (novela_id,)).fetchone():
+        consultas = (*consultas, *_LECTURAS_DEL_ENCARGO.get(puerta, ()))
     filas: list[list[Any]] = []
     for sql in consultas:
         filas.extend([list(f) for f in con.execute(sql, {"n": novela_id}).fetchall()])

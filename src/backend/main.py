@@ -30,7 +30,7 @@ from pydantic import BaseModel, Field, ValidationError, model_validator
 
 import config
 from compartido import db
-from compartido.brief import Brief
+from compartido.brief import Analisis, Brief, BriefIncompleto, analizar
 from compartido.grafo import lectura
 from compartido.tipos import TipoIntencion
 
@@ -511,6 +511,17 @@ def crear_intencion(cuerpo: NuevaIntencion, con: ConEscritura) -> IntencionEncol
         if lectura.novela(con, cuerpo.novela_id) is None:
             raise HTTPException(status_code=404, detail=f"No existe la novela {cuerpo.novela_id}")
 
+    if cuerpo.tipo == "crear_novela" and cuerpo.payload.get("brief") is not None:
+        # RF3-PER-05: un brief bien formado pero incompleto o contradictorio devuelve 422 con
+        # las dos listas en `detalle`, para que el cliente sepa que preguntar. Uno mal formado
+        # cae en la validacion general de abajo.
+        try:
+            analisis = analizar(Brief.model_validate(cuerpo.payload["brief"]))
+        except ValidationError:
+            analisis = None
+        if analisis is not None and not analisis.completo:
+            raise BriefNoValido(analisis)
+
     modelo = PAYLOADS.get(cuerpo.tipo)
     if modelo is not None:
         try:
@@ -935,6 +946,25 @@ async def stream_eventos(novela_id: int, request: Request) -> StreamingResponse:
 
 
 # --- Errores --------------------------------------------------------------------------------------
+
+
+class BriefNoValido(Exception):
+    """Un brief bien formado al que le falta algo o que se contradice (RF3-PER-05)."""
+
+    def __init__(self, analisis: Analisis) -> None:
+        super().__init__(str(BriefIncompleto(analisis)))
+        self.analisis = analisis
+
+
+@app.exception_handler(BriefNoValido)
+async def error_brief(_: Request, exc: BriefNoValido) -> JSONResponse:
+    return JSONResponse(
+        status_code=422,
+        content=Error(
+            codigo="brief_incompleto", mensaje=str(exc),
+            detalle=json.dumps(exc.analisis.como_dict(), ensure_ascii=False),
+        ).model_dump(),
+    )
 
 
 @app.exception_handler(HTTPException)

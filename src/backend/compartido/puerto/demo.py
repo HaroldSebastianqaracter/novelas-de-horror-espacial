@@ -488,7 +488,12 @@ def entrevistador(entrada: str, agente: str) -> dict[str, Any]:
     campo = _bloque(entrada, "LA ULTIMA PREGUNTA ERA SOBRE")
     respuesta = _bloque(entrada, "ULTIMA RESPUESTA DEL COMPRADOR")
     actualizaciones: list[dict[str, Any]] = []
-    if respuesta and not respuesta.startswith("(") and not campo.startswith("("):
+    quitar = re.match(r"quita (?:el vetado |el recuerdo |a )?(.+)$", respuesta, re.IGNORECASE)
+    if quitar and campo in ("elemento_con_vetado", "correccion"):
+        # «quita arañas»: se retira de los vetados, que es como se resuelve la contradiccion.
+        actualizaciones.append({"campo": "vetados", "operacion": "quitar",
+                                "valor": quitar.group(1).strip(), "cita": respuesta})
+    elif respuesta and not respuesta.startswith("(") and not campo.startswith("("):
         if campo == "correccion" and ":" in respuesta:
             campo, _, respuesta = (x.strip() for x in respuesta.partition(":"))
         candidatos = _CAMPOS_DE_CONTRADICCION.get(campo, [campo])

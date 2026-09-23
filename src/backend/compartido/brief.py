@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from compartido.texto import contiene_termino
 from compartido.tipos import Subgenero
@@ -105,10 +105,12 @@ class Destinatario(BaseModel):
     pronombres: Pronombres | None = None
     rasgos: list[ElementoPersonal] = Field(default_factory=list[ElementoPersonal], max_length=8)
 
-    @field_validator("nombre")
+    # Antes de validar la longitud: un nombre de solo espacios tiene que ser un nombre vacio y
+    # fallar aqui, no llegar al worker como "" y romper cada lectura posterior del brief.
+    @field_validator("nombre", mode="before")
     @classmethod
-    def _sin_espacios_de_sobra(cls, v: str | None) -> str | None:
-        return " ".join(v.split()) if v is not None else None
+    def _sin_espacios_de_sobra(cls, v: object) -> object:
+        return " ".join(v.split()) if isinstance(v, str) else v
 
 
 class Brief(BaseModel):
@@ -132,13 +134,33 @@ class Brief(BaseModel):
     vetados: list[str] = Field(default_factory=list[str], max_length=30)
     texto_libre: str = Field(default="", max_length=4000)
 
+    @field_validator("quien_regala", mode="before")
+    @classmethod
+    def _quien_regala_sin_espacios(cls, v: object) -> object:
+        return " ".join(v.split()) if isinstance(v, str) else v
+
+    @model_validator(mode="after")
+    def _codigos_unicos(self) -> Brief:
+        """Dos elementos con el mismo codigo romperian la tabla elemento_personal en el worker;
+        tienen que fallar aqui, en la validacion, que es donde lo ve la API (RF3-BRF-04)."""
+        codigos = [
+            e.codigo for e in [*self.destinatario.rasgos, *self.recuerdos, *self.allegados]
+            if e.codigo
+        ]
+        repetidos = sorted({c for c in codigos if codigos.count(c) > 1})
+        if repetidos:
+            raise ValueError(f"Codigos de elemento repetidos: {', '.join(repetidos)}")
+        return self
+
     def con_codigos(self) -> Brief:
         """Una copia con codigo en cada elemento que no lo tenga: RAS1, REC1, ALL1…"""
         copia = self.model_copy(deep=True)
-        for prefijo, lista in (
+        listas = (
             ("RAS", copia.destinatario.rasgos), ("REC", copia.recuerdos), ("ALL", copia.allegados),
-        ):
-            usados = {e.codigo for e in lista if e.codigo}
+        )
+        # Los usados son de todo el brief: un codigo puesto a mano en otra lista tambien cuenta.
+        usados = {e.codigo for _, lista in listas for e in lista if e.codigo}
+        for prefijo, lista in listas:
             n = 1
             for e in lista:
                 if e.codigo:

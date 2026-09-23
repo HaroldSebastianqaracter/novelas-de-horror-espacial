@@ -153,24 +153,21 @@ def evaluar(con: sqlite3.Connection, novela_id: int) -> ResultadoPuerta:
 def _encargo(
     con: sqlite3.Connection, novela_id: int, escenas: list[dict[str, Any]]
 ) -> list[Conflicto]:
-    """RF3-PER-04: lo que el brief exige a la escaleta."""
+    """RF3-PER-04: lo que el brief exige a la escaleta. Una novela sin brief no cambia."""
     salida: list[Conflicto] = []
-
-    pedidos = _restriccion(con, novela_id, "capitulos")
-    if pedidos is not None and pedidos.isdigit():
-        hay = int(con.execute(
-            "SELECT COUNT(*) FROM capitulo WHERE novela_id = ?", (novela_id,)
-        ).fetchone()[0])
-        if hay != int(pedidos):
-            salida.append(Conflicto(
-                comprobacion="numero_de_capitulos",
-                descripcion=f"El encargo pide {pedidos} capitulos y la escaleta tiene {hay}.",
-                datos={"pedidos": int(pedidos), "hay": hay},
-            ))
-
     brief = lectura.brief(con, novela_id)
     if brief is None or brief.destinatario.nombre is None:
         return salida
+
+    hay = int(con.execute(
+        "SELECT COUNT(*) FROM capitulo WHERE novela_id = ?", (novela_id,)
+    ).fetchone()[0])
+    if hay != brief.capitulos:
+        salida.append(Conflicto(
+            comprobacion="numero_de_capitulos",
+            descripcion=f"El encargo pide {brief.capitulos} capitulos y la escaleta tiene {hay}.",
+            datos={"pedidos": brief.capitulos, "hay": hay},
+        ))
 
     fila = con.execute(
         "SELECT id FROM personaje WHERE novela_id = ? AND nombre_clave = ?",

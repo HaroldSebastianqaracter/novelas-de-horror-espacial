@@ -217,3 +217,99 @@ def test_puerta_3_el_destinatario_nunca_muere() -> None:
         (novela_id, id_destinatario(con, novela_id), escena),
     )
     assert "destinatario_muere" in comprobaciones(p_continuidad.evaluar(con, novela_id, 3))
+
+
+# --- Vigencia por huella (RF3-PER-07; hallazgos 3 y 4 del validador) ----------------------------
+
+#: Las lecturas de la puerta 1 tal como estaban antes de spec3. Una novela sin brief tiene que
+#: dar exactamente esta huella, o toda novela ya generada perderia la vigencia al migrar.
+LECTURAS_PUERTA_1_ANTES_DE_SPEC3 = (
+    "SELECT id, numero, funcion_narrativa FROM acto WHERE novela_id = :n ORDER BY id",
+    "SELECT id, tipo, conflicto_central FROM hilo WHERE novela_id = :n ORDER BY id",
+    "SELECT g.id, g.hilo_id, g.tipo, g.posicion FROM punto_de_giro g "
+    "JOIN hilo h ON h.id = g.hilo_id WHERE h.novela_id = :n ORDER BY g.id",
+    "SELECT id, rol_narrativo, tipo_arco FROM personaje WHERE novela_id = :n ORDER BY id",
+    "SELECT subgenero_dominante, tipo_final FROM novela WHERE id = :n",
+)
+
+
+def test_una_novela_sin_brief_conserva_la_huella_de_antes() -> None:
+    import hashlib
+
+    from orquestador import vigencia
+    from tests.entorno import crear_novela
+
+    con, ruta = nueva_bd()
+    novela_id = crear_novela(con)
+    pipeline.planificar(contexto(con, ruta, novela_id))
+    filas: list[list[Any]] = []
+    for sql in LECTURAS_PUERTA_1_ANTES_DE_SPEC3:
+        filas.extend([list(f) for f in con.execute(sql, {"n": novela_id}).fetchall()])
+        filas.append(["--"])
+    esperada = hashlib.sha256(
+        json.dumps(filas, ensure_ascii=False, default=str, separators=(",", ":")).encode()
+    ).hexdigest()
+    assert vigencia.huella(con, novela_id, 1) == esperada
+
+
+def test_cambiar_lo_que_lee_la_puerta_1_del_encargo_le_quita_la_vigencia() -> None:
+    from orquestador import vigencia
+
+    con, novela_id = planificada()
+    assert vigencia.puerta_vigente(con, novela_id, 1)
+    con.execute("UPDATE novela SET dedicatoria = 'Otra dedicatoria' WHERE id = ?", (novela_id,))
+    assert not vigencia.puerta_vigente(con, novela_id, 1)
+
+
+def test_cambiar_los_elementos_planificados_le_quita_la_vigencia_a_la_puerta_2() -> None:
+    from orquestador import vigencia
+
+    con, novela_id = escaletada()
+    assert vigencia.puerta_vigente(con, novela_id, 2)
+    con.execute("DELETE FROM escena_elemento WHERE id = (SELECT MIN(id) FROM escena_elemento)")
+    assert not vigencia.puerta_vigente(con, novela_id, 2)
+
+
+# --- Rehacer una parada de estructura vuelve a la fase culpable (hallazgo 5) ---------------------
+
+
+def test_una_dedicatoria_mal_escrita_se_rehace_desde_el_arquitecto() -> None:
+    from compartido.puerto import demo as agentes_falsos
+    from orquestador import fallo
+
+    con, ruta = nueva_bd()
+    novela_id = crear(con, ruta, capitulos=3)
+    ctx = contexto(con, ruta, novela_id)
+    assert isinstance(ctx.puerto, PuertoFalso)
+    entradas: list[str] = []
+
+    def arquitecto(entrada: str, agente: str) -> dict[str, Any]:
+        entradas.append(entrada)
+        salida = agentes_falsos.arquitecto(entrada, agente)
+        if len(entradas) == 1:
+            salida["dedicatoria"] = "Para Marta, con carino."  # sin el nombre completo
+        return salida
+
+    ctx.puerto.registrar("arquitecto", arquitecto)
+    assert pipeline.avanzar(ctx) == "parada"
+    assert fallo.fase_a_rehacer(con, novela_id) == "arquitecto"
+
+    parada_id = int(fallo.paradas_abiertas(con, novela_id)[0]["id"])
+    with transaccion(con):
+        fallo.rehacer_estructura(con, novela_id, parada_id)
+    final = pipeline.avanzar(ctx)
+    assert final in ("completada", "completada_con_avisos"), final
+    assert len(entradas) == 2
+    assert "dedicatoria_nombra_al_destinatario" in entradas[1]
+
+
+def test_un_rechazo_solo_de_la_estructura_no_toca_el_elenco() -> None:
+    from orquestador import fallo
+
+    con, novela_id = planificada()
+    con.execute(
+        "INSERT INTO resultado_puerta (novela_id, puerta, veredicto, detalle) VALUES (?, 1, "
+        "'falla', ?)",
+        (novela_id, json.dumps({"conflictos": [{"comprobacion": "orden_de_giros"}]})),
+    )
+    assert fallo.fase_a_rehacer(con, novela_id) == "estructura"
