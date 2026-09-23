@@ -367,6 +367,8 @@ Si falla, se reintenta la escaleta una vez con el informe adjunto; el segundo fa
 
 > Esto implementa la regla de que la unidad de transacción es la unidad de trabajo. En la práctica, el worker acumula las escrituras del capítulo en una transacción abierta y la confirma al final; las llamadas al agente ocurren con la transacción abierta pero **sin bloquear a los lectores**, que es lo que WAL garantiza.
 
+> Sustituido por spec2, RF2-PIPE-08.
+
 **RF-PIPE-09** Redacción: el redactor recibe el paquete de capítulo (RF-CTX-01) y devuelve `{ escenas: [{ escena_id, texto }], notas? }`, una entrada por escena de la escaleta y en su orden. Falla la validación si falta una escena, sobra una, o algún `texto` contiene un marcador pendiente (patrón configurable, por defecto `[[…]]`, `TODO`, `XXX`). El reintento por validación cuenta como intento de la puerta 4.
 
 **RF-PIPE-10** Extracción: el extractor recibe la prosa recién escrita más el canon filtrado del paquete y devuelve, con referencia a la escena de origen en cada elemento:
@@ -424,6 +426,8 @@ Si alguna parte falla, el orquestador **vuelve a redacción** del mismo capítul
 5. Avanza `ejecucion.capitulos_completados` y `capitulo_actual`.
 6. Emite el evento `capitulo_completado`.
 7. Confirma.
+
+> Sustituido por spec2, RF2-PIPE-08.
 
 **RF-PIPE-15 — Puerta 5, determinista y no bloqueante.** Tras el último capítulo, el orquestador genera un informe con: siembras cuyo estado final no es `pagada` ni `abandonada`; hilos cuyo estado final no es `resuelto` ni `abierto_deliberado`; hilos que pasaron más de `N` capítulos en `latente` (`N` configurable, defecto 6). La ejecución termina en `completada` si el informe está vacío y en `completada_con_avisos` si no. La curva de tensión (`D`) y las reglas de la amenaza (`I`) no se evalúan en la v1.
 
@@ -564,6 +568,8 @@ Todo en una transacción. La escaleta y el canon de planificación **no** se toc
 
 No reanuda solo: el autor decide con `arrancar`. Es la parte de la reanudación que architecture.md señala como la que más cuidado necesita, y por eso la v1 prefiere detenerse a adivinar.
 
+> Sustituido por spec2, RF2-FALLO-06.
+
 **RF-FALLO-07** Una excepción no controlada en cualquier punto hace rollback, registra el traceback en `ejecucion.ultimo_error` y un evento `error`, y deja la ejecución en `error`. `arrancar` desde `error` reanuda como desde `detenida`.
 
 ### 3.10 Skills de los agentes
@@ -593,6 +599,8 @@ No reanuda solo: el autor decide con `arrancar`. Es la parte de la reanudación 
 > **Decisión de la spec (21-09-2026).** definitions.md modela esos cuatro como atributos. Mantenerlos como columnas mutables rompería la reanudación por borrado y haría que un `UPDATE` de prosa pudiera alterar estado sin rastro. Tablas de estado por entidad, con escena de origen, es la forma más coherente con «el registro de hechos es append-only». A llevar a definitions.md.
 
 **RF-PER-07** Integridad comprobable en cualquier momento con una consulta única `verificar_integridad()` que devuelve violaciones de: todo `hecho` tiene `escena_id` de una escena existente; toda `siembra_estado = pagada` tiene escena posterior a la de siembra; ningún `estado_conocimiento` precede a la escena que establece su hecho; ningún capítulo `completado` sin `capitulo_compilado` vigente; ningún `capitulo_compilado` vigente para un capítulo no completado. Es la comprobación que usa RF-FALLO-06 y la que los tests de propiedades atacan.
+
+> Ampliado por spec2, RF2-PER-07.
 
 **RF-PER-08** Índices mínimos: `hecho(novela_id, sujeto_tipo, sujeto_id, atributo)` para la puerta 3; `estado_conocimiento(personaje_id, hecho_id)`; `escena_texto(escena_id, version)`; `traza_evento(novela_id, id)`; `intencion(estado, creado_en)`.
 

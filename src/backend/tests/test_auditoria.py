@@ -53,7 +53,6 @@ def _intencion(con, tipo: str, novela_id: int, **payload: object) -> cola.Intenc
 # --- Fase 1: el capitulo a medias ---------------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, reason="Hallazgo 5: parar en el tramo 3 deja texto y hechos")
 def test_hallazgo_05_parar_durante_el_oficio_no_deja_el_capitulo_a_medias() -> None:
     con, ruta = nueva_bd()
     novela_id = crear_novela(con)
@@ -73,7 +72,6 @@ def test_hallazgo_05_parar_durante_el_oficio_no_deja_el_capitulo_a_medias() -> N
     assert textos_vigentes_del_capitulo(con, novela_id, 2) == 0
 
 
-@pytest.mark.xfail(strict=True, reason="Hallazgo 6: recuperar() no revierte el capitulo a medias")
 def test_hallazgo_06_el_worker_caido_no_deja_hechos_del_capitulo_a_medias() -> None:
     """La caida es de verdad: el subproceso sale con os._exit y no corre ningun finally."""
     con, ruta = nueva_bd()

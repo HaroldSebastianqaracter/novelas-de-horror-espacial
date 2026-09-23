@@ -9,7 +9,7 @@ Reglas que este modulo impone (RF-PER-01, RF-API-05):
 from __future__ import annotations
 
 import sqlite3
-from collections.abc import Iterator, Sequence
+from collections.abc import Collection, Iterator, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
@@ -264,16 +264,76 @@ _COMPROBACIONES: tuple[tuple[str, str, str], ...] = (
 )
 
 
-def verificar_integridad(con: sqlite3.Connection) -> list[Violacion]:
+#: Tablas de ESTADO: append-only y con escena de origen (RF-PER-06). Revertir un capitulo es
+#: borrar sus filas de aqui; `evento` va aparte porque su escena admite NULL (los antecedentes
+#: del mundo y los retcon no ocurren en ninguna escena).
+TABLAS_DE_ESTADO: tuple[str, ...] = (
+    "hecho", "estado_conocimiento", "uso_conocimiento", "estado_personaje", "estado_objeto",
+    "siembra_estado", "hilo_estado", "amenaza_revelacion", "entidad_no_reconocida",
+)
+
+ESTADOS_ACTIVOS: tuple[str, ...] = ("planificando", "escaletando", "generando")
+
+
+def _sql_estado_en_capitulo_no_completado() -> str:
+    partes = [
+        f"SELECT '{tabla}' AS tabla, x.id AS fila_id, ea.novela_id, ea.capitulo "
+        f"FROM {tabla} x JOIN escena_abierta ea ON ea.escena_id = x.escena_id"
+        for tabla in (*TABLAS_DE_ESTADO, "evento")
+    ]
+    partes.append(
+        "SELECT 'escena_texto' AS tabla, x.id AS fila_id, ea.novela_id, ea.capitulo "
+        "FROM escena_texto x JOIN escena_abierta ea ON ea.escena_id = x.escena_id "
+        "WHERE x.estado = 'vigente'"
+    )
+    return (
+        "WITH escena_abierta AS (SELECT e.id AS escena_id, e.novela_id, c.numero AS capitulo "
+        "FROM escena e JOIN capitulo c ON c.id = e.capitulo_id WHERE c.estado <> 'completado') "
+        + " UNION ALL ".join(partes)
+    )
+
+
+def novelas_activas(con: sqlite3.Connection) -> set[int]:
+    return {
+        int(f["novela_id"]) for f in con.execute(
+            f"SELECT novela_id FROM ejecucion WHERE estado IN "
+            f"({','.join('?' * len(ESTADOS_ACTIVOS))})",
+            ESTADOS_ACTIVOS,
+        )
+    }
+
+
+def verificar_integridad(
+    con: sqlite3.Connection, *, activas: Collection[int] | None = None
+) -> list[Violacion]:
     """Devuelve las violaciones de los invariantes del grafo. Lista vacia = grafo integro.
 
-    La usan la recuperacion del worker caido (RF-FALLO-06) y los tests de propiedades.
+    La usan la recuperacion del worker caido (RF2-FALLO-06) y los tests de propiedades.
+
+    `activas` son las novelas cuya ejecucion esta en marcha: en ellas un capitulo con texto y
+    hechos sin completar es el estado intermedio legitimo del tramo 2, no una violacion
+    (RF2-PER-07). Si no se dice, se lee de la tabla `ejecucion`.
     """
     violaciones: list[Violacion] = []
     for regla, descripcion, sql in _COMPROBACIONES:
         filas = [dict(f) for f in con.execute(sql).fetchall()]
         if filas:
             violaciones.append(Violacion(regla=regla, descripcion=descripcion, filas=filas))
+
+    en_marcha = set(activas) if activas is not None else novelas_activas(con)
+    a_medias = [
+        dict(f) for f in con.execute(_sql_estado_en_capitulo_no_completado()).fetchall()
+        if int(f["novela_id"]) not in en_marcha
+    ]
+    if a_medias:
+        violaciones.append(Violacion(
+            regla="estado_en_capitulo_no_completado",
+            descripcion=(
+                "Ningun texto vigente ni ninguna fila de estado pertenece a un capitulo no "
+                "completado de una novela sin ejecucion activa"
+            ),
+            filas=a_medias,
+        ))
 
     fk_rotas = [dict(f) for f in con.execute("PRAGMA foreign_key_check").fetchall()]
     if fk_rotas:

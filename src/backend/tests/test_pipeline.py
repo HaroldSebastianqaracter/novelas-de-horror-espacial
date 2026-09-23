@@ -220,7 +220,7 @@ def test_revertir_deja_el_grafo_como_estaba(entorno) -> None:
     assert foto() != antes
 
     with transaccion(con):
-        fallo.revertir_a(con, novela_id, 2)
+        fallo.relanzar(con, novela_id, 2)
 
     despues = foto()
     # El compilado no se borra, se descarta: es historia legible.
@@ -243,7 +243,7 @@ def test_se_puede_reanudar_y_termina(entorno) -> None:
     pipeline.avanzar(ctx)
 
     with transaccion(con):
-        fallo.revertir_a(con, novela_id, 2)
+        fallo.relanzar(con, novela_id, 2)
     assert con.execute(
         "SELECT COUNT(*) FROM capitulo WHERE novela_id = ? AND estado = 'completado'",
         (novela_id,),

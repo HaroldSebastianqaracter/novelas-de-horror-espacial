@@ -23,12 +23,16 @@ y no dentro:
 Lo que la regla original protegia se conserva: **texto y hechos entran juntos o no entra
 ninguno**, que es lo que impide que exista un capitulo escrito cuyos hechos no se capturaron.
 Lo que cambia es que entre el tramo 2 y el 3 puede quedar un capitulo con su texto y sus
-hechos pero sin marcar como completado. Eso no lo ve ningun lector como capitulo terminado, y
-si el worker muere ahi, la recuperacion revierte al ultimo capitulo integro.
+hechos pero sin marcar como completado. Es el unico estado intermedio legitimo, y solo
+mientras la ejecucion esta activa (RF2-PER-07). Si el capitulo sale del bucle por cualquier
+otro camino que no sea cerrarse, `generar_capitulo` lo revierte antes de propagar; y si el
+worker muere ahi, sin ocasion de revertir, la recuperacion lo hace al arrancar
+(RF2-FALLO-06).
 """
 
 from __future__ import annotations
 
+import logging
 import sqlite3
 from dataclasses import dataclass, field
 from typing import Any
@@ -63,6 +67,8 @@ from tareas.redaccion.esquemas import SalidaRedaccion
 
 from . import cola, estados, fallo
 from .puerta_global import evaluar as evaluar_puerta_global
+
+log = logging.getLogger("orquestador")
 
 
 class Detenido(Exception):
@@ -276,115 +282,144 @@ def escaletar(ctx: Contexto) -> None:
 
 
 def generar_capitulo(ctx: Contexto, numero: int) -> None:
-    """Paquete, redaccion, extraccion, puerta 3 y puerta 4 para un capitulo."""
+    """Paquete, redaccion, extraccion, puerta 3 y puerta 4 para un capitulo (RF2-PIPE-08).
+
+    Toda salida que no sea «capitulo cerrado» ni «parada de continuidad» revierte el
+    capitulo antes de propagarse: un `parar` durante el oficio, un agente interrumpido, una
+    salida invalida o cualquier excepcion. Sin eso, el texto y los hechos del tramo 2 se
+    quedarian en el grafo de un capitulo que nadie termino.
+    """
     _asegurar_activa(ctx, "arrancar_generacion")
-    for intento in range(1, ctx.cfg_max_intentos + 1):
-        with transaccion(ctx.con):
-            estados.fijar_fase(ctx.con, ctx.novela_id, "paquete", capitulo=numero,
-                               intento=intento)
-
-        criterios = ctx.eventos_criterios if intento > 1 else None
-        recuperado = _recuperar(ctx, numero)
-
-        try:
-            paquete_redaccion = s_redaccion.paquete(
-                ctx.con, ctx.novela_id, numero,
-                criterios_incumplidos=criterios, recuperado=recuperado,
-            )
-        except PresupuestoExcedido as exc:
-            _abrir_parada(ctx, "presupuesto", exc.informe(), capitulo=numero, intento=intento)
-            return
-
-        # --- Tramo 1: llamadas al agente, sin transaccion --------------------------------
-        with transaccion(ctx.con):
-            estados.fijar_fase(ctx.con, ctx.novela_id, "redaccion", capitulo=numero,
-                               intento=intento)
-        prosa, resultado_redaccion = _invocar(
-            ctx, "redaccion", paquete_redaccion, SalidaRedaccion,
-            capitulo=numero, intento=intento,
-        )
-        textos = {e.orden: e.texto for e in prosa.escenas}
-
-        with transaccion(ctx.con):
-            estados.fijar_fase(ctx.con, ctx.novela_id, "extraccion", capitulo=numero,
-                               intento=intento)
-        paquete_extraccion = s_extraccion.paquete(ctx.con, ctx.novela_id, numero, textos)
-        hechos, _ = _invocar(
-            ctx, "extraccion", paquete_extraccion, SalidaExtraccion,
-            capitulo=numero, intento=intento,
-        )
-
-        # --- Tramo 2: texto y hechos entran juntos, y la puerta 3 decide -----------------
-        limpio = False
-        try:
+    # Verdadero desde que el tramo 2 confirma hasta que el capitulo se cierra o se revierte.
+    a_medias = False
+    try:
+        for intento in range(1, ctx.cfg_max_intentos + 1):
             with transaccion(ctx.con):
-                estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_3", capitulo=numero,
+                estados.fijar_fase(ctx.con, ctx.novela_id, "paquete", capitulo=numero,
                                    intento=intento)
-                por_orden = s_redaccion.aplicar(
-                    ctx.con, ctx.novela_id, numero, prosa, intento=intento,
-                    llamada_id=resultado_redaccion.llamada_id,
-                )
-                s_extraccion.aplicar(ctx.con, ctx.novela_id, numero, hechos, por_orden)
-                continuidad = p_continuidad.evaluar(ctx.con, ctx.novela_id, numero)
-                if not continuidad.pasa:
-                    raise _Rechazado(continuidad)
-                limpio = True
-        except _Rechazado as rechazo:
-            _registrar_puerta(ctx, rechazo.resultado, capitulo=numero, intento=intento)
-            informe = rechazo.resultado.informe()
-            informe["prosa_rechazada"] = textos
-            _abrir_parada(ctx, "continuidad", informe, capitulo=numero, intento=intento)
-            return
 
-        if limpio:
+            criterios = ctx.eventos_criterios if intento > 1 else None
+            recuperado = _recuperar(ctx, numero)
+
+            try:
+                paquete_redaccion = s_redaccion.paquete(
+                    ctx.con, ctx.novela_id, numero,
+                    criterios_incumplidos=criterios, recuperado=recuperado,
+                )
+            except PresupuestoExcedido as exc:
+                _abrir_parada(ctx, "presupuesto", exc.informe(), capitulo=numero,
+                              intento=intento)
+                return
+
+            # --- Tramo 1: llamadas al agente, sin transaccion ----------------------------
+            with transaccion(ctx.con):
+                estados.fijar_fase(ctx.con, ctx.novela_id, "redaccion", capitulo=numero,
+                                   intento=intento)
+            prosa, resultado_redaccion = _invocar(
+                ctx, "redaccion", paquete_redaccion, SalidaRedaccion,
+                capitulo=numero, intento=intento,
+            )
+            textos = {e.orden: e.texto for e in prosa.escenas}
+
+            with transaccion(ctx.con):
+                estados.fijar_fase(ctx.con, ctx.novela_id, "extraccion", capitulo=numero,
+                                   intento=intento)
+            paquete_extraccion = s_extraccion.paquete(ctx.con, ctx.novela_id, numero, textos)
+            hechos, _ = _invocar(
+                ctx, "extraccion", paquete_extraccion, SalidaExtraccion,
+                capitulo=numero, intento=intento,
+            )
+
+            # --- Tramo 2: texto y hechos entran juntos, y la puerta 3 decide -------------
+            try:
+                with transaccion(ctx.con):
+                    estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_3", capitulo=numero,
+                                       intento=intento)
+                    por_orden = s_redaccion.aplicar(
+                        ctx.con, ctx.novela_id, numero, prosa, intento=intento,
+                        llamada_id=resultado_redaccion.llamada_id,
+                    )
+                    s_extraccion.aplicar(ctx.con, ctx.novela_id, numero, hechos, por_orden)
+                    continuidad = p_continuidad.evaluar(ctx.con, ctx.novela_id, numero)
+                    if not continuidad.pasa:
+                        raise _Rechazado(continuidad)
+            except _Rechazado as rechazo:
+                # La transaccion ya se revirtio entera: no hay nada a medias.
+                _registrar_puerta(ctx, rechazo.resultado, capitulo=numero, intento=intento)
+                informe = rechazo.resultado.informe()
+                informe["prosa_rechazada"] = textos
+                _abrir_parada(ctx, "continuidad", informe, capitulo=numero, intento=intento)
+                return
+
+            a_medias = True
             _registrar_puerta(ctx, continuidad, capitulo=numero, intento=intento)
 
-        # --- Tramo 3: oficio, y si pasa, cierre del capitulo -----------------------------
-        texto_completo = "\n\n".join(textos[k] for k in sorted(textos))
-        mecanica = p_oficio.evaluar(ctx.con, ctx.novela_id, numero, texto_completo)
+            # --- Tramo 3: oficio, y si pasa, cierre del capitulo -------------------------
+            texto_completo = "\n\n".join(textos[k] for k in sorted(textos))
+            mecanica = p_oficio.evaluar(ctx.con, ctx.novela_id, numero, texto_completo)
 
-        juicio: SalidaOficio | None = None
-        if mecanica.pasa:
-            with transaccion(ctx.con):
-                estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_4", capitulo=numero,
-                                   intento=intento)
-            paquete_oficio = s_oficio.paquete(
-                ctx.con, ctx.novela_id, numero, texto_completo, mecanica
+            juicio: SalidaOficio | None = None
+            if mecanica.pasa:
+                with transaccion(ctx.con):
+                    estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_4", capitulo=numero,
+                                       intento=intento)
+                paquete_oficio = s_oficio.paquete(
+                    ctx.con, ctx.novela_id, numero, texto_completo, mecanica
+                )
+                juicio, _ = _invocar(
+                    ctx, "oficio", paquete_oficio, SalidaOficio, capitulo=numero,
+                    intento=intento,
+                )
+
+            pasa_oficio = mecanica.pasa and juicio is not None and juicio.pasa
+            _registrar_puerta(ctx, mecanica, capitulo=numero, intento=intento)
+
+            if pasa_oficio:
+                with transaccion(ctx.con):
+                    _cerrar_capitulo(ctx, numero)
+                a_medias = False
+                _indexar(ctx, numero)
+                return
+
+            # Falla el oficio: se descarta lo escrito y se vuelve a redaccion con el criterio.
+            ctx.eventos_criterios = (
+                [v.model_dump() for v in juicio.incumplidos] if juicio is not None
+                else [{"criterio": c.comprobacion, "sugerencia": c.descripcion,
+                       "evidencia": "", "principio": "38"} for c in mecanica.bloqueantes]
             )
-            juicio, _ = _invocar(
-                ctx, "oficio", paquete_oficio, SalidaOficio, capitulo=numero, intento=intento
-            )
-
-        pasa_oficio = mecanica.pasa and juicio is not None and juicio.pasa
-        _registrar_puerta(ctx, mecanica, capitulo=numero, intento=intento)
-
-        if pasa_oficio:
             with transaccion(ctx.con):
-                _cerrar_capitulo(ctx, numero)
-            _indexar(ctx, numero)
-            return
+                fallo.revertir_grafo(ctx.con, ctx.novela_id, numero, motivo="oficio")
+            a_medias = False
 
-        # Falla el oficio: se descarta lo escrito y se vuelve a redaccion con el criterio.
-        ctx.eventos_criterios = (
-            [v.model_dump() for v in juicio.incumplidos] if juicio is not None
-            else [{"criterio": c.comprobacion, "sugerencia": c.descripcion,
-                   "evidencia": "", "principio": "38"} for c in mecanica.bloqueantes]
-        )
+            if intento == ctx.cfg_max_intentos:
+                informe: dict[str, Any] = {
+                    "motivo": (
+                        f"Tres intentos sin pasar la puerta de oficio en el capitulo {numero}. "
+                        "Si el capitulo no se puede escribir bien, el problema probablemente "
+                        "esta en la escaleta y no en la prosa."
+                    ),
+                    "mecanica": mecanica.informe(),
+                    "criterios_incumplidos": ctx.eventos_criterios,
+                }
+                _abrir_parada(ctx, "oficio", informe, capitulo=numero, intento=intento)
+                return
+    finally:
+        if a_medias:
+            _revertir_a_medias(ctx, numero)
+
+
+def _revertir_a_medias(ctx: Contexto, numero: int) -> None:
+    """Deshace el tramo 2 de un capitulo que sale del bucle sin cerrarse.
+
+    Corre en su propia transaccion y no lanza: si la reversion falla, lo que tiene que
+    llegar al llamante es la excepcion original, no la de la limpieza. La recuperacion del
+    worker volvera a intentarlo al arrancar (RF2-FALLO-06).
+    """
+    try:
         with transaccion(ctx.con):
-            fallo.revertir_a(ctx.con, ctx.novela_id, numero)
-
-        if intento == ctx.cfg_max_intentos:
-            informe: dict[str, Any] = {
-                "motivo": (
-                    f"Tres intentos sin pasar la puerta de oficio en el capitulo {numero}. "
-                    "Si el capitulo no se puede escribir bien, el problema probablemente esta "
-                    "en la escaleta y no en la prosa."
-                ),
-                "mecanica": mecanica.informe(),
-                "criterios_incumplidos": ctx.eventos_criterios,
-            }
-            _abrir_parada(ctx, "oficio", informe, capitulo=numero, intento=intento)
-            return
+            fallo.revertir_grafo(ctx.con, ctx.novela_id, numero, motivo="salida_anomala")
+    except Exception:  # noqa: BLE001 - no debe tapar la excepcion que nos trajo aqui
+        log.exception("No se pudo revertir el capitulo %s a medias", numero)
 
 
 class _Rechazado(Exception):

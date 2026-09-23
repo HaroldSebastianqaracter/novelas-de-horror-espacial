@@ -2,7 +2,7 @@
 
 Plan de verificación de [spec1.md](spec1.md). Métodos y etiquetas según [docs/validators.md](../docs/validators.md).
 
-Actualizado el 23 de septiembre de 2026. Suite: 53 tests en verde y 11 `xfail` estrictos, que son las reproducciones de la auditoría. Las rutas de evidencia son relativas a `src/backend/`.
+Actualizado el 23 de septiembre de 2026. Suite: 62 tests en verde y 9 `xfail` estrictos, que son las reproducciones de la auditoría que aún no ha cerrado ninguna fase de spec2. Las rutas de evidencia son relativas a `src/backend/`.
 
 > **Filas degradadas el 23 de septiembre de 2026.** La auditoría de ese día reprodujo fallos en siete filas que estaban en `implementado`: 11, 16, 17, 21, 25, 27 y 35. Pasan a `fallando` ya, y no cuando se arreglen, porque un plan que dice «implementado» sobre un fallo reproducido es justo lo que la sección siguiente llama la forma más común de mentir. Cada una vuelve a `implementado` en la fase de [spec2-plan.md](spec2-plan.md) que la corrige, y su propiedad endurecida vive en [spec2-verification.md](spec2-verification.md).
 
@@ -24,7 +24,7 @@ Actualizado el 23 de septiembre de 2026. Suite: 53 tests en verde y 11 `xfail` e
 | 8 | La conexión de lectura rechaza escrituras en el motor | Integration testing | `T` | `tests/test_api.py::test_la_conexion_de_lectura_rechaza_escrituras`, `tests/test_arquitectura.py::test_la_api_no_puede_escribir` | implementado |
 | 9 | Encolar una intención no ejecuta nada | Integration testing | `T` | `tests/test_api.py::test_encolar_una_intencion_no_ejecuta_nada` | implementado |
 | 10 | El `GET` de ejecución refleja el estado real | Integration testing | `T` | `tests/test_api.py::test_el_get_es_la_verdad` | implementado |
-| 11 | Un lector nunca ve un capítulo sin sus hechos ni hechos sin texto | Property-based sobre `verificar_integridad()` | `T` | `tests/test_pipeline.py`. **Contradicha**: tras `parar` o una caída en el tramo 3 quedan texto y hechos de un capítulo no completado y la integridad sale limpia. Reproducción: `tests/test_auditoria.py::test_hallazgo_05_…`, `::test_hallazgo_06_…` | **fallando** |
+| 11 | Un lector nunca ve un capítulo sin sus hechos ni hechos sin texto | Property-based sobre `verificar_integridad()` + integration testing por tipo de salida | `T` | Regla `estado_en_capitulo_no_completado` (RF2-PER-07) en `compartido/db.py`; `tests/test_capitulo_a_medias.py`; `tests/test_auditoria.py::test_hallazgo_05_…`, `::test_hallazgo_06_…`. Corregida por spec2, fase 1 | implementado |
 | 12 | Invariantes del grafo: hecho con escena, pago posterior a siembra, conocimiento no anterior a su hecho | Property-based testing | `T` | `compartido/db.py::verificar_integridad` + aserciones en `tests/test_pipeline.py` | implementado |
 | 13 | La puerta 1 para si una subtrama cierra tras el clímax | Unit testing | `T` | `tests/test_puerta_estructura.py::test_subtrama_que_cierra_tras_el_climax_para` | implementado |
 | 14 | La puerta 1 solo avisa del anidamiento imperfecto y del final incompatible | Unit testing | `T` | `tests/test_puerta_estructura.py::test_anidamiento_imperfecto_solo_avisa`, `::test_final_incompatible_con_el_subgenero_avisa` | implementado |
@@ -38,7 +38,7 @@ Actualizado el 23 de septiembre de 2026. Suite: 53 tests en verde y 11 `xfail` e
 | 22 | El orden de recorte es el que fija la arquitectura y los bloques fijos no se tocan | Unit testing | `T` | `tests/test_arquitectura.py::test_los_bloques_fijos_no_estan_en_el_orden_de_recorte`, `::test_el_capitulo_anterior_cae_antes_que_el_canon` | implementado |
 | 23 | Revertir a N deja el grafo como al terminar N-1 | Property-based testing | `T` | `tests/test_pipeline.py::test_revertir_deja_el_grafo_como_estaba` | implementado |
 | 24 | Tras revertir se puede reanudar y la novela termina | Integration testing | `T` | `tests/test_pipeline.py::test_se_puede_reanudar_y_termina` | implementado |
-| 25 | `parar` detiene sin dejar un capítulo a medias | Integration testing | `T` | `tests/test_pipeline.py::test_parar_detiene_sin_dejar_capitulo_a_medias` solo prueba `parar` **antes** de generar. Durante el oficio deja el capítulo a medias. Reproducción: `tests/test_auditoria.py::test_hallazgo_05_…` | **fallando** |
+| 25 | `parar` detiene sin dejar un capítulo a medias | Integration testing | `T` | `tests/test_pipeline.py::test_parar_detiene_sin_dejar_capitulo_a_medias` (antes de generar) y `tests/test_auditoria.py::test_hallazgo_05_…` (durante el oficio). Corregida por spec2, fase 1 | implementado |
 | 26 | El pipeline completo corre sin Claude Code instalado | Integration testing | `T` | `tests/test_pipeline.py::test_pipeline_completo_sin_claude_code` | implementado |
 | 27 | Las cinco puertas quedan registradas en `resultado_puerta` | Integration testing | `T` | `tests/test_pipeline.py::test_las_puertas_quedan_registradas`. **Contradicha**: la puerta 4 registra `pasa` con el juez en contra. Reproducción: `tests/test_auditoria.py::test_hallazgo_09_…` | **fallando** |
 | 28 | Toda llamada se reconstruye desde `llamada_modelo` | Integration testing | `T` | `tests/test_api.py::test_la_traza_no_devuelve_el_prompt_salvo_que_se_pida` | implementado |
@@ -48,7 +48,7 @@ Actualizado el 23 de septiembre de 2026. Suite: 53 tests en verde y 11 `xfail` e
 | 32 | WAL, `busy_timeout` y claves ajenas activas en toda conexión | Unit testing | `T` | `tests/test_arquitectura.py::test_wal_y_busy_timeout` | implementado |
 | 33 | El agente no puede leer el repositorio ni buscar canon por su cuenta | Guardrail | `D` | Verificado a mano contra el CLI: `--allowedTools ""` y directorio de trabajo vacío. Sin prueba automática | **pendiente** |
 | 34 | Dos workers no escriben a la vez | Integration testing | `T` | `orquestador/cola.py::tomar_cerrojo`. Sin prueba | **pendiente** |
-| 35 | El worker caído a mitad de capítulo reanuda desde el último capítulo íntegro | Demonstration | `D` | `worker.py::recuperar` no revierte el capítulo a medias. Reproducción con una caída real del proceso: `tests/test_auditoria.py::test_hallazgo_06_…` | **fallando** |
+| 35 | El worker caído a mitad de capítulo reanuda desde el último capítulo íntegro | Integration testing con una caída real del proceso (antes `D`) | `T` | `tests/test_auditoria.py::test_hallazgo_06_…`: el subproceso sale con `os._exit` durante el oficio y `recuperar()` revierte. Corregida por spec2, fase 1 | implementado |
 | 36 | El SSE recupera con `Last-Event-ID` sin huecos ni duplicados | Integration testing | `T` | `main.py::stream_eventos`. Sin prueba | **pendiente** |
 | 37 | La salida de cada agente cumple sus criterios de terminación | Evals por skill | `T`, `I` con juez | Sin conjunto de referencia | **pendiente** |
 | 38 | El extractor captura los hechos que un manuscrito de referencia fija | Evals con golden dataset | `I` | Sin dataset anotado | **pendiente** |

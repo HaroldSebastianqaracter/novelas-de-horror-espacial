@@ -60,7 +60,7 @@ class Worker:
             interrumpir()
 
     def recuperar(self) -> None:
-        """Al arrancar, deja el mundo consistente (RF-FALLO-06).
+        """Al arrancar, deja el mundo consistente (RF2-FALLO-06).
 
         No reanuda solo. El autor decide con `arrancar`: si el worker se cayo a mitad de un
         capitulo, lo prudente es detenerse y dejar que alguien mire, no adivinar.
@@ -84,8 +84,12 @@ class Worker:
         for e in activas:
             novela_id = int(e["novela_id"])
             completados = lectura.ultimo_capitulo_completado(self.con, novela_id)
-            violaciones = db.verificar_integridad(self.con)
             with transaccion(self.con):
+                # Con tres tramos por capitulo, el grafo puede haberse quedado con el texto y
+                # los hechos de un capitulo sin cerrar. Se revierte antes de nada (RF2-FALLO-06).
+                fallo.revertir_grafo(
+                    self.con, novela_id, completados + 1, motivo="worker_caido"
+                )
                 self.con.execute(
                     """
                     UPDATE ejecucion
@@ -97,6 +101,9 @@ class Worker:
                     """,
                     (completados + 1, completados, novela_id),
                 )
+                # Ya revertida y detenida, la regla del capitulo a medias aplica: si sale algo,
+                # la recuperacion no ha dejado el grafo integro y queda en la traza.
+                violaciones = db.verificar_integridad(self.con)
                 emitir_evento(
                     self.con, novela_id, "worker_recuperado",
                     capitulos_completados=completados,
@@ -230,7 +237,7 @@ class Worker:
             return
 
         with transaccion(self.con):
-            borrado = fallo.revertir_a(self.con, novela_id, desde)
+            borrado = fallo.relanzar(self.con, novela_id, desde)
         if self.indice.disponible:
             with transaccion(self.con):
                 self.indice.purgar(novela_id, desde)
@@ -260,7 +267,7 @@ class Worker:
             )
             with transaccion(self.con):
                 revocados = fallo.aceptar_retcon(self.con, novela_id, parada_id)
-                fallo.revertir_a(self.con, novela_id, capitulo)
+                fallo.relanzar(self.con, novela_id, capitulo)
                 fallo.cerrar_parada(self.con, novela_id, parada_id, "aceptar_retcon")
             cola.cerrar(
                 self.con, intencion.id, "hecha", resultado={"hechos_revocados": revocados}
@@ -268,7 +275,7 @@ class Worker:
         elif accion == "relanzar":
             desde = int(p.get("desde_capitulo") or 1)
             with transaccion(self.con):
-                fallo.revertir_a(self.con, novela_id, desde)
+                fallo.relanzar(self.con, novela_id, desde)
                 fallo.cerrar_parada(self.con, novela_id, parada_id, "relanzar")
             cola.cerrar(self.con, intencion.id, "hecha")
         else:

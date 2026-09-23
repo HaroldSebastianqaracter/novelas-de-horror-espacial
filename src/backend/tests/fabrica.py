@@ -37,6 +37,9 @@ def novela_minima(con: sqlite3.Connection) -> Grafo:
         "VALUES ('El casco', 'horror_cosmico', 'victoria_pirrica', 80000)"
     ))
     g = Grafo(novela_id=nid)
+    # La puerta 3 corre durante la generacion: los capitulos tienen texto y hechos sin estar
+    # completados, que es el estado intermedio legitimo solo con la ejecucion activa.
+    con.execute("INSERT INTO ejecucion (novela_id, estado) VALUES (?, 'generando')", (nid,))
 
     con.execute(
         "INSERT INTO estilo_narrativo (novela_id, registro, ritmo_prosa, densidad_sensorial,"

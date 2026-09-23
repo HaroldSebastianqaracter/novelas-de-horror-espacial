@@ -17,15 +17,10 @@ import json
 import sqlite3
 from typing import Any
 
+from compartido.db import TABLAS_DE_ESTADO
 from compartido.grafo import emitir_evento, insertar
 
 from . import estados
-
-# Tablas de estado que se borran al revertir, todas con `escena_id`.
-TABLAS_DE_ESTADO = (
-    "hecho", "estado_conocimiento", "uso_conocimiento", "estado_personaje", "estado_objeto",
-    "siembra_estado", "hilo_estado", "amenaza_revelacion", "entidad_no_reconocida",
-)
 
 
 def abrir_parada(
@@ -121,8 +116,14 @@ def aceptar_retcon(con: sqlite3.Connection, novela_id: int, parada_id: int) -> i
     return len(ids)
 
 
-def revertir_a(con: sqlite3.Connection, novela_id: int, desde_capitulo: int) -> dict[str, int]:
-    """Deja el grafo como estaba al terminar el capitulo N-1 (RF-FALLO-04).
+def revertir_grafo(
+    con: sqlite3.Connection, novela_id: int, desde_capitulo: int, *, motivo: str = "relanzar"
+) -> dict[str, int]:
+    """Deja el grafo como estaba al terminar el capitulo N-1 (RF-FALLO-04, RF2-PIPE-08).
+
+    Solo toca el grafo: estado, texto y el estado de los capitulos. No mueve la ejecucion ni
+    cierra paradas, que es lo que distingue esta operacion de `relanzar`. La usan el reintento
+    de oficio, la salida anomala del bucle de capitulo y la recuperacion del worker caido.
 
     No toca el canon ni la escaleta: relanzar regenera prosa, no plan.
     """
@@ -193,6 +194,20 @@ def revertir_a(con: sqlite3.Connection, novela_id: int, desde_capitulo: int) -> 
         "WHERE novela_id = ? AND numero >= ?",
         (novela_id, desde_capitulo),
     )
+    emitir_evento(
+        con, novela_id, "revertido", desde_capitulo=desde_capitulo, motivo=motivo,
+        borrado=borrado,
+    )
+    return borrado
+
+
+def relanzar(con: sqlite3.Connection, novela_id: int, desde_capitulo: int) -> dict[str, int]:
+    """Revierte el grafo y deja la ejecucion lista para regenerar desde N (RF-FALLO-04).
+
+    Es lo que hacen `relanzar` y `resolver_parada`: ademas de `revertir_grafo`, cierra las
+    paradas abiertas y mueve el estado. Corre dentro de la transaccion del llamante.
+    """
+    borrado = revertir_grafo(con, novela_id, desde_capitulo, motivo="relanzar")
 
     for parada in paradas_abiertas(con, novela_id):
         cerrar_parada(con, novela_id, int(parada["id"]), "relanzado")
@@ -213,5 +228,4 @@ def revertir_a(con: sqlite3.Connection, novela_id: int, desde_capitulo: int) -> 
         """,
         (destino, desde_capitulo, desde_capitulo - 1, novela_id),
     )
-    emitir_evento(con, novela_id, "revertido", desde_capitulo=desde_capitulo, borrado=borrado)
     return borrado
