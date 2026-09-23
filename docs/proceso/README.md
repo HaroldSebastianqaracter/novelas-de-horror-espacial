@@ -12,5 +12,6 @@ El razonamiento que llevó a storyMaker a ser como es: qué se decidió construi
 | Red-team log | [red-team-log.md](red-team-log.md) | Formato fijado; casos adversariales pendientes |
 | Uso del browser MCP | — | Pendiente (bloque 7 del [plan de entrega](../../specs/storymaker-plan.md)) |
 | Skills, subagentes y comandos | [herramientas.md](herramientas.md) | Escrita |
+| Resumen de la noche del 23 al 24 de septiembre (trabajo sin el autor) | [noche-23-09.md](noche-23-09.md) | Escrito; la rama `noche-23-09` está sin integrar |
 
 > **Decisión sin entrevistar, 23 de septiembre de 2026.** La documentación de proceso va en una subcarpeta propia y **resume y enlaza, no copia**. Cada decisión ya está justificada en su sitio, en los callouts de `architecture.md`, `definitions.md` y `validators.md`, y en los mensajes de commit de cada fase. Copiarla aquí crearía una segunda versión que se desincroniza con el primer cambio. Se descartó reorganizar `docs/` entero con el formato del examen: `AGENTS.md` fija cuatro tipos de documento que el resto del repo ya cita por su ruta, y moverlos rompería esas referencias. Afecta a `AGENTS.md`, que ahora nombra esta carpeta.
