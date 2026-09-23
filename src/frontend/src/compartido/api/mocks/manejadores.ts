@@ -5,7 +5,7 @@
  */
 import { http, HttpResponse } from "msw";
 import type { CapituloTexto, Ejecucion, Estructura, Intencion, IntencionEncolada, NovelaDetalle, NovelaResumen, Parada, TipoIntencion } from "../tipos";
-import { capitulosDe, detalleDe, ejecuciones, novelas, paradas, textoDe } from "./datos";
+import { capitulosDe, detalleDe, ejecuciones, fechaApi, novelas, paradas, textoDe } from "./datos";
 
 /** Lo que tarda el «worker» en atender una intención. */
 const ESPERA_MS = 2_500;
@@ -79,7 +79,7 @@ function crearNovela(): number {
 const intenciones = new Map<number, IntencionSimulada>();
 let siguienteIntencion = 1;
 
-const ahora = () => new Date().toISOString();
+const ahora = () => fechaApi();
 
 function fijarEstado(novelaId: number, estado: string, fase: string | null) {
   const ejecucion = ejecuciones[novelaId];
@@ -164,7 +164,8 @@ function avanzar(id: number): string | null {
   const novela = novelas.find((n) => n.id === id);
   if (novela) novela.capitulos_completados = e.capitulos_completados;
   if (e.capitulos_completados >= capitulos.length) {
-    Object.assign(e, { capitulo_actual: null });
+    // Como el worker: el cursor queda en el capítulo siguiente al último.
+    Object.assign(e, { capitulo_actual: capitulos.length + 1 });
     fijarEstado(id, "completada", null);
     return "completada";
   }
@@ -306,7 +307,7 @@ export const manejadores = [
       estado: intencion.cierre?.estado ?? "pendiente",
       motivo: intencion.cierre?.motivo ?? null,
       resultado: intencion.cierre?.resultado ?? null,
-      creado_en: new Date(intencion.creada).toISOString(),
+      creado_en: fechaApi(intencion.creada),
     });
   }),
 ];

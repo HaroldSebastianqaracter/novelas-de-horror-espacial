@@ -56,3 +56,19 @@ export const comoEstadoEjecucion = (v: string | null | undefined) => entre(ESTAD
 export const comoFase = (v: string | null | undefined) => entre(FASES, v);
 export const comoTipoParada = (v: string | null | undefined) => entre(TIPOS_PARADA, v);
 export const comoEstadoIntencion = (v: string | null | undefined) => entre(ESTADOS_INTENCION, v);
+
+/** Las fechas de la API salen de SQLite (`datetime('now')`): UTC sin zona, «2026-09-23 15:44:20». */
+export function instanteDeApi(texto: string): Date {
+  const sinZona = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(texto);
+  return new Date(sinZona ? `${texto.replace(" ", "T")}Z` : texto);
+}
+
+/**
+ * El capítulo en curso, o `null`. Al cerrar un capítulo el worker deja el cursor en el siguiente,
+ * así que al terminar la novela `capitulo_actual` vale `total_capitulos + 1`.
+ */
+export function capituloEnCurso(e: { capitulo_actual?: number | null; total_capitulos?: number | null }): number | null {
+  const n = e.capitulo_actual;
+  if (!n) return null;
+  return e.total_capitulos && n > e.total_capitulos ? null : n;
+}

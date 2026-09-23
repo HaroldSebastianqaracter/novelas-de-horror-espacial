@@ -16,6 +16,14 @@ npm run dev:mocks   # sin backend: MSW sirve la API con datos ficticios
 npm run dev         # contra el backend en 127.0.0.1:8000, a través del proxy /api
 ```
 
+Para probar contra una API en otro puerto sin tocar la tuya (por ejemplo una con el puerto falso y una base temporal), `NOVELAS_API` cambia el destino del proxy. En PowerShell:
+
+```powershell
+$env:NOVELAS_API = "http://127.0.0.1:8001"; npm run dev
+```
+
+La API se levanta en ese puerto con `.venv\Scripts\python.exe -m uvicorn main:app --port 8001` desde `src/backend`, porque `python -m main` la deja fija en el 8000.
+
 | Script | Qué hace |
 | --- | --- |
 | `npm run tipos` | Regenera `src/compartido/api/esquema.gen.ts` desde `../backend/tests/openapi.json`. Hay que hacerlo cada vez que cambie el contrato |

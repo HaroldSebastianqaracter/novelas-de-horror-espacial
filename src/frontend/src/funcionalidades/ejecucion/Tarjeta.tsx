@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { type Rechazo, type Seguimiento, UN_MINUTO } from "../../compartido/api/intenciones";
-import { comoFase } from "../../compartido/api/reglas";
+import { capituloEnCurso, comoFase } from "../../compartido/api/reglas";
 import type { Ejecucion, NovelaResumen } from "../../compartido/api/tipos";
 import { ChipEstado } from "../../compartido/ui/ChipEstado";
 import { Hace, useAhora } from "../../compartido/ui/Hace";
@@ -35,7 +35,8 @@ function lineaFase(ejecucion: Ejecucion | undefined, estado: string | null | und
   if (!ejecucion?.fase) return estado === "configurada" || estado == null ? "Sin arrancar" : "Sin fase activa";
   const fase = comoFase(ejecucion.fase);
   let texto = `Fase ${fase ? ETIQUETA_FASE[fase] : ejecucion.fase}`;
-  if (ejecucion.capitulo_actual) texto += ` · cap. ${ejecucion.capitulo_actual}`;
+  const capitulo = capituloEnCurso(ejecucion);
+  if (capitulo) texto += ` · cap. ${capitulo}`;
   if ((ejecucion.intento_actual ?? 1) > 1) texto += ` · intento ${ejecucion.intento_actual}/3`;
   return texto;
 }
@@ -98,7 +99,7 @@ export function Tarjeta({ opciones = [], pendiente, rechazo, alDescartarRechazo,
       {estado === "parada" && (
         <p className="tarjeta__alerta">
           Parada{ejecucion?.parada_abierta_id ? ` P-${ejecucion.parada_abierta_id}` : ""}
-          {ejecucion?.capitulo_actual ? ` · cap. ${ejecucion.capitulo_actual}` : ""} · esperando decisión
+          {ejecucion && capituloEnCurso(ejecucion) ? ` · cap. ${capituloEnCurso(ejecucion)}` : ""} · esperando decisión
         </p>
       )}
       {estado === "completada_con_avisos" && (

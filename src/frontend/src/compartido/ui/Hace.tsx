@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { instanteDeApi } from "../api/reglas";
 
 export function haceTanto(iso: string, ahora = Date.now()): string {
-  const s = Math.max(0, Math.round((ahora - new Date(iso).getTime()) / 1000));
+  const s = Math.max(0, Math.round((ahora - instanteDeApi(iso).getTime()) / 1000));
   if (s < 5) return "ahora";
   if (s < 60) return `hace ${s} s`;
   if (s < 3600) return `hace ${Math.floor(s / 60)} min`;
@@ -23,8 +24,9 @@ export function useAhora(intervalo: number | null): number {
 /** «hace 3 min», que se refresca solo cada 30 s. */
 export function Hace({ iso, className }: { iso: string; className?: string }) {
   const ahora = useAhora(30_000);
+  const instante = instanteDeApi(iso);
   return (
-    <time className={className} dateTime={iso} title={new Date(iso).toLocaleString("es-ES")}>
+    <time className={className} dateTime={instante.toISOString()} title={instante.toLocaleString("es-ES")}>
       {haceTanto(iso, ahora)}
     </time>
   );

@@ -5,7 +5,9 @@
  */
 import type { Capitulo, Ejecucion, NovelaDetalle, NovelaResumen, Parada } from "../tipos";
 
-const hace = (minutos: number) => new Date(Date.now() - minutos * 60_000).toISOString();
+/** Como las da la API: UTC sin zona, «2026-09-23 15:44:20». */
+export const fechaApi = (ms = Date.now()) => new Date(ms).toISOString().slice(0, 19).replace("T", " ");
+const hace = (minutos: number) => fechaApi(Date.now() - minutos * 60_000);
 
 export const novelas: NovelaResumen[] = [
   { id: 1, titulo: "", genero: "terror_espacial", creado_en: hace(20), estado: "configurada", capitulos_completados: 0, subgenero_dominante: null },

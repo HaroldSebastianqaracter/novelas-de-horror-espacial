@@ -97,7 +97,7 @@ Una funcionalidad no importa del interior de otra. Lo común baja a `compartido/
 
 **RF-FE-API-01 — Los tipos se generan.** Los tipos TypeScript salen de `src/backend/tests/openapi.json`, el snapshot que ya protege RF2-API-01, con `openapi-typescript` y el script `npm run tipos`, en `compartido/api/esquema.gen.ts`. TypeScript se queda en la 5.x, porque `openapi-typescript` usa la API de compilador que la 7 ya no trae. El fichero generado se commitea. Si el backend cambia el contrato, se regenera: un tipo escrito a mano que duplique un esquema publicado no pasa la revisión.
 
-**RF-FE-API-02 — Sin CORS.** En desarrollo, Vite hace de proxy de `/api` a `http://127.0.0.1:8000`, también para el SSE. El backend no cambia.
+**RF-FE-API-02 — Sin CORS.** En desarrollo, Vite hace de proxy de `/api` a `http://127.0.0.1:8000`, también para el SSE. El backend no cambia. La variable `NOVELAS_API` cambia el destino, para probar contra una API en otro puerto sin tocar la del autor.
 
 **RF-FE-API-03 — Mocks del mismo contrato.** MSW sirve respuestas escritas contra los tipos generados, así que un cambio del contrato rompe la compilación de los mocks. Con `VITE_MOCKS=1`, el frontend corre entero sin backend, y en los tests siempre corre así.
 
@@ -126,6 +126,13 @@ Una funcionalidad no importa del interior de otra. Lo común baja a `compartido/
 **RF-FE-DAT-04 — Reconexión.** Si el SSE se corta o la red cae, aparece un aviso no bloqueante («Enlace perdido, reintentando»). Al volver, se invalidan todas las consultas y el SSE se reabre con `Last-Event-ID`. Volver de una suspensión del equipo (`visibilitychange`) cuenta como reconexión.
 
 **RF-FE-DAT-05 — Ciclo de una intención.** `POST /intenciones` devuelve `202`, y el frontend consulta `GET /intenciones/{id}` hasta que el estado sea `hecha`, `rechazada` o `interrumpida`: cada segundo durante el primer minuto y cada 5 s después. Mientras tanto, lo que la pidió se ve como **pendiente**, y pasado el minuto el aviso cambia a «sigue en cola» sin dejar de consultar. Al cerrarse se invalidan la ejecución y el tablero. Con `rechazada` o `interrumpida` se muestra el motivo del worker en lenguaje legible (`otra_ejecucion_activa`, `worker_caido`) o tal cual si no se conoce. Las intenciones pendientes se guardan en `sessionStorage`, así que sobreviven a recargar la página.
+
+**RF-FE-DAT-06 — Cómo se leen dos campos de la API.** Lo destapó la demostración contra el backend real (fila 12 de la verificación): los mocks no lo reproducían.
+
+- Las fechas (`actualizado_en`, `creado_en`) salen de `datetime('now')` de SQLite, en UTC y sin zona (`2026-09-23 15:44:20`). El navegador lee ese formato como hora local, y con la hora de España daba «hace 2 h» a lo que acababa de pasar. El cliente las lee como UTC (`instanteDeApi`).
+- Al cerrar un capítulo, el worker deja `capitulo_actual` en el siguiente, así que al terminar la novela vale `total_capitulos + 1`. Un cursor más allá del último capítulo no es un capítulo en curso (`capituloEnCurso`): no se pinta en la cabecera ni en la tarjeta, ni se sugiere para relanzar.
+
+Las dos reglas viven en `reglas.ts`, y los mocks dan ambos campos como el backend.
 
 > **Decisión de la spec.** No hay tiempo máximo. El worker corre el pipeline dentro de su propio bucle, así que un `parar` espera a que el pipeline lo detecte (`hay_parada_pendiente`) y puede tardar lo que dure la llamada en curso al modelo. Mientras la intención siga `pendiente`, el `GET` dice que está en cola, y abandonarla sería contradecirlo. Se descartó el máximo de 60 s de la versión anterior de este requisito.
 
@@ -291,11 +298,14 @@ Ninguno bloquea la v1. Cada uno retira un fichero de deuda de RF-FE-API-04:
 | Incluir en `Parada` sus `acciones_validas`, y en `Ejecucion` si admite `arrancar` y `relanzar` | `reglas.ts` |
 | Declarar como `Literal` en los modelos de respuesta el estado de la ejecución, la fase, el tipo y el estado de la parada y el estado de la intención | Las uniones de `reglas.ts` |
 | Añadir `fase` y `total_capitulos` a `NovelaResumen` | La consulta de ejecución por tarjeta |
+| Dar las fechas en ISO 8601 con zona (`2026-09-23T15:44:20Z`) | `instanteDeApi` en `reglas.ts` |
 | Opcional: un endpoint de análisis del brief que no escriba (`POST /briefs/analisis` devolviendo `analizar`) | El viaje de envío para descubrir contradicciones |
 
 ## 6. Orden de implementación
 
 > Los siete pasos están hechos (23 de septiembre de 2026, un commit por paso). Queda pendiente lo que la verificación marca así: el test que compara los ficheros de deuda con Python (fila 2), la regla de lint de colores literales (fila 10), la revisión a mano (fila 11) y la demostración contra el backend real (fila 12).
+>
+> La demostración contra el backend real se hizo el 23-09 y añadió RF-FE-DAT-06. También destapó un fallo del backend que el frontend no puede corregir: la API responde `500` a ratos, porque la dependencia `leer` de `main.py` abre la conexión SQLite en un hilo del pool y la usa o la cierra en otro (`sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread`). Con varias consultas a la vez, como hace cada pantalla, salta en casi todas las cargas. El frontend lo absorbe porque reintenta los `5xx` (RF-FE-DAT-01), pero hay que corregirlo en el backend.
 
 1. Andamiaje, tokens, rutas, tipos generados y MSW.
 2. Tablero general, sin arrastre: columnas, tarjetas, sondeo.

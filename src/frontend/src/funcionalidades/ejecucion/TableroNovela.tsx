@@ -5,6 +5,7 @@ import { consultaEjecucion, consultaEstructura, consultaNovela, consultaNovelas 
 import { type Enlace, useEventosNovela } from "../../compartido/api/eventos";
 import { useIntenciones } from "../../compartido/api/intenciones";
 import {
+  capituloEnCurso,
   comoEstadoEjecucion,
   comoFase,
   type EstadoEjecucion,
@@ -174,6 +175,7 @@ function Cabecera({ detalle, ejecucion, capitulos }: PropsContenido) {
   const puedeArrancar = estado !== null && ESTADOS_QUE_ADMITEN_ARRANCAR.has(estado);
   const puedeParar = estado !== null && ESTADOS_ACTIVOS.has(estado);
   const puedeRelanzar = estado !== null && ESTADOS_QUE_ADMITEN_RELANZAR.has(estado) && capitulos.length > 0;
+  const enCurso = capituloEnCurso(ejecucion);
   const conIntento = estado !== null && (ESTADOS_ACTIVOS.has(estado) || estado === "parada" || estado === "error");
 
   const pedirIntencion = (tipo: "arrancar" | "parar" | "relanzar", payload: Record<string, unknown> = {}) => {
@@ -206,7 +208,7 @@ function Cabecera({ detalle, ejecucion, capitulos }: PropsContenido) {
         </div>
         <div>
           <dt>Capítulo</dt>
-          <dd>{ejecucion.capitulo_actual ? dos(ejecucion.capitulo_actual) : "—"}</dd>
+          <dd>{enCurso ? dos(enCurso) : "—"}</dd>
         </div>
         <div>
           <dt>Intento</dt>
@@ -265,7 +267,7 @@ function Cabecera({ detalle, ejecucion, capitulos }: PropsContenido) {
         {relanzando && (
           <FormRelanzar
             capitulos={capitulos}
-            sugerido={ejecucion.capitulo_actual ?? Math.min((ejecucion.capitulos_completados ?? 0) + 1, capitulos.length)}
+            sugerido={enCurso ?? Math.min((ejecucion.capitulos_completados ?? 0) + 1, capitulos.length)}
             alCancelar={() => setRelanzando(false)}
             alConfirmar={(desde) => {
               setRelanzando(false);
@@ -365,7 +367,7 @@ function Generacion({ novelaId, ejecucion, capitulos }: { novelaId: number; ejec
   const estado = comoEstadoEjecucion(ejecucion.estado);
   const fase = comoFase(ejecucion.fase);
   const total = ejecucion.total_capitulos || capitulos.length;
-  const actual = ejecucion.capitulo_actual;
+  const actual = capituloEnCurso(ejecucion);
   const enCurso = capitulos.find((c) => c.numero === actual && c.estado !== "completado");
   const revisionFinal = fase === "puerta_5" && estado !== "completada" && estado !== "completada_con_avisos";
   const pendientes = capitulos.filter((c) => c.estado !== "completado" && c.numero !== enCurso?.numero);
