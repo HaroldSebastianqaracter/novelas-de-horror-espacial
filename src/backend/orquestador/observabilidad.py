@@ -683,7 +683,11 @@ class Exportador:
                 "veredicto": veredicto, "capitulo": f["capitulo"], "intento": f["intento"],
                 "conflictos": [
                     {"comprobacion": c.get("comprobacion"), "aviso": bool(c.get("aviso")),
-                     "descripcion": c.get("descripcion")}
+                     "descripcion": c.get("descripcion"),
+                     # El registro del guardrail: cada hallazgo y la huella de la politica
+                     # (spec3, RF3-GRD-04).
+                     **({"politica": c.get("datos")}
+                        if c.get("comprobacion") == "termino_vetado" else {})}
                     for c in conflictos
                 ],
             }),

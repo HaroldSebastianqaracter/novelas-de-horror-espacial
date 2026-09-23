@@ -127,7 +127,7 @@ Requisitos en [spec3.md](spec3.md), 3.4; verificación en [spec3-verification.md
 
 - [x] Palabras prohibidas en SQLite, **globales y por novela**, con normalización de mayúsculas, acentos, plurales y variantes simples (spec3, 3.5; en la rama `noche-23-09`).
 - [x] Un capítulo con coincidencia vuelve al writer; con el límite agotado, la generación se detiene y se informa.
-- [ ] **Audit log** de las decisiones del policy engine: hecho en `decision_politica` (spec3, RF3-GRD-04). Falta que cada fila llegue a Langfuse: hoy llega la comprobación como score.
+- [x] **Audit log** de las decisiones del policy engine, en `decision_politica` y en los metadatos del span de la puerta 4 en Langfuse (spec3, RF3-GRD-04; en la rama `noche-23-09`).
 - [x] Tests: un caso por nivel y uno de variante (acento o plural).
 
 ### 6. Validadores que faltan

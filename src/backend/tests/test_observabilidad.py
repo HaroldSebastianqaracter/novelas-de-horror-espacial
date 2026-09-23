@@ -206,6 +206,25 @@ def test_las_puertas_llegan_como_spans_y_scores(
     assert sorpresas and all(s["value"] == 0.0 for s in sorpresas)
 
 
+def test_los_terminos_vetados_llegan_con_sus_hallazgos() -> None:
+    """spec3, RF3-GRD-04: el registro del guardrail llega a Langfuse, no solo el score."""
+    from compartido.puerta_base import Conflicto, ResultadoPuerta
+
+    con, _ = nueva_bd()
+    novela_id = crear_novela(con)
+    hallazgo = {"termino": "tortura", "origen": "global", "forma": "tortura",
+                "fragmento": "marcas de tortura en", "inicio": 10, "fin": 17}
+    ResultadoPuerta(puerta=4, conflictos=[Conflicto(
+        comprobacion="termino_vetado", capitulo=1, descripcion="Terminos vetados.",
+        datos={"politica": "abc", "hallazgos": [hallazgo]},
+    )]).registrar(con, novela_id, capitulo=1, intento=1)
+    cliente = ClienteFalso()
+    obs.Exportador(cliente).exportar(con, novela_id)
+    [span] = cliente.de_tipo("span-create")
+    [conflicto] = span["metadata"]["conflictos"]
+    assert conflicto["politica"] == {"politica": "abc", "hallazgos": [hallazgo]}
+
+
 def test_el_coste_es_el_del_puerto_y_nunca_parece_gratis() -> None:
     con, _ = nueva_bd()
     novela_id = crear_novela(con)
