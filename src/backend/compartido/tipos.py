@@ -63,6 +63,9 @@ Veredicto = Literal["pasa", "falla", "aviso"]
 AGENTES: tuple[str, ...] = (
     "arquitecto", "mundo", "elenco", "estructura", "escaleta", "redaccion", "extraccion",
     "continuidad", "oficio",
+    # El entrevistador no corre en el pipeline: lo invoca entrevista.py antes de crear la
+    # novela (specs/spec3.md, RF3-ENT-01). Es un agente con su skill igual que los demas.
+    "entrevistador",
 )
 
 TIPOS_EVENTO: tuple[str, ...] = (

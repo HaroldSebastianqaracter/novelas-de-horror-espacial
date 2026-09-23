@@ -379,6 +379,77 @@ def continuidad(entrada: str, agente: str) -> dict[str, Any]:
     }
 
 
+
+# --- Entrevistador (specs/spec3.md, RF3-ENT-07) -----------------------------------------------
+#
+# Responde de forma determinista a un guion: toma la ultima respuesta del comprador como el
+# valor del campo por el que se pregunto, con la respuesta entera (o cada trozo separado por
+# «;») como cita. No valida nada: si el valor no sirve para ese campo, lo descarta el codigo,
+# que es justo lo que hay que poder probar.
+
+_CAMPOS_DE_CONTRADICCION = {
+    "edad_bajo_intensidad": ["intensidad", "destinatario.edad"],
+    "subgenero_exige_intensidad": ["subgenero", "intensidad"],
+    "elemento_con_vetado": [],
+}
+_LISTAS = {"destinatario.rasgos", "recuerdos", "vetados"}
+_PREGUNTAS = {
+    "destinatario.nombre": "¿Como se llama la persona a la que regalas la novela?",
+    "destinatario.edad": "¿Cuantos años tiene?",
+    "destinatario.pronombres": "¿Como nos referimos a ella: el, ella o neutro?",
+    "destinatario.rasgos": "Cuentame como es: rasgos de caracter o fisicos, separados por «;».",
+    "recuerdos": "Dame uno o varios recuerdos suyos, separados por «;».",
+    "ocasion": "¿Para que ocasion es? (cumpleanos, aniversario, boda, jubilacion, navidad, otra)",
+    "quien_regala": "¿Quien firma el regalo?",
+    "intensidad": "¿Cuanto miedo quieres que pase? (atmosferico, tension, intenso)",
+    "tono": "¿Que tono prefieres? (sobrio, emotivo, humor_negro, aventura)",
+}
+
+
+def _bloque(entrada: str, titulo: str) -> str:
+    m = re.search(rf"## {re.escape(titulo)}[^\n]*\n\n(.*?)(?=\n\n## |\Z)", entrada, re.S)
+    return m.group(1).strip() if m else ""
+
+
+def entrevistador(entrada: str, agente: str) -> dict[str, Any]:
+    texto = re.search(r"<<<TEXTO_DEL_COMPRADOR\n(.*?)\nTEXTO_DEL_COMPRADOR>>>", entrada, re.S)
+    if texto:
+        frases = [f.strip() for f in re.split(r"(?<=[.!?])\s+|\n+", texto.group(1)) if f.strip()]
+        return {"actualizaciones": [
+            {"campo": "recuerdos", "valor": f, "cita": f} for f in frases if len(f.split()) >= 4
+        ], "pregunta": ""}
+
+    campo = _bloque(entrada, "LA ULTIMA PREGUNTA ERA SOBRE")
+    respuesta = _bloque(entrada, "ULTIMA RESPUESTA DEL COMPRADOR")
+    actualizaciones: list[dict[str, Any]] = []
+    if respuesta and not respuesta.startswith("(") and not campo.startswith("("):
+        if campo == "correccion" and ":" in respuesta:
+            campo, _, respuesta = (x.strip() for x in respuesta.partition(":"))
+        candidatos = _CAMPOS_DE_CONTRADICCION.get(campo, [campo])
+        for c in candidatos:
+            if c == "allegados":
+                nombre, _, relacion = respuesta.partition(",")
+                actualizaciones.append({"campo": c, "valor": nombre.strip(),
+                                        "relacion": relacion.strip(), "cita": respuesta})
+            elif c in _LISTAS:
+                actualizaciones += [
+                    {"campo": c, "valor": t.strip(), "cita": t.strip()}
+                    for t in respuesta.split(";") if t.strip()
+                ]
+            else:
+                actualizaciones.append({"campo": c, "valor": respuesta, "cita": respuesta})
+
+    pendientes = _bloque(entrada, "PENDIENTES").splitlines()
+    pregunta = ""
+    # El primer pendiente tras aplicar lo de este turno lo decide el codigo; aqui se pregunta
+    # por el primero de la lista, que es lo que haria el agente real con lo que ve.
+    if pendientes and "(ninguno)" not in pendientes[0]:
+        linea = pendientes[0].lstrip("- ")
+        clave = linea.split(":", 1)[1].strip() if linea.startswith("FALTA") else ""
+        pregunta = _PREGUNTAS.get(clave, f"Hay que resolver esto: {linea}")
+    return {"actualizaciones": actualizaciones, "pregunta": pregunta}
+
+
 TODOS = {
     "arquitecto": arquitecto,
     "mundo": mundo,
@@ -389,4 +460,5 @@ TODOS = {
     "extraccion": extraccion,
     "oficio": oficio,
     "continuidad": continuidad,
+    "entrevistador": entrevistador,
 }
