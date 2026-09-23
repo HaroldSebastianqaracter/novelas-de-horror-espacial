@@ -434,6 +434,8 @@ Cualquier conflicto (no aviso) hace **rollback** de la transacción del capítul
 
 > Sustituido por spec2, RF2-PIPE-12, en la contradicción factual y en la presencia imposible por muerte.
 
+> Sustituido por spec2, RF2-PIPE-21, en el conocimiento no adquirido, y RF2-PIPE-22, en la entidad fuera de canon.
+
 **RF-PIPE-13 — Puerta 4, oficio.** Con la puerta 3 limpia, en dos partes y en este orden:
 
 1. **Mecánica (`T`, código).** Búsquedas dirigidas sobre la prosa del capítulo: ocurrencias de `EstiloNarrativo.ticsProhibidos` (lista exacta del canon), palabras filtro (lista fija en `config.py`: vio, oyó, sintió, notó, se dio cuenta, empezó a, pudo ver y sus flexiones), adverbios en `-mente` en atribuciones de diálogo, verbos de habla expresivos. **Falla** solo si hay alguna ocurrencia de `ticsProhibidos`; el resto son avisos que van en el informe para el juez y para el redactor.

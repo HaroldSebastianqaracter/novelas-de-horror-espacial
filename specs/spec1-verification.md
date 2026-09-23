@@ -2,7 +2,7 @@
 
 Plan de verificación de [spec1.md](spec1.md). Métodos y etiquetas según [docs/validators.md](../docs/validators.md).
 
-Actualizado el 23 de septiembre de 2026. Suite: 200 tests en verde, 1 marcado `modelo` y 1 marcado `agente`; `ruff` limpio y `pyright` estricto en cero sobre `src/backend` sin los tests. Las rutas de evidencia son relativas a `src/backend/`.
+Actualizado el 23 de septiembre de 2026. Suite: 201 tests en verde, 1 marcado `modelo` y 1 marcado `agente`; `ruff` limpio y `pyright` estricto en cero sobre `src/backend` sin los tests. Las rutas de evidencia son relativas a `src/backend/`.
 
 > **Filas degradadas el 23 de septiembre de 2026.** La auditoría de ese día reprodujo fallos en siete filas que estaban en `implementado`: 11, 16, 17, 21, 25, 27 y 35. Pasan a `fallando` ya, y no cuando se arreglen, porque un plan que dice «implementado» sobre un fallo reproducido es justo lo que la sección siguiente llama la forma más común de mentir. Cada una vuelve a `implementado` en la fase de [spec2-plan.md](spec2-plan.md) que la corrige, y su propiedad endurecida vive en [spec2-verification.md](spec2-verification.md).
 

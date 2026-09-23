@@ -135,8 +135,9 @@ def _contradice(s: dict[str, Any]) -> None:
 
 
 def _usa_sin_saber(s: dict[str, Any]) -> None:
+    # Reyes no estuvo en ninguna escena donde se fijo la voz de Idris (RF2-PIPE-21).
     s["usos_de_conocimiento"].append({
-        "escena_orden": 1, "personaje_ref": demo.PERSONAJES[1], "sujeto_ref": demo.PERSONAJES[0],
+        "escena_orden": 1, "personaje_ref": demo.PERSONAJES[2], "sujeto_ref": demo.PERSONAJES[0],
         "atributo": "voz",
     })
 
@@ -172,7 +173,6 @@ def _inventa(s: dict[str, Any]) -> None:
     (_a_la_vez_en_dos_sitios, "presencia_imposible"),
     (_objeto_sin_traslado, "objeto_sin_traslado"),
     (_vuelve_atras, "coherencia_temporal"),
-    (_inventa, "entidad_fuera_de_canon"),
 ])
 def test_romper_la_demo_en_una_comprobacion_para_el_pipeline(
     cambio: Callable[[dict[str, Any]], None], comprobacion: str
@@ -192,3 +192,15 @@ def test_repetir_un_rasgo_no_crea_otro_hecho(
     """RF2-PIPE-19: el olor del puente se dice en cada capitulo y queda un solo hecho."""
     con, _, _ = demo_entera
     assert _uno(con, "SELECT COUNT(*) FROM hecho WHERE atributo_clave = 'olor'") == 1
+
+
+def test_una_entidad_inventada_es_un_aviso_y_la_demo_sigue() -> None:
+    """RF2-PIPE-22: el redactor inventa un nombre; queda registrado, no para."""
+    con, novela_id, final = _correr(_en_el_capitulo_2(_inventa))
+    assert final == "completada"
+    detalles = [json.loads(f[0]) for f in con.execute(
+        "SELECT detalle FROM resultado_puerta WHERE novela_id = ? AND puerta = 3", (novela_id,)
+    )]
+    avisos = {c["comprobacion"] for d in detalles for c in d["conflictos"] if c["aviso"]}
+    assert "entidad_fuera_de_canon" in avisos
+    assert _uno(con, "SELECT COUNT(*) FROM entidad_no_reconocida") == 1

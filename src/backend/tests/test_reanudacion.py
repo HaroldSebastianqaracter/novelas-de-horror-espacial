@@ -162,18 +162,19 @@ def test_relanzar_directo_sobre_una_parada_de_estructura_se_rechaza(
 
 
 def test_aceptar_retcon_sin_hecho_que_revocar_se_rechaza(w: worker.Worker) -> None:
-    """Un conflicto que no es factual (una entidad fuera de canon) no tiene hecho previo."""
+    """Un conflicto que no es factual (un muerto que reaparece) no tiene hecho previo."""
     novela_id = crear_novela(w.con)
 
-    def inventa(entrada: str, agente: str) -> dict:
+    def muere_y_sigue(entrada: str, agente: str) -> dict:
         salida = agentes_falsos.extraccion(entrada, agente)
         if "capitulo 2" in entrada.lower():
-            salida["entidades_no_reconocidas"] = [
-                {"escena_orden": 1, "nombre": "Doctor Vance", "contexto": "aparece de la nada"}
-            ]
+            salida["estados_personaje"].append({
+                "escena_orden": 1, "personaje_ref": agentes_falsos.PERSONAJES[1],
+                "condicion": "muerto",
+            })
         return salida
 
-    w.puerto.registrar("extraccion", inventa)  # type: ignore[attr-defined]
+    w.puerto.registrar("extraccion", muere_y_sigue)  # type: ignore[attr-defined]
     w._correr(novela_id)
     parada = fallo.paradas_abiertas(w.con, novela_id)[0]
     assert parada["tipo"] == "continuidad"

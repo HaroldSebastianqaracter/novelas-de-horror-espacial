@@ -122,7 +122,23 @@ def test_detecta_entidad_fuera_de_canon(grafo: tuple[sqlite3.Connection, Grafo])
         "VALUES (?,?,'Doctor Vance','aparece sin estar en el paquete')",
         (g.novela_id, g.escenas[(2, 1)]),
     )
-    assert "entidad_fuera_de_canon" in comprobaciones(con, g)
+    # Aviso, no parada (RF2-PIPE-22).
+    resultado = puerta.evaluar(con, g.novela_id, 2)
+    assert "entidad_fuera_de_canon" in {c.comprobacion for c in resultado.conflictos if c.aviso}
+    assert "entidad_fuera_de_canon" not in comprobaciones(con, g)
+
+
+def test_estar_en_la_escena_donde_se_fija_el_hecho_es_saberlo(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """RF2-PIPE-21: Ibarra estaba en la escena 1.1, donde se fijo el hecho; Reyes no."""
+    con, g = grafo
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)",
+        (g.novela_id, g.personajes["Ibarra"], g.hechos["ojos"], g.escenas[(2, 1)]),
+    )
+    assert "conocimiento_no_adquirido" not in comprobaciones(con, g)
 
 
 # --- Nada de falsos positivos --------------------------------------------------------------

@@ -61,9 +61,10 @@ WHERE n.novela_id = ?
         WHERE s.supersede_a = v.id AND os.ordinal <= onu.ordinal)
 """
 
-# --- 2. Conocimiento no adquirido ---------------------------------------------------------
+# --- 2. Conocimiento no adquirido (RF2-PIPE-21) --------------------------------------------
 # Un personaje usa informacion que todavia no ha recibido. Es la fuente numero uno de
-# errores de continuidad en obra larga.
+# errores de continuidad en obra larga. Recibirla es tener un estado de conocimiento que la
+# habilite o haber estado (reparto o POV) en la escena donde el texto la fijo: presenciarla.
 _SQL_CONOCIMIENTO = f"""
 SELECT u.id AS uso_id, p.nombre AS personaje, h.atributo, h.valor, h.sujeto_nombre,
        u.escena_id, c.numero AS capitulo
@@ -81,6 +82,14 @@ WHERE u.novela_id = ? AND c.numero = ?
           AND ec.hecho_id = u.hecho_id
           AND ec.postura IN {POSTURAS_QUE_HABILITAN}
           AND oc.ordinal <= ou.ordinal)
+  AND NOT EXISTS (
+        SELECT 1 FROM escena eh
+        JOIN escena_ordinal oh ON oh.escena_id = eh.id
+        WHERE eh.id = h.escena_id
+          AND oh.ordinal <= ou.ordinal
+          AND (eh.pov_id = u.personaje_id OR EXISTS (
+                SELECT 1 FROM escena_personaje sp
+                WHERE sp.escena_id = eh.id AND sp.personaje_id = u.personaje_id)))
 """
 
 # --- 3. Sorpresa imposible (aviso) --------------------------------------------------------
@@ -299,10 +308,12 @@ def evaluar(
 
     for f in _filas(con, _SQL_ENTIDADES, p):
         conflictos.append(Conflicto(
-            comprobacion="entidad_fuera_de_canon",
+            # Aviso (RF2-PIPE-22): el redactor inventa detalles menores como cualquier
+            # novelista, y quedan registrados para que el autor los revise.
+            comprobacion="entidad_fuera_de_canon", aviso=True,
             descripcion=(
-                f"El texto usa '{f['nombre']}', que no estaba en el paquete: el agente invento "
-                "una entidad fuera de su canon."
+                f"El texto usa '{f['nombre']}', que no estaba en el paquete: el redactor "
+                "invento una entidad fuera del canon."
             ),
             escena_id=f["escena_id"], capitulo=capitulo, datos=f,
         ))
