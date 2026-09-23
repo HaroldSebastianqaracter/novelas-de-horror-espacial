@@ -40,6 +40,7 @@ from typing import Any
 
 from pydantic import BaseModel, ValidationError
 
+from compartido import politica
 from compartido.contexto import Paquete, Presupuesto, PresupuestoExcedido
 from compartido.db import transaccion
 from compartido.grafo import emitir_evento, lectura
@@ -490,6 +491,7 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
             oficio = p_oficio.combinar(mecanica, juicio)
             pasa_oficio = oficio.pasa
             _registrar_puerta(ctx, oficio, capitulo=numero, intento=intento)
+            _registrar_politica(ctx, mecanica, numero, intento, texto_completo)
 
             if pasa_oficio:
                 with transaccion(ctx.con):
@@ -523,6 +525,19 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
     finally:
         if a_medias:
             _revertir_a_medias(ctx, numero)
+
+
+def _registrar_politica(
+    ctx: Contexto, mecanica: Any, numero: int, intento: int, texto: str
+) -> None:
+    """Cada termino vetado que encontro la puerta 4, con lo que se hizo (spec3, RF3-GRD-04)."""
+    for c in mecanica.conflictos:
+        if c.comprobacion != "termino_vetado":
+            continue
+        accion = "parar" if intento >= ctx.cfg_max_intentos else "reintentar"
+        with transaccion(ctx.con):
+            politica.registrar(ctx.con, ctx.novela_id, numero, intento, texto,
+                               c.datos["hallazgos"], c.datos["politica"], accion=accion)
 
 
 def _trazar_descartes(

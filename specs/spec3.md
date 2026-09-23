@@ -388,6 +388,30 @@ El mapa de sustitución no sale nunca de la máquina. Una novela sin brief no ti
 
 ---
 
+## 3.5 Bloque 5 — Guardrails
+
+Una novela regalo tiene dos listas de lo que no puede salir: lo que su intensidad no admite (RF3-BRF-02) y lo que el comprador vetó en la entrevista (`vetados`). Hasta aquí las dos llegaban al redactor como instrucción, y nada comprobaba la prosa. Este bloque es la comprobación: determinista, por palabras, con el capítulo de vuelta al redactor y un registro de cada decisión.
+
+**RF3-GRD-01 — Los términos vetados, en SQLite.** La tabla `termino_vetado` (migración 010) guarda un término por fila:
+- `novela_id` vacío para los **globales**, o el de una novela para los suyos;
+- `hasta_nivel`, en los globales: el término se veta en las novelas de esa intensidad y de las más suaves (`atmosferico` < `tension` < `intenso`); `intenso` lo veta en todas;
+- `excepciones`: expresiones en JSON dentro de las cuales el término no cuenta («a sangre fría» para «sangre»).
+
+La migración siembra una lista global prudente: el contenido sexual en todos los niveles, la sangre y los cadáveres hasta `atmosferico`, y la tortura, la mutilación y las vísceras hasta `tension`. Cada forma flexionada que importa (verbos y participios) es su propia fila, porque la búsqueda solo trata el plural simple. Los `vetados` del brief se aplican siempre, en todos los niveles, sin copiarlos a la tabla: el brief ya está en SQLite (RF3-PER-02). Una novela sin brief no tiene intensidad, y solo le aplican los globales de `intenso`.
+
+**RF3-GRD-02 — La búsqueda.** `compartido/politica.py` busca cada término en la prosa como **secuencia de palabras completas**, con la normalización de `compartido/texto.py` (sin mayúsculas ni tildes, con la eñe, y el plural simple como el singular), la misma del análisis del brief (RF3-BRF-03). Nunca por subcadena: «sangre» no está en «sangrienta» si nadie lo pone en la lista, y «tripa» no está en «tripulación». Antes de partir, se quitan los caracteres invisibles de formato (categoría Unicode Cf), y cada hallazgo guarda su posición sobre el **texto original**: el término, la forma que casó, el fragmento de alrededor y las posiciones de inicio y fin.
+
+**RF3-GRD-03 — El capítulo vuelve al redactor.** La parte mecánica de la puerta 4 falla con `termino_vetado` si hay algún hallazgo. La descripción lleva cada forma con su fragmento y pide reescribir esos pasajes sin la palabra ni lo que nombra. El capítulo vuelve al redactor como con cualquier fallo de la mecánica, y al agotar los intentos (`MAX_INTENTOS_CAPITULO`) la novela para con el informe de oficio, que lleva los hallazgos. Nunca se sustituye nada en silencio.
+
+**RF3-GRD-04 — Registro de decisiones.** Cada hallazgo deja una fila en `decision_politica` (migración 010): novela, capítulo, intento, término, origen (global, novela o brief), forma, fragmento, inicio y fin, la **acción** (`reintentar` si quedan intentos, `parar` si no), la **huella de la política** (sha-256 de los términos aplicados con sus excepciones y de la versión de la normalización) y la huella del texto. Es append-only y ninguna reversión la borra: es el registro de lo que el sistema decidió. A Langfuse llega con la puerta 4: la comprobación `termino_vetado` como score, con la descripción seudonimizada (RF3-OBS-05 y RF3-OBS-07).
+
+> **Decisión sin entrevistar.** Las decisiones de producto de este bloque se tomaron sin el autor, con el criterio más prudente, y quedan para su revisión:
+> - **Qué hay en la lista global.** Solo palabras que casi nunca tienen otro sentido. Se quedaron fuera «muerte», «herida» o «violación», que el nivel admite en algunos usos («violación del protocolo») y cuyo veto pararía capítulos legítimos. Lo que no se puede decidir por palabras (una muerte en escena, la crueldad) sigue siendo del redactor, por instrucción, y del juez.
+> - **Palabras y no temas.** Un veto como «ahogamiento» funciona; uno como «la pérdida de un hijo» solo casa si la prosa usa esas palabras. Los temas son del juez de personalización del bloque 6.
+> - **La flexión se escribe, no se deduce.** Se descartó el stemming, que junta palabras distintas («casa» y «caso»), y la expansión automática, que en castellano necesita un diccionario. Por eso la lista siembra las formas que importan.
+> - **Se reescribe el capítulo entero y no el párrafo.** El pipeline ya sabe devolver el capítulo con el fallo y la evidencia, y reescribir solo un párrafo exigiría otro agente y otra vuelta por la extracción. Coste aceptado: una reescritura completa por una palabra.
+> - **Puntos ciegos.** Una forma que no está en la lista, un sinónimo, una perífrasis, y un carácter invisible que no sea de formato dentro de una palabra. La prosa la escribe nuestro propio redactor, no un adversario, así que no se trata el leetspeak.
+
 ## 3.6 Bloque 6 — Validadores que faltan
 
 Tres errores de la prosa que el lector de un regalo ve y que ninguna puerta miraba: su nombre mal escrito, un allegado que la escaleta prometió y no sale, y un capítulo de longitud impropia. Los tres son deterministas y van en la parte mecánica de la puerta 4 (RF-PIPE-13), que corre antes del juez y, si falla, devuelve el capítulo al redactor con la descripción del fallo. Si falla tres veces, para.

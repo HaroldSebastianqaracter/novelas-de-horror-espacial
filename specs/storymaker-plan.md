@@ -125,10 +125,10 @@ Requisitos en [spec3.md](spec3.md), 3.4; verificación en [spec3-verification.md
 
 ### 5. Guardrails
 
-- [ ] Palabras prohibidas en SQLite, **globales y por novela**, con normalización de mayúsculas, acentos, plurales y variantes simples.
-- [ ] Un capítulo con coincidencia vuelve al writer; con el límite agotado, la generación se detiene y se informa.
-- [ ] **Audit log** de las decisiones del policy engine, también enviado a Langfuse.
-- [ ] Tests: un caso por nivel y uno de variante (acento o plural).
+- [x] Palabras prohibidas en SQLite, **globales y por novela**, con normalización de mayúsculas, acentos, plurales y variantes simples (spec3, 3.5; en la rama `noche-23-09`).
+- [x] Un capítulo con coincidencia vuelve al writer; con el límite agotado, la generación se detiene y se informa.
+- [x] **Audit log** de las decisiones del policy engine (`decision_politica`). A Langfuse llega la comprobación como score; cada fila del registro, todavía no.
+- [x] Tests: un caso por nivel y uno de variante (acento o plural).
 
 ### 6. Validadores que faltan
 

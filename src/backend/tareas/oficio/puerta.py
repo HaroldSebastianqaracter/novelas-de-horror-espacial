@@ -3,9 +3,10 @@
 Busquedas dirigidas sobre listas cerradas: lo que se puede comprobar contando, antes de
 gastar una llamada de juicio. Corre primero porque es gratis.
 
-Fallan los tics prohibidos y, desde spec3 RF3-VAL-01 y RF3-VAL-03, un nombre del canon mal
-escrito y un allegado del encargo que la escaleta planifico en el capitulo y la prosa no nombra:
-los tres son errores que el lector ve, y el capitulo vuelve al redactor. El resto son avisos que
+Fallan los tics prohibidos, un termino vetado (spec3, RF3-GRD-03) y, desde spec3 RF3-VAL-01 y
+RF3-VAL-03, un nombre del canon mal escrito y un allegado del encargo que la escaleta planifico
+en el capitulo y la prosa no nombra: son errores que el lector ve, y el capitulo vuelve al
+redactor. El resto son avisos que
 van al informe y al juez: que haya tres palabras filtro no significa que la voz falle, y
 convertirlo en fallo automatico produciria prosa timida en vez de prosa buena. La longitud real
 fuera del rango tambien es un aviso (RF3-VAL-02).
@@ -17,6 +18,7 @@ import re
 import sqlite3
 import unicodedata
 
+from compartido import politica
 from compartido.grafo import lectura
 from compartido.puerta_base import Conflicto, ResultadoPuerta
 from compartido.texto import contiene_termino
@@ -46,6 +48,40 @@ def _sin_tildes(texto: str) -> str:
 
 def _contar(texto_normalizado: str, expresion: str) -> int:
     return len(re.findall(rf"\b{re.escape(_sin_tildes(expresion))}\b", texto_normalizado))
+
+
+# --- spec3 RF3-GRD-03: los terminos vetados ------------------------------------------------------
+
+_MAXIMO_EN_LA_DESCRIPCION = 10
+
+
+def _terminos_vetados(
+    con: sqlite3.Connection, novela_id: int, capitulo: int, texto: str
+) -> Conflicto | None:
+    aplicadas = politica.reglas(con, novela_id)
+    hallazgos = politica.buscar(texto, aplicadas)
+    if not hallazgos:
+        return None
+    lista = "; ".join(
+        f"«{h.forma}» (termino «{h.regla.termino}») en «…{h.fragmento}…»"
+        for h in hallazgos[:_MAXIMO_EN_LA_DESCRIPCION]
+    )
+    resto = len(hallazgos) - _MAXIMO_EN_LA_DESCRIPCION
+    return Conflicto(
+        comprobacion="termino_vetado", capitulo=capitulo,
+        descripcion=(
+            f"Terminos vetados en la prosa: {lista}" + (f"; y {resto} mas" if resto > 0 else "")
+            + ". Reescribe esos pasajes sin esas palabras ni lo que nombran."
+        ),
+        datos={
+            "politica": politica.huella(aplicadas),
+            "hallazgos": [
+                {"termino": h.regla.termino, "origen": h.regla.origen, "forma": h.forma,
+                 "fragmento": h.fragmento, "inicio": h.inicio, "fin": h.fin}
+                for h in hallazgos
+            ],
+        },
+    )
 
 
 # --- spec3 RF3-VAL-01: los nombres del canon, escritos exactamente ------------------------------
@@ -242,6 +278,7 @@ def evaluar(
         ))
 
     for extra in (
+        _terminos_vetados(con, novela_id, capitulo, texto),
         _nombres_mal_escritos(con, novela_id, capitulo, texto),
         _longitud_real(con, novela_id, capitulo, texto),
     ):
