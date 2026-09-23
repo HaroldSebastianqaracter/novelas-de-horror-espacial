@@ -103,3 +103,29 @@ def test_la_mayoria_en_contra_devuelve_el_capitulo() -> None:
 def test_unanimes_no_se_piden_mas() -> None:
     _, llamadas = _pipeline_con_juez([])
     assert len(llamadas) == config.OFICIO_MUESTRAS
+
+
+def test_una_muestra_es_un_voto_aunque_repita_un_criterio() -> None:
+    """Validador de 5da56ac: contar veredictos dejaba que una muestra que repite un criterio
+    pesara varias veces y diera la vuelta a la mayoria de muestras."""
+    repetida = _juicio()
+    cliche = next(v for v in repetida.veredictos if v.criterio == "cliche")
+    repetida = SalidaOficio(veredictos=[*repetida.veredictos, cliche, cliche])
+    juicios = [_juicio("cliche"), _juicio("cliche"), _juicio("cliche"), _juicio(), repetida]
+    juicio, votos = p_oficio.votar(juicios)
+    assert votos["cliche"] == (3, 5)
+    assert not juicio.pasa
+
+
+def test_la_evidencia_es_de_una_muestra_de_la_mayoria() -> None:
+    juicio, _ = p_oficio.votar([_juicio(), _juicio("cliche"), _juicio("cliche")])
+    assert juicio.incumplidos[0].evidencia == "cita de cliche"
+
+
+def test_los_votos_van_en_el_conflicto() -> None:
+    from compartido.puerta_base import ResultadoPuerta
+
+    juicio, votos = p_oficio.votar([_juicio("cliche"), _juicio("cliche"), _juicio()])
+    r = p_oficio.combinar(ResultadoPuerta(puerta=4, conflictos=[]), juicio, votos)
+    [c] = [c for c in r.bloqueantes if c.comprobacion == "juicio:cliche"]
+    assert c.datos["votos"] == [2, 3]

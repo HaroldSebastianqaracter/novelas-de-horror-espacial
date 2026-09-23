@@ -50,6 +50,15 @@ def abrir_parada(
     return parada_id
 
 
+def anotar_informe(con: sqlite3.Connection, parada_id: int, clave: str, valor: Any) -> None:
+    """Anade o sustituye un campo del informe de una parada abierta (spec3, RF3-JUE-01)."""
+    fila = con.execute("SELECT informe FROM parada WHERE id = ?", (parada_id,)).fetchone()
+    informe = json.loads(fila["informe"]) if fila and fila["informe"] else {}
+    informe[clave] = valor
+    con.execute("UPDATE parada SET informe = ? WHERE id = ?",
+                (json.dumps(informe, ensure_ascii=False, default=str), parada_id))
+
+
 def cerrar_parada(
     con: sqlite3.Connection, novela_id: int, parada_id: int, resolucion: str
 ) -> None:

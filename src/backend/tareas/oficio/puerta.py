@@ -344,25 +344,36 @@ def evaluar(
     return ResultadoPuerta(puerta=4, conflictos=conflictos)
 
 
+def _voto(juicio: SalidaOficio, criterio: str) -> VeredictoCriterio | None:
+    """El voto de una muestra en un criterio: uno solo aunque lo repita, y en contra si alguno de
+    sus veredictos falla (validador de 5da56ac: contar veredictos dejaba que una muestra con un
+    criterio repetido pesara varias veces)."""
+    del_criterio = [v for v in juicio.veredictos if v.criterio == criterio]
+    return next((v for v in del_criterio if v.veredicto == "falla"),
+                del_criterio[0] if del_criterio else None)
+
+
 def discrepan(juicios: list[SalidaOficio]) -> bool:
-    """Si alguna muestra da otro veredicto que las demas en algun criterio (RF3-JUE-02)."""
+    """Si alguna muestra vota otra cosa que las demas en algun criterio (RF3-JUE-02)."""
     return any(
-        len({v.veredicto for j in juicios for v in j.veredictos if v.criterio == c}) > 1
+        len({v.veredicto for j in juicios if (v := _voto(j, c)) is not None}) > 1
         for c in CRITERIOS_OFICIO
     )
 
 
 def votar(juicios: list[SalidaOficio]) -> tuple[SalidaOficio, dict[str, tuple[int, int]]]:
-    """Un veredicto por criterio por mayoria de las muestras, y los votos (fallan, total).
+    """Un veredicto por criterio por mayoria de las muestras, y los votos (en contra, muestras).
 
-    Con empate falla: un `falla` cuesta una reescritura, dejar pasar un error cuesta la novela.
-    El veredicto que se devuelve es el de la primera muestra que coincide con la mayoria, para
-    que el redactor reciba una evidencia y una sugerencia reales.
+    Cada muestra es un voto. Con empate falla: un `falla` cuesta una reescritura, dejar pasar un
+    error cuesta la novela. El veredicto que se devuelve es el de la primera muestra que
+    coincide con la mayoria, para que el redactor reciba una evidencia y una sugerencia reales.
     """
     elegidos: list[VeredictoCriterio] = []
     votos: dict[str, tuple[int, int]] = {}
     for c in CRITERIOS_OFICIO:
-        del_criterio = [v for j in juicios for v in j.veredictos if v.criterio == c]
+        del_criterio = [v for j in juicios if (v := _voto(j, c)) is not None]
+        if not del_criterio:
+            raise ValueError(f"Ninguna muestra del juez trae el criterio '{c}'.")
         fallan = sum(v.veredicto == "falla" for v in del_criterio)
         votos[c] = (fallan, len(del_criterio))
         gana = "falla" if fallan * 2 >= len(del_criterio) else "pasa"

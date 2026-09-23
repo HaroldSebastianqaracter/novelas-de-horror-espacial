@@ -426,26 +426,31 @@ Tres errores de la prosa que el lector de un regalo ve y que ninguna puerta mira
 
 ### La segunda opinión en la parada
 
-**RF3-JUE-01 — El revisor de continuidad opina, y la parada sigue abierta.** Cuando la puerta 3 para un capítulo, antes de abrir la parada el pipeline invoca al agente `continuidad`, que tenía skill y esquema pero nadie llamaba. Recibe los conflictos bloqueantes numerados, con sus datos, y la prosa rechazada. Devuelve:
+**RF3-JUE-01 — El revisor de continuidad opina, y la parada sigue abierta.** Cuando la puerta 3 para un capítulo, el pipeline **abre la parada** y después invoca al agente `continuidad`, que tenía skill y esquema pero nadie llamaba. Recibe los conflictos bloqueantes, con sus datos y con su número en la lista entera del informe (avisos incluidos, que es como los ve el autor en el frontend), y la prosa rechazada. Devuelve:
 - el resumen;
 - la explicación de cada conflicto;
 - **una opinión por conflicto**, con su número: `real`, `falso_positivo` o `dudoso`, y el motivo, citando la prosa;
 - la sugerencia.
 
-Todo va al informe de la parada como `segunda_opinion`. La skill le da los falsos positivos conocidos: la reformulación, la presencia sin registrar, el reparto desfasado y el cálculo propio tomado por el dato. Si la llamada falla por el puerto, por una salida inválida o por el presupuesto, la parada se abre igual, con `segunda_opinion` vacía y el evento `segunda_opinion_fallida` en la traza. Una detención pedida por el autor sí se propaga. El esquema pasa de `tareas/oficio/` a `tareas/continuidad/esquemas.py`, junto a su servicio.
+Todo se añade al informe de la parada ya abierta como `segunda_opinion`. La skill le da los falsos positivos conocidos: la reformulación, la presencia sin registrar, el reparto desfasado y el cálculo propio tomado por el dato. Como la parada ya existe, nada de lo que pase en la llamada puede perderla: un fallo del puerto, una salida inválida, el presupuesto, una señal de terminar, una detención pedida por el autor o un error imprevisto dejan `segunda_opinion` vacía y el evento `segunda_opinion_fallida` en la traza. El validador de la primera versión, que llamaba al revisor antes de abrir la parada, encontró que esos casos se la llevaban por delante. El esquema pasa de `tareas/oficio/` a `tareas/continuidad/esquemas.py`, junto a su servicio.
 
 > **Decisión sin entrevistar.** La opinión no levanta nunca la parada. La puerta 3 es SQL y exacta con lo que registró el extractor. El juez LLM es menos fiable (el verificador de ConStory-Bench: 88 % de precisión y 55 % de recall), y dejarle decidir cambiaría una parada visible por un silencio. En la primera novela real, las diez paradas fueron falsos positivos o casos discutibles. Al autor le ahorra leer el grafo: le dice dónde mirar. Coste: una llamada por parada, unos 0,25 $. Se descartó un agente nuevo, porque el revisor de continuidad ya existía con este encargo a medias.
 
+**Medido con el revisor real** (23 de septiembre, las diez paradas de continuidad de `novela_real.db` sobre una copia, 2,10 $). En las paradas 2 a 10 (la 1 es de una versión de la puerta que ya no existe), de 17 conflictos opinó 12 `falso_positivo`, 3 `dudoso` y 2 `real`, cada uno con el motivo citando la prosa («el mismo dato con otras palabras», «la prosa pone la cifra en boca de otro personaje»). El repaso de la prosa de la sesión que hizo la pasada había clasificado las diez como falsos positivos o discutibles.
+
 ### El juez de oficio vota
 
-**RF3-JUE-02 — Tres muestras, y dos más si discrepan.** *Amplía RF-PIPE-13 de spec1.* El juez de oficio se invoca **tres veces** por intento con el mismo paquete (`OFICIO_MUESTRAS`). Si alguna muestra da otro veredicto que las demás en algún criterio, se piden **dos más** (`OFICIO_MUESTRAS_SI_DISCREPAN`, cinco en total). Cada criterio se decide por **mayoría**; con empate falla. El veredicto que llega al redactor es el de la primera muestra que coincide con la mayoría, con su evidencia y su sugerencia. Cada `juicio:<criterio>` que falla lleva sus votos (en contra y total), y si algún criterio no fue unánime, pase o falle, la puerta añade el aviso `juicio_dividido` con los votos: es lo que el juez no tiene claro, y el autor y Langfuse lo ven.
+**RF3-JUE-02 — Tres muestras, y dos más si discrepan.** *Amplía RF-PIPE-13 de spec1.* El juez de oficio se invoca **tres veces** por intento con el mismo paquete (`OFICIO_MUESTRAS`). Si alguna muestra da otro veredicto que las demás en algún criterio, se piden **dos más** (`OFICIO_MUESTRAS_SI_DISCREPAN`, cinco en total). Cada criterio se decide por **mayoría de muestras**, y cada muestra es un voto aunque repita el criterio (vota en contra si alguno de sus veredictos para él falla); con empate falla. El veredicto que llega al redactor es el de la primera muestra que coincide con la mayoría, con su evidencia y su sugerencia. Cada `juicio:<criterio>` que falla lleva sus votos (en contra y total), y si algún criterio no fue unánime, pase o falle, la puerta añade el aviso `juicio_dividido` con los votos: es lo que el juez no tiene claro, y el autor y Langfuse lo ven.
 
 > **Decisión sin entrevistar.** Lo motivó la medida real de RF3-PAS-12: el mismo capítulo 1 pasó `cuentas_cuadran` en una llamada y falló en la siguiente. La investigación de la noche proponía puntuar cada criterio con una nota, tomar la mediana y el rango, y parar al autor si el rango cruzaba el umbral. Se adaptó así:
 > - **Votos y no notas.** El esquema del juez es `pasa` o `falla`, y una escala necesita anclas y un umbral calibrado con fragmentos dorados del autor, que no hay.
 > - **Mayoría y no parada** cuando discrepan. Una parada por cada criterio dudoso pararía casi todos los capítulos, y el aviso ya deja la duda a la vista.
-> - **El empate falla.** Dejar pasar un error cuesta la novela; un `falla` de más cuesta una reescritura. Con cinco muestras no hay empate; solo puede darse si una muestra no trae un criterio, y el esquema lo impide.
+> - **El empate falla.** Dejar pasar un error cuesta la novela; un `falla` de más cuesta una reescritura. Con cinco muestras no hay empate.
+> - **Una muestra, un voto.** El esquema exige todos los criterios pero no que salgan una sola vez. El validador de la primera versión, que contaba veredictos, mostró que una muestra con un criterio repetido daba la vuelta a la mayoría.
 >
 > Coste: el juez pasa de una llamada por intento a tres, o cinco si discrepan (unos 0,25 $ cada una). La temperatura no se controla desde el CLI, así que la variación entre muestras es la del modelo. Queda pendiente calibrar con el autor si tres son pocas.
+
+**Medido con el juez real** (capítulos 1 y 4 de la copia de `novela_real.db`, 2,15 $). En el capítulo 1, `cuentas_cuadran` salió en contra en cuatro de cinco muestras: las tres primeras discreparon, se pidieron dos más y ganó `falla`. En el 4, en contra en tres de tres. Los otros ocho criterios salieron unánimes a favor en los dos capítulos. Es el caso que motivó el voto: con una sola muestra, el capítulo 1 pasó una vez y falló otra.
 
 ## 3.10 Bloque 10 — Infraestructura de evals
 

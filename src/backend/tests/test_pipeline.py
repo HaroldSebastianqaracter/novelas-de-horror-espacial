@@ -187,9 +187,9 @@ def test_la_parada_de_continuidad_lleva_una_segunda_opinion(entorno) -> None:
     [parada] = fallo.paradas_abiertas(con, novela_id)
     informe = json.loads(parada["informe"])
     opinion = informe["segunda_opinion"]
-    bloqueantes = [c for c in informe["conflictos"] if not c["aviso"]]
-    assert [o["conflicto"] for o in opinion["opiniones"]] == list(
-        range(1, len(bloqueantes) + 1))
+    # Numerados sobre la lista entera del informe, como los ve el autor en el frontend.
+    numeros = [n for n, c in enumerate(informe["conflictos"], start=1) if not c["aviso"]]
+    assert [o["conflicto"] for o in opinion["opiniones"]] == numeros
     [entrada] = [i["entrada"] for i in puerto.invocaciones if i["agente"] == "continuidad"]
     assert "1. [continuidad_factual]" in entrada
     assert "PROSA RECHAZADA DEL CAPITULO 2" in entrada
@@ -213,6 +213,65 @@ def test_si_la_segunda_opinion_falla_la_parada_se_abre_igual(entorno) -> None:
     assert con.execute(
         "SELECT COUNT(*) FROM traza_evento WHERE novela_id = ? AND tipo = "
         "'segunda_opinion_fallida'", (novela_id,)).fetchone()[0] == 1
+
+
+def test_una_opinion_de_falso_positivo_no_levanta_la_parada(entorno) -> None:
+    con, puerto, _ = entorno
+    novela_id = _crear_novela(con)
+    _parar_en_el_capitulo_2(puerto)
+
+    def todo_falso(entrada: str, agente: str) -> dict:
+        salida = agentes_falsos.continuidad(entrada, agente)
+        for o in salida["opiniones"]:
+            o["parece"] = "falso_positivo"
+        return salida
+
+    puerto.registrar("continuidad", todo_falso)
+    assert pipeline.avanzar(_contexto(entorno, novela_id)) == "parada"
+    [parada] = fallo.paradas_abiertas(con, novela_id)
+    assert parada["tipo"] == "continuidad"
+    opiniones = json.loads(parada["informe"])["segunda_opinion"]["opiniones"]
+    assert opiniones and {o["parece"] for o in opiniones} == {"falso_positivo"}
+
+
+@pytest.mark.parametrize("error", ["interrumpido", "inesperado", "detenido"])
+def test_nada_de_lo_que_pase_en_la_opinion_pierde_la_parada(entorno, error: str) -> None:
+    """Validador de 9cc7972: con la llamada antes de abrir la parada, una interrupcion, una
+    detencion pedida por el autor o un fallo imprevisto se la llevaban por delante."""
+    from compartido.puerto import AgenteInterrumpido
+
+    con, puerto, _ = entorno
+    novela_id = _crear_novela(con)
+    _parar_en_el_capitulo_2(puerto)
+
+    def falla(entrada: str, agente: str) -> dict:
+        if error == "interrumpido":
+            raise AgenteInterrumpido("senal de terminar")
+        if error == "inesperado":
+            raise RuntimeError("algo que nadie espera")
+        with transaccion(con):
+            cola.encolar(con, "parar", novela_id)
+        return agentes_falsos.continuidad(entrada, agente)
+
+    puerto.registrar("continuidad", falla)
+    pipeline.avanzar(_contexto(entorno, novela_id))
+    [parada] = fallo.paradas_abiertas(con, novela_id)
+    assert parada["tipo"] == "continuidad"
+
+
+def test_el_revisor_numera_como_el_informe() -> None:
+    from compartido.contexto import Presupuesto
+    from compartido.puerta_base import Conflicto, ResultadoPuerta
+    from tareas.continuidad import servicio as s_continuidad
+
+    con = db.preparar(Path(tempfile.mkdtemp()) / "novela.db")
+    resultado = ResultadoPuerta(puerta=3, conflictos=[
+        Conflicto(comprobacion="habito_roto", descripcion="Un aviso.", aviso=True),
+        Conflicto(comprobacion="continuidad_factual", descripcion="Un conflicto."),
+    ])
+    render = s_continuidad.paquete(con, 1, 2, resultado, {1: "Texto."}, presupuesto=Presupuesto(
+        bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE)).render()
+    assert "2. [continuidad_factual]" in render and "habito_roto" not in render
 
 
 def test_la_skill_de_continuidad_opina_y_no_levanta_la_parada() -> None:

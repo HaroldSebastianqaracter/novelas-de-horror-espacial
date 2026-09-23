@@ -45,7 +45,7 @@ from compartido import politica
 from compartido.contexto import Paquete, Presupuesto, PresupuestoExcedido
 from compartido.db import transaccion
 from compartido.grafo import emitir_evento, lectura
-from compartido.puerto import AgenteInterrumpido, ErrorDePuerto, PuertoAgente
+from compartido.puerto import AgenteInterrumpido, PuertoAgente
 from config import (
     MAX_INTENTOS_CAPITULO,
     OFICIO_MUESTRAS,
@@ -234,11 +234,13 @@ def _registrar_puerta(ctx: Contexto, resultado: Any, capitulo: int | None = None
 
 def _abrir_parada(ctx: Contexto, tipo: str, informe: dict[str, Any],
                   capitulo: int | None = None, intento: int | None = None,
-                  *, antes: Callable[[], None] | None = None) -> None:
+                  *, antes: Callable[[], None] | None = None,
+                  despues: Callable[[int], None] | None = None) -> None:
     """Abre la parada y lleva la ejecucion a `parada`, en una transaccion.
 
     `antes` corre dentro de esa misma transaccion: es lo que permite borrar la escaleta
-    rechazada y abrir la parada de forma atomica (RF2-FALLO-03).
+    rechazada y abrir la parada de forma atomica (RF2-FALLO-03). `despues` corre con la parada
+    ya abierta y recibe su id: lo que haga no puede impedir que exista (spec3, RF3-JUE-01).
     """
     with transaccion(ctx.con):
         if antes is not None:
@@ -250,6 +252,8 @@ def _abrir_parada(ctx: Contexto, tipo: str, informe: dict[str, Any],
             ctx.con, ctx.novela_id, "conflicto", fase=None, capitulo=capitulo,
             parada_id=parada_id,
         )
+    if despues is not None:
+        despues(parada_id)
     raise Parado(parada_id, tipo)
 
 
@@ -469,9 +473,12 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                 _registrar_puerta(ctx, rechazo.resultado, capitulo=numero, intento=intento)
                 informe = rechazo.resultado.informe()
                 informe["prosa_rechazada"] = textos
-                informe["segunda_opinion"] = _segunda_opinion(
-                    ctx, numero, intento, rechazo.resultado, textos)
-                _abrir_parada(ctx, "continuidad", informe, capitulo=numero, intento=intento)
+                informe["segunda_opinion"] = None
+                _abrir_parada(
+                    ctx, "continuidad", informe, capitulo=numero, intento=intento,
+                    despues=partial(_segunda_opinion, ctx, numero, intento,
+                                    rechazo.resultado, textos),
+                )
                 return
 
             a_medias = True
@@ -556,23 +563,25 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
 
 
 def _segunda_opinion(
-    ctx: Contexto, numero: int, intento: int, resultado: Any, textos: dict[int, str]
-) -> dict[str, Any] | None:
-    """El revisor de continuidad explica la parada y opina si cada conflicto parece real
-    (spec3, RF3-JUE-01). Nunca la levanta: si la llamada falla, la parada se abre igual y la
-    traza dice por que. Una detencion pedida por el autor si se propaga."""
+    ctx: Contexto, numero: int, intento: int, resultado: Any, textos: dict[int, str],
+    parada_id: int,
+) -> None:
+    """El revisor de continuidad explica la parada ya abierta y opina si cada conflicto parece
+    real (spec3, RF3-JUE-01), y la opinion se anade a su informe. Nunca la levanta ni impide que
+    exista: la parada se abre antes de llamarlo, y cualquier fallo de la llamada, tambien una
+    detencion pedida por el autor o una senal de terminar, solo deja la opinion vacia y el evento
+    en la traza (validador de 9cc7972: con la llamada antes de abrirla, esos casos la perdian)."""
     try:
         paquete = s_continuidad.paquete(ctx.con, ctx.novela_id, numero, resultado, textos,
                                         presupuesto=ctx.presupuesto)
         salida, _ = _invocar(ctx, "continuidad", paquete, SalidaContinuidad,
                              capitulo=numero, intento=intento)
-    except AgenteInterrumpido:
-        raise
-    except (ErrorDePuerto, PresupuestoExcedido, ValueError) as exc:
+    except Exception as exc:
         emitir_traza(ctx, "segunda_opinion_fallida", capitulo=numero, intento=intento,
                      error=f"{type(exc).__name__}: {exc}"[:500])
-        return None
-    return salida.model_dump()
+        return
+    with transaccion(ctx.con):
+        fallo.anotar_informe(ctx.con, parada_id, "segunda_opinion", salida.model_dump())
 
 
 def _registrar_politica(
