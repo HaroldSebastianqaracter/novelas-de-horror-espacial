@@ -22,6 +22,9 @@ dev = [
     "httpx>=0.27",
     "ruff>=0.7",
     "pyright>=1.1.390",
+    # Tests de propiedades de spec2. Desde la 6.151 trae una extension compilada (_native)
+    # que el Control de Aplicaciones de Windows bloquea en esta maquina; la 6.150 es Python puro.
+    "hypothesis>=6.100,<6.151",
 ]
 
 [build-system]

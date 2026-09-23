@@ -1,0 +1,303 @@
+"""Las reproducciones de la auditoria del 23 de septiembre de 2026, como tests.
+
+Cada test afirma el comportamiento CORRECTO y lleva el numero de hallazgo del informe en el
+nombre. Mientras el fallo exista, el test falla y la marca `xfail(strict=True)` lo cuenta sin
+romper la suite. El dia que el fallo desaparezca, `strict` convierte el pase inesperado en un
+error: la fase que lo arregle tiene que quitar la marca a conciencia, y asi se sabe que el test
+miraba donde estaba el problema (specs/spec2-plan.md, regla «rojo antes que verde»).
+"""
+
+from __future__ import annotations
+
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+import worker
+from compartido.contexto import Paquete, PresupuestoExcedido, ajustar
+from compartido.grafo import lectura
+from compartido.puerta_base import Conflicto, ResultadoPuerta
+from compartido.puerto import demo as agentes_falsos
+from orquestador import cola, fallo, pipeline
+from tareas.continuidad import puerta as p3
+from tests.entorno import (
+    cfg_de,
+    contar,
+    contexto,
+    crear_novela,
+    hechos_del_capitulo,
+    nueva_bd,
+    puerto_falso,
+    textos_vigentes_del_capitulo,
+)
+from tests.fabrica import novela_minima
+
+RAIZ = Path(__file__).resolve().parents[1]
+
+
+def _falla(puerta: int):  # noqa: ANN202 - sustituto de un evaluar de puerta
+    def evaluar(*_: object) -> ResultadoPuerta:
+        return ResultadoPuerta(puerta=puerta, conflictos=[Conflicto("forzado", "falla forzada")])
+
+    return evaluar
+
+
+def _intencion(con, tipo: str, novela_id: int, **payload: object) -> cola.Intencion:
+    iid = cola.encolar(con, tipo, novela_id, **payload)
+    con.execute("UPDATE intencion SET estado = 'en_curso' WHERE id = ?", (iid,))
+    return cola.Intencion(id=iid, tipo=tipo, novela_id=novela_id, payload=dict(payload))
+
+
+# --- Fase 1: el capitulo a medias ---------------------------------------------------------------
+
+
+@pytest.mark.xfail(strict=True, reason="Hallazgo 5: parar en el tramo 3 deja texto y hechos")
+def test_hallazgo_05_parar_durante_el_oficio_no_deja_el_capitulo_a_medias() -> None:
+    con, ruta = nueva_bd()
+    novela_id = crear_novela(con)
+    puerto = puerto_falso(con)
+    avisado = {"ya": False}
+
+    def extraccion(entrada: str, agente: str) -> dict:
+        salida = agentes_falsos.extraccion(entrada, agente)
+        if "capitulo 2" in entrada.lower() and not avisado["ya"]:
+            avisado["ya"] = True
+            cola.encolar(con, "parar", novela_id)  # llega como lo haria la API
+        return salida
+
+    puerto.registrar("extraccion", extraccion)
+    assert pipeline.avanzar(contexto(con, puerto, ruta, novela_id)) == "detenida"
+    assert hechos_del_capitulo(con, novela_id, 2) == 0
+    assert textos_vigentes_del_capitulo(con, novela_id, 2) == 0
+
+
+@pytest.mark.xfail(strict=True, reason="Hallazgo 6: recuperar() no revierte el capitulo a medias")
+def test_hallazgo_06_el_worker_caido_no_deja_hechos_del_capitulo_a_medias() -> None:
+    """La caida es de verdad: el subproceso sale con os._exit y no corre ningun finally."""
+    con, ruta = nueva_bd()
+    con.close()
+    guion = f"""
+import os, sys
+sys.path.insert(0, r"{RAIZ}")
+from compartido import db
+from compartido.puerto import demo
+from orquestador import pipeline
+from tests.entorno import contexto, crear_novela, puerto_falso
+con = db.preparar(r"{ruta}")
+novela_id = crear_novela(con)
+puerto = puerto_falso(con)
+def oficio(entrada, agente):
+    if "capitulo 2" in entrada.lower():
+        os._exit(3)
+    return demo.oficio(entrada, agente)
+puerto.registrar("oficio", oficio)
+pipeline.avanzar(contexto(con, puerto, r"{ruta}", novela_id))
+"""
+    salida = subprocess.run(
+        [sys.executable, "-c", guion], cwd=RAIZ, capture_output=True, text=True, timeout=120
+    )
+    assert salida.returncode == 3, salida.stderr[-2000:]
+
+    w = worker.Worker(cfg_de(ruta))
+    w.recuperar()
+    ejecucion = lectura.ejecucion(w.con, 1) or {}
+    assert ejecucion["estado"] == "detenida"
+    assert ejecucion["capitulos_completados"] == 1
+    assert hechos_del_capitulo(w.con, 1, 2) == 0
+    assert textos_vigentes_del_capitulo(w.con, 1, 2) == 0
+
+
+# --- Fase 2: reanudar nunca se salta una puerta -------------------------------------------------
+
+
+@pytest.mark.xfail(strict=True, reason="Hallazgo 1: resolver la parada salta puertas")
+def test_hallazgo_01_resolver_una_parada_de_estructura_no_se_salta_las_puertas(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, ruta = nueva_bd()
+    w = worker.Worker(cfg_de(ruta))
+    novela_id = crear_novela(w.con)
+    monkeypatch.setattr(pipeline.p_estructura, "evaluar", _falla(1))
+
+    w._correr(novela_id)
+    parada_id = int(fallo.paradas_abiertas(w.con, novela_id)[0]["id"])
+    w._resolver_parada(_intencion(
+        w.con, "resolver_parada", novela_id, parada_id=parada_id, accion="relanzar",
+        desde_capitulo=1,
+    ))
+
+    puertas = [
+        (int(f["puerta"]), str(f["veredicto"])) for f in w.con.execute(
+            "SELECT puerta, veredicto FROM resultado_puerta WHERE novela_id = ? ORDER BY id",
+            (novela_id,),
+        )
+    ]
+    # Nunca una puerta 5 sin que el ultimo veredicto de las puertas 1 y 2 sea favorable.
+    if any(p == 5 for p, _ in puertas):
+        antes = puertas[: [p for p, _ in puertas].index(5)]
+        for puerta in (1, 2):
+            ultimo = [v for p, v in antes if p == puerta][-1:]
+            assert ultimo and ultimo[0] != "falla", f"puerta 5 sin puerta {puerta}: {puertas}"
+    estado = str((lectura.ejecucion(w.con, novela_id) or {})["estado"])
+    assert not (estado.startswith("completada") and lectura.total_capitulos(w.con, novela_id) == 0)
+
+
+@pytest.mark.xfail(strict=True, reason="Hallazgo 2: la escaleta rechazada se queda en la base")
+def test_hallazgo_02_la_escaleta_rechazada_dos_veces_no_se_queda(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    con, ruta = nueva_bd()
+    novela_id = crear_novela(con)
+    monkeypatch.setattr(pipeline.p_escaleta, "evaluar", _falla(2))
+
+    final = pipeline.avanzar(contexto(con, puerto_falso(con), ruta, novela_id))
+    assert final == "parada"
+    assert lectura.total_capitulos(con, novela_id) == 0
+
+
+@pytest.mark.xfail(strict=True, reason="Hallazgo 12: aceptar_retcon vale para cualquier parada")
+def test_hallazgo_12_aceptar_retcon_sobre_una_parada_de_estructura_se_rechaza(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, ruta = nueva_bd()
+    w = worker.Worker(cfg_de(ruta))
+    novela_id = crear_novela(w.con)
+    monkeypatch.setattr(pipeline.p_estructura, "evaluar", _falla(1))
+    w._correr(novela_id)
+    parada_id = int(fallo.paradas_abiertas(w.con, novela_id)[0]["id"])
+
+    intencion = _intencion(
+        w.con, "resolver_parada", novela_id, parada_id=parada_id, accion="aceptar_retcon"
+    )
+    w._resolver_parada(intencion)
+    estado = w.con.execute(
+        "SELECT estado FROM intencion WHERE id = ?", (intencion.id,)
+    ).fetchone()["estado"]
+    assert estado == "rechazada"
+
+
+# --- Fase 3: un solo escritor -------------------------------------------------------------------
+
+
+@pytest.mark.xfail(strict=True, reason="Hallazgo 3: latir() no se entera de que perdio el cerrojo")
+def test_hallazgo_03_el_latido_sabe_si_perdio_el_cerrojo() -> None:
+    con, _ = nueva_bd()
+    cola.tomar_cerrojo(con, poll_segundos=1)
+    # Otro proceso se queda la fila mientras este no latia.
+    con.execute("UPDATE worker_lock SET pid = pid + 1 WHERE id = 1")
+    assert cola.latir(con) is False
+
+
+# --- Fase 4: el paquete no pierde canon en silencio ---------------------------------------------
+
+
+@pytest.mark.xfail(strict=True, reason="Hallazgo 4: el bloque de hechos desaparece sin excepcion")
+def test_hallazgo_04_el_bloque_de_hechos_no_desaparece_en_silencio() -> None:
+    from tareas.redaccion.servicio import _hechos
+
+    hechos = [
+        {"sujeto_nombre": f"Personaje{i % 6}", "atributo": f"atributo {i}", "valor": "x" * 40,
+         "capitulo_origen": i // 20}
+        for i in range(200)
+    ]
+    conocimiento = [
+        {"personaje": f"P{i % 6}", "postura": "sabe", "sujeto_nombre": "S", "atributo": f"a{i}",
+         "valor": "y" * 40, "capitulo": i // 30, "via": "presencio"}
+        for i in range(700)
+    ]
+    p = Paquete(agente="redaccion", capitulo=30)
+    p.anadir("instrucciones", "estilo")
+    p.anadir("escaleta", "escenas")
+    p.anadir("hechos", _hechos(hechos, conocimiento), "ESTADO ESTABLECIDO")
+    try:
+        ajustado = ajustar(p)
+    except PresupuestoExcedido:
+        return
+    assert "hechos" in ajustado.tokens_por_bloque
+
+
+@pytest.mark.xfail(strict=True, reason="Hallazgo 10: LIMIT 200 tira los hechos mas antiguos")
+def test_hallazgo_10_los_hechos_antiguos_del_reparto_entran_en_el_paquete() -> None:
+    con, _ = nueva_bd()
+    con.execute("BEGIN")
+    g = novela_minima(con)
+    con.execute("COMMIT")
+    for i in range(250):
+        con.execute(
+            "INSERT INTO hecho (novela_id, escena_id, sujeto_tipo, sujeto_nombre, atributo, valor)"
+            " VALUES (?,?,'mundo','Estacion',?, 'v')",
+            (g.novela_id, g.escenas[(1, 2)], f"atributo {i}"),
+        )
+    hechos = lectura.hechos_del_reparto(con, g.novela_id, 2)
+    assert any(h["id"] == g.hechos["ojos"] for h in hechos)
+
+
+# --- Fase 5: puerta 3 sin falsos positivos ------------------------------------------------------
+
+_INSERTAR_HECHO = (
+    "INSERT INTO hecho (novela_id, escena_id, sujeto_tipo, sujeto_id, sujeto_nombre, atributo, "
+    "valor, categoria, supersede_a) VALUES (?,?,'personaje',?,?,?,?,'fisico',?)"
+)
+
+
+@pytest.mark.xfail(strict=True, reason="Hallazgo 7: la supersesion encadenada da conflicto")
+def test_hallazgo_07_una_cadena_de_supersesiones_no_es_contradiccion() -> None:
+    con, _ = nueva_bd()
+    con.execute("BEGIN")
+    g = novela_minima(con)
+    con.execute("COMMIT")
+    ibarra = g.personajes["Ibarra"]
+    azules = con.execute(
+        _INSERTAR_HECHO,
+        (g.novela_id, g.escenas[(2, 1)], ibarra, "Ibarra", "color de ojos", "azules",
+         g.hechos["ojos"]),
+    ).lastrowid
+    con.execute(
+        _INSERTAR_HECHO,
+        (g.novela_id, g.escenas[(2, 2)], ibarra, "Ibarra", "color de ojos", "verdes", azules),
+    )
+    bloqueantes = p3.evaluar(con, g.novela_id, 2).bloqueantes
+    assert not [c for c in bloqueantes if c.comprobacion == "continuidad_factual"]
+
+
+@pytest.mark.xfail(strict=True, reason="Hallazgo 8: LOWER() de SQLite no pliega tildes")
+def test_hallazgo_08_valores_que_solo_difieren_en_tildes_no_se_contradicen() -> None:
+    con, _ = nueva_bd()
+    con.execute("BEGIN")
+    g = novela_minima(con)
+    con.execute("COMMIT")
+    reyes = g.personajes["Reyes"]
+    for escena, valor in (((1, 1), "Ámbar"), ((2, 1), "ámbar")):
+        con.execute(
+            _INSERTAR_HECHO,
+            (g.novela_id, g.escenas[escena], reyes, "Reyes", "color de pelo", valor, None),
+        )
+    bloqueantes = p3.evaluar(con, g.novela_id, 2).bloqueantes
+    assert not [c for c in bloqueantes if c.comprobacion == "continuidad_factual"]
+
+
+# --- Fase 6: la traza dice la verdad ------------------------------------------------------------
+
+
+@pytest.mark.xfail(strict=True, reason="Hallazgo 9: el juez de la puerta 4 no se registra")
+def test_hallazgo_09_una_parada_de_oficio_deja_la_puerta_4_en_falla() -> None:
+    con, ruta = nueva_bd()
+    novela_id = crear_novela(con)
+    puerto = puerto_falso(con)
+
+    def siempre_falla(entrada: str, agente: str) -> dict:
+        salida = agentes_falsos.oficio(entrada, agente)
+        salida["veredictos"][0] = {
+            "criterio": salida["veredictos"][0]["criterio"], "veredicto": "falla",
+            "evidencia": "La compuerta cedio.", "sugerencia": "Acerca la distancia.",
+        }
+        return salida
+
+    puerto.registrar("oficio", siempre_falla)
+    assert pipeline.avanzar(contexto(con, puerto, ruta, novela_id)) == "parada"
+    assert contar(
+        con, "SELECT COUNT(*) FROM resultado_puerta WHERE novela_id = ? AND puerta = 4 "
+        "AND veredicto = 'falla'", novela_id,
+    ) >= 1

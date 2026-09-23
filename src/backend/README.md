@@ -2,8 +2,8 @@
 
 Stack: FastAPI + Python 3.12 + SQLite. Motor de agentes: Claude Code.
 
-Implementa [specs/spec1.md](../../specs/spec1.md); su plan de verificación está en
-[specs/spec1-verification.md](../../specs/spec1-verification.md).
+Implementa [specs/spec1.md](../../specs/spec1.md), refinada por [specs/spec2.md](../../specs/spec2.md); sus planes de verificación están en
+[specs/spec1-verification.md](../../specs/spec1-verification.md) y [specs/spec2-verification.md](../../specs/spec2-verification.md).
 
 ## Preparar el entorno
 
