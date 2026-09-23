@@ -424,15 +424,74 @@ def test_una_presencia_de_alguien_fuera_del_canon_se_descarta_con_su_motivo() ->
     assert descartes.recuento["presencias"] == {"personaje_sin_resolver": 1}
 
 
+#: La regla de RF3-PAS-09, entera: dos frases sueltas sobrevivian a invertirla (validador de
+#: 88d5814).
+REGLA_DE_LA_PRESENCIA = (
+    "**Presencias**: quién está **físicamente** en cada escena, aunque la escaleta no lo "
+    "pusiera. Registra a todo personaje del canon que la prosa muestra allí: el que habla, el "
+    "que actúa, el que está callado al fondo. Nombrar o recordar a alguien no es estar, y "
+    "tampoco oírlo por un canal o verlo en una pantalla desde otro sitio. Con esto se sabe "
+    "quién oyó lo que se dijo en la escena: si alguien estaba y no lo registras, más adelante "
+    "parecerá que usa lo que nunca recibió; si lo registras sin estar, parecerá que lo recibió."
+)
+
+
 def test_la_skill_pide_las_presencias() -> None:
     from compartido.puerto.terminal import PuertoTerminal
     from config import raiz_repo
 
     skill = PuertoTerminal(skills_dir=raiz_repo() / ".claude" / "skills").ruta_skill(
         "extraccion").read_text(encoding="utf-8")
-    parrafo = skill.split("**Presencias**")[1].split("\n\n")[0]
-    assert "aunque la escaleta no lo pusiera" in parrafo
-    assert "Nombrar o recordar a alguien no es estar" in parrafo
+    parrafos = [p for p in skill.split("\n\n") if p.startswith("**Presencias**")]
+    assert parrafos == [REGLA_DE_LA_PRESENCIA]
+    # La descripcion de la skill dice que tambien produce presencias.
+    assert "presencias" in skill.split("---")[1]
+
+
+def test_el_extractor_recibe_a_los_personajes_fuera_del_reparto() -> None:
+    """Validador de 88d5814: solo le llegaba el reparto, y el personaje que el redactor mete
+    por su cuenta tenia que ir a entidades no reconocidas."""
+    import config
+    from compartido.contexto import Presupuesto
+
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    render = s_extraccion.paquete(
+        con, g.novela_id, 2, {1: "texto", 2: "texto"}, presupuesto=Presupuesto(
+            bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE),
+    ).render()
+    linea = next(x for x in render.splitlines() if x.startswith("Otros personajes"))
+    assert linea.endswith(": Reyes")
+    reparto = next(x for x in render.splitlines() if x.startswith("Personajes: "))
+    assert "Reyes" not in reparto
+
+
+def test_las_presencias_recorren_el_pipeline_hasta_la_traza() -> None:
+    def extraccion(entrada: str, agente: str) -> dict[str, Any]:
+        salida = demo.extraccion(entrada, agente)
+        if demo._capitulo(entrada) == 2:
+            salida["presencias"] = [
+                {"escena_orden": 1, "personaje_ref": "Reyes"},
+                {"escena_orden": 9, "personaje_ref": "Reyes"},
+                {"escena_orden": 1, "personaje_ref": "Nadie Conocido"},
+            ]
+        return salida
+
+    con, ruta = nueva_bd()
+    novela_id = crear_novela(con)
+    puerto = puerto_falso(con)
+    puerto.registrar("extraccion", extraccion)
+    assert pipeline.avanzar(contexto(con, puerto, ruta, novela_id)) == "completada"
+    assert contar(con, """
+        SELECT COUNT(*) FROM presencia_escena pr
+        JOIN personaje p ON p.id = pr.personaje_id
+        JOIN escena_ordinal eo ON eo.escena_id = pr.escena_id
+        WHERE p.nombre = 'Reyes' AND eo.capitulo_numero = 2""") == 1
+    recuentos = [json.loads(f[0])["recuento"] for f in con.execute(
+        "SELECT payload FROM traza_evento WHERE tipo = 'extraccion_descartes' "
+        "AND json_extract(payload, '$.capitulo') = 2"
+    )]
+    assert recuentos[-1]["presencias"] == {"escena_desconocida": 1, "personaje_sin_resolver": 1}
 
 
 def test_partir_el_compuesto_con_supersede_a_no_contradice() -> None:

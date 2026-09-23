@@ -76,6 +76,20 @@ def paquete(
     inventario.append(Elemento(
         "Personajes: " + ", ".join(p_["nombre"] for p_ in canon["personajes"]), True
     ))
+    # RF3-PAS-09: el redactor puede meter en una escena a alguien que la escaleta no puso, y
+    # es justo a quien hay que registrar en las presencias. Sin su nombre aqui, acabaria en
+    # entidades no reconocidas (validador de 88d5814).
+    en_reparto = {int(p_["id"]) for p_ in canon["personajes"]}
+    otros = [
+        str(f["nombre"]) for f in con.execute(
+            "SELECT id, nombre FROM personaje WHERE novela_id = ? ORDER BY nombre", (novela_id,)
+        ) if int(f["id"]) not in en_reparto
+    ]
+    if otros:
+        inventario.append(Elemento(
+            "Otros personajes de la novela (la escaleta no los pone en este capitulo, pero la "
+            "prosa puede traerlos): " + ", ".join(otros), True
+        ))
     inventario.append(Elemento(
         "Lugares: " + ", ".join(lugar["nombre"] for lugar in canon["lugares"]), True
     ))

@@ -1,6 +1,6 @@
 ---
 name: extraccion
-description: Lee la prosa recién escrita de un capítulo y registra en el grafo todo lo que el texto ha fijado — hechos, conocimiento, estados, eventos y siembras. Un capítulo sin extraer no está terminado.
+description: Lee la prosa recién escrita de un capítulo y registra en el grafo todo lo que el texto ha fijado — hechos, conocimiento, presencias, estados, eventos y siembras. Un capítulo sin extraer no está terminado.
 ---
 
 # Extractor
