@@ -295,6 +295,8 @@ Ninguno bloquea la v1. Cada uno retira un fichero de deuda de RF-FE-API-04:
 
 ## 6. Orden de implementación
 
+> Los siete pasos están hechos (23 de septiembre de 2026, un commit por paso). Queda pendiente lo que la verificación marca así: el test que compara los ficheros de deuda con Python (fila 2), la regla de lint de colores literales (fila 10), la revisión a mano (fila 11) y la demostración contra el backend real (fila 12).
+
 1. Andamiaje, tokens, rutas, tipos generados y MSW.
 2. Tablero general, sin arrastre: columnas, tarjetas, sondeo.
 3. Ciclo de intención y arrastre con alternativa de teclado.

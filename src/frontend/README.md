@@ -2,7 +2,7 @@
 
 Stack: React + Three.js.
 
-Pendiente de implementación. Requisitos en [specs/spec-frontend.md](../../specs/spec-frontend.md) y verificación en [specs/spec-frontend-verification.md](../../specs/spec-frontend-verification.md). La arquitectura está en [docs/architecture.md](../../docs/architecture.md#arquitectura-del-frontend).
+La v1 está construida con mocks; falta probarla contra el backend real (fila 12 de la verificación). Requisitos en [specs/spec-frontend.md](../../specs/spec-frontend.md) y verificación en [specs/spec-frontend-verification.md](../../specs/spec-frontend-verification.md). La arquitectura está en [docs/architecture.md](../../docs/architecture.md#arquitectura-del-frontend).
 
 La v1 es un tablero al estilo Jira: una tarjeta por novela y, dentro de cada novela, sus capítulos. Tiene además la alerta de parada, un lector de capítulos y el alta de una novela desde un brief. La referencia visual es el prototipo de la propuesta B, «papel técnico», en `novelasv2-b/novelasv2-b/`. Es un **extra** del plan de entrega: la lectura de la entrega sigue siendo el HTML con PDF del bloque 7.
 

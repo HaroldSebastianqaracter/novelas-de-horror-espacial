@@ -1,8 +1,9 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./app/App";
+// Primero los estilos base: los de cada pantalla van después y ganan los empates.
 import "./compartido/estilo/tokens.css";
 import "./compartido/estilo/base.css";
+import { App } from "./app/App";
 
 async function arrancar() {
   // Con `npm run dev:mocks` el frontend corre entero sin backend (RF-FE-API-03).

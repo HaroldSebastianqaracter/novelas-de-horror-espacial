@@ -1,6 +1,3 @@
-.migas { display: flex; gap: var(--espacio-2); font-size: var(--texto-sm); color: var(--color-texto-tenue); }
-.migas a { color: var(--color-texto-secundario); text-decoration: none; }
-.migas a:hover { color: var(--color-acento); text-decoration: underline; }
 
 /* Reconexión (RF-FE-DAT-04) */
 .banner-enlace {

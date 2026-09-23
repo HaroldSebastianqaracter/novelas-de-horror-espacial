@@ -10,7 +10,7 @@ El proyecto es un monorepo con estas carpetas principales:
 - **`specs/`** — especificaciones del programa, una por `.md`.
 - **`docs/`** — definiciones del proyecto (este documento entre ellas).
 
-**`src/backend/` está implementado** en su primera versión, según [specs/spec1.md](../specs/spec1.md): persistencia, puerto a Claude Code, las nueve skills de agente, orquestador, worker, las cinco puertas y la API. `src/frontend/` tiene su andamiaje (Vite, React, tipos generados y mocks) según [specs/spec-frontend.md](../specs/spec-frontend.md), con las pantallas en construcción. Ver sus respectivos `README.md`.
+**`src/backend/` está implementado** en su primera versión, según [specs/spec1.md](../specs/spec1.md): persistencia, puerto a Claude Code, las nueve skills de agente, orquestador, worker, las cinco puertas y la API. `src/frontend/` tiene su v1 según [specs/spec-frontend.md](../specs/spec-frontend.md): tablero, novela, paradas, lector y alta desde un brief, probada con mocks y pendiente de probar contra el backend real. Ver sus respectivos `README.md`.
 
 ## El sistema
 

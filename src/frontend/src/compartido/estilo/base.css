@@ -43,3 +43,7 @@ a { color: var(--color-acento); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+.migas { display: flex; flex-wrap: wrap; gap: var(--espacio-2); font-size: var(--texto-sm); color: var(--color-texto-tenue); }
+.migas a { color: var(--color-texto-secundario); text-decoration: none; }
+.migas a:hover { color: var(--color-acento); text-decoration: underline; }

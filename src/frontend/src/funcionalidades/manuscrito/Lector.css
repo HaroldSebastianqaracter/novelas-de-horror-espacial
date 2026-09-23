@@ -1,7 +1,4 @@
 /* Lector (RF-FE-LEC): la estética de la consola se apaga y manda el texto. */
-.lector .migas { display: flex; flex-wrap: wrap; gap: var(--espacio-2); font-size: var(--texto-sm); color: var(--color-texto-tenue); }
-.lector .migas a { color: var(--color-texto-secundario); text-decoration: none; }
-.lector .migas a:hover { color: var(--color-acento); text-decoration: underline; }
 .lector .aviso h1 { font-size: var(--texto-lg); margin-bottom: var(--espacio-2); }
 
 .lector__hoja {

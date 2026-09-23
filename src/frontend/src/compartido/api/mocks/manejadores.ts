@@ -17,7 +17,63 @@ interface IntencionSimulada {
   novelaId: number | null;
   payload: Record<string, unknown>;
   creada: number;
-  cierre?: { estado: "hecha" | "rechazada"; motivo: string | null };
+  cierre?: { estado: "hecha" | "rechazada"; motivo: string | null; resultado?: Record<string, unknown> };
+}
+
+interface BriefSimulado {
+  destinatario?: { nombre?: string; edad?: number; pronombres?: string; rasgos?: unknown[] };
+  recuerdos?: unknown[];
+  ocasion?: string;
+  quien_regala?: string;
+  intensidad?: string;
+  tono?: string;
+}
+
+const EDAD_MINIMA: Record<string, number> = { atmosferico: 10, tension: 14, intenso: 18 };
+
+/**
+ * Lo justo de `analizar` para que `dev:mocks` enseñe el camino del 422: faltantes y la
+ * contradicción de edad. El frontend real no lo hace nunca: lo hace la API (RF-FE-BRF-04).
+ */
+function analizarBrief(b: BriefSimulado) {
+  const d = b.destinatario ?? {};
+  const faltantes = (
+    [
+      ["destinatario.nombre", !d.nombre],
+      ["destinatario.edad", d.edad === undefined],
+      ["destinatario.pronombres", !d.pronombres],
+      ["destinatario.rasgos", !d.rasgos?.length],
+      ["recuerdos", !b.recuerdos?.length],
+      ["ocasion", !b.ocasion],
+      ["quien_regala", !b.quien_regala],
+      ["intensidad", !b.intensidad],
+      ["tono", !b.tono],
+    ] as const
+  )
+    .filter(([, falta]) => falta)
+    .map(([campo]) => campo);
+  const contradicciones = [];
+  const minima = b.intensidad ? EDAD_MINIMA[b.intensidad] : undefined;
+  if (d.edad !== undefined && minima !== undefined && d.edad < minima) {
+    contradicciones.push({
+      codigo: "edad_bajo_intensidad",
+      campos: ["destinatario.edad", "intensidad"],
+      mensaje: `La intensidad «${b.intensidad}» pide al menos ${minima} años y el destinatario tiene ${d.edad}.`,
+    });
+  }
+  return { faltantes, contradicciones };
+}
+
+function crearNovela(): number {
+  const id = Math.max(0, ...novelas.map((n) => n.id)) + 1;
+  const ahoraIso = ahora();
+  novelas.push({ id, titulo: "", genero: "terror_espacial", creado_en: ahoraIso, estado: "configurada", capitulos_completados: 0, subgenero_dominante: null });
+  ejecuciones[id] = {
+    novela_id: id, estado: "configurada", fase: null, capitulo_actual: null, intento_actual: 1,
+    capitulos_completados: 0, total_capitulos: 0, parada_abierta_id: null, ultimo_error: null, actualizado_en: ahoraIso,
+  };
+  capitulosDe[id] = [];
+  return id;
 }
 
 const intenciones = new Map<number, IntencionSimulada>();
@@ -37,6 +93,9 @@ function fijarEstado(novelaId: number, estado: string, fase: string | null) {
 function atender(i: IntencionSimulada): IntencionSimulada["cierre"] {
   const id = i.novelaId;
   const estado = id !== null ? ejecuciones[id]?.estado : undefined;
+  if (i.tipo === "crear_novela") {
+    return { estado: "hecha", motivo: null, resultado: { novela_id: crearNovela() } };
+  }
   if (i.tipo === "arrancar" && id !== null) {
     const otra = Object.values(ejecuciones).some((e) => e.novela_id !== id && ACTIVOS.includes(e.estado));
     if (otra) return { estado: "rechazada", motivo: "otra_ejecucion_activa" };
@@ -214,6 +273,15 @@ export const manejadores = [
 
   http.post("*/api/intenciones", async ({ request }) => {
     const cuerpo = (await request.json()) as { tipo: TipoIntencion; novela_id?: number | null; payload?: Record<string, unknown> };
+    if (cuerpo.tipo === "crear_novela" && cuerpo.payload?.brief) {
+      const analisis = analizarBrief(cuerpo.payload.brief as BriefSimulado);
+      if (analisis.faltantes.length || analisis.contradicciones.length) {
+        return HttpResponse.json(
+          { codigo: "brief_incompleto", mensaje: "El brief no esta completo", detalle: JSON.stringify(analisis) },
+          { status: 422 },
+        );
+      }
+    }
     const intencion: IntencionSimulada = {
       id: siguienteIntencion++,
       tipo: cuerpo.tipo,
@@ -237,7 +305,7 @@ export const manejadores = [
       tipo: intencion.tipo,
       estado: intencion.cierre?.estado ?? "pendiente",
       motivo: intencion.cierre?.motivo ?? null,
-      resultado: null,
+      resultado: intencion.cierre?.resultado ?? null,
       creado_en: new Date(intencion.creada).toISOString(),
     });
   }),
