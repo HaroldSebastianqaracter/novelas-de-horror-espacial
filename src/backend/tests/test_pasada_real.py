@@ -264,20 +264,28 @@ REGLA_DEL_USO = (
     "condiciones, es conocimiento por la vía `dedujo`; y si además actúa sobre él, regístralo "
     "también como uso. Ejemplo: «cuarenta horas para diez personas son veintiséis de planta», "
     "dicho por quien hace la cuenta, ni usa ni deduce el dato «déficit a las veintiséis horas "
-    "con once personas»: es la estimación de ese personaje, con otra gente y otra pregunta."
+    "con once personas»: es la estimación de ese personaje, con otra gente y otra pregunta. Si "
+    "más adelante vuelve a estimar lo mismo con otra cifra, usa el mismo atributo con "
+    "`supersede_a`: una estimación que cambia no contradice."
 )
 
 
 def test_el_extractor_recibe_la_regla_del_uso_entera() -> None:
-    """RF3-PAS-07, parada 9, por el mismo camino por el que el puerto lee la skill."""
+    """RF3-PAS-07, parada 9, por el mismo camino por el que el puerto lee la skill.
+
+    La seccion de los usos entera: un parrafo anadido que dijera lo contrario tambien falla.
+    """
     from compartido.puerto.terminal import PuertoTerminal
     from config import raiz_repo
 
     puerto = PuertoTerminal(skills_dir=raiz_repo() / ".claude" / "skills")
     skill = puerto.ruta_skill("extraccion").read_text(encoding="utf-8")
-    assert REGLA_DEL_USO in skill
-    # Sigue la regla de siempre: un uso se registra aunque el personaje ya supiera el dato.
-    assert "hay que registrarlo aunque el personaje ya lo supiera de antes" in skill
+    seccion = skill.split("**Usos de conocimiento**")[1].split("**Estados de personaje**")[0]
+    parrafos = [p.strip() for p in seccion.split("\n\n") if p.strip()]
+    assert len(parrafos) == 2
+    # La regla de siempre: un uso se registra aunque el personaje ya supiera el dato.
+    assert "hay que registrarlo aunque el personaje ya lo supiera de antes" in parrafos[0]
+    assert parrafos[1] == REGLA_DEL_USO
 
 
 def _puerta_3(con: sqlite3.Connection, g: fabrica.Grafo) -> tuple[set[str], set[str]]:
@@ -330,14 +338,49 @@ def test_una_deduccion_de_lo_que_no_presencio_habilita_el_uso_pero_avisa() -> No
     assert "deduccion_por_verificar" in avisos
 
 
-@pytest.mark.parametrize(("quien", "via"), [
-    ("Ibarra", "dedujo"),  # estaba en la escena del hecho
-    ("Reyes", "se_lo_contaron"),  # no lo deduce
+def _reyes_de_pov(con: sqlite3.Connection, g: fabrica.Grafo) -> None:
+    con.execute("UPDATE escena SET pov_id = ? WHERE id = ?",
+                (g.personajes["Reyes"], g.escenas[(1, 1)]))
+
+
+def _reyes_actua(con: sqlite3.Connection, g: fabrica.Grafo) -> None:
+    con.execute(
+        "INSERT INTO estado_personaje (novela_id, personaje_id, escena_id, condicion) "
+        "VALUES (?,?,?, 'vivo')",
+        (g.novela_id, g.personajes["Reyes"], g.escenas[(1, 1)]),
+    )
+
+
+def _reyes_usa_alli(con: sqlite3.Connection, g: fabrica.Grafo) -> None:
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)",
+        (g.novela_id, g.personajes["Reyes"], g.hechos["ojos"], g.escenas[(1, 1)]),
+    )
+
+
+def _reyes_lo_ignora(con: sqlite3.Connection, g: fabrica.Grafo) -> None:
+    con.execute("UPDATE estado_conocimiento SET postura = 'ignora' WHERE via = 'dedujo'")
+
+
+@pytest.mark.parametrize(("quien", "via", "preparar"), [
+    ("Ibarra", "dedujo", None),  # estaba en el reparto de la escena del hecho
+    ("Reyes", "se_lo_contaron", None),  # no lo deduce
+    # Validador de d6b64b9: la presencia de RF2-PIPE-30 (POV, reparto o actuar en la escena).
+    ("Reyes", "dedujo", _reyes_de_pov),
+    ("Reyes", "dedujo", _reyes_actua),
+    ("Reyes", "dedujo", _reyes_usa_alli),
+    # Una postura que no habilita usos no calla a nadie.
+    ("Reyes", "dedujo", _reyes_lo_ignora),
 ])
-def test_solo_avisa_la_deduccion_de_lo_que_no_presencio(quien: str, via: str) -> None:
+def test_solo_avisa_la_deduccion_de_lo_que_no_presencio(
+    quien: str, via: str, preparar: Any
+) -> None:
     con, _ = nueva_bd()
     g = fabrica.novela_minima(con)
     _conocer(con, g, quien, via)
+    if preparar is not None:
+        preparar(con, g)
     assert "deduccion_por_verificar" not in _puerta_3(con, g)[1]
 
 

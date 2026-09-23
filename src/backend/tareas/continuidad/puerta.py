@@ -145,12 +145,13 @@ WHERE ec.novela_id = ? AND c.numero = ?
 """
 
 # --- 3b. Deduccion por verificar (aviso, spec3 RF3-PAS-08) ----------------------------------
-# Un conocimiento por la via `dedujo` habilita los usos siguientes sin que nadie mire si la
-# deduccion es plausible. Cuando el hecho se fijo en una escena en la que el personaje no
-# estaba, esa deduccion es lo unico que evita la parada por conocimiento no adquirido: el
-# autor la ve. En la parada 9, una cifra que coincidia bastaba para tomar un calculo propio
-# por el dato registrado.
-_SQL_DEDUCCION = """
+# Un conocimiento por la via `dedujo` con una postura que habilita permite los usos siguientes
+# sin que nadie mire si la deduccion es plausible. Cuando el hecho se fijo en una escena en la
+# que el personaje no estaba (con la presencia de RF2-PIPE-30: POV, reparto o actuar en ella),
+# esa deduccion es lo unico que evita la parada por conocimiento no adquirido: el autor la ve.
+# En la parada 9, una cifra que coincidia bastaba para tomar un calculo propio por el dato
+# registrado.
+_SQL_DEDUCCION = f"""
 SELECT ec.id AS conocimiento_id, p.nombre AS personaje, h.sujeto_nombre, h.atributo, h.valor,
        ec.escena_id, c.numero AS capitulo, h.id AS hecho_id
 FROM estado_conocimiento ec
@@ -160,12 +161,17 @@ JOIN escena e          ON e.id = ec.escena_id
 JOIN capitulo c        ON c.id = e.capitulo_id
 WHERE ec.novela_id = ? AND c.numero = ?
   AND ec.via = 'dedujo'
+  AND ec.postura IN {POSTURAS_QUE_HABILITAN}
   AND NOT EXISTS (
         SELECT 1 FROM escena eh
         WHERE eh.id = h.escena_id
-          AND (eh.pov_id = ec.personaje_id OR EXISTS (
-                SELECT 1 FROM escena_personaje sp
-                WHERE sp.escena_id = eh.id AND sp.personaje_id = ec.personaje_id)))
+          AND (eh.pov_id = ec.personaje_id
+            OR EXISTS (SELECT 1 FROM escena_personaje sp
+                       WHERE sp.escena_id = eh.id AND sp.personaje_id = ec.personaje_id)
+            OR EXISTS (SELECT 1 FROM uso_conocimiento ua
+                       WHERE ua.escena_id = eh.id AND ua.personaje_id = ec.personaje_id)
+            OR EXISTS (SELECT 1 FROM estado_personaje ep
+                       WHERE ep.escena_id = eh.id AND ep.personaje_id = ec.personaje_id)))
 """
 
 # --- 4a. Presencia imposible: personaje muerto que reaparece -------------------------------
