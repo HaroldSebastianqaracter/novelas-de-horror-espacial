@@ -69,7 +69,7 @@ TIPOS_EVENTO: tuple[str, ...] = (
     "intencion_recibida", "fase_cambiada", "agente_iniciado", "agente_terminado",
     "puerta_evaluada", "capitulo_completado", "parada", "parada_resuelta", "detenida",
     "revertido", "rehecho", "completada", "error", "worker_recuperado", "paquete_recortado",
-    "extraccion_descartes",
+    "extraccion_descartes", "indice_fallo",
 )
 
 

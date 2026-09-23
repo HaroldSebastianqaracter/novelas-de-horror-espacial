@@ -273,7 +273,6 @@ class Worker:
 
         with transaccion(self.con):
             borrado = fallo.relanzar(self.con, novela_id, desde)
-        self._purgar_indice(novela_id, desde)
         cola.cerrar(self.con, intencion.id, "hecha", resultado={"borrado": borrado})
         self._correr(novela_id)
 
@@ -294,11 +293,6 @@ class Worker:
         if desde > tope:
             return f"no se puede relanzar desde {desde}: el ultimo completado es {tope - 1}"
         return None
-
-    def _purgar_indice(self, novela_id: int, desde: int) -> None:
-        if self.indice.disponible:
-            with transaccion(self.con):
-                self.indice.purgar(novela_id, desde)
 
     def _resolver_parada(self, intencion: cola.Intencion) -> None:
         """Resuelve una parada con una accion de la tabla cerrada de RF2-FALLO-03.
@@ -352,7 +346,6 @@ class Worker:
             with transaccion(self.con):
                 revocados = fallo.aceptar_retcon(self.con, novela_id, parada_id)
                 fallo.relanzar(self.con, novela_id, int(capitulo), suceso="aceptar_retcon")
-            self._purgar_indice(novela_id, int(capitulo))
             cola.cerrar(
                 self.con, intencion.id, "hecha", resultado={"hechos_revocados": revocados}
             )
@@ -365,7 +358,6 @@ class Worker:
                 return
             with transaccion(self.con):
                 fallo.relanzar(self.con, novela_id, desde)
-            self._purgar_indice(novela_id, desde)
             cola.cerrar(self.con, intencion.id, "hecha")
 
         self._correr(novela_id)

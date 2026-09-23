@@ -223,7 +223,21 @@ Los nombres se buscan como palabras enteras sobre el texto normalizado, igual qu
 
 ### 3.7 Fase 7 — El índice vectorial
 
-*Pendiente: se escribe al empezar la fase.*
+Hallazgos 13 (el KNN va sobre todo el índice y el filtro se aplica después) y 14 (un cambio de modelo o de dimensión pasa en silencio).
+
+**RF2-CTX-07** *Sustituye a RF-CTX-07 en la mecánica.* La distancia se calcula **solo sobre los candidatos** que el filtro determinista admitió (escenas anteriores, vigentes, que comparten lugar u objeto con la consulta), con la función de distancia de `sqlite-vec` sobre esas filas, y no con un KNN sobre todo el índice que luego se filtra. Así una novela larga, con cientos de escenas más parecidas en otros lugares, no deja vacío el bloque recuperado.
+
+**RF2-CTX-09** *Sustituye a RF-CTX-09.* Ningún resultado de puerta depende del índice, y **todo fallo del índice es un aviso en la traza** (evento `indice_fallo`, con la operación y el error), nunca un `pass`. Que el índice esté desactivado por configuración no es un fallo y no avisa.
+
+**RF2-CTX-10** *Sustituye a RF-CTX-10.* `indice_estado` guarda el modelo y la dimensión **con que se construyeron las tablas vec0**, no los del último proceso que arrancó. Si el modelo que carga el worker no coincide, las tablas se rehacen con la dimensión nueva y se reindexa todo lo escrito antes de usarlas. El respaldo por hash solo se usa si se pidió `hash` expresamente; en cualquier otro caso, si ningún modelo carga, no hay índice, el bloque recuperado queda vacío y la traza lo avisa.
+
+**RF2-FALLO-04b** *Requisito nuevo.* Toda reversión del grafo purga el índice en la misma transacción: las versiones de texto que dejan de ser vigentes y los hechos que dejan de serlo salen de las tablas vec0. Antes solo lo hacía `relanzar`, y el reintento de oficio o la recuperación dejaban vectores de texto descartado.
+
+**RF-CTX-08** (el desempate por similitud entre candidatos de canon) queda como **riesgo aceptado** en la v2: el orden determinista con desempate por `id` basta mientras no haya un golden set que diga que la similitud mejora algo.
+
+La relevancia de lo recuperado se mide con un **golden set** de consultas y escenas esperadas (recall@k, sin juez), con el modelo real cacheado. Va marcado `modelo` y no corre por defecto, porque exige el modelo descargado.
+
+> **Decisión de la spec (23-09-2026).** Para filtrar antes de medir se eligió calcular la distancia fila a fila sobre los candidatos, y no subir el `k` del KNN: con cualquier `k` fijo, una novela bastante larga vuelve a dejar fuera a los candidatos admitidos. El coste es lineal en el número de candidatos, que el filtro por lugar y capítulo ya acota.
 
 ### 3.8 Fase 8 — Contrato de la API y tipos
 

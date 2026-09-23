@@ -19,6 +19,7 @@ from typing import Any
 
 from compartido.db import TABLAS_DE_ESTADO
 from compartido.grafo import emitir_evento, insertar
+from compartido.vectores import purgar_descartes
 
 from . import estados
 
@@ -214,6 +215,11 @@ def revertir_grafo(
         (novela_id, desde_capitulo),
     )
     borrado["hecho_revocacion"] = cur.rowcount
+    # Lo que acaba de dejar de ser vigente sale tambien del indice, en esta misma transaccion
+    # (RF2-FALLO-04b). Si no se puede, queda en la traza.
+    error = purgar_descartes(con)
+    if error:
+        emitir_evento(con, novela_id, "indice_fallo", operacion="purgar", error=error)
     emitir_evento(
         con, novela_id, "revertido", desde_capitulo=desde_capitulo, motivo=motivo,
         borrado=borrado,

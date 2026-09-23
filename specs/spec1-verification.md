@@ -2,7 +2,7 @@
 
 Plan de verificación de [spec1.md](spec1.md). Métodos y etiquetas según [docs/validators.md](../docs/validators.md).
 
-Actualizado el 23 de septiembre de 2026. Suite: 146 tests en verde; las once reproducciones de la auditoría de la fase 0, y las siete que añadieron las fases 5 y 6, pasan ya sin marca. Las rutas de evidencia son relativas a `src/backend/`.
+Actualizado el 23 de septiembre de 2026. Suite: 151 tests en verde y 1 marcado `modelo` (el golden set de recuperación, que necesita el modelo descargado y no corre por defecto). Las rutas de evidencia son relativas a `src/backend/`.
 
 > **Filas degradadas el 23 de septiembre de 2026.** La auditoría de ese día reprodujo fallos en siete filas que estaban en `implementado`: 11, 16, 17, 21, 25, 27 y 35. Pasan a `fallando` ya, y no cuando se arreglen, porque un plan que dice «implementado» sobre un fallo reproducido es justo lo que la sección siguiente llama la forma más común de mentir. Cada una vuelve a `implementado` en la fase de [spec2-plan.md](spec2-plan.md) que la corrige, y su propiedad endurecida vive en [spec2-verification.md](spec2-verification.md).
 
@@ -42,7 +42,7 @@ Actualizado el 23 de septiembre de 2026. Suite: 146 tests en verde; las once rep
 | 26 | El pipeline completo corre sin Claude Code instalado | Integration testing | `T` | `tests/test_pipeline.py::test_pipeline_completo_sin_claude_code` | implementado |
 | 27 | Las cinco puertas quedan registradas en `resultado_puerta` | Integration testing + contract testing | `T` | `tests/test_pipeline.py::test_las_puertas_quedan_registradas`; la puerta 4 con mecánica y juicio en un registro: `tests/test_traza.py::test_toda_parada_de_oficio_tiene_la_puerta_4_en_falla`, `tests/test_auditoria.py::test_hallazgo_09_…`. Corregida por spec2, fase 6 | implementado |
 | 28 | Toda llamada se reconstruye desde `llamada_modelo` | Integration testing | `T` | `tests/test_api.py::test_la_traza_no_devuelve_el_prompt_salvo_que_se_pida` | implementado |
-| 29 | Ningún veredicto de puerta cambia según el índice vectorial esté o no | Integration testing | `T` | `tests/test_puerta_continuidad.py::test_puerta_no_depende_del_indice` | implementado |
+| 29 | Ningún veredicto de puerta cambia según el índice vectorial esté o no | Integration testing | `T` | `tests/test_puerta_continuidad.py::test_puerta_no_depende_del_indice`; con el índice activo y el modelo sin cargar, el pipeline termina y la traza avisa: `tests/test_indice.py::test_si_el_modelo_no_carga_el_pipeline_sigue_y_la_traza_lo_avisa` | implementado |
 | 30 | El estado es append-only con escena de origen, y lo mutable se deriva | Static analysis sobre el esquema + integration testing de los triggers | `A` + `T` | `tests/test_arquitectura.py::test_el_estado_es_append_only_con_escena_de_origen`, `::test_lo_que_cambia_durante_la_redaccion_no_es_columna_mutable`; `tests/test_migraciones.py::test_un_hecho_no_se_modifica` (el trigger `hecho_inmutable`), `tests/test_auditoria.py::test_hallazgo_21_…` | implementado |
 | 31 | El texto se versiona y nunca se hace `UPDATE` sobre él | Static analysis | `A` | `tests/test_arquitectura.py::test_el_texto_se_versiona_y_no_se_actualiza` | implementado |
 | 32 | WAL, `busy_timeout` y claves ajenas activas en toda conexión | Unit testing | `T` | `tests/test_arquitectura.py::test_wal_y_busy_timeout` | implementado |

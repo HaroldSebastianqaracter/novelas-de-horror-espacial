@@ -567,9 +567,24 @@ def _cerrar_capitulo(ctx: Contexto, numero: int) -> None:
     emitir_evento(ctx.con, ctx.novela_id, "capitulo_completado", capitulo=numero)
 
 
+def _indice_util(ctx: Contexto, operacion: str, capitulo: int) -> bool:
+    """Si el indice se puede usar. Si no, por un fallo y no por configuracion, avisa."""
+    if ctx.indice is None:
+        return False
+    if getattr(ctx.indice, "disponible", False):
+        return True
+    fallo = getattr(ctx.indice, "fallo", None)
+    if fallo:
+        emitir_traza(ctx, "indice_fallo", operacion=operacion, capitulo=capitulo, error=fallo)
+    return False
+
+
 def _recuperar(ctx: Contexto, numero: int) -> list[Any]:
-    """Bloque recuperado del paquete (RF-CTX-07). Sin indice, lista vacia y a seguir."""
-    if ctx.indice is None or not getattr(ctx.indice, "disponible", False) or numero <= 1:
+    """Bloque recuperado del paquete (RF2-CTX-07). Sin indice, lista vacia y a seguir.
+
+    Prescindible no es silencioso: todo fallo del indice queda en la traza (RF2-CTX-09).
+    """
+    if numero <= 1 or not _indice_util(ctx, "recuperar", numero):
         return []
     escenas = lectura.escenas_del_capitulo(ctx.con, ctx.novela_id, numero)
     if not escenas:
@@ -579,21 +594,24 @@ def _recuperar(ctx: Contexto, numero: int) -> list[Any]:
     )
     lugares = sorted({int(e["lugar_id"]) for e in escenas})
     try:
-        return ctx.indice.recuperar(
+        return ctx.indice.recuperar(  # type: ignore[union-attr]
             ctx.novela_id, consulta, hasta_capitulo=numero, lugares=lugares, limite=8
         )
-    except Exception:  # noqa: BLE001 - el indice es prescindible por diseno
+    except Exception as exc:  # noqa: BLE001 - el indice es prescindible, pero se avisa
+        emitir_traza(ctx, "indice_fallo", operacion="recuperar", capitulo=numero,
+                     error=f"{type(exc).__name__}: {exc}")
         return []
 
 
 def _indexar(ctx: Contexto, numero: int) -> None:
-    if ctx.indice is None or not getattr(ctx.indice, "disponible", False):
+    if not _indice_util(ctx, "indexar", numero):
         return
     try:
         with transaccion(ctx.con):
-            ctx.indice.indexar_capitulo(ctx.novela_id, numero)
-    except Exception:  # noqa: BLE001
-        pass
+            ctx.indice.indexar_capitulo(ctx.novela_id, numero)  # type: ignore[union-attr]
+    except Exception as exc:  # noqa: BLE001 - el indice es prescindible, pero se avisa
+        emitir_traza(ctx, "indice_fallo", operacion="indexar", capitulo=numero,
+                     error=f"{type(exc).__name__}: {exc}")
 
 
 # --- Recorrido completo -------------------------------------------------------------------------

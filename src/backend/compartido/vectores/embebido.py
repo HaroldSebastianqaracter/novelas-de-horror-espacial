@@ -72,7 +72,7 @@ class EmbedderHash:
     """
 
     def __init__(self, dimension: int = 384) -> None:
-        self.nombre = "hash-384"
+        self.nombre = f"hash-{dimension}"
         self.dimension = dimension
 
     def codificar(self, textos: list[str], *, tipo: Tipo = "pasaje") -> list[list[float]]:
@@ -132,7 +132,7 @@ def _backend_de(modelo: str) -> str:
     return "fastembed"
 
 
-def construir(modelo: str, *, permitir_hash: bool = True) -> Embedder:
+def construir(modelo: str, *, permitir_hash: bool = False) -> Embedder:
     """Devuelve el embedder que pide la configuracion, cayendo con elegancia.
 
     `modelo` es un nombre de modelo o uno de los alias 'model2vec', 'fastembed', 'hash'.
@@ -141,10 +141,11 @@ def construir(modelo: str, *, permitir_hash: bool = True) -> Embedder:
     nombre de modelo no es intercambiable entre backends, y pasarle a model2vec el nombre de
     un modelo de fastembed solo produce un segundo fallo.
 
-    El ultimo recurso es el deterministico por hash, que recupera mal pero no rompe nada: el
-    indice es derivado y ninguna decision del pipeline depende de el (RF-CTX-09). Cual se
-    acabo usando de verdad queda escrito en la tabla `indice_estado`, para que la diferencia
-    entre "recupera bien" y "recupera por hash" no sea invisible.
+    El hash solo se usa si se pide expresamente (RF2-CTX-10): un indice por hash recupera
+    por coincidencia de palabras, y caer a el en silencio mezclaba en la misma tabla vectores
+    de dos espacios distintos. Si ningun modelo carga, se lanza `EmbeddingNoDisponible` y el
+    indice queda sin usar, con el motivo en la traza. Cual se uso de verdad queda en
+    `indice_estado`.
     """
     pedido = _backend_de(modelo)
     if pedido == "hash":

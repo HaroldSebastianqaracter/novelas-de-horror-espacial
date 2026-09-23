@@ -517,6 +517,8 @@ Lo que la primera versión del backend resolvió, con el sitio donde está escri
 >
 > El índice **solo recupera y ordena**. El filtro determinista por reparto y lugar decide quién entra; la similitud solo desempata. Ninguna puerta depende de él, y si no está, el bloque recuperado queda vacío y el pipeline sigue igual.
 
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** Tres correcciones de la auditoría. La distancia se mide **solo sobre los candidatos** que el filtro admitió, y no con una búsqueda de vecinos sobre todo el índice filtrada después, que en una novela larga dejaba el bloque vacío. El índice guarda **con qué modelo se construyó** y se rehace si el modelo cambia: mezclar vectores de dos modelos no da error, da distancias sin sentido. Y el embedding por hash ya no es un repuesto silencioso: solo se usa si se pide; sin modelo no hay índice, y todo fallo del índice queda como aviso en la traza. Se descartó subir el número de vecinos, porque cualquier número fijo vuelve a quedarse corto. Detalle en [specs/spec2.md](../specs/spec2.md), RF2-CTX-07 a RF2-CTX-10.
+
 ## Decisiones pendientes
 
 - **Alcance de la revalidación en cascada** cuando una pasada reescribe una escena antigua: revalidar solo las escenas dependientes exige que las dependencias entre hechos estén modeladas, y eso todavía no está en [definitions.md](definitions.md). Es lo que bloquea al revisor, y por tanto la única pieza del pipeline que falta.

@@ -504,9 +504,15 @@ Si un paquete de planificación no cabe, se aplica RF-CTX-03: el canon completo 
 
 **RF-CTX-07 — Bloque recuperado.** Solo para el redactor. Antes de ensamblar el paquete del capítulo N, el orquestador construye una consulta por escena de la escaleta (objetivo, conflicto, lugar, reparto, `ganchoSalida`) y busca en el índice vectorial de `escena_texto` los fragmentos más cercanos de los capítulos 1 a N-1 que **no** estén ya en el bloque «capítulo anterior», restringidos a escenas que compartan al menos un `Lugar`, un `Objeto` o la `Amenaza` con la escena consultada. Devuelve como máximo 3 fragmentos por escena y 8 por capítulo, cada uno con su capítulo y escena de origen, ordenados por similitud, hasta agotar el presupuesto del bloque. Es la respuesta a «¿se ha descrito ya este pasillo, y cómo?»: prosa ya escrita, para que el redactor no la contradiga en la textura ni la repita.
 
+> Sustituido por spec2, RF2-CTX-07, en la mecánica: la distancia se mide solo sobre los candidatos admitidos.
+
 **RF-CTX-08 — Orden de candidatos de canon.** Cuando el bloque «canon filtrado» o el de «hechos y conocimiento» no cabe, el recorte por relevancia de RF-CTX-01 se aplica en dos pasos: primero el criterio determinista (número de escenas del capítulo en que aparece la entidad; el POV nunca se recorta), y solo para desempatar entre candidatos con la misma cuenta, la similitud entre la entidad (o el hecho) y la consulta de la escaleta del capítulo. El índice ordena; nunca decide qué entra sin que el filtro determinista lo haya admitido antes.
 
+> Riesgo aceptado en spec2 (U2-2): el desempate por similitud no se implementa.
+
 **RF-CTX-09 — El índice es derivado y no verifica.** Ningún resultado de puerta depende del índice vectorial. Si `sqlite-vec` no está disponible o el índice está vacío, el bloque recuperado queda vacío, RF-CTX-08 desempata por `id`, y el pipeline sigue. Una llamada al índice que falle se registra como aviso en la traza, no como error.
+
+> Sustituido por spec2, RF2-CTX-09.
 
 **RF-CTX-10 — Modelo de embeddings.** Claude Code escribe y juzga, pero no produce embeddings, así que el índice necesita un modelo aparte. Se usa uno **local, multilingüe y en CPU**, cargado como dependencia Python desde `compartido/vectores/`. El nombre vive en `config.py` (`NOVELAS_EMBEDDING_MODELO`); **la dimensión no se configura**, porque es una propiedad del modelo y un valor de entorno que pueda contradecirla es un fallo esperando. El índice la toma del modelo y la escribe en `indice_estado`.
 
@@ -524,6 +530,8 @@ Los modelos de la familia **e5 esperan prefijos**: `query:` para lo que se busca
 Se vectoriza por **escena** (una fila por versión vigente de `escena_texto`) y por **hecho** (una fila por triple vigente), tras confirmar el capítulo y fuera de su transacción. Cambiar de modelo obliga a reconstruir el índice entero, que también corre tras cualquier reversión (RF-FALLO-04).
 
 > **Decisión de la spec (21-09-2026).** architecture.md dejaba pendientes el modelo de embeddings, su dimensión y la granularidad. Se decide local y por escena y por hecho, y se descarta por párrafo en la v1: la unidad que el redactor necesita recuperar es la escena que describió un lugar, no un párrafo suelto, y el índice de párrafos multiplica el coste sin que el paquete lo pueda aprovechar con 4.000 tokens. Se descarta un modelo por API porque introduce la clave de proveedor que la elección de Claude Code evita. El modelo concreto es provisional y se fija midiendo sobre un capítulo real, igual que las cifras del presupuesto. El bloque recuperado va **después** del capítulo anterior en el orden de recorte porque el capítulo anterior es lo que el redactor necesita para el enlace inmediato de voz y ritmo; lo recuperado es textura de fondo.
+
+> Sustituido por spec2, RF2-CTX-10 y RF2-FALLO-04b: el índice guarda el modelo con que se construyó, se rehace si cambia, el hash solo si se pide, y toda reversión lo purga.
 
 ### 3.8 Puerto a Claude Code
 
