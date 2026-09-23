@@ -245,3 +245,9 @@ def test_la_migracion_crea_las_tablas_del_brief() -> None:
     assert "dedicatoria" in columnas
     assert db.version_actual(con) == db.version_objetivo()
 
+
+
+def test_una_novela_tiene_al_menos_tres_capitulos() -> None:
+    """Tres actos necesitan tres capitulos: con menos, la puerta 2 para siempre."""
+    with pytest.raises(ValueError, match="capitulos"):
+        con_cambios(capitulos=2)

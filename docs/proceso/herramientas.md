@@ -17,6 +17,7 @@ Una por agente del pipeline. El puerto lee la `SKILL.md` y se la entrega a Claud
 | `extraccion` | Extractor | Hechos, conocimiento, estados, eventos y siembras que fija la prosa |
 | `oficio` | Editor | Veredicto por criterio de oficio, con evidencia |
 | `continuidad` | Editor | El informe legible de un conflicto que la puerta 3 ya detectó |
+| `entrevistador` | Antes del pipeline | Convierte las respuestas del comprador en campos del brief y formula la siguiente pregunta; lo invoca `entrevista.py`, no el worker |
 
 ## Herramientas de desarrollo
 

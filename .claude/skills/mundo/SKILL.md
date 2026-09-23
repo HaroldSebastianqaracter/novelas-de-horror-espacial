@@ -37,6 +37,10 @@ Terminas cuando **toda regla que la trama vaya a usar está escrita**, incluidos
 
 **La avería es el reloj.** Respirar, calentarse, orientarse y comunicarse dependen de máquinas que pueden fallar, ser saboteadas o ser el antagonista. Dale a los sistemas críticos magnitudes concretas y visibles, porque una degradación con cifras es el reloj a la vista del suspense y funciona incluso en escenas sin amenaza activa.
 
+## Si la novela es un regalo
+
+Si la entrada trae recuerdos del destinatario, la estación puede hacerles eco: un lugar, un sistema o una costumbre de la tripulación que el destinatario reconozca transformado. Es material, no obligación: úsalo donde enriquezca el mundo y no copies el recuerdo literalmente.
+
 ## Qué no haces
 
 - **No creas personajes.** El elenco es de otro agente. Las facciones sí son tuyas; quién las compone, no.

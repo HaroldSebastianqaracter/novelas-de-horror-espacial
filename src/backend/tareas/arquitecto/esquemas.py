@@ -50,6 +50,11 @@ class SalidaArquitecto(BaseModel):
     pov_por_defecto: Pov = "tercera_limitada"
     tiempo_verbal: TiempoVerbal = "pasado"
     titulo_propuesto: str = ""
+    dedicatoria: str = Field(
+        default="", max_length=400,
+        description="Solo si la novela es un regalo: la dedicatoria de la portada, con el "
+                    "nombre del destinatario escrito exactamente como en el encargo",
+    )
     temas: list[TemaSalida] = Field(min_length=1)
     motivos: list[MotivoSalida] = Field(min_length=1)
     estilo: EstiloSalida

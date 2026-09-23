@@ -47,20 +47,33 @@ set NOVELAS_PUERTO=falso
 rem Consola 2: el lanzador crea la novela del brief de ejemplo y muestra como avanza
 set NOVELAS_DB_PATH=novela.db
 set NOVELAS_PUERTO=falso
-.venv\Scripts\python.exe demo.py
+.venv\Scripts\python.exe demo.py --brief ..\..\ejemplos\brief-ejemplo.json
 ```
 
 Con `NOVELAS_PUERTO=terminal` los agentes son Claude Code de verdad, y **cuesta dinero**. Las variables de entorno están en [.env.example](.env.example); la guía completa (API, reanudar, relanzar, verificar) en [src/backend/README.md](src/backend/README.md).
 
-## Brief de ejemplo
+## El encargo: una novela para alguien
 
-[ejemplos/brief-ejemplo.json](ejemplos/brief-ejemplo.json) es el brief con el que `demo.py` crea su novela. También se puede encolar por la API (`python -m main`, en `http://127.0.0.1:8000`):
+Cada novela es un regalo. El **brief** dice para quién es (nombre, edad, rasgos), qué recuerdos y qué personas o mascotas cercanas tienen que aparecer, cuánto miedo admite (tres niveles con edad mínima: atmosférico desde 10 años, tensión desde 14, intenso desde 18), el tono y qué no puede aparecer. El destinatario es el protagonista y nunca muere.
+
+Hay tres formas de hacer el brief, desde `src\backend`:
+
+```bat
+rem Entrevista conversacional: pregunta lo que falta, detecta contradicciones y encola la novela
+.venv\Scripts\python.exe entrevista.py
+rem Partiendo de una carta o anecdota que pega el comprador (se trata como dato, nunca como orden)
+.venv\Scripts\python.exe entrevista.py --texto-libre carta.txt
+rem Validar y encolar un brief ya escrito, sin agente
+.venv\Scripts\python.exe entrevista.py --brief ..\..\ejemplos\brief-ejemplo.json
+```
+
+[ejemplos/brief-ejemplo.json](ejemplos/brief-ejemplo.json) es un brief completo y reproducible. También se puede encolar por la API (`python -m main`, en `http://127.0.0.1:8000`); un brief incompleto o contradictorio devuelve `422` con lo que falta:
 
 ```bat
 curl -X POST http://127.0.0.1:8000/intenciones -H "Content-Type: application/json" -d @..\..\ejemplos\brief-ejemplo.json
 ```
 
-Hoy el brief es la semilla de la premisa más las restricciones. El brief personalizado (destinatario, recuerdos, intensidad del terror, temas vetados) es el bloque 2 del plan de entrega.
+Qué falta y qué se contradice lo decide el código, no el agente entrevistador: ver [specs/spec3.md](specs/spec3.md), 3.2.
 
 ## Estructura
 

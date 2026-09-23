@@ -39,11 +39,14 @@ En orden de dependencias: cada bloque se apoya en los anteriores.
 
 ### 2. Personalización del terror
 
-- [ ] **Brief** con schema: destinatario (nombre, edad, rasgos, recuerdos), intensidad del terror, tono, extensión y palabras o temas vetados por el cliente.
-- [ ] **Agente entrevistador** (tarea y skill) que detecta los datos que faltan y al menos una contradicción. La natural en este género es **edad del lector frente a intensidad del terror**.
-- [ ] **Texto libre no confiable** (una anécdota, una carta): se extraen hechos, nunca instrucciones.
-- [ ] El brief alimenta al arquitecto y al elenco. El destinatario pasa a ser personaje, sus recuerdos se trasladan a la estación, y se genera la dedicatoria.
-- [ ] Escala del examen: **10 capítulos de 1.000–1.500 palabras**.
+Requisitos en [spec3.md](spec3.md), 3.2; verificación en [spec3-verification.md](spec3-verification.md).
+
+- [x] **Brief** con schema: destinatario (nombre, edad, pronombres, rasgos), recuerdos, allegados, ocasión, intensidad del terror, tono, subgénero, extensión (3 a 10 capítulos) y términos vetados.
+- [x] **Agente entrevistador** (tarea, skill y `entrevista.py`). Qué falta y qué se contradice lo calcula el código: edad frente a intensidad, subgénero frente a intensidad y término vetado dentro de un elemento obligatorio.
+- [x] **Texto libre no confiable**: solo salen rasgos, recuerdos y allegados, cada uno con cita literal comprobada, y una búsqueda de patrones de inyección deja alertas.
+- [x] El brief llega a arquitecto (dedicatoria), mundo (recuerdos), elenco (destinatario protagonista y allegados), estructura, escaleta (elementos por escena) y redacción. Las puertas 1, 2 y 3 comprueban el encargo.
+- [x] Escala del examen: **10 capítulos de 1.000–1.500 palabras** por defecto, derivada del brief.
+- [ ] Probar la entrevista y una novela personalizada con **Claude Code real**. Cuesta dinero: pendiente de aprobación.
 
 ### 3. Huecos de la story bible
 

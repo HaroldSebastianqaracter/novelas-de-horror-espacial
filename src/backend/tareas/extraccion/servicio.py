@@ -14,6 +14,7 @@ from __future__ import annotations
 import sqlite3
 from typing import Any
 
+from compartido.brief import linea_destinatario
 from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
 from compartido.grafo import (
     Resolvedor,
@@ -45,13 +46,18 @@ def paquete(
     p = Paquete(agente=AGENTE, capitulo=capitulo)
 
     ultimo_orden = lectura.ultimo_orden_interno(con, novela_id)
+    brief = lectura.brief(con, novela_id)
+    # RF3-PER-03: el protagonista es el destinatario del regalo, y su condicion es lo que
+    # comprueba `destinatario_muere` en la puerta 3.
+    destinatario = f"\n{linea_destinatario(brief)}" if brief is not None else ""
     p.anadir(
         "instrucciones",
         f"Extrae del capitulo {capitulo} todo lo que el texto afirma. Refierete a cada "
         "elemento por el numero de escena en que aparece.\n"
         f"El ultimo orden_interno registrado en la novela es {ultimo_orden}: todo evento "
         "dramatizado lleva el suyo y continua la escala desde ahi (dos sucesos simultaneos "
-        "comparten orden; uno anterior en la cronologia, como un recuerdo, lleva uno menor).",
+        "comparten orden; uno anterior en la cronologia, como un recuerdo, lleva uno menor)."
+        + destinatario,
         "TU ENCARGO",
     )
 

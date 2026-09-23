@@ -6,6 +6,7 @@ import json
 import sqlite3
 from typing import Any
 
+from compartido.brief import linea_destinatario
 from compartido.grafo import Resolvedor, insertar, lectura
 from compartido.tipos import como_dict, como_lista
 
@@ -56,6 +57,26 @@ def paquete(con: sqlite3.Connection, novela_id: int) -> str:
 
     lineas += ["", "Facciones a las que pueden pertenecer (usa estos nombres exactos):"]
     lineas.extend(f"- {f['nombre']}: {f['proposito']}" for f in facciones)
+
+    brief = lectura.brief(con, novela_id)
+    if brief is not None:
+        # RF3-PER-03: el destinatario es el protagonista, con su nombre exacto, y cada
+        # allegado obligatorio es un personaje. Lo comprueba la puerta 1 (RF3-PER-04).
+        d = brief.destinatario
+        lineas += [
+            "", "LA NOVELA ES UN REGALO.", linea_destinatario(brief),
+            "Es el protagonista (rol_narrativo 'protagonista') y se llama exactamente asi. "
+            "Sus rasgos, que su cadena fantasma-herida-mentira-defecto tiene que respetar:",
+        ]
+        lineas.extend(f"- {e.texto}" for e in d.rasgos)
+        obligatorios = [a for a in brief.allegados if a.obligatorio]
+        if obligatorios:
+            lineas += ["", "Allegados que tienen que ser personajes, con estos nombres exactos:"]
+            lineas.extend(
+                f"- {a.nombre} ({a.relacion})" + (f": {', '.join(a.rasgos)}" if a.rasgos else "")
+                for a in obligatorios
+            )
+        lineas.append("El protagonista sobrevive a la novela.")
     return "\n".join(lineas)
 
 

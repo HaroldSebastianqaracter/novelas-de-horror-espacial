@@ -39,6 +39,16 @@ def paquete(con: sqlite3.Connection, novela_id: int) -> str:
     if restricciones:
         lineas += ["", "Restricciones:"]
         lineas.extend(f"- {k}: {v}" for k, v in sorted(restricciones.items()))
+    brief = lectura.brief(con, novela_id)
+    if brief is not None:
+        # RF3-PER-03: material que la estacion puede reflejar. Aqui no es obligatorio; lo
+        # obligatorio lo reparte la escaleta.
+        lineas += [
+            "",
+            "Recuerdos del destinatario de la novela (es un regalo): la estacion, sus lugares o "
+            "sus sistemas pueden hacerles eco de forma natural, sin copiarlos literalmente:",
+        ]
+        lineas.extend(f"- {e.texto}" for e in brief.recuerdos)
     return "\n".join(lineas)
 
 

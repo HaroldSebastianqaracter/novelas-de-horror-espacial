@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import sqlite3
 
-from compartido.grafo import NombreDesconocido, Resolvedor, insertar, lectura
+from compartido.brief import linea_destinatario
+from compartido.grafo import NombreDesconocido, Resolvedor, emitir_evento, insertar, lectura
 
 from .esquemas import SalidaEscaleta
 
@@ -81,11 +82,32 @@ def paquete(con: sqlite3.Connection, novela_id: int) -> str:
                if s["capitulo_pago_previsto"] else "")
             for s in siembras
         )
+
+    brief = lectura.brief(con, novela_id)
+    if brief is not None:
+        # RF3-PER-03: el destinatario es el punto de vista de la mayoria de las escenas, y cada
+        # elemento obligatorio va planificado en alguna. Lo comprueba la puerta 2.
+        elementos = lectura.elementos_personales(con, novela_id, solo_obligatorios=True)
+        lineas += [
+            "", "LA NOVELA ES UN REGALO.", linea_destinatario(brief),
+            f"CAPITULOS: exactamente {restricciones.get('capitulos', brief.capitulos)}.",
+            "El destinatario es el punto de vista de mas de la mitad de las escenas.",
+            "",
+            "Elementos personales que tienen que aparecer. Reparte cada codigo en al menos una "
+            "escena (campo `elementos`), donde encaje con naturalidad; no los acumules todos en "
+            "la misma:",
+        ]
+        lineas.extend(f"- {e['codigo']} ({e['tipo']}): {e['texto']}" for e in elementos)
     return "\n".join(lineas)
 
 
 def aplicar(con: sqlite3.Connection, novela_id: int, salida: SalidaEscaleta) -> None:
     resolvedor = Resolvedor(con, novela_id)
+    elementos = {
+        str(e["codigo"]).upper(): int(e["id"])
+        for e in lectura.elementos_personales(con, novela_id)
+    }
+    desconocidos: list[str] = []
 
     actos = {
         int(f["numero"]): int(f["id"])
@@ -140,6 +162,15 @@ def aplicar(con: sqlite3.Connection, novela_id: int, salida: SalidaEscaleta) -> 
                         "INSERT OR IGNORE INTO escena_objeto (escena_id, objeto_id) VALUES (?,?)",
                         (escena_id, oid),
                     )
+            for codigo in e.elementos:
+                elemento_id = elementos.get(codigo.strip().upper())
+                if elemento_id is None:
+                    desconocidos.append(codigo)
+                    continue
+                con.execute(
+                    "INSERT OR IGNORE INTO escena_elemento (escena_id, elemento_id) VALUES (?,?)",
+                    (escena_id, elemento_id),
+                )
             for orden, b in enumerate(e.beats, start=1):
                 insertar(con, "beat", escena_id=escena_id, orden=orden, tipo=b.tipo,
                          cambio=b.cambio)
@@ -148,3 +179,8 @@ def aplicar(con: sqlite3.Connection, novela_id: int, salida: SalidaEscaleta) -> 
                     con, "secuela", escena_id=escena_id, reaccion=e.secuela.reaccion,
                     dilema=e.secuela.dilema, decision=e.secuela.decision,
                 )
+
+    if desconocidos:
+        # RF3-PER-04: un codigo que no existe se ignora y queda en la traza. Si por eso un
+        # elemento obligatorio se queda sin escena, lo para la puerta 2.
+        emitir_evento(con, novela_id, "elemento_desconocido", codigos=sorted(set(desconocidos)))

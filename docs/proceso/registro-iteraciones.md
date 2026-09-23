@@ -22,6 +22,7 @@ Qué cambió tras cada eval, auditoría, test o ejecución real, y por qué. No 
 | 11 | 23-09 | Test de cobertura de la demo (fase 10) | La demo no generaba datos para varias comprobaciones de la puerta 3, y el test lo destapó: nadie escribía `hilo_estado`, y repetir un hecho vigente creaba una fila nueva que producía un falso «conocimiento no adquirido» | El extractor registra el estado de los hilos; un hecho repetido no crea fila | Commit `fa89af3`; `tests/test_demo.py`; RF2-PIPE-18, RF2-PIPE-19 |
 | 12 | 23-09 | Eval del extractor con Claude Code real | Primera medición real de la pieza frágil del diseño | Ninguno: recall 15 de 15 contra el capítulo anotado | Commit `a3819c7`; fila 38 de spec1-verification |
 | 13 | 23-09 | Primera llamada real del pipeline (arquitecto) | La llamada devolvió `num_turns = 3`, sin permisos denegados y con salida válida, y el guardarraíl la rechazó por sospecha de uso de herramientas | El número de turnos deja de contar como señal; solo cuentan los permisos denegados | Commit `59db690`; RF2-PUERTO-10 |
+| 14 | 23-09 | Test de la puerta 3 con el brief (bloque 2) | Una novela personalizada de dos capítulos nunca pasaba la puerta 2: la estructura tiene tres actos y el tercero se quedaba sin capítulos. El fallo no era del test sino del producto: el brief admitía de 1 a 10 capítulos | El brief exige al menos tres capítulos | Rama `bloque2-personalizacion`; `tests/test_brief.py::test_una_novela_tiene_al_menos_tres_capitulos`; spec3, RF3-BRF-01 |
 
 ## Lecciones del primer harness que siguen vigentes
 

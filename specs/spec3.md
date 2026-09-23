@@ -65,7 +65,7 @@ graph TD
 | `intensidad` | `atmosferico` · `tension` · `intenso` | sí | RF3-BRF-02 |
 | `tono` | `sobrio` · `emotivo` · `humor_negro` · `aventura` | sí | |
 | `subgenero` | uno de los seis de `compartido/tipos.py::Subgenero` | no | Si falta, lo elige el arquitecto |
-| `capitulos` | entero, 1–10 | no, por defecto 10 | Extensión (RF3-ESC-01) |
+| `capitulos` | entero, 3–10 | no, por defecto 10 | Extensión (RF3-ESC-01). Tres como mínimo: la estructura tiene tres actos, y un acto sin capítulos para la puerta 2 |
 | `vetados` | lista de textos, 0–30 | no | Palabras o temas que no pueden aparecer; los aplica el guardrail del bloque 5 |
 | `texto_libre` | texto, ≤ 4.000 | no | Anécdota o carta pegada por el comprador. **No confiable** (RF3-ENT-05) |
 
@@ -157,12 +157,13 @@ Más `entrevista` (la transcripción, con sus alertas y las llamadas al agente) 
 | 1 | `allegado_en_elenco` | Un allegado obligatorio no está en el elenco |
 | 1 | `dedicatoria_nombra_al_destinatario` | La dedicatoria no contiene el nombre del destinatario tal cual |
 | 1 | `subgenero_del_brief` | El brief fija un subgénero y el arquitecto eligió otro |
+| 1 | `subgenero_exige_intensidad` | El brief no fija subgénero y el arquitecto eligió uno que no cabe en la intensidad (terror corporal o slasher en «atmosférico») |
 | 2 | `numero_de_capitulos` | La escaleta no tiene exactamente los capítulos del brief |
 | 2 | `pov_del_destinatario` | El destinatario es el punto de vista de la mitad de las escenas o menos |
 | 2 | `elemento_sin_escena` | Un elemento obligatorio no está planificado en ninguna escena |
 | 3 | `destinatario_muere` | La condición del destinatario pasa a `muerto` en el capítulo |
 
-Un código de elemento que la escaleta declara y no existe se ignora y deja un aviso.
+Un código de elemento que la escaleta declara y no existe se ignora y queda en la traza (evento `elemento_desconocido`); si por eso un elemento obligatorio se queda sin escena, lo para `elemento_sin_escena`.
 
 > **Decisión de la spec.** Que un elemento esté **planificado** en una escena lo declara el escaletador, así que es dato autodeclarado (regla 3 de validators.md). La comprobación de la puerta 2 detecta un olvido del plan, pero no que la prosa lo cumpla. El segundo método, que el elemento aparezca en la prosa comprobado contra la tabla de hechos, es del bloque 6; hasta entonces la fila de verificación lo declara.
 

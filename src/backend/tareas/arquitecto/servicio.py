@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 
+from compartido.brief import bloque_encargo
 from compartido.grafo import actualizar, insertar, lectura
 
 from .esquemas import SalidaArquitecto
@@ -24,6 +25,11 @@ def paquete(con: sqlite3.Connection, novela_id: int) -> str:
         lineas.append(f"\nTitulo provisional: {n['titulo']}")
     if n.get("semilla_premisa"):
         lineas.append(f"\nSemilla de premisa: {n['semilla_premisa']}")
+    brief = lectura.brief(con, novela_id)
+    if brief is not None:
+        # RF3-PER-03: la novela es un regalo y su protagonista es el destinatario.
+        lineas += ["", "ENCARGO (la novela es un regalo):", bloque_encargo(brief),
+                   "Escribe tambien la dedicatoria de la portada."]
     return "\n".join(lineas)
 
 
@@ -37,6 +43,7 @@ def aplicar(con: sqlite3.Connection, novela_id: int, salida: SalidaArquitecto) -
         tema_central=salida.tema_central,
         subgenero_dominante=salida.subgenero_dominante,
         tipo_final=salida.tipo_final,
+        dedicatoria=salida.dedicatoria or None,
         pov_por_defecto=salida.pov_por_defecto,
         tiempo_verbal=salida.tiempo_verbal,
     )

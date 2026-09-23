@@ -99,6 +99,14 @@ def escenas_del_capitulo(
                 "WHERE eo.escena_id = ? ORDER BY o.nombre", (e["id"],)
             )
         ]
+        # Los elementos personales del encargo que la escaleta planifico aqui (RF3-PER-03).
+        e["elementos"] = [
+            f"{f['codigo']}: {f['texto']}" for f in con.execute(
+                "SELECT ep.codigo, ep.texto FROM escena_elemento ee "
+                "JOIN elemento_personal ep ON ep.id = ee.elemento_id "
+                "WHERE ee.escena_id = ? ORDER BY ep.id", (e["id"],)
+            )
+        ]
         e["beats"] = _filas(con.execute(
             "SELECT orden, tipo, cambio FROM beat WHERE escena_id = ? ORDER BY orden", (e["id"],)
         ))

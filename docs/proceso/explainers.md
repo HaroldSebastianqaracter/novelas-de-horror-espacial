@@ -38,8 +38,10 @@ Un párrafo por concepto del curso aplicado en el proyecto: qué es, en una fras
 
 **Model checking.** Explorar todos los estados alcanzables para comprobar un invariante. Aquí `tests/test_estados_exhaustivo.py` recorre la máquina de estados por anchura (19 estados abstractos, unas mil transiciones) y comprueba que ningún capítulo se genera sin las puertas 1 y 2 vigentes. *Pendiente:* su versión formal con TLA+ y TLC.
 
+**Prompt injection y contenido no confiable.** Un texto que aporta el usuario puede intentar dar órdenes al modelo. Aquí el texto libre del brief va delimitado y marcado como no confiable, pero la defensa no descansa en que el agente obedezca: de ese texto el código solo acepta rasgos, recuerdos y allegados, y cada uno con una cita literal que se comprueba contra el texto. Una búsqueda de patrones conocidos deja además una alerta (`tareas/entrevistador/servicio.py`).
+
 **Evals con golden set.** Medir un agente contra un conjunto de referencia con resultado conocido. Aquí el extractor se mide contra un capítulo anotado a mano con un puntuador determinista de recall: 15 de 15 con Claude Code real.
 
 ## Pendientes para la entrega
 
-Se escriben cuando se apliquen, con el mismo formato: **observabilidad con Langfuse**, **hooks** de validación y de policy, **guardrail de palabras prohibidas**, **validación visual con browser MCP**, **verificación formal con Lean 4**, **especificación con TLA+ y TLC**, **prompt injection** en el texto libre del brief, y **revisión humana** frente a LLM-as-judge.
+Se escriben cuando se apliquen, con el mismo formato: **observabilidad con Langfuse**, **hooks** de validación y de policy, **guardrail de palabras prohibidas**, **validación visual con browser MCP**, **verificación formal con Lean 4**, **especificación con TLA+ y TLC**, y **revisión humana** frente a LLM-as-judge.

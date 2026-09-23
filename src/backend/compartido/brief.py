@@ -127,7 +127,8 @@ class Brief(BaseModel):
     intensidad: Intensidad | None = None
     tono: Tono | None = None
     subgenero: Subgenero | None = None
-    capitulos: int = Field(default=10, ge=1, le=10)
+    # Tres actos necesitan al menos tres capitulos: con menos, la puerta 2 para siempre.
+    capitulos: int = Field(default=10, ge=3, le=10)
     vetados: list[str] = Field(default_factory=list[str], max_length=30)
     texto_libre: str = Field(default="", max_length=4000)
 
@@ -305,3 +306,37 @@ def elementos(brief: Brief) -> list[tuple[str, TipoElemento, str, bool, str, str
         texto = f"{a.nombre} ({a.relacion})" + (f": {', '.join(a.rasgos)}" if a.rasgos else "")
         salida.append((a.codigo, "allegado", texto, a.obligatorio, a.origen, a.cita))
     return salida
+
+
+# --- Como se nombra al destinatario en los paquetes (RF3-PER-03) -----------------------------
+
+#: La misma linea en todos los paquetes: el agente real la lee como instruccion, y los agentes
+#: de demostracion la buscan para saber como se llama el protagonista.
+MARCA_DESTINATARIO = "DESTINATARIO (protagonista, nombre exacto):"
+
+
+def linea_destinatario(brief: Brief) -> str:
+    d = brief.destinatario
+    return f"{MARCA_DESTINATARIO} {d.nombre} ({d.edad} años, pronombres: {d.pronombres})"
+
+
+def bloque_encargo(brief: Brief) -> str:
+    """El encargo tal como lo lee el arquitecto: para quien es y que no puede pasar."""
+    d = brief.destinatario
+    lineas = [
+        linea_destinatario(brief),
+        f"Rasgos: {'; '.join(e.texto for e in d.rasgos)}",
+        f"Ocasion: {brief.ocasion}{f' ({brief.ocasion_detalle})' if brief.ocasion_detalle else ''}",
+        f"Lo regala: {brief.quien_regala}",
+        f"Tono: {brief.tono}",
+    ]
+    if brief.intensidad is not None:
+        lineas.append(describir_intensidad(brief.intensidad))
+    if brief.subgenero is not None:
+        lineas.append(f"Subgenero fijado por el encargo: {brief.subgenero}")
+    if brief.mensaje_dedicatoria:
+        lineas.append(f"Mensaje para la dedicatoria: {brief.mensaje_dedicatoria}")
+    if brief.vetados:
+        lineas.append(f"Vetado (no puede aparecer): {', '.join(brief.vetados)}")
+    lineas.append("El destinatario sobrevive: su personaje no muere en ningun momento.")
+    return "\n".join(lineas)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 
+from compartido.brief import linea_destinatario
 from compartido.grafo import Resolvedor, insertar, lectura
 
 from .esquemas import SalidaEstructura
@@ -48,6 +49,12 @@ def paquete(con: sqlite3.Connection, novela_id: int) -> str:
 
     lineas += ["", "Lugares disponibles:"]
     lineas.extend(f"- {lugar['nombre']} ({lugar['tipo']})" for lugar in lugares)
+
+    brief = lectura.brief(con, novela_id)
+    if brief is not None:
+        # RF3-PER-03: el hilo principal es el del destinatario, que sobrevive.
+        lineas += ["", linea_destinatario(brief),
+                   "El hilo principal es el suyo, y su personaje sobrevive a la novela."]
     return "\n".join(lineas)
 
 

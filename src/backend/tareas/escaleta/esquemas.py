@@ -46,6 +46,11 @@ class EscenaSalida(BaseModel):
     secuencia: str = ""
     punto_de_giro: TipoPuntoDeGiro | None = None
     objetos: list[str] = Field(default_factory=list[str])
+    elementos: list[str] = Field(
+        default_factory=list[str],
+        description="Codigos de los elementos personales del encargo que esta escena integra "
+                    "(REC1, ALL2...). Solo si la novela es un regalo",
+    )
     beats: list[BeatSalida] = Field(default_factory=list[BeatSalida])
     secuela: SecuelaSalida | None = None
 

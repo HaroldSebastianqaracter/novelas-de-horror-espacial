@@ -8,7 +8,9 @@ comparacion de dos cadenas normalizadas.
 from __future__ import annotations
 
 import sqlite3
+from typing import Any
 
+from compartido.grafo import lectura, normalizar
 from compartido.puerta_base import Conflicto, ResultadoPuerta
 from tareas.escaleta.esquemas import normalizar_valor
 
@@ -144,4 +146,64 @@ def evaluar(con: sqlite3.Connection, novela_id: int) -> ResultadoPuerta:
                 ),
             ))
 
+    conflictos += _encargo(con, novela_id, escenas)
     return ResultadoPuerta(puerta=2, conflictos=conflictos)
+
+
+def _encargo(
+    con: sqlite3.Connection, novela_id: int, escenas: list[dict[str, Any]]
+) -> list[Conflicto]:
+    """RF3-PER-04: lo que el brief exige a la escaleta."""
+    salida: list[Conflicto] = []
+
+    pedidos = _restriccion(con, novela_id, "capitulos")
+    if pedidos is not None and pedidos.isdigit():
+        hay = int(con.execute(
+            "SELECT COUNT(*) FROM capitulo WHERE novela_id = ?", (novela_id,)
+        ).fetchone()[0])
+        if hay != int(pedidos):
+            salida.append(Conflicto(
+                comprobacion="numero_de_capitulos",
+                descripcion=f"El encargo pide {pedidos} capitulos y la escaleta tiene {hay}.",
+                datos={"pedidos": int(pedidos), "hay": hay},
+            ))
+
+    brief = lectura.brief(con, novela_id)
+    if brief is None or brief.destinatario.nombre is None:
+        return salida
+
+    fila = con.execute(
+        "SELECT id FROM personaje WHERE novela_id = ? AND nombre_clave = ?",
+        (novela_id, normalizar(brief.destinatario.nombre)),
+    ).fetchone()
+    suyas = sum(1 for e in escenas if fila is not None and e["pov_id"] == fila["id"])
+    if escenas and suyas * 2 <= len(escenas):
+        salida.append(Conflicto(
+            comprobacion="pov_del_destinatario",
+            descripcion=(
+                f"«{brief.destinatario.nombre}» es el punto de vista de {suyas} de "
+                f"{len(escenas)} escenas; tiene que serlo de mas de la mitad."
+            ),
+            datos={"suyas": suyas, "total": len(escenas)},
+        ))
+
+    for f in con.execute(
+        """
+        SELECT ep.codigo, ep.tipo, ep.texto FROM elemento_personal ep
+        WHERE ep.novela_id = ? AND ep.obligatorio = 1
+          AND NOT EXISTS (SELECT 1 FROM escena_elemento ee
+                          JOIN escena e ON e.id = ee.escena_id
+                          WHERE ee.elemento_id = ep.id AND e.novela_id = ?)
+        ORDER BY ep.id
+        """,
+        (novela_id, novela_id),
+    ):
+        salida.append(Conflicto(
+            comprobacion="elemento_sin_escena",
+            descripcion=(
+                f"El {f['tipo']} {f['codigo']} («{str(f['texto'])[:60]}») no esta planificado "
+                "en ninguna escena."
+            ),
+            datos={"codigo": f["codigo"]},
+        ))
+    return salida

@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import sqlite3
 
+from compartido.brief import SUBGENEROS_QUE_EXIGEN_INTENSIDAD
+from compartido.grafo import lectura, normalizar
 from compartido.puerta_base import Conflicto, ResultadoPuerta
 from config import FINALES_POR_SUBGENERO
 
@@ -161,4 +163,72 @@ def evaluar(con: sqlite3.Connection, novela_id: int) -> ResultadoPuerta:
                 datos={"subgenero": sub, "tipo_final": final},
             ))
 
+    conflictos += _encargo(con, novela_id)
     return ResultadoPuerta(puerta=1, conflictos=conflictos)
+
+
+def _encargo(con: sqlite3.Connection, novela_id: int) -> list[Conflicto]:
+    """RF3-PER-04: lo que el brief exige a la planificacion. Nada si no hay brief."""
+    brief = lectura.brief(con, novela_id)
+    if brief is None or brief.destinatario.nombre is None:
+        return []
+    salida: list[Conflicto] = []
+    nombre = brief.destinatario.nombre
+
+    fila = con.execute(
+        "SELECT rol_narrativo FROM personaje WHERE novela_id = ? AND nombre_clave = ?",
+        (novela_id, normalizar(nombre)),
+    ).fetchone()
+    if fila is None or fila["rol_narrativo"] != "protagonista":
+        salida.append(Conflicto(
+            comprobacion="destinatario_protagonista",
+            descripcion=(
+                f"El destinatario del regalo, «{nombre}», tiene que ser el protagonista con ese "
+                "nombre exacto" + ("" if fila is None else f", y es {fila['rol_narrativo']}") + "."
+            ),
+            datos={"nombre": nombre},
+        ))
+
+    presentes = {
+        str(f["nombre_clave"]) for f in con.execute(
+            "SELECT nombre_clave FROM personaje WHERE novela_id = ?", (novela_id,)
+        )
+    }
+    for a in brief.allegados:
+        if a.obligatorio and normalizar(a.nombre) not in presentes:
+            salida.append(Conflicto(
+                comprobacion="allegado_en_elenco",
+                descripcion=f"«{a.nombre}» ({a.relacion}) tiene que ser un personaje.",
+                datos={"allegado": a.nombre},
+            ))
+
+    novela = con.execute(
+        "SELECT dedicatoria, subgenero_dominante FROM novela WHERE id = ?", (novela_id,)
+    ).fetchone()
+    dedicatoria = str(novela["dedicatoria"] or "")
+    if nombre not in dedicatoria:
+        salida.append(Conflicto(
+            comprobacion="dedicatoria_nombra_al_destinatario",
+            descripcion=f"La dedicatoria tiene que nombrar a «{nombre}» tal cual.",
+            datos={"dedicatoria": dedicatoria},
+        ))
+
+    elegido = novela["subgenero_dominante"]
+    if brief.subgenero is not None and elegido != brief.subgenero:
+        salida.append(Conflicto(
+            comprobacion="subgenero_del_brief",
+            descripcion=(
+                f"El encargo fija el subgenero «{brief.subgenero}» y se eligio «{elegido}»."
+            ),
+            datos={"brief": brief.subgenero, "elegido": elegido},
+        ))
+    elif brief.intensidad == "atmosferico" and elegido in SUBGENEROS_QUE_EXIGEN_INTENSIDAD:
+        salida.append(Conflicto(
+            comprobacion="subgenero_exige_intensidad",
+            descripcion=(
+                f"El subgenero «{elegido}» vive del cuerpo o de las bajas y el encargo pide "
+                "intensidad «atmosferico»."
+            ),
+            datos={"subgenero": elegido},
+        ))
+    return salida

@@ -42,6 +42,14 @@ Los tipos de arco no son etiquetas. El **positivo** abandona la mentira y abraza
 
 **El trasfondo se sabe, no se cuenta.** Necesitas saber mucho más del que la novela mostrará. Se entrega solo cuando una conducta presente resulta inexplicable y crea la pregunta que el trasfondo responde.
 
+## Si la novela es un regalo
+
+Cuando la entrada dice que la novela es un regalo:
+
+- **El destinatario es el protagonista**, con su nombre escrito exactamente como en la entrada y `rol_narrativo` `protagonista`. Su cadena fantasma → herida → mentira → defecto sale de sus rasgos reales: tiene que reconocerse en cómo actúa, no solo en cómo se llama.
+- **Cada allegado de la lista es un personaje**, con su nombre exacto. Una mascota también: un personaje puede no hablar. Dale una función en la historia que respete lo que es para el destinatario.
+- **El destinatario sobrevive.** Diseña el arco para que el precio lo paguen otras cosas: una pérdida, una certeza, una relación.
+
 ## Qué no haces
 
 - **No escribes escenas ni decides la trama.** Eso es del estructurador.

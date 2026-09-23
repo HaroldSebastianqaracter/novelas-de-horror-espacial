@@ -11,6 +11,7 @@ import json
 import sqlite3
 from typing import Any
 
+from compartido.brief import describir_intensidad, linea_destinatario
 from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
 from compartido.grafo import insertar, lectura
 from compartido.tipos import como_dict, como_lista
@@ -40,6 +41,21 @@ def _instrucciones(con: sqlite3.Connection, novela_id: int, capitulo: int) -> st
     if tics:
         lineas += ["", "TICS PROHIBIDOS (una sola aparicion devuelve el capitulo entero):"]
         lineas.extend(f"- {t}" for t in tics)
+    brief = lectura.brief(con, novela_id)
+    if brief is not None:
+        # RF3-PER-03: el protagonista es una persona real y la novela es su regalo.
+        lineas += [
+            "", "LA NOVELA ES UN REGALO.", linea_destinatario(brief),
+            "Escribe su nombre siempre exactamente asi. Sobrevive a la novela.",
+        ]
+        if brief.intensidad is not None:
+            lineas.append(describir_intensidad(brief.intensidad))
+        if brief.vetados:
+            lineas.append(f"No puede aparecer, de ninguna forma: {', '.join(brief.vetados)}.")
+        lineas.append(
+            "Los elementos personales de cada escena se integran con naturalidad: que el "
+            "destinatario se reconozca, sin que el recuerdo se note pegado."
+        )
     return "\n".join(lineas)
 
 
@@ -63,6 +79,8 @@ def _escaleta(escenas: list[dict[str, Any]]) -> str:
             partes.append(f"- Gancho de salida: {e['gancho_salida']}")
         if e.get("objetos"):
             partes.append(f"- Objetos presentes: {', '.join(e['objetos'])}")
+        if e.get("elementos"):
+            partes.append("- Elementos personales que integra: " + "; ".join(e["elementos"]))
         if e.get("beats"):
             partes.append("- Beats: " + " | ".join(b["cambio"] for b in e["beats"]))
         if e.get("secuela"):

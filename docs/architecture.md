@@ -88,6 +88,7 @@ Los agentes son el punto donde se encuentran los otros tres documentos de `docs/
 | **Revisor de continuidad** | Informe de conflictos contra el canon | No hay contradicciones, o las hay y el pipeline para |
 | **Revisor de oficio** | Informe de voz, subtexto, función de escena y cliché | Cada criterio tiene veredicto contra su principio de [domain-knowledge.md](domain-knowledge.md) |
 | **Revisor** | El manuscrito revisado: las cuatro [pasadas globales](#pasadas-de-revisión), en orden | Las cuatro pasadas han corrido sin mezclarse y toda escena tocada ha vuelto a pasar la puerta 3 |
+| **Entrevistador** | El `Encargo` de una novela personalizada, con sus `ElementoPersonal` | El código no encuentra nada que falte ni que se contradiga, y el comprador lo confirma |
 
 > **Decisión sin entrevistar, 23 de septiembre de 2026.** La fila del extractor nombraba solo cinco registros, pero ya escribía los usos de conocimiento, las siembras y la revelación de la amenaza. Y nadie escribía `EstadoHilo`: todo hilo acababa la novela abierto y la puerta 5 avisaba siempre. Se le asigna al extractor, que es quien lee la prosa y ya registra las siembras (RF2-PIPE-18 de spec2). Se descartó derivarlo de los puntos de giro de la escaleta, que dicen lo planificado y no lo que la prosa hizo.
 
@@ -109,6 +110,7 @@ Cada agente se materializa como una **skill de Claude Code**: una carpeta en `.c
 | **Revisor de continuidad** | `continuidad` | — (solo lee) | 14, 26 · 44 |
 | **Revisor de oficio** | `oficio` | — (solo informa) | 10, 19, 25, 29, 31, 33, 38 · 55 |
 | **Revisor** | `revision` | — (reescribe prosa; el estado que altere la pasada estructural vuelve a pasar por el extractor) | 11, 13, 16, 17, 19, 26, 29, 32, 36, 38 |
+| **Entrevistador** | `entrevistador` | `Encargo`, `ElementoPersonal` | — (entiende respuestas y pregunta; no decide qué falta) |
 
 **El redactor y el revisor son los únicos agentes que producen algo que no es ontología.** Escriben prosa; que esa prosa se convierta en canon es trabajo del extractor. Esa asimetría es justo la razón de que el extractor exista y de que un capítulo sin extraer no esté terminado (principio 3).
 
@@ -120,7 +122,9 @@ Los números remiten a los principios numerados de [domain-knowledge.md](domain-
 - **El extractor casi no tiene oficio.** Solo el principio 26, y de rebote. Confirma lo que ya dice la nota de arriba: no es una fase del oficio humano, es una consecuencia de que escriba un modelo sin memoria. Su dificultad es de exhaustividad, no de criterio.
 - **El revisor de continuidad no escribe ontología ni necesita juicio.** Su puerta es SQL (principio 5). La skill existe solo para redactar el informe cuando ya hay conflicto.
 
-**Nueve de estas diez skills existen ya** en `.claude/skills/`, escritas junto con [specs/spec1.md](../specs/spec1.md). Falta la del **revisor**, que queda fuera de la primera versión. Además está `verificacion`, que es de desarrollo: sirve para construir este sistema y no forma parte de él, así que el puerto rechaza invocarla como agente.
+**Diez de estas once skills existen ya** en `.claude/skills/`: las nueve escritas junto con [specs/spec1.md](../specs/spec1.md) y la del **entrevistador**, que añade [specs/spec3.md](../specs/spec3.md). Falta la del **revisor**, que queda fuera de la primera versión.
+
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** El entrevistador es un agente más, con su skill y su carpeta en `tareas/`, pero **no corre en el pipeline**: lo invoca `entrevista.py` antes de crear la novela, y la entrevista no escribe en la base salvo la intención `crear_novela`, igual que la API. Se descartó hacerlo una fase del worker (la entrevista es interactiva y el worker no habla con nadie) y exponerlo por la API (la API no invoca al modelo). Qué falta y qué se contradice en el encargo lo calcula el código, no el agente: es la regla de que lo determinista va antes que el juicio. Además está `verificacion`, que es de desarrollo: sirve para construir este sistema y no forma parte de él, así que el puerto rechaza invocarla como agente.
 
 Cada skill lleva cuatro secciones: qué produce, con qué criterio, qué no hace y el formato de salida. Reparte **solo el oficio de su fase**, que es el principio 7 aplicado al conocimiento.
 
@@ -412,6 +416,7 @@ Un solo SQLite guarda las tres cosas: el grafo de estado, el texto y los vectore
 | Grupo | Tablas | Naturaleza |
 | --- | --- | --- |
 | **Canon** | `novela`, `restriccion`, `mundo`, `sistema_tecnologico`, `lugar`, `personaje`, `faccion`, `amenaza`, `objeto`, `linea_de_tiempo`, `tema`, `motivo`, `estilo_narrativo` | Cambia poco; cada cambio se versiona |
+| **Encargo** | `brief`, `elemento_personal`, `entrevista` | Lo fija el comprador antes de empezar; ninguna reversión lo toca |
 | **Estructura** | `acto`, `capitulo`, `secuencia`, `escena`, `secuela`, `beat`, `punto_de_giro`, `hilo`, `siembra` | El plan de la obra. `siembra` va aquí porque la planifica el estructurador, aunque su `estado` se actualice durante la redacción; [definitions.md](definitions.md) la agrupa con el estado por esa segunda razón |
 | **Estado** | `hecho`, `estado_conocimiento`, `uso_conocimiento`, `estado_personaje`, `estado_objeto`, `evento`, `siembra_estado`, `hilo_estado`, `amenaza_revelacion`, `entidad_no_reconocida`, `hecho_revocacion` | Append-only, **todas con su escena de origen** salvo la revocación, que es una decisión del autor y lleva el capítulo desde el que rige; es lo que consultan las puertas deterministas y lo que permite revertir borrando por escena. Un hecho no se modifica nunca: revocarlo es insertar una revocación, y un trigger lo hace cumplir |
 | **Texto** | `escena_texto` con versión, `capitulo_compilado` | Cada reescritura es una versión nueva, no un `UPDATE` |
@@ -419,7 +424,7 @@ Un solo SQLite guarda las tres cosas: el grafo de estado, el texto y los vectore
 | **Traza** | `ejecucion`, `llamada_modelo`, `resultado_puerta`, `traza_evento` | Observabilidad: qué agente produjo qué y con qué contexto. `traza_evento` es lo que lee el stream |
 | **Cola y control** | `intencion`, `parada`, `worker_lock`, `esquema_version`, `indice_estado` | Infraestructura: la cola, las paradas abiertas, el cerrojo del escritor único |
 
-A las tablas de las entidades se añaden las de relación que la ontología modela como muchos a muchos: `escena_personaje`, `escena_objeto`, `escena_motivo`, `personaje_relacion`, `faccion_relacion` e `hilo_personaje`. Son cincuenta tablas en total, sin contar las `vec0` del índice, más cuatro vistas derivadas: el orden global de escena, el estado vigente de siembras e hilos, y los hechos vigentes, que son los que ninguna revocación retira.
+A las tablas de las entidades se añaden las de relación que la ontología modela como muchos a muchos: `escena_personaje`, `escena_objeto`, `escena_motivo`, `escena_elemento`, `personaje_relacion`, `faccion_relacion` e `hilo_personaje`. Son cincuenta y cuatro tablas en total, sin contar las `vec0` del índice, más cuatro vistas derivadas: el orden global de escena, el estado vigente de siembras e hilos, y los hechos vigentes, que son los que ninguna revocación retira.
 
 > **Decisión sin entrevistar, 23 de septiembre de 2026.** La cifra decía cincuenta cuando eran cuarenta y nueve; con `hecho_revocacion` vuelven a ser cincuenta. La revocación pasa a ser una tabla porque `hecho.vigente` era la única columna mutable del estado append-only y un retcon no se deshacía al relanzar. El detalle está en [specs/spec2.md](../specs/spec2.md), RF2-PER-06, y en [definitions.md](definitions.md).
 
@@ -449,9 +454,9 @@ Cinco puertas. Las deterministas van primero porque son baratas y su fallo inval
 
 | Puerta | Cuándo | Qué comprueba | Etiqueta |
 | --- | --- | --- | --- |
-| **1. Estructura** | Tras la estructura global | Los cuatro puntos de giro obligatorios del hilo principal, en orden; el protagonista tiene arco declarado y hay oponente; **para** si una subtrama cierra después del clímax; **avisa** si el anidamiento no es perfecto o el final no encaja con el subgénero. Que el clímax responda la pregunta dramática es la parte de juicio, y no se evalúa en la v1 | `A` (+ `I` pendiente) |
-| **2. Escaleta** | Tras la escaleta | Toda escena tiene POV declarado y cambia un valor; ninguna escena carece de conflicto; presupuesto de longitud dentro de rango | `A` |
-| **3. Continuidad** | Tras extraer los hechos del capítulo | Contradicción con el canon; conocimiento no adquirido; presencia imposible, en sus dos formas (personaje muerto que reaparece, y personaje en dos lugares en el mismo momento); objeto que aparece sin traslado registrado; coherencia temporal; entidad usada por el texto que no estaba en el paquete. Una sorpresa repetida avisa pero no para | `A` |
+| **1. Estructura** | Tras la estructura global | Los cuatro puntos de giro obligatorios del hilo principal, en orden; el protagonista tiene arco declarado y hay oponente; **para** si una subtrama cierra después del clímax; **avisa** si el anidamiento no es perfecto o el final no encaja con el subgénero. Que el clímax responda la pregunta dramática es la parte de juicio, y no se evalúa en la v1. Si la novela es un regalo: el destinatario es el protagonista con su nombre exacto, los allegados están en el elenco, la dedicatoria lo nombra y el subgénero cabe en la intensidad | `A` (+ `I` pendiente) |
+| **2. Escaleta** | Tras la escaleta | Toda escena tiene POV declarado y cambia un valor; ninguna escena carece de conflicto; presupuesto de longitud dentro de rango. Si la novela es un regalo: los capítulos del encargo, el destinatario como punto de vista de más de la mitad de las escenas y cada elemento personal obligatorio planificado en alguna | `A` |
+| **3. Continuidad** | Tras extraer los hechos del capítulo | Contradicción con el canon; conocimiento no adquirido; presencia imposible, en sus dos formas (personaje muerto que reaparece, y personaje en dos lugares en el mismo momento); objeto que aparece sin traslado registrado; coherencia temporal; entidad usada por el texto que no estaba en el paquete. Una sorpresa repetida avisa pero no para. Si la novela es un regalo, el destinatario no muere | `A` |
 | **4. Oficio** | Con la puerta 3 limpia | Voz constante, distancia psíquica modulada, subtexto en diálogo, emoción no nombrada, la escena se gana su lugar, cliché — principios 10, 19, 25, 29, 31, 33, 38 y 55 de [domain-knowledge.md](domain-knowledge.md) | `I` |
 | **5. Global** | Sobre el manuscrito completo | Siembras sin pagar e hilos sin cerrar (`A`); reglas de la amenaza respetadas de principio a fin (`I`, exige interpretar el texto); curva de tensión en lectura continua (`D`) — principios 6, 14, 16, 18 y 44 | `A` + `I` + `D` |
 

@@ -15,7 +15,7 @@ import re
 import sqlite3
 from typing import Any
 
-from compartido.grafo import normalizar
+from compartido.grafo import lectura, normalizar
 from compartido.puerta_base import Conflicto, ResultadoPuerta
 
 POSTURAS_QUE_HABILITAN = ("sabe", "cree", "sospecha", "cree_version_falsa")
@@ -333,7 +333,36 @@ def evaluar(
     if textos:
         conflictos.extend(busquedas_dirigidas(con, novela_id, capitulo, textos))
 
+    conflictos.extend(_destinatario_muere(con, novela_id, capitulo))
     return ResultadoPuerta(puerta=3, conflictos=conflictos)
+
+
+def _destinatario_muere(
+    con: sqlite3.Connection, novela_id: int, capitulo: int
+) -> list[Conflicto]:
+    """RF3-PER-04: el destinatario del regalo nunca muere (decision entrevistada)."""
+    brief = lectura.brief(con, novela_id)
+    if brief is None or brief.destinatario.nombre is None:
+        return []
+    return [
+        Conflicto(
+            comprobacion="destinatario_muere", capitulo=capitulo, escena_id=f["escena_id"],
+            descripcion=(
+                f"«{f['nombre']}» es el destinatario del regalo y muere en la escena "
+                f"{f['orden']}. El destinatario sobrevive siempre."
+            ),
+            datos=dict(f),
+        )
+        for f in _filas(con, """
+            SELECT p.nombre, ep.escena_id, e.orden
+            FROM estado_personaje ep
+            JOIN personaje p ON p.id = ep.personaje_id
+            JOIN escena e    ON e.id = ep.escena_id
+            JOIN capitulo c  ON c.id = e.capitulo_id
+            WHERE ep.novela_id = ? AND c.numero = ? AND ep.condicion = 'muerto'
+              AND p.nombre_clave = ?
+        """, (novela_id, capitulo, normalizar(brief.destinatario.nombre)))
+    ]
 
 
 # --- Busquedas dirigidas sobre la prosa: el segundo metodo que mira el texto (RF2-PIPE-17) ----

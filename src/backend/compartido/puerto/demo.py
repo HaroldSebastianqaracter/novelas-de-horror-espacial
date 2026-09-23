@@ -43,7 +43,51 @@ def _capitulo(entrada: str) -> int:
     return int(m.group(1)) if m else 1
 
 
+# --- Lo que un agente real leeria del encargo en su paquete (specs/spec3.md, 3.2) -------------
+
+
+def _destinatario(entrada: str) -> str | None:
+    """El nombre del destinatario si la novela es un regalo (la marca de compartido.brief)."""
+    m = re.search(r"DESTINATARIO \(protagonista, nombre exacto\): (.+?) \(\d+ años", entrada)
+    return m.group(1).strip() if m else None
+
+
+def _reparto(entrada: str) -> list[str]:
+    """El reparto de la demo: con encargo, el destinatario ocupa el sitio del protagonista."""
+    return [_destinatario(entrada) or PERSONAJES[0], *PERSONAJES[1:]]
+
+
+def _capitulos_pedidos(entrada: str) -> int:
+    m = re.search(r"CAPITULOS: exactamente (\d+)", entrada)
+    return int(m.group(1)) if m else CAPITULOS
+
+
+def _codigos(entrada: str) -> list[str]:
+    """Los codigos de los elementos personales que la escaleta tiene que repartir."""
+    return re.findall(r"^- ((?:RAS|REC|ALL)\d+) \(", entrada, re.MULTILINE)
+
+
+def _allegados(entrada: str) -> list[tuple[str, str]]:
+    bloque = entrada.split("Allegados que tienen que ser personajes", 1)
+    if len(bloque) < 2:
+        return []
+    return re.findall(r"^- (.+?) \((.+?)\)", bloque[1].split("\n\n", 1)[0], re.MULTILINE)
+
+
 def arquitecto(entrada: str, agente: str) -> dict[str, Any]:
+    nombre = _destinatario(entrada)
+    subgenero = re.search(r"Subgenero fijado por el encargo: (\w+)", entrada)
+    salida = _arquitecto_base()
+    if nombre is not None:
+        salida["pregunta_dramatica"] = f"?Saldra {nombre} de la estacion sin perderse a si misma?"
+        salida["dedicatoria"] = f"Para {nombre}, que nunca deja un problema a medias."
+        # Con encargo, un subgenero que quepa en cualquier intensidad salvo que venga fijado.
+        salida["subgenero_dominante"] = subgenero.group(1) if subgenero else "horror_cosmico"
+        salida["tipo_final"] = "abierto"
+    return salida
+
+
+def _arquitecto_base() -> dict[str, Any]:
     return {
         "premisa": "Mantener un cuerpo vivo a cualquier precio acaba costando la voluntad.",
         "logline": "Una soldadora de casco llega a una estacion muda y descubre que lo que "
@@ -139,20 +183,29 @@ def elenco(entrada: str, agente: str) -> dict[str, Any]:
         "defecto": "No suelta nunca, aunque haga dano",
         "idiolecto": "Frases cortas, vocabulario de taller",
     }
-    return {"personajes": [
-        {**base, "nombre": PERSONAJES[0], "rol": "soldadora", "rol_narrativo": "protagonista",
+    prota, oponente, aliado = _reparto(entrada)
+    personajes: list[dict[str, Any]] = [
+        {**base, "nombre": prota, "rol": "soldadora", "rol_narrativo": "protagonista",
          "tipo_arco": "positivo", "posicion_tematica": "Salvar el cuerpo es salvar a alguien",
          "faccion": "Cuadrilla Nueve", "secreto": "",
-         "relaciones": [{"destino": PERSONAJES[1], "tipo": "se_opone_a"}]},
-        {**base, "nombre": PERSONAJES[1], "rol": "capataz", "rol_narrativo": "oponente",
+         "relaciones": [{"destino": oponente, "tipo": "se_opone_a"}]},
+        {**base, "nombre": oponente, "rol": "capataz", "rol_narrativo": "oponente",
          "tipo_arco": "negativo", "subtipo_arco": "caida",
          "posicion_tematica": "Un cuerpo sin voluntad ya no es nadie",
          "faccion": "Cuadrilla Nueve", "secreto": "Sabia lo del cargamento",
          "relaciones": []},
-        {**base, "nombre": PERSONAJES[2], "rol": "tecnica", "rol_narrativo": "aliado",
+        {**base, "nombre": aliado, "rol": "tecnica", "rol_narrativo": "aliado",
          "tipo_arco": "plano", "posicion_tematica": "No hay respuesta, solo consecuencias",
          "faccion": "Cuadrilla Nueve", "secreto": "", "relaciones": []},
-    ]}
+    ]
+    # Con encargo, cada allegado obligatorio es un personaje (RF3-PER-03).
+    for nombre, relacion in _allegados(entrada):
+        personajes.append({
+            **base, "nombre": nombre, "rol": relacion, "rol_narrativo": "aliado",
+            "tipo_arco": "plano", "posicion_tematica": f"Lo que {prota} no quiere perder: {nombre}",
+            "faccion": "", "secreto": "", "relaciones": [],
+        })
+    return {"personajes": personajes}
 
 
 def estructura(entrada: str, agente: str) -> dict[str, Any]:
@@ -165,7 +218,7 @@ def estructura(entrada: str, agente: str) -> dict[str, Any]:
         "hilos": [
             {"nombre": "principal", "tipo": "principal",
              "conflicto_central": "Salir de la estacion sin repetir lo de su hermano",
-             "personajes": PERSONAJES, "dramatiza_tema": True,
+             "personajes": _reparto(entrada), "dramatiza_tema": True,
              "puntos_de_giro": [
                  {"tipo": "gancho", "posicion": 2.0, "descripcion": "El silencio del canal"},
                  {"tipo": "incidente_incitador", "posicion": 12.0, "descripcion": "El hallazgo"},
@@ -175,7 +228,7 @@ def estructura(entrada: str, agente: str) -> dict[str, Any]:
              ]},
             {"nombre": "confianza", "tipo": "subtrama",
              "conflicto_central": "Saber quien sigue siendo quien dice ser",
-             "personajes": PERSONAJES[:2], "dramatiza_tema": False,
+             "personajes": _reparto(entrada)[:2], "dramatiza_tema": False,
              "puntos_de_giro": [
                  {"tipo": "primer_umbral", "posicion": 25.0, "descripcion": "La primera duda"},
                  {"tipo": "crisis", "posicion": 82.0, "descripcion": "La prueba del sellante"},
@@ -192,27 +245,39 @@ def estructura(entrada: str, agente: str) -> dict[str, Any]:
 def escaleta(entrada: str, agente: str) -> dict[str, Any]:
     # La longitud por escena sale del presupuesto, no de una constante: si no, la puerta 2
     # rechaza la escaleta por desviarse del objetivo, con razon.
-    por_escena = max(300, _objetivo_palabras(entrada) // (CAPITULOS * ESCENAS_POR_CAPITULO))
+    total = _capitulos_pedidos(entrada)
+    prota, oponente, _ = _reparto(entrada)
+    # Los elementos del encargo, repartidos en orden por las escenas: si hay mas elementos
+    # que escenas, alguna lleva varios.
+    codigos = _codigos(entrada)
+    n_escenas = total * ESCENAS_POR_CAPITULO
+    reparto_elementos = {
+        k: codigos[k::n_escenas] for k in range(n_escenas)
+    }
+    por_escena = max(300, _objetivo_palabras(entrada) // (total * ESCENAS_POR_CAPITULO))
     capitulos: list[dict[str, Any]] = []
-    for numero in range(1, CAPITULOS + 1):
+    for numero in range(1, total + 1):
         escenas: list[dict[str, Any]] = []
         for orden in range(1, ESCENAS_POR_CAPITULO + 1):
             escenas.append({
                 "orden": orden,
-                "pov": PERSONAJES[0],
+                "pov": prota,
                 "lugar": LUGARES[(numero + orden) % len(LUGARES)],
-                "reparto": [PERSONAJES[0], PERSONAJES[1]],
+                "reparto": [prota, oponente],
                 "objetivo": f"Revisar la cubierta {numero}.{orden}",
                 "conflicto": "La compuerta no responde al codigo",
                 "resultado": "Entra, con una celda menos",
                 "valor_inicial": "seguro" if orden == 1 else "expuesto",
                 "valor_final": "expuesto" if orden == 1 else "acorralado",
-                "tension": 3 + numero,
+                "tension": min(10, 3 + numero),
                 "gancho_salida": "Algo respira al otro lado",
                 "longitud_prevista": por_escena,
                 "analepsis": False,
                 "secuencia": f"sec{numero}",
                 "objetos": [OBJETO] if orden == 2 else [],
+                "elementos": reparto_elementos[
+                    (numero - 1) * ESCENAS_POR_CAPITULO + orden - 1
+                ],
                 "beats": [{"tipo": "accion", "cambio": "Fuerza la compuerta"}],
                 "secuela": {"reaccion": "Se queda quieta", "dilema": "Avisar o callar",
                             "decision": "Callar"},
@@ -220,7 +285,7 @@ def escaleta(entrada: str, agente: str) -> dict[str, Any]:
         capitulos.append({
             "numero": numero, "acto": min(numero, 3),
             "objetivo": f"Objetivo del capitulo {numero}",
-            "pov": PERSONAJES[0],
+            "pov": prota,
             "gancho_apertura": "El canal sigue mudo",
             "gancho_cierre": "La luz de la cubierta se apaga sola",
             "escenas": escenas,
@@ -228,14 +293,15 @@ def escaleta(entrada: str, agente: str) -> dict[str, Any]:
     secuencias = [
         {"nombre": f"sec{n}", "acto": min(n, 3),
          "objetivo_intermedio": f"Bloque {n}", "orden": n}
-        for n in range(1, CAPITULOS + 1)
+        for n in range(1, total + 1)
     ]
     return {"capitulos": capitulos, "secuencias": secuencias}
 
 
 def redaccion(entrada: str, agente: str) -> dict[str, Any]:
     cuerpo = (
-        "La compuerta cedio con un chasquido seco. Idris apoyo el hombro y conto hasta tres. "
+        f"La compuerta cedio con un chasquido seco. {_reparto(entrada)[0]} apoyo el hombro y "
+        "conto hasta tres. "
         "El aire del otro lado olia a metal frio y a algo dulce que no supo nombrar. "
         "Vaan la miraba desde el marco sin decir nada, con las manos quietas. "
         "—Pasa tu primero —dijo ella. Nadie se movio durante un rato largo."
@@ -277,7 +343,7 @@ def extraccion(entrada: str, agente: str) -> dict[str, Any]:
     capitulo = _capitulo(entrada)
     indice = min(max(capitulo, 1), CAPITULOS) - 1
     primera, ultima = ordenes[0], ordenes[-1]
-    idris, vaan, reyes = PERSONAJES
+    idris, vaan, reyes = _reparto(entrada)
 
     def hecho(sujeto_tipo: str, sujeto: str, atributo: str, valor: str,
               supersede: str = "") -> dict[str, Any]:
