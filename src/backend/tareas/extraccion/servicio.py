@@ -237,9 +237,14 @@ def aplicar(
         )
         return otras[0]
 
-    hechos_nuevos: dict[tuple[str, str], int] = {}
-    for h in salida.hechos:
-        eid = escena(orden_por_cita(h.escena_orden, h.cita))
+    # En orden de escena, no de lista (RF2-PIPE-25): una reafirmacion de la escena 1 se compara
+    # con lo que valia en la escena 1, no con la sustitucion de la escena 2.
+    por_escena = sorted(
+        ((orden_por_cita(h.escena_orden, h.cita), h) for h in salida.hechos),
+        key=lambda par: par[0],
+    )
+    for orden_hecho, h in por_escena:
+        eid = escena(orden_hecho)
         if eid is None:
             descartes.anotar("hechos", "escena_desconocida")
             continue
@@ -252,29 +257,38 @@ def aplicar(
         if vigente is not None and not h.supersede_a and (
             vigente["valor_clave"] == normalizar(h.valor)
         ):
-            hechos_nuevos[(normalizar(h.sujeto_ref), normalizar(h.atributo))] = int(vigente["id"])
             continue
         previo = ultimo_hecho(h.sujeto_ref, h.supersede_a) if h.supersede_a else None
-        hid = insertar_hecho(
+        insertar_hecho(
             con, novela_id=novela_id, escena_id=eid, sujeto_tipo=h.sujeto_tipo,
             sujeto_id=sujeto_id(h.sujeto_tipo, h.sujeto_ref), sujeto_nombre=h.sujeto_ref,
             atributo=h.atributo, valor=h.valor, categoria=h.categoria, cita=h.cita,
             supersede_a=previo,
         )
-        hechos_nuevos[(normalizar(h.sujeto_ref), normalizar(h.atributo))] = hid
 
-    def hecho_id(sujeto: str, atributo: str) -> int | None:
-        clave = (normalizar(sujeto), normalizar(atributo))
-        if clave in hechos_nuevos:
-            return hechos_nuevos[clave]
-        return ultimo_hecho(sujeto, atributo)
+    def hecho_id(sujeto: str, atributo: str, eid: int | None) -> int | None:
+        """El hecho vigente EN esa escena (RF2-PIPE-25): el ultimo fijado en una escena de
+        ordinal menor o igual. Los del capitulo ya estan insertados, asi que basta el grafo."""
+        if eid is None:
+            return None
+        fila = con.execute(
+            """
+            SELECT h.id FROM hecho_vigente h
+            JOIN escena_ordinal o ON o.escena_id = h.escena_id
+            WHERE h.novela_id = ? AND h.sujeto_clave = ? AND h.atributo_clave = ?
+              AND o.ordinal <= (SELECT ordinal FROM escena_ordinal WHERE escena_id = ?)
+            ORDER BY o.ordinal DESC, h.id DESC LIMIT 1
+            """,
+            (novela_id, normalizar(sujeto), normalizar(atributo), eid),
+        ).fetchone()
+        return int(fila["id"]) if fila else None
 
     # --- Conocimiento adquirido y conocimiento usado -------------------------------------
     for c in salida.conocimiento:
         eid, pid, hid = (
             escena(c.escena_orden),
             resolvedor.id_de("personaje", c.personaje_ref),
-            hecho_id(c.sujeto_ref, c.atributo),
+            hecho_id(c.sujeto_ref, c.atributo, escena(c.escena_orden)),
         )
         motivo = _motivo(eid, pid, hid)
         if motivo:
@@ -289,7 +303,7 @@ def aplicar(
         eid, pid, hid = (
             escena(u.escena_orden),
             resolvedor.id_de("personaje", u.personaje_ref),
-            hecho_id(u.sujeto_ref, u.atributo),
+            hecho_id(u.sujeto_ref, u.atributo, escena(u.escena_orden)),
         )
         motivo = _motivo(eid, pid, hid)
         if motivo:

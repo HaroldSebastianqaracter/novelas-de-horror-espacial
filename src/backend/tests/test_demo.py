@@ -262,3 +262,36 @@ def test_la_cita_manda_sobre_el_numero_de_escena() -> None:
         "SELECT payload FROM traza_evento WHERE tipo = 'extraccion_descartes'"
     )]
     assert {"escena_por_cita": 1} in correcciones
+
+
+def test_un_uso_apunta_al_hecho_vigente_en_su_escena_no_al_ultimo_del_capitulo() -> None:
+    """RF2-PIPE-25: el olor del puente cambia en la escena 2; un uso de la escena 1 es del
+    olor de antes. La sustitucion va la primera de la lista, para probar tambien el orden."""
+
+    def extraccion(entrada: str, agente: str) -> dict[str, Any]:
+        salida = demo.extraccion(entrada, agente)
+        if demo._capitulo(entrada) == 2:
+            salida["hechos"].insert(0, {
+                "escena_orden": 2, "sujeto_tipo": "lugar", "sujeto_ref": demo.LUGARES[0],
+                "atributo": "olor", "valor": "ozono quemado", "categoria": "fisico",
+                "cita": "ahora huele a ozono", "supersede_a": "olor",
+            })
+            salida["usos_de_conocimiento"].append({
+                "escena_orden": 1, "personaje_ref": demo.PERSONAJES[0],
+                "sujeto_ref": demo.LUGARES[0], "atributo": "olor",
+            })
+        elif demo._capitulo(entrada) > 2:
+            # Despues de la sustitucion, repetir el olor viejo SI seria una contradiccion.
+            for h in salida["hechos"]:
+                if h["atributo"] == "olor":
+                    h["valor"] = "ozono quemado"
+        return salida
+
+    con, novela_id, final = _correr(extraccion)
+    assert final == "completada", fallo.paradas_abiertas(con, novela_id)
+    valores = [f[0] for f in con.execute(
+        "SELECT h.valor FROM uso_conocimiento u JOIN hecho h ON h.id = u.hecho_id"
+        " JOIN escena e ON e.id = u.escena_id JOIN capitulo c ON c.id = e.capitulo_id"
+        " WHERE c.numero = 2 AND e.orden = 1 AND h.atributo = 'olor'"
+    )]
+    assert valores == ["metal frio y algo dulce"]
