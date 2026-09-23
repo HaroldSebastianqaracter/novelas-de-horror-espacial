@@ -143,7 +143,8 @@ def mirar(ruta: Path, novela_id: int | None, segundos: int) -> None:
                         print(f"    {str(informe['motivo'])[:200]}")
                     print(
                         f"\n  Para seguir:  python demo.py --relanzar {p['capitulo']} "
-                        f"--novela {novela_id}"
+                        f"--novela {novela_id}\n  O, si alguien se entero fuera de escena:"
+                        f"  python demo.py --dar-por-sabido --novela {novela_id}"
                     )
                 break
             if e.get("estado") in ("completada", "completada_con_avisos", "error", "detenida"):
@@ -197,6 +198,10 @@ def main() -> int:
     )
     parser.add_argument("--parar", action="store_true")
     parser.add_argument("--relanzar", type=int, default=None, metavar="N")
+    parser.add_argument(
+        "--dar-por-sabido", action="store_true",
+        help="resolver la parada de continuidad dando por sabido lo que el personaje uso",
+    )
     parser.add_argument("--leer", type=int, default=None, metavar="N")
     parser.add_argument("--segundos", type=int, default=3600, help="cuanto tiempo mirar")
     args = parser.parse_args()
@@ -223,6 +228,19 @@ def main() -> int:
         return 0
     if args.parar:
         parar(ruta, args.novela or _ultima(ruta))
+        return 0
+    if args.dar_por_sabido:
+        con = _abrir(ruta)
+        novela_id = args.novela or _ultima(ruta)
+        paradas = fallo.paradas_abiertas(con, novela_id) if novela_id else []
+        if not paradas:
+            print("No hay ninguna parada abierta.", file=sys.stderr)
+            return 1
+        with transaccion(con):
+            cola.encolar(con, "resolver_parada", novela_id, parada_id=int(paradas[0]["id"]),
+                         accion="dar_por_sabido")
+        con.close()
+        print(f"Dar por sabido encolado para la parada {paradas[0]['id']}.")
         return 0
     if args.relanzar is not None:
         con = _abrir(ruta)

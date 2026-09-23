@@ -53,6 +53,7 @@ RESOLUCIONES: dict[tuple[str, str], EstadoEjecucion] = {
     ("estructura", "rehacer"): "planificando",
     ("escaleta", "rehacer"): "escaletando",
     ("continuidad", "aceptar_retcon"): "generando",
+    ("continuidad", "dar_por_sabido"): "generando",
     ("continuidad", "relanzar"): "generando",
     ("oficio", "relanzar"): "generando",
     ("presupuesto", "relanzar"): "generando",

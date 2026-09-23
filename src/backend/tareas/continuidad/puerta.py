@@ -67,7 +67,7 @@ WHERE n.novela_id = ?
 # habilite o haber estado (reparto o POV) en la escena donde el texto la fijo: presenciarla.
 _SQL_CONOCIMIENTO = f"""
 SELECT u.id AS uso_id, p.nombre AS personaje, h.atributo, h.valor, h.sujeto_nombre,
-       u.escena_id, c.numero AS capitulo
+       u.escena_id, c.numero AS capitulo, h.id AS hecho_id, p.id AS personaje_id
 FROM uso_conocimiento u
 JOIN personaje p       ON p.id = u.personaje_id
 JOIN hecho_vigente h   ON h.id = u.hecho_id

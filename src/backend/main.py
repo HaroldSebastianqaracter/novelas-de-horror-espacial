@@ -60,7 +60,7 @@ class PayloadRelanzar(BaseModel):
 
 class PayloadResolverParada(BaseModel):
     parada_id: int = Field(ge=1)
-    accion: Literal["relanzar", "aceptar_retcon", "rehacer"]
+    accion: Literal["relanzar", "aceptar_retcon", "dar_por_sabido", "rehacer"]
     desde_capitulo: int | None = Field(default=None, ge=1)
 
 

@@ -18,7 +18,7 @@ import sqlite3
 from typing import Any
 
 from compartido.db import TABLAS_DE_ESTADO
-from compartido.grafo import emitir_evento, insertar
+from compartido.grafo import Resolvedor, emitir_evento, insertar, normalizar
 from compartido.tipos import como_dict, como_lista
 from compartido.vectores import purgar_descartes
 
@@ -128,6 +128,72 @@ def aceptar_retcon(con: sqlite3.Connection, novela_id: int, parada_id: int) -> i
             tipo="retcon", dramatizado=False,
         )
     return len(ids)
+
+
+def conocimientos_a_dar_por_sabidos(
+    con: sqlite3.Connection, novela_id: int, parada_id: int
+) -> set[tuple[int, int]]:
+    """(personaje_id, hecho_id) de los conflictos de conocimiento de una parada (RF2-FALLO-07).
+
+    Solo los que siguen en el grafo: un hecho fijado en el capitulo rechazado se fue con el al
+    revertir. Una parada anterior a que el conflicto trajera los ids se resuelve por las claves
+    del hecho y el nombre del personaje.
+    """
+    fila = con.execute("SELECT informe FROM parada WHERE id = ?", (parada_id,)).fetchone()
+    if fila is None:
+        return set()
+    try:
+        informe = como_dict(json.loads(fila["informe"] or "{}"))
+    except json.JSONDecodeError:
+        return set()
+    resolvedor = Resolvedor(con, novela_id)
+    pares: set[tuple[int, int]] = set()
+    for conflicto in como_lista(informe.get("conflictos")):
+        c = como_dict(conflicto)
+        if c.get("comprobacion") != "conocimiento_no_adquirido" or c.get("aviso"):
+            continue
+        d = como_dict(c.get("datos"))
+        personaje = d.get("personaje_id") or resolvedor.id_de(
+            "personaje", str(d.get("personaje") or "")
+        )
+        hecho = con.execute(
+            "SELECT id FROM hecho_vigente WHERE novela_id = ? AND id = ?",
+            (novela_id, d.get("hecho_id")),
+        ).fetchone() if d.get("hecho_id") else con.execute(
+            "SELECT id FROM hecho_vigente WHERE novela_id = ? AND sujeto_clave = ? "
+            "AND atributo_clave = ? AND valor_clave = ? ORDER BY id DESC LIMIT 1",
+            (novela_id, normalizar(str(d.get("sujeto_nombre") or "")),
+             normalizar(str(d.get("atributo") or "")), normalizar(str(d.get("valor") or ""))),
+        ).fetchone()
+        if personaje and hecho is not None:
+            pares.add((int(personaje), int(hecho["id"])))
+    return pares
+
+
+def dar_por_sabido(con: sqlite3.Connection, novela_id: int, parada_id: int) -> int:
+    """El autor confirma que el personaje se entero fuera de escena (RF2-FALLO-07).
+
+    Se registra como conocimiento contado en la ultima escena del capitulo anterior al de la
+    parada: queda en el grafo con su escena, como todo, y relanzar desde antes lo deshace.
+    """
+    pares = conocimientos_a_dar_por_sabidos(con, novela_id, parada_id)
+    capitulo = con.execute("SELECT capitulo FROM parada WHERE id = ?", (parada_id,)).fetchone()
+    if not pares or capitulo is None or capitulo["capitulo"] is None:
+        return 0
+    escena = con.execute(
+        "SELECT eo.escena_id FROM escena_ordinal eo JOIN escena e ON e.id = eo.escena_id "
+        "WHERE e.novela_id = ? AND eo.capitulo_numero < ? ORDER BY eo.ordinal DESC LIMIT 1",
+        (novela_id, int(capitulo["capitulo"])),
+    ).fetchone()
+    if escena is None:
+        return 0
+    for personaje_id, hecho_id in sorted(pares):
+        insertar(
+            con, "estado_conocimiento", novela_id=novela_id, personaje_id=personaje_id,
+            hecho_id=hecho_id, escena_id=int(escena["escena_id"]), postura="sabe",
+            via="se_lo_contaron",
+        )
+    return len(pares)
 
 
 def revertir_grafo(
@@ -241,7 +307,8 @@ def relanzar(
 ) -> dict[str, int]:
     """Revierte el grafo y deja la ejecucion lista para regenerar desde N (RF-FALLO-04).
 
-    Es lo que hacen `relanzar` y `resolver_parada` con `relanzar` o `aceptar_retcon`: ademas
+    Es lo que hacen `relanzar` y `resolver_parada` con `relanzar`, `aceptar_retcon` o
+    `dar_por_sabido`: ademas
     de `revertir_grafo`, cierra las paradas abiertas y mueve el estado. La transicion se
     valida ANTES de tocar nada: sobre una parada de estructura, por ejemplo, lanza
     `TransicionInvalida` y el grafo queda intacto (RF2-FALLO-03). Corre dentro de la
@@ -252,7 +319,7 @@ def relanzar(
 
     borrado = revertir_grafo(con, novela_id, desde_capitulo, motivo=suceso)
 
-    resolucion = "aceptar_retcon" if suceso == "aceptar_retcon" else "relanzado"
+    resolucion = suceso if suceso in ("aceptar_retcon", "dar_por_sabido") else "relanzado"
     for parada in paradas_abiertas(con, novela_id):
         cerrar_parada(con, novela_id, int(parada["id"]), resolucion)
 

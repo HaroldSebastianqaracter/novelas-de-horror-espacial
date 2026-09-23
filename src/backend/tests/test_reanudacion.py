@@ -349,3 +349,63 @@ def test_el_retcon_es_un_registro_y_relanzar_desde_antes_lo_deshace(w: worker.Wo
     assert del_capitulo_1 in fallo.hechos_a_revocar(
         w.con, int(fallo.paradas_abiertas(w.con, novela_id)[0]["id"])
     )
+
+
+# --- RF2-FALLO-07: dar por sabido lo que se supo fuera de escena --------------------------------
+
+
+def _usa_sin_haber_estado(entrada: str, agente: str) -> dict:
+    """Reyes usa en el capitulo 2 la voz de Idris, fijada en el 1 en escenas donde no estaba."""
+    salida = agentes_falsos.extraccion(entrada, agente)
+    if "capitulo 2" in entrada.lower():
+        salida["usos_de_conocimiento"].append({
+            "escena_orden": 1, "personaje_ref": agentes_falsos.PERSONAJES[2],
+            "sujeto_ref": agentes_falsos.PERSONAJES[0], "atributo": "voz",
+        })
+    return salida
+
+
+def test_dar_por_sabido_registra_lo_contado_y_el_capitulo_pasa(w: worker.Worker) -> None:
+    novela_id = crear_novela(w.con)
+    w.puerto.registrar("extraccion", _usa_sin_haber_estado)  # type: ignore[attr-defined]
+    w._correr(novela_id)
+    parada = fallo.paradas_abiertas(w.con, novela_id)[0]
+    assert parada["tipo"] == "continuidad" and parada["capitulo"] == 2
+
+    intencion = _intencion(w.con, "resolver_parada", novela_id, parada_id=parada["id"],
+                           accion="dar_por_sabido")
+    w._resolver_parada(intencion)
+    assert _estado_intencion(w.con, intencion)[0] == "hecha"
+    # Contado en la ultima escena del capitulo 1, y por eso sobrevive a relanzar el 2.
+    fila = w.con.execute(
+        "SELECT ec.via, ec.postura, eo.capitulo_numero FROM estado_conocimiento ec"
+        " JOIN personaje p ON p.id = ec.personaje_id"
+        " JOIN escena_ordinal eo ON eo.escena_id = ec.escena_id WHERE p.nombre = 'Reyes'"
+    ).fetchone()
+    assert tuple(fila) == ("se_lo_contaron", "sabe", 1)
+
+    # Aunque el extractor vuelva a registrar el mismo uso, el capitulo ya pasa.
+    w._correr(novela_id)
+    assert lectura.ultimo_capitulo_completado(w.con, novela_id) == agentes_falsos.CAPITULOS
+
+
+def test_dar_por_sabido_sin_conflicto_de_conocimiento_se_rechaza(w: worker.Worker) -> None:
+    novela_id = crear_novela(w.con)
+
+    def muere_y_sigue(entrada: str, agente: str) -> dict:
+        salida = agentes_falsos.extraccion(entrada, agente)
+        if "capitulo 2" in entrada.lower():
+            salida["estados_personaje"].append({
+                "escena_orden": 1, "personaje_ref": agentes_falsos.PERSONAJES[1],
+                "condicion": "muerto",
+            })
+        return salida
+
+    w.puerto.registrar("extraccion", muere_y_sigue)  # type: ignore[attr-defined]
+    w._correr(novela_id)
+    parada = fallo.paradas_abiertas(w.con, novela_id)[0]
+    intencion = _intencion(w.con, "resolver_parada", novela_id, parada_id=parada["id"],
+                           accion="dar_por_sabido")
+    w._resolver_parada(intencion)
+    estado, motivo = _estado_intencion(w.con, intencion)
+    assert estado == "rechazada" and "conocimiento" in (motivo or "")

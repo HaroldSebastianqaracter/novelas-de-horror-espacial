@@ -351,6 +351,26 @@ class Worker:
                 self.con, intencion.id, "hecha", resultado={"hechos_revocados": revocados}
             )
 
+        elif accion == "dar_por_sabido":
+            capitulo = parada["capitulo"]
+            if capitulo is None or not fallo.conocimientos_a_dar_por_sabidos(
+                self.con, novela_id, parada_id
+            ):
+                cola.cerrar(
+                    self.con, intencion.id, "rechazada",
+                    motivo=(
+                        "ningun conflicto de la parada es un conocimiento no adquirido sobre "
+                        "un hecho de un capitulo anterior"
+                    ),
+                )
+                return
+            with transaccion(self.con):
+                sabidos = fallo.dar_por_sabido(self.con, novela_id, parada_id)
+                fallo.relanzar(self.con, novela_id, int(capitulo), suceso="dar_por_sabido")
+            cola.cerrar(
+                self.con, intencion.id, "hecha", resultado={"conocimientos_dados": sabidos}
+            )
+
         else:  # relanzar
             desde = int(p.get("desde_capitulo") or parada["capitulo"] or 1)
             motivo = self._motivo_para_no_relanzar(novela_id, desde, "relanzar")
