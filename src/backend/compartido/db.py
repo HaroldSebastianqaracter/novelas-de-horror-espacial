@@ -1,15 +1,18 @@
 """Conexion, PRAGMAs, transacciones, migraciones e integridad del grafo.
 
-Reglas que este modulo impone (RF-PER-01, RF-API-05):
+Reglas que este modulo impone (RF-PER-01, RF-API-05, RF2-WK-08, RF2-PROC-03):
   * WAL, busy_timeout y foreign_keys en toda conexion.
   * La API abre en SOLO LECTURA; el worker es el unico escritor.
-  * El esquema base vive en esquema.sql; las migraciones incrementales, en migraciones/.
+  * Una conexion puede llevar una guarda que corre dentro de cada `BEGIN IMMEDIATE`: es el
+    fencing del worker, que comprueba que el cerrojo sigue siendo suyo antes de escribir.
+  * El esquema base vive en esquema.sql; las migraciones incrementales, en migraciones/. Las
+    dos se aplican con el cerrojo de escritura tomado y releyendo la version dentro.
 """
 
 from __future__ import annotations
 
 import sqlite3
-from collections.abc import Collection, Iterator, Sequence
+from collections.abc import Callable, Collection, Iterator, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
@@ -30,6 +33,26 @@ class ErrorDeDatos(Exception):
 
 class EscrituraEnSoloLectura(ErrorDeDatos):
     """Se intento escribir por una conexion de solo lectura."""
+
+
+Guardia = Callable[[sqlite3.Connection], None]
+
+
+class Conexion(sqlite3.Connection):
+    """Una conexion que puede llevar una guarda de escritura (RF2-WK-08).
+
+    `sqlite3.Connection` no admite referencias debiles ni atributos nuevos, asi que la guarda
+    viaja en una subclase. Toda conexion que abre `conectar` es de este tipo.
+    """
+
+    guardia: Guardia | None = None
+
+
+def fijar_guardia(con: sqlite3.Connection, guardia: Guardia | None) -> None:
+    """Hace que toda transaccion inmediata de `con` ejecute `guardia` nada mas empezar."""
+    if not isinstance(con, Conexion):
+        raise TypeError("Solo una conexion abierta con db.conectar admite guardia.")
+    con.guardia = guardia
 
 
 # -----------------------------------------------------------------------------------------
@@ -58,10 +81,15 @@ def conectar(ruta: Path, *, solo_lectura: bool = False) -> sqlite3.Connection:
         if not ruta.exists():
             raise ErrorDeDatos(f"No existe la base de datos: {ruta}")
         uri = f"file:{ruta.as_posix()}?mode=ro"
-        con = sqlite3.connect(uri, uri=True, timeout=BUSY_TIMEOUT_MS / 1000, isolation_level=None)
+        con = sqlite3.connect(
+            uri, uri=True, timeout=BUSY_TIMEOUT_MS / 1000, isolation_level=None,
+            factory=Conexion,
+        )
     else:
         ruta.parent.mkdir(parents=True, exist_ok=True)
-        con = sqlite3.connect(ruta, timeout=BUSY_TIMEOUT_MS / 1000, isolation_level=None)
+        con = sqlite3.connect(
+            ruta, timeout=BUSY_TIMEOUT_MS / 1000, isolation_level=None, factory=Conexion
+        )
 
     con.row_factory = sqlite3.Row
     _aplicar_pragmas(con, solo_lectura)
@@ -69,16 +97,27 @@ def conectar(ruta: Path, *, solo_lectura: bool = False) -> sqlite3.Connection:
 
 
 @contextmanager
-def transaccion(con: sqlite3.Connection, *, inmediata: bool = True) -> Iterator[sqlite3.Connection]:
+def transaccion(
+    con: sqlite3.Connection,
+    *,
+    inmediata: bool = True,
+    al_empezar: Guardia | None = None,
+) -> Iterator[sqlite3.Connection]:
     """Transaccion explicita. Confirma al salir sin excepcion, revierte si la hay.
 
     `inmediata` toma el bloqueo de escritura al empezar, que es lo que quiere el worker: si
     otro proceso esta escribiendo, se entera ya y no a mitad del capitulo.
 
-    Es la pieza de RF-PIPE-08: todo el capitulo entra en una sola transaccion o no entra nada.
+    `al_empezar` corre justo despues de `BEGIN IMMEDIATE`, con el cerrojo de escritura de
+    SQLite ya tomado; si no se pasa, se usa la guarda de la conexion. Es el fencing del worker
+    (RF2-WK-08): si lanza, la transaccion se revierte sin haber escrito nada. En una
+    transaccion diferida no corre, porque sin el cerrojo tomado la comprobacion no protege.
     """
     con.execute("BEGIN IMMEDIATE" if inmediata else "BEGIN")
     try:
+        guardia = al_empezar or getattr(con, "guardia", None)
+        if inmediata and guardia is not None:
+            guardia(con)
         yield con
     except BaseException:
         con.execute("ROLLBACK")
@@ -129,37 +168,82 @@ def _migraciones_pendientes(desde: int) -> list[tuple[int, Path]]:
     return sorted(encontradas)
 
 
-def _script_atomico(con: sqlite3.Connection, sql: str, version: int) -> None:
-    """Ejecuta un script DDL y sella su version, todo o nada.
+def sentencias(sql: str) -> list[str]:
+    """Parte un guion SQL en sentencias completas, en el orden en que aparecen.
 
-    `executescript` confirma cualquier transaccion pendiente antes de arrancar y no abre
-    ninguna por su cuenta, asi que el control de transaccion tiene que ir DENTRO del script.
+    Hace falta porque `executescript` confirma cualquier transaccion abierta antes de empezar
+    y el esquema tiene que aplicarse DENTRO de un `BEGIN IMMEDIATE` propio. Se apoya en
+    `sqlite3.complete_statement`, que sabe de comentarios, cadenas y cuerpos de trigger.
     """
-    sello = f"INSERT OR REPLACE INTO esquema_version (version) VALUES ({version});"
-    guion = f"BEGIN;\n{sql}\n{sello}\nCOMMIT;"
+    salida: list[str] = []
+    buffer = ""
+    for linea in sql.splitlines(keepends=True):
+        buffer += linea
+        if sqlite3.complete_statement(buffer):
+            salida.append(buffer.strip())
+            buffer = ""
+    if buffer.strip() and not all(
+        not x.strip() or x.strip().startswith("--") for x in buffer.splitlines()
+    ):
+        raise ErrorDeDatos(f"Sentencia SQL incompleta al final del guion: {buffer[:200]!r}")
+    return salida
+
+
+def _aplicar_version(
+    con: sqlite3.Connection, version: int, sql: str
+) -> bool:
+    """Aplica un guion y sella su version, todo o nada. Devuelve si lo aplico.
+
+    Toma el cerrojo de escritura (`BEGIN IMMEDIATE`) y vuelve a leer la version DENTRO de la
+    transaccion: si otro proceso ya la aplico mientras este esperaba, no hace nada. Es lo que
+    cierra la carrera entre leer la version y migrar (RF2-PROC-03).
+    """
+    con.execute("BEGIN IMMEDIATE")
     try:
-        con.executescript(guion)
-    except Exception:
-        if con.in_transaction:
+        if version_actual(con) >= version:
             con.execute("ROLLBACK")
+            return False
+        for sentencia in sentencias(sql):
+            con.execute(sentencia)
+        con.execute(
+            "INSERT OR REPLACE INTO esquema_version (version) VALUES (?)", (version,)
+        )
+    except BaseException:
+        con.execute("ROLLBACK")
         raise
+    con.execute("COMMIT")
+    return True
+
+
+def crear_esquema(con: sqlite3.Connection) -> bool:
+    """Crea el esquema base si la base esta vacia. Idempotente y segura entre procesos.
+
+    Es la unica escritura que el worker hace antes de tomar su cerrojo, porque la tabla del
+    cerrojo vive en el esquema; y la unica que se le permite a la API (RF2-PROC-03).
+    """
+    if version_actual(con) >= VERSION_ESQUEMA:
+        return False
+    return _aplicar_version(con, VERSION_ESQUEMA, RUTA_ESQUEMA.read_text(encoding="utf-8"))
+
+
+def migrar(con: sqlite3.Connection) -> list[int]:
+    """Aplica en orden las migraciones pendientes. Devuelve las que aplico este proceso."""
+    aplicadas: list[int] = []
+    for numero, fichero in _migraciones_pendientes(version_actual(con)):
+        if _aplicar_version(con, numero, fichero.read_text(encoding="utf-8")):
+            aplicadas.append(numero)
+    return aplicadas
 
 
 def preparar(ruta: Path) -> sqlite3.Connection:
     """Abre la base creandola si hace falta y deja el esquema al dia.
 
-    Es lo que llaman API y worker al arrancar (RF-PROC-03).
+    Comodidad para los tests y el lanzador. El worker no la usa: crea el esquema, toma el
+    cerrojo y solo entonces migra (RF2-PROC-03).
     """
     con = conectar(ruta)
-    actual = version_actual(con)
-
-    if actual == 0:
-        _script_atomico(con, RUTA_ESQUEMA.read_text(encoding="utf-8"), VERSION_ESQUEMA)
-        actual = VERSION_ESQUEMA
-
-    for numero, fichero in _migraciones_pendientes(actual):
-        _script_atomico(con, fichero.read_text(encoding="utf-8"), numero)
-
+    crear_esquema(con)
+    migrar(con)
     return con
 
 

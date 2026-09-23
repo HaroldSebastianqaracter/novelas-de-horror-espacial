@@ -16,6 +16,7 @@ import struct
 from dataclasses import dataclass
 from typing import Any
 
+from ..db import transaccion
 from .embebido import Embedder, construir
 
 
@@ -85,18 +86,27 @@ class Indice:
         except Exception:  # noqa: BLE001
             return False
 
+    def _escribir(self, sql: str, params: tuple[Any, ...] = ()) -> None:
+        """Toda escritura del indice pasa por una transaccion inmediata, y por tanto por el
+        fencing del worker (RF2-WK-08). Si ya hay una abierta, se escribe en ella."""
+        if self.con.in_transaction:
+            self.con.execute(sql, params)
+        else:
+            with transaccion(self.con):
+                self.con.execute(sql, params)
+
     def _crear_tablas(self, dim: int) -> None:
-        self.con.execute(
+        self._escribir(
             f"CREATE VIRTUAL TABLE IF NOT EXISTS vec_escena USING vec0("
             f"escena_texto_id INTEGER PRIMARY KEY, embedding float[{dim}])"
         )
-        self.con.execute(
+        self._escribir(
             f"CREATE VIRTUAL TABLE IF NOT EXISTS vec_hecho USING vec0("
             f"hecho_id INTEGER PRIMARY KEY, embedding float[{dim}])"
         )
 
     def _registrar_estado(self) -> None:
-        self.con.execute(
+        self._escribir(
             """
             INSERT INTO indice_estado (id, modelo, dimension, disponible, reconstruido_en)
             VALUES (1, ?, ?, ?, datetime('now'))

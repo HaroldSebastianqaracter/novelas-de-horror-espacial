@@ -31,27 +31,55 @@ class Worker:
     def __init__(self, cfg: config.Config, con: sqlite3.Connection | None = None) -> None:
         self.cfg = cfg
         # `con` solo lo pasan los tests que exploran la maquina de estados en memoria.
-        self.con: sqlite3.Connection = con if con is not None else db.preparar(cfg.db_path)
+        self.con: sqlite3.Connection = con if con is not None else db.conectar(cfg.db_path)
+        # La unica escritura antes del cerrojo: la tabla del cerrojo vive en el esquema.
+        db.crear_esquema(self.con)
         self.puerto = construir_puerto(cfg, self.con)
-        self.indice = Indice(
-            self.con, modelo=cfg.embedding_modelo, activo=cfg.vectores_activos
-        )
+        self._indice: Indice | None = None
+        self.latido: cola.Latido | None = None
         self.parar = False
         self._novela_en_curso: int | None = None
+
+    @property
+    def indice(self) -> Indice:
+        """Se construye la primera vez que se usa: construirlo escribe en `indice_estado`, y
+        el worker no escribe nada antes de tomar el cerrojo (RF2-PROC-03)."""
+        if self._indice is None:
+            self._indice = Indice(
+                self.con, modelo=self.cfg.embedding_modelo, activo=self.cfg.vectores_activos
+            )
+        return self._indice
 
     # -- ciclo de vida ---------------------------------------------------------------------
 
     def arrancar(self) -> None:
-        cola.tomar_cerrojo(
-            self.con, poll_segundos=self.cfg.poll_segundos
-        )
-        self.recuperar()
-        log.info("Worker en marcha. Sondeo cada %s s.", self.cfg.poll_segundos)
+        """Cerrojo, latido, migraciones, indice y recuperacion, en ese orden (RF2-PROC-03)."""
+        cola.tomar_cerrojo(self.con, poll_segundos=self.cfg.poll_segundos)
+        # Desde aqui, toda transaccion de esta conexion comprueba que el cerrojo sigue siendo
+        # nuestro antes de escribir (RF2-WK-08).
+        db.fijar_guardia(self.con, cola.exigir_cerrojo)
+        self.latido = cola.Latido(self.cfg.db_path, self.cfg.poll_segundos).iniciar()
         try:
+            aplicadas = db.migrar(self.con)
+            if aplicadas:
+                log.info("Migraciones aplicadas: %s", aplicadas)
+            _ = self.indice
+            self.recuperar()
+            log.info("Worker en marcha. Sondeo cada %s s.", self.cfg.poll_segundos)
             self.bucle()
         finally:
+            self.latido.detener()
             cola.soltar_cerrojo(self.con)
             log.info("Worker detenido.")
+
+    def vigilar(self) -> None:
+        """Punto de comprobacion del pipeline: aborta si ya no se puede o no se debe seguir."""
+        if self.latido is not None and self.latido.perdido.is_set():
+            raise cola.CerrojoPerdido(
+                "El latido descubrio que otro proceso tiene el cerrojo del worker."
+            )
+        if self.parar:
+            raise pipeline.Detenido()
 
     def detener(self, *_: Any) -> None:
         log.info("Senal recibida: terminando el ciclo en curso.")
@@ -125,7 +153,7 @@ class Worker:
 
     def bucle(self) -> None:
         while not self.parar:
-            cola.latir(self.con)
+            self.vigilar()
             intencion = cola.tomar(self.con)
             if intencion is None:
                 time.sleep(self.cfg.poll_segundos)
@@ -345,7 +373,7 @@ class Worker:
         self._novela_en_curso = novela_id
         ctx = pipeline.Contexto(
             con=self.con, puerto=self.puerto, cfg=self.cfg, novela_id=novela_id,
-            indice=self.indice,
+            indice=self.indice, vigilar=self.vigilar,
         )
         try:
             final = pipeline.avanzar(ctx)

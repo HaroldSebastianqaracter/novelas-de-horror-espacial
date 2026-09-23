@@ -204,6 +204,8 @@ src/backend/
 
 **RF-PROC-03** Si `NOVELAS_DB_PATH` no existe, cualquiera de los dos procesos crea el fichero y aplica el esquema completo al arrancar. Si existe, aplica las migraciones pendientes (RF-PER-04).
 
+> Sustituido por spec2, RF2-PROC-03.
+
 **RF-PROC-04** El worker rechaza arrancar si detecta otro worker vivo sobre la misma base de datos (fila `worker_lock` con latido reciente; ver RF-PER-09). Dos workers violarían el escritor único.
 
 ### 3.3 API HTTP
@@ -211,6 +213,8 @@ src/backend/
 **RF-API-01** La API expone OpenAPI en `/openapi.json` y toda respuesta se declara con esquemas Pydantic. El frontend generará su cliente desde ahí; ningún endpoint devuelve `dict` sin esquema.
 
 **RF-API-02** La API **solo lee** el grafo, con una excepción: `POST` de intenciones inserta una fila en `intencion`. Ninguna otra ruta escribe.
+
+> Ampliado por spec2, RF2-PROC-03: la API puede crear el esquema al arrancar, pero no migra.
 
 **RF-API-03** Endpoints de la v1:
 
@@ -311,6 +315,8 @@ stateDiagram-v2
 > Sustituido por spec2, RF2-WK-06.
 
 **RF-WK-07** El worker escribe una fila en `worker_lock` con su pid y renueva un latido cada ciclo. Al arrancar, si hay un latido de menos de tres ciclos de antigüedad de otro pid, aborta (RF-PROC-04).
+
+> Sustituido por spec2, RF2-WK-07 y RF2-WK-08.
 
 ### 3.5 Pipeline: planificación y escaleta
 

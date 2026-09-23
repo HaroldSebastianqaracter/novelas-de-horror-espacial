@@ -295,8 +295,11 @@ SQLite admite un escritor a la vez. Con dos procesos, esto deja de ser trivia y 
 - **El worker escribe. La API solo lee.** Única excepción: insertar una fila en la tabla de intenciones.
 - `PRAGMA journal_mode=WAL` — lectores y escritor no se bloquean entre sí.
 - `PRAGMA busy_timeout` distinto de cero.
+- **Un solo worker.** El worker toma un cerrojo en la base antes de escribir nada, un hilo propio lo renueva mientras el proceso vive, y cada transacción suya comprueba, con el bloqueo de escritura de SQLite ya tomado, que el cerrojo sigue siendo suyo. Si otro proceso se lo ha quedado, el worker se detiene sin escribir nada más.
 
 Sin esta regla, el fallo aparece como `database is locked` en mitad de un capítulo.
+
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** La auditoría encontró que el cerrojo caducaba a los seis segundos y que nadie lo renovaba durante un capítulo: un segundo worker podía entrar y los dos escribían. Se renueva desde un hilo y no desde el bucle de espera del agente, porque las fases SQL largas también necesitan latido; y se añade la comprobación dentro de cada transacción (*fencing*), porque un latido solo dice que el cerrojo **era** nuestro hace un momento. Se descartó alargar la gracia a minutos, que solo retrasa el mismo fallo. El detalle está en [specs/spec2.md](../specs/spec2.md), RF2-WK-07 y RF2-WK-08.
 
 ### La cola es una tabla
 

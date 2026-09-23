@@ -141,7 +141,17 @@ Una puerta está **vigente** si su último registro en `resultado_puerta` no es 
 
 ### 3.3 Fase 3 — Un solo escritor
 
-*Pendiente: se escribe al empezar la fase.*
+Hallazgos 3 (el cerrojo caduca a los 6 s y nadie late durante el pipeline) y 23 (se escribe antes de tomar el cerrojo; carrera entre leer la versión del esquema y migrar).
+
+**RF2-WK-07** *Sustituye a RF-WK-07.* El latido lo da un **hilo propio del worker, con su propia conexión**, cada `NOVELAS_POLL_SEGUNDOS`, mientras el proceso vive; no depende de que el bucle principal vuelva a la cola, que durante un capítulo puede tardar horas. Cada latido comprueba que la fila de `worker_lock` sigue siendo suya (`rowcount = 1`). Si no lo es, levanta la bandera `cerrojo_perdido` y deja de latir. El pipeline mira esa bandera en cada punto de comprobación y, si está levantada, aborta. La gracia sigue siendo de tres ciclos: otro worker solo puede quedarse el cerrojo si el latido lleva tres ciclos parado.
+
+**RF2-WK-08** *Requisito nuevo: fencing.* Toda transacción de escritura del worker comprueba, **ya dentro de `BEGIN IMMEDIATE`**, que `worker_lock.pid` es el suyo. Si no lo es, revierte y lanza `CerrojoPerdido`, que ningún manejador del pipeline captura: el worker se detiene. Se comprueba con el cerrojo de escritura de SQLite tomado, que es lo que impide que dos procesos escriban aunque los dos crean tener el cerrojo. La comprobación va asociada a la conexión del worker desde que toma el cerrojo, así que cubre toda transacción que pase por ella, también las de la traza, la cola y el puerto.
+
+**RF2-PROC-03** *Sustituye a RF-PROC-03.* El worker arranca en este orden: conectar → crear el esquema si no existe → **tomar el cerrojo** → arrancar el latido → migrar → construir el índice → recuperar. Crear el esquema es la única escritura anterior al cerrojo, porque la tabla del cerrojo vive en el esquema. Crear el esquema y migrar usan `BEGIN IMMEDIATE` y **vuelven a leer la versión dentro de la transacción**: si otro proceso ya la aplicó, no se hace nada. Cada fichero de esquema o de migración se aplica sentencia a sentencia dentro de esa transacción, y no con `executescript`, que confirmaría la transacción abierta antes de empezar.
+
+La API sigue pudiendo **crear** el esquema al arrancar, como excepción escrita a RF-API-02: quitárselo obligaría a arrancar siempre el worker antes que la API, y la carrera que preocupaba la resuelve el `BEGIN IMMEDIATE` con relectura. La API **no migra**: migrar es del worker, que lo hace con el cerrojo tomado.
+
+> **Decisión de la spec (23-09-2026).** El latido va en un hilo y no dentro del bucle de sondeo del puerto: el puerto solo late mientras hay una llamada al agente, y las fases SQL largas (la puerta 3, una reversión) quedarían otra vez sin latido. Se descartó alargar la gracia a minutos, que solo cambia cuánto tarda en aparecer el mismo fallo. El fencing no sustituye al latido, lo acota: un proceso congelado más tiempo que la gracia puede despertar con una transacción ya abierta y terminarla, pero no puede abrir otra.
 
 ### 3.4 Fase 4 — El paquete no pierde canon en silencio
 

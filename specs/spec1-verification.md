@@ -2,7 +2,7 @@
 
 Plan de verificación de [spec1.md](spec1.md). Métodos y etiquetas según [docs/validators.md](../docs/validators.md).
 
-Actualizado el 23 de septiembre de 2026. Suite: 79 tests en verde y 6 `xfail` estrictos, que son las reproducciones de la auditoría que aún no ha cerrado ninguna fase de spec2. Las rutas de evidencia son relativas a `src/backend/`.
+Actualizado el 23 de septiembre de 2026. Suite: 89 tests en verde y 5 `xfail` estrictos, que son las reproducciones de la auditoría que aún no ha cerrado ninguna fase de spec2. Las rutas de evidencia son relativas a `src/backend/`.
 
 > **Filas degradadas el 23 de septiembre de 2026.** La auditoría de ese día reprodujo fallos en siete filas que estaban en `implementado`: 11, 16, 17, 21, 25, 27 y 35. Pasan a `fallando` ya, y no cuando se arreglen, porque un plan que dice «implementado» sobre un fallo reproducido es justo lo que la sección siguiente llama la forma más común de mentir. Cada una vuelve a `implementado` en la fase de [spec2-plan.md](spec2-plan.md) que la corrige, y su propiedad endurecida vive en [spec2-verification.md](spec2-verification.md).
 
@@ -47,7 +47,7 @@ Actualizado el 23 de septiembre de 2026. Suite: 79 tests en verde y 6 `xfail` es
 | 31 | El texto se versiona y nunca se hace `UPDATE` sobre él | Static analysis | `A` | `tests/test_arquitectura.py::test_el_texto_se_versiona_y_no_se_actualiza` | implementado |
 | 32 | WAL, `busy_timeout` y claves ajenas activas en toda conexión | Unit testing | `T` | `tests/test_arquitectura.py::test_wal_y_busy_timeout` | implementado |
 | 33 | El agente no puede leer el repositorio ni buscar canon por su cuenta | Guardrail | `D` | Verificado a mano contra el CLI: `--allowedTools ""` y directorio de trabajo vacío. Sin prueba automática | **pendiente** |
-| 34 | Dos workers no escriben a la vez | Integration testing | `T` | `orquestador/cola.py::tomar_cerrojo`. Sin prueba | **pendiente** |
+| 34 | Dos workers no escriben a la vez | Integration testing con dos procesos reales | `T` | `tests/test_cerrojo.py`: latido en un hilo propio, fencing dentro de `BEGIN IMMEDIATE`, robo del cerrojo a mitad del pipeline sin ninguna escritura posterior. Corregida por spec2, fase 3 | implementado |
 | 35 | El worker caído a mitad de capítulo reanuda desde el último capítulo íntegro | Integration testing con una caída real del proceso (antes `D`) | `T` | `tests/test_auditoria.py::test_hallazgo_06_…`: el subproceso sale con `os._exit` durante el oficio y `recuperar()` revierte. Corregida por spec2, fase 1 | implementado |
 | 36 | El SSE recupera con `Last-Event-ID` sin huecos ni duplicados | Integration testing | `T` | `main.py::stream_eventos`. Sin prueba | **pendiente** |
 | 37 | La salida de cada agente cumple sus criterios de terminación | Evals por skill | `T`, `I` con juez | Sin conjunto de referencia | **pendiente** |

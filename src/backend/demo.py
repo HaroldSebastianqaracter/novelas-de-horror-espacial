@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 import sys
 import time
 from pathlib import Path
@@ -36,8 +37,15 @@ RESTRICCIONES = {
 }
 
 
+def _abrir(ruta: Path) -> sqlite3.Connection:
+    """Como la API: crea el esquema si hace falta, pero no migra; eso es del worker."""
+    con = db.conectar(ruta)
+    db.crear_esquema(con)
+    return con
+
+
 def crear(ruta: Path, titulo: str) -> int:
-    con = db.preparar(ruta)
+    con = _abrir(ruta)
     try:
         with transaccion(con):
             intencion_id = cola.encolar(
@@ -66,7 +74,7 @@ def crear(ruta: Path, titulo: str) -> int:
 
 
 def arrancar(ruta: Path, novela_id: int) -> None:
-    con = db.preparar(ruta)
+    con = _abrir(ruta)
     try:
         with transaccion(con):
             cola.encolar(con, "arrancar", novela_id)
@@ -76,7 +84,7 @@ def arrancar(ruta: Path, novela_id: int) -> None:
 
 
 def parar(ruta: Path, novela_id: int) -> None:
-    con = db.preparar(ruta)
+    con = _abrir(ruta)
     try:
         with transaccion(con):
             cola.encolar(con, "parar", novela_id)
@@ -217,7 +225,7 @@ def main() -> int:
         parar(ruta, args.novela or _ultima(ruta))
         return 0
     if args.relanzar is not None:
-        con = db.preparar(ruta)
+        con = _abrir(ruta)
         with transaccion(con):
             cola.encolar(con, "relanzar", args.novela, desde_capitulo=args.relanzar)
         con.close()

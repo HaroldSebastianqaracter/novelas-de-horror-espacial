@@ -176,7 +176,6 @@ def test_hallazgo_12_aceptar_retcon_sobre_una_parada_de_estructura_se_rechaza(
 # --- Fase 3: un solo escritor -------------------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, reason="Hallazgo 3: latir() no se entera de que perdio el cerrojo")
 def test_hallazgo_03_el_latido_sabe_si_perdio_el_cerrojo() -> None:
     con, _ = nueva_bd()
     cola.tomar_cerrojo(con, poll_segundos=1)

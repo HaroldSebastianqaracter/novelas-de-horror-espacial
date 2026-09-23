@@ -161,14 +161,20 @@ def _cargar_config() -> config.Config:
 
 @asynccontextmanager
 async def ciclo(app: FastAPI) -> AsyncIterator[None]:
-    """Al arrancar, deja el esquema al dia. NO lanza el worker: son dos comandos.
+    """Al arrancar, crea el esquema si no existe. NO lanza el worker: son dos comandos.
+
+    Crear el esquema es la unica escritura que se le permite a la API fuera de las
+    intenciones, y es segura entre procesos (RF2-PROC-03). Migrar no: eso es del worker, que
+    lo hace con su cerrojo tomado.
 
     Si alguien ya dejo una configuracion en `app.state.cfg` —los tests— se respeta. Leer el
     entorno por encima de lo que el llamante puso obligaria a montar variables globales solo
     para poder probar la API.
     """
     cfg: config.Config = getattr(app.state, "cfg", None) or _cargar_config()
-    db.preparar(cfg.db_path).close()
+    con = db.conectar(cfg.db_path)
+    db.crear_esquema(con)
+    con.close()
     app.state.cfg = cfg
     yield
 

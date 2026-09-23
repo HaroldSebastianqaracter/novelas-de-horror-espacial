@@ -100,6 +100,9 @@ class Contexto:
     cfg: Config
     novela_id: int
     indice: Any | None = None
+    #: Lo llama cada punto de comprobacion. El worker lo usa para abortar si perdio el
+    #: cerrojo (RF2-WK-07) o si recibio una senal de terminar.
+    vigilar: Callable[[], None] | None = None
     #: Criterios de oficio incumplidos, que vuelven al redactor en el reintento.
     eventos_criterios: list[dict[str, Any]] = field(default_factory=list)
 
@@ -167,6 +170,8 @@ def emitir_traza(ctx: Contexto, tipo: str, **payload: Any) -> None:
 
 
 def _comprobar_parada(ctx: Contexto) -> None:
+    if ctx.vigilar is not None:
+        ctx.vigilar()
     if cola.hay_parada_pendiente(ctx.con, ctx.novela_id):
         raise Detenido()
 
