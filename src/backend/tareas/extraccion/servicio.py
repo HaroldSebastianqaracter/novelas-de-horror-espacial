@@ -171,7 +171,21 @@ def _es_compuesto(valor: str) -> bool:
 #: Un trozo mas corto no dice nada por si mismo: «de», «humedad» o «vegetal» casan con casi
 #: cualquier compuesto.
 PALABRAS_MINIMAS_DEL_TROZO = 3
-_NEGADORES = frozenset({"no", "sin", "nunca", "ni", "jamas"})
+_NEGADORES = frozenset({
+    "no", "sin", "nunca", "ni", "jamas", "ningun", "ninguna", "ninguno", "nadie", "nada",
+    "tampoco", "salvo", "excepto",
+})
+#: Las palabras de una cifra escrita en letra: un trozo que corta una cifra la cambia («al
+#: ciento» de «al ciento quince por ciento»).
+_NUMERALES = frozenset({
+    "cero", "un", "uno", "una", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho",
+    "nueve", "diez", "once", "doce", "trece", "catorce", "quince", "dieciseis", "diecisiete",
+    "dieciocho", "diecinueve", "veinte", "veintiun", "veintiuno", "veintidos", "veintitres",
+    "veinticuatro", "veinticinco", "veintiseis", "veintisiete", "veintiocho", "veintinueve",
+    "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa", "cien",
+    "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos",
+    "setecientos", "ochocientos", "novecientos", "mil", "millon", "millones", "medio",
+})
 
 
 def _parte_de_un_compuesto(vigente: str, nuevo: str) -> bool:
@@ -197,13 +211,20 @@ def _parte_de_un_compuesto(vigente: str, nuevo: str) -> bool:
     y sin repetir ninguno. Con trozos no basta: juntar trozos de datos distintos cambia a quien
     se atribuye cada valor («sector 6 a Otxoa; turno de trabajo, al noventa» pone el sector 6 al
     noventa), y eso contradice (validador de ac534bd).
+
+    Un trozo tampoco corta una cifra («al ciento» de «al ciento quince por ciento»), y el
+    negador que cierra el segmento anterior cuenta como si fuera delante (validador de 0913640).
     """
     if not _es_compuesto(vigente):
         return False
     originales = [palabras(s) for s in vigente.split(";") if s.strip()]
     segmentos = [s for s in nuevo.split(";") if s.strip()]
     if len(segmentos) == 1:
-        return any(_trozo_de(o, segmentos[0]) for o in originales)
+        return any(
+            _trozo_de(o, segmentos[0], originales[j - 1][-1] if j > 0 and originales[j - 1]
+                      else frozenset())
+            for j, o in enumerate(originales)
+        )
     siguiente = 0
     for segmento in segmentos:
         encaje = next(
@@ -225,17 +246,34 @@ def _mismo_segmento(original: list[frozenset[str]], segmento: str) -> bool:
     )
 
 
-def _trozo_de(presentes: list[frozenset[str]], segmento: str) -> bool:
-    """Si `segmento` son tres palabras o mas seguidas de `presentes`, sin negador delante."""
+def _trozo_de(
+    presentes: list[frozenset[str]], segmento: str, previa: frozenset[str]
+) -> bool:
+    """Si `segmento` son tres palabras o mas seguidas de `presentes`, sin negador delante y
+    sin cortar una cifra. `previa` es la ultima palabra del segmento anterior del vigente."""
     buscadas = palabras(segmento)
     n = len(buscadas)
     if n < PALABRAS_MINIMAS_DEL_TROZO:
         return False
+    cifra = _cifras(presentes)
     return any(
         all(presentes[i + k] & buscadas[k] for k in range(n))
-        and not (i > 0 and presentes[i - 1] & _NEGADORES)
+        and not ((presentes[i - 1] if i > 0 else previa) & _NEGADORES)
+        and not (i > 0 and cifra[i - 1] and cifra[i])
+        and not (i + n < len(presentes) and cifra[i + n - 1] and cifra[i + n])
         for i in range(len(presentes) - n + 1)
     )
+
+
+def _cifras(presentes: list[frozenset[str]]) -> list[bool]:
+    """Que palabras forman parte de una cifra: numerales, digitos y la «y» entre dos de ellos."""
+    base = [any(f.isdigit() or f in _NUMERALES for f in p) for p in presentes]
+    return [
+        base[i] or (
+            "y" in p and 0 < i < len(presentes) - 1 and base[i - 1] and base[i + 1]
+        )
+        for i, p in enumerate(presentes)
+    ]
 
 
 def _mundo_y_titulo(con: sqlite3.Connection, novela_id: int) -> list[str]:

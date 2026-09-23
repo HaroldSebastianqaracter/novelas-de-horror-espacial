@@ -101,13 +101,15 @@ AMBIENTE = ("treinta y un grados y ochenta por ciento de humedad; olor dulce a f
             "cloro con algo debajo que no es vegetal")
 
 
-def _con_ambiente_compuesto() -> tuple[sqlite3.Connection, fabrica.Grafo, int]:
+def _con_ambiente_compuesto(
+    valor: str = AMBIENTE,
+) -> tuple[sqlite3.Connection, fabrica.Grafo, int]:
     con, _ = nueva_bd()
     g = fabrica.novela_minima(con)
     hid = insertar_hecho(
         con, novela_id=g.novela_id, escena_id=g.escenas[(1, 1)], sujeto_tipo="lugar",
         sujeto_id=g.lugares["Puente"], sujeto_nombre="Puente", atributo="ambiente interior",
-        valor=AMBIENTE, categoria="fisico", cita=None, supersede_a=None,
+        valor=valor, categoria="fisico", cita=None, supersede_a=None,
     )
     return con, g, hid
 
@@ -179,17 +181,68 @@ def test_cada_segmento_trozo_del_compuesto_es_una_reafirmacion() -> None:
     assert not parte(negado, "luz de emergencia")
 
 
+_A, _B, _C = (s.strip() for s in LIBRO.split(";"))
+
+
 @pytest.mark.parametrize("nuevo", [
     # Validador de ac534bd: trozos de datos distintos juntos cambian a quien va cada valor.
     "sector 6 a Otxoa; turno de trabajo, al noventa",
     "sectores 5 y 7; al ciento quince por ciento",
-    # Segmentos fuera de orden, repetidos o que cruzan el «;» del vigente.
+    # Segmentos recortados o que cruzan el «;» del vigente.
     "responsable I. Aldama; sector 6 a Otxoa",
-    "sector 6 a Otxoa; sector 6 a Otxoa",
     "por ciento sectores 5 y 7",
+    # Validador de 0913640: segmentos ENTEROS fuera de orden o repetidos.
+    f"{_C}; {_A}",
+    f"{_A}; {_A}",
+    f"{_B}; {_A}",
+    f"{_A}; {_C}; {_C}",
 ])
 def test_recombinar_trozos_del_compuesto_sigue_contradiciendo(nuevo: str) -> None:
     assert not s_extraccion._parte_de_un_compuesto(LIBRO, nuevo)
+
+
+def test_los_segmentos_enteros_en_orden_son_una_reafirmacion() -> None:
+    parte = s_extraccion._parte_de_un_compuesto
+    assert parte(LIBRO, f"{_A}; {_B}; {_C}")
+    assert parte(LIBRO, f"{_B}; {_C}")
+
+
+@pytest.mark.parametrize(("vigente", "nuevo"), [
+    # Validador de 0913640: negadores que faltaban.
+    ("ningun rastro de sangre en el suelo del modulo; luces de emergencia encendidas",
+     "rastro de sangre en el suelo"),
+    ("nadie ha entrado en la bodega desde el despegue; puerta sellada por fuera",
+     "ha entrado en la bodega"),
+    ("la baliza tampoco emite senal de socorro en ninguna frecuencia conocida",
+     "emite senal de socorro"),
+    ("todos los tripulantes vivos salvo el piloto de relevo del turno de noche",
+     "el piloto de relevo"),
+    # El negador que cierra el segmento anterior.
+    ("no; hay aire respirable en la bodega fria del sector siete",
+     "hay aire respirable en la bodega"),
+])
+def test_un_trozo_detras_de_cualquier_negador_no_es_una_parte(vigente: str, nuevo: str) -> None:
+    assert not s_extraccion._parte_de_un_compuesto(vigente, nuevo)
+
+
+def test_un_trozo_no_corta_una_cifra() -> None:
+    parte = s_extraccion._parte_de_un_compuesto
+    assert not parte(LIBRO, "sector 6 a Otxoa al ciento")
+    assert not parte(LIBRO, "quince por ciento")
+    assert not parte(LIBRO, "7, turno de trabajo, al noventa")
+    assert parte(LIBRO, "a Otxoa al ciento quince por ciento")
+    assert parte(LIBRO, "sectores 5 y 7, turno de trabajo")
+
+
+@pytest.mark.parametrize(("nuevo", "contradice"), [
+    (f"{_A}; {_C}", False),
+    (f"{_C}; {_A}", True),
+])
+def test_la_parada_8_pasa_por_la_puerta_3(nuevo: str, contradice: bool) -> None:
+    con, g, _ = _con_ambiente_compuesto(LIBRO)
+    _extraer_en_2_1(con, g, nuevo)
+    conflictos = p_continuidad.evaluar(con, g.novela_id, 2).bloqueantes
+    assert ("continuidad_factual" in {c.comprobacion for c in conflictos}) is contradice
 
 
 def test_la_atribucion_cruzada_dentro_de_un_solo_segmento_contradice() -> None:
