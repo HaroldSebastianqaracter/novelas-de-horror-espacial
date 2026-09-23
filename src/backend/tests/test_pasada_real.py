@@ -157,6 +157,24 @@ def test_un_trozo_detras_de_un_negador_no_es_una_parte() -> None:
     assert not s_extraccion._parte_de_un_compuesto("pasillo largo y frio", "pasillo largo y")
 
 
+#: El valor vigente real de la parada 8 del relanzamiento (capitulo 2 de la novela real).
+LIBRO = ("sector 6 a Otxoa al ciento quince por ciento; sectores 5 y 7, turno de trabajo, al "
+         "noventa; responsable I. Aldama")
+
+
+def test_cada_segmento_trozo_del_compuesto_es_una_reafirmacion() -> None:
+    """El extractor se quedo con el primer y el ultimo segmento y se salto el del medio."""
+    parte = s_extraccion._parte_de_un_compuesto
+    assert parte(LIBRO, "sector 6 a Otxoa al ciento quince por ciento; responsable I. Aldama")
+    # Un segmento que no esta en el vigente, uno de menos de tres palabras o uno detras de un
+    # negador tumban el valor entero.
+    assert not parte(LIBRO, "sector 6 a Otxoa al ciento quince; responsable J. Perez")
+    assert not parte(LIBRO, "sector 6 a Otxoa al ciento quince por ciento; Aldama")
+    negado = "sala cerrada sin luz de emergencia; ruido de bombas bajo el suelo metalico"
+    assert not parte(negado, "sala cerrada sin luz; luz de emergencia")
+    assert parte(negado, "sala cerrada sin luz; ruido de bombas")
+
+
 def test_partir_el_compuesto_con_supersede_a_no_contradice() -> None:
     """Lo que pide la marca [COMPUESTO]: cada dato en su hecho, sustituyendo al compuesto."""
     con, g, hid = _con_ambiente_compuesto()

@@ -186,11 +186,22 @@ def _parte_de_un_compuesto(vigente: str, nuevo: str) -> bool:
     El trozo son palabras completas seguidas del vigente (con los plurales simples de
     `compartido/texto.py`), de tres palabras o mas, y que no vayan detras de un negador: «es
     vegetal» es un trozo de «que no es vegetal» y dice lo contrario.
+
+    Un valor nuevo con varios segmentos separados por «;» cuenta si CADA segmento es un trozo
+    asi. El extractor tambien se queda con el primero y el ultimo y se salta el del medio: en el
+    relanzamiento del capitulo 3, «sector 6 a Otxoa al ciento quince por ciento; responsable I.
+    Aldama» frente al vigente con los sectores 5 y 7 en medio abrio una parada.
     """
     if not _es_compuesto(vigente):
         return False
-    buscadas = palabras(nuevo)
     presentes = palabras(vigente)
+    segmentos = [s for s in nuevo.split(";") if s.strip()]
+    return bool(segmentos) and all(_trozo_de(presentes, s) for s in segmentos)
+
+
+def _trozo_de(presentes: list[frozenset[str]], segmento: str) -> bool:
+    """Si `segmento` son tres palabras o mas seguidas de `presentes`, sin negador delante."""
+    buscadas = palabras(segmento)
     n = len(buscadas)
     if n < PALABRAS_MINIMAS_DEL_TROZO:
         return False
