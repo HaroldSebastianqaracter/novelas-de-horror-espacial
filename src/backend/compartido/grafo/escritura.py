@@ -38,6 +38,22 @@ def normalizar(nombre: str) -> str:
     return " ".join(unicodedata.normalize("NFC", "".join(salida)).split())
 
 
+#: Lo que se ignora al comparar dos variantes del mismo nombre (spec3, RF3-PAS-04). Ninguna
+#: palabra de una letra: «a» e «y» tambien designan («Anillo A», «Anillo Y»), y quitarlas hacia
+#: de tres lugares distintos el mismo.
+_PALABRAS_VACIAS = frozenset({"de", "del", "la", "el", "los", "las", "en", "al"})
+
+
+def clave_laxa(nombre: str) -> str:
+    """`normalizar` sin puntuacion y sin articulos ni preposiciones.
+
+    «Bodega fría del sector 7» y «Bodega fría, sector 7» dan la misma clave. No se guarda en
+    ninguna tabla: es un segundo intento del resolvedor cuando la clave exacta no existe.
+    """
+    sin_signos = "".join(c if c.isalnum() else " " for c in normalizar(nombre))
+    return " ".join(p for p in sin_signos.split() if p not in _PALABRAS_VACIAS)
+
+
 class _Nulo:
     """Marcador para poner una columna a NULL con `actualizar`: None significa «no tocar»."""
 
@@ -147,7 +163,10 @@ class Resolvedor:
         self.con = con
         self.novela_id = novela_id
         self._cache: dict[str, dict[str, int]] = {}
+        self._laxo: dict[str, dict[str, int | None]] = {}
         self.no_resueltos: list[tuple[str, str]] = []
+        #: Los nombres resueltos por su clave laxa y no por la exacta (RF3-PAS-04).
+        self.por_variante: list[tuple[str, str]] = []
 
     def _indice(self, tabla: str) -> dict[str, int]:
         if tabla not in self._cache:
@@ -174,6 +193,10 @@ class Resolvedor:
         clave = normalizar(nombre)
         encontrado = self._indice(tabla).get(clave)
         if encontrado is None:
+            encontrado = self._laxa(tabla).get(clave_laxa(nombre))
+            if encontrado is not None:
+                self.por_variante.append((tabla, nombre))
+        if encontrado is None:
             self.no_resueltos.append((tabla, nombre))
             if obligatorio:
                 raise NombreDesconocido(
@@ -181,12 +204,24 @@ class Resolvedor:
                 )
         return encontrado
 
+    def _laxa(self, tabla: str) -> dict[str, int | None]:
+        """Clave laxa -> id, o None si dos entidades la comparten: entonces no decide."""
+        if tabla not in self._laxo:
+            indice: dict[str, int | None] = {}
+            for nombre_exacto, id_fila in self._indice(tabla).items():
+                clave = clave_laxa(nombre_exacto)
+                indice[clave] = id_fila if clave not in indice else None
+            self._laxo[tabla] = indice
+        return self._laxo[tabla]
+
     def registrar(self, tabla: str, nombre: str, id_fila: int) -> None:
         """Mete en cache algo recien insertado, para que el resto de la fase lo vea."""
         self._indice(tabla)[normalizar(nombre)] = id_fila
+        self._laxo.pop(tabla, None)
 
     def olvidar(self, tabla: str) -> None:
         self._cache.pop(tabla, None)
+        self._laxo.pop(tabla, None)
 
 
 class NombreDesconocido(Exception):

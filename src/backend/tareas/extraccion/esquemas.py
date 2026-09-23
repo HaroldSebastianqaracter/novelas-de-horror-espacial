@@ -31,13 +31,24 @@ from compartido.tipos import (
     SujetoTipo,
 )
 
+#: Un hecho es un dato (spec3, RF3-PAS-01). En la primera pasada real, 57 de 94 valores pasaban
+#: de 8 palabras y cualquier reformulacion parecia una contradiccion; los legitimos (una
+#: distancia, un nombre, una relacion) no pasaban de 7.
+PALABRAS_VALOR = 10
+
 
 class HechoExtraido(BaseModel):
     escena_orden: int = Field(ge=1)
     sujeto_tipo: SujetoTipo
     sujeto_ref: str = Field(min_length=1, description="Nombre de la entidad del paquete")
     atributo: str = Field(min_length=2, description="Reutiliza los atributos que ya existen")
-    valor: str = Field(min_length=1)
+    valor: str = Field(
+        min_length=1,
+        description=f"UN solo dato, de {PALABRAS_VALOR} palabras como mucho. Si la prosa da "
+                    "varios, son varios hechos con atributos distintos",
+        # El limite viaja en el esquema; el mensaje claro lo da `SalidaExtraccion`.
+        json_schema_extra={"pattern": rf"^\s*\S+(\s+\S+){{0,{PALABRAS_VALOR - 1}}}\s*$"},
+    )
     conducta: bool = Field(
         default=False,
         description=(
@@ -153,8 +164,11 @@ class EntidadNoReconocida(BaseModel):
     contexto: str = ""
 
 
-#: Limites de los resumenes (spec1, salida del extractor; RF2-PIPE-20).
-PALABRAS_RESUMEN = 200
+#: Limites de los resumenes (spec1, salida del extractor; RF2-PIPE-20). Se pide menos de lo que
+#: se admite (RF3-PAS-02): el modelo no cuenta palabras, y pedirle 200 le hacia escribir entre
+#: 201 y 261, con lo que el recorte se llevaba la ultima frase, que suele ser el gancho.
+PALABRAS_RESUMEN = 250
+PALABRAS_RESUMEN_PEDIDAS = 160
 PALABRAS_RESUMEN_BREVE = 40
 
 
@@ -176,11 +190,28 @@ class SalidaExtraccion(BaseModel):
         default_factory=list[EntidadNoReconocida]
     )
     resumen: str = Field(
-        min_length=20, description=f"Sinopsis del capitulo, hasta {PALABRAS_RESUMEN} palabras"
+        min_length=20,
+        description=f"Sinopsis del capitulo, de unas {PALABRAS_RESUMEN_PEDIDAS} palabras",
     )
     resumen_breve: str = Field(
         min_length=10, description=f"Una frase, hasta {PALABRAS_RESUMEN_BREVE} palabras"
     )
+
+    @model_validator(mode="after")
+    def _un_dato_por_hecho(self) -> SalidaExtraccion:
+        # Todos los valores largos a la vez: el puerto repite una sola vez con el error, y un
+        # error por hecho obligaria a una repeticion por cada uno (RF3-PAS-01).
+        largos = [h for h in self.hechos if len(h.valor.split()) > PALABRAS_VALOR]
+        if largos:
+            raise ValueError(
+                f"Un hecho es UN dato, con un valor de {PALABRAS_VALOR} palabras como mucho. "
+                "Parte cada uno de estos en varios hechos, con un atributo distinto para cada "
+                "dato: " + "; ".join(
+                    f"«{h.sujeto_ref}: {h.atributo}» ({len(h.valor.split())} palabras)"
+                    for h in largos
+                )
+            )
+        return self
 
     @model_validator(mode="after")
     def _resumenes_dentro_de_limite(self) -> SalidaExtraccion:

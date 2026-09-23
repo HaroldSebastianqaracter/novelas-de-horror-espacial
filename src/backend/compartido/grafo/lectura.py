@@ -10,6 +10,7 @@ import json
 import sqlite3
 from typing import TYPE_CHECKING, Any
 
+from compartido.grafo.escritura import clave_laxa
 from compartido.tipos import como_lista
 
 if TYPE_CHECKING:
@@ -340,6 +341,28 @@ def ultimo_orden_interno(con: sqlite3.Connection, novela_id: int) -> int:
         "SELECT MAX(orden_interno) FROM evento WHERE novela_id = ?", (novela_id,)
     ).fetchone()[0]
     return int(valor) if valor is not None else 0
+
+
+def nombres_menores(
+    con: sqlite3.Connection, novela_id: int, antes_de_capitulo: int
+) -> list[str]:
+    """Los nombres fuera del canon que ya salieron antes de este capitulo (RF3-PAS-05).
+
+    Sin duplicados por clave laxa y con la primera grafia: es la que el redactor tiene que
+    mantener si vuelve a usar el nombre.
+    """
+    vistos: dict[str, str] = {}
+    for f in con.execute(
+        """
+        SELECT en.nombre FROM entidad_no_reconocida en
+        JOIN escena_ordinal eo ON eo.escena_id = en.escena_id
+        WHERE en.novela_id = ? AND eo.capitulo_numero < ? AND en.parada_id IS NULL
+        ORDER BY eo.ordinal, en.id
+        """,
+        (novela_id, antes_de_capitulo),
+    ):
+        vistos.setdefault(clave_laxa(str(f["nombre"])), str(f["nombre"]))
+    return list(vistos.values())
 
 
 def ultimo_dia(con: sqlite3.Connection, novela_id: int) -> int:

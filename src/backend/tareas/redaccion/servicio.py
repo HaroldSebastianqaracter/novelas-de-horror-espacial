@@ -99,6 +99,7 @@ _SECCION_AMENAZA = "### La amenaza (sus reglas no se rompen nunca)"
 _SECCION_SISTEMAS = "### Sistemas tecnicos (sus limites no se rompen)"
 _SECCION_OBJETOS = "### Objetos"
 _SECCION_FACCIONES = "### Facciones"
+_SECCION_MENORES = "### Nombres menores ya usados"
 
 
 def _personaje(p: dict[str, Any]) -> str:
@@ -217,7 +218,17 @@ def paquete(
         "\n".join(cabecera) + "\n\n" + _escaleta(escenas),
         f"ESCALETA DEL CAPITULO {capitulo}",
     )
-    p.anadir_elementos("canon", _canon(canon), "CANON DE ESTE CAPITULO", separador="\n\n")
+    elementos_canon = _canon(canon)
+    menores = lectura.nombres_menores(con, novela_id, capitulo)
+    if menores:
+        # RF3-PAS-05: lo que el redactor invento antes y nadie mantenia. Opcional: se recorta
+        # antes que el canon de verdad.
+        elementos_canon.append(Elemento(
+            "Nombres que ya aparecieron en capitulos anteriores (si vuelves a usar alguno, "
+            "escribelo exactamente asi): " + ", ".join(menores),
+            False, _SECCION_MENORES,
+        ))
+    p.anadir_elementos("canon", elementos_canon, "CANON DE ESTE CAPITULO", separador="\n\n")
     p.anadir_elementos(
         "hechos",
         _hechos(

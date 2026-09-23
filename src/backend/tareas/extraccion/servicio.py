@@ -19,6 +19,7 @@ from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
 from compartido.grafo import (
     Resolvedor,
     actualizar,
+    clave_laxa,
     insertar,
     insertar_hecho,
     lectura,
@@ -84,6 +85,20 @@ def paquete(
         ))
     if canon["amenaza"]:
         inventario.append(Elemento("Amenaza: la de la novela (sujeto_tipo 'amenaza')", True))
+    # RF3-PAS-03: el nombre del mundo es canon. En la primera pasada real, el de la propia
+    # estacion salio como entidad no reconocida.
+    obra = _mundo_y_titulo(con, novela_id)
+    if obra:
+        inventario.append(Elemento(
+            "Mundo y obra (sujeto_tipo 'mundo' o 'novela'): " + ", ".join(obra), True
+        ))
+    menores = lectura.nombres_menores(con, novela_id, capitulo)
+    if menores:
+        # RF3-PAS-05: no son canon, pero si reaparecen se registran con la misma grafia.
+        inventario.append(Elemento(
+            "Nombres menores de capitulos anteriores (no son canon: si reaparecen, van a "
+            "entidades_no_reconocidas escritos igual): " + ", ".join(menores),
+        ))
     p.anadir_elementos("canon", inventario, "ENTIDADES QUE EXISTEN")
 
     if atributos:
@@ -140,6 +155,38 @@ def paquete(
     p.anadir("prosa", "\n\n".join(cuerpo), "PROSA DEL CAPITULO")
 
     return ajustar(p, presupuesto)
+
+
+def _mundo_y_titulo(con: sqlite3.Connection, novela_id: int) -> list[str]:
+    """El nombre del mundo y el titulo de la novela, sin repetir si coinciden."""
+    fila = con.execute(
+        "SELECT n.titulo, m.nombre FROM novela n LEFT JOIN mundo m ON m.novela_id = n.id "
+        "WHERE n.id = ?",
+        (novela_id,),
+    ).fetchone()
+    if fila is None:
+        return []
+    nombres: dict[str, str] = {}
+    for nombre in (fila["nombre"], fila["titulo"]):
+        if nombre:
+            nombres.setdefault(clave_laxa(str(nombre)), str(nombre))
+    return list(nombres.values())
+
+
+#: Las tablas cuyos nombres cuentan como canon al registrar entidades no reconocidas.
+_TABLAS_DEL_CANON = ("personaje", "lugar", "objeto", "faccion", "sistema_tecnologico")
+
+
+def _claves_laxas_del_canon(con: sqlite3.Connection, novela_id: int) -> set[str]:
+    """Las claves laxas de todo nombre del canon, del mundo y del titulo (RF3-PAS-04)."""
+    claves = {clave_laxa(n) for n in _mundo_y_titulo(con, novela_id)}
+    for tabla in _TABLAS_DEL_CANON:
+        claves.update(
+            clave_laxa(str(f[0])) for f in con.execute(
+                f"SELECT nombre FROM {tabla} WHERE novela_id = ?", (novela_id,)
+            )
+        )
+    return claves
 
 
 class Descartes:
@@ -443,15 +490,30 @@ def aplicar(
             )
 
     # --- Lo que el texto uso y el canon no conoce ------------------------------------------
+    # Salvo que sea una variante de algo del canon, del mundo o del titulo, o un nombre que el
+    # capitulo ya registro, con esa u otra grafia (RF3-PAS-04). No se pierde: queda en la traza.
+    # Se compara contra las claves laxas del canon y no con el resolvedor, que anotaria cada
+    # intento en sus listas y contaria dos veces lo mismo en la traza.
+    canon_laxo = _claves_laxas_del_canon(con, novela_id)
+    ya_registradas: set[str] = set()
     for en in salida.entidades_no_reconocidas:
         eid = escena(en.escena_orden)
         if eid is None:
             descartes.anotar("entidades_no_reconocidas", "escena_desconocida")
             continue
+        clave = clave_laxa(en.nombre)
+        del_canon = clave in canon_laxo
+        if del_canon or clave in ya_registradas:
+            motivo = "entidad_del_canon" if del_canon else "entidad_repetida"
+            descartes.correcciones[motivo] = descartes.correcciones.get(motivo, 0) + 1
+            continue
+        ya_registradas.add(clave)
         insertar(
             con, "entidad_no_reconocida", novela_id=novela_id, escena_id=eid, nombre=en.nombre,
             contexto=en.contexto,
         )
+    if resolvedor.por_variante:
+        descartes.correcciones["nombre_por_variante"] = len(resolvedor.por_variante)
 
     # --- Lo que la prosa usa sin que el extractor lo diga (RF3-BIB-01) ---------------------
     registrar_menciones(con, novela_id, escenas_por_orden, textos or {})

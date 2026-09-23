@@ -57,6 +57,17 @@ Requisitos en [spec3.md](spec3.md), 3.3; verificación en [spec3-verification.md
 - [x] Vista de **cronología** con día numérico, orden, lugar y personajes; la puerta 3 comprueba que el día y el orden no se contradigan.
 - [x] Entidad **versión de la novela**, con copia del texto y qué capítulos cambiaron respecto a la anterior. Nace al completarse la novela.
 
+### Mejoras tras la primera pasada real
+
+Requisitos en [spec3.md](spec3.md), 3.11; verificación en [spec3-verification.md](spec3-verification.md), filas 33 a 38. Salen de la pasada del 23 de septiembre (2 de 4 capítulos, 11,57 $, seis paradas).
+
+- [x] **Un hecho, un dato**: valor de 10 palabras como mucho. Pendiente de confirmar con la eval del extractor real (fila 34).
+- [x] Resumen de unas 160 palabras con el límite duro en 250: se recortaba en 7 de 7 extracciones.
+- [x] **Nombres menores**: el mundo en el inventario, variantes resueltas contra el canon, la lista de los ya usados para redactor y extractor, y un aviso por nombre nuevo.
+- [ ] La puerta 4 no rechazó nada en 16 criterios: un capítulo malo conocido como eval y una comprobación mecánica de coletillas. Va con el bloque 6.
+- [ ] Modelo por agente: la extracción es el 48 % del coste y todo corre con Opus. Hace falta medir el extractor con Sonnet contra el golden set (con coste).
+- [ ] Los tres huecos de la parada 6: conocimiento por facción (RF2-PIPE-27), el objeto que viaja con su poseedor (RF2-PIPE-28) y los hábitos como conducta (RF2-PIPE-29). Decididos por el autor; los implementa la sesión que hizo la pasada, en spec2.
+
 ### 4. Observabilidad con Langfuse
 
 Va pronto porque el tuning y el coste necesitan datos acumulados.

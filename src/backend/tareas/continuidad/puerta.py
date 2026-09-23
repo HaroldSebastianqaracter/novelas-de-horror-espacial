@@ -16,7 +16,7 @@ import sqlite3
 from collections.abc import Callable
 from typing import Any
 
-from compartido.grafo import lectura, normalizar
+from compartido.grafo import clave_laxa, lectura, normalizar
 from compartido.puerta_base import Conflicto, ResultadoPuerta
 
 POSTURAS_QUE_HABILITAN = ("sabe", "cree", "sospecha", "cree_version_falsa")
@@ -420,7 +420,12 @@ def evaluar(
             capitulo=capitulo, datos=f,
         ))
 
+    # Un aviso por nombre nuevo (RF3-PAS-06): el que ya salio en un capitulo anterior, el autor
+    # ya lo vio. En la primera pasada real, 50 avisos para 15 nombres tapaban los que importan.
+    ya_vistos = {clave_laxa(n) for n in lectura.nombres_menores(con, novela_id, capitulo)}
     for f in _filas(con, _SQL_ENTIDADES, p):
+        if clave_laxa(str(f["nombre"])) in ya_vistos:
+            continue
         conflictos.append(Conflicto(
             # Aviso (RF2-PIPE-22): el redactor inventa detalles menores como cualquier
             # novelista, y quedan registrados para que el autor los revise.

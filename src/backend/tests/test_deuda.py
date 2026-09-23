@@ -195,11 +195,16 @@ def test_una_extraccion_con_el_resumen_largo_entra_recortada_y_la_traza_lo_dice(
 
     from compartido.puerto import demo
     from orquestador import pipeline
+    from tareas.extraccion.esquemas import PALABRAS_RESUMEN
     from tests.entorno import contexto, crear_novela, nueva_bd, puerto_falso
+
+    # Frases de tres palabras, diez de mas que el limite (RF3-PAS-02 lo subio de 200 a 250).
+    frases = PALABRAS_RESUMEN // 3 + 4
+    largo, cabe = frases * 3, (PALABRAS_RESUMEN // 3) * 3
 
     def extraccion(entrada: str, agente: str) -> dict[str, object]:
         salida = demo.extraccion(entrada, agente)
-        salida["resumen"] = "La cuadrilla avanza. " * 70  # 210 palabras
+        salida["resumen"] = "La cuadrilla avanza. " * frases
         return salida
 
     con, ruta = nueva_bd()
@@ -208,11 +213,11 @@ def test_una_extraccion_con_el_resumen_largo_entra_recortada_y_la_traza_lo_dice(
     puerto.registrar("extraccion", extraccion)
     assert pipeline.avanzar(contexto(con, puerto, ruta, novela_id)) == "completada"
     resumen = con.execute("SELECT resumen FROM capitulo WHERE numero = 1").fetchone()[0]
-    assert len(resumen.split()) == 198 and resumen.endswith(".")
+    assert len(resumen.split()) == cabe and resumen.endswith(".")
     eventos = [json.loads(f[0]) for f in con.execute(
         "SELECT payload FROM traza_evento WHERE tipo = 'resumen_recortado'"
     )]
-    assert eventos and eventos[0]["palabras"] == {"resumen": 210}
+    assert eventos and eventos[0]["palabras"] == {"resumen": largo}
 
 
 # --- RF2-PER-13: el mundo declara que lugar esta dentro de cual ----------------------------------
