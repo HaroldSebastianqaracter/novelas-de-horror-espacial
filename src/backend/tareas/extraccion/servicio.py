@@ -27,7 +27,7 @@ from compartido.grafo import (
 )
 from compartido.texto import aparece_en, palabras
 
-from .esquemas import SalidaExtraccion
+from .esquemas import PALABRAS_VALOR, SalidaExtraccion
 
 AGENTE = "extraccion"
 
@@ -113,11 +113,17 @@ def paquete(
             [Elemento(
                 "Atributos que ya existen, con su valor vigente. Si el texto vuelve a decir lo "
                 "mismo, repite el valor EXACTO. Si lo cambia, registra el nuevo con supersede_a "
-                "igual a ese atributo. Si habla de otro aspecto, usa otro atributo:",
+                "igual a ese atributo. Si habla de otro aspecto, usa otro atributo. Un valor "
+                "marcado [COMPUESTO] tiene mas de un dato y no se repite: si el texto vuelve a "
+                "hablar de el, registra cada dato en su propio hecho, con supersede_a igual a "
+                "ese atributo:",
                 True,
             )] + [
                 Elemento(
-                    f"- {sujeto}: " + "; ".join(f"{a} = {v}" for a, v in lista),
+                    f"- {sujeto}: " + "; ".join(
+                        f"{a} = {v}" + (" [COMPUESTO]" if _es_compuesto(str(v)) else "")
+                        for a, v in lista
+                    ),
                     posicion=i + 1,
                 )
                 for i, (sujeto, lista) in enumerate(ordenados)
@@ -155,6 +161,44 @@ def paquete(
     p.anadir("prosa", "\n\n".join(cuerpo), "PROSA DEL CAPITULO")
 
     return ajustar(p, presupuesto)
+
+
+def _es_compuesto(valor: str) -> bool:
+    """Un valor vigente de antes de RF3-PAS-01, mas largo de lo que hoy se admite."""
+    return len(valor.split()) > PALABRAS_VALOR
+
+
+#: Un trozo mas corto no dice nada por si mismo: «de», «humedad» o «vegetal» casan con casi
+#: cualquier compuesto.
+PALABRAS_MINIMAS_DEL_TROZO = 3
+_NEGADORES = frozenset({"no", "sin", "nunca", "ni", "jamas"})
+
+
+def _parte_de_un_compuesto(vigente: str, nuevo: str) -> bool:
+    """Si `nuevo` es un trozo de un valor vigente compuesto (spec3, RF3-PAS-01).
+
+    Con el limite de diez palabras, el extractor no puede repetir un valor vigente de
+    veinte: se queda con una parte. Esa parte dice lo mismo que el valor, no lo contradice, y
+    cuenta como reafirmacion. En la reanudacion de la pasada real, «treinta y un grados y
+    ochenta por ciento de humedad» frente al valor entero, con el olor detras, paraba el
+    capitulo 3.
+
+    El trozo son palabras completas seguidas del vigente (con los plurales simples de
+    `compartido/texto.py`), de tres palabras o mas, y que no vayan detras de un negador: «es
+    vegetal» es un trozo de «que no es vegetal» y dice lo contrario.
+    """
+    if not _es_compuesto(vigente):
+        return False
+    buscadas = palabras(nuevo)
+    presentes = palabras(vigente)
+    n = len(buscadas)
+    if n < PALABRAS_MINIMAS_DEL_TROZO:
+        return False
+    return any(
+        all(presentes[i + k] & buscadas[k] for k in range(n))
+        and not (i > 0 and presentes[i - 1] & _NEGADORES)
+        for i in range(len(presentes) - n + 1)
+    )
 
 
 def _mundo_y_titulo(con: sqlite3.Connection, novela_id: int) -> list[str]:
@@ -322,6 +366,7 @@ def aplicar(
         vigente = valor_vigente(h.sujeto_ref, h.atributo)
         if vigente is not None and not h.supersede_a and (
             vigente["valor_clave"] == normalizar(h.valor)
+            or _parte_de_un_compuesto(str(vigente["valor_clave"]), h.valor)
         ):
             # Pero la escena lo USA, y eso es lo que el bloque 8 necesita saber para regenerar
             # solo lo afectado por un cambio (RF3-BIB-01). Antes se perdia sin rastro.

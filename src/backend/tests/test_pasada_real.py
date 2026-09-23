@@ -14,12 +14,14 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from compartido.grafo import Resolvedor, clave_laxa
+from compartido.grafo import Resolvedor, clave_laxa, insertar_hecho
 from compartido.puerto import demo
 from orquestador import pipeline
+from tareas.continuidad import puerta as p_continuidad
+from tareas.extraccion import servicio as s_extraccion
 from tareas.extraccion.esquemas import PALABRAS_RESUMEN, PALABRAS_VALOR, SalidaExtraccion
 from tests import fabrica
-from tests.entorno import contexto, crear_novela, nueva_bd, puerto_falso
+from tests.entorno import contar, contexto, crear_novela, nueva_bd, puerto_falso
 
 #: Un valor real de la pasada: doce palabras con tres datos dentro.
 COMPUESTO = "doce por minuto, saturacion en ochenta y uno, once minutos hasta confusion"
@@ -57,10 +59,109 @@ def test_diez_palabras_pasan_y_once_no() -> None:
         SalidaExtraccion.model_validate(_salida(diez + " mas"))
 
 
-def test_el_esquema_que_recibe_el_agente_declara_el_limite() -> None:
-    esquema = json.dumps(SalidaExtraccion.model_json_schema(), ensure_ascii=False)
-    assert f"{PALABRAS_VALOR} palabras como mucho" in esquema
-    assert "{0,9}" in esquema
+def test_el_esquema_declara_el_limite_sin_patron() -> None:
+    """El limite va en la descripcion. Como `pattern`, Claude Code reintentaba por dentro la
+    salida estructurada: en la reanudacion, tres turnos y 1,75 $ por extraccion."""
+    esquema = SalidaExtraccion.model_json_schema()
+    assert f"{PALABRAS_VALOR} palabras como mucho" in json.dumps(esquema, ensure_ascii=False)
+    assert "pattern" not in esquema["$defs"]["HechoExtraido"]["properties"]["valor"]
+
+
+# --- RF3-PAS-01: un valor vigente compuesto, de antes del limite ---------------------------------
+
+#: El valor vigente real que paro el capitulo 3 en la reanudacion de la pasada.
+AMBIENTE = ("treinta y un grados y ochenta por ciento de humedad; olor dulce a fruta pasada y "
+            "cloro con algo debajo que no es vegetal")
+
+
+def _con_ambiente_compuesto() -> tuple[sqlite3.Connection, fabrica.Grafo, int]:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    hid = insertar_hecho(
+        con, novela_id=g.novela_id, escena_id=g.escenas[(1, 1)], sujeto_tipo="lugar",
+        sujeto_id=g.lugares["Puente"], sujeto_nombre="Puente", atributo="ambiente interior",
+        valor=AMBIENTE, categoria="fisico", cita=None, supersede_a=None,
+    )
+    return con, g, hid
+
+
+def _extraer_en_2_1(con: sqlite3.Connection, g: fabrica.Grafo, valor: str) -> None:
+    salida = SalidaExtraccion.model_validate({
+        "hechos": [{"escena_orden": 1, "sujeto_tipo": "lugar", "sujeto_ref": "Puente",
+                    "atributo": "ambiente interior", "valor": valor, "cita": valor}],
+        "resumen": "La cuadrilla vuelve al puente y el aire sigue igual de pesado.",
+        "resumen_breve": "Vuelven al puente.",
+    })
+    s_extraccion.aplicar(con, g.novela_id, 2, salida, {1: g.escenas[(2, 1)]})
+
+
+def test_una_parte_de_un_valor_compuesto_es_una_reafirmacion() -> None:
+    con, g, hid = _con_ambiente_compuesto()
+    _extraer_en_2_1(con, g, "treinta y un grados y ochenta por ciento de humedad")
+    assert contar(con, "SELECT COUNT(*) FROM hecho WHERE atributo = 'ambiente interior'") == 1
+    assert contar(con, "SELECT COUNT(*) FROM hecho_uso WHERE hecho_id = ? AND via = 'reafirma'",
+                  hid) == 1
+    conflictos = p_continuidad.evaluar(con, g.novela_id, 2).bloqueantes
+    assert "continuidad_factual" not in {c.comprobacion for c in conflictos}
+
+
+@pytest.mark.parametrize("valor", [
+    "dieciocho grados y aire seco",
+    # Validador: un trozo que quita la negacion afirma lo contrario del canon.
+    "algo debajo que es vegetal",
+    "es vegetal",
+    # Validador: trozos de una o dos palabras casan con casi cualquier compuesto.
+    "humedad",
+    "de",
+])
+def test_lo_que_no_es_un_trozo_valido_del_compuesto_sigue_contradiciendo(valor: str) -> None:
+    con, g, _ = _con_ambiente_compuesto()
+    _extraer_en_2_1(con, g, valor)
+    conflictos = p_continuidad.evaluar(con, g.novela_id, 2).bloqueantes
+    assert "continuidad_factual" in {c.comprobacion for c in conflictos}
+
+
+def test_un_trozo_detras_de_un_negador_no_es_una_parte() -> None:
+    vigente = "pasillo largo y frio, sin olor a quemado ni rastro de humo en el aire"
+    assert s_extraccion._parte_de_un_compuesto(vigente, "pasillo largo y frio")
+    assert not s_extraccion._parte_de_un_compuesto(vigente, "olor a quemado")
+    assert not s_extraccion._parte_de_un_compuesto(vigente, "rastro de humo")
+    # Un valor vigente corto no es compuesto: ahi manda la comparacion exacta de siempre.
+    assert not s_extraccion._parte_de_un_compuesto("pasillo largo y frio", "pasillo largo y")
+
+
+def test_partir_el_compuesto_con_supersede_a_no_contradice() -> None:
+    """Lo que pide la marca [COMPUESTO]: cada dato en su hecho, sustituyendo al compuesto."""
+    con, g, hid = _con_ambiente_compuesto()
+    salida = SalidaExtraccion.model_validate({
+        "hechos": [
+            {"escena_orden": 1, "sujeto_tipo": "lugar", "sujeto_ref": "Puente",
+             "atributo": atributo, "valor": valor, "supersede_a": "ambiente interior"}
+            for atributo, valor in (
+                ("temperatura interior", "treinta y un grados"),
+                ("olor interior", "fruta pasada y cloro"),
+            )
+        ],
+        "resumen": "La cuadrilla vuelve al puente y el aire sigue igual de pesado.",
+        "resumen_breve": "Vuelven al puente.",
+    })
+    s_extraccion.aplicar(con, g.novela_id, 2, salida, {1: g.escenas[(2, 1)]})
+    assert contar(con, "SELECT COUNT(*) FROM hecho WHERE supersede_a = ?", hid) == 2
+    conflictos = p_continuidad.evaluar(con, g.novela_id, 2).bloqueantes
+    assert "continuidad_factual" not in {c.comprobacion for c in conflictos}
+
+
+def test_el_paquete_marca_los_valores_compuestos() -> None:
+    import config
+    from compartido.contexto import Presupuesto
+
+    con, g, _ = _con_ambiente_compuesto()
+    render = s_extraccion.paquete(
+        con, g.novela_id, 2, {1: "texto", 2: "texto"}, presupuesto=Presupuesto(
+            bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE),
+    ).render()
+    assert f"ambiente interior = {AMBIENTE} [COMPUESTO]" in render
+    assert "color de ojos = grises [COMPUESTO]" not in render
 
 
 # --- RF3-PAS-02: el resumen --------------------------------------------------------------------

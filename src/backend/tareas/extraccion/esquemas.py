@@ -46,8 +46,9 @@ class HechoExtraido(BaseModel):
         min_length=1,
         description=f"UN solo dato, de {PALABRAS_VALOR} palabras como mucho. Si la prosa da "
                     "varios, son varios hechos con atributos distintos",
-        # El limite viaja en el esquema; el mensaje claro lo da `SalidaExtraccion`.
-        json_schema_extra={"pattern": rf"^\s*\S+(\s+\S+){{0,{PALABRAS_VALOR - 1}}}\s*$"},
+        # Sin `pattern` en el esquema: Claude Code lo valida con reintentos internos de la
+        # salida estructurada, y en la reanudacion de la pasada real la extraccion subio a tres
+        # turnos y 1,75 $. El limite lo dice la descripcion y lo hace cumplir `SalidaExtraccion`.
     )
     conducta: bool = Field(
         default=False,
