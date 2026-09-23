@@ -17,6 +17,8 @@ error de validacion.
 
 from __future__ import annotations
 
+import re
+
 from pydantic import BaseModel, Field, model_validator
 
 from compartido.tipos import (
@@ -133,6 +135,11 @@ class EntidadNoReconocida(BaseModel):
     contexto: str = ""
 
 
+#: Limites de los resumenes (spec1, salida del extractor; RF2-PIPE-20).
+PALABRAS_RESUMEN = 200
+PALABRAS_RESUMEN_BREVE = 40
+
+
 class SalidaExtraccion(BaseModel):
     """Termina cuando todo lo que el texto afirma esta registrado."""
 
@@ -150,15 +157,29 @@ class SalidaExtraccion(BaseModel):
     entidades_no_reconocidas: list[EntidadNoReconocida] = Field(
         default_factory=list[EntidadNoReconocida]
     )
-    resumen: str = Field(min_length=20, description="Sinopsis del capitulo, hasta 200 palabras")
-    resumen_breve: str = Field(min_length=10, description="Una frase, hasta 40 palabras")
+    resumen: str = Field(
+        min_length=20, description=f"Sinopsis del capitulo, hasta {PALABRAS_RESUMEN} palabras"
+    )
+    resumen_breve: str = Field(
+        min_length=10, description=f"Una frase, hasta {PALABRAS_RESUMEN_BREVE} palabras"
+    )
 
     @model_validator(mode="after")
     def _resumenes_dentro_de_limite(self) -> SalidaExtraccion:
         # El estado rodante se compone con estos dos resumenes (RF-CTX-04): si crecen, el
-        # presupuesto del bloque elastico deja de cuadrar.
-        if len(self.resumen.split()) > 200:
-            raise ValueError("El resumen supera las 200 palabras.")
-        if len(self.resumen_breve.split()) > 40:
-            raise ValueError("El resumen breve supera las 40 palabras.")
+        # presupuesto del bloque elastico deja de cuadrar. Pero pasarse no invalida la salida:
+        # se recorta (RF2-PIPE-20). Un modelo no cuenta palabras, y rechazar tiraba una
+        # extraccion entera por cinco palabras de mas.
+        self.resumen = recortar(self.resumen, PALABRAS_RESUMEN)
+        self.resumen_breve = recortar(self.resumen_breve, PALABRAS_RESUMEN_BREVE)
         return self
+
+
+def recortar(texto: str, limite: int) -> str:
+    """`texto` hasta `limite` palabras: por la ultima frase completa que quepa, o por la palabra."""
+    palabras = texto.split()
+    if len(palabras) <= limite:
+        return texto
+    corte = " ".join(palabras[:limite])
+    frases = [m.end() for m in re.finditer(r"[.!?…][»\"')]*(?=\s|$)", corte)]
+    return corte[: frases[-1]] if frases else corte

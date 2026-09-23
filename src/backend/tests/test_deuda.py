@@ -175,3 +175,41 @@ def test_un_evento_puede_llevar_en_su_payload_una_clave_tipo(
     ).fetchone()
     assert (fila["tipo"], fila["novela_id"]) == ("parada", g.novela_id)
     assert json.loads(fila["payload"]) == {"tipo": "continuidad", "novela_id": 99}
+
+
+# --- RF2-PIPE-20: un resumen largo se recorta, no tira la extraccion ------------------------------
+
+
+def test_un_resumen_largo_se_recorta_por_la_ultima_frase_completa() -> None:
+    from tareas.extraccion.esquemas import recortar
+
+    texto = "Primera frase corta. Segunda frase algo mas larga que la otra. Tercera sin punto"
+    assert recortar(texto, 12) == "Primera frase corta. Segunda frase algo mas larga que la otra."
+    assert recortar(texto, 5) == "Primera frase corta."
+    assert recortar("una dos tres cuatro cinco", 3) == "una dos tres"
+    assert recortar(texto, 100) == texto
+
+
+def test_una_extraccion_con_el_resumen_largo_entra_recortada_y_la_traza_lo_dice() -> None:
+    import json
+
+    from compartido.puerto import demo
+    from orquestador import pipeline
+    from tests.entorno import contexto, crear_novela, nueva_bd, puerto_falso
+
+    def extraccion(entrada: str, agente: str) -> dict[str, object]:
+        salida = demo.extraccion(entrada, agente)
+        salida["resumen"] = "La cuadrilla avanza. " * 70  # 210 palabras
+        return salida
+
+    con, ruta = nueva_bd()
+    novela_id = crear_novela(con)
+    puerto = puerto_falso(con)
+    puerto.registrar("extraccion", extraccion)
+    assert pipeline.avanzar(contexto(con, puerto, ruta, novela_id)) == "completada"
+    resumen = con.execute("SELECT resumen FROM capitulo WHERE numero = 1").fetchone()[0]
+    assert len(resumen.split()) == 198 and resumen.endswith(".")
+    eventos = [json.loads(f[0]) for f in con.execute(
+        "SELECT payload FROM traza_evento WHERE tipo = 'resumen_recortado'"
+    )]
+    assert eventos and eventos[0]["palabras"] == {"resumen": 210}

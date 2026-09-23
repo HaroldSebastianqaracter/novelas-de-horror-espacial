@@ -57,7 +57,11 @@ from tareas.estructura import puerta as p_estructura
 from tareas.estructura import servicio as s_estructura
 from tareas.estructura.esquemas import SalidaEstructura
 from tareas.extraccion import servicio as s_extraccion
-from tareas.extraccion.esquemas import SalidaExtraccion
+from tareas.extraccion.esquemas import (
+    PALABRAS_RESUMEN,
+    PALABRAS_RESUMEN_BREVE,
+    SalidaExtraccion,
+)
 from tareas.mundo import servicio as s_mundo
 from tareas.mundo.esquemas import SalidaMundo
 from tareas.oficio import puerta as p_oficio
@@ -174,6 +178,21 @@ def _invocar[T: BaseModel](
         return validado, resultado
 
     raise ValueError(f"El agente '{agente}' no produjo una salida valida: {ultimo}")
+
+
+def _trazar_resumenes_recortados(
+    ctx: Contexto, capitulo: int, intento: int, cruda: dict[str, Any]
+) -> None:
+    """El validador recorta los resumenes largos; aqui queda que lo hizo (RF2-PIPE-20)."""
+    campos = {
+        campo: len(str(cruda.get(campo, "")).split())
+        for campo, limite in (("resumen", PALABRAS_RESUMEN),
+                              ("resumen_breve", PALABRAS_RESUMEN_BREVE))
+        if len(str(cruda.get(campo, "")).split()) > limite
+    }
+    if campos:
+        emitir_traza(ctx, "resumen_recortado", capitulo=capitulo, intento=intento,
+                     palabras=campos)
 
 
 def emitir_traza(ctx: Contexto, tipo: str, **payload: Any) -> None:
@@ -406,10 +425,11 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                 ctx, numero, intento, s_extraccion.paquete,
                 ctx.con, ctx.novela_id, numero, textos, presupuesto=ctx.presupuesto,
             )
-            hechos, _ = _invocar(
+            hechos, resultado_extraccion = _invocar(
                 ctx, "extraccion", paquete_extraccion, SalidaExtraccion,
                 capitulo=numero, intento=intento,
             )
+            _trazar_resumenes_recortados(ctx, numero, intento, resultado_extraccion.salida)
 
             # --- Tramo 2: texto y hechos entran juntos, y la puerta 3 decide -------------
             descartes: s_extraccion.Descartes | None = None
