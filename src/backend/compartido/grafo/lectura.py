@@ -331,6 +331,31 @@ def hechos_del_reparto(
     ))
 
 
+def hechos_hasta(
+    con: sqlite3.Connection, novela_id: int, numero: int
+) -> list[dict[str, Any]]:
+    """Los hechos vigentes y no sustituidos hasta este capitulo, incluido.
+
+    Los usa el juez de oficio para las cuentas (spec3, RF3-PAS-12), y por eso incluye los de
+    este capitulo, que el extractor acaba de sacar de su prosa: una cuenta puede descuadrar
+    dentro del mismo capitulo. Primero los de amenaza, mundo y novela, que son los de toda la
+    obra, y despues del mas reciente al mas antiguo: el recorte quita desde el final.
+    """
+    return _filas(con.execute(
+        f"""
+        SELECT h.id, h.sujeto_tipo, h.sujeto_nombre, h.atributo, h.valor,
+               c.numero AS capitulo_origen
+        FROM hecho_vigente h
+        JOIN escena e   ON e.id = h.escena_id
+        JOIN capitulo c ON c.id = e.capitulo_id
+        WHERE h.novela_id = ? AND c.numero <= ? AND {_NO_SUSTITUIDO}
+        ORDER BY CASE WHEN h.sujeto_tipo IN ('amenaza', 'mundo', 'novela') THEN 0 ELSE 1 END,
+                 c.numero DESC, h.id DESC
+        """,
+        (novela_id, numero),
+    ))
+
+
 def valores_vigentes(
     con: sqlite3.Connection, novela_id: int
 ) -> dict[str, list[tuple[str, str]]]:

@@ -7,6 +7,7 @@ import sqlite3
 from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
 from compartido.grafo import lectura
 from compartido.puerta_base import ResultadoPuerta
+from compartido.texto import tiene_cifra
 
 AGENTE = "oficio"
 
@@ -27,8 +28,9 @@ def paquete(
     p = Paquete(agente=AGENTE, capitulo=capitulo)
 
     instrucciones = [
-        f"Juzga el capitulo {capitulo}. Ya ha pasado la continuidad: no busques "
-        "contradicciones.",
+        f"Juzga el capitulo {capitulo}. Ya ha pasado la continuidad de hechos, conocimiento "
+        "y presencias: de la continuidad solo te toca comprobar las cuentas "
+        "(`cuentas_cuadran`), con los hechos con cifras que van al final.",
         "",
         "ESTILO NARRATIVO DE LA OBRA (contra el que se mide la voz):",
         f"- Registro: {e.get('registro', '')}",
@@ -69,6 +71,20 @@ def paquete(
         f"ESCALETA DEL CAPITULO {capitulo}",
     )
     p.anadir("prosa", texto, f"PROSA DEL CAPITULO {capitulo}")
+
+    # Las cuentas se comprueban contra el canon (spec3, RF3-PAS-12). Opcionales: sin ellos el
+    # juez aun ve si la prosa cuadra consigo misma.
+    cifras = [h for h in lectura.hechos_hasta(con, novela_id, capitulo)
+              if tiene_cifra(h["valor"])]
+    if cifras:
+        p.anadir_elementos(
+            "hechos",
+            [Elemento("Canon cerrado: toda cifra de la prosa que se derive de estos hechos "
+                      "tiene que cuadrar con ellos.", True),
+             *(Elemento(f"- {h['sujeto_nombre']} · {h['atributo']}: {h['valor']} "
+                        f"(cap. {h['capitulo_origen']})", False) for h in cifras)],
+            "HECHOS ESTABLECIDOS CON CIFRAS",
+        )
 
     if mecanica is not None and mecanica.conflictos:
         p.anadir(

@@ -455,7 +455,7 @@ Cualquier conflicto (no aviso) hace **rollback** de la transacción del capítul
 
 Si alguna parte falla, el orquestador **vuelve a redacción** del mismo capítulo con los criterios incumplidos, la evidencia y la sugerencia en el paquete (RF-CTX-05). Al tercer intento fallido pasa a `parada` con informe `oficio`, adjuntando los tres veredictos: si el capítulo no se puede escribir bien, el problema probablemente está en la escaleta.
 
-> Ampliado por spec2, RF2-PIPE-13: el registro de la puerta 4 lleva la mecánica y el juicio.
+> Ampliado por spec2, RF2-PIPE-13: el registro de la puerta 4 lleva la mecánica y el juicio. Ampliado por spec3, RF3-PAS-12: un noveno criterio, `cuentas_cuadran` (48), con los hechos con cifras en el paquete del juez.
 
 **RF-PIPE-14** Al pasar la puerta 4, y dentro de la misma transacción, el orquestador:
 

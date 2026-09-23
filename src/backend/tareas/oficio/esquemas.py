@@ -21,6 +21,7 @@ PRINCIPIO_POR_CRITERIO: dict[str, str] = {
     "escena_se_gana_su_lugar": "10, 19",
     "cliche": "38",
     "tropos_con_causalidad": "55",
+    "cuentas_cuadran": "48",
 }
 
 

@@ -22,6 +22,29 @@ from compartido.grafo.escritura import normalizar
 _PALABRA = re.compile(r"[^\W_]+", re.UNICODE)
 _MINIMO = 2
 
+#: Las palabras de una cifra escrita en letra, normalizadas. Las usan el extractor, para no
+#: cortar una cifra al comparar trozos (spec3, RF3-PAS-01), y el juez de oficio, para saber
+#: que hechos llevan una cuenta (RF3-PAS-12).
+NUMERALES = frozenset({
+    "cero", "un", "uno", "una", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho",
+    "nueve", "diez", "once", "doce", "trece", "catorce", "quince", "dieciseis", "diecisiete",
+    "dieciocho", "diecinueve", "veinte", "veintiun", "veintiuno", "veintidos", "veintitres",
+    "veinticuatro", "veinticinco", "veintiseis", "veintisiete", "veintiocho", "veintinueve",
+    "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa", "cien",
+    "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos",
+    "setecientos", "ochocientos", "novecientos", "mil", "millon", "millones", "medio",
+})
+#: Tambien son articulos o adjetivos: «una mancha» no es una cuenta.
+_NUMERALES_AMBIGUOS = frozenset({"un", "uno", "una", "medio"})
+
+
+def tiene_cifra(texto: str) -> bool:
+    """Si el texto da una cantidad: digitos o un numeral en letra que no sea tambien articulo."""
+    return any(
+        p.isdigit() or (p in NUMERALES and p not in _NUMERALES_AMBIGUOS)
+        for p in _PALABRA.findall(normalizar(texto))
+    )
+
 
 def formas(palabra: str) -> frozenset[str]:
     """La palabra y sus singulares simples posibles, sin bajar de dos letras («las», «la»)."""

@@ -25,7 +25,7 @@ from compartido.grafo import (
     lectura,
     normalizar,
 )
-from compartido.texto import aparece_en, palabras
+from compartido.texto import NUMERALES, aparece_en, palabras
 
 from .esquemas import PALABRAS_VALOR, SalidaExtraccion
 
@@ -189,17 +189,6 @@ _NEGADORES = frozenset({
     "no", "sin", "nunca", "ni", "jamas", "ningun", "ninguna", "ninguno", "nadie", "nada",
     "tampoco", "salvo", "excepto",
 })
-#: Las palabras de una cifra escrita en letra: un trozo que corta una cifra la cambia («al
-#: ciento» de «al ciento quince por ciento»).
-_NUMERALES = frozenset({
-    "cero", "un", "uno", "una", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho",
-    "nueve", "diez", "once", "doce", "trece", "catorce", "quince", "dieciseis", "diecisiete",
-    "dieciocho", "diecinueve", "veinte", "veintiun", "veintiuno", "veintidos", "veintitres",
-    "veinticuatro", "veinticinco", "veintiseis", "veintisiete", "veintiocho", "veintinueve",
-    "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa", "cien",
-    "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos",
-    "setecientos", "ochocientos", "novecientos", "mil", "millon", "millones", "medio",
-})
 
 
 def _parte_de_un_compuesto(vigente: str, nuevo: str) -> bool:
@@ -280,8 +269,11 @@ def _trozo_de(
 
 
 def _cifras(presentes: list[frozenset[str]]) -> list[bool]:
-    """Que palabras forman parte de una cifra: numerales, digitos y la «y» entre dos de ellos."""
-    base = [any(f.isdigit() or f in _NUMERALES for f in p) for p in presentes]
+    """Que palabras forman parte de una cifra: numerales, digitos y la «y» entre dos de ellos.
+
+    Un trozo que corta una cifra la cambia («al ciento» de «al ciento quince por ciento»).
+    """
+    base = [any(f.isdigit() or f in NUMERALES for f in p) for p in presentes]
     return [
         base[i] or (
             "y" in p and 0 < i < len(presentes) - 1 and base[i - 1] and base[i + 1]

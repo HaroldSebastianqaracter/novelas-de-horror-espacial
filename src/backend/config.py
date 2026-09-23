@@ -129,6 +129,8 @@ CRITERIOS_OFICIO: tuple[str, ...] = (
     "escena_se_gana_su_lugar",
     "cliche",
     "tropos_con_causalidad",
+    # spec3, RF3-PAS-12: las cifras de la prosa cuadran con los hechos y entre si.
+    "cuentas_cuadran",
 )
 
 # --- Embeddings (RF-CTX-10) ---------------------------------------------------------------

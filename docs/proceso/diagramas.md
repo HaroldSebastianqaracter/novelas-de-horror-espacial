@@ -149,7 +149,7 @@ Tres reglas sostienen el esquema: **todo el estado es append-only y lleva su esc
 | Puerta 3: continuidad (contradicción factual, conocimiento no adquirido, presencia imposible, objeto sin traslado, coherencia temporal, día contra orden, entidad fuera de canon) | Programático | Tramo 2, dentro de la transacción que inserta texto y hechos | ROLLBACK y parada |
 | Búsquedas dirigidas sobre la prosa (nombre sin registro, cifra sin hecho, muerto nombrado) y descartes del extractor | Programático | Tramo 2, como avisos de la puerta 3 | Aviso en el informe |
 | Puerta 4, mecánica (tics prohibidos; palabras filtro, adverbios de atribución y verbos de habla como avisos) | Programático | Tras la puerta 3 limpia | El capítulo vuelve al writer |
-| Puerta 4, juicio de oficio (ocho criterios con evidencia) | Semántico (LLM-as-judge) | Tras la mecánica | El capítulo vuelve al writer; al tercer fallo, parada |
+| Puerta 4, juicio de oficio (nueve criterios con evidencia; el noveno, las cuentas contra el canon) | Semántico (LLM-as-judge) | Tras la mecánica | El capítulo vuelve al writer; al tercer fallo, parada |
 | Puerta 5: global (siembras sin pagar, pago sin siembra, hilos sin cerrar o fuera de orden, latencia de hilos) | Programático | Tras el último capítulo | Aviso: la novela termina `completada_con_avisos` |
 | Integridad del grafo (`verificar_integridad`) | Programático | Al recuperar un worker caído, y en los tests | Se revierte el capítulo a medias |
 | Evals del extractor (recall contra capítulo anotado) | Eval | Desarrollo, `pytest -m agente` | — |

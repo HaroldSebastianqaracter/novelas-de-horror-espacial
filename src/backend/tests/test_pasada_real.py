@@ -795,3 +795,127 @@ def test_el_redactor_y_el_extractor_reciben_los_nombres_menores_y_el_mundo(
         assert all("Berila IV" in e for e in entradas(agente, 2)), agente
         assert all("Malla-3" in e for e in entradas(agente, 3)), agente
     assert all("Estacion Cerro Quince" in e for e in entradas("extraccion", 1))
+
+
+# --- RF3-PAS-12: el juez de oficio comprueba las cuentas -----------------------------------------
+
+
+@pytest.mark.parametrize(("valor", "cifra"), [
+    ("once: cinco del turno y seis fuera", True),
+    ("llega en 31 horas", True),
+    ("cuarenta de antelacion", True),
+    # «un», «una» y «medio» tambien son articulos o adjetivos.
+    ("una mancha oscura en el casco", False),
+    ("medio sumergido en el hielo", False),
+    ("grises", False),
+])
+def test_un_hecho_da_una_cantidad(valor: str, cifra: bool) -> None:
+    from compartido.texto import tiene_cifra
+
+    assert tiene_cifra(valor) is cifra
+
+
+def test_el_juez_recibe_los_hechos_con_cifras() -> None:
+    import config
+    from compartido.contexto import Presupuesto
+    from tareas.oficio import servicio as s_oficio
+
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    for escena, tipo, sujeto_id, sujeto, atributo, valor in (
+        ((1, 1), "mundo", None, "Estacion", "personas a bordo", "once: cinco y seis"),
+        ((2, 1), "personaje", g.personajes["Reyes"], "Reyes", "horas sin dormir", "treinta"),
+        ((1, 2), "personaje", g.personajes["Reyes"], "Reyes", "voz", "grave"),
+    ):
+        insertar_hecho(
+            con, novela_id=g.novela_id, escena_id=g.escenas[escena], sujeto_tipo=tipo,
+            sujeto_id=sujeto_id, sujeto_nombre=sujeto, atributo=atributo, valor=valor,
+            categoria="otro", cita=None, supersede_a=None,
+        )
+    paquete = s_oficio.paquete(con, g.novela_id, 2, "La prosa.", presupuesto=Presupuesto(
+        bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE))
+    hechos = next(b for b in paquete.bloques if b.nombre == "hechos")
+    lineas = [e.texto for e in hechos.elementos if not e.obligatorio]
+    # El mundo primero; los del propio capitulo tambien, porque la cuenta puede descuadrar
+    # dentro de el; sin cifra, fuera.
+    assert lineas == ["- Estacion · personas a bordo: once: cinco y seis (cap. 1)",
+                      "- Reyes · horas sin dormir: treinta (cap. 2)"]
+    render = paquete.render()
+    assert "HECHOS ESTABLECIDOS CON CIFRAS" in render
+    assert "cuentas_cuadran" in render
+    # En el capitulo 1 todavia no hay nada del 2.
+    paquete_1 = s_oficio.paquete(con, g.novela_id, 1, "La prosa.", presupuesto=Presupuesto(
+        bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE))
+    assert "horas sin dormir" not in paquete_1.render()
+
+
+def test_el_veredicto_exige_las_cuentas() -> None:
+    from pydantic import ValidationError
+
+    from tareas.oficio.esquemas import SalidaOficio
+
+    salida = demo.oficio("", "oficio")
+    # Nueve veredictos, con uno repetido en lugar del de las cuentas.
+    otros = [v for v in salida["veredictos"] if v["criterio"] != "cuentas_cuadran"]
+    salida["veredictos"] = [*otros, otros[0]]
+    with pytest.raises(ValidationError, match="cuentas_cuadran"):
+        SalidaOficio.model_validate(salida)
+
+
+#: El criterio de RF3-PAS-12 en la skill del juez, entero.
+CRITERIO_DE_LAS_CUENTAS = (
+    "**`cuentas_cuadran`** — Toda cifra de la prosa que se deriva de otras cuadra con ellas: "
+    "personas, horas, plazos, distancias, raciones. Haz cada cuenta. Cuadra con los hechos "
+    "establecidos que te llegan («once a bordo: cinco del turno y seis de fuera» no admite «los "
+    "siete de fuera»; un carguero que llega en treinta y una horas no admite un aviso con "
+    "cuarenta de antelación) y cuadra dentro del capítulo (si eran diez y embarcan cuatro, "
+    "quedan seis, no siete). Una cifra que el personaje estima o recuerda mal a sabiendas, y "
+    "que la escena marca como tal, pasa. La evidencia es la cita de la prosa; la sugerencia "
+    "nombra el hecho o la cifra con la que no cuadra."
+)
+
+
+def test_la_skill_del_juez_lleva_el_criterio_de_las_cuentas() -> None:
+    from compartido.puerto.terminal import PuertoTerminal
+    from config import CRITERIOS_OFICIO, raiz_repo
+
+    skill = PuertoTerminal(skills_dir=raiz_repo() / ".claude" / "skills").ruta_skill(
+        "oficio").read_text(encoding="utf-8")
+    assert CRITERIO_DE_LAS_CUENTAS in skill
+    # Cada criterio de la lista cerrada tiene su parrafo, y la skill no dice otro numero.
+    for criterio in CRITERIOS_OFICIO:
+        assert f"**`{criterio}`**" in skill, criterio
+    assert "ocho" not in skill
+    # Ya no le dice que no busque ninguna contradiccion.
+    assert "No buscas contradicciones:" not in skill
+
+
+def test_un_fallo_de_las_cuentas_vuelve_al_redactor_con_la_evidencia() -> None:
+    con, ruta = nueva_bd()
+    novela_id = crear_novela(con)
+    puerto = puerto_falso(con)
+    veces = {"n": 0}
+
+    def juez(entrada: str, agente: str) -> dict[str, Any]:
+        salida = demo.oficio(entrada, agente)
+        veces["n"] += 1
+        if veces["n"] == 1:
+            salida["veredictos"] = [
+                v if v["criterio"] != "cuentas_cuadran" else {
+                    "criterio": "cuentas_cuadran", "veredicto": "falla",
+                    "evidencia": "los siete de fuera",
+                    "sugerencia": "A bordo son once: cinco del turno y seis de fuera.",
+                }
+                for v in salida["veredictos"]
+            ]
+        return salida
+
+    puerto.registrar("oficio", juez)
+    assert pipeline.avanzar(contexto(con, puerto, ruta, novela_id)) == "completada"
+    oficio = [i["entrada"] for i in puerto.invocaciones if i["agente"] == "oficio"]
+    assert "HECHOS ESTABLECIDOS CON CIFRAS" in oficio[0]
+    redacciones = [i["entrada"] for i in puerto.invocaciones
+                   if i["agente"] == "redaccion" and demo._capitulo(i["entrada"]) == 1]
+    assert len(redacciones) == 2
+    assert "los siete de fuera" in redacciones[1]
+    assert "cuentas_cuadran" in redacciones[1]
