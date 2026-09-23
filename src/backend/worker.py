@@ -82,11 +82,14 @@ class Worker:
             raise pipeline.Detenido()
 
     def detener(self, *_: Any) -> None:
+        """Lo que hace una senal de terminar (RF2-WK-09).
+
+        El pipeline se detiene en el siguiente punto de comprobacion, y el puerto queda cerrado:
+        ninguna llamada posterior se lanza, aunque la senal llegue entre dos llamadas.
+        """
         log.info("Senal recibida: terminando el ciclo en curso.")
         self.parar = True
-        interrumpir = getattr(self.puerto, "interrumpir", None)
-        if callable(interrumpir):
-            interrumpir()
+        self.puerto.interrumpir(definitivo=True)
 
     def recuperar(self) -> None:
         """Al arrancar, deja el mundo consistente (RF2-FALLO-06).

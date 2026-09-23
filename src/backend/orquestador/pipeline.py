@@ -412,6 +412,7 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
             )
 
             # --- Tramo 2: texto y hechos entran juntos, y la puerta 3 decide -------------
+            descartes: s_extraccion.Descartes | None = None
             try:
                 with transaccion(ctx.con):
                     estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_3", capitulo=numero,
@@ -420,12 +421,18 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                         ctx.con, ctx.novela_id, numero, prosa, intento=intento,
                         llamada_id=resultado_redaccion.llamada_id,
                     )
-                    s_extraccion.aplicar(ctx.con, ctx.novela_id, numero, hechos, por_orden)
-                    continuidad = p_continuidad.evaluar(ctx.con, ctx.novela_id, numero)
+                    descartes = s_extraccion.aplicar(
+                        ctx.con, ctx.novela_id, numero, hechos, por_orden
+                    )
+                    continuidad = p_continuidad.evaluar(
+                        ctx.con, ctx.novela_id, numero, textos=textos,
+                        usos_descartados=descartes.usos,
+                    )
                     if not continuidad.pasa:
                         raise _Rechazado(continuidad)
             except _Rechazado as rechazo:
                 # La transaccion ya se revirtio entera: no hay nada a medias.
+                _trazar_descartes(ctx, numero, intento, descartes)
                 _registrar_puerta(ctx, rechazo.resultado, capitulo=numero, intento=intento)
                 informe = rechazo.resultado.informe()
                 informe["prosa_rechazada"] = textos
@@ -433,6 +440,7 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                 return
 
             a_medias = True
+            _trazar_descartes(ctx, numero, intento, descartes)
             _registrar_puerta(ctx, continuidad, capitulo=numero, intento=intento)
 
             # --- Tramo 3: oficio, y si pasa, cierre del capitulo -------------------------
@@ -454,8 +462,10 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                     intento=intento,
                 )
 
-            pasa_oficio = mecanica.pasa and juicio is not None and juicio.pasa
-            _registrar_puerta(ctx, mecanica, capitulo=numero, intento=intento)
+            # La puerta 4 se registra entera, mecanica y juicio (RF2-PIPE-13).
+            oficio = p_oficio.combinar(mecanica, juicio)
+            pasa_oficio = oficio.pasa
+            _registrar_puerta(ctx, oficio, capitulo=numero, intento=intento)
 
             if pasa_oficio:
                 with transaccion(ctx.con):
@@ -489,6 +499,15 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
     finally:
         if a_medias:
             _revertir_a_medias(ctx, numero)
+
+
+def _trazar_descartes(
+    ctx: Contexto, numero: int, intento: int, descartes: Any
+) -> None:
+    """Lo que el extractor dijo y no se pudo registrar, a la traza (RF2-PIPE-16)."""
+    if descartes is not None and descartes.total:
+        emitir_traza(ctx, "extraccion_descartes", capitulo=numero, intento=intento,
+                     recuento=descartes.recuento, usos=descartes.usos)
 
 
 def _paquete_o_parada(

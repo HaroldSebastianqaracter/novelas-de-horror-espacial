@@ -268,6 +268,8 @@ src/backend/
 
 **RF-WK-04** El worker consulta si hay una intención `parar` pendiente para la novela activa **entre pasos** y **durante** una llamada de agente (comprobando cada `NOVELAS_POLL_SEGUNDOS` mientras espera al subproceso). Mientras ejecuta una novela no toma intenciones de otras salvo `crear_novela`.
 
+> Ampliado por spec2, RF2-WK-09: SIGTERM y SIGINT paran en el siguiente punto de comprobación.
+
 **RF-WK-05** El estado de la ejecución vive en la tabla `ejecucion` y es lo que devuelve `GET /ejecucion`:
 
 | Campo | Valores |
@@ -433,6 +435,8 @@ Cualquier conflicto (no aviso) hace **rollback** de la transacción del capítul
 
 Si alguna parte falla, el orquestador **vuelve a redacción** del mismo capítulo con los criterios incumplidos, la evidencia y la sugerencia en el paquete (RF-CTX-05). Al tercer intento fallido pasa a `parada` con informe `oficio`, adjuntando los tres veredictos: si el capítulo no se puede escribir bien, el problema probablemente está en la escaleta.
 
+> Ampliado por spec2, RF2-PIPE-13: el registro de la puerta 4 lleva la mecánica y el juicio.
+
 **RF-PIPE-14** Al pasar la puerta 4, y dentro de la misma transacción, el orquestador:
 
 1. Inserta `escena_texto` (una versión nueva por escena) y `capitulo_compilado`.
@@ -553,6 +557,8 @@ Sin sesión persistente: cada invocación es nueva.
 **RF-PUERTO-05** Si el subproceso supera `timeout_s`, el puerto lo termina, registra `timeout` y lanza `TiempoAgotado`. El orquestador lo trata como fallo de agente: reintenta una vez; el segundo pasa a `error`.
 
 **RF-PUERTO-06** El puerto expone `interrumpir()`, que termina el subproceso en curso y registra `interrumpida`. Lo llama el worker al recibir `parar` (RF-WK-03).
+
+> Ampliado por spec2, RF2-WK-09 (una interrupción por señal es definitiva) y RF2-PUERTO-10 (`--tools ""`, `--strict-mcp-config` y comprobación de turnos y permisos denegados).
 
 **RF-PUERTO-07** `PuertoFalso` implementa la misma interfaz devolviendo respuestas grabadas por agente desde un directorio de fixtures, y registra las entradas que recibe. Es lo que usan los tests del orquestador y los `demo`: el pipeline entero debe poder correr de principio a fin con `NOVELAS_PUERTO=falso` sin Claude Code instalado.
 

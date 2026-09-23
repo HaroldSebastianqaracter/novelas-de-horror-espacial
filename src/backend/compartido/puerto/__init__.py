@@ -9,6 +9,7 @@ from . import demo
 from .base import (
     AgenteInterrumpido,
     AgenteNoAutenticado,
+    AgenteUsoHerramientas,
     ErrorDePuerto,
     PuertoAgente,
     ResultadoAgente,
@@ -25,6 +26,7 @@ if TYPE_CHECKING:
 __all__ = [
     "AgenteInterrumpido",
     "AgenteNoAutenticado",
+    "AgenteUsoHerramientas",
     "ErrorDePuerto",
     "PuertoAgente",
     "PuertoFalso",

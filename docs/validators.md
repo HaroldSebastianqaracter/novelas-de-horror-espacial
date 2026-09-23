@@ -160,7 +160,7 @@ Los tres puntos ciegos estructurales de este proyecto:
 
 | Punto ciego | Por qué | Qué lo tapa |
 | --- | --- | --- |
-| **Lo que el extractor no registró** | Todas las comprobaciones deterministas consultan el grafo. Una puerta no puede echar de menos un hecho que nadie escribió. El fallo entra aguas arriba y ninguna puerta lo nota. | Evals del extractor con golden dataset (`I`), antes que las de cualquier otro agente. |
+| **Lo que el extractor no registró** | Todas las comprobaciones deterministas consultan el grafo. Una puerta no puede echar de menos un hecho que nadie escribió. El fallo entra aguas arriba y ninguna puerta lo nota. | Evals del extractor con golden dataset (`I`), antes que las de cualquier otro agente. Y, más barato, búsquedas dirigidas sobre la prosa que la comparan con lo registrado: nombres del canon sin ningún registro en la escena, cifras sin hecho de fecha o distancia, un muerto nombrado fuera de una analepsis. Avisan, no paran. |
 | **El metadato autodeclarado** | `valorInicial`/`valorFinal`, `pov` y `EstadoHilo.estado` los escribe el agente evaluado. La consulta es impecable y el dato puede ser mentira. | Un segundo método sobre el texto: juicio de función de escena (`I`) en la misma escena que la consulta aprobó. |
 | **La lista cerrada** | Las búsquedas dirigidas solo encuentran los tics que ya están en la lista. Un verde significa «ninguno de los conocidos», no «prosa limpia». | Muestreo humano periódico que alimente la lista, y la eval de cliché (`I`). |
 

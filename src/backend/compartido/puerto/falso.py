@@ -41,6 +41,7 @@ class PuertoFalso:
         self.retraso_s = retraso_s
         self.invocaciones: list[dict[str, Any]] = []
         self._interrumpido = threading.Event()
+        self._cerrado = threading.Event()
 
     def registrar(self, agente: str, generador: Generador) -> None:
         self.generadores[agente] = generador
@@ -75,6 +76,8 @@ class PuertoFalso:
         intento: int | None = None,
         tokens_por_bloque: dict[str, int] | None = None,
     ) -> ResultadoAgente:
+        if self._cerrado.is_set():
+            raise AgenteInterrumpido("El puerto se cerro por una senal de terminar.")
         self._interrumpido.clear()
         self.invocaciones.append(
             {
@@ -163,5 +166,7 @@ class PuertoFalso:
             )
             return int(cur.lastrowid or 0)
 
-    def interrumpir(self) -> None:
+    def interrumpir(self, *, definitivo: bool = False) -> None:
         self._interrumpido.set()
+        if definitivo:
+            self._cerrado.set()

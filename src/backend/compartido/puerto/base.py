@@ -35,6 +35,14 @@ class AgenteInterrumpido(ErrorDePuerto):
     """La invocacion se corto porque llego una intencion de parar (RF-PUERTO-06)."""
 
 
+class AgenteUsoHerramientas(ErrorDePuerto):
+    """El agente intento usar herramientas, que no tiene (RF2-PUERTO-10).
+
+    Todo lo que necesita esta en el paquete. Si pide leer un fichero o ejecutar algo, esta
+    buscando canon por su cuenta, que es justo lo que el principio 7 prohibe.
+    """
+
+
 class AgenteNoAutenticado(ErrorDePuerto):
     """Claude Code no esta autenticado en esta maquina (RF-PUERTO-09)."""
 
@@ -94,6 +102,10 @@ class PuertoAgente(Protocol):
         """
         ...
 
-    def interrumpir(self) -> None:
-        """Corta la invocacion en curso, si la hay."""
+    def interrumpir(self, *, definitivo: bool = False) -> None:
+        """Corta la invocacion en curso, si la hay.
+
+        `definitivo` es lo que usa una senal de terminar (RF2-WK-09): ademas de cortar la
+        llamada en curso, corta cualquier llamada posterior sin lanzarla.
+        """
         ...

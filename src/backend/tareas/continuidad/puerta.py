@@ -11,9 +11,11 @@ y ninguna depende del indice vectorial: una puerta que a veces falla no es una p
 
 from __future__ import annotations
 
+import re
 import sqlite3
 from typing import Any
 
+from compartido.grafo import normalizar
 from compartido.puerta_base import Conflicto, ResultadoPuerta
 
 POSTURAS_QUE_HABILITAN = ("sabe", "cree", "sospecha", "cree_version_falsa")
@@ -208,8 +210,20 @@ WHERE en.novela_id = ? AND c.numero = ? AND en.parada_id IS NULL
 """
 
 
-def evaluar(con: sqlite3.Connection, novela_id: int, capitulo: int) -> ResultadoPuerta:
-    """Corre la puerta 3 sobre un capitulo ya extraido, dentro de la transaccion abierta."""
+def evaluar(
+    con: sqlite3.Connection,
+    novela_id: int,
+    capitulo: int,
+    *,
+    textos: dict[int, str] | None = None,
+    usos_descartados: list[dict[str, Any]] | None = None,
+) -> ResultadoPuerta:
+    """Corre la puerta 3 sobre un capitulo ya extraido, dentro de la transaccion abierta.
+
+    Con `textos` (la prosa por numero de escena) anade los avisos de las busquedas dirigidas
+    (RF2-PIPE-17); con `usos_descartados`, un aviso por cada uso de conocimiento que el
+    extractor dijo y no se pudo registrar (RF2-PIPE-16).
+    """
     conflictos: list[Conflicto] = []
     p = (novela_id, capitulo)
 
@@ -293,4 +307,185 @@ def evaluar(con: sqlite3.Connection, novela_id: int, capitulo: int) -> Resultado
             escena_id=f["escena_id"], capitulo=capitulo, datos=f,
         ))
 
+    for u in usos_descartados or []:
+        conflictos.append(Conflicto(
+            comprobacion="conocimiento_sin_comprobar", aviso=True, capitulo=capitulo,
+            escena_id=u.get("escena_id"),
+            descripcion=(
+                f"{u['personaje']} usa '{u['sujeto']}: {u['atributo']}' en la escena "
+                f"{u['escena_orden']} y no se pudo registrar ({u['motivo']}): ninguna consulta "
+                "ha comprobado que lo supiera."
+            ),
+            datos=dict(u),
+        ))
+
+    if textos:
+        conflictos.extend(busquedas_dirigidas(con, novela_id, capitulo, textos))
+
     return ResultadoPuerta(puerta=3, conflictos=conflictos)
+
+
+# --- Busquedas dirigidas sobre la prosa: el segundo metodo que mira el texto (RF2-PIPE-17) ----
+# Todas las comprobaciones de arriba consultan el grafo, y el grafo solo tiene lo que el
+# extractor registro. Estas miran la prosa y la comparan con lo registrado: es la regla 3 de
+# validators.md, con picaresca antes que con un juez. Son AVISOS: una escena puede nombrar a
+# alguien sin que haya nada que extraer, y lo que miden es la cobertura del extractor. Su
+# punto ciego: rasgos sin nombre propio ni cifra, alias y pronombres.
+
+_CIFRA = re.compile(r"(?<![\w.,])\d+(?:[.,]\d+)?(?![\w])")
+_LONGITUD_MINIMA_NOMBRE = 3
+
+
+def _aparece(texto_normalizado: str, nombre: str) -> bool:
+    clave = normalizar(nombre)
+    if len(clave) < _LONGITUD_MINIMA_NOMBRE:
+        return False
+    return re.search(rf"(?<!\w){re.escape(clave)}(?!\w)", texto_normalizado) is not None
+
+
+def _escenas(con: sqlite3.Connection, novela_id: int, capitulo: int) -> list[dict[str, Any]]:
+    return [dict(f) for f in con.execute(
+        """
+        SELECT e.id, e.orden, e.lugar_id, e.analepsis, eo.ordinal
+        FROM escena e
+        JOIN capitulo c        ON c.id = e.capitulo_id
+        JOIN escena_ordinal eo ON eo.escena_id = e.id
+        WHERE e.novela_id = ? AND c.numero = ?
+        ORDER BY e.orden
+        """,
+        (novela_id, capitulo),
+    ).fetchall()]
+
+
+# Registros que cuentan como «el extractor dijo algo de esta entidad en esta escena».
+_REGISTROS: dict[str, str] = {
+    "personaje": """
+        SELECT 1 FROM hecho h WHERE h.escena_id = :e AND h.sujeto_tipo = 'personaje'
+                                AND h.sujeto_id = :id
+        UNION ALL SELECT 1 FROM estado_personaje x WHERE x.escena_id = :e AND x.personaje_id = :id
+        UNION ALL SELECT 1 FROM estado_conocimiento x
+                  WHERE x.escena_id = :e AND x.personaje_id = :id
+        UNION ALL SELECT 1 FROM uso_conocimiento x WHERE x.escena_id = :e AND x.personaje_id = :id
+        UNION ALL SELECT 1 FROM estado_objeto x WHERE x.escena_id = :e AND x.poseedor_id = :id
+    """,
+    "lugar": """
+        SELECT 1 FROM hecho h WHERE h.escena_id = :e AND h.sujeto_tipo = 'lugar'
+                                AND h.sujeto_id = :id
+        UNION ALL SELECT 1 FROM estado_objeto x
+                  WHERE x.escena_id = :e AND x.ubicacion_lugar_id = :id
+    """,
+    "objeto": """
+        SELECT 1 FROM hecho h WHERE h.escena_id = :e AND h.sujeto_tipo = 'objeto'
+                                AND h.sujeto_id = :id
+        UNION ALL SELECT 1 FROM estado_objeto x WHERE x.escena_id = :e AND x.objeto_id = :id
+    """,
+}
+
+
+def _nombres_sin_registro(
+    con: sqlite3.Connection, novela_id: int, capitulo: int,
+    escena: dict[str, Any], plano: str, entidades: dict[str, list[dict[str, Any]]],
+) -> Conflicto | None:
+    sin_registro: list[str] = []
+    for tipo, filas in entidades.items():
+        for f in filas:
+            # El lugar donde transcurre la escena se nombra sin que haya nada que extraer.
+            if tipo == "lugar" and f["id"] == escena["lugar_id"]:
+                continue
+            if not _aparece(plano, f["nombre"]):
+                continue
+            hay = con.execute(
+                f"SELECT EXISTS ({_REGISTROS[tipo]})", {"e": escena["id"], "id": f["id"]}
+            ).fetchone()[0]
+            if not hay:
+                sin_registro.append(str(f["nombre"]))
+    if not sin_registro:
+        return None
+    return Conflicto(
+        comprobacion="nombre_sin_registro", aviso=True, capitulo=capitulo,
+        escena_id=escena["id"],
+        descripcion=(
+            f"La escena {escena['orden']} nombra a {', '.join(sin_registro)} y el extractor no "
+            "registro nada sobre ellos en ella. Si la prosa fija algo, se ha perdido."
+        ),
+        datos={"nombres": sin_registro},
+    )
+
+
+def _cifras_sin_hecho(
+    con: sqlite3.Connection, capitulo: int, escena: dict[str, Any], texto: str
+) -> Conflicto | None:
+    cifras = _CIFRA.findall(texto)
+    if not cifras:
+        return None
+    hay = con.execute(
+        "SELECT EXISTS (SELECT 1 FROM hecho WHERE escena_id = ? "
+        "AND categoria IN ('fecha', 'distancia'))",
+        (escena["id"],),
+    ).fetchone()[0]
+    if hay:
+        return None
+    return Conflicto(
+        comprobacion="cifra_sin_hecho", aviso=True, capitulo=capitulo, escena_id=escena["id"],
+        descripcion=(
+            f"La escena {escena['orden']} da cifras ({', '.join(cifras[:5])}) y no hay ningun "
+            "hecho de fecha ni de distancia registrado en ella."
+        ),
+        datos={"cifras": cifras[:20]},
+    )
+
+
+def _muertos_nombrados(
+    con: sqlite3.Connection, novela_id: int, capitulo: int,
+    escena: dict[str, Any], plano: str,
+) -> Conflicto | None:
+    if escena["analepsis"]:
+        return None
+    muertos = [dict(f) for f in con.execute(
+        """
+        SELECT p.id, p.nombre FROM personaje p
+        WHERE p.novela_id = ?
+          AND (SELECT ep.condicion FROM estado_personaje ep
+               JOIN escena_ordinal o ON o.escena_id = ep.escena_id
+               WHERE ep.personaje_id = p.id AND ep.condicion IS NOT NULL AND o.ordinal < ?
+               ORDER BY o.ordinal DESC, ep.id DESC LIMIT 1) = 'muerto'
+        """,
+        (novela_id, escena["ordinal"]),
+    ).fetchall()]
+    nombrados = [m["nombre"] for m in muertos if _aparece(plano, m["nombre"])]
+    if not nombrados:
+        return None
+    return Conflicto(
+        comprobacion="muerto_nombrado", aviso=True, capitulo=capitulo, escena_id=escena["id"],
+        descripcion=(
+            f"La escena {escena['orden']} nombra a {', '.join(nombrados)}, que murio antes, y no "
+            "es una analepsis. Puede ser un recuerdo; puede ser una reaparicion imposible."
+        ),
+        datos={"nombres": nombrados},
+    )
+
+
+def busquedas_dirigidas(
+    con: sqlite3.Connection, novela_id: int, capitulo: int, textos: dict[int, str]
+) -> list[Conflicto]:
+    """Los avisos de las tres busquedas dirigidas sobre la prosa del capitulo."""
+    entidades = {
+        tabla: [dict(f) for f in con.execute(
+            f"SELECT id, nombre FROM {tabla} WHERE novela_id = ? ORDER BY id", (novela_id,)
+        ).fetchall()]
+        for tabla in ("personaje", "lugar", "objeto")
+    }
+    avisos: list[Conflicto] = []
+    for escena in _escenas(con, novela_id, capitulo):
+        texto = textos.get(int(escena["orden"]), "")
+        if not texto:
+            continue
+        plano = normalizar(texto)
+        for aviso in (
+            _nombres_sin_registro(con, novela_id, capitulo, escena, plano, entidades),
+            _cifras_sin_hecho(con, capitulo, escena, texto),
+            _muertos_nombrados(con, novela_id, capitulo, escena, plano),
+        ):
+            if aviso is not None:
+                avisos.append(aviso)
+    return avisos

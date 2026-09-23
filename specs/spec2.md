@@ -201,7 +201,25 @@ Hallazgos 7 (supersesión encadenada), 8 (`LOWER()` no pliega tildes), 15 (`orde
 
 ### 3.6 Fase 6 — La traza dice la verdad
 
-*Pendiente: se escribe al empezar la fase.*
+Hallazgos 9 (el juez de la puerta 4 no se registra), 11 (el extractor descarta en silencio), 17 (el agente podría usar herramientas) y 18 (SIGTERM entre llamadas no para).
+
+**RF2-PIPE-13** *Amplía RF-PIPE-13.* El `resultado_puerta` de la puerta 4 lleva la parte mecánica **y** la de juicio en un solo registro: los conflictos de la mecánica y un conflicto por cada criterio que el juez da por `falla`, con su evidencia y su sugerencia. El veredicto es `falla` si falla cualquiera de las dos. Si la mecánica falla, el juez no se invoca y el registro lo dice.
+
+**RF2-PIPE-16** *Requisito nuevo.* `extraccion.aplicar` devuelve el recuento de lo que descartó, por tipo de registro y motivo (`escena_desconocida`, `personaje_sin_resolver`, `hecho_sin_resolver`, `objeto_sin_resolver`), y el detalle de cada uso de conocimiento descartado. El recuento va a la traza (evento `extraccion_descartes`). En la puerta 3, cada uso de conocimiento descartado es un **aviso** `conocimiento_sin_comprobar`: es conocimiento que el personaje usa y que ninguna consulta ha podido comprobar.
+
+**RF2-PIPE-17** *Requisito nuevo: el segundo método que mira el texto (regla 3 de validators.md; picaresca antes que juez).* Búsquedas dirigidas sobre la prosa del capítulo, dentro del tramo 2, como **avisos** de la puerta 3:
+
+- `nombre_sin_registro`: nombres del canon (personajes, lugares, objetos) que aparecen en la prosa de una escena sin ningún registro extraído sobre ellos en esa escena;
+- `cifra_sin_hecho`: cifras en la prosa de una escena sin ningún hecho de categoría `fecha` o `distancia` en ella;
+- `muerto_nombrado`: el nombre de un personaje cuya última condición registrada es `muerto` en la prosa de una escena posterior que no es analepsis.
+
+Los nombres se buscan como palabras enteras sobre el texto normalizado, igual que se comparan las claves. Son avisos y no conflictos: una escena puede nombrar a alguien sin que haya nada que extraer, y lo que miden es la cobertura del extractor, no la continuidad.
+
+**RF2-PUERTO-10** *Requisito nuevo.* El puerto invoca a Claude Code con `--tools ""`, que **retira** las herramientas integradas (no solo sus permisos), junto a `--allowedTools ""`, y con `--strict-mcp-config`, que deja fuera los servidores MCP de la configuración del usuario. Una llamada que devuelve `permission_denials` no vacío, o más de dos turnos, es un error de puerto (`AgenteUsoHerramientas`): el agente intentó usar herramientas. No se reintenta.
+
+> **Decisión de la spec (23-09-2026).** El plan fijaba el umbral en «más de un turno». Una llamada real verificada con el CLI 2.1.274, con `--json-schema` y sin herramientas, devuelve `num_turns = 2`: la salida estructurada consume un turno. Con el umbral del plan, toda llamada legítima habría sido un error. El umbral pasa a dos, y la señal principal es `permission_denials`. Se descartó `--restricted`, que además ignora los ficheros de configuración del usuario y no está probado contra la autenticación de la sesión, como no lo estaba `--bare`, que la rompía.
+
+**RF2-WK-09** *Requisito nuevo.* SIGTERM y SIGINT detienen el pipeline en el siguiente punto de comprobación, no solo si llegan durante una llamada. La interrupción que viene de una señal es **definitiva**: el puerto la conserva y cualquier llamada posterior se corta sin lanzar el subproceso. La que viene de una intención `parar` sigue siendo de una sola llamada.
 
 ### 3.7 Fase 7 — El índice vectorial
 

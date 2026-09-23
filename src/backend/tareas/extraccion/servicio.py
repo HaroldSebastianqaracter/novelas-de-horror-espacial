@@ -12,6 +12,7 @@ inventar `tono de la mirada`.
 from __future__ import annotations
 
 import sqlite3
+from typing import Any
 
 from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
 from compartido.grafo import (
@@ -115,15 +116,55 @@ def paquete(
     return ajustar(p, presupuesto)
 
 
+class Descartes:
+    """Lo que el extractor dijo y no se pudo registrar, con el motivo (RF2-PIPE-16).
+
+    Antes cada `continue` perdia el dato sin rastro: el extractor escribia «Dra. Kowalski» y el
+    uso de conocimiento desaparecia, asi que la comprobacion de conocimiento no adquirido nunca
+    llegaba a verlo. Ahora se cuenta, va a la traza, y los usos descartados vuelven a la puerta
+    3 como aviso.
+    """
+
+    def __init__(self) -> None:
+        self.recuento: dict[str, dict[str, int]] = {}
+        self.usos: list[dict[str, Any]] = []
+
+    def anotar(self, tipo: str, motivo: str) -> None:
+        por_motivo = self.recuento.setdefault(tipo, {})
+        por_motivo[motivo] = por_motivo.get(motivo, 0) + 1
+
+    @property
+    def total(self) -> int:
+        return sum(n for m in self.recuento.values() for n in m.values())
+
+
+def _motivo(eid: int | None, pid: int | None = 0, hid: int | None = 0,
+            objeto: int | None = 0) -> str | None:
+    """Por que no se puede registrar algo, o None si se puede. 0 significa «no aplica»."""
+    if eid is None:
+        return "escena_desconocida"
+    if pid is None:
+        return "personaje_sin_resolver"
+    if hid is None:
+        return "hecho_sin_resolver"
+    if objeto is None:
+        return "objeto_sin_resolver"
+    return None
+
+
 def aplicar(
     con: sqlite3.Connection,
     novela_id: int,
     capitulo: int,
     salida: SalidaExtraccion,
     escenas_por_orden: dict[int, int],
-) -> None:
-    """Registra en el grafo todo lo que el texto fijo. Append-only, con escena de origen."""
+) -> Descartes:
+    """Registra en el grafo todo lo que el texto fijo. Append-only, con escena de origen.
+
+    Devuelve lo que no pudo registrar y por que: nada se descarta en silencio.
+    """
     resolvedor = Resolvedor(con, novela_id)
+    descartes = Descartes()
 
     def escena(orden: int | None) -> int | None:
         return escenas_por_orden.get(int(orden)) if orden is not None else None
@@ -154,6 +195,7 @@ def aplicar(
     for h in salida.hechos:
         eid = escena(h.escena_orden)
         if eid is None:
+            descartes.anotar("hechos", "escena_desconocida")
             continue
         previo = ultimo_hecho(h.sujeto_ref, h.supersede_a) if h.supersede_a else None
         hid = insertar_hecho(
@@ -177,7 +219,9 @@ def aplicar(
             resolvedor.id_de("personaje", c.personaje_ref),
             hecho_id(c.sujeto_ref, c.atributo),
         )
-        if None in (eid, pid, hid):
+        motivo = _motivo(eid, pid, hid)
+        if motivo:
+            descartes.anotar("conocimiento", motivo)
             continue
         insertar(
             con, "estado_conocimiento", novela_id=novela_id, personaje_id=pid, hecho_id=hid,
@@ -190,7 +234,13 @@ def aplicar(
             resolvedor.id_de("personaje", u.personaje_ref),
             hecho_id(u.sujeto_ref, u.atributo),
         )
-        if None in (eid, pid, hid):
+        motivo = _motivo(eid, pid, hid)
+        if motivo:
+            descartes.anotar("usos_de_conocimiento", motivo)
+            descartes.usos.append({
+                "personaje": u.personaje_ref, "sujeto": u.sujeto_ref, "atributo": u.atributo,
+                "escena_orden": u.escena_orden, "escena_id": eid, "motivo": motivo,
+            })
             continue
         insertar(
             con, "uso_conocimiento", novela_id=novela_id, personaje_id=pid, hecho_id=hid,
@@ -200,7 +250,9 @@ def aplicar(
     # --- Estados -------------------------------------------------------------------------
     for ep in salida.estados_personaje:
         eid, pid = escena(ep.escena_orden), resolvedor.id_de("personaje", ep.personaje_ref)
-        if eid is None or pid is None:
+        motivo = _motivo(eid, pid)
+        if motivo:
+            descartes.anotar("estados_personaje", motivo)
             continue
         insertar(
             con, "estado_personaje", novela_id=novela_id, personaje_id=pid, escena_id=eid,
@@ -210,7 +262,9 @@ def aplicar(
 
     for eo in salida.estados_objeto:
         eid, oid = escena(eo.escena_orden), resolvedor.id_de("objeto", eo.objeto_ref)
-        if eid is None or oid is None:
+        motivo = _motivo(eid, objeto=oid)
+        if motivo:
+            descartes.anotar("estados_objeto", motivo)
             continue
         insertar(
             con, "estado_objeto", novela_id=novela_id, objeto_id=oid, escena_id=eid,
@@ -237,6 +291,7 @@ def aplicar(
     for s in salida.siembras:
         eid = escena(s.escena_orden)
         if eid is None:
+            descartes.anotar("siembras", "escena_desconocida")
             continue
         fila = None
         if s.siembra_ref:
@@ -278,6 +333,7 @@ def aplicar(
     for en in salida.entidades_no_reconocidas:
         eid = escena(en.escena_orden)
         if eid is None:
+            descartes.anotar("entidades_no_reconocidas", "escena_desconocida")
             continue
         insertar(
             con, "entidad_no_reconocida", novela_id=novela_id, escena_id=eid, nombre=en.nombre,
@@ -291,3 +347,4 @@ def aplicar(
             con, "capitulo", int(cap["id"]),
             resumen=salida.resumen, resumen_breve=salida.resumen_breve,
         )
+    return descartes

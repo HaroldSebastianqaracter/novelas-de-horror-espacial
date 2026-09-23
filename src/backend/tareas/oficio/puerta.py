@@ -1,4 +1,4 @@
-"""Puerta 4, parte mecanica (RF-PIPE-13, punto 1).
+"""Puerta 4: la parte mecanica y la combinacion con el juicio (RF-PIPE-13, RF2-PIPE-13).
 
 Busquedas dirigidas sobre listas cerradas: lo que se puede comprobar contando, antes de
 gastar una llamada de juicio. Corre primero porque es gratis.
@@ -17,6 +17,8 @@ import unicodedata
 from compartido.grafo import lectura
 from compartido.puerta_base import Conflicto, ResultadoPuerta
 from config import PALABRAS_FILTRO
+
+from .esquemas import SalidaOficio
 
 # «dijo secamente», «respondio friamente»: el adverbio que sostiene un verbo debil.
 _ADVERBIO_ATRIBUCION = re.compile(
@@ -98,4 +100,36 @@ def evaluar(
             datos={k: v for k, v in expresivos.items() if v},
         ))
 
+    return ResultadoPuerta(puerta=4, conflictos=conflictos)
+
+
+def combinar(mecanica: ResultadoPuerta, juicio: SalidaOficio | None) -> ResultadoPuerta:
+    """La puerta 4 entera en un solo resultado: mecanica y juicio (RF2-PIPE-13).
+
+    Cada criterio que el juez da por `falla` es un conflicto, con su evidencia y su
+    sugerencia. Si la mecanica falla, el juez no se invoca y el resultado lo dice: registrar
+    solo la mecanica hacia que la traza dijera `pasa` con el juez en contra.
+    """
+    conflictos = list(mecanica.conflictos)
+    if juicio is None:
+        if mecanica.pasa:
+            conflictos.append(Conflicto(
+                comprobacion="juicio_ausente",
+                descripcion="La mecanica paso pero no hay veredicto del juez de oficio.",
+            ))
+        else:
+            conflictos.append(Conflicto(
+                comprobacion="juicio_no_invocado", aviso=True,
+                descripcion="La mecanica fallo: el juez de oficio no se invoco.",
+            ))
+    else:
+        conflictos.extend(
+            Conflicto(
+                comprobacion=f"juicio:{v.criterio}",
+                descripcion=f"Principio {v.principio}. {v.sugerencia}".strip(),
+                datos={"criterio": v.criterio, "principio": v.principio,
+                       "evidencia": v.evidencia, "sugerencia": v.sugerencia},
+            )
+            for v in juicio.incumplidos
+        )
     return ResultadoPuerta(puerta=4, conflictos=conflictos)

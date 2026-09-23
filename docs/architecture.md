@@ -170,11 +170,13 @@ De ahí una regla dura: **el paquete de capítulo se le entrega al agente, y el 
 > | Qué | Cómo |
 > | --- | --- |
 > | La skill entra como prompt de sistema | El puerto lee la `SKILL.md` del disco y sustituye con ella el prompt de sistema. No depende de que el modo no interactivo descubra skills, ni de darle la herramienta que las carga |
-> | El agente no tiene herramientas | La lista de herramientas permitidas va vacía: no puede leer ficheros, buscar ni ejecutar |
+> | El agente no tiene herramientas | Se le **retiran** las herramientas integradas y los servidores MCP de la configuración del usuario, y además la lista de permitidas va vacía: no puede leer ficheros, buscar ni ejecutar. Y se comprueba después: una respuesta con permisos denegados, o con más turnos de los que usa la salida estructurada, es un error |
 > | No hay nada que leer | El directorio de trabajo es un temporal vacío por llamada, no la raíz del repositorio |
 > | La salida llega validada | Se le pasa el esquema JSON de su tarea y el CLI devuelve la salida ya conforme |
 >
 > Se descartaron dos alternativas. Entregar el canon **como ficheros acotados** en un directorio, que exigiría devolverle la herramienta de lectura y con ella la capacidad de leer de más. Y **pedírselo en el prompt**, que convierte una garantía en una petición.
+>
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** La auditoría señaló que una lista de permitidas vacía quita permisos pero no retira las herramientas, y que nada comprobaba si el agente intentaba usarlas. Se añade la retirada explícita y la comprobación de la respuesta. El umbral de turnos es dos y no uno: una llamada real sin herramientas y con salida estructurada usa dos, verificado contra la versión instalada del CLI. Detalle en [specs/spec2.md](../specs/spec2.md), RF2-PUERTO-10.
 >
 > Queda un supuesto sin verificar: que Claude Code **no compacte** dentro de una llamada. Sin herramientas y con el paquete bajo presupuesto no debería ocurrir, y el puerto registra en la traza cualquier señal de que haya ocurrido, para poder contradecirlo.
 

@@ -4,8 +4,12 @@ Como se acota el contexto del agente, que es la pendiente mas urgente de la arqu
 
   * La SKILL.md la leemos NOSOTROS y la inyectamos con `--system-prompt-file`, que SUSTITUYE
     el prompt de sistema. Asi no dependemos de que el modo no interactivo descubra skills.
-  * `--allowedTools ""` deja al agente SIN herramientas: no puede leer ficheros, buscar ni
-    ejecutar nada. Todo lo que sabe esta en el paquete que le montamos.
+  * `--tools ""` RETIRA las herramientas integradas, y `--allowedTools ""` les quita el
+    permiso: el agente no puede leer ficheros, buscar ni ejecutar nada. `--strict-mcp-config`
+    deja fuera los servidores MCP de la configuracion del usuario, que traerian las suyas.
+    Todo lo que sabe esta en el paquete que le montamos (RF2-PUERTO-10).
+  * Y se comprueba despues: una llamada con permisos denegados, o con mas turnos de los que
+    necesita la salida estructurada, es un error, porque el agente intento usar algo.
   * El directorio de trabajo es un temporal VACIO, no la raiz del repo.
   * `--json-schema` obliga a que la salida cumpla el esquema y la devuelve ya parseada en
     `structured_output`.
@@ -39,6 +43,7 @@ from ..db import transaccion
 from .base import (
     AgenteInterrumpido,
     AgenteNoAutenticado,
+    AgenteUsoHerramientas,
     ErrorDePuerto,
     ResultadoAgente,
     SalidaInvalida,
@@ -50,6 +55,10 @@ from .base import (
 SKILLS_PROHIBIDAS = frozenset({"verificacion"})
 
 INTERVALO_SONDEO_S = 0.25
+
+#: Turnos de una llamada legitima: la respuesta y la salida estructurada de --json-schema,
+#: que consume uno (verificado contra el CLI 2.1.274: num_turns = 2 sin ninguna herramienta).
+TURNOS_ESPERADOS = 2
 
 
 def _estimar_tokens(texto: str) -> int:
@@ -92,6 +101,18 @@ def _extraer_json(texto: str) -> dict[str, Any] | None:
     return None
 
 
+def _uso_de_herramientas(sobre: dict[str, Any]) -> str:
+    """Por que una respuesta delata que el agente intento usar herramientas, o '' si no."""
+    denegados = sobre.get("permission_denials") or []
+    if denegados:
+        nombres = sorted({str(d.get("tool_name", "?")) for d in denegados if isinstance(d, dict)})
+        return f"permisos denegados para {', '.join(nombres) or len(denegados)}"
+    turnos = int(sobre.get("num_turns") or 0)
+    if turnos > TURNOS_ESPERADOS:
+        return f"{turnos} turnos, cuando una respuesta sin herramientas usa {TURNOS_ESPERADOS}"
+    return ""
+
+
 class PuertoTerminal:
     """Invoca a Claude Code como subproceso. Un puerto por worker."""
 
@@ -109,6 +130,9 @@ class PuertoTerminal:
         self.con = con
         self._proceso: subprocess.Popen[bytes] | None = None
         self._interrumpido = threading.Event()
+        # Una senal de terminar cierra el puerto para siempre: el siguiente `invocar` no puede
+        # limpiar la bandera y lanzar otra llamada (RF2-WK-09).
+        self._cerrado = threading.Event()
         self._lock = threading.Lock()
 
     # -- skills ---------------------------------------------------------------------------
@@ -194,7 +218,9 @@ class PuertoTerminal:
             self.claude_bin,
             "-p",
             "--system-prompt-file", str(sistema_file),
+            "--tools", "",
             "--allowedTools", "",
+            "--strict-mcp-config",
             "--output-format", "json",
             "--json-schema", json.dumps(esquema, ensure_ascii=False),
         ]
@@ -219,7 +245,7 @@ class PuertoTerminal:
 
                 limite = comenzado + timeout_s
                 while proceso.poll() is None:
-                    if self._interrumpido.is_set():
+                    if self._interrumpido.is_set() or self._cerrado.is_set():
                         proceso.kill()
                         proceso.wait(timeout=10)
                         raise AgenteInterrumpido("Invocacion cortada por una intencion de parar.")
@@ -251,6 +277,8 @@ class PuertoTerminal:
         intento: int | None = None,
         tokens_por_bloque: dict[str, int] | None = None,
     ) -> ResultadoAgente:
+        if self._cerrado.is_set():
+            raise AgenteInterrumpido("El puerto se cerro por una senal de terminar.")
         self._interrumpido.clear()
         timeout = timeout_s or self.timeout_por_defecto
         sistema = self.ruta_skill(agente).read_text(encoding="utf-8")
@@ -312,6 +340,16 @@ class PuertoTerminal:
                     entrada_actual = f"{entrada}\n\n[Intento anterior fallido: {mensaje[:500]}]"
                     continue
 
+                uso_de_herramientas = _uso_de_herramientas(sobre)
+                if uso_de_herramientas:
+                    self._cerrar_traza(
+                        llamada_id, estado="error", salida_cruda=out, duracion_ms=ms,
+                        exit_code=code, metadatos=metadatos,
+                    )
+                    raise AgenteUsoHerramientas(
+                        f"El agente '{agente}' intento usar herramientas: {uso_de_herramientas}"
+                    )
+
                 salida = sobre.get("structured_output")
                 if not isinstance(salida, dict):
                     salida = _extraer_json(resultado_txt)
@@ -359,9 +397,15 @@ class PuertoTerminal:
         finally:
             shutil.rmtree(sistema_dir, ignore_errors=True)
 
-    def interrumpir(self) -> None:
-        """Corta la invocacion en curso (RF-PUERTO-06)."""
+    def interrumpir(self, *, definitivo: bool = False) -> None:
+        """Corta la invocacion en curso (RF-PUERTO-06).
+
+        Con `definitivo`, que es lo que manda una senal, ademas cierra el puerto: ninguna
+        llamada posterior se lanza (RF2-WK-09).
+        """
         self._interrumpido.set()
+        if definitivo:
+            self._cerrado.set()
         with self._lock:
             proceso = self._proceso
         if proceso is not None and proceso.poll() is None:

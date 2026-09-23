@@ -58,6 +58,22 @@ def test_una_tarea_no_importa_de_otra() -> None:
     assert not fallos, "Una tarea importa de otra:\n" + "\n".join(fallos)
 
 
+FICHEROS_DE_UNA_TAREA = frozenset({
+    "__init__.py", "esquemas.py", "servicio.py", "prompt.py", "puerta.py", "router.py",
+})
+
+
+def test_cada_tarea_solo_tiene_los_ficheros_que_permite_la_spec() -> None:
+    """RF-COD-02: una tarea es esquemas, servicio, prompt, puerta y router, y sus tests."""
+    fallos = [
+        str(f.relative_to(RAIZ))
+        for tarea in DIR_TAREAS.iterdir() if tarea.is_dir() and tarea.name != "__pycache__"
+        for f in tarea.glob("*.py")
+        if f.name not in FICHEROS_DE_UNA_TAREA and not f.name.startswith("test_")
+    ]
+    assert not fallos, "Ficheros que RF-COD-02 no admite en una tarea:\n" + "\n".join(fallos)
+
+
 # docs/architecture.md nombra DIEZ agentes. El decimo, `revision`, queda fuera de la v1
 # (spec1.md, 1.2): las pasadas globales dependen de la revalidacion en cascada, que a su vez
 # exige dependencias entre hechos que definitions.md todavia no modela. Se declara aqui para

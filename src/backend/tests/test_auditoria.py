@@ -262,7 +262,6 @@ def test_hallazgo_08_valores_que_solo_difieren_en_tildes_no_se_contradicen() -> 
 # --- Fase 6: la traza dice la verdad ------------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, reason="Hallazgo 9: el juez de la puerta 4 no se registra")
 def test_hallazgo_09_una_parada_de_oficio_deja_la_puerta_4_en_falla() -> None:
     con, ruta = nueva_bd()
     novela_id = crear_novela(con)
@@ -328,3 +327,63 @@ def test_hallazgo_21_un_hecho_no_se_modifica_se_revoca() -> None:
     con.execute("COMMIT")
     with pytest.raises(sqlite3.IntegrityError):
         con.execute("UPDATE hecho SET vigente = 0 WHERE id = ?", (g.hechos["ojos"],))
+
+
+# --- Fase 6: la traza dice la verdad ----------------------------------------------------------
+
+
+def test_hallazgo_11_un_uso_sobre_un_hecho_que_no_existe_deja_aviso() -> None:
+    con, ruta = nueva_bd()
+    novela_id = crear_novela(con)
+    puerto = puerto_falso(con)
+
+    def extraccion(entrada: str, agente: str) -> dict:
+        salida = agentes_falsos.extraccion(entrada, agente)
+        salida["usos_de_conocimiento"] = [{
+            "escena_orden": 1, "personaje_ref": agentes_falsos.PERSONAJES[0],
+            "sujeto_ref": "Dra. Kowalski", "atributo": "secreto",
+        }]
+        return salida
+
+    puerto.registrar("extraccion", extraccion)
+    pipeline.avanzar(contexto(con, puerto, ruta, novela_id))
+    detalles = [
+        f["detalle"] for f in con.execute(
+            "SELECT detalle FROM resultado_puerta WHERE novela_id = ? AND puerta = 3",
+            (novela_id,),
+        )
+    ]
+    assert any("conocimiento_sin_comprobar" in d for d in detalles)
+
+
+def _puerto_terminal(respuesta: dict):  # noqa: ANN202
+    from compartido.puerto import PuertoTerminal
+    from tests import claude_falso
+
+    return PuertoTerminal(
+        claude_bin=str(claude_falso.ejecutable(respuesta)), skills_dir=claude_falso.SKILLS,
+        timeout_agente_segundos=60,
+    )
+
+
+def test_hallazgo_17_una_llamada_con_permisos_denegados_es_un_error_de_puerto() -> None:
+    from compartido.puerto import ErrorDePuerto
+    from tests import claude_falso
+
+    puerto = _puerto_terminal(claude_falso.sobre(
+        {"x": 1}, permission_denials=[{"tool_name": "Read", "tool_input": {}}],
+    ))
+    with pytest.raises(ErrorDePuerto):
+        puerto.invocar("arquitecto", "entrada", {"type": "object"})
+
+
+def test_hallazgo_18_una_senal_entre_llamadas_corta_la_siguiente() -> None:
+    from compartido.puerto import AgenteInterrumpido
+    from tests import claude_falso
+
+    _, ruta = nueva_bd()
+    w = worker.Worker(cfg_de(ruta))
+    w.puerto = _puerto_terminal(claude_falso.sobre({"x": 1}))
+    w.detener()  # SIGTERM mientras no hay ninguna llamada en curso
+    with pytest.raises(AgenteInterrumpido):
+        w.puerto.invocar("arquitecto", "entrada", {"type": "object"})
