@@ -127,10 +127,10 @@ class Paquete:
     """El contexto de una llamada, con la cuenta de lo que ocupa y de lo que se recorto."""
 
     agente: str
-    bloques: list[Bloque] = field(default_factory=list)
+    bloques: list[Bloque] = field(default_factory=list[Bloque])
     capitulo: int | None = None
     #: bloque -> {"elementos": quitados, "tokens": liberados, "sustituido": 0|1}
-    recortes: dict[str, dict[str, int]] = field(default_factory=dict)
+    recortes: dict[str, dict[str, int]] = field(default_factory=dict[str, dict[str, int]])
 
     def anadir(
         self, nombre: str, texto: str, titulo: str = "", *, obligatorio: bool | None = None
@@ -173,7 +173,9 @@ class Paquete:
     def render(self) -> str:
         return "\n\n".join(p for p in (b.render() for b in self.bloques) if p)
 
-    def _apuntar(self, nombre: str, quitados: int, tokens: int, sustituido: bool) -> None:
+    def apuntar_recorte(
+        self, nombre: str, quitados: int, tokens: int, *, sustituido: bool
+    ) -> None:
         r = self.recortes.setdefault(nombre, {"elementos": 0, "tokens": 0, "sustituido": 0})
         r["elementos"] += quitados
         r["tokens"] += tokens
@@ -209,17 +211,20 @@ def _recortar_bloque(paquete: Paquete, bloque: Bloque, objetivo: int) -> None:
         bloque.elementos = [e for e in bloque.elementos if e.obligatorio] + bloque.alternativa
         bloque.alternativa = None
         if bloque.tokens <= objetivo:
-            paquete._apuntar(  # noqa: SLF001
+            paquete.apuntar_recorte(
                 bloque.nombre, sustituidos, antes - bloque.tokens, sustituido=True
             )
             return
 
     opcionales = sum(1 for e in bloque.elementos if not e.obligatorio)
     bajo, alto = 0, opcionales
-    tokens = lambda k: estimar(_render(  # noqa: E731
-        bloque.nombre, bloque.titulo, bloque.separador,
-        _sin_los_ultimos_opcionales(bloque.elementos, k),
-    ))
+
+    def tokens(k: int) -> int:
+        return estimar(_render(
+            bloque.nombre, bloque.titulo, bloque.separador,
+            _sin_los_ultimos_opcionales(bloque.elementos, k),
+        ))
+
     if tokens(alto) > objetivo:
         bajo = alto  # ni quitandolos todos: se quitan todos y decide el techo del paquete
     while bajo < alto:
@@ -229,7 +234,7 @@ def _recortar_bloque(paquete: Paquete, bloque: Bloque, objetivo: int) -> None:
         else:
             bajo = medio + 1
     bloque.elementos = _sin_los_ultimos_opcionales(bloque.elementos, bajo)
-    paquete._apuntar(  # noqa: SLF001
+    paquete.apuntar_recorte(
         bloque.nombre, sustituidos + bajo, antes - bloque.tokens, sustituido=sustituidos > 0
     )
 

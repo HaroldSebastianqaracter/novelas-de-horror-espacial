@@ -241,7 +241,15 @@ La relevancia de lo recuperado se mide con un **golden set** de consultas y esce
 
 ### 3.8 Fase 8 — Contrato de la API y tipos
 
-*Pendiente: se escribe al empezar la fase.*
+Hallazgo 19 (seis endpoints devuelven `dict` sin esquema) y los errores de pyright estricto, que nunca se había pasado.
+
+**RF2-API-01** *Refuerza RF-API-01, que ya prohibía `dict` sin esquema: ahora se cumple y se comprueba.* Toda respuesta JSON de la API tiene un modelo Pydantic con sus propiedades: `ver_novela`, `ver_estructura`, `ver_versiones`, `ver_conocimiento` y `ver_llamadas` tienen el suyo, y `ver_canon` devuelve una **unión discriminada** por el campo `entidad`, que coincide con el valor del camino (`mundo`, `sistemas`, `lugares`…). Las columnas JSON del canon (reglas de la amenaza, sistemas críticos de un lugar) salen ya como listas tipadas. El stream de eventos se declara como `text/event-stream`. Dos comprobaciones: ninguna respuesta del OpenAPI es un objeto sin propiedades, y un **snapshot versionado** del esquema (`tests/openapi.json`) obliga a revisar a mano cualquier cambio de contrato.
+
+**RF2-API-04** *Amplía RF-API-04.* La API valida la forma de cada payload con un modelo por tipo de intención (`crear_novela`, `relanzar`, `resolver_parada`). Un payload mal formado, como un `desde_capitulo` que no es un entero o una `accion` fuera de la lista, es `422` con el campo y el motivo, nunca un `500`.
+
+**Tipos.** `pyright` en modo estricto pasa en cero sobre `src/backend` sin los tests, con el entorno virtual del proyecto (`venvPath`/`venv` en `pyproject.toml`; sin eso pyright no veía pydantic ni FastAPI y todo modelo salía «sin tipo»). El JSON leído de la base se tipa con dos ayudas compartidas, `como_dict` y `como_lista`. El comando único de verificación (`pytest`, `ruff check`, `pyright`) está en `src/backend/README.md`.
+
+> **Decisión del plan, mantenida.** Sin CI: el proyecto no tiene ninguna y montarla es otra decisión. Los tests quedan fuera del modo estricto: comprueban comportamiento, y tiparlos a fondo no añade garantías sobre el código que ejercitan.
 
 ### 3.9 Fase 9 — Deuda menor
 

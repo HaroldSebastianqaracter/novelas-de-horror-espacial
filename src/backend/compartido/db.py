@@ -14,7 +14,7 @@ from __future__ import annotations
 import importlib.util
 import sqlite3
 import time
-from collections.abc import Callable, Collection, Iterator, Sequence
+from collections.abc import Callable, Collection, Generator, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
@@ -125,7 +125,7 @@ def transaccion(
     *,
     inmediata: bool = True,
     al_empezar: Guardia | None = None,
-) -> Iterator[sqlite3.Connection]:
+) -> Generator[sqlite3.Connection]:
     """Transaccion explicita. Confirma al salir sin excepcion, revierte si la hay.
 
     `inmediata` toma el bloqueo de escritura al empezar, que es lo que quiere el worker: si

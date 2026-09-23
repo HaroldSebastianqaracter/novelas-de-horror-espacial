@@ -13,6 +13,7 @@ from typing import Any
 
 from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
 from compartido.grafo import insertar, lectura
+from compartido.tipos import como_dict, como_lista
 
 from .esquemas import SalidaRedaccion
 
@@ -93,14 +94,14 @@ def _personaje(p: dict[str, Any]) -> str:
 
 def _amenaza(a: dict[str, Any]) -> str:
     try:
-        reglas = json.loads(a.get("reglas") or "[]")
+        reglas: Any = json.loads(a.get("reglas") or "[]")
     except json.JSONDecodeError:
         reglas = []
     lineas = [str(a["naturaleza"])]
     lineas.extend(
         f"- Puede {r.get('capacidad', '')}. No puede {r.get('limite', '')}. "
         f"Se activa con {r.get('activacion', '')}."
-        for r in reglas if isinstance(r, dict)
+        for r in map(como_dict, como_lista(reglas)) if r
     )
     return "\n".join(lineas)
 

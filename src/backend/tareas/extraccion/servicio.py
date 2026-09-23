@@ -101,7 +101,7 @@ def paquete(
             "SIEMBRAS VIVAS (marca si el capitulo las riega o las paga)",
         )
 
-    cuerpo = []
+    cuerpo: list[str] = []
     for e in escenas:
         texto = textos.get(int(e["orden"]), "")
         if not texto:

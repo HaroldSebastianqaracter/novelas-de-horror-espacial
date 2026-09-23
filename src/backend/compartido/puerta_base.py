@@ -24,7 +24,7 @@ class Conflicto:
     aviso: bool = False
     escena_id: int | None = None
     capitulo: int | None = None
-    datos: dict[str, Any] = field(default_factory=dict)
+    datos: dict[str, Any] = field(default_factory=dict[str, Any])
 
     def __str__(self) -> str:
         marca = "aviso" if self.aviso else "conflicto"
@@ -35,7 +35,7 @@ class Conflicto:
 @dataclass(frozen=True)
 class ResultadoPuerta:
     puerta: int
-    conflictos: list[Conflicto] = field(default_factory=list)
+    conflictos: list[Conflicto] = field(default_factory=list[Conflicto])
 
     @property
     def bloqueantes(self) -> list[Conflicto]:

@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from typing import Any
 
 from compartido.grafo import Resolvedor, insertar, lectura
+from compartido.tipos import como_dict, como_lista
 
 from .esquemas import SalidaElenco
 
@@ -42,14 +44,14 @@ def paquete(con: sqlite3.Connection, novela_id: int) -> str:
         lineas += ["", f"Mundo: {mundo['nombre']}. {mundo['reglas_fisicas']}"]
     if amenaza:
         try:
-            reglas = json.loads(amenaza["reglas"] or "[]")
+            reglas: Any = json.loads(amenaza["reglas"] or "[]")
         except json.JSONDecodeError:
             reglas = []
         lineas += ["", f"Amenaza: {amenaza['naturaleza']} (origen: {amenaza['origen']})"]
         lineas.extend(
             f"  - puede {r.get('capacidad', '')}; no puede {r.get('limite', '')}; "
             f"se activa con {r.get('activacion', '')}"
-            for r in reglas if isinstance(r, dict)
+            for r in map(como_dict, como_lista(reglas)) if r
         )
 
     lineas += ["", "Facciones a las que pueden pertenecer (usa estos nombres exactos):"]

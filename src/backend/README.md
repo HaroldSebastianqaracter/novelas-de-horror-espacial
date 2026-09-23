@@ -106,9 +106,26 @@ tareas/          una carpeta por agente, con su esquema, su servicio y su puerta
 Dos reglas lo sostienen, y las dos están comprobadas en `tests/test_arquitectura.py`:
 **una tarea no importa de otra**, y **FastAPI solo aparece en el borde HTTP**.
 
-## Probar
+## Verificar
+
+Tres comandos, y los tres tienen que salir limpios antes de cada commit. No hay CI: esto es
+lo que la sustituye.
 
 ```bat
 .venv\Scripts\python.exe -m pytest -q
 .venv\Scripts\python.exe -m ruff check .
+.venv\Scripts\python.exe -m pyright
+```
+
+`pyright` va en modo estricto sobre todo el backend salvo los tests. Dos extras que no corren
+por defecto:
+
+```bat
+rem El golden set de recuperacion, con el modelo de embeddings real (tiene que estar en la cache).
+.venv\Scripts\python.exe -m pytest -q -m modelo
+
+rem Regenerar el snapshot del contrato OpenAPI tras un cambio de la API hecho a proposito.
+rem Revisa el diff de tests\openapi.json antes de commitear.
+set NOVELAS_ACTUALIZAR_OPENAPI=1
+.venv\Scripts\python.exe -m pytest -q tests\test_api.py -k contrato
 ```

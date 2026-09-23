@@ -104,7 +104,7 @@ class Contexto:
     #: cerrojo (RF2-WK-07) o si recibio una senal de terminar.
     vigilar: Callable[[], None] | None = None
     #: Criterios de oficio incumplidos, que vuelven al redactor en el reintento.
-    eventos_criterios: list[dict[str, Any]] = field(default_factory=list)
+    eventos_criterios: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
 
     @property
     def cfg_max_intentos(self) -> int:

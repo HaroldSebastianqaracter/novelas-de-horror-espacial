@@ -1,0 +1,2737 @@
+{
+  "components": {
+    "schemas": {
+      "Acto": {
+        "properties": {
+          "funcion_narrativa": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Funcion Narrativa"
+          },
+          "numero": {
+            "title": "Numero",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "numero"
+        ],
+        "title": "Acto",
+        "type": "object"
+      },
+      "AmenazaCanon": {
+        "properties": {
+          "entidad": {
+            "const": "amenaza",
+            "default": "amenaza",
+            "title": "Entidad",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "naturaleza": {
+            "title": "Naturaleza",
+            "type": "string"
+          },
+          "origen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origen"
+          },
+          "reglas": {
+            "items": {
+              "$ref": "#/components/schemas/ReglaAmenaza"
+            },
+            "title": "Reglas",
+            "type": "array"
+          },
+          "tema_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tema Id"
+          }
+        },
+        "required": [
+          "id",
+          "naturaleza"
+        ],
+        "title": "AmenazaCanon",
+        "type": "object"
+      },
+      "Capitulo": {
+        "properties": {
+          "escenas": {
+            "items": {
+              "$ref": "#/components/schemas/Escena"
+            },
+            "title": "Escenas",
+            "type": "array"
+          },
+          "estado": {
+            "title": "Estado",
+            "type": "string"
+          },
+          "numero": {
+            "title": "Numero",
+            "type": "integer"
+          },
+          "objetivo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objetivo"
+          },
+          "resumen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resumen"
+          }
+        },
+        "required": [
+          "numero",
+          "estado"
+        ],
+        "title": "Capitulo",
+        "type": "object"
+      },
+      "CapituloTexto": {
+        "properties": {
+          "numero": {
+            "title": "Numero",
+            "type": "integer"
+          },
+          "palabras": {
+            "title": "Palabras",
+            "type": "integer"
+          },
+          "texto": {
+            "title": "Texto",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "numero",
+          "version",
+          "palabras",
+          "texto"
+        ],
+        "title": "CapituloTexto",
+        "type": "object"
+      },
+      "ConocimientoVista": {
+        "properties": {
+          "atributo": {
+            "title": "Atributo",
+            "type": "string"
+          },
+          "capitulo": {
+            "title": "Capitulo",
+            "type": "integer"
+          },
+          "personaje": {
+            "title": "Personaje",
+            "type": "string"
+          },
+          "postura": {
+            "title": "Postura",
+            "type": "string"
+          },
+          "sujeto_nombre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sujeto Nombre"
+          },
+          "valor": {
+            "title": "Valor",
+            "type": "string"
+          },
+          "via": {
+            "title": "Via",
+            "type": "string"
+          }
+        },
+        "required": [
+          "personaje",
+          "atributo",
+          "valor",
+          "postura",
+          "via",
+          "capitulo"
+        ],
+        "title": "ConocimientoVista",
+        "type": "object"
+      },
+      "Ejecucion": {
+        "description": "La verdad sobre la generacion. El frontend pinta esto, no los eventos.",
+        "properties": {
+          "actualizado_en": {
+            "title": "Actualizado En",
+            "type": "string"
+          },
+          "capitulo_actual": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capitulo Actual"
+          },
+          "capitulos_completados": {
+            "default": 0,
+            "title": "Capitulos Completados",
+            "type": "integer"
+          },
+          "estado": {
+            "title": "Estado",
+            "type": "string"
+          },
+          "fase": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fase"
+          },
+          "intento_actual": {
+            "default": 1,
+            "title": "Intento Actual",
+            "type": "integer"
+          },
+          "novela_id": {
+            "title": "Novela Id",
+            "type": "integer"
+          },
+          "parada_abierta_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parada Abierta Id"
+          },
+          "total_capitulos": {
+            "default": 0,
+            "title": "Total Capitulos",
+            "type": "integer"
+          },
+          "ultimo_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ultimo Error"
+          }
+        },
+        "required": [
+          "novela_id",
+          "estado",
+          "actualizado_en"
+        ],
+        "title": "Ejecucion",
+        "type": "object"
+      },
+      "Escena": {
+        "properties": {
+          "analepsis": {
+            "default": false,
+            "title": "Analepsis",
+            "type": "boolean"
+          },
+          "conflicto": {
+            "title": "Conflicto",
+            "type": "string"
+          },
+          "lugar": {
+            "title": "Lugar",
+            "type": "string"
+          },
+          "objetivo": {
+            "title": "Objetivo",
+            "type": "string"
+          },
+          "orden": {
+            "title": "Orden",
+            "type": "integer"
+          },
+          "pov": {
+            "title": "Pov",
+            "type": "string"
+          },
+          "reparto": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reparto",
+            "type": "array"
+          },
+          "tension": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tension"
+          },
+          "valor_final": {
+            "title": "Valor Final",
+            "type": "string"
+          },
+          "valor_inicial": {
+            "title": "Valor Inicial",
+            "type": "string"
+          }
+        },
+        "required": [
+          "orden",
+          "pov",
+          "lugar",
+          "reparto",
+          "objetivo",
+          "conflicto",
+          "valor_inicial",
+          "valor_final"
+        ],
+        "title": "Escena",
+        "type": "object"
+      },
+      "EstadoIntencion": {
+        "properties": {
+          "creado_en": {
+            "title": "Creado En",
+            "type": "string"
+          },
+          "estado": {
+            "title": "Estado",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "motivo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motivo"
+          },
+          "resultado": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resultado"
+          },
+          "tipo": {
+            "title": "Tipo",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tipo",
+          "estado",
+          "creado_en"
+        ],
+        "title": "EstadoIntencion",
+        "type": "object"
+      },
+      "EstiloNarrativo": {
+        "properties": {
+          "convenciones_formato": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Convenciones Formato"
+          },
+          "densidad_sensorial": {
+            "title": "Densidad Sensorial",
+            "type": "string"
+          },
+          "distancia_psiquica": {
+            "title": "Distancia Psiquica",
+            "type": "string"
+          },
+          "registro": {
+            "title": "Registro",
+            "type": "string"
+          },
+          "ritmo_prosa": {
+            "title": "Ritmo Prosa",
+            "type": "string"
+          },
+          "tics_prohibidos": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tics Prohibidos",
+            "type": "array"
+          }
+        },
+        "required": [
+          "registro",
+          "ritmo_prosa",
+          "densidad_sensorial",
+          "distancia_psiquica"
+        ],
+        "title": "EstiloNarrativo",
+        "type": "object"
+      },
+      "Estructura": {
+        "properties": {
+          "actos": {
+            "items": {
+              "$ref": "#/components/schemas/Acto"
+            },
+            "title": "Actos",
+            "type": "array"
+          },
+          "capitulos": {
+            "items": {
+              "$ref": "#/components/schemas/Capitulo"
+            },
+            "title": "Capitulos",
+            "type": "array"
+          },
+          "hilos": {
+            "items": {
+              "$ref": "#/components/schemas/Hilo"
+            },
+            "title": "Hilos",
+            "type": "array"
+          },
+          "puntos_de_giro": {
+            "items": {
+              "$ref": "#/components/schemas/PuntoDeGiro"
+            },
+            "title": "Puntos De Giro",
+            "type": "array"
+          },
+          "siembras": {
+            "items": {
+              "$ref": "#/components/schemas/SiembraVista"
+            },
+            "title": "Siembras",
+            "type": "array"
+          }
+        },
+        "required": [
+          "actos",
+          "capitulos",
+          "hilos",
+          "siembras",
+          "puntos_de_giro"
+        ],
+        "title": "Estructura",
+        "type": "object"
+      },
+      "EventoCanon": {
+        "properties": {
+          "descripcion": {
+            "title": "Descripcion",
+            "type": "string"
+          },
+          "dramatizado": {
+            "title": "Dramatizado",
+            "type": "boolean"
+          },
+          "entidad": {
+            "const": "eventos",
+            "default": "eventos",
+            "title": "Entidad",
+            "type": "string"
+          },
+          "escena_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Escena Id"
+          },
+          "fecha_interna": {
+            "title": "Fecha Interna",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "orden_interno": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Orden Interno"
+          },
+          "tipo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo"
+          }
+        },
+        "required": [
+          "id",
+          "fecha_interna",
+          "descripcion",
+          "dramatizado"
+        ],
+        "title": "EventoCanon",
+        "type": "object"
+      },
+      "FaccionCanon": {
+        "properties": {
+          "entidad": {
+            "const": "facciones",
+            "default": "facciones",
+            "title": "Entidad",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "nombre": {
+            "title": "Nombre",
+            "type": "string"
+          },
+          "objetivos": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objetivos"
+          },
+          "proposito": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposito"
+          },
+          "recursos": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recursos"
+          }
+        },
+        "required": [
+          "id",
+          "nombre"
+        ],
+        "title": "FaccionCanon",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Hecho": {
+        "properties": {
+          "atributo": {
+            "title": "Atributo",
+            "type": "string"
+          },
+          "capitulo_origen": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capitulo Origen"
+          },
+          "categoria": {
+            "title": "Categoria",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "sujeto_nombre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sujeto Nombre"
+          },
+          "sujeto_tipo": {
+            "title": "Sujeto Tipo",
+            "type": "string"
+          },
+          "valor": {
+            "title": "Valor",
+            "type": "string"
+          },
+          "vigente": {
+            "default": true,
+            "title": "Vigente",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "sujeto_tipo",
+          "atributo",
+          "valor",
+          "categoria"
+        ],
+        "title": "Hecho",
+        "type": "object"
+      },
+      "Hilo": {
+        "properties": {
+          "conflicto_central": {
+            "title": "Conflicto Central",
+            "type": "string"
+          },
+          "estado": {
+            "title": "Estado",
+            "type": "string"
+          },
+          "hilo_id": {
+            "title": "Hilo Id",
+            "type": "integer"
+          },
+          "tipo": {
+            "title": "Tipo",
+            "type": "string"
+          }
+        },
+        "required": [
+          "hilo_id",
+          "tipo",
+          "conflicto_central",
+          "estado"
+        ],
+        "title": "Hilo",
+        "type": "object"
+      },
+      "IntencionEncolada": {
+        "properties": {
+          "estado": {
+            "title": "Estado",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "tipo": {
+            "title": "Tipo",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tipo",
+          "estado"
+        ],
+        "title": "IntencionEncolada",
+        "type": "object"
+      },
+      "Llamada": {
+        "properties": {
+          "agente": {
+            "title": "Agente",
+            "type": "string"
+          },
+          "capitulo": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capitulo"
+          },
+          "creado_en": {
+            "title": "Creado En",
+            "type": "string"
+          },
+          "duracion_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duracion Ms"
+          },
+          "entrada": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entrada"
+          },
+          "estado": {
+            "title": "Estado",
+            "type": "string"
+          },
+          "exit_code": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exit Code"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "intento": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intento"
+          },
+          "metadatos": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadatos"
+          },
+          "salida_cruda": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salida Cruda"
+          },
+          "sistema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sistema"
+          },
+          "tokens_entrada": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tokens Entrada"
+          },
+          "tokens_entrada_por_bloque": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tokens Entrada Por Bloque"
+          },
+          "tokens_salida": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tokens Salida"
+          }
+        },
+        "required": [
+          "id",
+          "agente",
+          "estado",
+          "creado_en"
+        ],
+        "title": "Llamada",
+        "type": "object"
+      },
+      "LugarCanon": {
+        "properties": {
+          "descripcion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descripcion"
+          },
+          "entidad": {
+            "const": "lugares",
+            "default": "lugares",
+            "title": "Entidad",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "nombre": {
+            "title": "Nombre",
+            "type": "string"
+          },
+          "sistemas_criticos": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Sistemas Criticos",
+            "type": "array"
+          },
+          "tipo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo"
+          }
+        },
+        "required": [
+          "id",
+          "nombre"
+        ],
+        "title": "LugarCanon",
+        "type": "object"
+      },
+      "MotivoCanon": {
+        "properties": {
+          "entidad": {
+            "const": "motivos",
+            "default": "motivos",
+            "title": "Entidad",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "significado_final": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Significado Final"
+          },
+          "significado_inicial": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Significado Inicial"
+          },
+          "simbolo": {
+            "title": "Simbolo",
+            "type": "string"
+          },
+          "tema_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tema Id"
+          }
+        },
+        "required": [
+          "id",
+          "simbolo"
+        ],
+        "title": "MotivoCanon",
+        "type": "object"
+      },
+      "MundoCanon": {
+        "properties": {
+          "culturas": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Culturas"
+          },
+          "entidad": {
+            "const": "mundo",
+            "default": "mundo",
+            "title": "Entidad",
+            "type": "string"
+          },
+          "geografia": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geografia"
+          },
+          "historia": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Historia"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "nombre": {
+            "title": "Nombre",
+            "type": "string"
+          },
+          "reglas_fisicas": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reglas Fisicas"
+          }
+        },
+        "required": [
+          "id",
+          "nombre"
+        ],
+        "title": "MundoCanon",
+        "type": "object"
+      },
+      "NovelaCanon": {
+        "properties": {
+          "creado_en": {
+            "title": "Creado En",
+            "type": "string"
+          },
+          "genero": {
+            "title": "Genero",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "logline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logline"
+          },
+          "longitud_objetivo": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitud Objetivo"
+          },
+          "pov_por_defecto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pov Por Defecto"
+          },
+          "pregunta_dramatica": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pregunta Dramatica"
+          },
+          "premisa": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Premisa"
+          },
+          "semilla_premisa": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Semilla Premisa"
+          },
+          "subgenero_dominante": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subgenero Dominante"
+          },
+          "tema_central": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tema Central"
+          },
+          "tiempo_verbal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tiempo Verbal"
+          },
+          "tipo_final": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo Final"
+          },
+          "titulo": {
+            "title": "Titulo",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "titulo",
+          "genero",
+          "creado_en"
+        ],
+        "title": "NovelaCanon",
+        "type": "object"
+      },
+      "NovelaDetalle": {
+        "properties": {
+          "estilo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EstiloNarrativo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "novela": {
+            "$ref": "#/components/schemas/NovelaCanon"
+          },
+          "restricciones": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Restricciones",
+            "type": "object"
+          }
+        },
+        "required": [
+          "novela",
+          "restricciones"
+        ],
+        "title": "NovelaDetalle",
+        "type": "object"
+      },
+      "NovelaResumen": {
+        "properties": {
+          "capitulos_completados": {
+            "default": 0,
+            "title": "Capitulos Completados",
+            "type": "integer"
+          },
+          "creado_en": {
+            "title": "Creado En",
+            "type": "string"
+          },
+          "estado": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estado"
+          },
+          "genero": {
+            "title": "Genero",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "subgenero_dominante": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subgenero Dominante"
+          },
+          "titulo": {
+            "title": "Titulo",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "titulo",
+          "genero",
+          "creado_en"
+        ],
+        "title": "NovelaResumen",
+        "type": "object"
+      },
+      "NuevaIntencion": {
+        "properties": {
+          "novela_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Novela Id"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "tipo": {
+            "enum": [
+              "crear_novela",
+              "arrancar",
+              "parar",
+              "relanzar",
+              "resolver_parada"
+            ],
+            "title": "Tipo",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tipo"
+        ],
+        "title": "NuevaIntencion",
+        "type": "object"
+      },
+      "ObjetoCanon": {
+        "properties": {
+          "entidad": {
+            "const": "objetos",
+            "default": "objetos",
+            "title": "Entidad",
+            "type": "string"
+          },
+          "funcion_narrativa": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Funcion Narrativa"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "nombre": {
+            "title": "Nombre",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nombre"
+        ],
+        "title": "ObjetoCanon",
+        "type": "object"
+      },
+      "Pagina_Hecho_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Hecho"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "items"
+        ],
+        "title": "Pagina[Hecho]",
+        "type": "object"
+      },
+      "Parada": {
+        "properties": {
+          "capitulo": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capitulo"
+          },
+          "creado_en": {
+            "title": "Creado En",
+            "type": "string"
+          },
+          "estado": {
+            "title": "Estado",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "informe": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Informe"
+          },
+          "intento": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intento"
+          },
+          "resolucion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolucion"
+          },
+          "tipo": {
+            "title": "Tipo",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tipo",
+          "estado",
+          "creado_en"
+        ],
+        "title": "Parada",
+        "type": "object"
+      },
+      "PersonajeCanon": {
+        "properties": {
+          "defecto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Defecto"
+          },
+          "deseo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deseo"
+          },
+          "entidad": {
+            "const": "personajes",
+            "default": "personajes",
+            "title": "Entidad",
+            "type": "string"
+          },
+          "faccion_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faccion Id"
+          },
+          "fantasma": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fantasma"
+          },
+          "herida": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Herida"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "idiolecto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idiolecto"
+          },
+          "mentira": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mentira"
+          },
+          "necesidad_interna": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Necesidad Interna"
+          },
+          "nombre": {
+            "title": "Nombre",
+            "type": "string"
+          },
+          "posicion_tematica": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Posicion Tematica"
+          },
+          "rol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rol"
+          },
+          "rol_narrativo": {
+            "title": "Rol Narrativo",
+            "type": "string"
+          },
+          "secreto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secreto"
+          },
+          "subtipo_arco": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtipo Arco"
+          },
+          "tipo_arco": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo Arco"
+          }
+        },
+        "required": [
+          "id",
+          "nombre",
+          "rol_narrativo"
+        ],
+        "title": "PersonajeCanon",
+        "type": "object"
+      },
+      "PuntoDeGiro": {
+        "properties": {
+          "hilo_id": {
+            "title": "Hilo Id",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "posicion": {
+            "title": "Posicion",
+            "type": "number"
+          },
+          "tipo": {
+            "title": "Tipo",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "hilo_id",
+          "tipo",
+          "posicion"
+        ],
+        "title": "PuntoDeGiro",
+        "type": "object"
+      },
+      "ReglaAmenaza": {
+        "properties": {
+          "activacion": {
+            "default": "",
+            "title": "Activacion",
+            "type": "string"
+          },
+          "capacidad": {
+            "default": "",
+            "title": "Capacidad",
+            "type": "string"
+          },
+          "limite": {
+            "default": "",
+            "title": "Limite",
+            "type": "string"
+          }
+        },
+        "title": "ReglaAmenaza",
+        "type": "object"
+      },
+      "SiembraVista": {
+        "properties": {
+          "capitulo_pago_previsto": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capitulo Pago Previsto"
+          },
+          "elemento": {
+            "title": "Elemento",
+            "type": "string"
+          },
+          "estado": {
+            "title": "Estado",
+            "type": "string"
+          },
+          "hilo_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hilo Id"
+          },
+          "siembra_id": {
+            "title": "Siembra Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "siembra_id",
+          "elemento",
+          "estado"
+        ],
+        "title": "SiembraVista",
+        "type": "object"
+      },
+      "SistemaCanon": {
+        "properties": {
+          "acceso": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acceso"
+          },
+          "capacidades": {
+            "title": "Capacidades",
+            "type": "string"
+          },
+          "costes": {
+            "title": "Costes",
+            "type": "string"
+          },
+          "dureza": {
+            "title": "Dureza",
+            "type": "string"
+          },
+          "entidad": {
+            "const": "sistemas",
+            "default": "sistemas",
+            "title": "Entidad",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "limites": {
+            "title": "Limites",
+            "type": "string"
+          },
+          "nombre": {
+            "title": "Nombre",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nombre",
+          "capacidades",
+          "costes",
+          "limites",
+          "dureza"
+        ],
+        "title": "SistemaCanon",
+        "type": "object"
+      },
+      "TemaCanon": {
+        "properties": {
+          "entidad": {
+            "const": "temas",
+            "default": "temas",
+            "title": "Entidad",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "pregunta_central": {
+            "title": "Pregunta Central",
+            "type": "string"
+          },
+          "verdad_tematica": {
+            "title": "Verdad Tematica",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "pregunta_central",
+          "verdad_tematica"
+        ],
+        "title": "TemaCanon",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "VersionEscena": {
+        "properties": {
+          "creado_en": {
+            "title": "Creado En",
+            "type": "string"
+          },
+          "escena": {
+            "title": "Escena",
+            "type": "integer"
+          },
+          "estado": {
+            "title": "Estado",
+            "type": "string"
+          },
+          "intento": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intento"
+          },
+          "llamada_modelo_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Llamada Modelo Id"
+          },
+          "origen": {
+            "title": "Origen",
+            "type": "string"
+          },
+          "palabras": {
+            "title": "Palabras",
+            "type": "integer"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "escena",
+          "version",
+          "estado",
+          "origen",
+          "palabras",
+          "creado_en"
+        ],
+        "title": "VersionEscena",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "summary": "Borde HTTP del backend. Solo lee; actuar es encolar una intencion.",
+    "title": "Novela de terror espacial",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/intenciones": {
+      "post": {
+        "description": "Encola una intencion. El worker la recoge; la API no ejecuta nada.\n\nLa API valida la FORMA; el estado lo valida el worker, que es quien lo conoce.",
+        "operationId": "crear_intencion_intenciones_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NuevaIntencion"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntencionEncolada"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Crear Intencion"
+      }
+    },
+    "/intenciones/{intencion_id}": {
+      "get": {
+        "operationId": "ver_intencion_intenciones__intencion_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "intencion_id",
+            "required": true,
+            "schema": {
+              "title": "Intencion Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstadoIntencion"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Intencion"
+      }
+    },
+    "/novelas": {
+      "get": {
+        "operationId": "listar_novelas_novelas_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NovelaResumen"
+                  },
+                  "title": "Response Listar Novelas Novelas Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Listar Novelas"
+      }
+    },
+    "/novelas/{novela_id}": {
+      "get": {
+        "operationId": "ver_novela_novelas__novela_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NovelaDetalle"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Novela"
+      }
+    },
+    "/novelas/{novela_id}/canon/{entidad}": {
+      "get": {
+        "operationId": "ver_canon_novelas__novela_id__canon__entidad__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entidad",
+            "required": true,
+            "schema": {
+              "title": "Entidad",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "discriminator": {
+                      "mapping": {
+                        "amenaza": "#/components/schemas/AmenazaCanon",
+                        "eventos": "#/components/schemas/EventoCanon",
+                        "facciones": "#/components/schemas/FaccionCanon",
+                        "lugares": "#/components/schemas/LugarCanon",
+                        "motivos": "#/components/schemas/MotivoCanon",
+                        "mundo": "#/components/schemas/MundoCanon",
+                        "objetos": "#/components/schemas/ObjetoCanon",
+                        "personajes": "#/components/schemas/PersonajeCanon",
+                        "sistemas": "#/components/schemas/SistemaCanon",
+                        "temas": "#/components/schemas/TemaCanon"
+                      },
+                      "propertyName": "entidad"
+                    },
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/MundoCanon"
+                      },
+                      {
+                        "$ref": "#/components/schemas/SistemaCanon"
+                      },
+                      {
+                        "$ref": "#/components/schemas/LugarCanon"
+                      },
+                      {
+                        "$ref": "#/components/schemas/PersonajeCanon"
+                      },
+                      {
+                        "$ref": "#/components/schemas/FaccionCanon"
+                      },
+                      {
+                        "$ref": "#/components/schemas/AmenazaCanon"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ObjetoCanon"
+                      },
+                      {
+                        "$ref": "#/components/schemas/TemaCanon"
+                      },
+                      {
+                        "$ref": "#/components/schemas/MotivoCanon"
+                      },
+                      {
+                        "$ref": "#/components/schemas/EventoCanon"
+                      }
+                    ]
+                  },
+                  "title": "Response Ver Canon Novelas  Novela Id  Canon  Entidad  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Canon"
+      }
+    },
+    "/novelas/{novela_id}/capitulos/{numero}": {
+      "get": {
+        "operationId": "ver_capitulo_novelas__novela_id__capitulos__numero__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "numero",
+            "required": true,
+            "schema": {
+              "title": "Numero",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "version",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CapituloTexto"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Capitulo"
+      }
+    },
+    "/novelas/{novela_id}/capitulos/{numero}/versiones": {
+      "get": {
+        "operationId": "ver_versiones_novelas__novela_id__capitulos__numero__versiones_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "numero",
+            "required": true,
+            "schema": {
+              "title": "Numero",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VersionEscena"
+                  },
+                  "title": "Response Ver Versiones Novelas  Novela Id  Capitulos  Numero  Versiones Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Versiones"
+      }
+    },
+    "/novelas/{novela_id}/conocimiento": {
+      "get": {
+        "operationId": "ver_conocimiento_novelas__novela_id__conocimiento_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "personaje",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Personaje"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limite",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limite",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConocimientoVista"
+                  },
+                  "title": "Response Ver Conocimiento Novelas  Novela Id  Conocimiento Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Conocimiento"
+      }
+    },
+    "/novelas/{novela_id}/ejecucion": {
+      "get": {
+        "description": "El estado completo. Esta es la verdad; el stream solo avisa de que cambio.",
+        "operationId": "ver_ejecucion_novelas__novela_id__ejecucion_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ejecucion"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Ejecucion"
+      }
+    },
+    "/novelas/{novela_id}/estructura": {
+      "get": {
+        "operationId": "ver_estructura_novelas__novela_id__estructura_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Estructura"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Estructura"
+      }
+    },
+    "/novelas/{novela_id}/eventos": {
+      "get": {
+        "description": "SSE. Un evento avisa de que algo cambio; el cliente reconsulta.\n\nSi el cliente trae `Last-Event-ID`, se retoma justo despues. La reconexion es un caso de\nprimera clase: esto va a estar abierto horas.",
+        "operationId": "stream_eventos_novelas__novela_id__eventos_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Un evento de traza por linea `data:`, con su `id:`."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stream Eventos"
+      }
+    },
+    "/novelas/{novela_id}/hechos": {
+      "get": {
+        "operationId": "ver_hechos_novelas__novela_id__hechos_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sujeto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sujeto"
+            }
+          },
+          {
+            "in": "query",
+            "name": "categoria",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Categoria"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capitulo",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Capitulo"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limite",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limite",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "desde",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Desde",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pagina_Hecho_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Hechos"
+      }
+    },
+    "/novelas/{novela_id}/paradas": {
+      "get": {
+        "operationId": "listar_paradas_novelas__novela_id__paradas_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Parada"
+                  },
+                  "title": "Response Listar Paradas Novelas  Novela Id  Paradas Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Listar Paradas"
+      }
+    },
+    "/novelas/{novela_id}/paradas/{parada_id}": {
+      "get": {
+        "operationId": "ver_parada_novelas__novela_id__paradas__parada_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "parada_id",
+            "required": true,
+            "schema": {
+              "title": "Parada Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Parada"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Parada"
+      }
+    },
+    "/novelas/{novela_id}/traza/llamadas": {
+      "get": {
+        "description": "Por defecto sin el prompt: son decenas de miles de tokens por fila.",
+        "operationId": "ver_llamadas_novelas__novela_id__traza_llamadas_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "completo",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Completo",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limite",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limite",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Llamada"
+                  },
+                  "title": "Response Ver Llamadas Novelas  Novela Id  Traza Llamadas Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Llamadas"
+      }
+    }
+  }
+}

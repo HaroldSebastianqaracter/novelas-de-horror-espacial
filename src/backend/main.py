@@ -20,13 +20,13 @@ import asyncio
 import json
 import logging
 import sqlite3
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import AsyncGenerator, AsyncIterator, Iterator
 from contextlib import asynccontextmanager
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 import config
 from compartido import db
@@ -51,13 +51,31 @@ class CrearNovela(BaseModel):
     titulo: str = Field(min_length=1)
     genero: str = "terror_espacial"
     semilla_premisa: str = ""
-    restricciones: dict[str, str] = Field(default_factory=dict)
+    restricciones: dict[str, str] = Field(default_factory=dict[str, str])
+
+
+class PayloadRelanzar(BaseModel):
+    desde_capitulo: int = Field(ge=1)
+
+
+class PayloadResolverParada(BaseModel):
+    parada_id: int = Field(ge=1)
+    accion: Literal["relanzar", "aceptar_retcon", "rehacer"]
+    desde_capitulo: int | None = Field(default=None, ge=1)
+
+
+#: La API valida la FORMA de cada payload; el estado lo valida el worker (RF-API-04).
+PAYLOADS: dict[str, type[BaseModel]] = {
+    "crear_novela": CrearNovela,
+    "relanzar": PayloadRelanzar,
+    "resolver_parada": PayloadResolverParada,
+}
 
 
 class NuevaIntencion(BaseModel):
     tipo: TipoIntencion
     novela_id: int | None = None
-    payload: dict[str, Any] = Field(default_factory=dict)
+    payload: dict[str, Any] = Field(default_factory=dict[str, Any])
 
 
 class IntencionEncolada(BaseModel):
@@ -129,7 +147,7 @@ class Capitulo(BaseModel):
     objetivo: str | None = None
     estado: str
     resumen: str | None = None
-    escenas: list[Escena] = Field(default_factory=list)
+    escenas: list[Escena] = Field(default_factory=list[Escena])
 
 
 class CapituloTexto(BaseModel):
@@ -155,6 +173,232 @@ class Pagina[T](BaseModel):
     items: list[T]
 
 
+# --- Canon y estructura (RF2-API-01: ninguna respuesta sin esquema) --------------------------
+
+
+class NovelaCanon(BaseModel):
+    id: int
+    titulo: str
+    genero: str
+    subgenero_dominante: str | None = None
+    premisa: str | None = None
+    logline: str | None = None
+    pregunta_dramatica: str | None = None
+    tema_central: str | None = None
+    tipo_final: str | None = None
+    longitud_objetivo: int | None = None
+    pov_por_defecto: str | None = None
+    tiempo_verbal: str | None = None
+    semilla_premisa: str | None = None
+    creado_en: str
+
+
+class EstiloNarrativo(BaseModel):
+    registro: str
+    ritmo_prosa: str
+    densidad_sensorial: str
+    distancia_psiquica: str
+    tics_prohibidos: list[str] = Field(default_factory=list[str])
+    convenciones_formato: str | None = None
+
+
+class NovelaDetalle(BaseModel):
+    novela: NovelaCanon
+    restricciones: dict[str, str]
+    estilo: EstiloNarrativo | None = None
+
+
+class MundoCanon(BaseModel):
+    entidad: Literal["mundo"] = "mundo"
+    id: int
+    nombre: str
+    geografia: str | None = None
+    historia: str | None = None
+    culturas: str | None = None
+    reglas_fisicas: str | None = None
+
+
+class SistemaCanon(BaseModel):
+    entidad: Literal["sistemas"] = "sistemas"
+    id: int
+    nombre: str
+    capacidades: str
+    costes: str
+    limites: str
+    acceso: str | None = None
+    dureza: str
+
+
+class LugarCanon(BaseModel):
+    entidad: Literal["lugares"] = "lugares"
+    id: int
+    nombre: str
+    tipo: str | None = None
+    descripcion: str | None = None
+    sistemas_criticos: list[int] = Field(default_factory=list[int])
+
+
+class PersonajeCanon(BaseModel):
+    entidad: Literal["personajes"] = "personajes"
+    id: int
+    nombre: str
+    rol: str | None = None
+    rol_narrativo: str
+    deseo: str | None = None
+    necesidad_interna: str | None = None
+    fantasma: str | None = None
+    herida: str | None = None
+    mentira: str | None = None
+    defecto: str | None = None
+    tipo_arco: str | None = None
+    subtipo_arco: str | None = None
+    idiolecto: str | None = None
+    secreto: str | None = None
+    posicion_tematica: str | None = None
+    faccion_id: int | None = None
+
+
+class FaccionCanon(BaseModel):
+    entidad: Literal["facciones"] = "facciones"
+    id: int
+    nombre: str
+    proposito: str | None = None
+    objetivos: str | None = None
+    recursos: str | None = None
+
+
+class ReglaAmenaza(BaseModel):
+    capacidad: str = ""
+    limite: str = ""
+    activacion: str = ""
+
+
+class AmenazaCanon(BaseModel):
+    entidad: Literal["amenaza"] = "amenaza"
+    id: int
+    naturaleza: str
+    reglas: list[ReglaAmenaza] = Field(default_factory=list[ReglaAmenaza])
+    origen: str | None = None
+    tema_id: int | None = None
+
+
+class ObjetoCanon(BaseModel):
+    entidad: Literal["objetos"] = "objetos"
+    id: int
+    nombre: str
+    funcion_narrativa: str | None = None
+
+
+class TemaCanon(BaseModel):
+    entidad: Literal["temas"] = "temas"
+    id: int
+    pregunta_central: str
+    verdad_tematica: str
+
+
+class MotivoCanon(BaseModel):
+    entidad: Literal["motivos"] = "motivos"
+    id: int
+    tema_id: int | None = None
+    simbolo: str
+    significado_inicial: str | None = None
+    significado_final: str | None = None
+
+
+class EventoCanon(BaseModel):
+    entidad: Literal["eventos"] = "eventos"
+    id: int
+    escena_id: int | None = None
+    fecha_interna: str
+    orden_interno: int | None = None
+    descripcion: str
+    tipo: str | None = None
+    dramatizado: bool
+
+
+#: Una fila de canon: la entidad del camino dice cual de los modelos es (union discriminada).
+EntidadCanon = Annotated[
+    MundoCanon | SistemaCanon | LugarCanon | PersonajeCanon | FaccionCanon | AmenazaCanon
+    | ObjetoCanon | TemaCanon | MotivoCanon | EventoCanon,
+    Field(discriminator="entidad"),
+]
+
+
+class Acto(BaseModel):
+    numero: int
+    funcion_narrativa: str | None = None
+
+
+class Hilo(BaseModel):
+    hilo_id: int
+    tipo: str
+    conflicto_central: str
+    estado: str
+
+
+class SiembraVista(BaseModel):
+    siembra_id: int
+    elemento: str
+    hilo_id: int | None = None
+    capitulo_pago_previsto: int | None = None
+    estado: str
+
+
+class PuntoDeGiro(BaseModel):
+    id: int
+    hilo_id: int
+    tipo: str
+    posicion: float
+
+
+class Estructura(BaseModel):
+    actos: list[Acto]
+    capitulos: list[Capitulo]
+    hilos: list[Hilo]
+    siembras: list[SiembraVista]
+    puntos_de_giro: list[PuntoDeGiro]
+
+
+class VersionEscena(BaseModel):
+    escena: int
+    version: int
+    estado: str
+    origen: str
+    intento: int | None = None
+    palabras: int
+    creado_en: str
+    llamada_modelo_id: int | None = None
+
+
+class ConocimientoVista(BaseModel):
+    personaje: str
+    sujeto_nombre: str | None = None
+    atributo: str
+    valor: str
+    postura: str
+    via: str
+    capitulo: int
+
+
+class Llamada(BaseModel):
+    id: int
+    agente: str
+    capitulo: int | None = None
+    intento: int | None = None
+    tokens_entrada: int | None = None
+    tokens_salida: int | None = None
+    duracion_ms: int | None = None
+    exit_code: int | None = None
+    estado: str
+    creado_en: str
+    # Solo con ?completo=1: son decenas de miles de tokens por fila.
+    sistema: str | None = None
+    entrada: str | None = None
+    salida_cruda: str | None = None
+    tokens_entrada_por_bloque: dict[str, int] | None = None
+    metadatos: dict[str, Any] | None = None
+
+
 # --- Aplicacion ------------------------------------------------------------------------------
 
 
@@ -163,7 +407,7 @@ def _cargar_config() -> config.Config:
 
 
 @asynccontextmanager
-async def ciclo(app: FastAPI) -> AsyncIterator[None]:
+async def ciclo(app: FastAPI) -> AsyncGenerator[None]:
     """Al arrancar, crea el esquema si no existe. NO lanza el worker: son dos comandos.
 
     Crear el esquema es la unica escritura que se le permite a la API fuera de las
@@ -250,19 +494,17 @@ def crear_intencion(cuerpo: NuevaIntencion, con: ConEscritura) -> IntencionEncol
         if lectura.novela(con, cuerpo.novela_id) is None:
             raise HTTPException(status_code=404, detail=f"No existe la novela {cuerpo.novela_id}")
 
-    if cuerpo.tipo == "crear_novela":
-        CrearNovela.model_validate(cuerpo.payload)
-    elif cuerpo.tipo == "relanzar":
-        if int(cuerpo.payload.get("desde_capitulo", 0)) < 1:
-            raise HTTPException(status_code=422, detail="desde_capitulo debe ser >= 1")
-    elif cuerpo.tipo == "resolver_parada":
-        if not cuerpo.payload.get("parada_id"):
-            raise HTTPException(status_code=422, detail="Falta parada_id")
-        if cuerpo.payload.get("accion") not in ("relanzar", "aceptar_retcon", "rehacer"):
-            raise HTTPException(
-                status_code=422,
-                detail="accion debe ser 'relanzar', 'aceptar_retcon' o 'rehacer'",
+    modelo = PAYLOADS.get(cuerpo.tipo)
+    if modelo is not None:
+        try:
+            modelo.model_validate(cuerpo.payload)
+        except ValidationError as exc:
+            # Un payload mal formado es 422, nunca un 500 (RF2-API-04).
+            detalle = "; ".join(
+                f"{'.'.join(str(x) for x in e['loc']) or 'payload'}: {e['msg']}"
+                for e in exc.errors()
             )
+            raise HTTPException(status_code=422, detail=detalle) from exc
 
     cur = con.execute(
         "INSERT INTO intencion (tipo, novela_id, payload) VALUES (?,?,?)",
@@ -306,14 +548,15 @@ def listar_novelas(con: Con) -> list[NovelaResumen]:
     ]
 
 
-@app.get("/novelas/{novela_id}")
-def ver_novela(novela_id: int, con: Con) -> dict[str, Any]:
+@app.get("/novelas/{novela_id}", response_model=NovelaDetalle)
+def ver_novela(novela_id: int, con: Con) -> NovelaDetalle:
     n = _novela_o_404(con, novela_id)
-    return {
-        "novela": n,
-        "restricciones": lectura.restricciones(con, novela_id),
-        "estilo": lectura.estilo(con, novela_id),
-    }
+    estilo = lectura.estilo(con, novela_id)
+    return NovelaDetalle(
+        novela=NovelaCanon.model_validate(n),
+        restricciones=lectura.restricciones(con, novela_id),
+        estilo=EstiloNarrativo.model_validate(estilo) if estilo else None,
+    )
 
 
 @app.get("/novelas/{novela_id}/ejecucion", response_model=Ejecucion)
@@ -342,8 +585,16 @@ _ENTIDADES = {
 }
 
 
-@app.get("/novelas/{novela_id}/canon/{entidad}")
-def ver_canon(novela_id: int, entidad: str, con: Con) -> list[dict[str, Any]]:
+_MODELOS_CANON: dict[str, type[BaseModel]] = {
+    "mundo": MundoCanon, "sistemas": SistemaCanon, "lugares": LugarCanon,
+    "personajes": PersonajeCanon, "facciones": FaccionCanon, "amenaza": AmenazaCanon,
+    "objetos": ObjetoCanon, "temas": TemaCanon, "motivos": MotivoCanon, "eventos": EventoCanon,
+}
+_COLUMNAS_JSON = ("sistemas_criticos", "reglas")
+
+
+@app.get("/novelas/{novela_id}/canon/{entidad}", response_model=list[EntidadCanon])
+def ver_canon(novela_id: int, entidad: str, con: Con) -> list[BaseModel]:
     _novela_o_404(con, novela_id)
     tabla = _ENTIDADES.get(entidad)
     if tabla is None:
@@ -351,19 +602,24 @@ def ver_canon(novela_id: int, entidad: str, con: Con) -> list[dict[str, Any]]:
             status_code=404,
             detail=f"Entidad desconocida. Validas: {', '.join(sorted(_ENTIDADES))}",
         )
-    return [
-        dict(f) for f in con.execute(
-            f"SELECT * FROM {tabla} WHERE novela_id = ? ORDER BY id", (novela_id,)
-        )
-    ]
+    modelo = _MODELOS_CANON[entidad]
+    filas: list[BaseModel] = []
+    for f in con.execute(f"SELECT * FROM {tabla} WHERE novela_id = ? ORDER BY id", (novela_id,)):
+        datos: dict[str, Any] = {**dict(f), "entidad": entidad}
+        for columna in _COLUMNAS_JSON:
+            if columna in datos:
+                datos[columna] = _json(datos[columna]) or []
+        filas.append(modelo.model_validate(datos))
+    return filas
 
 
-@app.get("/novelas/{novela_id}/estructura")
-def ver_estructura(novela_id: int, con: Con) -> dict[str, Any]:
+@app.get("/novelas/{novela_id}/estructura", response_model=Estructura)
+def ver_estructura(novela_id: int, con: Con) -> Estructura:
     _novela_o_404(con, novela_id)
     actos = [
-        dict(f) for f in con.execute(
-            "SELECT * FROM acto WHERE novela_id = ? ORDER BY numero", (novela_id,)
+        Acto.model_validate(dict(f)) for f in con.execute(
+            "SELECT numero, funcion_narrativa FROM acto WHERE novela_id = ? ORDER BY numero",
+            (novela_id,),
         )
     ]
     capitulos: list[Capitulo] = []
@@ -385,22 +641,22 @@ def ver_estructura(novela_id: int, con: Con) -> dict[str, Any]:
             numero=int(f["numero"]), objetivo=f["objetivo"], estado=str(f["estado"]),
             resumen=f["resumen"], escenas=escenas,
         ))
-    return {
-        "actos": actos,
-        "capitulos": [c.model_dump() for c in capitulos],
-        "hilos": lectura.hilos(con, novela_id),
-        "siembras": [
-            dict(f) for f in con.execute(
+    return Estructura(
+        actos=actos,
+        capitulos=capitulos,
+        hilos=[Hilo.model_validate(h) for h in lectura.hilos(con, novela_id)],
+        siembras=[
+            SiembraVista.model_validate(dict(f)) for f in con.execute(
                 "SELECT * FROM siembra_vigente WHERE novela_id = ?", (novela_id,)
             )
         ],
-        "puntos_de_giro": [
-            dict(f) for f in con.execute(
+        puntos_de_giro=[
+            PuntoDeGiro.model_validate(dict(f)) for f in con.execute(
                 "SELECT g.* FROM punto_de_giro g JOIN hilo h ON h.id = g.hilo_id "
                 "WHERE h.novela_id = ? ORDER BY g.posicion", (novela_id,)
             )
         ],
-    }
+    )
 
 
 # --- Manuscrito -----------------------------------------------------------------------------------
@@ -436,11 +692,11 @@ def ver_capitulo(
     )
 
 
-@app.get("/novelas/{novela_id}/capitulos/{numero}/versiones")
-def ver_versiones(novela_id: int, numero: int, con: Con) -> list[dict[str, Any]]:
+@app.get("/novelas/{novela_id}/capitulos/{numero}/versiones", response_model=list[VersionEscena])
+def ver_versiones(novela_id: int, numero: int, con: Con) -> list[VersionEscena]:
     _novela_o_404(con, novela_id)
     return [
-        dict(f) for f in con.execute(
+        VersionEscena.model_validate(dict(f)) for f in con.execute(
             """
             SELECT e.orden AS escena, et.version, et.estado, et.origen, et.intento,
                    et.palabras, et.creado_en, et.llamada_modelo_id
@@ -507,11 +763,11 @@ def ver_hechos(
     ])
 
 
-@app.get("/novelas/{novela_id}/conocimiento")
+@app.get("/novelas/{novela_id}/conocimiento", response_model=list[ConocimientoVista])
 def ver_conocimiento(
     novela_id: int, con: Con, personaje: str | None = None,
     limite: Annotated[int, Query(ge=1, le=500)] = 100,
-) -> list[dict[str, Any]]:
+) -> list[ConocimientoVista]:
     _novela_o_404(con, novela_id)
     sql = """
         SELECT p.nombre AS personaje, h.sujeto_nombre, h.atributo, h.valor, ec.postura, ec.via,
@@ -529,7 +785,7 @@ def ver_conocimiento(
         params.append(f"%{personaje}%")
     sql += " ORDER BY p.nombre, c.numero LIMIT ?"
     params.append(limite)
-    return [dict(f) for f in con.execute(sql, params)]
+    return [ConocimientoVista.model_validate(dict(f)) for f in con.execute(sql, params)]
 
 
 # --- Paradas --------------------------------------------------------------------------------------
@@ -571,11 +827,14 @@ def ver_parada(novela_id: int, parada_id: int, con: Con) -> Parada:
 # --- Traza ----------------------------------------------------------------------------------------
 
 
-@app.get("/novelas/{novela_id}/traza/llamadas")
+@app.get(
+    "/novelas/{novela_id}/traza/llamadas", response_model=list[Llamada],
+    response_model_exclude_unset=True,
+)
 def ver_llamadas(
     novela_id: int, con: Con, completo: bool = False,
     limite: Annotated[int, Query(ge=1, le=200)] = 50,
-) -> list[dict[str, Any]]:
+) -> list[Llamada]:
     """Por defecto sin el prompt: son decenas de miles de tokens por fila."""
     columnas = (
         "id, agente, capitulo, intento, tokens_entrada, tokens_salida, duracion_ms, "
@@ -583,16 +842,29 @@ def ver_llamadas(
     )
     if completo:
         columnas += ", sistema, entrada, salida_cruda, tokens_entrada_por_bloque, metadatos"
-    return [
-        dict(f) for f in con.execute(
-            f"SELECT {columnas} FROM llamada_modelo WHERE novela_id = ? "
-            f"ORDER BY id DESC LIMIT ?",
-            (novela_id, limite),
-        )
-    ]
+    llamadas: list[Llamada] = []
+    for f in con.execute(
+        f"SELECT {columnas} FROM llamada_modelo WHERE novela_id = ? ORDER BY id DESC LIMIT ?",
+        (novela_id, limite),
+    ):
+        datos: dict[str, Any] = dict(f)
+        for columna in ("tokens_entrada_por_bloque", "metadatos"):
+            if columna in datos:
+                datos[columna] = _json(datos[columna])
+        llamadas.append(Llamada.model_validate(datos))
+    return llamadas
 
 
-@app.get("/novelas/{novela_id}/eventos")
+class RespuestaSSE(StreamingResponse):
+    """El stream de eventos: `text/event-stream`, no JSON, tambien en el contrato OpenAPI."""
+
+    media_type = "text/event-stream"
+
+
+@app.get(
+    "/novelas/{novela_id}/eventos", response_class=RespuestaSSE,
+    responses={200: {"description": "Un evento de traza por linea `data:`, con su `id:`."}},
+)
 async def stream_eventos(novela_id: int, request: Request) -> StreamingResponse:
     """SSE. Un evento avisa de que algo cambio; el cliente reconsulta.
 
@@ -638,7 +910,7 @@ async def stream_eventos(novela_id: int, request: Request) -> StreamingResponse:
                 silencio = 0.0
                 yield ": keepalive\n\n"
 
-    return StreamingResponse(
+    return RespuestaSSE(
         generar(),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},

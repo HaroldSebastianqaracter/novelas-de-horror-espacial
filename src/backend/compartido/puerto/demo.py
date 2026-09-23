@@ -193,9 +193,9 @@ def escaleta(entrada: str, agente: str) -> dict[str, Any]:
     # La longitud por escena sale del presupuesto, no de una constante: si no, la puerta 2
     # rechaza la escaleta por desviarse del objetivo, con razon.
     por_escena = max(300, _objetivo_palabras(entrada) // (CAPITULOS * ESCENAS_POR_CAPITULO))
-    capitulos = []
+    capitulos: list[dict[str, Any]] = []
     for numero in range(1, CAPITULOS + 1):
-        escenas = []
+        escenas: list[dict[str, Any]] = []
         for orden in range(1, ESCENAS_POR_CAPITULO + 1):
             escenas.append({
                 "orden": orden,

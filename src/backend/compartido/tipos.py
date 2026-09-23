@@ -7,7 +7,7 @@ Son la traduccion de las listas cerradas de docs/definitions.md y docs/domain-kn
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Literal
+from typing import Any, Literal, cast
 
 # --- Ontologia ---------------------------------------------------------------------------
 
@@ -71,6 +71,16 @@ TIPOS_EVENTO: tuple[str, ...] = (
     "revertido", "rehecho", "completada", "error", "worker_recuperado", "paquete_recortado",
     "extraccion_descartes", "indice_fallo",
 )
+
+
+def como_dict(valor: object) -> dict[str, Any]:
+    """Un objeto JSON ya cargado, o {} si no lo es. El tipo lo fija quien lo lee."""
+    return cast(dict[str, Any], valor) if isinstance(valor, dict) else {}
+
+
+def como_lista(valor: object) -> list[Any]:
+    """Una lista JSON ya cargada, o [] si no lo es."""
+    return cast(list[Any], valor) if isinstance(valor, list) else []
 
 
 def nombres_repetidos(nombres: Iterable[str]) -> list[str]:

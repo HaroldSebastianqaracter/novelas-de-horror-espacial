@@ -43,7 +43,11 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.pyright]
 include = ["."]
-exclude = ["**/__pycache__", ".venv"]
+# Los tests quedan fuera del modo estricto (spec2, fase 8): comprueban comportamiento, y
+# tiparlos a fondo no anade garantias sobre el codigo que ejercitan.
+exclude = ["**/__pycache__", ".venv", "tests", ".hypothesis"]
+venvPath = "."
+venv = ".venv"
 typeCheckingMode = "strict"
 pythonVersion = "3.12"
 reportMissingImports = "warning"

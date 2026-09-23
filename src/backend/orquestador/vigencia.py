@@ -19,6 +19,8 @@ import json
 import sqlite3
 from typing import Any
 
+from compartido.tipos import como_dict, como_lista
+
 #: Lo que lee cada puerta, fila a fila y en orden estable. Cambiar cualquiera de estas filas
 #: deja la puerta sin vigencia; cambiar otra cosa, no.
 _LECTURAS: dict[int, tuple[str, ...]] = {
@@ -75,7 +77,7 @@ def _detalle(fila: sqlite3.Row) -> dict[str, Any]:
         cargado = json.loads(fila["detalle"] or "{}")
     except json.JSONDecodeError:
         return {}
-    return cargado if isinstance(cargado, dict) else {}
+    return como_dict(cargado)
 
 
 def puerta_vigente(con: sqlite3.Connection, novela_id: int, puerta: int) -> bool:
@@ -96,7 +98,7 @@ def informe_de_rechazo(con: sqlite3.Connection, novela_id: int, puerta: int) -> 
     if fila is None or str(fila["veredicto"]) != "falla":
         return []
     salida: list[str] = []
-    for c in _detalle(fila).get("conflictos", []):
-        if isinstance(c, dict) and not c.get("aviso"):
+    for c in map(como_dict, como_lista(_detalle(fila).get("conflictos"))):
+        if c and not c.get("aviso"):
             salida.append(f"[{c.get('comprobacion', '')}] {c.get('descripcion', '')}")
     return salida

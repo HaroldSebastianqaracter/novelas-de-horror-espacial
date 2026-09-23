@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from compartido.db import BUSY_TIMEOUT_MS, conectar, transaccion
+from compartido.tipos import como_dict
 
 
 @dataclass(frozen=True)
@@ -50,7 +51,7 @@ def tomar(con: sqlite3.Connection) -> Intencion | None:
     if fila is None:
         return None
     try:
-        payload = json.loads(fila["payload"] or "{}")
+        payload = como_dict(json.loads(fila["payload"] or "{}"))
     except json.JSONDecodeError:
         payload = {}
     return Intencion(

@@ -37,7 +37,7 @@ class PersonajeSalida(BaseModel):
         min_length=5, description="Que responde este personaje a la pregunta central"
     )
     faccion: str = ""
-    relaciones: list[RelacionSalida] = Field(default_factory=list)
+    relaciones: list[RelacionSalida] = Field(default_factory=list[RelacionSalida])
 
     @model_validator(mode="after")
     def _subtipo_solo_si_negativo(self) -> PersonajeSalida:

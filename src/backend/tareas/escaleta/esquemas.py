@@ -45,8 +45,8 @@ class EscenaSalida(BaseModel):
     analepsis: bool = False
     secuencia: str = ""
     punto_de_giro: TipoPuntoDeGiro | None = None
-    objetos: list[str] = Field(default_factory=list)
-    beats: list[BeatSalida] = Field(default_factory=list)
+    objetos: list[str] = Field(default_factory=list[str])
+    beats: list[BeatSalida] = Field(default_factory=list[BeatSalida])
     secuela: SecuelaSalida | None = None
 
     @model_validator(mode="after")
@@ -86,7 +86,7 @@ class SecuenciaSalida(BaseModel):
 
 class SalidaEscaleta(BaseModel):
     capitulos: list[CapituloSalida] = Field(min_length=1)
-    secuencias: list[SecuenciaSalida] = Field(default_factory=list)
+    secuencias: list[SecuenciaSalida] = Field(default_factory=list[SecuenciaSalida])
 
     @model_validator(mode="after")
     def _capitulos_correlativos(self) -> SalidaEscaleta:

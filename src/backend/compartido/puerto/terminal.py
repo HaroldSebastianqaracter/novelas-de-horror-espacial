@@ -40,6 +40,7 @@ from pathlib import Path
 from typing import Any
 
 from ..db import transaccion
+from ..tipos import como_dict, como_lista
 from .base import (
     AgenteInterrumpido,
     AgenteNoAutenticado,
@@ -94,8 +95,9 @@ def _extraer_json(texto: str) -> dict[str, Any] | None:
                         cargado = json.loads(texto[inicio : i + 1])
                     except json.JSONDecodeError:
                         break
-                    if isinstance(cargado, dict):
-                        return cargado
+                    objeto = como_dict(cargado)
+                    if objeto or cargado == {}:
+                        return objeto
                     break
         inicio = texto.find("{", inicio + 1)
     return None
@@ -103,9 +105,9 @@ def _extraer_json(texto: str) -> dict[str, Any] | None:
 
 def _uso_de_herramientas(sobre: dict[str, Any]) -> str:
     """Por que una respuesta delata que el agente intento usar herramientas, o '' si no."""
-    denegados = sobre.get("permission_denials") or []
+    denegados = como_lista(sobre.get("permission_denials"))
     if denegados:
-        nombres = sorted({str(d.get("tool_name", "?")) for d in denegados if isinstance(d, dict)})
+        nombres = sorted({str(como_dict(d).get("tool_name", "?")) for d in denegados})
         return f"permisos denegados para {', '.join(nombres) or len(denegados)}"
     turnos = int(sobre.get("num_turns") or 0)
     if turnos > TURNOS_ESPERADOS:
@@ -350,9 +352,11 @@ class PuertoTerminal:
                         f"El agente '{agente}' intento usar herramientas: {uso_de_herramientas}"
                     )
 
-                salida = sobre.get("structured_output")
-                if not isinstance(salida, dict):
-                    salida = _extraer_json(resultado_txt)
+                salida: dict[str, Any] | None = (
+                    como_dict(sobre["structured_output"])
+                    if isinstance(sobre.get("structured_output"), dict)
+                    else _extraer_json(resultado_txt)
+                )
 
                 if not isinstance(salida, dict):
                     ultimo_error = "La respuesta no contiene un objeto JSON conforme al esquema."
@@ -371,7 +375,7 @@ class PuertoTerminal:
                     )
                     continue
 
-                uso = sobre.get("usage") or {}
+                uso = como_dict(sobre.get("usage"))
                 tokens_salida = int(uso.get("output_tokens") or _estimar_tokens(resultado_txt))
                 tokens_entrada = int(uso.get("input_tokens") or 0)
                 self._cerrar_traza(

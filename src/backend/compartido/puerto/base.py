@@ -65,7 +65,7 @@ class ResultadoAgente:
     coste_usd: float = 0.0
     num_turnos: int = 0
     llamada_id: int | None = None
-    metadatos: dict[str, Any] = field(default_factory=dict)
+    metadatos: dict[str, Any] = field(default_factory=dict[str, Any])
 
     @property
     def hubo_compactacion(self) -> bool:

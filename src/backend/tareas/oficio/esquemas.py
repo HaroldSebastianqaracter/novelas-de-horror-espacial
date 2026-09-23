@@ -74,5 +74,5 @@ class SalidaContinuidad(BaseModel):
     """
 
     resumen: str = Field(min_length=20)
-    explicacion_por_conflicto: list[str] = Field(default_factory=list)
+    explicacion_por_conflicto: list[str] = Field(default_factory=list[str])
     sugerencia: str = ""

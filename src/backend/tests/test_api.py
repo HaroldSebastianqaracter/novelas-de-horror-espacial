@@ -7,6 +7,7 @@ verdad aunque el stream se caiga.
 
 from __future__ import annotations
 
+import json
 import sqlite3
 import tempfile
 from collections.abc import Iterator
@@ -191,3 +192,101 @@ def test_la_conexion_de_lectura_rechaza_escrituras(cliente) -> None:
     with pytest.raises(sqlite3.OperationalError):
         con.execute("INSERT INTO novela (titulo) VALUES ('x')")
     con.close()
+
+
+# --- spec2, fase 8: el contrato esta tipado y no cambia sin revision ----------------------------
+
+SNAPSHOT = Path(__file__).with_name("openapi.json")
+
+
+def _resolver(esquema: dict, raiz: dict) -> dict:
+    while "$ref" in esquema:
+        nombre = esquema["$ref"].rsplit("/", 1)[-1]
+        esquema = raiz["components"]["schemas"][nombre]
+    return esquema
+
+
+def test_ninguna_respuesta_es_un_objeto_sin_esquema(cliente) -> None:
+    """RF2-API-01: el cliente generado no puede salir con `any` en ninguna respuesta."""
+    c, _ = cliente
+    raiz = c.get("/openapi.json").json()
+    sueltas: list[str] = []
+    for ruta, metodos in raiz["paths"].items():
+        for metodo, operacion in metodos.items():
+            for codigo, respuesta in operacion.get("responses", {}).items():
+                if not codigo.startswith("2"):
+                    continue
+                contenido = respuesta.get("content", {}).get("application/json")
+                if contenido is None:
+                    continue  # el SSE es text/event-stream
+                esquema = _resolver(contenido["schema"], raiz)
+                if esquema.get("type") == "array":
+                    esquema = _resolver(esquema["items"], raiz)
+                tipado = "properties" in esquema or "oneOf" in esquema or "anyOf" in esquema
+                if not tipado:
+                    sueltas.append(f"{metodo.upper()} {ruta} -> {esquema}")
+    assert not sueltas, "Respuestas sin esquema:\n" + "\n".join(sueltas)
+
+
+def test_el_contrato_no_cambia_sin_revisarlo(cliente) -> None:
+    """Snapshot versionado del OpenAPI. Si el cambio es a proposito, regeneralo con
+    NOVELAS_ACTUALIZAR_OPENAPI=1 y revisa el diff antes de commitear."""
+    import os
+
+    c, _ = cliente
+    actual = c.get("/openapi.json").json()
+    if os.environ.get("NOVELAS_ACTUALIZAR_OPENAPI") == "1":
+        SNAPSHOT.write_text(
+            json.dumps(actual, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+    guardado = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+    assert actual == guardado, (
+        "El contrato de la API ha cambiado. Si es a proposito, regenera tests/openapi.json "
+        "con NOVELAS_ACTUALIZAR_OPENAPI=1 y revisa el diff."
+    )
+
+
+@pytest.mark.parametrize("payload", [
+    {"desde_capitulo": "tres"}, {"desde_capitulo": 0}, {},
+])
+def test_relanzar_con_un_capitulo_que_no_es_entero_es_422(cliente, payload: dict) -> None:
+    c, ruta = cliente
+    novela_id = _generar(ruta)
+    respuesta = c.post(
+        "/intenciones", json={"tipo": "relanzar", "novela_id": novela_id, "payload": payload}
+    )
+    assert respuesta.status_code == 422, respuesta.text
+    assert respuesta.json()["codigo"] == "peticion_invalida"
+
+
+@pytest.mark.parametrize("payload", [
+    {"parada_id": 1, "accion": "borrar_todo"}, {"accion": "rehacer"},
+    {"parada_id": "una", "accion": "rehacer"},
+])
+def test_resolver_parada_mal_formada_es_422(cliente, payload: dict) -> None:
+    c, ruta = cliente
+    novela_id = _generar(ruta)
+    respuesta = c.post(
+        "/intenciones",
+        json={"tipo": "resolver_parada", "novela_id": novela_id, "payload": payload},
+    )
+    assert respuesta.status_code == 422, respuesta.text
+
+
+def test_crear_una_novela_sin_titulo_es_422_y_no_500(cliente) -> None:
+    c, _ = cliente
+    respuesta = c.post("/intenciones", json={"tipo": "crear_novela", "payload": {}})
+    assert respuesta.status_code == 422
+
+
+def test_cada_entidad_del_canon_sale_con_su_esquema(cliente) -> None:
+    c, ruta = cliente
+    novela_id = _generar(ruta)
+    for entidad in ("mundo", "sistemas", "lugares", "personajes", "facciones", "amenaza",
+                    "objetos", "temas", "motivos", "eventos"):
+        filas = c.get(f"/novelas/{novela_id}/canon/{entidad}").json()
+        assert filas, entidad
+        assert all(f["entidad"] == entidad for f in filas)
+    amenaza = c.get(f"/novelas/{novela_id}/canon/amenaza").json()[0]
+    assert amenaza["reglas"] and "capacidad" in amenaza["reglas"][0]

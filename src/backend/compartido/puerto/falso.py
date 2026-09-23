@@ -19,6 +19,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from ..tipos import como_dict
 from .base import AgenteInterrumpido, ResultadoAgente, SalidaInvalida
 
 Generador = Callable[[str, str], dict[str, Any]]
@@ -59,8 +60,8 @@ class PuertoFalso:
         candidatos.append(self.fixtures_dir / f"{agente}.json")
         for ruta in candidatos:
             if ruta.is_file():
-                cargado = json.loads(ruta.read_text(encoding="utf-8"))
-                if isinstance(cargado, dict):
+                cargado = como_dict(json.loads(ruta.read_text(encoding="utf-8")))
+                if cargado:
                     return cargado
         return None
 

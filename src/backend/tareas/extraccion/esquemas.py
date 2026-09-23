@@ -69,7 +69,7 @@ class EstadoPersonajeExtraido(BaseModel):
     )
     salud_fisica: str = ""
     estado_psicologico: str = ""
-    nivel_confianza: dict[str, str] = Field(default_factory=dict)
+    nivel_confianza: dict[str, str] = Field(default_factory=dict[str, str])
 
 
 class EstadoObjetoExtraido(BaseModel):
@@ -127,15 +127,19 @@ class EntidadNoReconocida(BaseModel):
 class SalidaExtraccion(BaseModel):
     """Termina cuando todo lo que el texto afirma esta registrado."""
 
-    hechos: list[HechoExtraido] = Field(default_factory=list)
-    conocimiento: list[ConocimientoExtraido] = Field(default_factory=list)
-    usos_de_conocimiento: list[UsoConocimiento] = Field(default_factory=list)
-    estados_personaje: list[EstadoPersonajeExtraido] = Field(default_factory=list)
-    estados_objeto: list[EstadoObjetoExtraido] = Field(default_factory=list)
-    eventos: list[EventoExtraido] = Field(default_factory=list)
-    siembras: list[SiembraExtraida] = Field(default_factory=list)
+    hechos: list[HechoExtraido] = Field(default_factory=list[HechoExtraido])
+    conocimiento: list[ConocimientoExtraido] = Field(default_factory=list[ConocimientoExtraido])
+    usos_de_conocimiento: list[UsoConocimiento] = Field(default_factory=list[UsoConocimiento])
+    estados_personaje: list[EstadoPersonajeExtraido] = Field(
+        default_factory=list[EstadoPersonajeExtraido]
+    )
+    estados_objeto: list[EstadoObjetoExtraido] = Field(default_factory=list[EstadoObjetoExtraido])
+    eventos: list[EventoExtraido] = Field(default_factory=list[EventoExtraido])
+    siembras: list[SiembraExtraida] = Field(default_factory=list[SiembraExtraida])
     amenaza_revelacion: NivelRevelacion | None = None
-    entidades_no_reconocidas: list[EntidadNoReconocida] = Field(default_factory=list)
+    entidades_no_reconocidas: list[EntidadNoReconocida] = Field(
+        default_factory=list[EntidadNoReconocida]
+    )
     resumen: str = Field(min_length=20, description="Sinopsis del capitulo, hasta 200 palabras")
     resumen_breve: str = Field(min_length=10, description="Una frase, hasta 40 palabras")
 

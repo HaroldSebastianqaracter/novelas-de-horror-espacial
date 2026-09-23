@@ -19,6 +19,7 @@ from typing import Any
 
 from compartido.db import TABLAS_DE_ESTADO
 from compartido.grafo import emitir_evento, insertar
+from compartido.tipos import como_dict, como_lista
 from compartido.vectores import purgar_descartes
 
 from . import estados
@@ -83,13 +84,12 @@ def hechos_a_revocar(con: sqlite3.Connection, parada_id: int) -> set[int]:
     if fila is None:
         return set()
     try:
-        informe = json.loads(fila["informe"] or "{}")
+        informe = como_dict(json.loads(fila["informe"] or "{}"))
     except json.JSONDecodeError:
         return set()
     ids: set[int] = set()
-    for conflicto in informe.get("conflictos", []):
-        datos = conflicto.get("datos") or {}
-        previo = datos.get("hecho_previo_id")
+    for conflicto in como_lista(informe.get("conflictos")):
+        previo = como_dict(como_dict(conflicto).get("datos")).get("hecho_previo_id")
         if previo:
             ids.add(int(previo))
     return ids
@@ -227,7 +227,7 @@ def revertir_grafo(
     return borrado
 
 
-def _estado_y_parada(con: sqlite3.Connection, novela_id: int) -> tuple[str, str | None]:
+def estado_y_parada(con: sqlite3.Connection, novela_id: int) -> tuple[str, str | None]:
     """Estado de la ejecucion y, si esta en parada, el tipo de la parada abierta."""
     estado = str(con.execute(
         "SELECT estado FROM ejecucion WHERE novela_id = ?", (novela_id,)
@@ -247,7 +247,7 @@ def relanzar(
     `TransicionInvalida` y el grafo queda intacto (RF2-FALLO-03). Corre dentro de la
     transaccion del llamante.
     """
-    estado_actual, tipo = _estado_y_parada(con, novela_id)
+    estado_actual, tipo = estado_y_parada(con, novela_id)
     destino = estados.siguiente(estado_actual, suceso, tipo_parada=tipo)
 
     borrado = revertir_grafo(con, novela_id, desde_capitulo, motivo=suceso)
@@ -281,7 +281,7 @@ def borrar_escaleta(con: sqlite3.Connection, novela_id: int) -> None:
 
 
 def _rehacer(con: sqlite3.Connection, novela_id: int, parada_id: int) -> str:
-    estado_actual, tipo = _estado_y_parada(con, novela_id)
+    estado_actual, tipo = estado_y_parada(con, novela_id)
     destino = estados.siguiente(estado_actual, "rehacer", tipo_parada=tipo)
     cerrar_parada(con, novela_id, parada_id, "rehacer")
     con.execute(
@@ -303,7 +303,7 @@ def rehacer_estructura(con: sqlite3.Connection, novela_id: int, parada_id: int) 
     El estructurador vuelve a correr con el informe de la puerta 1 en su paquete; mundo,
     elenco y premisa se conservan. Corre dentro de la transaccion del llamante.
     """
-    _, tipo = _estado_y_parada(con, novela_id)
+    _, tipo = estado_y_parada(con, novela_id)
     if tipo != "estructura":
         estados.siguiente("parada", "rehacer", tipo_parada=tipo)  # lanza con el motivo
     # La escaleta cuelga de los actos: si la hubiera, caeria con ellos.
@@ -319,7 +319,7 @@ def rehacer_estructura(con: sqlite3.Connection, novela_id: int, parada_id: int) 
 
 def rehacer_escaleta(con: sqlite3.Connection, novela_id: int, parada_id: int) -> str:
     """Borra la escaleta rechazada, si queda algo, y deja la ejecucion en `escaletando`."""
-    _, tipo = _estado_y_parada(con, novela_id)
+    _, tipo = estado_y_parada(con, novela_id)
     if tipo != "escaleta":
         estados.siguiente("parada", "rehacer", tipo_parada=tipo)
     borrar_escaleta(con, novela_id)

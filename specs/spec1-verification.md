@@ -2,7 +2,7 @@
 
 Plan de verificación de [spec1.md](spec1.md). Métodos y etiquetas según [docs/validators.md](../docs/validators.md).
 
-Actualizado el 23 de septiembre de 2026. Suite: 151 tests en verde y 1 marcado `modelo` (el golden set de recuperación, que necesita el modelo descargado y no corre por defecto). Las rutas de evidencia son relativas a `src/backend/`.
+Actualizado el 23 de septiembre de 2026. Suite: 161 tests en verde y 1 marcado `modelo`; `ruff` limpio y `pyright` estricto en cero sobre `src/backend` sin los tests. Las rutas de evidencia son relativas a `src/backend/`.
 
 > **Filas degradadas el 23 de septiembre de 2026.** La auditoría de ese día reprodujo fallos en siete filas que estaban en `implementado`: 11, 16, 17, 21, 25, 27 y 35. Pasan a `fallando` ya, y no cuando se arreglen, porque un plan que dice «implementado» sobre un fallo reproducido es justo lo que la sección siguiente llama la forma más común de mentir. Cada una vuelve a `implementado` en la fase de [spec2-plan.md](spec2-plan.md) que la corrige, y su propiedad endurecida vive en [spec2-verification.md](spec2-verification.md).
 
@@ -19,7 +19,7 @@ Actualizado el 23 de septiembre de 2026. Suite: 151 tests en verde y 1 marcado `
 | 3 | La API no alcanza el puerto ni el orquestador | Static analysis | `A` | `tests/test_arquitectura.py::test_los_router_no_invocan_al_modelo_ni_orquestan` | implementado |
 | 4 | La lista de carpetas es la lista de agentes | Static analysis | `A` | `tests/test_arquitectura.py::test_la_lista_de_carpetas_es_la_lista_de_agentes` | implementado |
 | 5 | Cada agente tiene su skill, con las secciones que la spec exige | Unit testing | `T` | `tests/test_arquitectura.py::test_cada_agente_de_la_v1_tiene_su_skill`, `::test_las_skills_tienen_la_forma_que_pide_la_spec` | implementado |
-| 6 | Toda respuesta de la API está en OpenAPI | Contract testing | `T` | `tests/test_api.py::test_openapi_declara_todas_las_rutas` | implementado |
+| 6 | Toda respuesta de la API está en OpenAPI, con esquema | Contract testing | `T` | `tests/test_api.py::test_openapi_declara_todas_las_rutas`, `::test_ninguna_respuesta_es_un_objeto_sin_esquema`, `::test_el_contrato_no_cambia_sin_revisarlo` (snapshot `tests/openapi.json`). Reforzada por spec2, fase 8 | implementado |
 | 7 | La API no escribe salvo en `intencion` | Integration testing | `T` | `tests/test_api.py::test_la_api_solo_escribe_intenciones` | implementado |
 | 8 | La conexión de lectura rechaza escrituras en el motor | Integration testing | `T` | `tests/test_api.py::test_la_conexion_de_lectura_rechaza_escrituras`, `tests/test_arquitectura.py::test_la_api_no_puede_escribir` | implementado |
 | 9 | Encolar una intención no ejecuta nada | Integration testing | `T` | `tests/test_api.py::test_encolar_una_intencion_no_ejecuta_nada` | implementado |

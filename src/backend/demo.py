@@ -155,7 +155,7 @@ def mirar(ruta: Path, novela_id: int | None, segundos: int) -> None:
         con.close()
 
 
-def resumen(con, novela_id: int) -> None:
+def resumen(con: sqlite3.Connection, novela_id: int) -> None:
     capitulos = con.execute(
         "SELECT numero, estado, resumen_breve FROM capitulo WHERE novela_id = ? ORDER BY numero",
         (novela_id,),

@@ -212,6 +212,8 @@ src/backend/
 
 **RF-API-01** La API expone OpenAPI en `/openapi.json` y toda respuesta se declara con esquemas Pydantic. El frontend generará su cliente desde ahí; ningún endpoint devuelve `dict` sin esquema.
 
+> Reforzado por spec2, RF2-API-01: se cumple y se comprueba con un snapshot del OpenAPI.
+
 **RF-API-02** La API **solo lee** el grafo, con una excepción: `POST` de intenciones inserta una fila en `intencion`. Ninguna otra ruta escribe.
 
 > Ampliado por spec2, RF2-PROC-03: la API puede crear el esquema al arrancar, pero no migra.
@@ -663,6 +665,8 @@ No reanuda solo: el autor decide con `arrancar`. Es la parte de la reanudación 
 **RNF-04 Recursos.** Un único fichero SQLite; sin servicios adicionales; sin red salvo la que Claude Code use por su cuenta.
 
 **RNF-05 Calidad del código.** Python ≥ 3.12, `uv` para dependencias, `ruff` (formato y lint), `pyright` en modo estricto sobre `src/backend/`, `pytest` para tests. Los tres pasan en limpio antes de cada commit.
+
+> Cumplido desde spec2, fase 8: pyright estricto en cero sobre `src/backend` sin los tests.
 
 **RNF-06 Sin secretos.** El repositorio y la base de datos no contienen credenciales. El backend no lee ninguna variable con clave de API.
 

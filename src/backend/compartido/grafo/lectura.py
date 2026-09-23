@@ -10,6 +10,8 @@ import json
 import sqlite3
 from typing import Any
 
+from compartido.tipos import como_lista
+
 
 def _fila(f: sqlite3.Row | None) -> dict[str, Any] | None:
     return None if f is None else dict(f)
@@ -45,9 +47,8 @@ def estilo(con: sqlite3.Connection, novela_id: int) -> dict[str, Any] | None:
 
 
 def tics_prohibidos(con: sqlite3.Connection, novela_id: int) -> list[str]:
-    e = estilo(con, novela_id)
-    valor = (e or {}).get("tics_prohibidos") or []
-    return [str(t) for t in valor] if isinstance(valor, list) else []
+    e = estilo(con, novela_id) or {}
+    return [str(t) for t in como_lista(e.get("tics_prohibidos"))]
 
 
 def ejecucion(con: sqlite3.Connection, novela_id: int) -> dict[str, Any] | None:

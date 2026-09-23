@@ -26,7 +26,7 @@ class LugarSalida(BaseModel):
     nombre: str = Field(min_length=2)
     tipo: str = ""
     descripcion: str = Field(min_length=10)
-    sistemas_criticos: list[str] = Field(default_factory=list)
+    sistemas_criticos: list[str] = Field(default_factory=list[str])
 
 
 class FaccionSalida(BaseModel):

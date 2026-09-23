@@ -19,6 +19,7 @@ from compartido import db
 from compartido.db import transaccion
 from compartido.grafo import emitir_evento, insertar, lectura
 from compartido.puerto import construir as construir_puerto
+from compartido.tipos import como_dict
 from compartido.vectores import Indice
 from orquestador import cola, estados, fallo, pipeline, vigencia
 
@@ -201,7 +202,7 @@ class Worker:
                 genero=p.get("genero") or "terror_espacial",
                 semilla_premisa=p.get("semilla_premisa"),
             )
-            for tipo, valor in (p.get("restricciones") or {}).items():
+            for tipo, valor in como_dict(p.get("restricciones")).items():
                 insertar(
                     self.con, "restriccion", novela_id=novela_id, tipo=tipo, valor=str(valor)
                 )
@@ -278,7 +279,7 @@ class Worker:
 
     def _motivo_para_no_relanzar(self, novela_id: int, desde: int, suceso: str) -> str | None:
         """Todo lo que impide relanzar, comprobado ANTES de tocar el grafo (RF2-WK-06)."""
-        estado, tipo = fallo._estado_y_parada(self.con, novela_id)  # noqa: SLF001
+        estado, tipo = fallo.estado_y_parada(self.con, novela_id)
         try:
             estados.siguiente(estado, suceso, tipo_parada=tipo)
         except estados.TransicionInvalida as exc:

@@ -31,7 +31,7 @@ class HiloSalida(BaseModel):
     nombre: str = Field(min_length=2, description="Identificador legible del hilo")
     tipo: TipoHilo
     conflicto_central: str = Field(min_length=10)
-    personajes: list[str] = Field(default_factory=list)
+    personajes: list[str] = Field(default_factory=list[str])
     dramatiza_tema: bool = False
     puntos_de_giro: list[PuntoDeGiroSalida] = Field(min_length=2)
 
@@ -70,8 +70,8 @@ class ObjetoSalida(BaseModel):
 class SalidaEstructura(BaseModel):
     actos: list[ActoSalida] = Field(min_length=3)
     hilos: list[HiloSalida] = Field(min_length=1)
-    siembras: list[SiembraSalida] = Field(default_factory=list)
-    objetos: list[ObjetoSalida] = Field(default_factory=list)
+    siembras: list[SiembraSalida] = Field(default_factory=list[SiembraSalida])
+    objetos: list[ObjetoSalida] = Field(default_factory=list[ObjetoSalida])
 
     @model_validator(mode="after")
     def _un_solo_principal(self) -> SalidaEstructura:
