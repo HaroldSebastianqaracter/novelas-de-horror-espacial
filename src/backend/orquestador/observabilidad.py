@@ -99,14 +99,15 @@ _ESPECIALES: dict[str, str] = {
 #: se ve.
 _RELLENOS = frozenset({"ᅟ", "ᅠ", "ㅤ", "ﾠ", "⠀"})
 #: Particulas de un nombre compuesto: «Maria de los Angeles» no convierte en etiqueta cada
-#: «los» del texto. Es la unica lista que se aplica a todos los nombres del brief.
+#: «los» del texto. Tambien pueden ser un nombre («Van», «Del»): en mayuscula casan, pero
+#: solo en mayuscula (`_partes_del_nombre`).
 _PARTICULAS = frozenset({
     "de", "del", "la", "las", "los", "el", "y", "da", "das", "do", "dos", "di", "van", "von",
     "der", "den", "le",
 })
 #: Lo que acompana a un nombre en la firma de `quien_regala` («Andres, tu hermano», «con todo
-#: mi carino»). Solo cuenta escrito en minuscula: en mayuscula puede ser un nombre («Tia»,
-#: «Prima»), y sustituir de mas es el lado seguro.
+#: mi carino»). Escrito en minuscula no es el nombre; en mayuscula puede serlo («Tia»,
+#: «Prima») y casa solo en mayuscula (`_partes_del_nombre`).
 _ACOMPANAN_A_LA_FIRMA = frozenset({
     "tus", "mis", "sus", "con", "para", "por", "que", "una", "uno", "unos", "unas", "les",
     "todo", "toda", "todos", "todas", "mucho", "mucha", "muchos", "muchas", "tuyo", "tuya",
@@ -116,7 +117,7 @@ _ACOMPANAN_A_LA_FIRMA = frozenset({
     "hijos", "amigo", "amiga", "amigos", "amigas", "novio", "novia", "esposo", "esposa",
     "marido", "mujer", "familia", "querido", "querida", "queridos", "queridas", "carino",
     "amor", "beso", "besos", "abrazo", "abrazos", "feliz", "felicidades", "cumpleanos",
-    "parte", "regalo", "siempre", "navidad", "aniversario", "boda",
+    "parte", "regalo", "siempre", "navidad", "aniversario", "boda", "muy", "fuerte",
 })
 #: Lo que abre una firma y se escribe en mayuscula solo por ir delante («Tus padres…»,
 #: «Con todo…»).
@@ -179,48 +180,78 @@ def _plegar(texto: str) -> tuple[str, list[int], set[int]]:
     return "".join(plegado), posiciones, suaves
 
 
-def _partes_del_nombre(nombre: str, *, firma: bool) -> list[str]:
-    """Las partes de un nombre del brief que lo identifican, plegadas.
+def _mayuscula(c: str) -> bool:
+    # Un digrafo de titulo («ǅ») es mayuscula para quien lee, aunque `isupper()` diga que no.
+    return c.isupper() or c.istitle()
 
-    Se trocea por cualquier caracter que no sea letra, y tambien por una frontera suave; como
-    una frontera suave tambien puede ir dentro de una parte («Mar­ta» con guion blando), se
-    toman las dos lecturas. En la firma de `quien_regala`, lo que acompana al nombre no cuenta.
+
+def _paso_a_mayuscula(original: str, plegado: str, posiciones: list[int], k: int) -> bool:
+    """Si entre `plegado[k - 1]` y `plegado[k]` una mayuscula abre otra palabra:
+    «regaloParaMarta», o «MARTAIbanez», donde la abre la mayuscula que va antes de minuscula."""
+    antes, despues = posiciones[k - 1], posiciones[k]
+    if antes == despues or not _mayuscula(original[despues]):
+        return False
+    if original[antes].islower():
+        return True
+    siguiente = posiciones[k + 1] if k + 1 < len(plegado) else despues
+    return siguiente != despues and original[siguiente].islower()
+
+
+def _partes_del_nombre(nombre: str, *, firma: bool) -> dict[str, bool]:
+    """Las partes de un nombre del brief, plegadas; para cada una, si casa en cualquier
+    grafia (True) o solo empezando en mayuscula en la prosa (False).
+
+    Se trocea por cualquier caracter que no sea letra. Una frontera suave o un paso a
+    mayuscula («MartaIbanez») pueden separar dos partes o ir dentro de una («Mar­ta» con guion
+    blando), asi que se toman todas las lecturas: cada tramo entre dos cortes cualesquiera.
+
+    Lo que puede no ser un nombre se sustituye igual, pero solo en mayuscula: una particula
+    («Van», «Del»), lo que acompana a un nombre en la firma, y una parte que solo sale de
+    partir por un corte sin separador visible («mar» de «Mar­ta»). En mayuscula es como se
+    escribe un nombre en la prosa; en minuscula, «del» o «el mar» no se tocan. Escritas en
+    minuscula en el brief, la particula («Maria de los Angeles») y lo que acompana a la firma
+    («tu hermano») no son el nombre, y tampoco el posesivo que abre la firma («Tus padres»).
     """
     plegado, posiciones, suaves = _plegar(nombre)
     primera_letra = next((k for k, x in enumerate(plegado) if x.isalpha()), -1)
-    cortes = sorted({0, len(plegado), *suaves})
-    tramos = [(0, len(plegado)), *zip(cortes, cortes[1:], strict=False)]
-    partes: list[str] = []
-    for desde, hasta in tramos:
-        for patron in (_TOKEN_CON_APOSTROFO, _TOKEN):
-            for m in patron.finditer(plegado, desde, hasta):
-                p = m.group()
-                if len(p) < 3 or p in _PARTICULAS:
-                    continue
-                if firma:
-                    mayuscula = nombre[posiciones[m.start()]].isupper()
-                    if p in _ACOMPANAN_A_LA_FIRMA and not mayuscula:
+    cortes = sorted({
+        0, len(plegado), *suaves,
+        *(k for k in range(1, len(plegado))
+          if plegado[k - 1].isalpha() and plegado[k].isalpha()
+          and _paso_a_mayuscula(nombre, plegado, posiciones, k)),
+    })
+    partes: dict[str, bool] = {}
+    for i, desde in enumerate(cortes):
+        for hasta in cortes[i + 1:]:
+            entera = desde == 0 and hasta == len(plegado)
+            for patron in (_TOKEN_CON_APOSTROFO, _TOKEN):
+                for m in patron.finditer(plegado, desde, hasta):
+                    p = m.group()
+                    if len(p) < 3:
                         continue
-                    if m.start() == primera_letra and p in _ENCABEZAN_LA_FIRMA:
+                    if firma and m.start() == primera_letra and p in _ENCABEZAN_LA_FIRMA:
                         continue
-                partes.append(p)
+                    dudosa = p in _PARTICULAS or (firma and p in _ACOMPANAN_A_LA_FIRMA)
+                    if dudosa and not _mayuscula(nombre[posiciones[m.start()]]):
+                        continue
+                    partes[p] = partes.get(p, False) or (entera and not dudosa)
     return partes
 
 
 class Seudonimizador:
     """Sustituye los nombres del encargo por etiquetas antes de que salgan de la maquina.
 
-    El destinatario, quien regala y cada allegado, completos y por partes de tres letras o mas
-    que no sean particulas; en la firma de quien regala, tampoco lo que acompana al nombre en
-    minuscula («tu hermano»). Se compara sobre el texto plegado (sin marcas, sin lo que no se
-    ve, sin distinguir mayusculas) y como palabra completa: una letra pegada la hace otra
-    palabra, salvo que medie una frontera suave o un paso a mayuscula («regaloParaMarta»,
-    «MARTAIbanez»); un digito o un guion bajo no la hacen otra palabra. Tambien en las claves
-    de los diccionarios (`nivel_confianza` va por personaje). El mapa no se envia nunca.
+    El destinatario, quien regala y cada allegado, completos y por partes de tres letras o
+    mas (`_partes_del_nombre` dice cuales casan solo en mayuscula). Se compara sobre el texto
+    plegado (sin marcas, sin lo que no se ve, sin distinguir mayusculas) y como palabra
+    completa: una letra pegada la hace otra palabra, salvo que medie una frontera suave o un
+    paso a mayuscula («regaloParaMarta», «MARTAIbanez»); un digito o un guion bajo no la hacen
+    otra palabra. Tambien en las claves de los diccionarios (`nivel_confianza` va por
+    personaje). El mapa no se envia nunca.
     """
 
     def __init__(self, brief: Brief | None) -> None:
-        self._formas: list[tuple[str, str]] = []
+        self._formas: list[tuple[str, str, bool]] = []
         if brief is None:
             return
         grupos: list[tuple[str, str]] = []
@@ -232,16 +263,26 @@ class Seudonimizador:
             (f"[ALLEGADO_{i}]", a.nombre) for i, a in enumerate(brief.allegados, start=1)
         )
         # El primero que reclama una forma se la queda: el destinatario manda sobre un
-        # allegado que comparta apellido.
+        # allegado que comparta apellido. Una forma casa en cualquier grafia si alguien la
+        # reclama asi.
         asignadas: dict[str, str] = {}
+        libres: set[str] = set()
         for etiqueta, nombre in grupos:
             completo = " ".join(_plegar(nombre)[0].split())
             partes = _partes_del_nombre(nombre, firma=etiqueta == "[QUIEN_REGALA]")
-            for forma in (completo, *partes):
-                if forma:
-                    asignadas.setdefault(forma, etiqueta)
+            # Un nombre de una palabra es su unica parte, y vale lo que diga la parte.
+            candidatas = dict(partes)
+            if completo and completo not in partes:
+                candidatas[completo] = True
+            for forma, libre in candidatas.items():
+                asignadas.setdefault(forma, etiqueta)
+                if libre:
+                    libres.add(forma)
         # Las formas largas antes que sus partes: «Marta Ibanez» entera, no «[X] Ibanez».
-        self._formas = sorted(asignadas.items(), key=lambda par: len(par[0]), reverse=True)
+        self._formas = sorted(
+            ((f, e, f in libres) for f, e in asignadas.items()),
+            key=lambda t: len(t[0]), reverse=True,
+        )
 
     def texto(self, texto: str) -> str:
         if not self._formas or not texto:
@@ -253,23 +294,17 @@ class Seudonimizador:
                 return True
             if not (plegado[k - 1].isalpha() and plegado[k].isalpha()):
                 return True
-            antes, despues = posiciones[k - 1], posiciones[k]
-            if antes == despues or not texto[despues].isupper():
-                return False
-            if texto[antes].islower():
-                return True
-            # «MARTAIbanez»: la mayuscula que abre una palabra capitalizada.
-            siguiente = posiciones[k + 1] if k + 1 < len(plegado) else despues
-            return siguiente != despues and texto[siguiente].islower()
+            return _paso_a_mayuscula(texto, plegado, posiciones, k)
 
         # Varios espacios seguidos del texto casan con uno del nombre.
         tramos: list[tuple[int, int, str]] = []
-        for forma, etiqueta in self._formas:
+        for forma, etiqueta, libre in self._formas:
             patron = r"\s+".join(re.escape(p) for p in forma.split(" "))
             tramos.extend(
                 (m.start(), m.end(), etiqueta)
                 for m in re.finditer(patron, plegado)
                 if frontera(m.start()) and frontera(m.end())
+                and (libre or _mayuscula(texto[posiciones[m.start()]]))
             )
         if not tramos:
             return texto
@@ -300,10 +335,13 @@ class Seudonimizador:
             )
             elegidos[lo:hi] = [fundido]
             inicios[lo:hi] = [fundido[0]]
-        salida = texto
-        for desde, hasta, etiqueta in reversed(elegidos):
-            salida = salida[:desde] + etiqueta + salida[hasta:]
-        return unicodedata.normalize("NFC", salida)
+        trozos: list[str] = []
+        previo = 0
+        for desde, hasta, etiqueta in elegidos:
+            trozos += [texto[previo:desde], etiqueta]
+            previo = hasta
+        trozos.append(texto[previo:])
+        return unicodedata.normalize("NFC", "".join(trozos))
 
     def valor(self, valor: Any) -> Any:
         if isinstance(valor, str):

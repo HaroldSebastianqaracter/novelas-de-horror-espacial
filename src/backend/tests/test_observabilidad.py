@@ -438,8 +438,48 @@ def test_la_firma_distingue_lo_que_acompana_de_un_nombre(
     assert s.texto(prosa) == esperado
 
 
+@pytest.mark.parametrize(("destinatario", "prosa", "esperado"), [
+    # Validador (quinta revision): una particula que es un nombre se escapaba.
+    ("Van Ferrer", "Van grita.", "[DESTINATARIO] grita."),
+    ("Del Soto", "Del grita.", "[DESTINATARIO] grita."),
+    # ...pero en minuscula en la prosa no es el nombre.
+    ("Van Ferrer", "Ellos van al puente del sector.", "Ellos van al puente del sector."),
+    # Una particula en minuscula en el brief no es el nombre.
+    ("Ludo van Berk", "Ellos van. Berk grita.", "Ellos van. [DESTINATARIO] grita."),
+    # El brief con las partes pegadas en camelCase.
+    ("MartaIbáñez", "Marta grita. Ibáñez calla.", "[DESTINATARIO] grita. [DESTINATARIO] calla."),
+    ("MARTAIbáñez", "Marta grita. Ibáñez calla.", "[DESTINATARIO] grita. [DESTINATARIO] calla."),
+    # Dos fronteras suaves de papel distinto en el brief: todas las lecturas.
+    ("Marta​Ibá­ñez", "Ibáñez calla.", "[DESTINATARIO] calla."),
+    ("Mar­ta​Ibáñez", "Marta grita.", "[DESTINATARIO] grita."),
+    ("Marta​Ibáñez​So­to", "Soto calla.", "[DESTINATARIO] calla."),
+    # Lo que solo sale de partir por un corte invisible casa solo en mayuscula.
+    ("Mar­ta Soto", "El mar estaba en calma.", "El mar estaba en calma."),
+    # Un digrafo de titulo abre palabra.
+    ("Džemal Horvat", "regaloParaǅemal grita.", "regaloPara[DESTINATARIO] grita."),
+])
+def test_quinta_revision_del_seudonimizador(destinatario: str, prosa: str, esperado: str) -> None:
+    s = obs.Seudonimizador(_brief_con(destinatario=destinatario, regala="Luis", allegado="Kiko"))
+    assert s.texto(prosa) == esperado
+
+
+@pytest.mark.parametrize(("regala", "prosa", "esperado"), [
+    # Una palabra de dedicatoria que abre la firma en mayuscula casa solo en mayuscula.
+    ("Feliz cumpleaños, Andrés", "Qué feliz estaba. Andrés llega.",
+     "Qué feliz estaba. [QUIEN_REGALA] llega."),
+    ("Un beso muy fuerte de tu hermano Andrés", "Muy fuerte, dijo Andrés.",
+     "Muy fuerte, dijo [QUIEN_REGALA]."),
+])
+def test_la_firma_no_ensucia_la_prosa_con_su_dedicatoria(
+    regala: str, prosa: str, esperado: str
+) -> None:
+    s = obs.Seudonimizador(_brief_con(destinatario="Marta Ibáñez", regala=regala,
+                                      allegado="Kiko"))
+    assert s.texto(prosa) == esperado
+
+
 def test_muchos_aciertos_no_se_funden_mal() -> None:
-    """Validador: la fusion de solapes era cuadratica; ahora cada tramo mira a sus vecinos."""
+    """Miles de aciertos seguidos salen bien. Mide la correccion de la fusion, no su coste."""
     s = obs.Seudonimizador(_brief_con(destinatario="Marta Ibáñez", regala="Luis",
                                       allegado="Kiko"))
     texto = "Marta y Kiko miran a Luis. " * 3000
