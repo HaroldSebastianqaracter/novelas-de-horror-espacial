@@ -499,6 +499,96 @@ def test_las_presencias_recorren_el_pipeline_hasta_la_traza() -> None:
     assert recuentos[-1]["presencias"] == {"escena_desconocida": 1, "personaje_sin_resolver": 1}
 
 
+# --- RF3-PAS-10: la ficha para el redactor -------------------------------------------------------
+
+
+def _con_reyes_visto_en_el_capitulo_1() -> tuple[sqlite3.Connection, fabrica.Grafo]:
+    """Reyes no esta en ningun reparto, pero el extractor lo constato en la escena 1.1."""
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    con.execute("INSERT INTO presencia_escena (novela_id, escena_id, personaje_id) "
+                "VALUES (?,?,?)", (g.novela_id, g.escenas[(1, 1)], g.personajes["Reyes"]))
+    return con, g
+
+
+def test_el_redactor_conoce_a_quien_ya_salio_fuera_del_reparto() -> None:
+    import config
+    from compartido.contexto import Presupuesto
+    from compartido.grafo import lectura
+    from tareas.redaccion import servicio as s_redaccion
+
+    con, g = _con_reyes_visto_en_el_capitulo_1()
+    assert [p["nombre"] for p in lectura.personajes_fuera_del_reparto(con, g.novela_id, 2)] \
+        == ["Reyes"]
+    # En el capitulo 1 todavia no habia salido antes.
+    assert lectura.personajes_fuera_del_reparto(con, g.novela_id, 1) == []
+    paquete = s_redaccion.paquete(con, g.novela_id, 2, presupuesto=Presupuesto(
+        bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE))
+    canon = next(b for b in paquete.bloques if b.nombre == "canon")
+    otros = [e for e in canon.elementos if e.seccion.startswith("### Otros personajes")]
+    assert [e.texto.split("**")[1] for e in otros] == ["Reyes"]
+    # Opcional: se recorta antes que el reparto.
+    assert not any(e.obligatorio for e in otros)
+
+
+def test_el_redactor_recibe_los_hechos_de_objetos_facciones_y_de_quien_ya_salio() -> None:
+    from compartido.grafo import lectura
+
+    con, g = _con_reyes_visto_en_el_capitulo_1()
+    faccion = con.execute(
+        "INSERT INTO faccion (novela_id, nombre, nombre_clave, proposito) "
+        "VALUES (?, 'Turno', 'turno', 'Operar la estacion')", (g.novela_id,)).lastrowid
+    con.execute("UPDATE personaje SET faccion_id = ? WHERE id = ?",
+                (faccion, g.personajes["Kowalski"]))
+    con.execute("INSERT INTO escena_objeto (escena_id, objeto_id) VALUES (?,?)",
+                (g.escenas[(2, 1)], g.objetos["Baliza"]))
+    # Un objeto que este capitulo no toca no entra.
+    llave = con.execute("INSERT INTO objeto (novela_id, nombre, nombre_clave, funcion_narrativa) "
+                        "VALUES (?, 'Llave', 'llave', 'Abre')", (g.novela_id,)).lastrowid
+    for tipo, sujeto_id, sujeto, atributo, valor in (
+        ("personaje", g.personajes["Reyes"], "Reyes", "voz", "grave"),
+        ("objeto", g.objetos["Baliza"], "Baliza", "bateria", "doce horas"),
+        ("faccion", faccion, "Turno", "personas", "cinco"),
+        ("objeto", llave, "Llave", "color", "roja"),
+    ):
+        insertar_hecho(
+            con, novela_id=g.novela_id, escena_id=g.escenas[(1, 1)], sujeto_tipo=tipo,
+            sujeto_id=sujeto_id, sujeto_nombre=sujeto, atributo=atributo, valor=valor,
+            categoria="otro", cita=None, supersede_a=None,
+        )
+
+    hechos = {(h["sujeto_nombre"], h["atributo"]): h["obligatorio"]
+              for h in lectura.hechos_del_reparto(con, g.novela_id, 2)}
+    assert hechos[("Reyes", "voz")] == 0
+    assert hechos[("Baliza", "bateria")] == 0
+    assert hechos[("Turno", "personas")] == 0
+    assert ("Llave", "color") not in hechos
+
+
+#: Las dos reglas de RF3-PAS-10 en la skill del redactor, enteras.
+REGLAS_DEL_REDACTOR = (
+    "- **No descuadras una cuenta.** Si alguien cuenta personas, horas, plazos o raciones, la "
+    "cuenta sale de los hechos establecidos y cuadra con ellos: si a bordo son once, cinco del "
+    "turno y seis de fuera, nadie dice «los siete de fuera»; si el carguero llega en treinta y "
+    "una horas, nadie pide algo con cuarenta de antelación. Antes de escribir una cifra que se "
+    "deriva de otras, haz la cuenta.\n"
+    "- **No traes a nadie de fuera de la escaleta sin su ficha.** Si una escena necesita a "
+    "alguien que la escaleta no puso, que sea uno de los otros personajes que ya han salido, "
+    "como dicen su ficha y sus hechos, y no otro. Quien está en una escena oye lo que se dice "
+    "en ella."
+)
+
+
+def test_la_skill_del_redactor_lleva_las_reglas_de_la_cuenta_y_de_la_ficha() -> None:
+    from compartido.puerto.terminal import PuertoTerminal
+    from config import raiz_repo
+
+    skill = PuertoTerminal(skills_dir=raiz_repo() / ".claude" / "skills").ruta_skill(
+        "redaccion").read_text(encoding="utf-8")
+    assert REGLAS_DEL_REDACTOR in skill
+    assert skill.count("No descuadras una cuenta") == 1
+
+
 def test_partir_el_compuesto_con_supersede_a_no_contradice() -> None:
     """Lo que pide la marca [COMPUESTO]: cada dato en su hecho, sustituyendo al compuesto."""
     con, g, hid = _con_ambiente_compuesto()

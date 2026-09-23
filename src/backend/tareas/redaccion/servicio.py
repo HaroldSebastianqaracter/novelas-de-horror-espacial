@@ -100,6 +100,10 @@ _SECCION_SISTEMAS = "### Sistemas tecnicos (sus limites no se rompen)"
 _SECCION_OBJETOS = "### Objetos"
 _SECCION_FACCIONES = "### Facciones"
 _SECCION_MENORES = "### Nombres menores ya usados"
+_SECCION_OTROS = (
+    "### Otros personajes que ya han salido (la escaleta no los pone en este capitulo; si la "
+    "prosa trae a alguno, que sea como aqui)"
+)
 
 
 def _personaje(p: dict[str, Any]) -> str:
@@ -219,6 +223,12 @@ def paquete(
         f"ESCALETA DEL CAPITULO {capitulo}",
     )
     elementos_canon = _canon(canon)
+    # RF3-PAS-10: quien ya salio y la escaleta no pone aqui. Si el redactor lo trae, que sea
+    # como es; opcional, se recorta antes que el reparto.
+    elementos_canon += [
+        Elemento(_personaje(p), False, _SECCION_OTROS)
+        for p in lectura.personajes_fuera_del_reparto(con, novela_id, capitulo)
+    ]
     menores = lectura.nombres_menores(con, novela_id, capitulo)
     if menores:
         # RF3-PAS-05: lo que el redactor invento antes y nadie mantenia. Opcional: se recorta

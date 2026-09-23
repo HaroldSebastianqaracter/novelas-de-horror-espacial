@@ -52,6 +52,8 @@ Cuando las instrucciones dicen que la novela es un regalo:
 
 - **No inventas entidades.** Ni personajes, ni lugares, ni objetos, ni reglas que no estén en tu paquete. Si necesitas un nombre propio que no te han dado, no lo crees: reescribe la frase para no necesitarlo. Lo que inventes fuera del paquete se detecta y queda registrado para el autor. Si te llega una lista de nombres que ya aparecieron en capítulos anteriores y vuelves a usar uno, escríbelo exactamente igual.
 - **No contradices un hecho ya establecido.** Los que te llegan son canon cerrado.
+- **No descuadras una cuenta.** Si alguien cuenta personas, horas, plazos o raciones, la cuenta sale de los hechos establecidos y cuadra con ellos: si a bordo son once, cinco del turno y seis de fuera, nadie dice «los siete de fuera»; si el carguero llega en treinta y una horas, nadie pide algo con cuarenta de antelación. Antes de escribir una cifra que se deriva de otras, haz la cuenta.
+- **No traes a nadie de fuera de la escaleta sin su ficha.** Si una escena necesita a alguien que la escaleta no puso, que sea uno de los otros personajes que ya han salido, como dicen su ficha y sus hechos, y no otro. Quien está en una escena oye lo que se dice en ella.
 - **No haces saber a un personaje algo que aún no ha recibido.** Es la fuente número uno de errores en obra larga.
 - **No buscas canon por tu cuenta.** No tienes herramientas: todo lo que hay es lo que se te ha entregado, y eso es deliberado.
 - **No dejas marcadores** como TODO, XXX o corchetes dobles. Un capítulo con marcadores no está escrito.

@@ -239,6 +239,39 @@ _NO_SUSTITUIDO = (
     "NOT EXISTS (SELECT 1 FROM hecho_vigente s WHERE s.supersede_a = h.id)"
 )
 
+#: Los personajes que estuvieron en alguna escena de un capitulo anterior (la vista
+#: `presencia`: reparto, POV, lo que constato el extractor o actuar) y no estan en el reparto de
+#: este (spec3, RF3-PAS-10). Necesita la CTE `reparto` y los parametros :novela y :capitulo.
+_VISTOS_FUERA_DEL_REPARTO = """
+    SELECT pr.personaje_id, MAX(c5.numero) AS ultimo_capitulo
+    FROM presencia pr
+    JOIN escena e5   ON e5.id = pr.escena_id
+    JOIN capitulo c5 ON c5.id = e5.capitulo_id
+    WHERE e5.novela_id = :novela AND c5.numero < :capitulo
+      AND pr.personaje_id NOT IN (SELECT personaje_id FROM reparto)
+    GROUP BY pr.personaje_id
+"""
+
+
+def personajes_fuera_del_reparto(
+    con: sqlite3.Connection, novela_id: int, numero: int
+) -> list[dict[str, Any]]:
+    """Quien ya salio en la novela y la escaleta no pone en este capitulo (RF3-PAS-10).
+
+    El redactor mete a veces a alguien que la escaleta no puso (paradas 8 y 10 de la pasada
+    real): si lo hace, que sea uno de estos y como es. Del mas reciente al mas antiguo, que es
+    el orden en que se recortan desde el final.
+    """
+    return _filas(con.execute(
+        _REPARTO_Y_LUGARES + f"""
+        , vistos AS ({_VISTOS_FUERA_DEL_REPARTO})
+        SELECT p.*, v.ultimo_capitulo FROM personaje p
+        JOIN vistos v ON v.personaje_id = p.id
+        ORDER BY v.ultimo_capitulo DESC, p.nombre
+        """,
+        {"novela": novela_id, "capitulo": numero},
+    ))
+
 
 def hechos_del_reparto(
     con: sqlite3.Connection, novela_id: int, numero: int
@@ -246,15 +279,29 @@ def hechos_del_reparto(
     """Hechos vigentes que este capitulo necesita, marcados como obligatorios u opcionales.
 
     Sin limite de filas (RF2-CTX-11). Obligatorios: los de los personajes del reparto y los de
-    los lugares de sus escenas. Opcionales: los de amenaza, mundo y novela, del mas reciente al
-    mas antiguo, que es el orden en que se recortan desde el final. Solo los establecidos
-    antes de este capitulo y no sustituidos por otro.
+    los lugares de sus escenas. Opcionales, del mas reciente al mas antiguo, que es el orden en
+    que se recortan desde el final: los de amenaza, mundo y novela, y (spec3, RF3-PAS-10) los
+    de los objetos del capitulo, las facciones del reparto y los personajes que ya salieron sin
+    estar en este reparto, que el redactor puede traer. Solo los establecidos antes de este
+    capitulo y no sustituidos por otro.
     """
     return _filas(con.execute(
         _REPARTO_Y_LUGARES + f"""
-        , candidatos AS (
-            SELECT h.id, h.sujeto_tipo, h.sujeto_nombre, h.atributo, h.valor, h.categoria,
-                   c.numero AS capitulo_origen,
+        , objetos AS (
+            SELECT DISTINCT eo.objeto_id
+            FROM escena_objeto eo
+            JOIN escena e4   ON e4.id = eo.escena_id
+            JOIN capitulo c4 ON c4.id = e4.capitulo_id
+            WHERE e4.novela_id = :novela AND c4.numero = :capitulo
+        ),
+        facciones AS (
+            SELECT DISTINCT p.faccion_id FROM personaje p
+            WHERE p.id IN (SELECT personaje_id FROM reparto) AND p.faccion_id IS NOT NULL
+        ),
+        vistos AS ({_VISTOS_FUERA_DEL_REPARTO}),
+        candidatos AS (
+            SELECT h.id, h.sujeto_tipo, h.sujeto_id, h.sujeto_nombre, h.atributo, h.valor,
+                   h.categoria, c.numero AS capitulo_origen,
                    CASE WHEN (h.sujeto_tipo = 'personaje'
                               AND h.sujeto_id IN (SELECT personaje_id FROM reparto))
                           OR (h.sujeto_tipo = 'lugar'
@@ -268,6 +315,9 @@ def hechos_del_reparto(
         )
         SELECT * FROM candidatos
         WHERE obligatorio = 1 OR sujeto_tipo IN ('amenaza', 'mundo', 'novela')
+           OR (sujeto_tipo = 'objeto' AND sujeto_id IN (SELECT objeto_id FROM objetos))
+           OR (sujeto_tipo = 'faccion' AND sujeto_id IN (SELECT faccion_id FROM facciones))
+           OR (sujeto_tipo = 'personaje' AND sujeto_id IN (SELECT personaje_id FROM vistos))
         ORDER BY obligatorio DESC,
                  CASE WHEN obligatorio = 1 THEN sujeto_nombre END,
                  capitulo_origen DESC, id DESC
