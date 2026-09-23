@@ -1,4 +1,4 @@
--- Migracion 008 (specs/spec3.md, bloque 4: RF3-OBS-08).
+-- Migracion 009 (specs/spec3.md, bloque 4: RF3-OBS-08).
 --
 -- Lo que el worker ya envio a Langfuse, fila a fila. Solo lo escribe el worker, que es el
 -- unico escritor. El comando exportar_langfuse.py no lo toca: abre la base en solo lectura y

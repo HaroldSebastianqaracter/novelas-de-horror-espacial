@@ -532,7 +532,7 @@ def _inicio_de_unidad(con: sqlite3.Connection, novela_id: int, unidad: str) -> o
 
 _TODAS = "SELECT * FROM {tabla} t WHERE t.novela_id = :novela {extra} ORDER BY t.id"
 #: Lo que el worker no ha enviado todavia. El comando no lo usa: abre en solo lectura bases que
-#: pueden ser anteriores a la migracion 008 y no tener `langfuse_envio`.
+#: pueden ser anteriores a la migracion 009 y no tener `langfuse_envio`.
 _PENDIENTES = """
 SELECT * FROM {tabla} t
 WHERE t.novela_id = :novela {extra}
