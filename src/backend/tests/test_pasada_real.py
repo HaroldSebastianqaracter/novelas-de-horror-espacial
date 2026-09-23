@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from pathlib import Path
 from typing import Any
 
 import pytest
@@ -252,13 +251,94 @@ def test_la_atribucion_cruzada_dentro_de_un_solo_segmento_contradice() -> None:
     assert s_extraccion._parte_de_un_compuesto(vigente, "la capitana Vela lleva el traje rojo")
 
 
-def test_la_skill_distingue_un_uso_de_un_calculo_propio() -> None:
-    """RF3-PAS-07, parada 9: una cuenta propia con una cifra parecida no usa el hecho."""
-    skill = (Path(__file__).resolve().parents[3] / ".claude" / "skills" / "extraccion"
-             / "SKILL.md").read_text(encoding="utf-8")
-    assert "tal como consta" in skill
-    assert "no es un uso" in skill
-    assert "`dedujo`" in skill
+#: La regla de RF3-PAS-07, entera: comparar frases sueltas dejaba pasar una skill que la
+#: invertia sin quitarlas (validador de 5ffcbe6).
+REGLA_DEL_USO = (
+    "Un uso es actuar sobre el dato **tal como consta**. Si el personaje calcula con sus "
+    "propios datos una cifra o un valor que se parece a un hecho del canon, aunque compartan "
+    "una palabra o un número, eso no es un uso de ese hecho, y tampoco es conocimiento de él: "
+    "una cifra que coincide no es el mismo dato. Registra la cuenta como un hecho **del "
+    "personaje** (su estimación, su cálculo), con un atributo propio, y no como un hecho del "
+    "sujeto sobre el que calcula: lo que un personaje estima no es canon del mundo. Solo si la "
+    "escena muestra que llega al dato registrado exacto, el mismo valor en las mismas "
+    "condiciones, es conocimiento por la vía `dedujo`; y si además actúa sobre él, regístralo "
+    "también como uso. Ejemplo: «cuarenta horas para diez personas son veintiséis de planta», "
+    "dicho por quien hace la cuenta, ni usa ni deduce el dato «déficit a las veintiséis horas "
+    "con once personas»: es la estimación de ese personaje, con otra gente y otra pregunta."
+)
+
+
+def test_el_extractor_recibe_la_regla_del_uso_entera() -> None:
+    """RF3-PAS-07, parada 9, por el mismo camino por el que el puerto lee la skill."""
+    from compartido.puerto.terminal import PuertoTerminal
+    from config import raiz_repo
+
+    puerto = PuertoTerminal(skills_dir=raiz_repo() / ".claude" / "skills")
+    skill = puerto.ruta_skill("extraccion").read_text(encoding="utf-8")
+    assert REGLA_DEL_USO in skill
+    # Sigue la regla de siempre: un uso se registra aunque el personaje ya supiera el dato.
+    assert "hay que registrarlo aunque el personaje ya lo supiera de antes" in skill
+
+
+def _puerta_3(con: sqlite3.Connection, g: fabrica.Grafo) -> tuple[set[str], set[str]]:
+    r = p_continuidad.evaluar(con, g.novela_id, 2)
+    return {c.comprobacion for c in r.bloqueantes}, {c.comprobacion for c in r.avisos}
+
+
+def _conocer(con: sqlite3.Connection, g: fabrica.Grafo, quien: str, via: str) -> None:
+    con.execute(
+        "INSERT INTO estado_conocimiento (novela_id, personaje_id, hecho_id, escena_id, postura,"
+        " via) VALUES (?,?,?,?, 'sabe', ?)",
+        (g.novela_id, g.personajes[quien], g.hechos["ojos"], g.escenas[(2, 1)], via),
+    )
+
+
+def _usar(con: sqlite3.Connection, g: fabrica.Grafo, quien: str) -> None:
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)",
+        (g.novela_id, g.personajes[quien], g.hechos["ojos"], g.escenas[(2, 1)]),
+    )
+
+
+def test_la_salida_que_pide_la_regla_del_uso_no_para() -> None:
+    """Parada 9: el uso falso para; la cuenta como hecho del personaje, sin uso, no."""
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    _usar(con, g, "Reyes")
+    assert "conocimiento_no_adquirido" in _puerta_3(con, g)[0]
+
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    insertar_hecho(
+        con, novela_id=g.novela_id, escena_id=g.escenas[(2, 1)], sujeto_tipo="personaje",
+        sujeto_id=g.personajes["Reyes"], sujeto_nombre="Reyes",
+        atributo="estimacion del color de ojos de Ibarra", valor="grises o azules",
+        categoria="otro", cita=None, supersede_a=None,
+    )
+    bloqueantes, _ = _puerta_3(con, g)
+    assert not bloqueantes & {"conocimiento_no_adquirido", "continuidad_factual"}
+
+
+def test_una_deduccion_de_lo_que_no_presencio_habilita_el_uso_pero_avisa() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    _conocer(con, g, "Reyes", "dedujo")
+    _usar(con, g, "Reyes")
+    bloqueantes, avisos = _puerta_3(con, g)
+    assert "conocimiento_no_adquirido" not in bloqueantes
+    assert "deduccion_por_verificar" in avisos
+
+
+@pytest.mark.parametrize(("quien", "via"), [
+    ("Ibarra", "dedujo"),  # estaba en la escena del hecho
+    ("Reyes", "se_lo_contaron"),  # no lo deduce
+])
+def test_solo_avisa_la_deduccion_de_lo_que_no_presencio(quien: str, via: str) -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    _conocer(con, g, quien, via)
+    assert "deduccion_por_verificar" not in _puerta_3(con, g)[1]
 
 
 def test_partir_el_compuesto_con_supersede_a_no_contradice() -> None:

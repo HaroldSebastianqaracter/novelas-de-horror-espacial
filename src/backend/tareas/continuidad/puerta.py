@@ -144,6 +144,30 @@ WHERE ec.novela_id = ? AND c.numero = ?
           AND o2.ordinal < oc.ordinal)
 """
 
+# --- 3b. Deduccion por verificar (aviso, spec3 RF3-PAS-08) ----------------------------------
+# Un conocimiento por la via `dedujo` habilita los usos siguientes sin que nadie mire si la
+# deduccion es plausible. Cuando el hecho se fijo en una escena en la que el personaje no
+# estaba, esa deduccion es lo unico que evita la parada por conocimiento no adquirido: el
+# autor la ve. En la parada 9, una cifra que coincidia bastaba para tomar un calculo propio
+# por el dato registrado.
+_SQL_DEDUCCION = """
+SELECT ec.id AS conocimiento_id, p.nombre AS personaje, h.sujeto_nombre, h.atributo, h.valor,
+       ec.escena_id, c.numero AS capitulo, h.id AS hecho_id
+FROM estado_conocimiento ec
+JOIN personaje p       ON p.id = ec.personaje_id
+JOIN hecho_vigente h   ON h.id = ec.hecho_id
+JOIN escena e          ON e.id = ec.escena_id
+JOIN capitulo c        ON c.id = e.capitulo_id
+WHERE ec.novela_id = ? AND c.numero = ?
+  AND ec.via = 'dedujo'
+  AND NOT EXISTS (
+        SELECT 1 FROM escena eh
+        WHERE eh.id = h.escena_id
+          AND (eh.pov_id = ec.personaje_id OR EXISTS (
+                SELECT 1 FROM escena_personaje sp
+                WHERE sp.escena_id = eh.id AND sp.personaje_id = ec.personaje_id)))
+"""
+
 # --- 4a. Presencia imposible: personaje muerto que reaparece -------------------------------
 # La muerte es un dato cerrado, `estado_personaje.condicion`, y no una busqueda en el texto
 # libre de la salud: «casi muerto» no es una muerte y «fallecida» si. Cuenta la ULTIMA
@@ -361,6 +385,17 @@ def evaluar(
             comprobacion="sorpresa_imposible", aviso=True,
             descripcion=(
                 f"{f['personaje']} se entera de '{f['atributo']}' por {f['via']}, y ya lo sabia."
+            ),
+            escena_id=f["escena_id"], capitulo=capitulo, datos=f,
+        ))
+
+    for f in _filas(con, _SQL_DEDUCCION, p):
+        conflictos.append(Conflicto(
+            comprobacion="deduccion_por_verificar", aviso=True,
+            descripcion=(
+                f"{f['personaje']} deduce '{f['sujeto_nombre']}: {f['atributo']} = "
+                f"{f['valor']}', fijado en una escena en la que no estaba. Comprueba que la "
+                "prosa llega a ese dato exacto y no a otro parecido."
             ),
             escena_id=f["escena_id"], capitulo=capitulo, datos=f,
         ))
