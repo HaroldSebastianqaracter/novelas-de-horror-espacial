@@ -1,0 +1,16 @@
+{
+  "tipo": "crear_novela",
+  "payload": {
+    "titulo": "Cerro Quince",
+    "genero": "terror_espacial",
+    "semilla_premisa": "Una cuadrilla de mantenimiento llega a una estacion de reabastecimiento que lleva ocho meses sin responder.",
+    "restricciones": {
+      "longitud_objetivo_palabras": "9000",
+      "longitud_capitulo_palabras": "1500-3500",
+      "publico": "adulto",
+      "politica_contenido": "violencia explicita permitida, sin contenido sexual",
+      "pov_por_defecto": "tercera_limitada",
+      "tiempo_verbal": "pasado"
+    }
+  }
+}

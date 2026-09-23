@@ -1,0 +1,32 @@
+# Trade-offs
+
+Cada decisión de diseño relevante, escrita como decisión: qué opciones había, con qué criterio se eligió y qué se eligió. El razonamiento completo está en el sitio que indica la última columna; aquí va lo justo para comparar.
+
+## Decididas
+
+| Decisión | Opciones consideradas | Criterio | Elección | Razonamiento completo |
+| --- | --- | --- | --- | --- |
+| **Single-agent o multi-agent** | Redactor único con herramientas · un agente por capa de oficio · fases con críticos en paralelo · **un agente por fase** | Cada agente con una entrada, una salida y un criterio de terminación propios, y sin más contexto del que su fase necesita | Un agente por fase: nueve en la v1 (planner = arquitecto, mundo, elenco, estructura y escaleta; writer = redacción; editor = oficio y continuidad) más el extractor | architecture.md, «Los agentes» |
+| **Motor de los agentes** | API de un proveedor · Claude Agent SDK · **Claude Code por terminal** | Sin clave de proveedor, skills versionadas con el código, decisión reversible | Terminal, detrás de un puerto que absorbe la diferencia con el SDK | architecture.md, «El motor de los agentes» |
+| **Cómo se acota el contexto del agente** | Pedírselo en el prompt · entregarle ficheros acotados · **quitarle las herramientas** | Una garantía por construcción vale más que una petición | Sin herramientas (`--tools ""`), skill como prompt de sistema, directorio de trabajo vacío | architecture.md, «Las dos gestiones de contexto se pisan» |
+| **Formato de la story bible** | Ficheros JSON o Markdown · almacén vectorial · **grafo relacional en SQLite** | La continuidad tiene que ser una consulta exacta, y el texto y el estado no pueden desincronizarse | SQLite: canon, estructura, estado append-only con escena de origen, texto versionado y vectores en un solo fichero | architecture.md, «Persistencia» |
+| **Hecho como triple o como enunciado** | Enunciado en texto libre · **triple sujeto/atributo/valor** | Con texto libre, «contradicción» es una opinión; con un triple, una comparación | Triple, más la cita literal de la prosa | definitions.md, «Hecho» |
+| **Estado mutable o append-only** | Columnas que se actualizan · **registros append-only con escena de origen** | Reanudar desde el capítulo N tiene que ser trivial y auditable | Append-only: revertir es borrar por escena de origen. Lo que cambia se deriva en vistas | definitions.md, callout inicial |
+| **Verificación: juez o consulta** | LLM-as-judge para todo · **puertas deterministas primero y juicio después** | Lo que tiene respuesta exacta no se le pregunta a un modelo (picaresca antes que juicio) | Puertas 1, 2, 3 y 5 en SQL; la 4 con parte mecánica y juez | validators.md, «Cómo se usan juntos» |
+| **Forma de ejecución** | Tareas en el proceso de la API · cola con broker · motor durable (Temporal) · **web-queue-worker sobre SQLite** | Sobrevivir a reinicios sin una segunda fuente de verdad | API que solo lee y encola, más un worker que escribe, con la cola como tabla | architecture.md, «Arquitectura de ejecución» |
+| **Transacciones de un capítulo** | Una sola transacción con las llamadas dentro · **tramos cortos con las llamadas fuera** | Pulsar «parar» en mitad de un capítulo no puede devolver `database is locked` | Tres tramos; texto y hechos entran juntos y la puerta 3 corre dentro de su transacción | architecture.md, «Por qué SQLite encaja» |
+| **Quién comprime el estado rodante** | Un agente reescribe la sinopsis · **el código elige entre dos resúmenes** | Sin coste extra ni una fuente más de deriva | Código: resumen completo para los últimos capítulos y de una frase para los anteriores | architecture.md, «Presupuesto de contexto» |
+| **Modelo de embeddings** | API de un proveedor · **local multilingüe en CPU** | Sin clave de proveedor; la novela es en castellano | Local; el que se usó queda en `indice_estado` | architecture.md, «El índice vectorial» |
+| **Escritor único** | Cerrojo con latido en el bucle · **latido en un hilo más fencing** | Las fases SQL largas también tienen que latir; dos procesos nunca escriben a la vez | Hilo propio y comprobación del dueño del cerrojo dentro de cada `BEGIN IMMEDIATE` | architecture.md, «El escritor único» |
+| **Salida de una parada de las puertas 1 y 2** | Rechazar y crear otra novela · **rehacer la fase** | El autor no pierde la novela, y ninguna puerta se salta | Rehacer: se borra lo rechazado y el agente lo repite con el informe (decisión entrevistada) | architecture.md, «Política de fallo» |
+| **Cuándo una puerta sigue siendo válida** | Por orden de eventos · **por huella del contenido que juzgó** | «Juzgó exactamente lo que hay ahora» tiene que ser comprobable | SHA-256 de lo que la puerta lee, guardado con su veredicto | architecture.md, «Política de fallo» |
+| **Personalización** | Abrir el sistema a varios géneros · **personalizar dentro del terror espacial** | Mantener el oficio del género y cumplir el requisito del cliente | El terror se adapta al destinatario (decisión entrevistada) | [storymaker-plan.md](../../specs/storymaker-plan.md) |
+| **Modelo de lectura** | Web React · PDF puro · **HTML estático exportado a PDF** | El frontend no existe; el browser MCP necesita algo que inspeccionar; la entrega pide PDF | HTML estático y PDF generado desde él | [storymaker-plan.md](../../specs/storymaker-plan.md), bloque 7 |
+
+## Pendientes
+
+| Decisión | Opciones | Qué la desbloquea |
+| --- | --- | --- |
+| Integración de TLA+ con el flujo real | Especificar la máquina a mano · generarla desde `estados.py` · comprobar en un test que las transiciones de la spec y las del código coinciden | Bloque 9 del plan de entrega |
+| Invariantes de Lean priorizados | Orden temporal · edad coherente · ubicuidad · nadie aparece tras su muerte | Bloque 9; conviene empezar por los que la puerta 3 ya comprueba en SQL, para comparar los dos métodos |
+| Dónde viven los dos hooks | Hooks de Claude Code (`Stop`) · hooks del orquestador | Bloque 6: los agentes corren sin herramientas y los hooks de herramientas no se disparan |

@@ -1,0 +1,7 @@
+- [novelasv2 vive aparte de main](novelasv2-rama-independiente.md) — nunca proponer merge ni PR a main
+- [Huecos de diseño con criterio propio](huecos-de-diseno-con-criterio-propio.md) — grillme corto, decidir el resto y marcarlo en el doc
+- [Repo My-factory](repo-my-factory.md) — agentes y skills reutilizables; subir ahí + fila en README + push
+- [Tablero de novelas tipo Jira](frontend-tablero-tipo-jira.md) — idea guardada para el frontend, sin implementar
+- [Agente evaluador de tono](agente-evaluador-de-tono.md) — score por capítulo con banda de varianza; idea guardada, sin implementar
+- [Mutabilidad de atributos](mutabilidad-de-atributos.md) — puerta 3 sin depender de supersede_a; idea guardada, fuera de spec2-plan
+- [Worker vivo del usuario](worker-vivo-del-usuario.md) — no parar procesos python por patron; en Windows son dos por worker

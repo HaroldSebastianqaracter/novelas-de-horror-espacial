@@ -7,6 +7,8 @@ Las definiciones del proyecto están en [docs/](docs/); cada definición nueva s
 - [docs/domain-knowledge.md](docs/domain-knowledge.md) — principios de escritura y oficio narrativo.
 - [docs/validators.md](docs/validators.md) — métodos de verificación del código y de la salida de los agentes.
 
+Aparte de esos cuatro, [docs/proceso/](docs/proceso/README.md) guarda la documentación de proceso que pide la entrega: spec inicial, trade-offs, explainers, diagramas, registro de iteraciones y red-team log. **Resume y enlaza; no redefine.** Una decisión se justifica en su documento de los cuatro, y `docs/proceso/` apunta a ella. Todo cambio provocado por un fallo, una eval o un contraejemplo añade su entrada al [registro de iteraciones](docs/proceso/registro-iteraciones.md).
+
 ## Estructura del proyecto
 
 Monorepo con [src/](src/) (todo el código: [src/backend/](src/backend/) y [src/frontend/](src/frontend/)) y [specs/](specs/) (las especificaciones del programa, una por `.md`). Detalle del stack y del sistema de agentes en [docs/architecture.md](docs/architecture.md).

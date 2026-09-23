@@ -1,0 +1,45 @@
+# Explainers
+
+Un párrafo por concepto del curso aplicado en el proyecto: qué es, en una frase, y cómo se aplica aquí. No repite la teoría; enseña dónde está en el código.
+
+## Aplicados
+
+**Harness.** El código que rodea al modelo y decide qué ve, qué puede hacer y cuándo se acepta lo que produce. Aquí es el orquestador de `src/backend/orquestador/`: elige la fase, monta el paquete de contexto, invoca al agente, valida su salida y aplica las puertas. El modelo escribe y juzga; nunca decide el flujo.
+
+**Spec-driven development.** El código sigue a una spec con requisitos numerados. Aquí es la primera regla de `AGENTS.md`: todo cambio en `src/` empieza en `specs/`, y la spec entra en el mismo commit. El código cita los requisitos (`RF2-PIPE-12`) y los tests también.
+
+**Multi-agent por fases.** Varios agentes especializados en lugar de uno generalista. Aquí hay uno por fase de la escritura (planner, writer, editor y extractor), cada uno con su skill en `.claude/skills/` y su carpeta en `src/backend/tareas/`. Una tarea no importa de otra, y un test lo comprueba.
+
+**Context engineering.** Seleccionar qué entra en cada llamada en vez de volcarlo todo. Aquí el paquete de capítulo (`compartido/contexto/paquete.py`) se ensambla por bloques con presupuesto propio, dentro de un techo de 100.000 tokens. Cada elemento es obligatorio u opcional, y si lo obligatorio no cabe el sistema para en vez de truncar el canon.
+
+**Memoria externa (story bible).** Lo que el modelo no puede recordar entre llamadas vive fuera de él. Aquí es la base SQLite: cada hecho que fija la prosa se guarda como triple con su escena de origen, y el extractor lo registra antes de dar el capítulo por terminado. Los resúmenes por capítulo construyen el estado rodante.
+
+**Checkpoint y reanudación.** Poder retomar desde la última unidad completa. Aquí la unidad es el capítulo: como todo el estado es append-only con escena de origen, volver al capítulo N es borrar lo posterior (`orquestador/fallo.py::revertir_grafo`). Un worker caído se recupera así al arrancar.
+
+**Tools con schema.** La salida del agente se valida contra un esquema antes de usarla. Aquí cada tarea tiene su `esquemas.py` (Pydantic); el esquema viaja al CLI como JSON Schema, y lo que no valida se repite una vez con el error adjunto antes de fallar.
+
+**Retries con límite.** Reintentar lo recuperable sin entrar en bucle. Aquí la puerta 4 devuelve el capítulo al writer como máximo tres veces con el criterio incumplido; después abre una parada. El puerto repite una vez una salida inválida, y la escaleta, una vez.
+
+**Guardrails por construcción.** Impedir la conducta indebida quitando el medio, no pidiéndola. Aquí el agente corre sin herramientas y en un directorio vacío, así que no puede leer el repo aunque quiera. Si aun así lo intenta (permisos denegados en la respuesta), el puerto lo trata como error.
+
+**Validación determinista antes que juicio.** Lo que tiene respuesta exacta se comprueba con código. Aquí la continuidad es SQL: la puerta 3 compara hechos, conocimiento, presencia y cronología dentro de la misma transacción que los inserta, y si hay conflicto revierte.
+
+**LLM-as-judge.** Un modelo evalúa con una rúbrica lo que no tiene respuesta única. Aquí es el agente `oficio`, que da un veredicto por criterio (voz, distancia psíquica, subtexto, cliché…) con su evidencia citada. *Pendiente para la entrega:* puntuación por criterio y un criterio de personalización.
+
+**Trust Spec (T/A/I/D/U).** Cada comprobación se etiqueta por el origen de su evidencia: ejecutar (T), analizar (A), leer y juzgar (I), observar (D) o riesgo aceptado (U). Aquí es el vocabulario de `docs/validators.md` y de los planes de verificación; toda propiedad lleva su etiqueta.
+
+**Puntos ciegos y validador solitario.** Cada método tiene una zona que no ve, y una propiedad con un solo método está en riesgo. Aquí es una columna obligatoria en los planes de verificación. El caso canónico: la puerta 3 solo ve los hechos que el extractor registró, así que el extractor tiene sus propias evals.
+
+**Picaresca.** Antes de mandar algo a un juez, buscar el atajo determinista aunque cubra solo una parte. Aquí produjo las búsquedas dirigidas de la puerta 3: nombres del canon en la prosa sin registro, cifras sin hecho, un muerto nombrado.
+
+**Property-based testing.** Afirmar una propiedad para cualquier entrada y dejar que la herramienta busque el contraejemplo. Aquí, con `hypothesis`: «ningún elemento obligatorio se pierde al recortar el paquete», en `tests/test_paquete.py`.
+
+**Mutation testing.** Romper a propósito algo correcto para saber si el validador lo detecta. Aquí se introducen contradicciones en un grafo limpio (`tests/test_puerta_continuidad.py`) y se rompe la demo una comprobación cada vez (`tests/test_demo.py`).
+
+**Model checking.** Explorar todos los estados alcanzables para comprobar un invariante. Aquí `tests/test_estados_exhaustivo.py` recorre la máquina de estados por anchura (19 estados abstractos, unas mil transiciones) y comprueba que ningún capítulo se genera sin las puertas 1 y 2 vigentes. *Pendiente:* su versión formal con TLA+ y TLC.
+
+**Evals con golden set.** Medir un agente contra un conjunto de referencia con resultado conocido. Aquí el extractor se mide contra un capítulo anotado a mano con un puntuador determinista de recall: 15 de 15 con Claude Code real.
+
+## Pendientes para la entrega
+
+Se escriben cuando se apliquen, con el mismo formato: **observabilidad con Langfuse**, **hooks** de validación y de policy, **guardrail de palabras prohibidas**, **validación visual con browser MCP**, **verificación formal con Lean 4**, **especificación con TLA+ y TLC**, **prompt injection** en el texto libre del brief, y **revisión humana** frente a LLM-as-judge.

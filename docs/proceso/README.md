@@ -1,0 +1,16 @@
+# Documentación de proceso
+
+El razonamiento que llevó a storyMaker a ser como es: qué se decidió construir, qué se descartó, qué cambió tras cada fallo y cómo se comprobó. Es la documentación que pide la entrega del examen; el sistema en sí está descrito en los cuatro documentos de [docs/](../).
+
+| Lo que pide la entrega | Dónde está | Estado |
+| --- | --- | --- |
+| Spec inicial | [spec-inicial.md](spec-inicial.md) | Escrita |
+| Trade-offs | [trade-offs.md](trade-offs.md) | Escrita; se amplía con cada decisión nueva |
+| Explainers | [explainers.md](explainers.md) | Los conceptos ya aplicados; los pendientes, marcados |
+| Diagramas | [diagramas.md](diagramas.md) | Harness, esquema SQLite y tabla de validadores; falta la máquina de estados TLA+ |
+| Registro de iteraciones | [registro-iteraciones.md](registro-iteraciones.md) | Al día hasta el 23 de septiembre de 2026 |
+| Red-team log | [red-team-log.md](red-team-log.md) | Formato fijado; casos adversariales pendientes |
+| Uso del browser MCP | — | Pendiente (bloque 7 del [plan de entrega](../../specs/storymaker-plan.md)) |
+| Skills, subagentes y comandos | [herramientas.md](herramientas.md) | Escrita |
+
+> **Decisión sin entrevistar, 23 de septiembre de 2026.** La documentación de proceso va en una subcarpeta propia y **resume y enlaza, no copia**. Cada decisión ya está justificada en su sitio, en los callouts de `architecture.md`, `definitions.md` y `validators.md`, y en los mensajes de commit de cada fase. Copiarla aquí crearía una segunda versión que se desincroniza con el primer cambio. Se descartó reorganizar `docs/` entero con el formato del examen: `AGENTS.md` fija cuatro tipos de documento que el resto del repo ya cita por su ruta, y moverlos rompería esas referencias. Afecta a `AGENTS.md`, que ahora nombra esta carpeta.

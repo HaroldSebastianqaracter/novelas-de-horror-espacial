@@ -28,12 +28,14 @@ En orden de dependencias: cada bloque se apoya en los anteriores.
 
 ### 1. Base del repo
 
-- [ ] `CLAUDE.md` cuidado y legible: el enunciado lo evalúa, y hoy es un stub.
-- [ ] README raíz, `.env.example` y un brief de ejemplo reproducible.
-- [ ] Renombrar el remoto a **storyMaker**.
-- [ ] Commitear `.claude/commands/` y los ficheros de memoria del proyecto (hoy la memoria vive fuera del repo).
-- [ ] Esqueleto de `/docs` con el formato del examen: spec inicial, trade-offs, explainers, diagramas, registro de iteraciones y red-team log. Los docs actuales (`architecture.md`, `validators.md`, `definitions.md`, `domain-knowledge.md`) se enlazan desde ahí; no se duplican.
-- [ ] **Empezar el registro de iteraciones** con la auditoría del 23 de septiembre y las fases de spec2: cada hallazgo, su reproducción y el cambio que provocó ya son causa y efecto.
+- [x] `CLAUDE.md` cuidado y legible: importa `AGENTS.md` y añade solo lo propio de Claude Code (comandos, coste, datos del autor, qué son las skills, cómo se cierra un paso).
+- [x] README raíz, `.env.example` y un brief de ejemplo reproducible (`ejemplos/brief-ejemplo.json`, el mismo que usa `demo.py`).
+- [ ] Renombrar el remoto a **storyMaker**. Lo tiene que hacer el autor en GitHub (Settings → Repository name); después, `git remote set-url origin <url nueva>`.
+- [x] `.claude/commands/` (`/verificar`, `/demo-falsa`, `/validar-cambio`, `/sincronizar-memoria`) y una copia de la memoria en `.claude/memoria/`.
+- [x] `docs/proceso/` con el formato del examen: spec inicial, trade-offs, explainers, diagramas, registro de iteraciones, red-team log y herramientas. Resume y enlaza los cuatro documentos de `docs/`; no los duplica.
+- [x] Registro de iteraciones al día: la auditoría, las fases de spec2, las evals del extractor y la primera llamada real.
+- [x] Por qué se reinició el proyecto el 21 de septiembre (petición de la profesora), en `spec-inicial.md` y en la entrada 0 del registro.
+- [ ] Hacer que el backend cargue un `.env` por su cuenta (hoy solo lee el entorno del proceso). Es un cambio en `src/` con su spec; encaja en el bloque 4, que trae las claves de Langfuse.
 
 ### 2. Personalización del terror
 
@@ -53,6 +55,8 @@ En orden de dependencias: cada bloque se apoya en los anteriores.
 ### 4. Observabilidad con Langfuse
 
 Va pronto porque el tuning y el coste necesitan datos acumulados.
+
+El primer harness (historial anterior al 21 de septiembre) ya tenía Langfuse integrado. Conviene mirarlo antes de empezar: commits `2280640`, `cf3ba67` y `b87775d`. Deja una lección medida: Langfuse declaraba menos de la cuarta parte del coste real porque solo anotaba a los subagentes. Aquí el coste se registra desde el puerto, llamada a llamada.
 
 - [ ] Una traza por novela, agrupada en una sesión por novela que incluya la entrevista y las regeneraciones.
 - [ ] Un span por rol y por tool, con nombre identificable.
