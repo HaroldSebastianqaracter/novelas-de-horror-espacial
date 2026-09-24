@@ -33,9 +33,10 @@ _DETERMINANTES = frozenset({
     "todos", "todas",
 })
 #: Palabras de una firma descriptiva que no son nombre y no se ocultan sueltas (plegadas).
-_NO_SON_NOMBRE = _DETERMINANTES | ACOMPANAN_A_LA_FIRMA | {
+_NO_SON_NOMBRE = _DETERMINANTES | ACOMPANAN_A_LA_FIRMA | PARTICULAS_DE_NOMBRE | {
     "companero", "companera", "companeros", "companeras", "colega", "colegas", "equipo",
     "clase", "instituto", "colegio", "oficina", "trabajo", "compis",
+    "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez",
 }
 
 
@@ -107,7 +108,11 @@ class Mascara:
                 etiqueta = f"[{base}_{extra}]"
                 extra += 1
             formas[forma] = etiqueta
-            self._originales[etiqueta] = original if descriptiva else _grafia(original)
+            # En una firma descriptiva vuelve como la escribio el comprador, salvo un nombre
+            # suelto en minuscula («tu tía carmen»), que vuelve con mayuscula.
+            self._originales[etiqueta] = (
+                original if descriptiva and forma == completo else _grafia(original)
+            )
             if not original[:1].isupper() or (firma and forma == completo):
                 self._minusculas.add(forma)
             propias += 1

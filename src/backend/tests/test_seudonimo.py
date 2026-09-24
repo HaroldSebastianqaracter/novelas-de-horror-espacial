@@ -376,3 +376,34 @@ def test_la_puerta_1_mira_tambien_los_lugares() -> None:
                 "(SELECT MIN(id) FROM lugar WHERE novela_id = ?)", (novela_id,))
     assert "etiqueta_en_el_canon" in {
         c.comprobacion for c in p_estructura.evaluar(con, novela_id).bloqueantes}
+
+
+# --- Lo que encontro el validador de 6b54315 -----------------------------------------------------
+
+
+@pytest.mark.parametrize(("firma", "texto"), [
+    ("Los García", "vinieron los garcía."),
+    ("Mis padres", "llamaron mis padres."),
+    ("Luz", "firmo luz."),
+])
+def test_la_firma_entera_se_oculta_en_cualquier_grafia(firma: str, texto: str) -> None:
+    datos = brief_ejemplo()
+    datos["quien_regala"] = firma
+    m = Mascara(Brief.model_validate(datos))
+    assert "[QUIEN_REGALA]" in m.ocultar(texto)
+
+
+def test_una_firma_en_minuscula_no_oculta_particulas_y_su_nombre_vuelve_con_mayuscula() -> None:
+    datos = brief_ejemplo()
+    datos["quien_regala"] = "tu tía carmen del valle"
+    m = Mascara(Brief.model_validate(datos))
+    assert m.ocultar("La luz del pasillo.") == "La luz del pasillo."
+    assert m.restaurar("Vio a [QUIEN_REGALA_2].") == "Vio a Carmen."
+
+
+@pytest.mark.parametrize("etiqueta", ["[TELÉFONO_OCULTO]", "[DIRECCIÓN_ELIMINADA]",
+                                      "[DOCUMENTO_OCULTO]", "[DIRECCIONES_OCULTAS]"])
+def test_las_etiquetas_con_tilde_o_de_documento_paran(etiqueta: str) -> None:
+    from compartido.texto import ETIQUETA_SIN_NOMBRE
+
+    assert ETIQUETA_SIN_NOMBRE.search(f"y {etiqueta} dijo")
