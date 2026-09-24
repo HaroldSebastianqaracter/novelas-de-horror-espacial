@@ -194,21 +194,34 @@ _REGLA_DEL_CENSO = (
     "Si una escena no cuenta personas, no hace falta que lo haga."
 )
 _SECCION_CONOCIMIENTO = "### Quien sabe que (nadie puede actuar sobre lo que no ha recibido)"
+_SECCION_CIFRAS = "### Cifras establecidas (las cuentas de tu prosa se comprueban contra ellas)"
+_REGLA_DE_LAS_CIFRAS = (
+    "Son todas las cifras del canon hasta el capitulo anterior, las mismas con las que el juez "
+    "comprueba tu prosa (las de arriba tambien cuentan). Una cifra que se deriva de ellas (lo "
+    "que falta hasta un plazo, cuantos quedan, cuantas veces ha pasado algo) sale de hacer la "
+    "cuenta con ellas. Si con lo que tienes aqui no puedes hacerla, no la escribas como cifra."
+)
 
 
-def _hechos(hechos: list[dict[str, Any]], conocimiento: list[dict[str, Any]]) -> list[Elemento]:
+def _hechos(hechos: list[dict[str, Any]], conocimiento: list[dict[str, Any]],
+            cifras: list[dict[str, Any]]) -> list[Elemento]:
     """Hechos y conocimiento como elementos: obligatorios delante, opcionales al final.
 
     El conocimiento del reparto es obligatorio entero (RF2-CTX-11), asi que lo unico que se
     puede recortar son los hechos opcionales, en el orden de `lectura.hechos_del_reparto`: los
     de quien esta fuera del reparto, despues los de objetos y facciones, y los de amenaza, mundo
     y novela al final, cada grupo empezando por los mas antiguos.
+
+    Entre los dos van las cifras que el juez comprueba y que no estan ya entre los obligatorios
+    (spec3, RF3-PAS-18), en el orden del juez: el recorte quita antes cualquier hecho sin cifra.
+    Cada hecho sale una sola vez.
     """
     def linea(h: dict[str, Any]) -> str:
         return (f"- {h['sujeto_nombre']} · {h['atributo']}: {h['valor']} "
                 f"(cap. {h['capitulo_origen']})")
 
-    elementos = [Elemento(linea(h), True, _SECCION_HECHOS) for h in hechos if h["obligatorio"]]
+    obligatorios = [h for h in hechos if h["obligatorio"]]
+    elementos = [Elemento(linea(h), True, _SECCION_HECHOS) for h in obligatorios]
     elementos += [
         Elemento(
             f"- {c['personaje']} {c['postura']} que {c['sujeto_nombre']} · {c['atributo']}: "
@@ -217,8 +230,14 @@ def _hechos(hechos: list[dict[str, Any]], conocimiento: list[dict[str, Any]]) ->
         )
         for c in conocimiento
     ]
+    listados = {h["id"] for h in obligatorios}
+    if cifras:
+        elementos.append(Elemento(_REGLA_DE_LAS_CIFRAS, True, _SECCION_CIFRAS))
+        resto = [h for h in cifras if h["id"] not in listados]
+        elementos += [Elemento(linea(h), False, _SECCION_CIFRAS) for h in resto]
+        listados |= {h["id"] for h in resto}
     elementos += [
-        Elemento(linea(h), False, _SECCION_HECHOS) for h in hechos if not h["obligatorio"]
+        Elemento(linea(h), False, _SECCION_HECHOS) for h in hechos if h["id"] not in listados
     ]
     return elementos
 
@@ -304,6 +323,9 @@ def paquete(
         _censo(con, novela_id, capitulo) + _hechos(
             lectura.hechos_del_reparto(con, novela_id, capitulo),
             lectura.conocimiento_del_reparto(con, novela_id, capitulo),
+            # Hasta el anterior: lo que el extractor saco de un intento fallido de este
+            # capitulo no es canon para reescribirlo.
+            lectura.hechos_con_cifras(con, novela_id, capitulo - 1),
         ),
         "ESTADO ESTABLECIDO",
     )

@@ -435,6 +435,21 @@ def hechos_hasta(
     ))
 
 
+def hechos_con_cifras(
+    con: sqlite3.Connection, novela_id: int, numero: int
+) -> list[dict[str, Any]]:
+    """Los hechos de `hechos_hasta` que dan una cantidad, en su mismo orden.
+
+    Son las cuentas contra las que el juez de oficio comprueba la prosa (spec3, RF3-PAS-12), y
+    el redactor recibe los mismos hasta el capitulo anterior (RF3-PAS-18): lo que el juez exige
+    tiene que haberle llegado a quien escribe.
+    """
+    # Aqui y no arriba: `compartido.texto` importa `compartido.grafo`, que carga este modulo.
+    from compartido.texto import tiene_cifra
+
+    return [h for h in hechos_hasta(con, novela_id, numero) if tiene_cifra(h["valor"])]
+
+
 def valores_vigentes(
     con: sqlite3.Connection, novela_id: int
 ) -> dict[str, list[tuple[str, str]]]:

@@ -197,7 +197,8 @@ def test_hallazgo_04_el_bloque_de_hechos_no_desaparece_en_silencio() -> None:
     from tareas.redaccion.servicio import _hechos
 
     hechos = [
-        {"sujeto_nombre": f"Personaje{i % 6}", "atributo": f"atributo {i}", "valor": "x" * 40,
+        {"id": i, "sujeto_nombre": f"Personaje{i % 6}", "atributo": f"atributo {i}",
+         "valor": "x" * 40,
          "capitulo_origen": i // 20, "obligatorio": i < 50}
         for i in range(200)
     ]
@@ -209,7 +210,7 @@ def test_hallazgo_04_el_bloque_de_hechos_no_desaparece_en_silencio() -> None:
     p = Paquete(agente="redaccion", capitulo=30)
     p.anadir("instrucciones", "estilo")
     p.anadir("escaleta", "escenas")
-    p.anadir_elementos("hechos", _hechos(hechos, conocimiento), "ESTADO ESTABLECIDO")
+    p.anadir_elementos("hechos", _hechos(hechos, conocimiento, []), "ESTADO ESTABLECIDO")
     presupuesto = Presupuesto(
         bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE
     )

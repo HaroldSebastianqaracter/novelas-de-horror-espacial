@@ -7,7 +7,6 @@ import sqlite3
 from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
 from compartido.grafo import lectura
 from compartido.puerta_base import ResultadoPuerta
-from compartido.texto import tiene_cifra
 
 AGENTE = "oficio"
 
@@ -74,8 +73,7 @@ def paquete(
 
     # Las cuentas se comprueban contra el canon (spec3, RF3-PAS-12). Opcionales: sin ellos el
     # juez aun ve si la prosa cuadra consigo misma.
-    cifras = [h for h in lectura.hechos_hasta(con, novela_id, capitulo)
-              if tiene_cifra(h["valor"])]
+    cifras = lectura.hechos_con_cifras(con, novela_id, capitulo)
     if cifras:
         p.anadir_elementos(
             "hechos",

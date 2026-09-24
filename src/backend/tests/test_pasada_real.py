@@ -610,8 +610,14 @@ REGLAS_DEL_REDACTOR = (
     "- **No descuadras una cuenta.** Si alguien cuenta personas, horas, plazos o raciones, la "
     "cuenta sale de los hechos establecidos y cuadra con ellos: si a bordo son once, cinco del "
     "turno y seis de fuera, nadie dice «los siete de fuera»; si el carguero llega en treinta y "
-    "una horas, nadie pide algo con cuarenta de antelación. Antes de escribir una cifra que se "
-    "deriva de otras, haz la cuenta.\n"
+    "una horas, nadie pide algo con cuarenta de antelación. Tres cuentas fallan a menudo. Lo que "
+    "falta hasta un plazo se resta desde el momento de la escena: si el carguero llega el día "
+    "140 y ya han pasado semanas, no faltan ciento cuarenta días. Un recuento cerrado de algo "
+    "que se acumula entre capítulos («tres notas en la libreta», «la cuarta vez») incluye lo de "
+    "los capítulos anteriores. Y si un personaje explica una cifra con otras, la operación da lo "
+    "que dice. Escribe una cifra derivada solo cuando la escena la necesita, y antes haz la "
+    "cuenta con la sección «Cifras establecidas» de tu paquete; si no puedes hacerla con lo que "
+    "tienes, dilo sin número («antes de que llegue el carguero», «otra nota más»).\n"
     "- **No traes a nadie de fuera de la escaleta sin su ficha.** Si una escena necesita a "
     "alguien que la escaleta no puso, que sea uno de los otros personajes que ya han salido, "
     "como dicen su ficha y sus hechos, y no otro. Quien está en una escena oye lo que se dice "
@@ -628,6 +634,11 @@ def test_la_skill_del_redactor_lleva_las_reglas_de_la_cuenta_y_de_la_ficha() -> 
         "redaccion").read_text(encoding="utf-8")
     assert REGLAS_DEL_REDACTOR in skill
     assert skill.count("No descuadras una cuenta") == 1
+    # La seccion que cita es la que el paquete trae (RF3-PAS-18).
+    from tareas.redaccion.servicio import _SECCION_CIFRAS
+
+    assert _SECCION_CIFRAS.startswith("### Cifras establecidas")
+    assert "«Cifras establecidas»" in REGLAS_DEL_REDACTOR
 
 
 def test_partir_el_compuesto_con_supersede_a_no_contradice() -> None:
@@ -1156,3 +1167,78 @@ def test_la_skill_del_redactor_pide_mostrar_como_llega_lo_que_sabe_otro() -> Non
 
     assert _SECCION_CONOCIMIENTO.startswith("### Quien sabe que")
     assert "«Quien sabe que»" in linea
+
+
+# --- RF3-PAS-18: el redactor recibe las cifras que el juez comprueba ------------------------------
+
+
+def _cifras_de_prueba(con: sqlite3.Connection, g: fabrica.Grafo) -> None:
+    """Cifras de dentro y de fuera del reparto del 2, y hechos sin cifra que compiten con ellas."""
+    for escena, tipo, sujeto_id, sujeto, atributo, valor in (
+        ((1, 1), "mundo", None, "Estacion", "llegada del carguero", "dia 140"),
+        ((1, 1), "lugar", g.lugares["Modulo de carga"], "Modulo de carga", "volumen",
+         "nueve metros cubicos"),
+        ((1, 2), "personaje", g.personajes["Kowalski"], "Kowalski", "notas en la libreta",
+         "tres"),
+        ((1, 2), "personaje", g.personajes["Kowalski"], "Kowalski", "voz", "grave"),
+        ((1, 2), "mundo", None, "Estacion", "ambiente", "frio y humedo"),
+    ):
+        insertar_hecho(
+            con, novela_id=g.novela_id, escena_id=g.escenas[escena], sujeto_tipo=tipo,
+            sujeto_id=sujeto_id, sujeto_nombre=sujeto, atributo=atributo, valor=valor,
+            categoria="otro", cita=None, supersede_a=None,
+        )
+
+
+def test_el_redactor_recibe_todas_las_cifras_que_comprueba_el_juez() -> None:
+    import config
+    from compartido.contexto import Presupuesto
+    from tareas.oficio import servicio as s_oficio
+
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    _cifras_de_prueba(con, g)
+    juez = next(b for b in s_oficio.paquete(
+        con, g.novela_id, 2, "La prosa.", presupuesto=Presupuesto(
+            bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE)).bloques
+        if b.nombre == "hechos")
+    cifras_del_juez = {e.texto for e in juez.elementos if e.texto.startswith("- ")}
+    hechos = next(b for b in _paquete_del_2(con, g).bloques if b.nombre == "hechos")
+    lineas = [e.texto for e in hechos.elementos]
+    assert cifras_del_juez and cifras_del_juez <= set(lineas)
+    # Una sola vez cada hecho, aunque este tambien entre los del reparto.
+    assert len(lineas) == len(set(lineas))
+    assert any(e.seccion.startswith("### Cifras establecidas") and e.obligatorio
+               and "las mismas con las que el juez" in e.texto for e in hechos.elementos)
+
+
+def test_las_cifras_se_recortan_despues_que_los_hechos_sin_cifra() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    _cifras_de_prueba(con, g)
+    hechos = next(b for b in _paquete_del_2(con, g).bloques if b.nombre == "hechos")
+    opcionales = [e for e in hechos.elementos if not e.obligatorio]
+    # El recorte quita desde el final: toda cifra va delante de todo hecho opcional sin ella.
+    ultima_cifra = max(i for i, e in enumerate(opcionales) if e.seccion.startswith("### Cifras"))
+    primera_sin = min(i for i, e in enumerate(opcionales) if not e.seccion.startswith("### Cifras"))
+    assert ultima_cifra < primera_sin
+    assert "- Estacion · ambiente: frio y humedo (cap. 1)" in [e.texto for e in opcionales]
+
+
+def test_el_redactor_no_recibe_como_canon_las_cifras_de_su_propio_capitulo() -> None:
+    """Las saco el extractor de un intento fallido: al reescribir el capitulo no son canon."""
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    insertar_hecho(
+        con, novela_id=g.novela_id, escena_id=g.escenas[(2, 1)], sujeto_tipo="mundo",
+        sujeto_id=None, sujeto_nombre="Estacion", atributo="dias de espera",
+        valor="once dias", categoria="otro", cita=None, supersede_a=None,
+    )
+    assert "once dias" not in _paquete_del_2(con, g).render()
+
+
+def test_sin_cifras_en_el_canon_no_hay_seccion_de_cifras() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    hechos = next(b for b in _paquete_del_2(con, g).bloques if b.nombre == "hechos")
+    assert not [e for e in hechos.elementos if e.seccion.startswith("### Cifras")]
