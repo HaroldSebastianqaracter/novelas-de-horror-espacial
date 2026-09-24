@@ -975,3 +975,82 @@ def test_un_error_de_programacion_en_el_paso_final_acaba_en_error(
     assert _estado(con, novela_id) == "error"
     assert _textos(con, novela_id) == antes
     assert (lectura.entidad(con, novela_id, "personaje", reyes) or {})["nombre"] == SOLO_EN_EL_DOS
+
+
+# --- Lo que encontro el validador de 5717c7d -----------------------------------------------------
+
+
+def test_una_palabra_que_solo_comparte_otro_nombre_sigue_siendo_el_viejo() -> None:
+    """«Marta Ruiz» se protege entera; «Ruiz» a secas sigue siendo «Tomás Ruiz»."""
+    cambio = Cambio(tipo="renombrar", antes="Tomás Ruiz", despues="Tomás Vidal",
+                    tabla="personaje", entidad_id=1, protegidos=("Marta Ruiz",))
+    assert cambio.mapa() == {"Tomás Ruiz": "Tomás Vidal", "Ruiz": "Vidal"}
+    assert cambio.partes_viejas() == ["Ruiz"]
+    aprobada = {1: "Tomás Ruiz entro. Ruiz miro a Marta Ruiz."}
+    assert sustituir_nombres(aprobada[1], cambio.mapa(), cambio.protegidos) == \
+        "Tomás Vidal entro. Vidal miro a Marta Ruiz."
+    queda = {1: "Tomás Vidal entro. Ruiz miro a Marta Ruiz."}
+    r = p_revision.comprobar(cambio, 1, aprobada, queda, ("R", "B"), ["Tomás Vidal entro"])
+    assert "cambio_sin_aplicar" in {c.comprobacion for c in r.conflictos}
+
+
+def test_el_nombre_nuevo_no_tapa_que_se_toco_a_otro() -> None:
+    cambio = Cambio(tipo="renombrar", antes="Nina Soto", despues="Nina Reyes",
+                    tabla="personaje", entidad_id=1, protegidos=("Nina",))
+    aprobada = {1: "Nina Soto llego tarde. Nina, la otra, no la espero."}
+    mal = {1: "Nina Reyes llego tarde. Vera, la otra, no la espero."}
+    r = p_revision.comprobar(cambio, 1, aprobada, mal, ("R", "B"), ["Nina Reyes llego"])
+    assert "cambio_toca_otro" in {c.comprobacion for c in r.conflictos}
+
+
+def test_el_nombre_viejo_sin_tilde_no_se_esconde_tras_un_protegido() -> None:
+    cambio = Cambio(tipo="renombrar", antes="Tomás Reyes", despues="Tomás Vidal",
+                    tabla="personaje", entidad_id=1, protegidos=(SOLO_EN_EL_DOS,))
+    aprobada = {1: f"Tomas {SOLO_EN_EL_DOS} miro a {SOLO_EN_EL_DOS} sin decir nada."}
+    r = p_revision.comprobar(cambio, 1, aprobada, aprobada, ("R", "B"), [])
+    assert "cambio_sin_aplicar" in {c.comprobacion for c in r.conflictos}
+
+
+def test_un_nombre_de_varias_palabras_solo_cuenta_seguido() -> None:
+    from compartido.cambio import menciones_de
+
+    assert menciones_de("Nina Reyes llego.", NINA) == [0]
+    assert menciones_de("Nina\nReyes llego.", NINA) == [0]
+    assert menciones_de("Nina, Reyes llego.", NINA) == []
+    assert menciones_de("Nina y Reyes llegaron.", NINA) == []
+
+
+def test_el_pipeline_compara_con_los_resumenes_aprobados(
+    novela, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    con, ruta, novela_id = novela
+    cap = lectura.capitulo(con, novela_id, 2) or {}
+    vistos: list[tuple[str, str]] = []
+    original = pipeline.p_revision.comprobar
+
+    def espia(*args: Any, **kwargs: Any) -> Any:
+        vistos.append(kwargs["aprobados"])
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(pipeline.p_revision, "comprobar", espia)
+    _pedir(con, ruta, novela_id, "Que se llame «Oriol»",
+           {"tipo": "entidad", "entidad": "personajes",
+            "id": _id(con, "personaje", SOLO_EN_EL_DOS)})
+    assert vistos == [(cap["resumen"], cap["resumen_breve"])]
+
+
+def test_un_nombre_que_llevan_dos_entidades_no_se_renombra(novela) -> None:
+    from compartido.grafo import insertar
+
+    con, ruta, novela_id = novela
+    antes = _textos(con, novela_id)
+    with transaccion(con):
+        mundo = con.execute("SELECT id FROM mundo WHERE novela_id = ?",
+                            (novela_id,)).fetchone()[0]
+        insertar(con, "lugar", novela_id=novela_id, mundo_id=mundo, nombre=SOLO_EN_EL_DOS,
+                 descripcion="Una nave que se llama como el personaje.")
+    intencion = _pedir(con, ruta, novela_id, "Que se llame «Oriol»",
+                       {"tipo": "entidad", "entidad": "personajes",
+                        "id": _id(con, "personaje", SOLO_EN_EL_DOS)})
+    assert (intencion["estado"], intencion["motivo"]) == ("rechazada", "cambio_no_admisible")
+    assert _textos(con, novela_id) == antes

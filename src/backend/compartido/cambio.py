@@ -68,8 +68,13 @@ class Cambio:
         return buscable and (self.categoria in _CATEGORIAS_LITERALES or cifras)
 
     def _compartidas(self) -> set[str]:
-        """Las palabras del nombre viejo que tambien salen en el nombre de otra entidad."""
-        return {normalizar(p) for n in self.protegidos for p in partes_de_nombre(n)}
+        """Las palabras del nombre viejo que son, enteras, el nombre de otra entidad.
+
+        Solo esas: con «Marta Ruiz» protegida, «Ruiz» a secas sigue siendo el viejo al renombrar
+        «Tomás Ruiz» (el nombre entero de Marta ya se protege aparte); con «Reyes» protegido,
+        «Reyes» a secas es el otro (validador de 5717c7d).
+        """
+        return {normalizar(n) for n in self.protegidos}
 
     def mapa(self) -> dict[str, str]:
         """Que se sustituye por que al renombrar (`mapa_de_nombres`), sin lo que es de otros.
@@ -131,19 +136,35 @@ def _palabras(claves: tuple[str, ...] | list[str]) -> re.Pattern[str]:
     )
 
 
+def _fuera_de(texto: str, protegidos: tuple[str, ...],
+              dejar: tuple[str, ...]) -> list[re.Match[str]]:
+    """Cada nombre protegido del texto que no cae dentro de un nombre de `dejar`.
+
+    `dejar` se busca como `menciones_de`, sin mirar tildes: con «Reyes» protegido, el «Reyes»
+    de «Tomas Reyes» es parte del viejo «Tomás Reyes» aunque la prosa se coma la tilde
+    (validador de 5717c7d). Un protegido mas largo que lo de `dejar` no cae dentro: «Pedro
+    Reyes» sigue siendo el otro al renombrar a «Reyes».
+    """
+    tramos = [t for n in dejar if n for t in tramos_de(texto, n)]
+    return [
+        m for m in _palabras(protegidos).finditer(texto)
+        if not any(a <= m.start(1) and m.end(1) <= b for a, b in tramos)
+    ]
+
+
 def tapar(texto: str, protegidos: tuple[str, ...], dejar: tuple[str, ...] = ()) -> str:
     """El texto con cada nombre protegido tapado por un relleno de su misma longitud.
 
-    Conserva las posiciones, para que el inicio de frase se siga midiendo igual. Lo de `dejar`
-    compite con los protegidos, el mas largo primero, y no se tapa: con «Reyes» protegido y
-    «Nina Reyes» en `dejar`, «Nina Reyes» queda entero y «Reyes» a secas se tapa.
+    Conserva las posiciones, para que el inicio de frase se siga midiendo igual. Lo que cae
+    dentro de un nombre de `dejar` no se tapa: con «Reyes» protegido y «Nina Reyes» en
+    `dejar`, «Nina Reyes» queda entero y «Reyes» a secas se tapa.
     """
     if not protegidos:
         return texto
-    visibles = set(dejar)
-    return _palabras([*protegidos, *dejar]).sub(
-        lambda m: m.group(1) if m.group(1) in visibles else "_" * len(m.group(1)), texto
-    )
+    salida = list(texto)
+    for m in _fuera_de(texto, protegidos, dejar):
+        salida[m.start(1):m.end(1)] = "_" * (m.end(1) - m.start(1))
+    return "".join(salida)
 
 
 def sustituir_nombres(texto: str, mapa: dict[str, str], protegidos: tuple[str, ...] = ()) -> str:
@@ -162,17 +183,19 @@ def sustituir_nombres(texto: str, mapa: dict[str, str], protegidos: tuple[str, .
     return _palabras(claves).sub(lambda m: mapa.get(m.group(1), m.group(1)), texto)
 
 
-def veces_protegidos(texto: str, protegidos: tuple[str, ...], viejo: str) -> dict[str, int]:
-    """Cuantas veces sale cada nombre protegido, fuera del nombre viejo entero.
+def veces_protegidos(texto: str, protegidos: tuple[str, ...], viejo: str,
+                     nuevo: str = "") -> dict[str, int]:
+    """Cuantas veces sale cada nombre protegido, fuera del nombre viejo y del nuevo enteros.
 
-    El mas largo gana: con «Reyes» protegido, el «Reyes» de «Nina Reyes» (el viejo) no cuenta.
+    Con «Reyes» protegido, el «Reyes» de «Nina Reyes» no cuenta, sea el viejo o el nuevo: si
+    contara dentro del nuevo, cada vez que el revisor lo escribe taparia una vez que borro al
+    otro (validador de 5717c7d).
     """
     if not protegidos:
         return {}
     veces = dict.fromkeys(protegidos, 0)
-    for m in _palabras([*protegidos, viejo]).finditer(texto):
-        if m.group(1) in veces and m.group(1) != viejo:
-            veces[m.group(1)] += 1
+    for m in _fuera_de(texto, protegidos, (viejo, nuevo)):
+        veces[m.group(1)] += 1
     return veces
 
 
@@ -189,11 +212,16 @@ def menciones_de(texto: str, nombre: str) -> list[int]:
     Un nombre de varias palabras se busca como frase: sus palabras seguidas, separadas solo por
     espacios («Nina Reyes», no «Nina, Reyes» ni «Nina y Reyes»).
     """
+    return [a for a, _ in tramos_de(texto, nombre)]
+
+
+def tramos_de(texto: str, nombre: str) -> list[tuple[int, int]]:
+    """Donde empieza y acaba cada mencion del nombre, con las reglas de `menciones_de`."""
     claves = [normalizar(p) for p in PALABRA_DE_NOMBRE.findall(nombre)]
     if not claves:
         return []
     palabras = list(PALABRA_DE_NOMBRE.finditer(texto))
-    salida: list[int] = []
+    salida: list[tuple[int, int]] = []
     for i in range(len(palabras) - len(claves) + 1):
         tramo = palabras[i:i + len(claves)]
         if (
@@ -202,7 +230,7 @@ def menciones_de(texto: str, nombre: str) -> list[int]:
             and all(not texto[a.end():b.start()].strip()
                     for a, b in zip(tramo, tramo[1:], strict=False))
         ):
-            salida.append(tramo[0].start())
+            salida.append((tramo[0].start(), tramo[-1].end()))
     return salida
 
 

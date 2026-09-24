@@ -247,6 +247,13 @@ def _renombrado(con: sqlite3.Connection, novela_id: int, e: dict[str, Any], nuev
         raise NoAdmisible(f"«{e['nombre']}» ya se llama asi.")
     if _nombre_ocupado(con, novela_id, nuevo, (str(e["tabla"]), int(e["id"]))):
         raise NoAdmisible(f"Ya hay otro personaje, lugar u objeto que se llama «{nuevo}».")
+    if _nombre_ocupado(con, novela_id, str(e["nombre"]), (str(e["tabla"]), int(e["id"]))):
+        # La prosa no dice cual de los dos es cada mencion: sustituirlas todas renombraria
+        # tambien al otro, y no sustituir ninguna no aplicaria el cambio (validador de 5717c7d).
+        raise NoAdmisible(
+            f"Hay otro personaje, lugar u objeto que tambien se llama «{e['nombre']}»: la prosa "
+            "no distingue cual es cual, y renombrar a uno renombraria al otro."
+        )
     vetado = _vetado(con, novela_id, nuevo)
     if vetado:
         raise NoAdmisible(f"El nombre «{nuevo}» contiene un termino vetado («{vetado}»).")

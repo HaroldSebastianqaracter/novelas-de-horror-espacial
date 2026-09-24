@@ -1078,7 +1078,7 @@ def _confirmar_cambio(ctx: Contexto, cambio: Cambio, corregidos: dict[int, Salid
     """
     try:
         _escribir_cambio(ctx, cambio, corregidos)
-    except (sqlite3.DatabaseError, ValueError) as exc:
+    except (sqlite3.DatabaseError, o_cambios.CanonDesfasado) as exc:
         raise CambioImposible(
             "Un error de datos impidio aplicar el cambio.", [f"{type(exc).__name__}: {exc}"]
         ) from exc

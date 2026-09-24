@@ -26,6 +26,10 @@ _NO_SE_SUSTITUYEN = frozenset({
     "ejecucion", "entrevista", "entidad_no_reconocida", "langfuse_envio", "indice_estado",
 })
 
+class CanonDesfasado(Exception):
+    """El canon ya no es el que el cambio vio: un error de datos, no del codigo (RF3-CAM-12)."""
+
+
 #: Lo que cuelga de un hecho y pasa a apuntar al que lo sustituye.
 _QUE_APUNTAN_A_UN_HECHO = ("hecho_uso", "estado_conocimiento", "uso_conocimiento")
 
@@ -132,7 +136,7 @@ def _cambiar_hecho(con: sqlite3.Connection, novela_id: int, cambio: Cambio,
                    citas: dict[int, list[str]]) -> None:
     h = lectura.hecho_vigente(con, novela_id, int(cambio.hecho_id or 0))
     if h is None:
-        raise ValueError(f"El hecho {cambio.hecho_id} ya no esta vigente.")
+        raise CanonDesfasado(f"El hecho {cambio.hecho_id} ya no esta vigente.")
     fila = _filas(con, "SELECT * FROM hecho_vigente WHERE id = ?", int(h["id"]))[0]
     cita = next(iter(citas.get(int(h["capitulo"]), [])), None) or fila["cita"]
     nuevo = _sustituir_hecho(con, novela_id, fila, valor=cambio.despues, cita=cita)

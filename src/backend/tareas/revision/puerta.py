@@ -67,8 +67,8 @@ def _sin_aplicar_renombrado(cambio: Cambio, capitulo: int, viejo: str, nuevo: st
 
 def _toca_otro(cambio: Cambio, capitulo: int, viejo: str, nuevo: str) -> Conflicto | None:
     """Un nombre de otra entidad que la correccion quito o cambio (validador de 58e70f0)."""
-    antes = veces_protegidos(viejo, cambio.protegidos, cambio.antes)
-    despues = veces_protegidos(nuevo, cambio.protegidos, cambio.antes)
+    antes = veces_protegidos(viejo, cambio.protegidos, cambio.antes, cambio.despues)
+    despues = veces_protegidos(nuevo, cambio.protegidos, cambio.antes, cambio.despues)
     tocados = {n: (antes[n], despues[n]) for n in antes if despues[n] < antes[n]}
     if not tocados:
         return None
