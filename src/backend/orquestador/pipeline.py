@@ -46,7 +46,7 @@ from compartido import politica
 from compartido.cambio import Cambio
 from compartido.contexto import Paquete, Presupuesto, PresupuestoExcedido
 from compartido.db import simulacion, transaccion
-from compartido.grafo import emitir_evento, lectura
+from compartido.grafo import emitir_evento, lectura, normalizar
 from compartido.puerta_base import ResultadoPuerta
 from compartido.puerto import AgenteInterrumpido, PuertoAgente
 from compartido.tipos import como_dict, como_lista
@@ -156,6 +156,7 @@ def _invocar[T: BaseModel](
     *,
     capitulo: int | None = None,
     intento: int | None = None,
+    mascara: Mascara | None = None,
 ) -> tuple[T, Any]:
     """Invoca al agente y valida su salida contra el modelo de su tarea.
 
@@ -175,7 +176,9 @@ def _invocar[T: BaseModel](
     por_bloque = paquete.tokens_por_bloque if hasattr(paquete, "tokens_por_bloque") else None
     # Los nombres del encargo no salen de la maquina (spec3, RF3-SEU-01): el agente ve
     # etiquetas, y su respuesta vuelve con los nombres antes de validarla.
-    mascara = Mascara(lectura.brief(ctx.con, ctx.novela_id))
+    # La correccion del lector trae la suya, hecha dentro de la simulacion con el brief ya
+    # cambiado (validador de cd8ab12): aqui el brief leido seria el de antes del cambio.
+    mascara = mascara or Mascara(lectura.brief(ctx.con, ctx.novela_id))
     entrada = mascara.ocultar(entrada)
     if not mascara.vacia:
         entrada = f"{mascara.leyenda()}\n\n{entrada}"
@@ -579,19 +582,20 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
 
 
 def _juzgar(
-    ctx: Contexto, paquete_oficio: Any, numero: int, intento: int
+    ctx: Contexto, paquete_oficio: Any, numero: int, intento: int,
+    mascara: Mascara | None = None,
 ) -> tuple[SalidaOficio, dict[str, tuple[int, int]]]:
     """El juez vota (spec3, RF3-JUE-02): con una muestra, el veredicto de un capitulo cambiaba
     de una llamada a otra. Tres muestras, y dos mas si discrepan."""
     juicios = [
         _invocar(ctx, "oficio", paquete_oficio, SalidaOficio, capitulo=numero,
-                 intento=intento)[0]
+                 intento=intento, mascara=mascara)[0]
         for _ in range(OFICIO_MUESTRAS)
     ]
     if p_oficio.discrepan(juicios):
         juicios += [
             _invocar(ctx, "oficio", paquete_oficio, SalidaOficio, capitulo=numero,
-                     intento=intento)[0]
+                     intento=intento, mascara=mascara)[0]
             for _ in range(OFICIO_MUESTRAS_SI_DISCREPAN - len(juicios))
         ]
     return p_oficio.votar(juicios)
@@ -997,6 +1001,19 @@ def _fracasar(ctx: Contexto, cambio_id: int, informe: dict[str, Any]) -> str:
     return final
 
 
+def _nombre_anterior_del_encargo(ctx: Contexto, cambio: Cambio) -> str | None:
+    """El nombre viejo, si el cambio renombra a una persona del encargo (RF3-SEU-01)."""
+    if cambio.tipo != "renombrar":
+        return None
+    brief = lectura.brief(ctx.con, ctx.novela_id)
+    if brief is None:
+        return None
+    del_encargo = [brief.destinatario.nombre, brief.quien_regala,
+                   *(a.nombre for a in brief.allegados)]
+    viejo = normalizar(cambio.antes)
+    return cambio.antes if any(n and normalizar(n) == viejo for n in del_encargo) else None
+
+
 def _revisar_capitulo(
     ctx: Contexto, cambio: Cambio, numero: int
 ) -> SalidaRevision | dict[str, Any]:
@@ -1009,6 +1026,7 @@ def _revisar_capitulo(
     informe: dict[str, Any] = {}
     cap = lectura.capitulo(ctx.con, ctx.novela_id, numero) or {}
     aprobados = (str(cap.get("resumen") or ""), str(cap.get("resumen_breve") or ""))
+    anterior = _nombre_anterior_del_encargo(ctx, cambio)
     for intento in range(1, ctx.cfg_max_intentos + 1):
         with transaccion(ctx.con):
             estados.fijar_fase(ctx.con, ctx.novela_id, "revision", capitulo=numero,
@@ -1017,8 +1035,11 @@ def _revisar_capitulo(
             o_cambios.aplicar_canon(ctx.con, ctx.novela_id, cambio)
             paquete = s_revision.paquete(ctx.con, ctx.novela_id, numero, cambio, viejo,
                                          criterios_incumplidos=criterios)
+            # RF3-SEU-01 en el cambio: el brief ya lleva el nombre nuevo, y el viejo, si era
+            # de una persona del encargo, sale como [NOMBRE_ANTERIOR].
+            mascara = Mascara(lectura.brief(ctx.con, ctx.novela_id), anterior=anterior)
         salida, _ = _invocar(ctx, "revision", paquete, SalidaRevision, capitulo=numero,
-                             intento=intento)
+                             intento=intento, mascara=mascara)
         nuevo = salida.textos()
         comprobado = p_revision.comprobar(
             cambio, numero, viejo, nuevo, (salida.resumen, salida.resumen_breve), salida.citas,
@@ -1048,7 +1069,7 @@ def _revisar_capitulo(
             with transaccion(ctx.con):
                 estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_4", capitulo=numero,
                                    intento=intento)
-            juicio, votos = _juzgar(ctx, paquete_oficio, numero, intento)
+            juicio, votos = _juzgar(ctx, paquete_oficio, numero, intento, mascara)
         oficio = p_oficio.combinar(mecanica, juicio, votos)
         _registrar_puerta(ctx, oficio, capitulo=numero, intento=intento)
         ultimo = intento == ctx.cfg_max_intentos

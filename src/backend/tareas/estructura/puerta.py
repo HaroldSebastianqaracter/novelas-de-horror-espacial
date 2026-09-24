@@ -16,6 +16,7 @@ import sqlite3
 from compartido.brief import SUBGENEROS_QUE_EXIGEN_INTENSIDAD
 from compartido.grafo import lectura, normalizar
 from compartido.puerta_base import Conflicto, ResultadoPuerta
+from compartido.texto import ETIQUETA_SIN_NOMBRE
 from config import FINALES_POR_SUBGENERO
 
 APERTURAS = ("gancho", "incidente_incitador", "primer_umbral")
@@ -223,6 +224,29 @@ def _encargo(con: sqlite3.Connection, novela_id: int) -> list[Conflicto]:
             comprobacion="dedicatoria_nombra_al_destinatario",
             descripcion=f"La dedicatoria tiene que nombrar a «{nombre}» tal cual.",
             datos={"dedicatoria": dedicatoria},
+        ))
+
+    # RF3-SEU-04 fuera de la prosa: un nombre que no volvio se quedaria en el canon y en la
+    # portada (validador de cd8ab12).
+    con_etiqueta = [
+        texto for texto in (
+            dedicatoria,
+            *(str(f[0]) for f in con.execute(
+                "SELECT titulo FROM novela WHERE id = ? UNION ALL "
+                "SELECT nombre FROM personaje WHERE novela_id = ? UNION ALL "
+                "SELECT nombre FROM lugar WHERE novela_id = ? UNION ALL "
+                "SELECT nombre FROM objeto WHERE novela_id = ?",
+                (novela_id, novela_id, novela_id, novela_id))),
+        ) if ETIQUETA_SIN_NOMBRE.search(texto or "")
+    ]
+    if con_etiqueta:
+        salida.append(Conflicto(
+            comprobacion="etiqueta_en_el_canon",
+            descripcion=(
+                "La planificacion dejo etiquetas donde iba un nombre: "
+                + "; ".join(f"«{t[:80]}»" for t in con_etiqueta) + "."
+            ),
+            datos={"textos": con_etiqueta},
         ))
 
     elegido = novela["subgenero_dominante"]

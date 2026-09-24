@@ -73,9 +73,15 @@ def cuenta_personas(texto: str) -> bool:
     return any(_PALABRA_DE_PERSONAS.fullmatch(p) for p in _PALABRA.findall(normalizar(texto)))
 
 
-#: Una etiqueta que la prosa no deberia llevar nunca (spec3, RF3-SEU-04): una del encargo sin
-#: restaurar, u otra que el modelo invente («[NOMBRE_ANONIMIZADO]», «[DESTINATARIO_APODO]»).
-ETIQUETA_SIN_NOMBRE = re.compile(r"\[[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ0-9_]{2,}\]")
+#: Una etiqueta que la prosa no deberia llevar nunca (spec3, RF3-SEU-04): una del encargo que
+#: no se restauro («[DESTINATARIO_APODO]») o una de anonimizacion («[NOMBRE_ANONIMIZADO]»,
+#: «[DNI_OCULTO]»). Solo esas: «[ALERTA]» o «[FIN]» son texto legitimo del genero (validador de
+#: cd8ab12).
+ETIQUETA_SIN_NOMBRE = re.compile(
+    r"\[(?:(?:DESTINATARIO|QUIEN_REGALA|NOMBRE_ANTERIOR|ALLEGADO_\d+)(?:_[A-Z0-9]+)?"
+    r"|[A-Z_]*(?:ANONIMIZAD|OCULT|ELIMINAD)[A-Z_]*)\]",
+    re.IGNORECASE,
+)
 
 
 def tiene_cifra(texto: str) -> bool:
