@@ -36,7 +36,15 @@ Un párrafo por concepto del curso aplicado en el proyecto: qué es, en una fras
 
 **Mutation testing.** Romper a propósito algo correcto para saber si el validador lo detecta. Aquí se introducen contradicciones en un grafo limpio (`tests/test_puerta_continuidad.py`) y se rompe la demo una comprobación cada vez (`tests/test_demo.py`).
 
-**Model checking.** Explorar todos los estados alcanzables para comprobar un invariante. Aquí `tests/test_estados_exhaustivo.py` recorre la máquina de estados por anchura (19 estados abstractos, unas mil transiciones) y comprueba que ningún capítulo se genera sin las puertas 1 y 2 vigentes. *Pendiente:* su versión formal con TLA+ y TLC.
+**Model checking.** Explorar todos los estados alcanzables para comprobar un invariante. Aquí `tests/test_estados_exhaustivo.py` recorre la máquina de estados por anchura (19 estados abstractos, unas mil transiciones) y comprueba que ningún capítulo se genera sin las puertas 1 y 2 vigentes. Ejecuta el código real, pero solo hasta cuatro pasos de profundidad.
+
+**Especificación con TLA+ y TLC.** Describir un sistema como estados y acciones en un lenguaje matemático, y dejar que un model checker recorra todos los comportamientos posibles de un modelo pequeño. Busca un estado que rompa un invariante (seguridad) o un comportamiento que nunca llegue a donde debe (liveness). Aquí es `formal/tla/StoryMaker.tla`:
+
+- cada acción es una transacción del orquestador o del worker;
+- las puertas son elecciones no deterministas;
+- TLC comprueba, con 5 capítulos y 2 reintentos, que nunca se publica un capítulo sin sus puertas, que reanudar no pierde ni duplica capítulos, que la versión anterior se conserva y que toda ejecución termina.
+
+Encontró el hallazgo 1 en la máquina de spec1. Además, encontró un fallo del diseño del cambio del lector antes de implementarlo: un renombrado dejaba la novela completada con las puertas 1 y 2 sin vigencia. `comprobar_tablas.py` mantiene sus tablas iguales a las del código. `mutaciones.py` rompe el modelo a propósito para comprobar que los invariantes miran algo.
 
 **Prompt injection y contenido no confiable.** Un texto que aporta el usuario puede intentar dar órdenes al modelo. Aquí el texto libre del brief va delimitado y marcado como no confiable, pero la defensa no descansa en que el agente obedezca: de ese texto el código solo acepta rasgos, recuerdos y allegados, y cada uno con una cita literal que se comprueba contra el texto. Una búsqueda de patrones conocidos deja además una alerta (`tareas/entrevistador/servicio.py`).
 
@@ -46,4 +54,4 @@ Un párrafo por concepto del curso aplicado en el proyecto: qué es, en una fras
 
 ## Pendientes para la entrega
 
-Se escriben cuando se apliquen, con el mismo formato: **hooks** de validación y de policy, **guardrail de palabras prohibidas**, **validación visual con browser MCP**, **verificación formal con Lean 4**, **especificación con TLA+ y TLC**, y **revisión humana** frente a LLM-as-judge.
+Se escriben cuando se apliquen, con el mismo formato: **hooks** de validación y de policy, **guardrail de palabras prohibidas**, **validación visual con browser MCP**, **verificación formal con Lean 4** y **revisión humana** frente a LLM-as-judge.

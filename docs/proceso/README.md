@@ -7,7 +7,7 @@ El razonamiento que llevó a storyMaker a ser como es: qué se decidió construi
 | Spec inicial | [spec-inicial.md](spec-inicial.md) | Escrita |
 | Trade-offs | [trade-offs.md](trade-offs.md) | Escrita; se amplía con cada decisión nueva |
 | Explainers | [explainers.md](explainers.md) | Los conceptos ya aplicados; los pendientes, marcados |
-| Diagramas | [diagramas.md](diagramas.md) | Harness, esquema SQLite y tabla de validadores; falta la máquina de estados TLA+ |
+| Diagramas | [diagramas.md](diagramas.md) | Harness, máquina de estados (la del código y la de TLA+), esquema SQLite y tabla de validadores |
 | Registro de iteraciones | [registro-iteraciones.md](registro-iteraciones.md) | Al día hasta el 23 de septiembre de 2026 |
 | Red-team log | [red-team-log.md](red-team-log.md) | Formato fijado; casos adversariales pendientes |
 | Uso del browser MCP | — | Pendiente (bloque 7 del [plan de entrega](../../specs/storymaker-plan.md)) |
