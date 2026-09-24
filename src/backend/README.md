@@ -127,6 +127,19 @@ exportar una novela escrita antes:
 
 El comando abre la base en solo lectura: se puede lanzar con el worker en marcha.
 
+## Lean 4
+
+La verificación formal de la cronología (specs/spec-lean.md) necesita Lean, instalado a nivel
+de usuario con elan. La versión la fija `formal/lean/lean-toolchain`, y elan la descarga sola la
+primera vez:
+
+```bat
+cd ..\..\formal\lean
+%USERPROFILE%\.elan\bin\lake build
+```
+
+Sin Lean, la verificación avisa (`lean_no_disponible`) y deja pasar, y sus tests se saltan.
+
 ## Cómo está cortado
 
 ```text
