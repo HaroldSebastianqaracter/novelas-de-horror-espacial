@@ -203,7 +203,8 @@ def test_una_firma_generica_sale_entera_y_vuelve_tal_cual() -> None:
     datos["quien_regala"] = "tu hermano"
     m = Mascara(Brief.model_validate(datos))
     texto = "Dijo que tu hermano vendria. Tu hermano llamo. Mi hermano no."
-    assert m.ocultar(texto) == \n        "Dijo que [QUIEN_REGALA] vendria. [QUIEN_REGALA] llamo. Mi hermano no."
+    esperado = "Dijo que [QUIEN_REGALA] vendria. [QUIEN_REGALA] llamo. Mi hermano no."
+    assert m.ocultar(texto) == esperado
     assert m.restaurar(m.ocultar(texto)) == texto
     datos["quien_regala"] = "Sus compañeros del instituto"
     m = Mascara(Brief.model_validate(datos))
