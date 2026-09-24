@@ -227,3 +227,96 @@ def test_una_etiqueta_en_la_dedicatoria_o_en_un_nombre_para_la_planificacion() -
     [c] = [c for c in p_estructura.evaluar(con, novela_id).bloqueantes
            if c.comprobacion == "etiqueta_en_el_canon"]
     assert len(c.datos["textos"]) == 2
+
+
+# --- Lo que encontro el validador de 7e88879 -----------------------------------------------------
+
+
+def test_un_brief_en_minusculas_tampoco_envia_ningun_nombre() -> None:
+    """Asi viaja el nombre en los paquetes: se oculta en cualquier grafia."""
+    datos = brief_ejemplo()
+    datos["destinatario"]["nombre"] = "marta ibáñez"
+    datos["quien_regala"] = "andrés"
+    datos["allegados"][1]["nombre"] = "andrés"
+    m = Mascara(Brief.model_validate(datos))
+    oculto = m.ocultar("Para marta ibáñez, de andrés. Marta sonrio; Andrés no.")
+    assert _nombres_en(oculto) == set()
+    assert m.restaurar(oculto) == "Para Marta Ibáñez, de Andrés. Marta sonrio; Andrés no."
+
+
+def test_una_novela_con_el_brief_en_minusculas_no_envia_ningun_nombre() -> None:
+    con, ruta = nueva_bd()
+    novela_id = crear(con, ruta, capitulos=3, destinatario={
+        **brief_ejemplo()["destinatario"], "nombre": "marta ibáñez"})
+    puerto = puerto_falso(con)
+    ctx = pipeline.Contexto(con=con, puerto=puerto, cfg=cfg_de(ruta), novela_id=novela_id)
+    pipeline.avanzar(ctx)
+    assert all(_nombres_en(i["entrada"]) & {"marta", "ibanez"} == set()
+               for i in puerto.invocaciones)
+
+
+def test_una_firma_que_es_un_nombre_en_minuscula_se_oculta() -> None:
+    datos = brief_ejemplo()
+    datos["quien_regala"] = "julia"
+    m = Mascara(Brief.model_validate(datos))
+    assert m.ocultar("Para ti, de Julia. julia.") == "Para ti, de [QUIEN_REGALA]. [QUIEN_REGALA]."
+    assert "firma la dedicatoria" in m.leyenda()
+
+
+def test_la_firma_generica_vuelve_tal_cual_y_la_leyenda_la_dice() -> None:
+    datos = brief_ejemplo()
+    datos["quien_regala"] = "tu hermano"
+    m = Mascara(Brief.model_validate(datos))
+    assert m.restaurar("Con carino, [QUIEN_REGALA].") == "Con carino, tu hermano."
+    assert "firma la dedicatoria como «tu hermano»" in m.leyenda()
+
+
+def test_la_grafia_respeta_guiones_y_apostrofos() -> None:
+    datos = brief_ejemplo()
+    datos["destinatario"]["nombre"] = "JEAN-LUC O'NEILL"
+    m = Mascara(Brief.model_validate(datos))
+    assert m.restaurar("[DESTINATARIO]") == "Jean-Luc O'Neill"
+
+
+def test_el_apellido_por_analogia_tambien_vuelve() -> None:
+    datos = brief_ejemplo()
+    datos["allegados"][1]["nombre"] = "Andrés Ibarra"
+    m = Mascara(Brief.model_validate(datos))
+    # El destinatario reclama sus formas primero; el apellido del allegado vuelve igual.
+    assert m.restaurar("[ALLEGADO_1_APELLIDO] y [ALLEGADO_2_APELLIDO]") == "Nala y Ibarra"
+
+
+@pytest.mark.parametrize("texto", ["[ARCHIVO_ELIMINADO]", "[TRANSMISION_OCULTA]", "[oculto]",
+                                   "[ELIMINADO]"])
+def test_lo_eliminado_u_oculto_del_genero_no_para(texto: str) -> None:
+    from compartido.texto import ETIQUETA_SIN_NOMBRE
+
+    assert not ETIQUETA_SIN_NOMBRE.search(texto)
+
+
+def test_una_etiqueta_con_varios_sufijos_para() -> None:
+    from compartido.texto import ETIQUETA_SIN_NOMBRE
+
+    assert ETIQUETA_SIN_NOMBRE.search("Y [DESTINATARIO_NOMBRE_COMPLETO] miro.")
+
+
+@pytest.mark.parametrize("sql", [
+    "UPDATE novela SET titulo = '[DESTINATARIO] y la luz' WHERE id = ?",
+    "UPDATE personaje SET nombre = '[ALLEGADO_3]' WHERE id = "
+    "(SELECT MAX(id) FROM personaje WHERE novela_id = ?)",
+    "UPDATE objeto SET nombre = 'Radio de [QUIEN_REGALA]' WHERE id = "
+    "(SELECT MIN(id) FROM objeto WHERE novela_id = ?)",
+])
+def test_la_puerta_1_mira_titulo_personajes_y_objetos(sql: str) -> None:
+    from orquestador import fallo
+    from tareas.estructura import puerta as p_estructura
+    from tests.test_personalizacion import contexto
+
+    con, ruta = nueva_bd()
+    novela_id = crear(con, ruta, capitulos=3)
+    pipeline.planificar(contexto(con, ruta, novela_id))
+    con.execute(sql, (novela_id,))
+    assert "etiqueta_en_el_canon" in {
+        c.comprobacion for c in p_estructura.evaluar(con, novela_id).bloqueantes}
+    # El titulo y la dedicatoria los escribe el arquitecto: se rehace desde el.
+    assert fallo.FASE_DE_COMPROBACION["etiqueta_en_el_canon"] == "arquitecto"
