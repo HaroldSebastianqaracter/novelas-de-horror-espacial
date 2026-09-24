@@ -74,12 +74,15 @@ def cuenta_personas(texto: str) -> bool:
 
 
 #: Una etiqueta que la prosa no deberia llevar nunca (spec3, RF3-SEU-04): una del encargo que
-#: no se restauro («[DESTINATARIO_APODO]») o una de anonimizacion («[NOMBRE_ANONIMIZADO]»,
-#: «[DNI_OCULTO]»). Solo esas: «[ALERTA]» o «[FIN]» son texto legitimo del genero (validador de
-#: cd8ab12).
+#: no se restauro («[DESTINATARIO_APODO]», con uno o mas sufijos) o una de anonimizacion: todo lo
+#: que diga ANONIMIZADO, y un dato personal oculto o eliminado («[NOMBRE_OCULTO]», «[DNI_OCULTO]»,
+#: «[correo_eliminado]»). «[ALERTA]», «[FIN]» o «[ARCHIVO_ELIMINADO]» son texto legitimo del
+#: genero (validadores de cd8ab12, 7e88879 y ac7dc1d).
 ETIQUETA_SIN_NOMBRE = re.compile(
-    r"\[(?:(?:DESTINATARIO|QUIEN_REGALA|NOMBRE_ANTERIOR|ALLEGADO_\d+)(?:_[A-Z0-9]+)?"
-    r"|[A-Z_]*(?:ANONIMIZAD|OCULT|ELIMINAD)[A-Z_]*)\]",
+    r"\[(?:(?:DESTINATARIO|QUIEN_REGALA|NOMBRE_ANTERIOR|ALLEGADO_\d+)(?:_[A-Z0-9]+)*"
+    r"|[A-Z_]*ANONIMIZAD[OA]S?[A-Z_]*"
+    r"|(?:NOMBRE|APELLIDO|TELEFONO|CORREO|EMAIL|DNI|NIE|PASAPORTE|DIRECCION|EMPRESA|PERSONA"
+    r"|CLIENTE)S?_(?:OCULT|ELIMINAD|REDACTAD|BORRAD|CENSURAD|OMITID)[OA]S?)\]",
     re.IGNORECASE,
 )
 

@@ -7,7 +7,8 @@ respuesta, las etiquetas se cambian por los nombres. Asi el modelo trabaja con
 busqueda es la del seudonimizador de Langfuse (plegado y fronteras de palabra), con una
 diferencia: aqui una forma solo casa si empieza en mayuscula, porque lo que se reescribe es lo
 que lee el modelo, y «la luz del pasillo» no puede volverse «la [DESTINATARIO_NOMBRE] del
-pasillo» (validador de cd8ab12).
+pasillo» (validador de cd8ab12). La excepcion es un nombre que el brief escribe en minuscula,
+que casa en cualquier grafia: asi viaja en los paquetes (validador de 7e88879).
 """
 
 from __future__ import annotations
@@ -17,13 +18,25 @@ from typing import Any, cast
 
 from compartido.brief import Brief
 from compartido.grafo.escritura import normalizar
-from compartido.texto import PARTICULAS_DE_NOMBRE
+from compartido.texto import INICIO_DE_FRASE, PARTICULAS_DE_NOMBRE
 from compartido.tipos import como_dict, como_lista
 
-from .observabilidad import Seudonimizador, partes_del_nombre, plegar
+from .observabilidad import ACOMPANAN_A_LA_FIRMA, Seudonimizador, partes_del_nombre, plegar
 
 #: La etiqueta del nombre que tenia una persona del encargo antes de un cambio del lector.
 ANTERIOR = "NOMBRE_ANTERIOR"
+
+#: Con que empieza una firma descriptiva de quien regala («tu tía Carmen», «Los García»).
+_DETERMINANTES = frozenset({
+    "tu", "tus", "su", "sus", "mi", "mis", "vuestro", "vuestra", "vuestros", "vuestras",
+    "nuestro", "nuestra", "nuestros", "nuestras", "el", "la", "los", "las", "un", "una",
+    "todos", "todas",
+})
+#: Palabras de una firma descriptiva que no son nombre y no se ocultan sueltas (plegadas).
+_NO_SON_NOMBRE = _DETERMINANTES | ACOMPANAN_A_LA_FIRMA | {
+    "companero", "companera", "companeros", "companeras", "colega", "colegas", "equipo",
+    "clase", "instituto", "colegio", "oficina", "trabajo", "compis",
+}
 
 
 class Mascara:
@@ -37,6 +50,7 @@ class Mascara:
         self._originales: dict[str, str] = {}   # etiqueta que produce `ocultar` -> nombre
         self._alias: dict[str, str] = {}        # etiqueta que se acepta al volver -> nombre
         self._roles: list[str] = []
+        self._minusculas: set[str] = set()
         formas: dict[str, str] = {}
         grupos = _grupos(brief) if brief is not None else []
         if anterior and grupos:
@@ -45,9 +59,12 @@ class Mascara:
                            "escribas: donde estaba, va la etiqueta nueva."))
         for base, nombre, firma, rol in grupos:
             self._anadir(formas, base, nombre, firma=firma, rol=rol)
-        # Las formas largas antes que sus partes: «Marta Ibanez» entera, no «[X] Ibanez».
+        # Las formas largas antes que sus partes: «Marta Ibanez» entera, no «[X] Ibanez». Una
+        # forma casa en cualquier grafia solo si el brief la escribe en minuscula: entonces es
+        # asi como viaja en los paquetes, y ocultarla gana a no tocar «la luz».
         self._busqueda = Seudonimizador.desde_formas(sorted(
-            ((f, e, False) for f, e in formas.items()), key=lambda t: len(t[0]), reverse=True,
+            ((f, e, f in self._minusculas) for f, e in formas.items()),
+            key=lambda t: len(t[0]), reverse=True,
         ))
         aceptadas = {**self._alias, **self._originales}
         self._vuelta = re.compile(
@@ -59,23 +76,29 @@ class Mascara:
         plegado, posiciones, _ = plegar(nombre)
         completo = " ".join(plegado.split())
         palabras = completo.split(" ")
+        # La firma de quien regala se oculta siempre entera, en cualquier grafia, y vuelve tal
+        # como la escribio el comprador. Si es descriptiva («tu tía Carmen», «Los García»), sus
+        # palabras sueltas se ocultan tambien, salvo determinantes y parentescos, esten en
+        # mayuscula o en minuscula (validadores de ac7dc1d y 32b785c).
+        descriptiva = firma and bool(palabras) and palabras[0] in _DETERMINANTES
         candidatas = list(partes_del_nombre(nombre, firma=firma))
-        # Una firma generica («tu hermano», «sus compañeros») no es un nombre: solo se ocultan
-        # sus palabras con mayuscula en el brief, y la firma entera solo si es un nombre.
-        generica = firma and any(p.islower() and normalizar(p) not in PARTICULAS_DE_NOMBRE
-                                 for p in nombre.split())
-        if completo and completo not in candidatas and not generica:
+        if descriptiva:
+            candidatas = [f for f in candidatas if f not in _NO_SON_NOMBRE]
+        if completo and completo not in candidatas:
             candidatas.append(completo)
         propias = 0
         extra = 2
         for forma in sorted(candidatas, key=plegado.find):
             original = _original(nombre, plegado, posiciones, forma)
-            if original is None or (firma and not original[:1].isupper()):
+            if original is None:
                 continue
             if forma in formas:
                 continue  # el primero que la reclama se la queda (el destinatario manda)
             if forma == completo:
                 etiqueta = f"[{base}]"
+            elif descriptiva:
+                etiqueta = f"[{base}_{extra}]"
+                extra += 1
             elif len(palabras) > 1 and forma == palabras[0]:
                 etiqueta = f"[{base}_NOMBRE]"
             elif len(palabras) > 1 and forma == palabras[-1]:
@@ -84,8 +107,19 @@ class Mascara:
                 etiqueta = f"[{base}_{extra}]"
                 extra += 1
             formas[forma] = etiqueta
-            self._originales[etiqueta] = _grafia(original)
+            self._originales[etiqueta] = original if descriptiva else _grafia(original)
+            if not original[:1].isupper() or (firma and forma == completo):
+                self._minusculas.add(forma)
             propias += 1
+        if descriptiva:
+            sueltas = [self._originales[formas[f]] for f in candidatas
+                       if f != completo and f in formas]
+            entera = " ".join(nombre.split())
+            self._alias.setdefault(f"[{base}]", entera)
+            self._alias.setdefault(f"[{base}_NOMBRE]", sueltas[0] if sueltas else entera)
+            self._alias.setdefault(f"[{base}_APELLIDO]", sueltas[-1] if sueltas else entera)
+            self._roles.append(rol)
+            return
         # Lo que un modelo escribiria por analogia tambien vuelve: `_NOMBRE` de un nombre de
         # una palabra, o la etiqueta de quien regala cuando es un allegado.
         entero = _grafia(" ".join(nombre.split()))
@@ -116,7 +150,16 @@ class Mascara:
         if self._vuelta is None:
             return valor
         if isinstance(valor, str):
-            return self._vuelta.sub(lambda m: self._nombre(m.group(1)), valor)
+            texto = valor
+
+            def cambio(m: re.Match[str]) -> str:
+                nombre = self._nombre(m.group(1))
+                # Al empezar frase, con mayuscula: «tu hermano» vuelve «Tu hermano».
+                if nombre[:1].islower() and INICIO_DE_FRASE.search(texto, 0, m.start()):
+                    return nombre[:1].upper() + nombre[1:]
+                return nombre
+
+            return self._vuelta.sub(cambio, texto)
         if isinstance(valor, dict):
             salida: dict[str, Any] = {}
             for k, v in como_dict(cast(object, valor)).items():
@@ -182,8 +225,14 @@ def _original(nombre: str, plegado: str, posiciones: list[int], forma: str) -> s
 
 def _grafia(texto: str) -> str:
     """Como se escribe el nombre en la prosa: el del brief, salvo que venga todo en minusculas
-    o todo en mayusculas, que entonces va con mayuscula inicial (validador de cd8ab12)."""
+    o todo en mayusculas, que entonces va con mayuscula inicial en cada trozo («Jean-Luc»,
+    «O'Neill»; validadores de cd8ab12 y 7e88879)."""
     if not (texto.islower() or texto.isupper()):
         return texto
-    return " ".join(p.lower() if normalizar(p) in PARTICULAS_DE_NOMBRE and i else p.capitalize()
-                    for i, p in enumerate(texto.split()))
+
+    def palabra(p: str, i: int) -> str:
+        if i and normalizar(p) in PARTICULAS_DE_NOMBRE:
+            return p.lower()
+        return "".join(t.capitalize() for t in re.split(r"([-'’])", p))
+
+    return " ".join(palabra(p, i) for i, p in enumerate(texto.split()))

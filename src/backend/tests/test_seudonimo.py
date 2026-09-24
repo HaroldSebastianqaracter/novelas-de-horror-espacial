@@ -196,16 +196,20 @@ def test_las_etiquetas_que_un_modelo_escribiria_por_analogia_vuelven() -> None:
     assert m.restaurar("[ALLEGADO_1_NOMBRE] y [QUIEN_REGALA]") == "Nala y Andrés"
 
 
-def test_una_firma_generica_no_se_oculta() -> None:
+def test_una_firma_generica_sale_entera_y_vuelve_tal_cual() -> None:
+    """La firma entera se oculta y vuelve como la escribio el comprador; sus palabras corrientes
+    no se ocultan sueltas (validador de 32b785c)."""
     datos = brief_ejemplo()
     datos["quien_regala"] = "tu hermano"
     m = Mascara(Brief.model_validate(datos))
-    assert m.ocultar("Dijo que tu hermano vendria. Tu hermano llamo.") == \
-        "Dijo que tu hermano vendria. Tu hermano llamo."
+    texto = "Dijo que tu hermano vendria. Tu hermano llamo. Mi hermano no."
+    esperado = "Dijo que [QUIEN_REGALA] vendria. [QUIEN_REGALA] llamo. Mi hermano no."
+    assert m.ocultar(texto) == esperado
+    assert m.restaurar(m.ocultar(texto)) == texto
     datos["quien_regala"] = "Sus compañeros del instituto"
     m = Mascara(Brief.model_validate(datos))
-    assert m.ocultar("Sus compañeros del instituto firmaron.") == \
-        "Sus compañeros del instituto firmaron."
+    assert m.ocultar("Sus compañeros del instituto firmaron. Los compañeros no.") == \
+        "[QUIEN_REGALA] firmaron. Los compañeros no."
 
 
 def test_dos_claves_que_vuelven_iguales_no_se_pisan() -> None:
@@ -227,3 +231,148 @@ def test_una_etiqueta_en_la_dedicatoria_o_en_un_nombre_para_la_planificacion() -
     [c] = [c for c in p_estructura.evaluar(con, novela_id).bloqueantes
            if c.comprobacion == "etiqueta_en_el_canon"]
     assert len(c.datos["textos"]) == 2
+
+
+# --- Lo que encontro el validador de 7e88879 -----------------------------------------------------
+
+
+def test_un_brief_en_minusculas_tampoco_envia_ningun_nombre() -> None:
+    """Asi viaja el nombre en los paquetes: se oculta en cualquier grafia."""
+    datos = brief_ejemplo()
+    datos["destinatario"]["nombre"] = "marta ibáñez"
+    datos["quien_regala"] = "andrés"
+    datos["allegados"][1]["nombre"] = "andrés"
+    m = Mascara(Brief.model_validate(datos))
+    oculto = m.ocultar("Para marta ibáñez, de andrés. Marta sonrio; Andrés no.")
+    assert _nombres_en(oculto) == set()
+    assert m.restaurar(oculto) == "Para Marta Ibáñez, de Andrés. Marta sonrio; Andrés no."
+
+
+def test_una_novela_con_el_brief_en_minusculas_no_envia_ningun_nombre() -> None:
+    con, ruta = nueva_bd()
+    novela_id = crear(con, ruta, capitulos=3, destinatario={
+        **brief_ejemplo()["destinatario"], "nombre": "marta ibáñez"})
+    puerto = puerto_falso(con)
+    ctx = pipeline.Contexto(con=con, puerto=puerto, cfg=cfg_de(ruta), novela_id=novela_id)
+    pipeline.avanzar(ctx)
+    assert all(_nombres_en(i["entrada"]) & {"marta", "ibanez"} == set()
+               for i in puerto.invocaciones)
+
+
+def test_una_firma_que_es_un_nombre_en_minuscula_se_oculta() -> None:
+    datos = brief_ejemplo()
+    datos["quien_regala"] = "julia"
+    m = Mascara(Brief.model_validate(datos))
+    assert m.ocultar("Para ti, de Julia. julia.") == "Para ti, de [QUIEN_REGALA]. [QUIEN_REGALA]."
+    assert "firma la dedicatoria" in m.leyenda()
+
+
+def test_la_firma_generica_vuelve_tal_cual_y_la_leyenda_la_dice() -> None:
+    datos = brief_ejemplo()
+    datos["quien_regala"] = "tu hermano"
+    m = Mascara(Brief.model_validate(datos))
+    assert m.restaurar("Con carino, [QUIEN_REGALA].") == "Con carino, tu hermano."
+    assert m.restaurar("[QUIEN_REGALA] llamo.") == "Tu hermano llamo."
+    assert "[QUIEN_REGALA]: quien hace el regalo y firma la dedicatoria." in m.leyenda()
+
+
+def test_la_grafia_respeta_guiones_y_apostrofos() -> None:
+    datos = brief_ejemplo()
+    datos["destinatario"]["nombre"] = "JEAN-LUC O'NEILL"
+    m = Mascara(Brief.model_validate(datos))
+    assert m.restaurar("[DESTINATARIO]") == "Jean-Luc O'Neill"
+
+
+def test_el_apellido_por_analogia_tambien_vuelve() -> None:
+    datos = brief_ejemplo()
+    datos["allegados"][1]["nombre"] = "Andrés Ibarra"
+    m = Mascara(Brief.model_validate(datos))
+    # El destinatario reclama sus formas primero; el apellido del allegado vuelve igual.
+    assert m.restaurar("[ALLEGADO_1_APELLIDO] y [ALLEGADO_2_APELLIDO]") == "Nala y Ibarra"
+
+
+@pytest.mark.parametrize("texto", ["[ARCHIVO_ELIMINADO]", "[TRANSMISION_OCULTA]", "[oculto]",
+                                   "[ELIMINADO]", "[DATOS_ELIMINADOS]", "[REGISTRO_ELIMINADO]"])
+def test_lo_eliminado_u_oculto_del_genero_no_para(texto: str) -> None:
+    from compartido.texto import ETIQUETA_SIN_NOMBRE
+
+    assert not ETIQUETA_SIN_NOMBRE.search(texto)
+
+
+def test_una_etiqueta_con_varios_sufijos_para() -> None:
+    from compartido.texto import ETIQUETA_SIN_NOMBRE
+
+    assert ETIQUETA_SIN_NOMBRE.search("Y [DESTINATARIO_NOMBRE_COMPLETO] miro.")
+
+
+@pytest.mark.parametrize("sql", [
+    "UPDATE novela SET titulo = '[DESTINATARIO] y la luz' WHERE id = ?",
+    "UPDATE personaje SET nombre = '[ALLEGADO_3]' WHERE id = "
+    "(SELECT MAX(id) FROM personaje WHERE novela_id = ?)",
+    "UPDATE objeto SET nombre = 'Radio de [QUIEN_REGALA]' WHERE id = "
+    "(SELECT MIN(id) FROM objeto WHERE novela_id = ?)",
+])
+def test_la_puerta_1_mira_titulo_personajes_y_objetos(sql: str) -> None:
+    from orquestador import fallo
+    from tareas.estructura import puerta as p_estructura
+    from tests.test_personalizacion import contexto
+
+    con, ruta = nueva_bd()
+    novela_id = crear(con, ruta, capitulos=3)
+    pipeline.planificar(contexto(con, ruta, novela_id))
+    con.execute(sql, (novela_id,))
+    assert "etiqueta_en_el_canon" in {
+        c.comprobacion for c in p_estructura.evaluar(con, novela_id).bloqueantes}
+    # El titulo y la dedicatoria los escribe el arquitecto: se rehace desde el.
+    assert fallo.FASE_DE_COMPROBACION["etiqueta_en_el_canon"] == "arquitecto"
+
+
+# --- Lo que encontro el validador de ac7dc1d -----------------------------------------------------
+
+
+@pytest.mark.parametrize(("firma", "texto", "oculto"), [
+    ("tu tía Carmen", "Con carino, tu tía Carmen. Carmen llamo.",
+     "Con carino, [QUIEN_REGALA]. [QUIEN_REGALA_2] llamo."),
+    ("tu tía carmen", "De tu tía carmen. Carmen y carmen.",
+     "De [QUIEN_REGALA]. [QUIEN_REGALA_2] y [QUIEN_REGALA_2]."),
+    ("Los García", "De parte de Los García. García vino.",
+     "De parte de [QUIEN_REGALA]. [QUIEN_REGALA_2] vino."),
+    ("La Tata", "La Tata vino.", "[QUIEN_REGALA] vino."),
+    ("Mis padres", "Mis padres vinieron. Los padres no.",
+     "[QUIEN_REGALA] vinieron. Los padres no."),
+])
+def test_una_firma_con_determinante_oculta_sus_nombres_y_nada_mas(firma: str, texto: str,
+                                                                  oculto: str) -> None:
+    datos = brief_ejemplo()
+    datos["quien_regala"] = firma
+    m = Mascara(Brief.model_validate(datos))
+    assert m.ocultar(texto) == oculto
+    vuelta = m.restaurar(oculto)
+    assert normalizar(vuelta) == normalizar(texto)
+    assert m.restaurar("Con carino, [QUIEN_REGALA]") == f"Con carino, {firma}"
+    # El nombre de pila por analogia vuelve al primer nombre de la firma.
+    assert "[QUIEN_REGALA_NOMBRE]" not in m.restaurar("[QUIEN_REGALA_NOMBRE]")
+    assert _nombres_en(m.leyenda()) == set() and "carmen" not in normalizar(m.leyenda())
+
+
+@pytest.mark.parametrize("etiqueta", ["[NOMBRE_OCULTO]", "[nombre_eliminado]", "[APELLIDO_OCULTO]",
+                                      "[TELEFONO_OCULTO]", "[CORREO_ELIMINADO]",
+                                      "[NOMBRE_CENSURADO]", "[PERSONA_OCULTA]",
+                                      "[Nombre_Anonimizado]", "[NOMBRE_OMITIDO]"])
+def test_toda_etiqueta_de_un_dato_personal_oculto_para(etiqueta: str) -> None:
+    from compartido.texto import ETIQUETA_SIN_NOMBRE
+
+    assert ETIQUETA_SIN_NOMBRE.search(f"y {etiqueta} dijo")
+
+
+def test_la_puerta_1_mira_tambien_los_lugares() -> None:
+    from tareas.estructura import puerta as p_estructura
+    from tests.test_personalizacion import contexto
+
+    con, ruta = nueva_bd()
+    novela_id = crear(con, ruta, capitulos=3)
+    pipeline.planificar(contexto(con, ruta, novela_id))
+    con.execute("UPDATE lugar SET nombre = 'Casa de [DESTINATARIO_NOMBRE]' WHERE id = "
+                "(SELECT MIN(id) FROM lugar WHERE novela_id = ?)", (novela_id,))
+    assert "etiqueta_en_el_canon" in {
+        c.comprobacion for c in p_estructura.evaluar(con, novela_id).bloqueantes}
