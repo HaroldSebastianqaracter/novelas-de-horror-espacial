@@ -12,3 +12,7 @@ __pycache__/
 # Capturas y trazas del browser MCP (spec-frontend, RF-FE-MCP): la evidencia va en docs/, no esto.
 .playwright-mcp/
 evals_out/
+
+# Salidas de las pruebas locales (browser MCP y evals reales): no van al repo
+.playwright-mcp/
+src/backend/evals_real*/
