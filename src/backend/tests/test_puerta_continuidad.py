@@ -35,6 +35,12 @@ def comprobaciones(con: sqlite3.Connection, g: Grafo, capitulo: int = 2) -> set[
     return {c.comprobacion for c in resultado.bloqueantes}
 
 
+def detectadas(con: sqlite3.Connection, g: Grafo, capitulo: int = 2) -> set[str]:
+    """Lo que la puerta encuentra, pare o avise."""
+    resultado = puerta.evaluar(con, g.novela_id, capitulo)
+    return {c.comprobacion for c in resultado.conflictos}
+
+
 # --- El grafo limpio no produce conflictos ------------------------------------------------
 
 
@@ -105,7 +111,9 @@ def test_detecta_objeto_sin_traslado(grafo: tuple[sqlite3.Connection, Grafo]) ->
     con.execute("UPDATE escena SET lugar_id = ? WHERE id = ?",
                 (g.lugares["Esclusa"], g.escenas[(2, 2)]))
     con.execute("DELETE FROM estado_objeto WHERE escena_id = ?", (g.escenas[(2, 2)],))
-    assert "objeto_sin_traslado" in comprobaciones(con, g)
+    assert "objeto_sin_traslado" in detectadas(con, g)
+    # Avisa, no para (RF2-PIPE-32).
+    assert "objeto_sin_traslado" not in comprobaciones(con, g)
 
 
 def test_detecta_retroceso_temporal(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
@@ -310,10 +318,10 @@ def test_un_objeto_que_pasa_a_un_lugar_contenido_no_se_ha_movido(
     con.execute("DELETE FROM estado_objeto WHERE escena_id = ?", (g.escenas[(2, 2)],))
     con.execute("UPDATE lugar SET dentro_de_id = ? WHERE id = ?",
                 (g.lugares["Modulo de carga"], g.lugares["Esclusa"]))
-    assert "objeto_sin_traslado" not in comprobaciones(con, g)
+    assert "objeto_sin_traslado" not in detectadas(con, g)
     # Sin la contencion, el mismo grafo si para: es la comprobacion la que cambia.
     con.execute("UPDATE lugar SET dentro_de_id = NULL")
-    assert "objeto_sin_traslado" in comprobaciones(con, g)
+    assert "objeto_sin_traslado" in detectadas(con, g)
 
 
 def test_estar_a_la_vez_en_un_lugar_y_en_otro_que_contiene_no_es_ubicuidad(
@@ -383,16 +391,16 @@ def test_un_objeto_que_lleva_alguien_viaja_con_el(grafo: tuple[sqlite3.Connectio
     con.execute("UPDATE escena SET lugar_id = ? WHERE id = ?",
                 (g.lugares["Esclusa"], g.escenas[(2, 2)]))
     con.execute("DELETE FROM estado_objeto WHERE escena_id = ?", (g.escenas[(2, 2)],))
-    assert "objeto_sin_traslado" in comprobaciones(con, g)
+    assert "objeto_sin_traslado" in detectadas(con, g)
     con.execute("UPDATE estado_objeto SET poseedor_id = ? WHERE objeto_id = ?",
                 (g.personajes["Kowalski"], g.objetos["Baliza"]))
-    assert "objeto_sin_traslado" not in comprobaciones(con, g)
+    assert "objeto_sin_traslado" not in detectadas(con, g)
     # Si el poseedor no esta en la escena, vuelve a parar.
     con.execute("DELETE FROM escena_personaje WHERE escena_id = ? AND personaje_id = ?",
                 (g.escenas[(2, 2)], g.personajes["Kowalski"]))
     con.execute("UPDATE escena SET pov_id = ? WHERE id = ?",
                 (g.personajes["Ibarra"], g.escenas[(2, 2)]))
-    assert "objeto_sin_traslado" in comprobaciones(con, g)
+    assert "objeto_sin_traslado" in detectadas(con, g)
 
 
 # --- RF2-PIPE-29: romper un habito es aviso, no conflicto ------------------------------------
@@ -491,9 +499,9 @@ def test_la_presencia_extraida_cuenta_para_la_faccion_y_el_poseedor(
                 (g.escenas[(2, 2)], g.personajes["Kowalski"]))
     con.execute("UPDATE escena SET pov_id = ? WHERE id = ?",
                 (g.personajes["Ibarra"], g.escenas[(2, 2)]))
-    assert "objeto_sin_traslado" in comprobaciones(con, g)
+    assert "objeto_sin_traslado" in detectadas(con, g)
     _presente(con, g, "Kowalski", (2, 2))
-    assert "objeto_sin_traslado" not in comprobaciones(con, g)
+    assert "objeto_sin_traslado" not in detectadas(con, g)
 
 
 def test_la_presencia_extraida_cuenta_para_la_deduccion(

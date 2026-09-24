@@ -453,7 +453,10 @@ CASOS: list[Caso] = [
                      "(fila 38d, RF2-PIPE-31)"),
     Caso("C05", "objeto", "contradiccion",
          "Un objeto aparece en otro lugar sin traslado ni poseedor",
-         _objeto_sin_traslado, Esperado(frozenset({"objeto_sin_traslado"}))),
+         _objeto_sin_traslado, Esperado(avisos=frozenset({"objeto_sin_traslado"})),
+         punto_ciego="Avisa y no para: la escena la pone la escaleta, y sin un estado del "
+                     "extractor alli la puerta no sabe si la prosa trae el objeto (RF2-PIPE-32, "
+                     "fila 45)"),
     Caso("C06", "espacio", "contradiccion",
          "Un personaje en dos lugares en el mismo momento de la cronologia",
          _dos_lugares_a_la_vez, Esperado(frozenset({"presencia_imposible"}))),

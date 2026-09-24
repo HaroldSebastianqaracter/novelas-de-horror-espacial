@@ -442,6 +442,8 @@ Cualquier conflicto (no aviso) hace **rollback** de la transacción del capítul
 
 > Ampliado por spec2, RF2-PIPE-26: en la presencia imposible y el objeto sin traslado, un lugar y los que contiene son el mismo sitio.
 
+> Cambiado por spec2, RF2-PIPE-32: el objeto sin traslado avisa y no para.
+
 > Ampliado por spec2, RF2-PIPE-27 (el conocimiento circula entre capítulos dentro de la facción) y RF2-PIPE-28 (un objeto viaja con su poseedor).
 
 > Ampliado por spec2, RF2-PIPE-31: estar en una escena incluye que el extractor registre allí al personaje, aunque la escaleta no lo pusiera.

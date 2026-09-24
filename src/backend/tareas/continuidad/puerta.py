@@ -416,8 +416,10 @@ def evaluar(
     for f in _filas(con, _SQL_OBJETO, p):
         if mismo_sitio(f["lugar_escena_id"], f["ultima_ubicacion_id"]):
             continue
+        # Aviso, no conflicto (RF2-PIPE-32): la escena la pone la escaleta, y si el extractor
+        # no situa alli el objeto, la puerta no sabe si la prosa lo trae.
         conflictos.append(Conflicto(
-            comprobacion="objeto_sin_traslado",
+            comprobacion="objeto_sin_traslado", aviso=True,
             descripcion=(
                 f"'{f['objeto']}' aparece en '{f['lugar_escena']}' y su ultima ubicacion "
                 f"registrada era '{f['ultima_ubicacion']}', sin traslado."
