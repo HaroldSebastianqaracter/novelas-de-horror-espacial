@@ -9,6 +9,8 @@
 .alerta-parada__franja .baliza { color: var(--color-texto-invertido); }
 .alerta-parada__franja:not([data-abierta]) .baliza { animation: none; }
 .alerta-parada__franja-der { margin-left: auto; font-weight: var(--peso-medio); }
+.alerta-parada__titulo { display: flex; align-items: center; gap: var(--espacio-3); }
+.alerta-parada__titulo h1 { margin: 0; }
 .alerta-parada__cabecera {
   display: grid; gap: var(--espacio-4); margin-top: calc(-1 * var(--espacio-4)); padding: var(--espacio-5);
   background: var(--color-superficie-elevada); border: var(--borde-fino) solid var(--color-alerta-borde); border-top: 0;

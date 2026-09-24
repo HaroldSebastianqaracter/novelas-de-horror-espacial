@@ -40,6 +40,22 @@
 .portada__titulo { font-size: clamp(2rem, 5vw, 3rem) !important; line-height: 1.1; }
 .portada__dedicatoria { max-width: 28rem; margin: var(--espacio-4) 0 0; font-style: italic; font-size: var(--texto-lectura); color: var(--color-lectura-tenue); }
 .ficha__ahora { font-family: var(--fuente-interfaz); font-size: var(--texto-sm); font-weight: normal; color: var(--color-lectura-tenue); }
+/* Portada ilustrada (RF-FE-IMG-01): la ilustración va abajo, a todo el ancho, y el hueco de su
+   altura aparta el texto, que nunca la pisa. Hasta saber cuál es, papel liso. */
+.portada--ilustrada {
+  display: flex; flex-direction: column; gap: 0; width: 100%; min-width: 0; max-width: 36rem; margin-inline: auto; padding: 0; /* sin min-width 0, el aspect-ratio ensancha la rejilla con la altura del texto */
+  aspect-ratio: 1748 / 2480; min-height: auto; place-items: stretch; /* sin min-height fijo: crece con el texto */
+  background: var(--color-lectura-fondo) var(--portada, none) center bottom / 100% auto no-repeat;
+}
+/* Más específico que el `.libro` de pantalla estrecha, que le devolvería el relleno. */
+.libro.portada--ilustrada { padding: 0; }
+.portada--ilustrada .portada__texto { display: grid; justify-items: center; gap: var(--espacio-3); padding: var(--espacio-7) var(--espacio-5) var(--espacio-4); }
+.portada__hueco { flex: none; width: 100%; aspect-ratio: 1748 / 1330; margin-top: auto; }
+/* El plano de la nave encabeza la ficha (RF-FE-IMG-02). */
+.ficha__plano {
+  aspect-ratio: 3 / 1; margin: calc(-1 * var(--espacio-3)) 0 var(--espacio-4);
+  background: url("../../compartido/imagenes/plano-nave.webp") center / contain no-repeat; mix-blend-mode: multiply;
+}
 .portada__regalo { margin: var(--espacio-4) 0 0; font-family: var(--fuente-interfaz); font-size: var(--texto-sm); letter-spacing: 0.02em; color: var(--color-lectura-tenue); }
 
 /* Novedades */
@@ -171,6 +187,12 @@
   .hoja { break-before: page; }
   .portada.hoja { break-before: auto; }
   .portada { min-height: 70vh; }
+  /* Después de `.libro`, que en papel redefine el fondo entero. */
+  .portada--ilustrada {
+    min-height: 0; max-width: none; height: 176mm; aspect-ratio: auto; print-color-adjust: exact; -webkit-print-color-adjust: exact;
+    background: var(--color-superficie-elevada) var(--portada, none) center bottom / 100% auto no-repeat;
+  }
+  .ficha__plano { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .capitulo__texto { font-size: 11pt; line-height: 1.55; }
   .capitulo__texto p { orphans: 2; widows: 2; }
   .indice__lista li { break-inside: avoid; font-size: 11pt; }

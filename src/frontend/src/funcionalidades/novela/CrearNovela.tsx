@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { analisisDeError, INTENSIDADES } from "../../compartido/api/brief";
 import { motivoLegible, useIntenciones } from "../../compartido/api/intenciones";
+import { DIBUJOS } from "../../compartido/imagenes";
+import { Dibujo } from "../../compartido/ui/Dibujo";
 import {
   aBrief,
   type Borrador,
@@ -110,7 +112,8 @@ export function CrearNovela() {
           <span aria-hidden="true">/</span>
           <span aria-current="page">Nueva novela</span>
         </nav>
-        <header>
+        <header className="crear__cabecera">
+          <Dibujo src={DIBUJOS.crearNovela} className="dibujo--crear" />
           <h1 id="titulo-crear">Nueva novela</h1>
           <p className="intro">
             Un terror espacial a medida: quien la recibe es el protagonista. Al crearla queda <strong>En espera</strong> hasta

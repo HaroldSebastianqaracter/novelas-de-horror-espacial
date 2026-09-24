@@ -2,7 +2,7 @@
 
 Requisitos del frontend web: un tablero al estilo Jira para ver las novelas y su generación, el detalle de una novela con sus capítulos, las paradas y la creación de una novela desde un brief. Desde la versión 0.2 es también **la lectura de la entrega**: portada, índice, ficha de personajes y lugares, versiones con sus novedades, el cambio del lector y la exportación a PDF.
 
-Versión 0.3 · 24 de septiembre de 2026 (la 0.1, del 23, era el tablero; la 0.2, la lectura contra MSW; la 0.3, la lectura contra el backend integrado)
+Versión 0.4 · 24 de septiembre de 2026 (la 0.1, del 23, era el tablero; la 0.2, la lectura contra MSW; la 0.3, la lectura contra el backend integrado; la 0.4, las imágenes)
 
 > **Cómo leer este documento.** Se apoya en [spec1](spec1.md) (API y estados), [spec2](spec2.md) (paradas y reanudación) y [spec3](spec3.md) (brief), y no cambia ninguno. Los requisitos llevan el prefijo `RF-FE-`. Los callouts **Decisión entrevistada** y **Decisión de la spec** marcan qué se preguntó al autor y qué se decidió sin él. El plan de verificación está en [spec-frontend-verification.md](spec-frontend-verification.md).
 
@@ -420,6 +420,22 @@ Una hoja de estilos `@media print` quita la navegación y fija el tamaño de pá
 
 **RF-FE-MCP-02 — Uso real y evidencia.** Un agente con el MCP abre la lectura de una novela completada, recorre la portada, el índice, la ficha, dos capítulos, las novedades y la vista de impresión, y registra lo que ve mal como fallos para el rol que corresponda: el frontend si es de la web, y el backend si es del dato. Qué inspeccionó, qué detectó y qué se cambió por ello queda en `docs/proceso/inspeccion-browser-mcp.md`, y lo que provocó un cambio, en el registro de iteraciones. El enunciado lo pide como evidencia.
 
+### 3.14 Imágenes
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** El autor pidió mejorar la web visualmente con imágenes. Se acordaron dos estilos, uno por cara de la web: **planos en cianotipo** para la consola, que siguen el papel técnico de la propuesta B, y **portadas de terror literario** para la lectura (papel, un solo motivo, duotono de tinta y un acento de rojo óxido). El autor generó con IA las que pudo, y el resto salió del archivo de dominio público de la NASA, tratado para que case con los dos estilos. Referencias: el diseño de producción de *Alien* (1979) y de *Alien: Isolation*, y las portadas minimalistas de terror y de ciencia ficción.
+
+**RF-FE-IMG-01 — Portada ilustrada.** La portada de la lectura lleva la ilustración del subgénero dominante de la novela (`NovelaCanon.subgenero_dominante`): una por cada subgénero de `compartido/tipos.py`, y una genérica sin subgénero o con uno desconocido. La ilustración ocupa el pie de la portada a todo el ancho, y el título, la dedicatoria y la línea del regalo van encima, en el papel: el texto nunca la pisa, porque un hueco con la proporción de la ilustración lo aparta, y la portada crece si el texto no cabe. Mientras no se sabe el subgénero, la portada es papel liso, sin la genérica de paso. La vista de impresión lleva la misma portada a página completa, con la ilustración en tamaño de impresión.
+
+**RF-FE-IMG-02 — Planos.** El plano de una nave encabeza «Personajes y lugares», en la web y en el apéndice del PDF, y un plano técnico encabeza el tablero general. Su papel es blanco y se funden con `mix-blend-mode: multiply`, así que quedan impresos sobre el papel de cada pantalla sin marco.
+
+**RF-FE-IMG-03 — Dibujos de línea.** Cuatro SVG de trazo: el pictograma de la alerta de parada (en su cabecera), el del tablero vacío, el de la ruta desconocida y el del alta de novela (solo en pantalla estrecha, donde no está la estación 3D). Se pintan como máscara CSS con el color del texto (`currentColor`), así que el mismo fichero va en azul o en el rojo de alerta.
+
+**RF-FE-IMG-04 — Formato, peso y accesibilidad.** Todas son decorativas: se pintan con CSS, sin `<img>`, y los lectores de pantalla no las anuncian. Ninguna lleva texto, logotipos ni caras reconocibles. Las portadas van en WebP en dos tamaños, 874 px de ancho para la pantalla (de 16 a 103 KB) y 1748 (A5 a 300 ppp) para imprimir. La vista de impresión no se marca lista (RF-FE-PDF-01) hasta que la portada y el plano están decodificados, porque son fondos CSS y el PDF podía salir sin ellos.
+
+**RF-FE-IMG-05 — Procedencia.** `compartido/imagenes/CREDITOS.md` dice de dónde sale cada imagen y cómo se trató: las fotos de la NASA con su identificador, las generadas por el autor, y los SVG que se retocaron. Del material de la NASA se respeta lo que piden sus normas de uso: ni su logotipo ni nada que sugiera que respalda el producto.
+
+> **Decisión de la spec.** Las imágenes son fijas y no se generan por novela: el pipeline no tiene un agente de imagen, y el enunciado deja las ilustraciones fuera de alcance. Una portada por subgénero da variedad sin tocar el backend. Se descartó una foto de banco de imágenes comercial, por la licencia, y dejar las fotos de la NASA en color, porque rompían el papel de la lectura.
+
 ## 4. Estados que toda pantalla tiene que cubrir
 
 Cargando, vacío, error de red (con reintento), reconexión (RF-FE-DAT-04), intención pendiente, intención rechazada, novela en `error` y novela `completada_con_avisos`. En la lectura, además: novela sin versiones, versión que no existe y cambio del lector en curso.
@@ -501,6 +517,8 @@ Los personajes salen de la vista `presencia` y los lugares, del lugar de cada es
 > La demostración contra el backend real se hizo el 23-09 y añadió RF-FE-DAT-06. También destapó un fallo del backend que el frontend no puede corregir: la API responde `500` a ratos, porque la dependencia `leer` de `main.py` abre la conexión SQLite en un hilo del pool y la usa o la cierra en otro (`sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread`). Con varias consultas a la vez, como hace cada pantalla, salta en casi todas las cargas. El frontend lo absorbía porque reintenta los `5xx` (RF-FE-DAT-01). El backend lo corrigió en `1c5a319` (RF2-API-06), y repetida la demostración con ese cambio, la API no dio ningún `500`.
 
 > **Ronda de la lectura (24 de septiembre de 2026).** Pasos 8 a 13, un commit por paso. El 10 se programó contra MSW con el contrato de la sección 5.2 y, con el backend integrado, el paso 13 lo engancha: tipos regenerados, `/apariciones` en la ficha, la línea del regalo en la portada, el alcance del worker en el panel, y la prueba del cambio del lector y del PDF contra la API y el worker reales con el puerto falso. Hechos: 8 a 11, 13 y la configuración del paso 12. Quedan el PDF de ejemplo (de la novela de 10 capítulos que se está generando), la inspección del paso 12, que necesita reabrir Claude Code para que cargue el servidor MCP, y la demostración con Claude Code real para el vídeo.
+>
+> **Paso 14, las imágenes (24 de septiembre de 2026).** Sección 3.14: portadas por subgénero, planos y dibujos de línea, con sus créditos.
 
 1. Andamiaje, tokens, rutas, tipos generados y MSW.
 2. Tablero general, sin arrastre: columnas, tarjetas, sondeo.

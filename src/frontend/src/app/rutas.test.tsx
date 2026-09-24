@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { servidor } from "../compartido/api/mocks/servidor";
+import { DIBUJOS } from "../compartido/imagenes";
 import { renderizarEn } from "../pruebas/renderizar";
 
 describe("andamiaje", () => {
@@ -14,8 +15,9 @@ describe("andamiaje", () => {
 
   it("sin novelas, el tablero lleva a crear la primera", async () => {
     servidor.use(http.get("*/api/novelas", () => HttpResponse.json([])));
-    renderizarEn("/");
+    const { container } = renderizarEn("/");
     expect(await screen.findByRole("link", { name: "Crea la primera" })).toHaveAttribute("href", "/crear");
+    expect(container.querySelector(".vacio .dibujo--vacio")).toHaveAttribute("aria-hidden", "true");
   });
 
   it("un fallo de la API se muestra con reintento", async () => {
@@ -33,8 +35,11 @@ describe("andamiaje", () => {
     },
   );
 
-  it("una ruta desconocida lo dice", async () => {
-    renderizarEn("/no-existe");
+  it("una ruta desconocida lo dice, con su dibujo decorativo (RF-FE-IMG-03)", async () => {
+    const { container } = renderizarEn("/no-existe");
     expect(await screen.findByRole("heading", { name: "Ruta desconocida" })).toBeInTheDocument();
+    const dibujo = container.querySelector(".dibujo--sin-senal") as HTMLElement;
+    expect(dibujo).toHaveAttribute("aria-hidden", "true");
+    expect(dibujo.style.getPropertyValue("--dibujo")).toContain(DIBUJOS.sinSenal);
   });
 });

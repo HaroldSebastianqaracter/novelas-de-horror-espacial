@@ -83,6 +83,44 @@ describe("capítulo y qué cambió (RF-FE-LEE-05, RF-FE-LEE-07)", () => {
   });
 });
 
+describe("la portada ilustrada (RF-FE-IMG-01)", () => {
+  const ilustracion = async () => {
+    const titulo = await screen.findByRole("heading", { level: 1, name: "Deriva en el anillo Tántalo" });
+    const portada = titulo.closest("article") as HTMLElement;
+    return () => portada.style.getPropertyValue("--portada");
+  };
+
+  it("lleva la ilustración de su subgénero, en tamaño de pantalla", async () => {
+    renderizarEn("/novelas/6/lectura");
+    const fondo = await ilustracion();
+    await waitFor(() => expect(fondo()).toContain("portada-horror_cosmico-web"));
+  });
+
+  it("sin subgénero, la genérica; y hasta saberlo, ninguna", async () => {
+    let soltar = () => {};
+    const detalle = new Promise<void>((r) => {
+      soltar = r;
+    });
+    servidor.use(
+      http.get("*/api/novelas/6", async () => {
+        await detalle;
+        return HttpResponse.json({
+          novela: { id: 6, titulo: "Deriva en el anillo Tántalo", genero: "terror_espacial", creado_en: "2026-09-20 10:00:00", subgenero_dominante: null },
+          restricciones: {},
+          estilo: null,
+          dedicatoria: null,
+          regalo: null,
+        });
+      }),
+    );
+    renderizarEn("/novelas/6/lectura");
+    const fondo = await ilustracion();
+    expect(fondo()).toBe("");
+    soltar();
+    await waitFor(() => expect(fondo()).toContain("portada-generica-web"));
+  });
+});
+
 describe("personajes y lugares (RF-FE-LEE-04)", () => {
   it("cada personaje y lugar enlaza a los capítulos donde aparece, sin destripar la historia", async () => {
     renderizarEn("/novelas/6/lectura/ficha");

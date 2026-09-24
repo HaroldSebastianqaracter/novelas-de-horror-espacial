@@ -14,6 +14,8 @@ import {
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { type ReactNode, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { DIBUJOS } from "../../compartido/imagenes";
+import { Dibujo } from "../../compartido/ui/Dibujo";
 import { consultaEjecucion, consultaNovelas } from "../../compartido/api/consultas";
 import { useIntenciones } from "../../compartido/api/intenciones";
 import { comoEstadoEjecucion, ESTADOS_ACTIVOS } from "../../compartido/api/reglas";
@@ -130,6 +132,7 @@ export function TableroGeneral() {
 
   return (
     <section className="pantalla pantalla--tablero" aria-labelledby="titulo-tablero">
+      <div className="cabecera-plano" aria-hidden="true" />
       <header className="pantalla__cabecera">
         <div>
           <h1 id="titulo-tablero">Tablero general</h1>
@@ -319,6 +322,7 @@ function CarrilAtencion({
 function TableroVacio() {
   return (
     <div className="vacio">
+      <Dibujo src={DIBUJOS.vacioTablero} className="dibujo--vacio" />
       <h2>Todavía no hay novelas</h2>
       <p>
         Cada novela nace <strong>En espera</strong>. Al arrancarla, los agentes la planifican y la escriben solos,

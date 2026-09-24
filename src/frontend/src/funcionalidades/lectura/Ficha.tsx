@@ -19,6 +19,7 @@ export function Ficha() {
   useTitulo(`Personajes y lugares · ${version.titulo}`);
   return (
     <article className="libro ficha" aria-labelledby="titulo-ficha">
+      <div className="ficha__plano" aria-hidden="true" />
       <h1 id="titulo-ficha">Personajes y lugares</h1>
       <FichaContenido
         novelaId={novelaId}

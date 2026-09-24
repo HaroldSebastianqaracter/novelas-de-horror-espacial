@@ -80,4 +80,12 @@
 .menu__opcion[aria-disabled="true"] { color: var(--color-texto-tenue); cursor: not-allowed; }
 .menu__motivo { font-size: var(--texto-xs); color: var(--color-texto-tenue); }
 .boton--alerta { color: var(--color-texto-invertido); background: var(--color-alerta); border-color: var(--color-alerta); }
+/* Dibujos de línea (RF-FE-IMG-03): el SVG es la máscara y el color, el del texto. */
+.dibujo { display: block; background-color: currentColor; -webkit-mask: var(--dibujo) center / contain no-repeat; mask: var(--dibujo) center / contain no-repeat; }
+.dibujo--vacio { width: 9rem; aspect-ratio: 1; color: var(--color-acento); }
+.dibujo--parada { flex: none; width: 3rem; aspect-ratio: 1; color: var(--color-alerta); }
+.dibujo--sin-senal { width: min(22rem, 100%); aspect-ratio: 16 / 9; color: var(--color-acento); }
+.dibujo--crear { float: right; width: 5.5rem; aspect-ratio: 3 / 4; margin: 0 0 var(--espacio-2) var(--espacio-3); color: var(--color-acento); }
+@media (min-width: 768px) { .dibujo--crear { display: none; } }
+
 .boton--alerta:hover { background: var(--color-alerta-texto); border-color: var(--color-alerta-texto); }

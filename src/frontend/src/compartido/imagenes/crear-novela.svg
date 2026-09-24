@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320" aria-hidden="true" focusable="false">
+  <g stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    
+    <path d="M 20 40 L 20 20 L 40 20 M 200 20 L 220 20 L 220 40 M 220 280 L 220 300 L 200 300 M 40 300 L 20 300 L 20 280" />
+    
+    
+    <line x1="120" y1="20" x2="120" y2="300" stroke-dasharray="6 6" stroke-width="1" />
+
+    
+    <path d="M 85 85 L 155 85 L 145 45 L 95 45 Z" />
+    <path d="M 105 45 L 105 30 L 135 30 L 135 45" />
+    <line x1="95" y1="65" x2="145" y2="65" />
+    
+    
+    <line x1="85" y1="90" x2="85" y2="105" stroke-dasharray="4 4" stroke-width="1" />
+    <line x1="155" y1="90" x2="155" y2="105" stroke-dasharray="4 4" stroke-width="1" />
+
+    
+    <rect x="75" y="110" width="90" height="20" rx="3" />
+    <line x1="90" y1="110" x2="90" y2="130" />
+    <line x1="105" y1="110" x2="105" y2="130" />
+    <line x1="135" y1="110" x2="135" y2="130" />
+    <line x1="150" y1="110" x2="150" y2="130" />
+    <circle cx="120" cy="120" r="4" />
+    
+    
+    <line x1="75" y1="135" x2="75" y2="155" stroke-dasharray="4 4" stroke-width="1" />
+    <line x1="165" y1="135" x2="165" y2="155" stroke-dasharray="4 4" stroke-width="1" />
+
+    
+    <path d="M 65 160 L 175 160 L 165 260 C 165 275, 145 285, 120 285 C 95 285, 75 275, 75 260 Z" />
+    <rect x="90" y="180" width="60" height="50" rx="4" />
+    <line x1="90" y1="195" x2="150" y2="195" />
+    <circle cx="120" cy="215" r="8" />
+    <line x1="80" y1="250" x2="160" y2="250" />
+    
+    
+    <polygon points="75,200 85,200 85,240 70,240" />
+    <line x1="74" y1="205" x2="85" y2="215" stroke-width="1" />
+    <line x1="72" y1="215" x2="85" y2="228" stroke-width="1" />
+    <line x1="71" y1="225" x2="82" y2="235" stroke-width="1" />
+
+    
+    <path d="M 130 35 C 145 20, 180 30, 165 50" />
+    <polygon points="160,50 195,65 180,95 145,80" />
+    <circle cx="163" cy="58" r="2" fill="currentColor" stroke="none" />
+    <line x1="165" y1="68" x2="182" y2="76" />
+    <line x1="162" y1="74" x2="179" y2="82" />
+  </g>
+</svg>

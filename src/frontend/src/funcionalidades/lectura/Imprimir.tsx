@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { consultaNovela } from "../../compartido/api/consultas";
 import { useTitulo } from "../../compartido/ui/titulo";
 import { partirEnEscenas } from "../manuscrito/Lector";
 import { FichaContenido, useConsultasFicha } from "./Ficha";
 import { useLecturaActual } from "./MarcoLectura";
-import { LineaRegalo } from "./Portada";
+import { planoNave, portadaDe, precargar } from "../../compartido/imagenes";
+import { fondoPortada, LineaRegalo } from "./Portada";
 import { motivoLegible } from "./usarLectura";
 
 const miles = new Intl.NumberFormat("es-ES");
@@ -26,7 +27,18 @@ export function Imprimir() {
   // `data-error-impresion`.
   const ficha = useConsultasFicha(novelaId, esUltima);
   const novela = useQuery(consultaNovela(novelaId));
-  const listo = ficha.listo && novela.isSuccess;
+  // La portada y el plano son fondos CSS: sin precargarlos, el PDF podía salir sin ellos.
+  const ilustracion = novela.data ? portadaDe(novela.data.novela.subgenero_dominante).impresion : null;
+  const [imagenesListas, setImagenesListas] = useState<string | null>(null);
+  useEffect(() => {
+    if (!ilustracion) return;
+    let vigente = true;
+    void precargar([ilustracion, planoNave]).then(() => vigente && setImagenesListas(ilustracion));
+    return () => {
+      vigente = false;
+    };
+  }, [ilustracion]);
+  const listo = ficha.listo && novela.isSuccess && imagenesListas === ilustracion;
   const fallo = ficha.error !== null || novela.isError;
   const impreso = useRef(false);
 
@@ -63,16 +75,23 @@ export function Imprimir() {
         </button>
       </div>
 
-      <section className="libro portada hoja" aria-labelledby="imprimir-titulo">
-        <p className="portada__genero">Terror espacial</p>
-        <h1 id="imprimir-titulo" className="portada__titulo">
-          {version.titulo || "Sin título"}
-        </h1>
-        {version.dedicatoria && <p className="portada__dedicatoria">{version.dedicatoria}</p>}
-        <LineaRegalo regalo={novela.data?.regalo} />
-        <p className="portada__edicion">
-          Versión {numero} · {motivoLegible(version.motivo).toLowerCase()}
-        </p>
+      <section
+        className="libro portada portada--ilustrada hoja"
+        aria-labelledby="imprimir-titulo"
+        style={fondoPortada(ilustracion)}
+      >
+        <div className="portada__texto">
+          <p className="portada__genero">Terror espacial</p>
+          <h1 id="imprimir-titulo" className="portada__titulo">
+            {version.titulo || "Sin título"}
+          </h1>
+          {version.dedicatoria && <p className="portada__dedicatoria">{version.dedicatoria}</p>}
+          <LineaRegalo regalo={novela.data?.regalo} />
+          <p className="portada__edicion">
+            Versión {numero} · {motivoLegible(version.motivo).toLowerCase()}
+          </p>
+        </div>
+        <div className="portada__hueco" aria-hidden="true" />
       </section>
 
       {conNovedades && (
@@ -131,6 +150,7 @@ export function Imprimir() {
       ))}
 
       <section id="apendice-ficha" className="libro ficha hoja" aria-labelledby="imprimir-ficha">
+        <div className="ficha__plano" aria-hidden="true" />
         <h2 id="imprimir-ficha">Personajes y lugares</h2>
         <FichaContenido
           novelaId={novelaId}

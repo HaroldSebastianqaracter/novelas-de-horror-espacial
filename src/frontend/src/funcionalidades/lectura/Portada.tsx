@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import type { CSSProperties } from "react";
 import { Link } from "react-router";
 import { consultaNovela } from "../../compartido/api/consultas";
 import type { Regalo } from "../../compartido/api/tipos";
+import { portadaDe } from "../../compartido/imagenes";
 import { Hace } from "../../compartido/ui/Hace";
 import { useTitulo } from "../../compartido/ui/titulo";
 import { useLecturaActual } from "./MarcoLectura";
@@ -16,16 +18,21 @@ export function Portada() {
   useTitulo(version.titulo || "Lectura");
   const conNovedades = (numero ?? 1) > 1;
   const cambiados = new Set(version.capitulos_cambiados);
+  // Hasta saber el subgénero, papel sin ilustración: así no parpadea la genérica.
+  const ilustracion = novela.data ? portadaDe(novela.data.novela.subgenero_dominante).web : null;
 
   return (
     <div className="lectura__pila">
-      <article className="libro portada" aria-labelledby="titulo-libro">
-        <p className="portada__genero">Terror espacial</p>
-        <h1 id="titulo-libro" className="portada__titulo">
-          {version.titulo || "Sin título"}
-        </h1>
-        {version.dedicatoria && <p className="portada__dedicatoria">{version.dedicatoria}</p>}
-        <LineaRegalo regalo={novela.data?.regalo} />
+      <article className="libro portada portada--ilustrada" aria-labelledby="titulo-libro" style={fondoPortada(ilustracion)}>
+        <div className="portada__texto">
+          <p className="portada__genero">Terror espacial</p>
+          <h1 id="titulo-libro" className="portada__titulo">
+            {version.titulo || "Sin título"}
+          </h1>
+          {version.dedicatoria && <p className="portada__dedicatoria">{version.dedicatoria}</p>}
+          <LineaRegalo regalo={novela.data?.regalo} />
+        </div>
+        <div className="portada__hueco" aria-hidden="true" />
       </article>
 
       {conNovedades && <Novedades />}
@@ -53,6 +60,10 @@ export function Portada() {
     </div>
   );
 }
+
+/** La ilustración de la portada como variable CSS (RF-FE-IMG-01), o nada mientras no se sabe cuál. */
+export const fondoPortada = (src: string | null): CSSProperties | undefined =>
+  src ? ({ "--portada": `url("${src}")` } as CSSProperties) : undefined;
 
 /** Para quién es, de parte de quién y por qué ocasión (RF-FE-LEE-02). Nada si la novela no es un regalo. */
 export function LineaRegalo({ regalo }: { regalo: Regalo | null | undefined }) {

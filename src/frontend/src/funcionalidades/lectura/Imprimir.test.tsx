@@ -22,6 +22,9 @@ describe("vista de impresión y PDF (RF-FE-PDF-01, RF-FE-PDF-02)", () => {
     ]);
 
     expect(screen.getByText("Para Oda Varga · De Lía y Marcos · Cumpleaños")).toBeInTheDocument();
+    // La portada del PDF, en tamaño de impresión (RF-FE-IMG-01).
+    const portada = container.querySelector(".imprimir > .portada") as HTMLElement;
+    expect(portada.style.getPropertyValue("--portada")).toMatch(/portada-horror_cosmico\.webp/);
     const indice = screen.getByRole("navigation", { name: "Índice" });
     expect(within(indice).getByRole("link", { name: "Capítulo 3" })).toHaveAttribute("href", "#cap-3");
     expect(within(indice).getByRole("link", { name: "Personajes y lugares" })).toHaveAttribute("href", "#apendice-ficha");
@@ -84,6 +87,27 @@ describe("vista de impresión y PDF (RF-FE-PDF-01, RF-FE-PDF-02)", () => {
     expect(imprimir).not.toHaveBeenCalled();
     expect(screen.getByText(/el libro no está completo para imprimirlo/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Imprimir o guardar como PDF" })).toBeDisabled();
+  });
+
+  it("no se marca lista hasta decodificar la portada y el plano, y un fallo de carga no la bloquea (RF-FE-IMG-04)", async () => {
+    // jsdom no tiene `decode`: se simula con promesas que el test resuelve a mano.
+    const pendientes: { resolver: () => void; rechazar: (e: Error) => void }[] = [];
+    const prototipo = HTMLImageElement.prototype as { decode?: () => Promise<void> };
+    const original = prototipo.decode;
+    prototipo.decode = () => new Promise<void>((resolver, rechazar) => pendientes.push({ resolver, rechazar }));
+    try {
+      const { container } = renderizarEn("/novelas/6/lectura/imprimir");
+      await waitFor(() => expect(pendientes.length).toBeGreaterThanOrEqual(2));
+      await screen.findByRole("region", { name: "Personajes y lugares" });
+      await delay(300);
+      expect(container.querySelector("[data-listo-para-imprimir]")).toBeNull();
+      // La portada carga y el plano falla: decorativo, no bloquea.
+      pendientes.forEach((p, i) => (i % 2 === 0 ? p.resolver() : p.rechazar(new Error("no carga"))));
+      await waitFor(() => expect(container.querySelector("[data-listo-para-imprimir]")).not.toBeNull());
+    } finally {
+      if (original) prototipo.decode = original;
+      else delete prototipo.decode;
+    }
   });
 
   it("si fallan las apariciones tampoco se marca lista", async () => {

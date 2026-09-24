@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { consultaEstructura, consultaNovela, consultaParada } from "../../compartido/api/consultas";
 import { useIntenciones } from "../../compartido/api/intenciones";
+import { DIBUJOS } from "../../compartido/imagenes";
+import { Dibujo } from "../../compartido/ui/Dibujo";
 import { type AccionParada, ACCIONES_POR_TIPO_DE_PARADA, comoTipoParada, type TipoParada } from "../../compartido/api/reglas";
 import type { Parada } from "../../compartido/api/tipos";
 import { EstadoConsulta } from "../../compartido/ui/EstadoConsulta";
@@ -102,9 +104,12 @@ function Contenido({ parada, novelaId, titulo }: { parada: Parada; novelaId: num
         </span>
       </div>
       <header className="alerta-parada__cabecera">
-        <h1 id="titulo-parada">
-          {titulo}: parada de {parada.tipo}
-        </h1>
+        <div className="alerta-parada__titulo">
+          <Dibujo src={DIBUJOS.parada} className="dibujo--parada" />
+          <h1 id="titulo-parada">
+            {titulo}: parada de {parada.tipo}
+          </h1>
+        </div>
         <dl className="telemetria">
           <div>
             <dt>Tipo</dt>

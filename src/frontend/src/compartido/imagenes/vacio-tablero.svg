@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" aria-hidden="true" focusable="false">
+  <g stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    
+    <path d="M 20 40 L 20 20 L 40 20 M 200 20 L 220 20 L 220 40 M 220 200 L 220 220 L 200 220 M 40 220 L 20 220 L 20 200" />
+    
+    
+    <line x1="120" y1="10" x2="120" y2="230" stroke-dasharray="6 4" stroke-width="1" />
+    <polygon points="120,205 40,165 120,125 200,165" stroke-dasharray="4 4" stroke-width="1" />
+
+    
+    <path d="M 120 200 L 50 165 L 120 130 L 190 165 Z" />
+    <path d="M 120 170 L 50 135 L 120 100 L 190 135 Z" />
+    <path d="M 50 165 L 50 135 M 190 165 L 190 135 M 120 200 L 120 170" />
+    
+    
+    <path d="M 60 135 L 60 150 L 120 180 L 120 165 Z" />
+    <path d="M 180 135 L 180 150 L 120 180 L 120 165 Z" />
+    <path d="M 60 135 L 60 150 L 120 120 L 120 105 Z" />
+    <path d="M 180 135 L 180 150 L 120 120 L 120 105 Z" />
+    
+    
+    <line x1="70" y1="155" x2="110" y2="175" />
+    <line x1="80" y1="145" x2="120" y2="165" />
+    <line x1="90" y1="135" x2="130" y2="155" />
+    <line x1="100" y1="125" x2="140" y2="145" />
+    <line x1="110" y1="115" x2="150" y2="135" />
+
+    
+    <path d="M 116 98 L 186 133 L 186 63 L 116 28 Z" />
+    <path d="M 124 94 L 182 123 L 182 71 L 124 42 Z" />
+    
+    
+    <polygon points="65,150 85,160 85,175 65,165" />
+    <circle cx="75" cy="160" r="2" fill="currentColor" stroke="none" />
+    <circle cx="75" cy="168" r="2" fill="currentColor" stroke="none" />
+  </g>
+</svg>

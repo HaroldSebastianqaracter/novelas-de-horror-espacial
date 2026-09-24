@@ -4,6 +4,7 @@ import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { paradas } from "../../compartido/api/mocks/datos";
 import { servidor } from "../../compartido/api/mocks/servidor";
+import { DIBUJOS } from "../../compartido/imagenes";
 import type { Parada } from "../../compartido/api/tipos";
 import { sinViolaciones } from "../../pruebas/accesibilidad";
 import { renderizarEn } from "../../pruebas/renderizar";
@@ -40,6 +41,14 @@ describe("informe de la parada (RF-FE-PAR-01)", () => {
     expect(within(canon).getByText(/traje gris, todavía con el polvo/)).toBeInTheDocument();
 
     expect(screen.getByText("Prosa del capítulo rechazado (2 escenas)")).toBeInTheDocument();
+  });
+
+  it("la cabecera lleva el pictograma de parada, decorativo (RF-FE-IMG-03)", async () => {
+    renderizarEn(RUTA);
+    const titulo = await screen.findByRole("heading", { level: 1 });
+    const pictograma = titulo.parentElement?.querySelector(".dibujo--parada") as HTMLElement;
+    expect(pictograma).toHaveAttribute("aria-hidden", "true");
+    expect(pictograma.style.getPropertyValue("--dibujo")).toContain(DIBUJOS.parada);
   });
 
   it("enseña la segunda opinión legible: una línea por conflicto, con su veredicto y su motivo (RF3-JUE-01)", async () => {
