@@ -12,7 +12,8 @@
     "tipos:comprobar": "npm run tipos && git diff --exit-code -- src/compartido/api/esquema.gen.ts",
     "comprobar": "tsc -b",
     "test": "vitest run",
-    "test:vigilar": "vitest"
+    "test:vigilar": "vitest",
+    "pdf": "node scripts/exportar-pdf.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -36,6 +37,7 @@
     "jsdom": "^30.1.1",
     "msw": "^2.15.0",
     "openapi-typescript": "^7.13.0",
+    "playwright": "1.63.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.6",
     "vitest": "^4.1.11"

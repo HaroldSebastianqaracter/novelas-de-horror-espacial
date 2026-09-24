@@ -41,6 +41,8 @@ export function Portada() {
           <Link to={enlace("/ficha")}>Personajes y lugares</Link>
           <span aria-hidden="true"> · </span>
           <Link to={enlace("/versiones")}>Todas las versiones</Link>
+          <span aria-hidden="true"> · </span>
+          <Link to={enlace("/imprimir", { imprimir: "1" })}>Exportar a PDF</Link>
         </p>
       </nav>
     </div>

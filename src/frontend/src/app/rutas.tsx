@@ -1,6 +1,6 @@
 import type { RouteObject } from "react-router";
 import { AlertaParada, TableroGeneral, TableroNovela } from "../funcionalidades/ejecucion";
-import { CapituloLectura, Ficha, MarcoLectura, Portada, Versiones } from "../funcionalidades/lectura";
+import { CapituloLectura, Ficha, Imprimir, MarcoLectura, Portada, Versiones } from "../funcionalidades/lectura";
 import { Lector } from "../funcionalidades/manuscrito";
 import { CrearNovela } from "../funcionalidades/novela";
 import { Marco } from "./Marco";
@@ -15,6 +15,7 @@ export const rutas: RouteObject[] = [
       { index: true, element: <Portada /> },
       { path: "ficha", element: <Ficha /> },
       { path: "versiones", element: <Versiones /> },
+      { path: "imprimir", element: <Imprimir /> },
       { path: "capitulos/:n", element: <CapituloLectura /> },
     ],
   },

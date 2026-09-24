@@ -33,6 +33,7 @@ Con los mocks, la novela 6 («Deriva en el anillo Tántalo») está completada y
 | `npm run comprobar` | Comprobación de tipos |
 | `npm test` | Tests (Vitest, siempre contra MSW) |
 | `npm run build` | Build de producción en `dist/` |
+| `npm run pdf -- <url> <salida.pdf>` | Exporta a PDF la vista de impresión de una novela (`/novelas/:id/lectura/imprimir`) con Playwright. Necesita el servidor de desarrollo en marcha |
 
 ## Ideas guardadas
 

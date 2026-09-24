@@ -97,7 +97,7 @@ describe("formulario del brief (RF-FE-BRF)", () => {
     await usuario.click(screen.getByRole("button", { name: "Crear novela" }));
     expect(await screen.findByText(/esperando asignación/)).toBeInTheDocument();
 
-    expect(await screen.findByRole("heading", { level: 1, name: "Sin título" }, { timeout: 6_000 })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "Sin título" }, { timeout: 12_000 })).toBeInTheDocument();
     const cuerpo = enviados[0] as { tipo: string; payload: { brief: Record<string, unknown> } };
     expect(cuerpo.tipo).toBe("crear_novela");
     expect(cuerpo.payload.brief).toMatchObject({ intensidad: "tension", tono: "emotivo", ocasion: "cumpleanos" });

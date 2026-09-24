@@ -402,11 +402,11 @@ Mientras la API no dé el alcance calculado por el worker (sección 5.2), se lla
 4. Los capítulos, cada uno en página nueva.
 5. La ficha de personajes y lugares como apéndice.
 
-Una hoja de estilos `@media print` quita la navegación y fija el tamaño de página, los márgenes y los saltos. Los enlaces internos son anclas, y el PDF los conserva.
+Una hoja de estilos `@media print` quita la navegación y fija el tamaño de página (A5), los márgenes y los saltos. Los enlaces internos son anclas, y el PDF los conserva. La vista marca `data-listo-para-imprimir` cuando tiene todo lo que necesita (la versión, el canon y la escaleta), y es lo que espera `npm run pdf`.
 
 **RF-FE-PDF-02 — Desde la lectura.** El botón «Exportar a PDF» abre la vista de impresión y lanza el diálogo de imprimir del navegador, donde se elige «Guardar como PDF».
 
-**RF-FE-PDF-03 — Por línea de órdenes.** `npm run pdf -- <url> <salida.pdf>` abre la vista de impresión con Playwright y guarda el PDF (`page.pdf`, con fondo y con las anclas). Así se produce `/ejemplos/novela-ejemplo.pdf` desde una novela real completada.
+**RF-FE-PDF-03 — Por línea de órdenes.** `npm run pdf -- <url> <salida.pdf>` abre la vista de impresión con Playwright (dependencia de desarrollo, versión fijada), espera a que esté lista y a las fuentes, y guarda el PDF (`page.pdf`, con fondos, anclas y esquema de títulos). Así se produce `/ejemplos/novela-ejemplo.pdf` desde una novela real completada.
 
 > **Decisión de la spec.** Un solo camino al PDF, la vista de impresión, con dos disparadores: el del navegador para el lector y el de Playwright para la entrega, que es repetible. Se descartó generar el PDF en el servidor (otra dependencia en el backend) y una librería de PDF en el cliente (maquetaría distinto de lo que se ve).
 
@@ -495,7 +495,7 @@ Los personajes salen de la vista `presencia` y los lugares, del lugar de cada es
 >
 > La demostración contra el backend real se hizo el 23-09 y añadió RF-FE-DAT-06. También destapó un fallo del backend que el frontend no puede corregir: la API responde `500` a ratos, porque la dependencia `leer` de `main.py` abre la conexión SQLite en un hilo del pool y la usa o la cierra en otro (`sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread`). Con varias consultas a la vez, como hace cada pantalla, salta en casi todas las cargas. El frontend lo absorbía porque reintenta los `5xx` (RF-FE-DAT-01). El backend lo corrigió en `1c5a319` (RF2-API-06), y repetida la demostración con ese cambio, la API no dio ningún `500`.
 
-> **Ronda de la lectura (24 de septiembre de 2026).** Pasos 8 a 13, un commit por paso. El 10 se programa contra MSW con el contrato de la sección 5.2 hasta que el backend lo implemente. Hechos: 8, 9 (la ficha, de momento desde la escaleta, y la portada sin la línea del regalo hasta que la API la sirva) y 10 contra MSW (falta probarlo contra el backend cuando f4 lo integre).
+> **Ronda de la lectura (24 de septiembre de 2026).** Pasos 8 a 13, un commit por paso. El 10 se programa contra MSW con el contrato de la sección 5.2 hasta que el backend lo implemente. Hechos: 8, 9 (la ficha, de momento desde la escaleta, y la portada sin la línea del regalo hasta que la API la sirva) 10 contra MSW (falta probarlo contra el backend cuando f4 lo integre) y 11 (el PDF de ejemplo, cuando haya una novela real completada con versión).
 
 1. Andamiaje, tokens, rutas, tipos generados y MSW.
 2. Tablero general, sin arrastre: columnas, tarjetas, sondeo.

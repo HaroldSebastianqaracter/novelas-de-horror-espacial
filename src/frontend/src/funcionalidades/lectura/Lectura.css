@@ -144,3 +144,34 @@
 .franja-cambio[data-tono="aviso"] { background: var(--color-aviso-velo); border-left-color: var(--color-aviso); }
 .franja-cambio__peticion { color: var(--color-texto-secundario); }
 .franja-cambio .boton { justify-self: start; }
+
+/* Vista de impresión y PDF (RF-FE-PDF-01) */
+.imprimir { display: grid; gap: var(--espacio-6); }
+.imprimir__barra {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--espacio-3);
+  max-width: calc(var(--ancho-lectura) + 2 * var(--espacio-8)); width: 100%; margin: 0 auto;
+  font-family: var(--fuente-interfaz); font-size: var(--texto-sm); color: var(--color-texto-secundario);
+}
+.imprimir__barra p { margin: 0; }
+.portada__edicion { margin: var(--espacio-5) 0 0; font-family: var(--fuente-interfaz); font-size: var(--texto-xs); color: var(--color-lectura-tenue); }
+.imprimir .capitulo__cabecera h2 { font-size: var(--texto-xl); }
+.imprimir .ficha h3 { font-size: var(--texto-lg); margin: var(--espacio-5) 0 var(--espacio-3); }
+.imprimir .ficha h4 { font-size: var(--texto-md); margin-bottom: var(--espacio-1); }
+
+@page { size: A5; margin: 16mm 14mm 18mm; }
+@media print {
+  .no-imprimir, .lectura__barra, .franja-cambio, .saltar { display: none !important; }
+  /* En papel, el fondo casi blanco: el crema de pantalla dejaría un marco en los márgenes. */
+  .lectura, .lectura__contenido { min-height: 0; padding: 0; background: var(--color-superficie-elevada); }
+  .imprimir { display: block; }
+  .libro { max-width: none; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: var(--color-superficie-elevada); }
+  /* Cada hoja empieza página, salvo la portada, que es la primera. */
+  .hoja { break-before: page; }
+  .portada.hoja { break-before: auto; }
+  .portada { min-height: 70vh; }
+  .capitulo__texto { font-size: 11pt; line-height: 1.55; }
+  .capitulo__texto p { orphans: 2; widows: 2; }
+  .indice__lista li { break-inside: avoid; font-size: 11pt; }
+  .ficha__entrada { break-inside: avoid; }
+  .libro a { color: inherit; text-decoration: none; }
+}
