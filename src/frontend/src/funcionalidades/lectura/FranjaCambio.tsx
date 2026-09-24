@@ -21,11 +21,14 @@ export function FranjaCambio({
   cambio,
   versiones,
   alCerrar,
+  alTerminar,
 }: {
   novelaId: number;
   cambio: CambioGuardado;
   versiones: readonly VersionResumen[];
   alCerrar: () => void;
+  /** El cambio ya no está en marcha: el capítulo deja pedir otro. */
+  alTerminar: () => void;
 }) {
   const intencion = useQuery({
     ...consultaIntencion(cambio.intencionId),
@@ -53,6 +56,15 @@ export function FranjaCambio({
   useEffect(() => {
     if (aplicado && !nueva) void clienteConsultas.invalidateQueries({ queryKey: claves.versiones(novelaId) });
   }, [aplicado, nueva, clienteConsultas, novelaId]);
+
+  const terminado =
+    !!nueva ||
+    estadoIntencion === "rechazada" ||
+    estadoIntencion === "interrumpida" ||
+    (seguimiento.data !== undefined && CAMBIO_TERMINADO.has(seguimiento.data.estado));
+  useEffect(() => {
+    if (terminado && !cambio.terminado) alTerminar();
+  }, [terminado, cambio.terminado, alTerminar]);
 
   const cerrar = (
     <button type="button" className="boton boton--mini" onClick={alCerrar}>
@@ -106,7 +118,18 @@ export function FranjaCambio({
   }
 
   const estadoCambio = seguimiento.data?.estado;
-  if (estadoCambio === "fallido" || estadoCambio === "rechazado" || estadoCambio === "interrumpido") {
+  if (estadoCambio === "interrumpido") {
+    return (
+      <section className="franja-cambio" data-tono="aviso" role="alert" aria-label="Tu cambio">
+        <p>
+          <strong>Se detuvo antes de terminar.</strong> No se aplicó nada y no hay versión nueva.
+        </p>
+        {pie}
+        {cerrar}
+      </section>
+    );
+  }
+  if (estadoCambio === "fallido" || estadoCambio === "rechazado") {
     const informe = seguimiento.data?.informe as { motivo?: unknown } | null;
     return (
       <section className="franja-cambio" data-tono="aviso" role="alert" aria-label="Tu cambio">

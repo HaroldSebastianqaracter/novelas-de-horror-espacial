@@ -188,6 +188,49 @@ describe("seguir el cambio (RF-FE-CAM-04, RF-FE-CAM-05)", () => {
     expect(alerta).toHaveTextContent("Tres intentos sin pasar la puerta 4");
   }, 25_000);
 
+  it("tras un rechazo se puede pedir otro cambio, aunque la franja siga a la vista", async () => {
+    const usuario = userEvent.setup();
+    renderizarEn(CAPITULO);
+    await pedir(usuario, await abrirPanel(usuario), /Nala/, "Hazlo más triste");
+    await screen.findByRole("alert", { name: "Tu cambio" }, { timeout: 8_000 });
+    await waitFor(() => expect(screen.getByRole("button", { name: "Pedir un cambio" })).toBeEnabled());
+    expect(screen.queryByText("Ya hay un cambio tuyo en marcha.")).not.toBeInTheDocument();
+  }, 20_000);
+
+  it("la franja sobrevive a recargar: se reconstruye desde el GET", async () => {
+    const usuario = userEvent.setup();
+    const { unmount } = renderizarEn(CAPITULO);
+    await pedir(usuario, await abrirPanel(usuario), /Nala/, "El perro se llama Luna");
+    await screen.findByRole("status", { name: "Tu cambio" });
+    unmount();
+    renderizarEn(CAPITULO);
+    const franja = await screen.findByRole("status", { name: "Tu cambio" });
+    expect(franja).toHaveTextContent("Tu cambio: El perro se llama Luna");
+    await waitFor(() => expect(franja).toHaveTextContent(/Reescribiendo por tu cambio los capítulos 3 y 5/), { timeout: 8_000 });
+  }, 25_000);
+
+  it("un cambio interrumpido dice que se detuvo, no que falló", async () => {
+    servidor.use(
+      http.get("*/api/novelas/6/cambios/:cid", ({ params }) =>
+        HttpResponse.json({ id: Number(params.cid), estado: "interrumpido", peticion: "x", objetivo: { tipo: "fragmento" }, cita: null, cambio: null, capitulos: [3], informe: null, version: null, creado_en: "2026-09-24 10:00:00" }),
+      ),
+    );
+    const usuario = userEvent.setup();
+    renderizarEn(CAPITULO);
+    await pedir(usuario, await abrirPanel(usuario), /Nala/, "El perro se llama Luna");
+    const alerta = await screen.findByRole("alert", { name: "Tu cambio" }, { timeout: 8_000 });
+    expect(alerta).toHaveTextContent("Se detuvo antes de terminar. No se aplicó nada y no hay versión nueva.");
+  }, 20_000);
+
+  it("al cancelar, el foco vuelve al botón que abrió el panel", async () => {
+    const usuario = userEvent.setup();
+    renderizarEn(CAPITULO);
+    const panel = await abrirPanel(usuario);
+    expect(within(panel).getByRole("heading", { name: "Pedir un cambio" })).toHaveFocus();
+    await usuario.click(within(panel).getByRole("button", { name: "Cancelar" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Pedir un cambio" })).toHaveFocus());
+  });
+
   it("el panel no tiene violaciones de accesibilidad automáticas", async () => {
     const usuario = userEvent.setup();
     const { container } = renderizarEn(CAPITULO);

@@ -378,7 +378,7 @@ Se elige uno. Debajo, «qué quieres cambiar»: texto libre de 3 a 300 caractere
 **RF-FE-CAM-03 — Alcance antes de confirmar.** Antes de enviar, el panel dice qué capítulos se van a reescribir:
 
 - En un hecho, sus capítulos de `GET /hechos/{id}/usos`.
-- En una entidad, sus apariciones (RF-FE-LEE-04).
+- En una entidad, los capítulos de la versión cuya prosa escribe su nombre, la misma regla que usa el worker para renombrar.
 - En un fragmento, «el capítulo N y los que dependan de lo que cambie; lo decide el worker».
 
 Mientras la API no dé el alcance calculado por el worker (sección 5.2), se llama «estimación». Se confirma en dos pasos, como RF-FE-PAR-03: reescribir capítulos cuesta tiempo y, con Claude Code real, dinero.
@@ -388,7 +388,10 @@ Mientras la API no dé el alcance calculado por el worker (sección 5.2), se lla
 - la intención, hasta que el worker la cierra. Si la rechaza, el motivo en lenguaje legible y, con `cambio_no_admisible`, la explicación del intérprete (`resultado.explicacion`);
 - con la intención hecha, el cambio (`GET /cambios/{cambio_id}`) y la ejecución: «Reescribiendo por tu cambio los capítulos …», con la fase (`revision` se lee «Aplicando tu cambio») y el capítulo;
 - si el cambio termina `fallido`, «no se pudo aplicar tu cambio», sin versión nueva: el backend no abre parada, vuelve a `completada*` y deja el evento `cambio_fallido`;
-- si la ejecución queda `parada` o `detenida`, lo dice, y la parada enlaza a su alerta.
+- si termina `interrumpido` (el autor lo paró y la ejecución queda `detenida`), «se detuvo antes de terminar»;
+- si la ejecución queda `parada`, lo dice y enlaza a la alerta. El contrato dice que un cambio no abre parada, pero la franja no lo da por supuesto.
+
+Un cambio terminado (aplicado, rechazado, fallido o interrumpido) deja de bloquear pedir otro, aunque su franja siga a la vista hasta que el lector la cierre. Al cerrar el panel, el foco vuelve al botón que lo abrió; al pedir el cambio, va al título del capítulo.
 
 **RF-FE-CAM-05 — La versión nueva.** Cuando aparece una versión nueva con motivo `cambio_lector`, la franja pasa a «Versión N+1: cambiaron los capítulos …», con enlaces a cada uno con «ver qué cambió» activado. La versión anterior queda en la lista de versiones y se puede leer. La anuncia el SSE, que invalida `/versiones`. Si el evento se pierde, el cambio `aplicado` vuelve a pedir las versiones.
 
@@ -468,6 +471,7 @@ Lo que la lectura necesita y la API no da todavía. Se envió a la sesión del b
   - `novela_no_terminada`: la ejecución no está `completada` ni `completada_con_avisos`. Con un solo worker, cubre también la ejecución activa;
   - `version_desfasada`;
   - `objetivo_inexistente`: la entidad o el hecho no existen o no son de esa novela;
+  - `cambio_invalido`: el worker no puede aplicar la forma del cambio (con `resultado.explicacion`);
   - `cambio_no_admisible`: el intérprete no lo entiende como un cambio del canon («hazlo más triste»), el valor no tiene forma válida, choca con otra entidad, lleva un término vetado o trae un patrón de inyección. La explicación va en `resultado.explicacion`.
 - **`resultado`** de la intención `hecha`: `{ "cambio_id": 12, "capitulos": [3, 5, 8] }`.
 - **Durante el cambio**, la ejecución pasa a `generando`, con la fase `revision` o `puerta_4` y en `capitulo_actual` el capítulo que se corrige. Al final pasa por `puerta_5` y vuelve a `completada*` con una versión nueva, motivo `cambio_lector` y la `peticion` en `detalle` (RF3-BIB-12). `capitulos_completados` no se mueve.

@@ -235,4 +235,5 @@ export function restaurarLectura() {
   for (const id of Object.keys(canonDe)) delete canonDe[Number(id)];
   Object.assign(canonDe, structuredClone(canonInicial));
   for (const id of Object.keys(cambiosDe)) delete cambiosDe[Number(id)];
+  siguienteCambio = 1;
 }

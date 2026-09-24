@@ -35,7 +35,7 @@ export function CapituloLectura() {
   });
   const motivoNoPuede = !esUltima
     ? "Solo se pide sobre la última versión."
-    : cambio
+    : cambio && !cambio.terminado
       ? "Ya hay un cambio tuyo en marcha."
       : ejecucion.isPending || novelas.isPending
         ? "Comprobando el estado de la novela…"
@@ -46,6 +46,8 @@ export function CapituloLectura() {
             : null;
 
   const articulo = useRef<HTMLElement>(null);
+  const botonCambio = useRef<HTMLButtonElement>(null);
+  const tituloCapitulo = useRef<HTMLHeadingElement>(null);
   const texto = useRef<HTMLDivElement>(null);
   const [seleccion, setSeleccion] = useState<{ texto: string; arriba: number; izquierda: number } | null>(null);
   const [panel, setPanel] = useState<{ cita: string | null } | null>(null);
@@ -105,7 +107,9 @@ export function CapituloLectura() {
     <article ref={articulo} className="libro capitulo" aria-labelledby="titulo-capitulo">
       <header className="capitulo__cabecera">
         <p className="capitulo__novela">{version.titulo}</p>
-        <h1 id="titulo-capitulo">Capítulo {n}</h1>
+        <h1 id="titulo-capitulo" ref={tituloCapitulo} tabIndex={-1}>
+          Capítulo {n}
+        </h1>
         <p className="capitulo__meta">{miles.format(capitulo.palabras)} palabras</p>
         <div className="capitulo__herramientas">
           {puedeComparar && (
@@ -114,6 +118,7 @@ export function CapituloLectura() {
             </button>
           )}
           <button
+            ref={botonCambio}
             type="button"
             className="boton boton--mini"
             disabled={motivoNoPuede !== null || panel !== null}
@@ -136,10 +141,16 @@ export function CapituloLectura() {
           capitulo={n}
           cita={panel.cita}
           version={version}
-          alCerrar={() => setPanel(null)}
+          alCerrar={() => {
+            setPanel(null);
+            // El foco vuelve a quien abrió el panel.
+            requestAnimationFrame(() => botonCambio.current?.focus());
+          }}
           alPedir={(intencionId, peticion) => {
             guardarCambio({ intencionId, versionBase: version.numero, peticion });
             setPanel(null);
+            // El botón queda desactivado mientras dura el cambio: el foco va al capítulo.
+            requestAnimationFrame(() => tituloCapitulo.current?.focus());
           }}
         />
       )}

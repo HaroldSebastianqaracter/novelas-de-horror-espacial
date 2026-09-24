@@ -9,6 +9,8 @@ export interface CambioGuardado {
   intencionId: number;
   versionBase: number;
   peticion: string;
+  /** Se aplicó, se rechazó, falló o se interrumpió: ya no bloquea pedir otro. */
+  terminado?: boolean;
 }
 
 const clave = (novelaId: number) => `novelasv2.cambio-lector.${novelaId}`;

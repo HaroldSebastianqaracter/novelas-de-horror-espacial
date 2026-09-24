@@ -49,6 +49,7 @@ export const MOTIVOS_CAMBIO: Record<string, string> = {
   version_desfasada: "Estabas leyendo una versión que ya no es la última. Vuelve a la última y pídelo otra vez.",
   objetivo_inexistente: "Lo que querías cambiar ya no existe en la novela.",
   cambio_no_admisible: "Ese cambio no se puede aplicar como un cambio de la historia.",
+  cambio_invalido: "El cambio no tiene una forma que el worker pueda aplicar.",
 };
 
 async function leerSinContrato<T>(ruta: string): Promise<T> {

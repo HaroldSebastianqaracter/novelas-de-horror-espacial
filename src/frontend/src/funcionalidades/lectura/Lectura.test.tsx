@@ -1,6 +1,9 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
+import { versionesDe } from "../../compartido/api/mocks/lectura";
+import { servidor } from "../../compartido/api/mocks/servidor";
 import { sinViolaciones } from "../../pruebas/accesibilidad";
 import { renderizarEn } from "../../pruebas/renderizar";
 
@@ -150,4 +153,43 @@ describe("la lectura desde la consola y su accesibilidad (RF-FE-LEE-08)", () => 
       unmount();
     }
   }, 20_000);
+});
+
+describe("navegar, títulos y pistas (RF-FE-LEE-07, RF-FE-LEE-08)", () => {
+  it("al cambiar de capítulo se vuelve arriba y el foco va al texto; al cargar, no", async () => {
+    const usuario = userEvent.setup();
+    renderizarEn("/novelas/6/lectura/capitulos/3");
+    await screen.findByRole("heading", { level: 1, name: "Capítulo 3" });
+    const principal = document.getElementById("contenido-lectura") as HTMLElement;
+    expect(principal).not.toHaveFocus();
+
+    document.documentElement.scrollTop = 800;
+    await usuario.click(screen.getByRole("link", { name: "Capítulo 4 →" }));
+    await screen.findByRole("heading", { level: 1, name: "Capítulo 4" });
+    await waitFor(() => expect(principal).toHaveFocus());
+    expect(document.documentElement.scrollTop).toBe(0);
+  });
+
+  it("los estados de aviso también cambian el título de la pestaña", async () => {
+    const { unmount } = renderizarEn("/novelas/3/lectura");
+    await screen.findByRole("heading", { name: "Esta novela todavía no tiene lectura" });
+    await waitFor(() => expect(document.title).toBe("Sin lectura todavía · novelasv2"));
+    unmount();
+    renderizarEn("/novelas/6/lectura?version=9");
+    await screen.findByRole("heading", { name: "No existe la versión 9" });
+    await waitFor(() => expect(document.title).toBe("No existe la versión 9 · novelasv2"));
+  });
+
+  it("lo añadido y lo quitado llevan pista para lectores de pantalla, y una escena nueva se marca", async () => {
+    const version1 = structuredClone(versionesDe[6]?.[0]);
+    const tres = version1?.capitulos.find((c) => c.numero === 3);
+    // En la versión 1, el capítulo 3 no tenía la última escena: en la 2 aparece entera.
+    if (tres) tres.texto = tres.texto.split("\n\n* * *\n\n").slice(0, 2).join("\n\n* * *\n\n");
+    servidor.use(http.get("*/api/novelas/6/versiones/1", () => HttpResponse.json(version1)));
+    renderizarEn("/novelas/6/lectura/capitulos/3?cambios=1");
+    const escenaNueva = await screen.findByText("(escena nueva)");
+    expect(escenaNueva.closest("p")).toHaveAttribute("data-cambio", "nuevo");
+    const insertado = screen.getAllByText(/Nala ladró dos veces/, { selector: "ins" })[0] as HTMLElement;
+    expect(insertado).toHaveTextContent("[añadido: Nala ladró dos veces");
+  });
 });

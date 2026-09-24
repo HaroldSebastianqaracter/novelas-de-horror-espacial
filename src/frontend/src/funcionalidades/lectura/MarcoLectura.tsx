@@ -28,11 +28,14 @@ export function MarcoLectura() {
   // Al cargar no se mueve: el primer foco es el enlace para saltar al texto.
   const principal = useRef<HTMLElement>(null);
   const { pathname } = useLocation();
-  const vista = `${pathname}|${numero ?? ""}`;
-  const vistaAnterior = useRef(vista);
+  const vista = numero === null ? null : `${pathname}|${numero}`;
+  const vistaAnterior = useRef<string | null>(null);
   useEffect(() => {
-    if (vistaAnterior.current === vista) return;
+    // Resolver la versión al cargar no es cambiar de vista: la primera vista conocida solo se anota.
+    if (vista === null || vistaAnterior.current === vista) return;
+    const primera = vistaAnterior.current === null;
     vistaAnterior.current = vista;
+    if (primera) return;
     document.documentElement.scrollTop = 0;
     principal.current?.focus({ preventScroll: true });
   }, [vista]);
@@ -67,7 +70,13 @@ export function MarcoLectura() {
       </header>
       <main ref={principal} id="contenido-lectura" className="lectura__contenido" tabIndex={-1}>
         {cambio && (
-          <FranjaCambio novelaId={novelaId} cambio={cambio} versiones={lista} alCerrar={() => guardarCambio(null)} />
+          <FranjaCambio
+            novelaId={novelaId}
+            cambio={cambio}
+            versiones={lista}
+            alCerrar={() => guardarCambio(null)}
+            alTerminar={() => guardarCambio({ ...cambio, terminado: true })}
+          />
         )}
         <EstadoConsulta cargando={versiones.isPending} error={versiones.error} reintentar={() => void versiones.refetch()}>
           {sinLectura ? (

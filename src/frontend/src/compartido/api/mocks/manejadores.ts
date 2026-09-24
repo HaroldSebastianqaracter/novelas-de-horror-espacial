@@ -217,6 +217,8 @@ function avanzarCambio(id: number): string | null {
 /** Olvida los cambios a medias. Los tests lo llaman entre caso y caso. */
 export function restaurarSimulacion() {
   cambioEnCurso.clear();
+  intenciones.clear();
+  siguienteIntencion = 1;
 }
 
 /** Solo para los tests, donde el reloj no avanza: lleva el cambio en curso hasta el final. */
