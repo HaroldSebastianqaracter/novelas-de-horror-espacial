@@ -319,7 +319,7 @@ def test_un_objeto_que_pasa_a_un_lugar_contenido_no_se_ha_movido(
     con.execute("UPDATE lugar SET dentro_de_id = ? WHERE id = ?",
                 (g.lugares["Modulo de carga"], g.lugares["Esclusa"]))
     assert "objeto_sin_traslado" not in detectadas(con, g)
-    # Sin la contencion, el mismo grafo si para: es la comprobacion la que cambia.
+    # Sin la contencion, el mismo grafo si se detecta: es la comprobacion la que cambia.
     con.execute("UPDATE lugar SET dentro_de_id = NULL")
     assert "objeto_sin_traslado" in detectadas(con, g)
 
@@ -395,7 +395,7 @@ def test_un_objeto_que_lleva_alguien_viaja_con_el(grafo: tuple[sqlite3.Connectio
     con.execute("UPDATE estado_objeto SET poseedor_id = ? WHERE objeto_id = ?",
                 (g.personajes["Kowalski"], g.objetos["Baliza"]))
     assert "objeto_sin_traslado" not in detectadas(con, g)
-    # Si el poseedor no esta en la escena, vuelve a parar.
+    # Si el poseedor no esta en la escena, vuelve a detectarse.
     con.execute("DELETE FROM escena_personaje WHERE escena_id = ? AND personaje_id = ?",
                 (g.escenas[(2, 2)], g.personajes["Kowalski"]))
     con.execute("UPDATE escena SET pov_id = ? WHERE id = ?",
