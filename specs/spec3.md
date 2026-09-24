@@ -757,3 +757,44 @@ La puerta 3 no puede con las tres primeras: compara cada valor con el de su mism
 **Medido con el juez real** (23 de septiembre, copia de `novela_real.db`, cuatro capítulos, 1,16 $), con la primera redacción de la exención («una cifra que el personaje estima o recuerda mal a sabiendas… pasa»). El juez cazó b4 (cuarenta horas de antelación frente a treinta y una) y b3 («delante de siete» frente al censo) en el capítulo 4. En el 3 cazó una contradicción real que no estaba en la lista: una reserva de sesenta y una horas-persona que baja de cuarenta en veinte minutos. En el 2 cazó «nueve de ustedes» frente al hecho «once respiran cinco días», y el capítulo 1 pasó con la cuenta razonada. No cazó b1: tomó «los siete de fuera» por un recuento falseado a propósito por el personaje, amparándose en la exención. Por eso la exención se endureció a la redacción de arriba. Con esa prosa, la puerta 4 habría devuelto tres de los cuatro capítulos al redactor.
 
 **Medido otra vez con la exención endurecida** (capítulos 1 y 2, 0,47 $). El capítulo 2 sigue fallando por «nueve de ustedes», y el juez explica que «los siete de fuera» sí queda señalado por la propia escena: con la regla nueva, es un error marcado y no un descuido. El capítulo 1 pasa a fallar por una conversación en tiempo real con cincuenta y un minutos de retardo por sentido, que la misma escena usa dos párrafos después. Es una contradicción plausible que antes pasó. Con una sola muestra por criterio, el veredicto de un capítulo concreto puede variar entre llamadas: es lo que ataca la puerta 4 con varias muestras del bloque 6, pendiente.
+
+## 3.12 Lo que enseñó la novela de tres capítulos
+
+La segunda pasada real (24 de septiembre, `novela_3cap.db`, el brief de ejemplo recortado a tres capítulos) paró cuatro veces y no llegó a terminar: tres paradas de continuidad en el capítulo 2 y una de oficio en el capítulo 3, con los tres intentos gastados. Leída con la prosa, cada parada tenía una causa que se repetía en la novela de cuatro capítulos. Las tres decisiones de esta sección las tomó el autor en entrevista el 24 de septiembre, antes de lanzar la novela de diez capítulos.
+
+### El allegado, por su nombre
+
+**RF3-PAS-13 — Un allegado se nombra.** *Amplía RF3-VAL-02.* En el capítulo 3, la escaleta ponía al hermano de la protagonista en la escena 3, y la prosa lo metía («Aquí tu hermano favorito») sin escribir su nombre. `allegado_ausente` devolvía el capítulo con «intégralo en esa escena», y el redactor, que creía haberlo integrado, repitió lo mismo dos veces. La comprobación se queda como estaba, porque el nombre es lo que el comprador reconoce en el regalo; lo que cambia es lo que se le pide al redactor:
+
+- el conflicto dice que escriba el nombre, literal y con mayúscula, al menos una vez en esa escena, y que llamarlo por su parentesco o su papel no cuenta;
+- el paquete del redactor lo pide de entrada junto a los elementos personales de cada escena.
+
+### El juez, siempre
+
+**RF3-PAS-14 — El juez corre aunque falle la mecánica.** *Modifica RF2-PIPE-13 de spec2.* Hasta ahora, si la mecánica de la puerta 4 fallaba, el juez de oficio no se invocaba. En el capítulo 3, los intentos 1 y 2 fallaron por el allegado y el juez no llegó a leerlos; en el 3 la mecánica pasó y el juez vio una cuenta que no cuadraba (nueve personas donde el canon dice siete), que el redactor ya no tuvo intento para arreglar. Ahora el juez vota en cada intento, y el redactor recibe en la vuelta todo lo que falló: los conflictos de la mecánica y los criterios del juez juntos.
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** Cuesta de 3 a 5 llamadas del juez más por cada intento que falla la mecánica (de 0,3 a 0,5 $). Se descartó añadir un cuarto intento: seguiría descubriendo los fallos de uno en uno. La corrección del lector (RF3-CAM-09) mantiene el orden anterior: sus comprobaciones son bloqueantes baratas y un revisor que no aplicó el cambio no merece juez.
+
+### Lo que ve cualquiera
+
+**RF3-PAS-15 — Hechos observables.** *Amplía RF2-PIPE-21.* En el capítulo 2, una personaje actuaba sobre el patrón del pulso de una luz del pozo que la protagonista había visto a solas, y la puerta 3 paró tres veces por conocimiento no adquirido. Se relanzó dos veces y al final el autor lo dio por sabido: una luz que late a la vista es algo que cualquiera en la estación puede haber visto fuera de escena. La novela de cuatro capítulos paró por casos de la misma familia.
+
+- El extractor marca `observable: true` en un hecho que percibe cualquiera en ese lugar, con los sentidos o en un indicador a la vista de todos (una luz, un ruido, una alarma, un temblor). Lo que se sabe por dentro, se dice en privado o se lee no lo es. Ante la duda, no.
+- Como la conducta (RF2-PIPE-29), ser observable es del atributo: la marca va en `atributo_observable` (migración 012) con su escena, y revertir el capítulo la borra. Renombrar al sujeto con el cambio del lector (RF3-CAM-11) mueve sus marcas de observable y de conducta a la clave nueva.
+- En la puerta 3, un uso de un hecho observable no para. Si el personaje estuvo en el lugar donde se fijó el hecho entre la escena que lo fijó y la del uso, las dos incluidas, lo sabe y no hay nada que decir. Haber pasado por allí antes no basta: una alarma que sonó ayer no la oyó quien estuvo la semana pasada (validador de la primera versión). Si no estuvo, es el aviso `conocimiento_observable`, para que el autor compruebe que es verosímil.
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** Se eligió frente a pasar todo el conocimiento no adquirido a aviso, que dejaba de proteger los errores reales, y frente a dejarlo como estaba, que con diez capítulos pararía varias veces por el mismo motivo. El riesgo es que el extractor marque de más y se cuele un error real como aviso: la skill pide ante la duda `false`, y la marca queda a la vista en el grafo. «El mismo lugar» es el mismo `lugar_id`, sin contención (RF2-PIPE-26): quien estuvo en un sitio que contiene al otro recibe el aviso, no el silencio.
+
+### El censo, delante
+
+**RF3-PAS-16 — El redactor recibe el censo.** *Amplía RF3-PAS-10 y RF3-PAS-12.* En el intento 2 del capítulo 3 las cuentas cuadraban («siete a bordo: Marta, Idoia, Casilda, Tomás y tres de la cuadrilla»); en el 3, al reescribir el capítulo entero para arreglar otra cosa, daban nueve. Los de la cuadrilla no tienen nombre ni ficha, y el único dato del canon era una línea, «personas a bordo: siete personas», así que el redactor rehacía la suma de memoria en cada versión. En la primera novela, tres de las cuatro contradicciones reales que pasaron las puertas eran cuentas de este tipo. El juez las caza (RF3-PAS-12, y ahora en cada intento por RF3-PAS-14), pero es probabilístico; esto ataca que se cometan.
+
+- Si el canon tiene algún dato que cuenta personas (una cantidad y una palabra de gente: «personas a bordo: siete», «bajas del turno: dos», «once respirando»), el bloque de hechos del redactor empieza por una sección **Censo**, obligatoria:
+  - la regla: toda cifra de personas cuadra con el censo; antes de escribirla, la suma de los que tienen nombre más los anónimos que cuentan los datos; quien se va o muere baja el total desde esa escena; quien está lejos no cuenta entre los presentes;
+  - cada personaje de la novela con su última condición registrada antes del capítulo (vivo, herido, muerto…);
+  - los datos que cuentan personas hasta el capítulo, como mucho 30, con los de mundo delante y después del más reciente al más antiguo.
+- Sin ningún dato de personas no hay sección: los nombres ya están en el canon del capítulo.
+- Va dentro del bloque `hechos` y no en uno propio, porque los bloques del redactor ya suman el paquete entero (RF2-CTX-12); por ser obligatoria, el recorte no la toca.
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** El autor eligió hacerlo antes de la novela de diez capítulos, a propuesta de la sesión que lanzó la de tres. Se dejó para después una comprobación determinista de las cifras de personas (el punto ciego C12 del banco): es un trabajo grande, y con el censo delante y el juez en cada intento ya hay dos defensas. El criterio de «dato de personas» es de palabras y cifras, a propósito ancho: una línea que sobra cuesta unos tokens y una que falta deja al redactor sumando de memoria.
+

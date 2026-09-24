@@ -506,22 +506,22 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
             texto_completo = "\n\n".join(textos[k] for k in sorted(textos))
             mecanica = p_oficio.evaluar(ctx.con, ctx.novela_id, numero, texto_completo)
 
-            juicio: SalidaOficio | None = None
-            votos: dict[str, tuple[int, int]] | None = None
-            if mecanica.pasa:
-                with transaccion(ctx.con):
-                    estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_4", capitulo=numero,
-                                       intento=intento)
-                try:
-                    paquete_oficio = _paquete_o_parada(
-                        ctx, numero, intento, s_oficio.paquete,
-                        ctx.con, ctx.novela_id, numero, texto_completo, mecanica,
-                        presupuesto=ctx.presupuesto, revertir=True,
-                    )
-                except Parado:
-                    a_medias = False  # la parada ya revirtio el capitulo en su transaccion
-                    raise
-                juicio, votos = _juzgar(ctx, paquete_oficio, numero, intento)
+            # El juez corre aunque la mecanica falle (spec3, RF3-PAS-14): si no, el redactor
+            # descubre los fallos de uno en uno y el ultimo intento se gasta en el primero que
+            # el juez ve (capitulo 3 de la novela de tres capitulos).
+            with transaccion(ctx.con):
+                estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_4", capitulo=numero,
+                                   intento=intento)
+            try:
+                paquete_oficio = _paquete_o_parada(
+                    ctx, numero, intento, s_oficio.paquete,
+                    ctx.con, ctx.novela_id, numero, texto_completo, mecanica,
+                    presupuesto=ctx.presupuesto, revertir=True,
+                )
+            except Parado:
+                a_medias = False  # la parada ya revirtio el capitulo en su transaccion
+                raise
+            juicio, votos = _juzgar(ctx, paquete_oficio, numero, intento)
 
             # La puerta 4 se registra entera, mecanica y juicio (RF2-PIPE-13).
             oficio = p_oficio.combinar(mecanica, juicio, votos)
@@ -535,12 +535,12 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                 _indexar(ctx, numero)
                 return
 
-            # Falla el oficio: se descarta lo escrito y se vuelve a redaccion con el criterio.
-            ctx.eventos_criterios = (
-                [v.model_dump() for v in juicio.incumplidos] if juicio is not None
-                else [{"criterio": c.comprobacion, "sugerencia": c.descripcion,
-                       "evidencia": "", "principio": "38"} for c in mecanica.bloqueantes]
-            )
+            # Falla el oficio: se descarta lo escrito y se vuelve a redaccion con TODO lo que
+            # fallo, la mecanica y el juez juntos (RF3-PAS-14).
+            ctx.eventos_criterios = [
+                {"criterio": c.comprobacion, "sugerencia": c.descripcion,
+                 "evidencia": "", "principio": "38"} for c in mecanica.bloqueantes
+            ] + [v.model_dump() for v in juicio.incumplidos]
             ultimo = intento == ctx.cfg_max_intentos
             with transaccion(ctx.con):
                 fallo.revertir_grafo(ctx.con, ctx.novela_id, numero, motivo="oficio")

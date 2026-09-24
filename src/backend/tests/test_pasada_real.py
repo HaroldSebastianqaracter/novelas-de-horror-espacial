@@ -941,3 +941,117 @@ def test_un_fallo_de_las_cuentas_vuelve_al_redactor_con_la_evidencia() -> None:
     assert len(redacciones) == 2
     assert "los siete de fuera" in redacciones[1]
     assert "cuentas_cuadran" in redacciones[1]
+
+
+# --- RF3-PAS-15: lo observable -------------------------------------------------------------------
+
+REGLA_DE_LO_OBSERVABLE = (
+    "**Observables.** Si el dato lo percibe cualquiera que esté en ese lugar, con los sentidos o "
+    "en un indicador a la vista de todos (una luz que late con un patrón, un ruido, una alarma, "
+    "un temblor, el frío), marca `observable: true`. Lo que se sabe por dentro, se dice en "
+    "privado, se lee en un documento o solo sale en una pantalla que mira uno, no es observable. "
+    "Ante la duda, `false`: marcar de más deja pasar errores de conocimiento."
+)
+
+
+def test_el_extractor_marca_lo_observable_y_solo_eso() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    salida = SalidaExtraccion.model_validate({
+        "hechos": [
+            {"escena_orden": 1, "sujeto_tipo": "lugar", "sujeto_ref": "Puente",
+             "atributo": "luz de emergencia", "valor": "late en rojo", "observable": True,
+             "cita": "late en rojo"},
+            {"escena_orden": 1, "sujeto_tipo": "lugar", "sujeto_ref": "Puente",
+             "atributo": "codigo de la escotilla", "valor": "cuatro siete", "cita": "cuatro"},
+        ],
+        "resumen": "La cuadrilla entra en el puente y la luz de emergencia late en rojo.",
+        "resumen_breve": "Entran en el puente.",
+    })
+    s_extraccion.aplicar(con, g.novela_id, 1, salida, {1: g.escenas[(1, 1)]})
+    marcas = con.execute("SELECT sujeto_clave, atributo_clave FROM atributo_observable").fetchall()
+    assert [tuple(m) for m in marcas] == [("puente", "luz de emergencia")]
+
+
+def test_la_skill_pide_marcar_lo_observable() -> None:
+    from compartido.puerto.terminal import PuertoTerminal
+    from config import raiz_repo
+
+    skill = PuertoTerminal(skills_dir=raiz_repo() / ".claude" / "skills").ruta_skill(
+        "extraccion").read_text(encoding="utf-8")
+    seccion = "**Observables.**" + skill.split("**Observables.**")[1].split("\n\n")[0]
+    assert seccion.strip() == REGLA_DE_LO_OBSERVABLE
+
+
+# --- RF3-PAS-16: el censo del redactor -----------------------------------------------------------
+
+
+@pytest.mark.parametrize(("texto", "cuenta"), [
+    ("personas a bordo: siete personas", True),
+    ("bajas del turno: dos", True),
+    ("once respirando", True),
+    ("tamano de la cuadrilla: seis", True),
+    ("periodicidad del pulso: doce coma cuatro segundos", False),
+    ("tripulacion: la del carguero", False),
+    ("profundidad del pozo: ciento veinte metros", False),
+])
+def test_un_dato_que_cuenta_personas(texto: str, cuenta: bool) -> None:
+    from compartido.texto import cuenta_personas
+
+    assert cuenta_personas(texto) is cuenta
+
+
+def _paquete_del_2(con: sqlite3.Connection, g: fabrica.Grafo) -> Any:
+    import config
+    from compartido.contexto import Presupuesto
+    from tareas.redaccion import servicio as s_redaccion
+
+    return s_redaccion.paquete(con, g.novela_id, 2, presupuesto=Presupuesto(
+        bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE))
+
+
+def test_el_redactor_recibe_el_censo_con_los_muertos_y_los_datos_de_personas() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    insertar_hecho(
+        con, novela_id=g.novela_id, escena_id=g.escenas[(1, 1)], sujeto_tipo="lugar",
+        sujeto_id=g.lugares["Puente"], sujeto_nombre="Puente", atributo="personas a bordo",
+        valor="siete personas", categoria="otro", cita=None, supersede_a=None,
+    )
+    con.execute(
+        "INSERT INTO estado_personaje (novela_id, personaje_id, escena_id, condicion) "
+        "VALUES (?,?,?, 'muerto')", (g.novela_id, g.personajes["Ibarra"], g.escenas[(1, 2)]),
+    )
+    hechos = next(b for b in _paquete_del_2(con, g).bloques if b.nombre == "hechos")
+    censo = [e for e in hechos.elementos if e.seccion == "### Censo: las cuentas de personas"]
+    assert censo and all(e.obligatorio for e in censo)
+    textos = [e.texto for e in censo]
+    assert textos[0].startswith("Toda cifra de personas que escribas")
+    assert "Ibarra (oponente), muerto (desde el cap. 1)" in textos[1]
+    assert "Reyes (aliado), sin nada registrado" in textos[1]
+    assert "- Puente · personas a bordo: siete personas (cap. 1)" in textos
+    # Delante de los demas hechos: es lo primero que lee del estado establecido.
+    assert hechos.elementos[:len(censo)] == censo
+
+
+def test_sin_datos_de_personas_no_hay_censo() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    hechos = next(b for b in _paquete_del_2(con, g).bloques if b.nombre == "hechos")
+    assert not [e for e in hechos.elementos if e.seccion.startswith("### Censo")]
+
+
+def test_la_condicion_de_este_capitulo_no_entra_en_su_censo() -> None:
+    """Al reescribir el capitulo 2, una muerte que el propio 2 registro no es canon previo."""
+    from compartido.grafo import lectura
+
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    con.execute(
+        "INSERT INTO estado_personaje (novela_id, personaje_id, escena_id, condicion) "
+        "VALUES (?,?,?, 'muerto')", (g.novela_id, g.personajes["Ibarra"], g.escenas[(2, 1)]),
+    )
+    censo = {c["nombre"]: c["condicion"] for c in lectura.censo_de_personajes(con, g.novela_id, 2)}
+    assert censo["Ibarra"] is None
+    censo = {c["nombre"]: c["condicion"] for c in lectura.censo_de_personajes(con, g.novela_id, 3)}
+    assert censo["Ibarra"] == "muerto"

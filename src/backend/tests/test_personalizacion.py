@@ -84,7 +84,7 @@ def test_el_paquete_del_redactor_lleva_los_elementos_de_cada_escena() -> None:
     pipeline.avanzar(ctx)
     assert isinstance(ctx.puerto, PuertoFalso)
     entradas = [i["entrada"] for i in ctx.puerto.invocaciones if i["agente"] == "redaccion"]
-    assert any("Elementos personales que integra: REC1" in e for e in entradas)
+    assert any("Elementos personales que integra" in e and "): REC1" in e for e in entradas)
     assert all("DESTINATARIO (protagonista, nombre exacto): Marta Ibáñez" in e for e in entradas)
 
 

@@ -30,6 +30,10 @@ class CanonDesfasado(Exception):
     """El canon ya no es el que el cambio vio: un error de datos, no del codigo (RF3-CAM-12)."""
 
 
+#: Las marcas que van por la clave del sujeto (RF2-PIPE-29, RF3-PAS-15): al renombrarlo, pasan
+#: a la clave nueva, o el hecho dejaria de ser conducta u observable (validador de 221f1be).
+_MARCAS_POR_SUJETO = ("atributo_conducta", "atributo_observable")
+
 #: Lo que cuelga de un hecho y pasa a apuntar al que lo sustituye.
 _QUE_APUNTAN_A_UN_HECHO = ("hecho_uso", "estado_conocimiento", "uso_conocimiento")
 
@@ -56,12 +60,24 @@ def _renombrar(con: sqlite3.Connection, novela_id: int, cambio: Cambio) -> None:
         (cambio.despues, normalizar(cambio.despues), novela_id, cambio.entidad_id),
     )
     # Los hechos que llevan el nombre en el sujeto, el valor o la cita.
+    claves: set[tuple[str, str]] = set()
     for h in _filas(con, "SELECT * FROM hecho_vigente WHERE novela_id = ? ORDER BY id",
                     novela_id):
         nuevos = {c: sustituir_nombres(str(h[c]), mapa, cambio.protegidos)
                   for c in ("sujeto_nombre", "valor", "cita") if h[c] is not None}
         if any(nuevos[c] != h[c] for c in nuevos):
-            _sustituir_hecho(con, novela_id, h, **nuevos)
+            nuevo = _sustituir_hecho(con, novela_id, h, **nuevos)
+            clave = con.execute("SELECT sujeto_clave FROM hecho WHERE id = ?",
+                                (nuevo,)).fetchone()[0]
+            if clave != h["sujeto_clave"]:
+                claves.add((str(h["sujeto_clave"]), str(clave)))
+    for vieja, nueva in sorted(claves):
+        for tabla in _MARCAS_POR_SUJETO:
+            con.execute(
+                f"UPDATE OR IGNORE {tabla} SET sujeto_clave = ? "  # tabla cerrada
+                "WHERE novela_id = ? AND sujeto_clave = ?",
+                (nueva, novela_id, vieja),
+            )
     _sustituir_en_textos(con, novela_id, mapa, cambio.protegidos)
 
 

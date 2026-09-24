@@ -209,7 +209,7 @@ Hallazgos 7 (supersesión encadenada), 8 (`LOWER()` no pliega tildes), 15 (`orde
 
 Hallazgos 9 (el juez de la puerta 4 no se registra), 11 (el extractor descarta en silencio), 17 (el agente podría usar herramientas) y 18 (SIGTERM entre llamadas no para).
 
-**RF2-PIPE-13** *Amplía RF-PIPE-13.* El `resultado_puerta` de la puerta 4 lleva la parte mecánica **y** la de juicio en un solo registro: los conflictos de la mecánica y un conflicto por cada criterio que el juez da por `falla`, con su evidencia y su sugerencia. El veredicto es `falla` si falla cualquiera de las dos. Si la mecánica falla, el juez no se invoca y el registro lo dice.
+**RF2-PIPE-13** *Amplía RF-PIPE-13.* El `resultado_puerta` de la puerta 4 lleva la parte mecánica **y** la de juicio en un solo registro: los conflictos de la mecánica y un conflicto por cada criterio que el juez da por `falla`, con su evidencia y su sugerencia. El veredicto es `falla` si falla cualquiera de las dos. Si la mecánica falla, el juez no se invoca y el registro lo dice. *Modificado por spec3, RF3-PAS-14 (24-09-2026): en la generación el juez corre siempre, y el redactor recibe la mecánica y el juicio juntos; solo la corrección del lector conserva el orden anterior.*
 
 **RF2-PIPE-16** *Requisito nuevo.* `extraccion.aplicar` devuelve el recuento de lo que descartó, por tipo de registro y motivo (`escena_desconocida`, `personaje_sin_resolver`, `hecho_sin_resolver`, `objeto_sin_resolver`), y el detalle de cada uso de conocimiento descartado. El recuento va a la traza (evento `extraccion_descartes`). En la puerta 3, cada uso de conocimiento descartado es un **aviso** `conocimiento_sin_comprobar`: es conocimiento que el personaje usa y que ninguna consulta ha podido comprobar.
 

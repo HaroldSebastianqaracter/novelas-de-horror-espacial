@@ -190,6 +190,10 @@ def test_un_allegado_planificado_que_la_prosa_no_nombra_vuelve_al_redactor() -> 
                    if i["agente"] == "redaccion" and demo._capitulo(i["entrada"]) == capitulo]
     assert len(redacciones) == 2
     assert "allegado_ausente" in redacciones[1]
+    # RF3-PAS-13: la vuelta dice como arreglarlo, y el primer paquete ya lo pedia.
+    aviso = "Llamarlo por su parentesco o su papel («tu hermano», «la perra») no cuenta"
+    assert aviso in redacciones[1]
+    assert "a cada allegado, por su nombre al menos una vez" in redacciones[0]
 
 
 @pytest.mark.parametrize(("nombre", "texto", "nombrado"), [

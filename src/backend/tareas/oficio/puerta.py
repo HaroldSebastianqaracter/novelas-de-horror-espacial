@@ -255,7 +255,10 @@ def _allegados_ausentes(
             comprobacion="allegado_ausente", capitulo=capitulo,
             descripcion=(
                 f"La escaleta pone a «{nombre}» ({codigo}) en la escena {orden} y la prosa del "
-                "capitulo no lo nombra. Es un elemento del regalo: integralo en esa escena."
+                f"capitulo no escribe su nombre. Es un elemento del regalo: en esa escena, "
+                f"escribe «{nombre}» al menos una vez, con mayuscula. Llamarlo por su parentesco "
+                "o su papel («tu hermano», «la perra») no cuenta, aunque este en la escena "
+                "(RF3-PAS-13)."
             ),
             datos={"codigo": codigo, "nombre": nombre, "escena": orden},
         ))
@@ -374,8 +377,9 @@ def combinar(
     """La puerta 4 entera en un solo resultado: mecanica y juicio (RF2-PIPE-13).
 
     Cada criterio que el juez da por `falla` es un conflicto, con su evidencia y su
-    sugerencia. Si la mecanica falla, el juez no se invoca y el resultado lo dice: registrar
-    solo la mecanica hacia que la traza dijera `pasa` con el juez en contra.
+    sugerencia. La generacion invoca al juez siempre (spec3, RF3-PAS-14); la correccion del
+    lector no lo invoca si su mecanica falla, y el resultado lo dice: registrar solo la
+    mecanica hacia que la traza dijera `pasa` con el juez en contra.
     """
     conflictos = list(mecanica.conflictos)
     if juicio is None:
