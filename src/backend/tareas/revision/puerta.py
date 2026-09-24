@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from difflib import SequenceMatcher
 
-from compartido.cambio import Cambio, menciones_de, partes_viejas, tapar
+from compartido.cambio import Cambio, menciones_de, tapar, veces_protegidos
 from compartido.puerta_base import Conflicto, ResultadoPuerta
 from compartido.texto import INICIO_DE_FRASE, PALABRA_DE_NOMBRE, veces_termino
 from config import CAMBIO_SIMILITUD_MINIMA
@@ -28,12 +28,13 @@ def _nombre_que_queda(cambio: Cambio, aprobada: str, texto: str) -> dict[str, in
 
     Si la palabra tambien sale en minuscula en la prosa aprobada, es una palabra corriente
     («Luna», «la luna»): al empezar frase no cuenta. Dentro del nombre de otra entidad
-    («Pedro Reyes» al renombrar a «Reyes») tampoco.
+    («Pedro Reyes» al renombrar a «Reyes») tampoco, ni cuando es el nombre entero de otra
+    («Reyes» al renombrar a «Nina Reyes»): lo que cuenta entonces es la frase «Nina Reyes».
     """
-    texto = tapar(texto, cambio.protegidos)
+    texto = tapar(texto, cambio.protegidos, dejar=(cambio.antes,))
     corrientes = {p.casefold() for p in PALABRA_DE_NOMBRE.findall(aprobada) if p[0].islower()}
     quedan: dict[str, int] = {}
-    for parte in partes_viejas(cambio.antes, cambio.despues):
+    for parte in cambio.partes_viejas():
         veces = [
             pos for pos in menciones_de(texto, parte)
             if parte.casefold() not in corrientes or not INICIO_DE_FRASE.search(texto, 0, pos)
@@ -61,6 +62,24 @@ def _sin_aplicar_renombrado(cambio: Cambio, capitulo: int, viejo: str, nuevo: st
             f"«{cambio.despues}»."
         ),
         datos={"prosa": quedan, "resumenes": en_resumen},
+    )
+
+
+def _toca_otro(cambio: Cambio, capitulo: int, viejo: str, nuevo: str) -> Conflicto | None:
+    """Un nombre de otra entidad que la correccion quito o cambio (validador de 58e70f0)."""
+    antes = veces_protegidos(viejo, cambio.protegidos, cambio.antes)
+    despues = veces_protegidos(nuevo, cambio.protegidos, cambio.antes)
+    tocados = {n: (antes[n], despues[n]) for n in antes if despues[n] < antes[n]}
+    if not tocados:
+        return None
+    return Conflicto(
+        comprobacion="cambio_toca_otro", capitulo=capitulo,
+        descripcion=(
+            "La correccion toca el nombre de otra entidad: "
+            + ", ".join(f"«{n}» salia {a} vez/veces y ahora {d}" for n, (a, d) in tocados.items())
+            + f". Solo cambia «{cambio.antes}»; lo demas es de otro y se queda como estaba."
+        ),
+        datos={"tocados": {n: {"antes": a, "despues": d} for n, (a, d) in tocados.items()}},
     )
 
 
@@ -109,8 +128,12 @@ def comprobar(
     nuevo: dict[int, str],
     resumenes: tuple[str, str],
     citas: list[str],
+    aprobados: tuple[str, str] = ("", ""),
 ) -> ResultadoPuerta:
-    """Las comprobaciones del cambio sobre un capitulo corregido (RF3-CAM-09)."""
+    """Las comprobaciones del cambio sobre un capitulo corregido (RF3-CAM-09).
+
+    `resumenes` son los corregidos y `aprobados`, los de antes del cambio.
+    """
     if sorted(nuevo) != sorted(viejo):
         return ResultadoPuerta(puerta=4, conflictos=[Conflicto(
             comprobacion="cambio_escenas", capitulo=capitulo,
@@ -124,13 +147,17 @@ def comprobar(
     texto_viejo, texto_nuevo = _unir(viejo), _unir(nuevo)
     resumen = "\n".join(resumenes)
     conflictos: list[Conflicto] = []
+    otro = None
+    resumenes_aprobados = "\n".join(aprobados)
     if cambio.tipo == "renombrar":
         aplicado = _sin_aplicar_renombrado(cambio, capitulo, texto_viejo, texto_nuevo, resumen)
+        otro = _toca_otro(cambio, capitulo, f"{texto_viejo}\n{resumenes_aprobados}",
+                          f"{texto_nuevo}\n{resumen}")
     elif cambio.literal:
         aplicado = _sin_aplicar_hecho(cambio, capitulo, texto_viejo, texto_nuevo, resumen)
     else:
         aplicado = None
-    for c in (aplicado, _citas(capitulo, texto_viejo, texto_nuevo, citas)):
+    for c in (aplicado, otro, _citas(capitulo, texto_viejo, texto_nuevo, citas)):
         if c is not None:
             conflictos.append(c)
 

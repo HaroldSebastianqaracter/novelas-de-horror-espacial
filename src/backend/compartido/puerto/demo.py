@@ -579,13 +579,16 @@ def interprete(entrada: str, agente: str) -> dict[str, Any]:
 
 
 def revision(entrada: str, agente: str) -> dict[str, Any]:
-    from compartido.cambio import mapa_de_nombres, sustituir_nombres
+    from compartido.cambio import Cambio, sustituir_nombres
 
     cambio = _bloque(entrada, "EL CAMBIO")
     nombre = re.search(r"«([^»]+)» se llama ahora «([^»]+)»", cambio)
     dato = re.search(r"vale ahora «([^»]+)» \(antes, «([^»]+)»\)", cambio)
+    no_toques = re.search(r"No toques (.*?): es otro nombre", cambio)
+    protegidos = tuple(re.findall(r"«([^»]+)»", no_toques.group(1))) if no_toques else ()
     if nombre:
-        mapa = mapa_de_nombres(nombre.group(1), nombre.group(2))
+        mapa = Cambio(tipo="renombrar", antes=nombre.group(1), despues=nombre.group(2),
+                      protegidos=protegidos).mapa()
         nuevo_valor = nombre.group(2)
     elif dato:
         mapa = {dato.group(2): dato.group(1)}
@@ -594,7 +597,7 @@ def revision(entrada: str, agente: str) -> dict[str, Any]:
         mapa, nuevo_valor = {}, ""
 
     def corregir(texto: str) -> str:
-        return sustituir_nombres(texto, mapa)
+        return sustituir_nombres(texto, mapa, protegidos)
 
     prosa = _bloque(entrada, "PROSA APROBADA")
     escenas: list[dict[str, Any]] = []

@@ -13,7 +13,7 @@ from __future__ import annotations
 import sqlite3
 from typing import Any
 
-from compartido.cambio import Cambio, mapa_de_nombres, sustituir_nombres
+from compartido.cambio import Cambio, sustituir_nombres
 from compartido.grafo import TABLAS_CON_NOMBRE_CLAVE, insertar_hecho, lectura, normalizar
 
 #: Tablas que no se tocan al sustituir un nombre en los textos: la prosa y sus versiones (las
@@ -45,7 +45,7 @@ def aplicar_canon(
 
 
 def _renombrar(con: sqlite3.Connection, novela_id: int, cambio: Cambio) -> None:
-    mapa = mapa_de_nombres(cambio.antes, cambio.despues)
+    mapa = cambio.mapa()
     tabla = str(cambio.tabla)
     con.execute(
         f"UPDATE {tabla} SET nombre = ?, nombre_clave = ? WHERE novela_id = ? AND id = ?",
@@ -69,14 +69,13 @@ def _sustituir_en_textos(con: sqlite3.Connection, novela_id: int, mapa: dict[str
     esta novela, salvo lo que no se sustituye (`_NO_SE_SUSTITUYEN`). El nombre de las demas
     entidades no se toca nunca: renombrar a una no renombra a otra (validador de 2fa0ee6).
     """
-    for tabla, todas in _textos_de_la_novela(con):
+    for tabla, todas, filtro in _textos_de_la_novela(con):
         columnas = [c for c in todas
                     if not (tabla in TABLAS_CON_NOMBRE_CLAVE and c == "nombre")]
         if not columnas:
             continue
-        clave = "id" if tabla == "novela" else "novela_id"
         for fila in _filas(con, f"SELECT id, {', '.join(columnas)} FROM {tabla} "
-                                f"WHERE {clave} = ?", novela_id):
+                                f"WHERE {filtro}", novela_id):
             nuevos = {c: sustituir_nombres(str(fila[c]), mapa, protegidos) for c in columnas
                       if fila[c] is not None}
             cambiados = {c: v for c, v in nuevos.items() if v != fila[c]}
@@ -87,9 +86,14 @@ def _sustituir_en_textos(con: sqlite3.Connection, novela_id: int, mapa: dict[str
                         (*cambiados.values(), fila["id"]))
 
 
-def _textos_de_la_novela(con: sqlite3.Connection) -> list[tuple[str, list[str]]]:
-    """Cada tabla de la novela con sus columnas de texto (las claves normalizadas, fuera)."""
-    salida: list[tuple[str, list[str]]] = []
+def _textos_de_la_novela(con: sqlite3.Connection) -> list[tuple[str, list[str], str]]:
+    """Cada tabla de la novela con sus columnas de texto y el filtro de sus filas.
+
+    Las claves normalizadas, fuera. Es de la novela lo que lleva `novela_id` y lo que cuelga de
+    una escena suya por `escena_id` (`beat`, `secuela`: validador de 58e70f0). El filtro lleva
+    un solo parametro, el id de la novela.
+    """
+    salida: list[tuple[str, list[str], str]] = []
     for tabla, sql in con.execute(
         "SELECT name, sql FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' "
         "ORDER BY name"
@@ -101,7 +105,15 @@ def _textos_de_la_novela(con: sqlite3.Connection) -> list[tuple[str, list[str]]]
             continue
         info = con.execute(f"PRAGMA table_info({tabla})").fetchall()
         nombres = {str(c["name"]) for c in info}
-        if "id" not in nombres or (tabla != "novela" and "novela_id" not in nombres):
+        if "id" not in nombres:
+            continue
+        if tabla == "novela":
+            filtro = "id = ?"
+        elif "novela_id" in nombres:
+            filtro = "novela_id = ?"
+        elif "escena_id" in nombres:
+            filtro = "escena_id IN (SELECT id FROM escena WHERE novela_id = ?)"
+        else:
             continue
         columnas = [
             str(c["name"]) for c in info
@@ -109,7 +121,7 @@ def _textos_de_la_novela(con: sqlite3.Connection) -> list[tuple[str, list[str]]]
             and str(c["name"]) not in ("creado_en", "actualizado_en")
         ]
         if columnas:
-            salida.append((str(tabla), columnas))
+            salida.append((str(tabla), columnas, filtro))
     return salida
 
 

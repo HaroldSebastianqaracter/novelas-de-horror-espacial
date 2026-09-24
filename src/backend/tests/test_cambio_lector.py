@@ -811,3 +811,167 @@ def test_las_comprobaciones_no_cuentan_el_nombre_de_otra_entidad() -> None:
     r = p_revision.comprobar(cambio, 1, aprobada, nuevo, ("R", "B"), ["Oriol entro"])
     assert r.pasa
     assert sustituir_nombres(aprobada[1], {"Reyes": "Oriol"}, ("Pedro Reyes",)) == nuevo[1]
+
+
+# --- Una parte del nombre que es otra entidad (validador de 58e70f0) ----------------------------
+
+NINA = "Nina Reyes"
+
+
+def test_una_parte_del_nombre_que_es_otra_entidad_no_se_sustituye_suelta() -> None:
+    cambio = Cambio(tipo="renombrar", antes=NINA, despues="Nina Soto", tabla="personaje",
+                    entidad_id=1, protegidos=(SOLO_EN_EL_DOS,))
+    assert cambio.mapa() == {NINA: "Nina Soto"}
+    assert cambio.partes_viejas() == [NINA]
+    assert sustituir_nombres(f"{NINA} miro a {SOLO_EN_EL_DOS}.", cambio.mapa(),
+                             cambio.protegidos) == f"Nina Soto miro a {SOLO_EN_EL_DOS}."
+
+    aprobada = {1: f"{NINA} miro a {SOLO_EN_EL_DOS} y {SOLO_EN_EL_DOS} no contesto."}
+    bien = {1: f"Nina Soto miro a {SOLO_EN_EL_DOS} y {SOLO_EN_EL_DOS} no contesto."}
+    assert p_revision.comprobar(cambio, 1, aprobada, bien, ("R", "B"), ["Nina Soto miro"]).pasa
+    # El nombre entero se busca como frase: si queda, no pasa.
+    r = p_revision.comprobar(cambio, 1, aprobada, aprobada, ("R", "B"), [])
+    assert "cambio_sin_aplicar" in {c.comprobacion for c in r.conflictos}
+    # Una parte que no es de nadie mas sigue contando suelta.
+    tomas = Cambio(tipo="renombrar", antes="Tomás Ruiz", despues="Tomás Vidal",
+                   tabla="personaje", entidad_id=1, protegidos=("Tomás Pérez",))
+    assert tomas.mapa() == {"Tomás Ruiz": "Tomás Vidal", "Ruiz": "Vidal"}
+    assert tomas.partes_viejas() == ["Ruiz"]
+
+
+def test_tocar_el_nombre_de_otra_entidad_no_pasa() -> None:
+    cambio = Cambio(tipo="renombrar", antes=NINA, despues="Nina Soto", tabla="personaje",
+                    entidad_id=1, protegidos=(SOLO_EN_EL_DOS,))
+    aprobada = {1: f"{NINA} miro a {SOLO_EN_EL_DOS} y {SOLO_EN_EL_DOS} no contesto."}
+    mal = {1: f"Nina Soto miro a {SOLO_EN_EL_DOS} y Soto no contesto."}
+    r = p_revision.comprobar(cambio, 1, aprobada, mal, ("R", "B"), ["Nina Soto miro"])
+    [conflicto] = [c for c in r.conflictos if c.comprobacion == "cambio_toca_otro"]
+    assert conflicto.datos["tocados"] == {SOLO_EN_EL_DOS: {"antes": 2, "despues": 1}}
+    # En los resumenes, igual.
+    bien = {1: mal[1].replace("y Soto", f"y {SOLO_EN_EL_DOS}")}
+    r = p_revision.comprobar(cambio, 1, aprobada, bien, ("Soto espera.", "B"), ["Nina Soto miro"],
+                             aprobados=(f"{SOLO_EN_EL_DOS} espera.", "B"))
+    assert "cambio_toca_otro" in {c.comprobacion for c in r.conflictos}
+
+
+def test_renombrar_con_una_parte_que_es_otra_entidad_no_la_toca(novela) -> None:
+    """De punta a punta: el canon, la prosa, las fichas y lo que cuelga de las escenas."""
+    from compartido.grafo import insertar
+    from orquestador import cambios as o_cambios
+
+    con, ruta, novela_id = novela
+    reyes = _id(con, "personaje", SOLO_EN_EL_DOS)
+    escena = _escena_del_capitulo(con, novela_id, 2)
+    with transaccion(con):
+        faccion = con.execute("SELECT faccion_id FROM personaje WHERE id = ?",
+                              (reyes,)).fetchone()[0]
+        nina = insertar(con, "personaje", novela_id=novela_id, faccion_id=faccion,
+                        nombre=NINA, rol_narrativo="aliado")
+        textos = o_cambios.textos_del_capitulo(con, novela_id, 2)
+        primera = min(textos)
+        textos[primera] += f" {NINA} le tendio la mano."
+        o_cambios.guardar_textos(con, novela_id, 2, textos)
+        s_redaccion.compilar(con, novela_id, 2)
+        con.execute("UPDATE personaje SET deseo = ? WHERE id = ?",
+                    (f"Que {NINA} confie en {SOLO_EN_EL_DOS}.", reyes))
+        con.execute("INSERT INTO beat (escena_id, orden, tipo, cambio) VALUES (?, 99, ?, ?)",
+                    (escena, "giro", f"{NINA} descubre a {SOLO_EN_EL_DOS}."))
+        con.execute("INSERT OR REPLACE INTO secuela (escena_id, reaccion, dilema, decision) "
+                    "VALUES (?, ?, ?, ?)",
+                    (escena, f"{NINA} tiembla.", f"Avisar a {SOLO_EN_EL_DOS} o no.",
+                     f"{NINA} calla."))
+    antes = _textos(con, novela_id)
+
+    intencion = _pedir(con, ruta, novela_id, "Que se llame «Nina Soto»",
+                       {"tipo": "entidad", "entidad": "personajes", "id": nina})
+    cambio = lectura.cambio(con, novela_id, intencion["resultado"]["cambio_id"]) or {}
+    assert cambio["estado"] == "aplicado", cambio
+
+    despues = _textos(con, novela_id)
+    assert "Nina Soto le tendio la mano." in despues[2] and NINA not in despues[2]
+    assert despues[2].count(SOLO_EN_EL_DOS) == antes[2].count(SOLO_EN_EL_DOS) - 1
+    assert f"{SOLO_EN_EL_DOS} reviso la baliza" in despues[2]
+    assert (lectura.entidad(con, novela_id, "personaje", reyes) or {})["nombre"] == \
+        SOLO_EN_EL_DOS
+    assert (lectura.entidad(con, novela_id, "personaje", nina) or {})["nombre"] == "Nina Soto"
+    assert con.execute("SELECT deseo FROM personaje WHERE id = ?", (reyes,)).fetchone()[0] == \
+        f"Que Nina Soto confie en {SOLO_EN_EL_DOS}."
+    assert con.execute("SELECT cambio FROM beat WHERE escena_id = ? AND orden = 99",
+                       (escena,)).fetchone()[0] == f"Nina Soto descubre a {SOLO_EN_EL_DOS}."
+    assert tuple(con.execute("SELECT reaccion, dilema, decision FROM secuela WHERE escena_id = ?",
+                             (escena,)).fetchone()) == (
+        "Nina Soto tiembla.", f"Avisar a {SOLO_EN_EL_DOS} o no.", "Nina Soto calla.")
+    assert db.verificar_integridad(con) == []
+
+
+def test_lo_que_cuelga_de_una_escena_se_filtra_por_su_novela(novela) -> None:
+    from orquestador import cambios as o_cambios
+
+    con, _, _ = novela
+    filtros = {t: f for t, _, f in o_cambios._textos_de_la_novela(con)}
+    assert filtros["beat"] == filtros["secuela"] == \
+        "escena_id IN (SELECT id FROM escena WHERE novela_id = ?)"
+    assert filtros["novela"] == "id = ?" and filtros["personaje"] == "novela_id = ?"
+
+
+def test_sin_protegidos_el_nombre_de_otra_entidad_tampoco_se_toca(novela) -> None:
+    """El filtro de la columna `nombre`, solo: sin protegidos, sigue sin renombrar a otra."""
+    from compartido.grafo import insertar
+    from orquestador import cambios as o_cambios
+
+    con, _, novela_id = novela
+    reyes = _id(con, "personaje", SOLO_EN_EL_DOS)
+    with transaccion(con):
+        faccion = con.execute("SELECT faccion_id FROM personaje WHERE id = ?",
+                              (reyes,)).fetchone()[0]
+        otro = insertar(con, "personaje", novela_id=novela_id, faccion_id=faccion,
+                        nombre=f"Pedro {SOLO_EN_EL_DOS}", rol_narrativo="aliado")
+        con.execute("UPDATE personaje SET deseo = ? WHERE id = ?",
+                    (f"Que {SOLO_EN_EL_DOS} vuelva.", otro))
+    with simulacion(con):
+        o_cambios._sustituir_en_textos(con, novela_id, {SOLO_EN_EL_DOS: "Oriol"}, ())
+        fila = con.execute("SELECT nombre, deseo FROM personaje WHERE id = ?",
+                           (otro,)).fetchone()
+        assert tuple(fila) == (f"Pedro {SOLO_EN_EL_DOS}", "Que Oriol vuelva.")
+        assert con.execute("SELECT nombre FROM personaje WHERE id = ?",
+                           (reyes,)).fetchone()[0] == SOLO_EN_EL_DOS
+
+
+def test_un_renombrado_que_no_sale_en_ningun_capitulo_no_publica_version(novela) -> None:
+    """RF3-CAM-05: alcance vacio. El canon cambia; la prosa, el titulo y la dedicatoria, no."""
+    from compartido.grafo import insertar
+
+    con, ruta, novela_id = novela
+    antes = _textos(con, novela_id)
+    reyes = _id(con, "personaje", SOLO_EN_EL_DOS)
+    with transaccion(con):
+        faccion = con.execute("SELECT faccion_id FROM personaje WHERE id = ?",
+                              (reyes,)).fetchone()[0]
+        mudo = insertar(con, "personaje", novela_id=novela_id, faccion_id=faccion,
+                        nombre="Brais Otero", rol_narrativo="aliado")
+    assert lectura.alcance_de_cambio(con, novela_id, tabla="personaje", entidad_id=mudo) == []
+
+    intencion = _pedir(con, ruta, novela_id, "Que se llame «Brais Lago»",
+                       {"tipo": "entidad", "entidad": "personajes", "id": mudo})
+    assert intencion["estado"] == "hecha" and intencion["resultado"]["capitulos"] == []
+    cambio = lectura.cambio(con, novela_id, intencion["resultado"]["cambio_id"]) or {}
+    assert cambio["estado"] == "aplicado"
+    assert (lectura.entidad(con, novela_id, "personaje", mudo) or {})["nombre"] == "Brais Lago"
+    assert lectura.version(con, novela_id, 2) is None
+    assert _textos(con, novela_id) == antes
+    assert _estado(con, novela_id) in ("completada", "completada_con_avisos")
+
+
+def test_un_error_de_programacion_en_el_paso_final_acaba_en_error(
+    novela, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """RF3-CAM-12: solo un error de datos hace fracasar el cambio; un fallo del codigo, no."""
+    con, ruta, novela_id = novela
+    antes = _textos(con, novela_id)
+    reyes = _id(con, "personaje", SOLO_EN_EL_DOS)
+    _falla_en(monkeypatch, pipeline.o_cambios, "guardar_textos", KeyError("fallo del codigo"))
+    _pedir(con, ruta, novela_id, "Que se llame «Oriol»",
+           {"tipo": "entidad", "entidad": "personajes", "id": reyes})
+    assert _estado(con, novela_id) == "error"
+    assert _textos(con, novela_id) == antes
+    assert (lectura.entidad(con, novela_id, "personaje", reyes) or {})["nombre"] == SOLO_EN_EL_DOS

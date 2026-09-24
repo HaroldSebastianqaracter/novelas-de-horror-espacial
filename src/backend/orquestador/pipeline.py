@@ -999,6 +999,8 @@ def _revisar_capitulo(
     viejo = o_cambios.textos_del_capitulo(ctx.con, ctx.novela_id, numero)
     criterios: list[dict[str, Any]] | None = None
     informe: dict[str, Any] = {}
+    cap = lectura.capitulo(ctx.con, ctx.novela_id, numero) or {}
+    aprobados = (str(cap.get("resumen") or ""), str(cap.get("resumen_breve") or ""))
     for intento in range(1, ctx.cfg_max_intentos + 1):
         with transaccion(ctx.con):
             estados.fijar_fase(ctx.con, ctx.novela_id, "revision", capitulo=numero,
@@ -1012,6 +1014,7 @@ def _revisar_capitulo(
         nuevo = salida.textos()
         comprobado = p_revision.comprobar(
             cambio, numero, viejo, nuevo, (salida.resumen, salida.resumen_breve), salida.citas,
+            aprobados=aprobados,
         )
         texto = "\n\n".join(nuevo[k] for k in sorted(nuevo))
         mecanica = comprobado
@@ -1068,14 +1071,14 @@ def _confirmar_cambio(ctx: Contexto, cambio: Cambio, corregidos: dict[int, Salid
                       ) -> None:
     """El paso final, dentro de la transaccion de `_completar` (RF3-CAM-11).
 
-    Cualquier error de datos aqui deshace la transaccion y hace fracasar el cambio: la novela
-    vuelve a su estado completado, como pide RF3-CAM-12 (validador de 2fa0ee6).
+    Un error de datos aqui (la base o un dato que ya no cuadra) deshace la transaccion y hace
+    fracasar el cambio: la novela vuelve a su estado completado, como pide RF3-CAM-12
+    (validador de 2fa0ee6). Un error de programacion no es del cambio: sube tal cual y la
+    ejecucion acaba en `error` (validador de 58e70f0).
     """
     try:
         _escribir_cambio(ctx, cambio, corregidos)
-    except CambioImposible:
-        raise
-    except Exception as exc:
+    except (sqlite3.DatabaseError, ValueError) as exc:
         raise CambioImposible(
             "Un error de datos impidio aplicar el cambio.", [f"{type(exc).__name__}: {exc}"]
         ) from exc

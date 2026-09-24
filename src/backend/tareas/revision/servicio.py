@@ -10,7 +10,7 @@ import sqlite3
 from typing import Any
 
 from compartido import politica
-from compartido.cambio import Cambio, partes_viejas
+from compartido.cambio import Cambio
 from compartido.contexto import Elemento, Paquete
 from compartido.grafo import lectura
 
@@ -19,7 +19,8 @@ AGENTE = "revision"
 
 def _que_hacer(cambio: Cambio) -> str:
     if cambio.tipo == "renombrar":
-        partes = [p for p in partes_viejas(cambio.antes, cambio.despues) if p != cambio.antes]
+        # Solo las palabras que no nombran a nadie mas (validador de 58e70f0).
+        partes = [p for p in cambio.partes_viejas() if p != cambio.antes]
         extra = (" Tambien cuando la prosa lo llama solo "
                  + " o ".join(f"«{p}»" for p in partes) + ".") if partes else ""
         otros = (" No toques " + ", ".join(f"«{n}»" for n in cambio.protegidos)
