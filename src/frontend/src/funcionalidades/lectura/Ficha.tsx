@@ -4,7 +4,7 @@ import { consultaCanon, consultaEstructura } from "../../compartido/api/consulta
 import type { components } from "../../compartido/api/esquema.gen";
 import { EstadoConsulta } from "../../compartido/ui/EstadoConsulta";
 import { useTitulo } from "../../compartido/ui/titulo";
-import { aparicionesDesdeEscaleta, capitulosDe } from "./apariciones";
+import { aparicionesDesdeEscaleta, aparicionesEnLaProsa, capitulosDe } from "./apariciones";
 import { useLecturaActual } from "./MarcoLectura";
 
 type Personaje = components["schemas"]["PersonajeCanon"];
@@ -15,7 +15,7 @@ type Lugar = components["schemas"]["LugarCanon"];
  * historia: nada de deseo, herida, mentira ni secreto.
  */
 export function Ficha() {
-  const { novelaId, version, enlace } = useLecturaActual();
+  const { novelaId, version, enlace, esUltima, ultima } = useLecturaActual();
   useTitulo(`Personajes y lugares · ${version.titulo}`);
   const personajes = useQuery(consultaCanon(novelaId, "personajes"));
   const lugares = useQuery(consultaCanon(novelaId, "lugares"));
@@ -23,12 +23,20 @@ export function Ficha() {
   const error = personajes.error ?? lugares.error ?? estructura.error;
   const cargando = personajes.isPending || lugares.isPending || estructura.isPending;
 
-  const apariciones = estructura.data
-    ? aparicionesDesdeEscaleta(
-        estructura.data,
-        version.capitulos.map((c) => c.numero),
-      )
-    : null;
+  // El canon y la escaleta son los de ahora. En una versión anterior, «aparece en» se busca en su
+  // propia prosa, para que la ficha no contradiga el texto que se está leyendo.
+  const nombres = {
+    personajes: (personajes.data ?? []).flatMap((p) => ("nombre" in p ? [p.nombre] : [])),
+    lugares: (lugares.data ?? []).flatMap((l) => ("nombre" in l ? [l.nombre] : [])),
+  };
+  const apariciones = !esUltima
+    ? aparicionesEnLaProsa(version.capitulos, nombres)
+    : estructura.data
+      ? aparicionesDesdeEscaleta(
+          estructura.data,
+          version.capitulos.map((c) => c.numero),
+        )
+      : null;
 
   const aparece = (capitulos: number[]) =>
     capitulos.length === 0 ? (
@@ -59,10 +67,17 @@ export function Ficha() {
           void estructura.refetch();
         }}
       >
-        <p className="ficha__fuente">
-          Dónde aparece cada uno sale de la escaleta (quién está y dónde ocurre cada escena), no de la prosa: alguien
-          puede asomar en un capítulo sin figurar aquí.
-        </p>
+        {esUltima ? (
+          <p className="ficha__fuente">
+            Dónde aparece cada uno sale de la escaleta (quién está y dónde ocurre cada escena), no de la prosa: alguien
+            puede asomar en un capítulo sin figurar aquí.
+          </p>
+        ) : (
+          <p className="ficha__fuente">
+            Esta ficha es la de la versión {ultima}, la actual: en la versión que lees puede haber nombres o datos que
+            luego cambiaron. «Aparece en» se busca en el texto de esta versión.
+          </p>
+        )}
         <section aria-labelledby="titulo-personajes">
           <h2 id="titulo-personajes">Personajes</h2>
           <ul className="ficha__lista">

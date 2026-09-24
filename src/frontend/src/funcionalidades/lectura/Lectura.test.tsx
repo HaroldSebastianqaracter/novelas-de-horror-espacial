@@ -100,6 +100,18 @@ describe("personajes y lugares (RF-FE-LEE-04)", () => {
   });
 });
 
+describe("la ficha de una versión anterior (RF-FE-LEE-04)", () => {
+  it("busca «aparece en» en el texto de esa versión y avisa de que la ficha es la actual", async () => {
+    renderizarEn("/novelas/6/lectura/ficha?version=1");
+    const personajes = await screen.findByRole("region", { name: "Personajes" });
+    const nala = within(personajes).getByRole("heading", { name: "Nala" }).closest("li") as HTMLElement;
+    expect(nala).toHaveTextContent("No aparece en esta versión");
+    expect(screen.getByText(/Esta ficha es la de la versión 2, la actual/)).toBeInTheDocument();
+    const oda = within(personajes).getByRole("heading", { name: "Oda Varga" }).closest("li") as HTMLElement;
+    expect(within(oda).getByRole("link", { name: "capítulo 1" })).toHaveAttribute("href", "/novelas/6/lectura/capitulos/1?version=1");
+  });
+});
+
 describe("versiones (RF-FE-LEE-06)", () => {
   it("lista las versiones, la más nueva primero, con sus capítulos cambiados enlazados", async () => {
     renderizarEn("/novelas/6/lectura/versiones");

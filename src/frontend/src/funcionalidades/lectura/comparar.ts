@@ -14,8 +14,13 @@ export interface ParrafoComparado {
   trozos: Trozo[];
 }
 
-/** Más pares que esto y un párrafo se da por sustituido entero, sin comparar palabras. */
+/**
+ * Con más pares de palabras que esto entre las dos versiones del capítulo, se compara solo por
+ * párrafos: un párrafo cambiado sale entero como quitado y nuevo (RF-FE-LEE-07).
+ */
 export const MAX_PARES = 4_000_000;
+
+const contarPalabras = (texto: string) => texto.split(/\s+/).filter(Boolean).length;
 
 export const partirEnParrafos = (texto: string) =>
   texto
@@ -71,10 +76,10 @@ function juntar(trozos: Trozo[]): Trozo[] {
 /** Palabras y espacios, para que al unir los trozos salga el texto exacto. */
 const tokens = (texto: string) => texto.split(/(\s+)/).filter((t) => t !== "");
 
-export function compararPalabras(antes: string, despues: string): Trozo[] {
+export function compararPalabras(antes: string, despues: string, maxPares = MAX_PARES): Trozo[] {
   const a = tokens(antes);
   const b = tokens(despues);
-  if (a.length * b.length > MAX_PARES) {
+  if (contarPalabras(antes) * contarPalabras(despues) > maxPares) {
     return juntar([
       { tipo: "quitado", texto: antes },
       { tipo: "nuevo", texto: despues },
@@ -84,11 +89,13 @@ export function compararPalabras(antes: string, despues: string): Trozo[] {
 }
 
 /** El capítulo `despues` comparado con `antes`. Sin `antes`, todo es nuevo. */
-export function compararCapitulo(antes: string | undefined, despues: string): ParrafoComparado[] {
+export function compararCapitulo(antes: string | undefined, despues: string, maxPares = MAX_PARES): ParrafoComparado[] {
   const nuevos = partirEnParrafos(despues);
   if (antes === undefined) return nuevos.map((p) => ({ tipo: "nuevo", trozos: [{ tipo: "nuevo", texto: p }] }));
   const viejos = partirEnParrafos(antes);
-  if (viejos.length * nuevos.length > MAX_PARES) {
+  // Por palabras solo si el capítulo entero cabe en el tope; si no, solo por párrafos.
+  const porPalabras = contarPalabras(antes) * contarPalabras(despues) <= maxPares;
+  if (viejos.length * nuevos.length > maxPares) {
     return [
       ...viejos.map((p): ParrafoComparado => ({ tipo: "quitado", trozos: [{ tipo: "quitado", texto: p }] })),
       ...nuevos.map((p): ParrafoComparado => ({ tipo: "nuevo", trozos: [{ tipo: "nuevo", texto: p }] })),
@@ -102,7 +109,16 @@ export function compararCapitulo(antes: string | undefined, despues: string): Pa
   const vaciar = () => {
     const pares = Math.min(quitados.length, anadidos.length);
     for (let k = 0; k < pares; k++) {
-      salida.push({ tipo: "cambiado", trozos: compararPalabras(quitados[k] as string, anadidos[k] as string) });
+      const [a, b] = [quitados[k] as string, anadidos[k] as string];
+      salida.push({
+        tipo: "cambiado",
+        trozos: porPalabras
+          ? compararPalabras(a, b, maxPares)
+          : [
+              { tipo: "quitado", texto: a },
+              { tipo: "nuevo", texto: b },
+            ],
+      });
     }
     for (const p of quitados.slice(pares)) salida.push({ tipo: "quitado", trozos: [{ tipo: "quitado", texto: p }] });
     for (const p of anadidos.slice(pares)) salida.push({ tipo: "nuevo", trozos: [{ tipo: "nuevo", texto: p }] });

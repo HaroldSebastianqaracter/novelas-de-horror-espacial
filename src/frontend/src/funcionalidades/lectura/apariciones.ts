@@ -4,7 +4,7 @@
  * y su lugar para los lugares, casados por nombre.
  */
 import type { Estructura } from "../../compartido/api/tipos";
-import { normalizar } from "./texto";
+import { contieneTermino, normalizar } from "./texto";
 
 export interface Apariciones {
   personajes: Map<string, number[]>;
@@ -32,6 +32,16 @@ export function aparicionesDesdeEscaleta(estructura: Estructura, capitulosDeLaVe
   const ordenar = (mapa: Map<string, Set<number>>) =>
     new Map([...mapa].map(([k, v]) => [k, [...v].sort((a, b) => a - b)] as const));
   return { personajes: ordenar(personajes), lugares: ordenar(lugares) };
+}
+
+/** En una versión anterior: los capítulos cuya prosa escribe el nombre, por palabras completas. */
+export function aparicionesEnLaProsa(
+  capitulos: readonly { numero: number; texto: string }[],
+  nombres: { personajes: readonly string[]; lugares: readonly string[] },
+): Apariciones {
+  const buscar = (lista: readonly string[]) =>
+    new Map(lista.map((n) => [normalizar(n), capitulos.filter((c) => contieneTermino(c.texto, n)).map((c) => c.numero)] as const));
+  return { personajes: buscar(nombres.personajes), lugares: buscar(nombres.lugares) };
 }
 
 export const capitulosDe = (apariciones: Map<string, number[]>, nombre: string) => apariciones.get(normalizar(nombre)) ?? [];

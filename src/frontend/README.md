@@ -24,6 +24,8 @@ $env:NOVELAS_API = "http://127.0.0.1:8001"; npm run dev
 
 La API se levanta en ese puerto con `.venv\Scripts\python.exe -m uvicorn main:app --port 8001` desde `src/backend`, porque `python -m main` la deja fija en el 8000.
 
+Con los mocks, la novela 6 («Deriva en el anillo Tántalo») está completada y tiene dos versiones: es la que enseña la lectura en `/novelas/6/lectura`. Para probar el cambio del lector hay que parar antes la novela 3, que se está generando, porque el worker hace una cosa a la vez. Una petición con «triste» se rechaza como no admisible, y una con «fracas» falla sin versión nueva.
+
 | Script | Qué hace |
 | --- | --- |
 | `npm run tipos` | Regenera `src/compartido/api/esquema.gen.ts` desde `../backend/tests/openapi.json`. Hay que hacerlo cada vez que cambie el contrato |

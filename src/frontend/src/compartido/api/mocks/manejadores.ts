@@ -6,7 +6,7 @@
 import { http, HttpResponse } from "msw";
 import type { CapituloTexto, Ejecucion, Estructura, Intencion, IntencionEncolada, NovelaDetalle, NovelaResumen, Parada, TipoIntencion } from "../tipos";
 import { capitulosDe, detalleDe, ejecuciones, fechaApi, novelas, paradas, textoDe } from "./datos";
-import { canonDe, escenasDeNovela, versionesDe } from "./lectura";
+import { alcanceDe, type CambioSimulado, cambiosDe, canonDe, escenasDeNovela, hechosDe, publicarCambio, registrarCambio, usosDe, versionesDe } from "./lectura";
 
 /** Lo que tarda el «worker» en atender una intención. */
 const ESPERA_MS = 2_500;
@@ -14,7 +14,7 @@ const ACTIVOS = ["planificando", "escaletando", "generando"];
 
 interface IntencionSimulada {
   id: number;
-  tipo: TipoIntencion;
+  tipo: TipoIntencion | "cambio_lector";
   novelaId: number | null;
   payload: Record<string, unknown>;
   creada: number;
@@ -77,6 +77,30 @@ function crearNovela(): number {
   return id;
 }
 
+/** Lo mínimo que valida la API de un `cambio_lector` antes de encolarlo (spec-frontend 5.2). */
+function camposInvalidosDelCambio(p: Record<string, unknown>): string[] {
+  const malos: string[] = [];
+  const objetivo = p.objetivo as Record<string, unknown> | undefined;
+  const cita = p.cita as Record<string, unknown> | undefined;
+  if (!Number.isInteger(p.version_base)) malos.push("version_base");
+  const tipo = objetivo?.tipo;
+  if (tipo === "entidad") {
+    if (!["personajes", "lugares", "objetos"].includes(String(objetivo?.entidad)) || !Number.isInteger(objetivo?.id)) malos.push("objetivo");
+  } else if (tipo === "hecho") {
+    if (!Number.isInteger(objetivo?.hecho_id)) malos.push("objetivo");
+  } else if (tipo !== "fragmento") malos.push("objetivo");
+  const peticion = typeof p.peticion === "string" ? p.peticion.trim() : "";
+  if (peticion.length < 3 || peticion.length > 300) malos.push("peticion");
+  if (cita !== undefined) {
+    const texto = typeof cita.texto === "string" ? cita.texto : "";
+    if (!Number.isInteger(cita.capitulo) || !texto || texto.length > 500) malos.push("cita");
+  } else if (tipo === "fragmento") malos.push("cita");
+  return malos;
+}
+
+/** El cambio del lector que se está reescribiendo en cada novela, y por qué capítulo va. */
+const cambioEnCurso = new Map<number, { registro: CambioSimulado; indice: number }>();
+
 const intenciones = new Map<number, IntencionSimulada>();
 let siguienteIntencion = 1;
 
@@ -123,6 +147,27 @@ function atender(i: IntencionSimulada): IntencionSimulada["cierre"] {
     else fijarEstado(id, "generando", "paquete");
     return { estado: "hecha", motivo: null };
   }
+  if (i.tipo === "cambio_lector" && id !== null) {
+    const e = ejecuciones[id];
+    if (!e || !["completada", "completada_con_avisos"].includes(e.estado)) return { estado: "rechazada", motivo: "novela_no_terminada" };
+    if (Number(i.payload.version_base) !== versionesDe[id]?.at(-1)?.numero) return { estado: "rechazada", motivo: "version_desfasada" };
+    const peticion = String(i.payload.peticion);
+    if (/triste|mejor|bonit|más miedo/i.test(peticion)) {
+      return {
+        estado: "rechazada",
+        motivo: "cambio_no_admisible",
+        resultado: { explicacion: `«${peticion}» es una indicación de estilo, no un cambio de algo que pase en la historia.` },
+      };
+    }
+    const objetivo = i.payload.objetivo as Record<string, unknown>;
+    const capitulos = alcanceDe(id, objetivo, i.payload.cita as { capitulo: number } | undefined);
+    if (capitulos === null) return { estado: "rechazada", motivo: "objetivo_inexistente" };
+    const registro = registrarCambio(id, i.payload, capitulos);
+    cambioEnCurso.set(id, { registro, indice: 0 });
+    Object.assign(e, { capitulo_actual: capitulos[0] ?? null, intento_actual: 1 });
+    fijarEstado(id, "generando", "revision");
+    return { estado: "hecha", motivo: null, resultado: { cambio_id: registro.id, capitulos } };
+  }
   if (i.tipo === "parar" && id !== null) {
     if (estado && ACTIVOS.includes(estado)) fijarEstado(id, "detenida", null);
     return { estado: "hecha", motivo: null };
@@ -133,10 +178,57 @@ function atender(i: IntencionSimulada): IntencionSimulada["cierre"] {
 const FASES_PLAN = ["arquitecto", "mundo", "elenco", "estructura", "puerta_1", "escaleta", "puerta_2"];
 const FASES_CAP = ["paquete", "redaccion", "extraccion", "puerta_3", "puerta_4"];
 
+/**
+ * Un paso de un cambio del lector: revisión y puerta 4 por cada capítulo del alcance, y la puerta 5
+ * al final. Si falla no hay parada: vuelve a completada sin versión nueva (spec-frontend 5.2).
+ */
+function avanzarCambio(id: number): string | null {
+  const enCurso = cambioEnCurso.get(id);
+  const e = ejecuciones[id];
+  if (!enCurso || !e || e.estado !== "generando") return null;
+  const { registro } = enCurso;
+  if (e.fase === "revision") {
+    fijarEstado(id, "generando", "puerta_4");
+    return "fase_cambiada";
+  }
+  if (e.fase === "puerta_4") {
+    enCurso.indice += 1;
+    const siguiente = registro.capitulos[enCurso.indice];
+    if (siguiente !== undefined) {
+      e.capitulo_actual = siguiente;
+      fijarEstado(id, "generando", "revision");
+    } else {
+      fijarEstado(id, "generando", "puerta_5");
+    }
+    return "fase_cambiada";
+  }
+  cambioEnCurso.delete(id);
+  e.capitulo_actual = (capitulosDe[id]?.length ?? 0) + 1;
+  if (/fracas/i.test(registro.peticion)) {
+    Object.assign(registro, { estado: "fallido", informe: { motivo: "Tres intentos sin pasar la puerta 4 en el capítulo reescrito." } });
+    fijarEstado(id, "completada", null);
+    return "cambio_fallido";
+  }
+  publicarCambio(id, registro);
+  fijarEstado(id, "completada", null);
+  return "version_publicada";
+}
+
+/** Olvida los cambios a medias. Los tests lo llaman entre caso y caso. */
+export function restaurarSimulacion() {
+  cambioEnCurso.clear();
+}
+
+/** Solo para los tests, donde el reloj no avanza: lleva el cambio en curso hasta el final. */
+export function terminarCambio(novelaId: number) {
+  for (let i = 0; i < 100 && cambioEnCurso.has(novelaId); i++) avanzarCambio(novelaId);
+}
+
 /** Un paso del pipeline simulado. Devuelve el tipo de evento, o `null` si la novela no está activa. */
 function avanzar(id: number): string | null {
   const e = ejecuciones[id];
   if (!e || !ACTIVOS.includes(e.estado)) return null;
+  if (cambioEnCurso.has(id)) return avanzarCambio(id);
   const capitulos = capitulosDe[id] ?? [];
   if (e.estado === "planificando" || e.estado === "escaletando") {
     const siguiente = FASES_PLAN[FASES_PLAN.indexOf(e.fase ?? "") + 1];
@@ -267,6 +359,38 @@ export const manejadores = [
     return version ? HttpResponse.json(version) : noEncontrada(`la version ${String(params.n)}`);
   }),
 
+  http.get("*/api/novelas/:id/hechos", ({ params, request }) => {
+    if (!detalleDe(Number(params.id))) return noEncontrada("la novela");
+    const capitulo = new URL(request.url).searchParams.get("capitulo");
+    const todos = hechosDe[Number(params.id)] ?? [];
+    // Un hecho «es del capítulo» si se establece o se usa en él, como la vista `hecho_escena`.
+    const items = capitulo
+      ? todos.filter((h) => (usosDe[Number(params.id)]?.[h.id] ?? []).some((u) => u.capitulo === Number(capitulo)))
+      : todos;
+    return HttpResponse.json({ total: items.length, items });
+  }),
+
+  http.get("*/api/novelas/:id/hechos/:hid/usos", ({ params }) => {
+    const usos = usosDe[Number(params.id)]?.[Number(params.hid)];
+    return usos ? HttpResponse.json(usos) : noEncontrada(`el hecho ${String(params.hid)}`);
+  }),
+
+  http.get("*/api/novelas/:id/cambios", ({ params }) => HttpResponse.json(cambiosDe[Number(params.id)] ?? [])),
+
+  http.get("*/api/novelas/:id/cambios/alcance", ({ params, request }) => {
+    const q = new URL(request.url).searchParams;
+    const objetivo = q.has("hecho_id")
+      ? { tipo: "hecho", hecho_id: Number(q.get("hecho_id")) }
+      : { tipo: "entidad", entidad: q.get("entidad"), id: Number(q.get("id")) };
+    const capitulos = alcanceDe(Number(params.id), objetivo);
+    return capitulos ? HttpResponse.json({ capitulos }) : noEncontrada("el objetivo");
+  }),
+
+  http.get("*/api/novelas/:id/cambios/:cid", ({ params }) => {
+    const cambio = cambiosDe[Number(params.id)]?.find((c) => c.id === Number(params.cid));
+    return cambio ? HttpResponse.json(cambio) : noEncontrada(`el cambio ${String(params.cid)}`);
+  }),
+
   http.get("*/api/novelas/:id/canon/:entidad", ({ params }) => {
     if (!detalleDe(Number(params.id))) return noEncontrada("la novela");
     return HttpResponse.json(canonDe[Number(params.id)]?.[String(params.entidad)] ?? []);
@@ -293,7 +417,20 @@ export const manejadores = [
   ),
 
   http.post("*/api/intenciones", async ({ request }) => {
-    const cuerpo = (await request.json()) as { tipo: TipoIntencion; novela_id?: number | null; payload?: Record<string, unknown> };
+    const cuerpo = (await request.json()) as { tipo: IntencionSimulada["tipo"]; novela_id?: number | null; payload?: Record<string, unknown> };
+    if (cuerpo.tipo === "cambio_lector") {
+      const campos = camposInvalidosDelCambio(cuerpo.payload ?? {});
+      if (campos.length) {
+        return HttpResponse.json(
+          {
+            codigo: "cambio_invalido",
+            mensaje: "El cambio pedido no es valido",
+            detalle: JSON.stringify(campos.map((campo) => ({ campo, error: "no es valido" }))),
+          },
+          { status: 422 },
+        );
+      }
+    }
     if (cuerpo.tipo === "crear_novela" && cuerpo.payload?.brief) {
       const analisis = analizarBrief(cuerpo.payload.brief as BriefSimulado);
       if (analisis.faltantes.length || analisis.contradicciones.length) {

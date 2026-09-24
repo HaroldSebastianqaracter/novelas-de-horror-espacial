@@ -29,6 +29,7 @@ export const ETIQUETA_INTENCION: Record<string, string> = {
   relanzar: "Relanzar",
   resolver_parada: "Resolver parada",
   crear_novela: "Crear novela",
+  cambio_lector: "Cambio del lector",
 };
 
 function lineaFase(ejecucion: Ejecucion | undefined, estado: string | null | undefined): string {

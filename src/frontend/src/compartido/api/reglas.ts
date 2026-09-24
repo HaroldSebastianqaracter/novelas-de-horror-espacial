@@ -17,6 +17,8 @@ export type EstadoEjecucion = (typeof ESTADOS_EJECUCION)[number];
 export const FASES = [
   "arquitecto", "mundo", "elenco", "estructura", "puerta_1", "escaleta", "puerta_2",
   "paquete", "redaccion", "extraccion", "puerta_3", "puerta_4", "puerta_5",
+  // La del revisor que aplica un cambio del lector a cada capítulo de su alcance (bloque 8).
+  "revision",
 ] as const;
 export type Fase = (typeof FASES)[number];
 

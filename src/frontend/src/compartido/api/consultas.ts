@@ -98,6 +98,37 @@ export const consultaVersion = (novelaId: number, numero: number) =>
     staleTime: Infinity,
   });
 
+/** Los hechos que se establecen o se usan en un capítulo (vista `hecho_escena`). */
+export const consultaHechosDeCapitulo = (novelaId: number, capitulo: number) =>
+  queryOptions({
+    queryKey: [...claves.novela(novelaId), "hechos", capitulo] as const,
+    queryFn: () =>
+      leer(
+        api.GET("/novelas/{novela_id}/hechos", {
+          params: { path: { novela_id: novelaId }, query: { capitulo, limite: 500 } },
+        }),
+      ),
+  });
+
+export const consultaUsosDeHecho = (novelaId: number, hechoId: number) =>
+  queryOptions({
+    queryKey: [...claves.novela(novelaId), "hechos", "usos", hechoId] as const,
+    queryFn: () =>
+      leer(
+        api.GET("/novelas/{novela_id}/hechos/{hecho_id}/usos", {
+          params: { path: { novela_id: novelaId, hecho_id: hechoId } },
+        }),
+      ),
+  });
+
+/** La misma consulta que usa el seguidor de intenciones: comparten caché. */
+export const consultaIntencion = (intencionId: number) =>
+  queryOptions({
+    queryKey: claves.intencion(intencionId),
+    queryFn: () =>
+      leer(api.GET("/intenciones/{intencion_id}", { params: { path: { intencion_id: intencionId } } })),
+  });
+
 export const consultaCanon = (novelaId: number, entidad: EntidadLectura) =>
   queryOptions({
     queryKey: claves.canon(novelaId, entidad),

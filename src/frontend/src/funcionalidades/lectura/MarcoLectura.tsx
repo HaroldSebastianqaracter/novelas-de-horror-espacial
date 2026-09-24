@@ -1,7 +1,11 @@
-import { Link, NavLink, Outlet, useOutletContext } from "react-router";
+import { useEffect, useRef } from "react";
+import { Link, NavLink, Outlet, useLocation, useOutletContext } from "react-router";
 import { ErrorApi } from "../../compartido/api/cliente";
 import { useEventosNovela } from "../../compartido/api/eventos";
 import { EstadoConsulta } from "../../compartido/ui/EstadoConsulta";
+import { useTitulo } from "../../compartido/ui/titulo";
+import { type CambioGuardado, useCambioGuardado } from "./cambioGuardado";
+import { FranjaCambio } from "./FranjaCambio";
 import { type Lectura, useLectura } from "./usarLectura";
 import "./Lectura.css";
 
@@ -15,6 +19,23 @@ export function MarcoLectura() {
   // El SSE invalida `/versiones`: una versión nueva aparece sola (RF-FE-CAM-05).
   useEventosNovela(novelaId);
   const noExiste = version.error instanceof ErrorApi && version.error.estado === 404;
+  const [cambio, guardarCambio] = useCambioGuardado(novelaId);
+  const contexto: ContextoLectura = { ...lectura, cambio, guardarCambio };
+  const sinLectura = !versiones.isPending && lista.length === 0;
+  useTitulo(sinLectura ? "Sin lectura todavía" : noExiste ? `No existe la versión ${numero}` : null);
+
+  // Al cambiar de vista (o de versión), se lee desde arriba y el foco va al texto (RF-FE-LEE-08).
+  // Al cargar no se mueve: el primer foco es el enlace para saltar al texto.
+  const principal = useRef<HTMLElement>(null);
+  const { pathname } = useLocation();
+  const vista = `${pathname}|${numero ?? ""}`;
+  const vistaAnterior = useRef(vista);
+  useEffect(() => {
+    if (vistaAnterior.current === vista) return;
+    vistaAnterior.current = vista;
+    document.documentElement.scrollTop = 0;
+    principal.current?.focus({ preventScroll: true });
+  }, [vista]);
 
   return (
     <div className="lectura">
@@ -44,9 +65,12 @@ export function MarcoLectura() {
           </p>
         )}
       </header>
-      <main id="contenido-lectura" className="lectura__contenido" tabIndex={-1}>
+      <main ref={principal} id="contenido-lectura" className="lectura__contenido" tabIndex={-1}>
+        {cambio && (
+          <FranjaCambio novelaId={novelaId} cambio={cambio} versiones={lista} alCerrar={() => guardarCambio(null)} />
+        )}
         <EstadoConsulta cargando={versiones.isPending} error={versiones.error} reintentar={() => void versiones.refetch()}>
-          {lista.length === 0 ? (
+          {sinLectura ? (
             <div className="aviso">
               <h1 className="lectura__titulo-aviso">Esta novela todavía no tiene lectura</h1>
               <p>
@@ -63,7 +87,7 @@ export function MarcoLectura() {
             </div>
           ) : (
             <EstadoConsulta cargando={version.isPending} error={version.error} reintentar={() => void version.refetch()}>
-              {version.data && <Outlet context={lectura} />}
+              {version.data && <Outlet context={contexto} />}
             </EstadoConsulta>
           )}
         </EstadoConsulta>
@@ -72,9 +96,14 @@ export function MarcoLectura() {
   );
 }
 
+type ContextoLectura = Lectura & {
+  cambio: CambioGuardado | null;
+  guardarCambio: (cambio: CambioGuardado | null) => void;
+};
+
 /** La lectura resuelta por el marco, con su versión ya cargada. */
 export function useLecturaActual() {
-  const lectura = useOutletContext<Lectura>();
+  const lectura = useOutletContext<ContextoLectura>();
   const version = lectura.version.data;
   if (!version) throw new Error("La vista de lectura se pintó sin versión");
   return { ...lectura, version };

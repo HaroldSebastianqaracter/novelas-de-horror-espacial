@@ -103,7 +103,7 @@ describe("formulario del brief (RF-FE-BRF)", () => {
     expect(cuerpo.payload.brief).toMatchObject({ intensidad: "tension", tono: "emotivo", ocasion: "cumpleanos" });
     expect(localStorage.getItem("novelasv2.borrador-brief")).toBeNull();
     servidor.events.removeAllListeners();
-  }, 15_000);
+  }, 30_000);
 
   it("un 422 de brief_incompleto lleva al paso del campo y lo marca con el mensaje del servidor (RF-FE-BRF-04)", async () => {
     const usuario = userEvent.setup();
@@ -118,7 +118,7 @@ describe("formulario del brief (RF-FE-BRF)", () => {
     expect(edad).toHaveAccessibleDescription(/pide al menos 14 años y el destinatario tiene 12/);
     const pasos = screen.getByRole("list", { name: "Pasos del brief" });
     expect(within(pasos).getByRole("button", { name: "Paso 4: El terror, con errores" })).toBeInTheDocument();
-  }, 15_000);
+  }, 30_000);
 
   it("un error de forma no se envía: se marca en su paso", async () => {
     let enviadas = 0;
@@ -167,5 +167,5 @@ describe("formulario del brief (RF-FE-BRF)", () => {
       await waitFor(() => expect(screen.getByRole("heading", { level: 2, name: `${i + 1} · ${paso}` })).toBeInTheDocument());
       await sinViolaciones(container);
     }
-  }, 15_000);
+  }, 30_000);
 });

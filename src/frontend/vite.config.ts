@@ -20,5 +20,9 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["src/pruebas/preparar.ts"],
     css: false,
+    // Con toda la suite en paralelo, los flujos de varios pasos (cambio del lector) pasan de 5 s.
+    testTimeout: 15_000,
+    // La máquina se comparte con el backend y sus workers: la mitad de los núcleos es más estable.
+    maxWorkers: "50%",
   },
 });

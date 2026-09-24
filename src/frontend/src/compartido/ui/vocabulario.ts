@@ -43,4 +43,5 @@ export const ETIQUETA_FASE: Record<Fase, string> = {
   puerta_3: "Puerta 3",
   puerta_4: "Puerta 4",
   puerta_5: "Puerta 5",
+  revision: "Aplicando tu cambio",
 };

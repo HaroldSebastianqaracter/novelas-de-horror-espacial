@@ -20,7 +20,7 @@ const REPARTO = [["Oda Varga", "Ciro Lenz"], ["Oda Varga", "Maura Quiles", "Ciro
 function escenasDe(numero: number): Escena[] {
   return [0, 1, 2].map((i) => {
     const conPerro = (numero === 3 || numero === 5) && i === 2;
-    const reparto = conPerro ? ["Oda Varga", "Nala"] : [...(REPARTO[i % 2] ?? [])];
+    const reparto = conPerro ? ["Oda Varga", nombreDelPerro()] : [...(REPARTO[i % 2] ?? [])];
     return {
       orden: i + 1,
       pov: "Oda Varga",
@@ -108,9 +108,131 @@ export const canonDe: Record<number, Record<string, EntidadCanon[]>> = {
   },
 };
 
+const canonInicial = structuredClone(canonDe);
+
+/** El perro cambia de nombre con un cambio del lector: la escaleta lo sigue. */
+function nombreDelPerro(): string {
+  return canonDe[6]?.personajes?.find((p) => p.id === 4)?.nombre ?? "Nala";
+}
+
 export const escenasDeNovela: Record<number, (numero: number) => Escena[]> = { 6: escenasDe };
+
+/** Hechos del canon de la novela 6, con dónde se establecen y se usan (`hecho_escena`). */
+export const hechosDe: Record<number, { id: number; sujeto_tipo: string; sujeto_nombre: string; atributo: string; valor: string; categoria: string; capitulo_origen: number; vigente: boolean }[]> = {
+  6: [
+    { id: 31, sujeto_tipo: "objeto", sujeto_nombre: "contenedor once", atributo: "estado", valor: "abierto desde dentro", categoria: "estado", capitulo_origen: 1, vigente: true },
+    { id: 32, sujeto_tipo: "lugar", sujeto_nombre: "Bodega once", atributo: "olor", valor: "óxido", categoria: "rasgo", capitulo_origen: 1, vigente: true },
+  ],
+};
+export const usosDe: Record<number, Record<number, { capitulo: number; escena_orden: number; via: string; cita: string | null }[]>> = {
+  6: {
+    31: [1, 2, 4, 6, 7, 8, 9, 10].map((capitulo) => ({ capitulo, escena_orden: 3, via: capitulo === 1 ? "establece" : "reafirma", cita: "el contenedor once estaba abierto desde dentro" })),
+    32: Array.from({ length: 10 }, (_, i) => ({ capitulo: i + 1, escena_orden: 1, via: i === 0 ? "establece" : "menciona", cita: "olía a óxido" })),
+  },
+};
+
+export interface CambioSimulado {
+  id: number;
+  estado: string;
+  peticion: string;
+  objetivo: Record<string, unknown>;
+  cita: { capitulo: number; texto: string } | null;
+  cambio: { tipo: string; antes: string | null; despues: string | null } | null;
+  capitulos: number[];
+  informe: unknown;
+  version: number | null;
+  creado_en: string;
+}
+export const cambiosDe: Record<number, CambioSimulado[]> = {};
+let siguienteCambio = 1;
+
+const escapar = (texto: string) => texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const palabrasCompletas = (termino: string) =>
+  new RegExp(String.raw`(^|[^\p{L}\p{N}])` + escapar(termino) + String.raw`(?=$|[^\p{L}\p{N}])`, "gu");
+
+/** La regla del worker, simplificada: una entidad, los capítulos cuya prosa la nombra; un hecho, sus usos. */
+export function alcanceDe(novelaId: number, objetivo: Record<string, unknown>, cita?: { capitulo: number } | null): number[] | null {
+  const ultima = versionesDe[novelaId]?.at(-1);
+  if (!ultima) return null;
+  if (objetivo.tipo === "entidad") {
+    const entidad = canonDe[novelaId]?.[String(objetivo.entidad)]?.find((e) => e.id === Number(objetivo.id));
+    if (!entidad) return null;
+    return ultima.capitulos.filter((c) => palabrasCompletas(entidad.nombre).test(c.texto)).map((c) => c.numero);
+  }
+  if (objetivo.tipo === "hecho") {
+    const usos = usosDe[novelaId]?.[Number(objetivo.hecho_id)];
+    if (!usos) return null;
+    return [...new Set(usos.map((u) => u.capitulo))].sort((a, b) => a - b);
+  }
+  return cita ? [cita.capitulo] : [];
+}
+
+/** Registra un cambio aceptado, en `reescribiendo`. */
+export function registrarCambio(novelaId: number, payload: Record<string, unknown>, capitulos: number[]): CambioSimulado {
+  const objetivo = payload.objetivo as Record<string, unknown>;
+  let cambio: CambioSimulado["cambio"] = null;
+  const nuevoNombre = /se llam[ae]\s+([\p{L}]+)/u.exec(String(payload.peticion))?.[1];
+  if (objetivo.tipo === "entidad" && nuevoNombre) {
+    const entidad = canonDe[novelaId]?.[String(objetivo.entidad)]?.find((e) => e.id === Number(objetivo.id));
+    cambio = { tipo: "renombrar", antes: entidad?.nombre ?? null, despues: nuevoNombre };
+  } else {
+    cambio = { tipo: "cambiar_hecho", antes: null, despues: String(payload.peticion) };
+  }
+  const registro: CambioSimulado = {
+    id: siguienteCambio++,
+    estado: "reescribiendo",
+    peticion: String(payload.peticion),
+    objetivo,
+    cita: (payload.cita as CambioSimulado["cita"]) ?? null,
+    cambio,
+    capitulos,
+    informe: null,
+    version: null,
+    creado_en: fecha(0),
+  };
+  (cambiosDe[novelaId] ??= []).push(registro);
+  return registro;
+}
+
+/** Aplica el cambio y publica la versión siguiente, motivo `cambio_lector` (RF3-BIB-12). */
+export function publicarCambio(novelaId: number, registro: CambioSimulado): number | null {
+  const lista = versionesDe[novelaId];
+  const ultima = lista?.at(-1);
+  if (!lista || !ultima) return null;
+  const capitulos = ultima.capitulos.map((c) => {
+    if (!registro.capitulos.includes(c.numero)) return { ...c, cambiado: false };
+    let texto = c.texto;
+    const { cambio } = registro;
+    if (cambio?.tipo === "renombrar" && cambio.antes && cambio.despues) {
+      texto = texto.replace(palabrasCompletas(cambio.antes), (_, antes: string) => `${antes}${cambio.despues}`);
+    } else {
+      const peticion = registro.peticion.replace(/\.$/, "");
+      texto = `${texto}\n\n(Reescrito para que ${peticion.charAt(0).toLowerCase()}${peticion.slice(1)}.)`;
+    }
+    return { ...c, texto, palabras: texto.split(/\s+/).filter(Boolean).length, cambiado: texto !== c.texto };
+  });
+  const numero = ultima.numero + 1;
+  lista.push({
+    ...ultima,
+    numero,
+    motivo: "cambio_lector",
+    detalle: registro.peticion,
+    creado_en: fecha(0),
+    capitulos,
+    capitulos_cambiados: capitulos.filter((c) => c.cambiado).map((c) => c.numero),
+  });
+  if (registro.cambio?.tipo === "renombrar" && registro.cambio.despues) {
+    const entidad = canonDe[novelaId]?.[String(registro.objetivo.entidad)]?.find((e) => e.id === Number(registro.objetivo.id));
+    if (entidad) entidad.nombre = registro.cambio.despues;
+  }
+  Object.assign(registro, { estado: "aplicado", version: numero });
+  return numero;
+}
 
 export function restaurarLectura() {
   for (const id of Object.keys(versionesDe)) delete versionesDe[Number(id)];
   Object.assign(versionesDe, structuredClone(versionesIniciales));
+  for (const id of Object.keys(canonDe)) delete canonDe[Number(id)];
+  Object.assign(canonDe, structuredClone(canonInicial));
+  for (const id of Object.keys(cambiosDe)) delete cambiosDe[Number(id)];
 }

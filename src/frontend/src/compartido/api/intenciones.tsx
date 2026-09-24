@@ -14,21 +14,22 @@ import {
   useRef,
   useState,
 } from "react";
+import { type IntencionPedida, MOTIVOS_CAMBIO, type TipoIntencionAmpliada } from "./cambios";
 import { api, leer } from "./cliente";
 import { claves } from "./consultas";
 import { comoEstadoIntencion } from "./reglas";
-import type { Intencion, NuevaIntencion, TipoIntencion } from "./tipos";
+import type { Intencion, NuevaIntencion } from "./tipos";
 
 export interface Seguimiento {
   id: number;
-  tipo: TipoIntencion;
+  tipo: TipoIntencionAmpliada;
   novelaId: number | null;
   /** Cuándo se encoló, en ms. Pasado un minuto se consulta más despacio y se avisa. */
   desde: number;
 }
 
 export interface Rechazo {
-  tipo: TipoIntencion;
+  tipo: TipoIntencionAmpliada;
   motivo: string;
 }
 
@@ -40,7 +41,7 @@ interface Opciones {
 interface ContextoIntenciones {
   pendientes: readonly Seguimiento[];
   rechazos: Readonly<Record<number, Rechazo>>;
-  pedir: (intencion: NuevaIntencion, opciones?: Opciones) => Promise<Seguimiento>;
+  pedir: (intencion: IntencionPedida, opciones?: Opciones) => Promise<Seguimiento>;
   descartarRechazo: (novelaId: number) => void;
 }
 
@@ -50,6 +51,7 @@ const CLAVE_ALMACEN = "novelasv2.intenciones";
 const MOTIVOS: Record<string, string> = {
   otra_ejecucion_activa: "Ya hay otra novela en curso: solo se genera una a la vez.",
   worker_caido: "El worker se reinició antes de atenderla. Vuelve a pedirla.",
+  ...MOTIVOS_CAMBIO,
 };
 
 /** El motivo del worker en lenguaje legible, o tal cual si no se conoce. */
@@ -91,8 +93,9 @@ export function IntencionesProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const pedir = useCallback(
-    async (intencion: NuevaIntencion, opciones?: Opciones) => {
-      const encolada = await leer(api.POST("/intenciones", { body: intencion }));
+    async (intencion: IntencionPedida, opciones?: Opciones) => {
+      // DEUDA (RF-FE-API-04): `cambio_lector` no está aún en el enumerado del OpenAPI.
+      const encolada = await leer(api.POST("/intenciones", { body: intencion as NuevaIntencion }));
       const seguimiento: Seguimiento = {
         id: encolada.id,
         tipo: intencion.tipo,
