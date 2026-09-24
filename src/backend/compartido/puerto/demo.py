@@ -641,7 +641,12 @@ def revision(entrada: str, agente: str) -> dict[str, Any]:
         escenas.append({"orden": int(orden), "texto": corregido})
         if corregido != texto.strip() and nuevo_valor:
             i = corregido.find(nuevo_valor)
-            cita = corregido[max(0, i - 20):i + len(nuevo_valor) + 20]
+            # Por palabras enteras: cortar por letras podia partir una etiqueta de la
+            # seudonimizacion («[DESTINATARIO_NOM»), que ya no se restaura y deja la cita sin
+            # casar con la prosa (spec3, RF3-SEU; lo vio a1 en la demo del cambio del lector).
+            ini = corregido.rfind(" ", 0, max(0, i - 20)) + 1 if i > 20 else 0
+            fin = corregido.find(" ", i + len(nuevo_valor) + 20)
+            cita = corregido[ini:fin if fin >= 0 else len(corregido)]
             if cita not in texto:
                 citas.append(cita)
     resumenes = _bloque(entrada, "RESUMENES DEL CAPITULO")
