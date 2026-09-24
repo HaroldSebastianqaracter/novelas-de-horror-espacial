@@ -160,3 +160,58 @@ def test_la_skill_del_extractor_pide_los_elementos() -> None:
         "\n\n")[0]
     assert seccion.strip() == REGLA_DE_LOS_ELEMENTOS
     assert skill.count("**Elementos del encargo.**") == 1
+
+
+def test_el_cambio_del_lector_no_exige_elementos_que_no_volvio_a_extraer() -> None:
+    """Una novela anterior a la migracion 013 no tiene registros: el cambio tiene que poder
+    reescribir igual (validador de 73d4723)."""
+    from tests import test_cambio_lector as tcl
+
+    con, ruta, novela_id = tcl._completa()
+    con.execute("DELETE FROM elemento_integrado")
+    antes = tcl._textos(con, novela_id)
+    reyes = tcl._id(con, "personaje", tcl.SOLO_EN_EL_DOS)
+    intencion = tcl._pedir(con, ruta, novela_id, "Que se llame «Oriol»",
+                           {"tipo": "entidad", "entidad": "personajes", "id": reyes})
+    cambio = lectura.cambio(con, novela_id, intencion["resultado"]["cambio_id"]) or {}
+    assert cambio["estado"] == "aplicado", cambio
+    assert tcl._textos(con, novela_id)[2] != antes[2]
+
+
+def test_lo_integrado_en_otro_capitulo_no_cuenta_para_este() -> None:
+    con, novela_id = escaletada()
+    x = _planificado(con, novela_id)
+    otra = con.execute(
+        "SELECT e.id FROM escena e JOIN capitulo c ON c.id = e.capitulo_id "
+        "WHERE e.novela_id = ? AND c.numero = 2 LIMIT 1", (novela_id,)).fetchone()[0]
+    con.execute("INSERT INTO elemento_integrado (novela_id, escena_id, elemento_id, cita) "
+                "VALUES (?, ?, ?, 'otra cita')", (novela_id, otra, x["id"]))
+    faltan = {c.datos["codigo"] for c in p_oficio.evaluar(con, novela_id, 1, "T.").bloqueantes
+              if c.comprobacion == "elemento_sin_integrar"}
+    assert x["codigo"] in faltan
+
+
+def test_lo_integrado_en_un_capitulo_sin_completar_no_cuenta_para_la_puerta_5() -> None:
+    con, novela_id = escaletada()
+    x = _planificado(con, novela_id)
+    _extraer(con, novela_id, x["orden"], x["escena_id"],
+             [{"escena_orden": x["orden"], "codigo": x["codigo"], "cita": "los destellos"}],
+             "Contaba los destellos.")
+    avisos = {c.datos["codigo"] for c in p_global.evaluar(con, novela_id).conflictos
+              if c.comprobacion == "elemento_obligatorio_ausente"}
+    assert x["codigo"] in avisos
+    con.execute("UPDATE capitulo SET estado = 'completado' WHERE novela_id = ?", (novela_id,))
+    avisos = {c.datos["codigo"] for c in p_global.evaluar(con, novela_id).conflictos
+              if c.comprobacion == "elemento_obligatorio_ausente"}
+    assert x["codigo"] not in avisos
+
+
+def test_el_bloque_de_elementos_del_extractor_no_se_recorta() -> None:
+    import config
+    from compartido.contexto import Presupuesto
+
+    con, novela_id = escaletada()
+    paquete = s_extraccion.paquete(con, novela_id, 1, {1: "Texto."}, presupuesto=Presupuesto(
+        bloques=config.PRESUPUESTO_BLOQUES, techo=config.PRESUPUESTO_PAQUETE))
+    bloques = [b for b in paquete.bloques if b.titulo.startswith("ELEMENTOS DEL ENCARGO")]
+    assert bloques and all(e.obligatorio for b in bloques for e in b.elementos)

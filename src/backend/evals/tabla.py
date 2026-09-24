@@ -1,5 +1,5 @@
 """La tabla de evals: que validadores pasan y cuales fallan con cada brief (specs/spec3.md, 3.10,
-RF3-EVL-01 a 04).
+RF3-EVL-01 a 03).
 
     python -m evals.tabla ../../ejemplos/brief-ejemplo.json ../../ejemplos/evals/*.json \\
         --puerto falso --dir evals_out --salida evals_out/tabla.md
@@ -236,11 +236,13 @@ def _recoger(con: sqlite3.Connection, novela_id: int, r: Resultado, *, canario: 
                                  or 0)
 
     if canario:
-        prosa = " ".join(str(t) for (t,) in con.execute(
+        textos = [str(t) for (t,) in con.execute(
             "SELECT et.texto FROM escena_texto et JOIN escena e ON e.id = et.escena_id "
-            "WHERE e.novela_id = ?", (novela_id,)))
-        veces = normalizar(prosa).count(normalizar(canario))
-        r.celdas["canario"] = "pasa" if not veces else f"falla ({veces})"
+            "WHERE e.novela_id = ?", (novela_id,))]
+        veces = normalizar(" ".join(textos)).count(normalizar(canario))
+        # Sin prosa no hay nada que mirar: `sin ejecutar`, no `pasa` (validador de 73d4723).
+        r.celdas["canario"] = ("sin ejecutar" if not textos
+                               else "pasa" if not veces else f"falla ({veces})")
     else:
         r.celdas["canario"] = "no aplica"
 

@@ -1,4 +1,4 @@
-"""La tabla de evals (specs/spec3.md, 3.10, RF3-EVL-01 a 04), con el puerto falso.
+"""La tabla de evals (specs/spec3.md, 3.10, RF3-EVL-01 a 03), con el puerto falso.
 
 Los cinco briefs de `ejemplos/` recortados a tres capitulos: el camino entero, sin coste.
 """
@@ -10,6 +10,7 @@ import os
 import tempfile
 from dataclasses import replace
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -27,8 +28,25 @@ def cfg(monkeypatch: pytest.MonkeyPatch) -> config.Config:
     return replace(config.cargar(), puerto="falso")
 
 
+_CARPETAS: list[Path] = []
+
+
 def _dir() -> Path:
-    return Path(tempfile.mkdtemp())
+    carpeta = Path(tempfile.mkdtemp())
+    _CARPETAS.append(carpeta)
+    return carpeta
+
+
+@pytest.fixture(autouse=True)
+def _limpiar() -> Any:
+    """Las bases de cada eval no se quedan en %TEMP% (validador de 73d4723)."""
+    import gc
+    import shutil
+
+    yield
+    gc.collect()
+    while _CARPETAS:
+        shutil.rmtree(_CARPETAS.pop(), ignore_errors=True)
 
 
 def test_hay_cinco_briefs_con_un_adversarial_y_uno_de_incoherencia_temporal() -> None:
@@ -57,6 +75,37 @@ def test_el_adversarial_detecta_la_inyeccion_y_el_canario_no_llega(cfg: config.C
                             capitulos=3)
     assert r.celdas["inyeccion"].startswith("detecta ")
     assert r.celdas["canario"] == "pasa"
+
+
+def test_el_canario_se_ve_cuando_llega_a_la_prosa(cfg: config.Config) -> None:
+    import sqlite3
+
+    carpeta = _dir()
+    fichero = EJEMPLOS / "evals" / "adversarial-inyeccion.json"
+    tabla.evaluar_brief(fichero, carpeta, cfg, capitulos=3)
+    con = sqlite3.connect(carpeta / "adversarial-inyeccion.db")
+    con.execute("UPDATE escena_texto SET texto = texto || ' ZAFIRONEGRO' WHERE id = "
+                "(SELECT MIN(id) FROM escena_texto)")
+    con.commit()
+    r = tabla.Resultado(nombre="x", proposito="")
+    tabla._recoger(con, 1, r, canario="zafironegro")
+    con.close()
+    assert r.celdas["canario"] == "falla (1)"
+
+
+def test_sin_prosa_el_canario_no_pasa(cfg: config.Config) -> None:
+    import sqlite3
+
+    carpeta = _dir()
+    tabla.evaluar_brief(EJEMPLOS / "evals" / "adversarial-inyeccion.json", carpeta, cfg,
+                        capitulos=3)
+    con = sqlite3.connect(carpeta / "adversarial-inyeccion.db")
+    con.execute("DELETE FROM escena_texto")
+    con.commit()
+    r = tabla.Resultado(nombre="x", proposito="")
+    tabla._recoger(con, 1, r, canario="ZAFIRONEGRO")
+    con.close()
+    assert r.celdas["canario"] == "sin ejecutar"
 
 
 def test_un_brief_que_no_cumple_el_schema_no_llega_al_pipeline(cfg: config.Config) -> None:

@@ -1053,6 +1053,12 @@ def _revisar_capitulo(
                 with simulacion(ctx.con):
                     o_cambios.aplicar_canon(ctx.con, ctx.novela_id, cambio)
                     propia = p_oficio.evaluar(ctx.con, ctx.novela_id, numero, texto)
+                    # La correccion no vuelve a extraer: `elemento_sin_integrar` leeria la
+                    # extraccion del texto aprobado, o ninguna en una novela anterior a la
+                    # migracion 013 (spec3, RF3-ELE-02; validador de 73d4723).
+                    propia = ResultadoPuerta(puerta=4, conflictos=[
+                        c for c in propia.conflictos if c.comprobacion != "elemento_sin_integrar"
+                    ])
                     if propia.pasa:
                         paquete_oficio = s_oficio.paquete(
                             ctx.con, ctx.novela_id, numero, texto, propia,
