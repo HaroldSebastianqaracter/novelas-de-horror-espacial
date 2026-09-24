@@ -430,6 +430,11 @@ def test_al_relanzar_una_parada_formal_el_redactor_recibe_lo_que_encontro_lean(
     assert "lean_nadie_tras_morir" in entradas[0]
     assert all("lean_nadie_tras_morir" not in e for e in entradas[1:])
     assert _puertas_6(conexion, novela_id) == ["falla", "pasa"]
+    # Completada la novela, lo que encontro Lean ya no vale para otra regeneracion.
+    from orquestador import pipeline
+
+    ctx = pipeline.Contexto(con=conexion, puerto=w.puerto, cfg=w.cfg, novela_id=novela_id)
+    assert pipeline._criterios_formales(ctx, 2) == []  # pyright: ignore[reportPrivateUsage]
 
 
 def test_un_cambio_que_fracaso_en_lean_no_da_criterios_al_redactor(
