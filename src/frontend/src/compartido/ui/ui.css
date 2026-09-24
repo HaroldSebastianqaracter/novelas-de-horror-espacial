@@ -4,6 +4,7 @@
   color: var(--color-texto-secundario); font-size: var(--texto-sm);
 }
 .aviso p { margin: 0 0 var(--espacio-2); }
+.aviso--carga { display: flex; align-items: center; gap: var(--espacio-3); }
 .aviso--error {
   background: var(--color-alerta-fondo); color: var(--color-alerta-texto);
   box-shadow: inset 0 0 0 1px var(--color-alerta-borde);

@@ -1,6 +1,7 @@
 /* El plano de la consola (RF-FE-IMG-02): una franja decorativa sobre el título. */
+.cabecera-plano-marco { position: relative; margin-bottom: var(--espacio-3); }
 .cabecera-plano {
-  height: clamp(4.5rem, 10vw, 8rem); margin-bottom: var(--espacio-3);
+  height: clamp(4.5rem, 10vw, 8rem);
   background: url("../../compartido/imagenes/cabecera-consola.webp") center / contain no-repeat; mix-blend-mode: multiply;
 }
 .pantalla__cabecera { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--espacio-4); flex-wrap: wrap; }

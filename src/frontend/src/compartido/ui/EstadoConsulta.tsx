@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Astronauta } from "./Astronauta";
 import "./ui.css";
 
 interface Props {
@@ -12,9 +13,10 @@ interface Props {
 export function EstadoConsulta({ cargando, error, reintentar, children }: Props) {
   if (cargando) {
     return (
-      <p className="aviso" role="status">
-        Consultando…
-      </p>
+      <div className="aviso aviso--carga" role="status">
+        <Astronauta modo="flotar" />
+        <span>Consultando…</span>
+      </div>
     );
   }
   if (error) {

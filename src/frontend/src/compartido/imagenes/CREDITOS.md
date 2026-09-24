@@ -37,3 +37,7 @@ Cada portada va en dos tamaños: `-web` (874 × 1240) para la pantalla y la comp
 ## Sobre las imágenes de la NASA
 
 El material de la NASA no tiene, en general, derechos de autor ([NASA Images and Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/)). Las condiciones que se respetan aquí: no se usa el logotipo ni la insignia de la NASA, ninguna imagen da a entender que la NASA respalda el producto, y no aparece ninguna persona reconocible.
+
+## Astronauta pixel art (`astronauta/`)
+
+Hecho por el autor con Claude Design: hoja de 6 × 6 frames de 32 px (`sprite-sheet.png`, con las animaciones descritas en `sprite-sheet.json`) y la versión quieta para «reducir movimiento» (`astronauta-estatico.svg`). `vista-previa/` guarda los GIF de cada animación y la lámina con la paleta y el contraste sobre el crema; no se sirven en la web. Lo pinta `compartido/ui/Astronauta.tsx` con CSS `steps()` a ×3: pasea en la portada y la consola, asoma en las pantallas vacías y flota en las cargas; nunca sobre el texto de un capítulo.

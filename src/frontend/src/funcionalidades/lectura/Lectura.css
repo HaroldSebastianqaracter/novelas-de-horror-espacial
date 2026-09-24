@@ -209,3 +209,6 @@
   .ficha__entrada { break-inside: avoid; }
   .libro a { color: inherit; text-decoration: none; }
 }
+
+/* El astronauta pasea bajo el índice, sin salirse del ancho del libro. */
+.lectura__pila > .astronauta-pista { width: 100%; max-width: calc(var(--ancho-lectura) + 2 * var(--espacio-8)); margin: calc(-1 * var(--espacio-4)) auto 0; }

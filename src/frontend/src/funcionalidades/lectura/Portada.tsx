@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { consultaNovela } from "../../compartido/api/consultas";
 import type { Regalo } from "../../compartido/api/tipos";
 import { portadaDe } from "../../compartido/imagenes";
+import { Astronauta } from "../../compartido/ui/Astronauta";
 import { Hace } from "../../compartido/ui/Hace";
 import { useTitulo } from "../../compartido/ui/titulo";
 import { useLecturaActual } from "./MarcoLectura";
@@ -57,6 +58,7 @@ export function Portada() {
           <Link to={enlace("/imprimir", { imprimir: "1" })}>Exportar a PDF</Link>
         </p>
       </nav>
+      <Astronauta />
     </div>
   );
 }

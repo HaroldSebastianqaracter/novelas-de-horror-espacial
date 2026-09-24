@@ -15,6 +15,7 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { type ReactNode, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { DIBUJOS } from "../../compartido/imagenes";
+import { Astronauta } from "../../compartido/ui/Astronauta";
 import { Dibujo } from "../../compartido/ui/Dibujo";
 import { consultaEjecucion, consultaNovelas } from "../../compartido/api/consultas";
 import { useIntenciones } from "../../compartido/api/intenciones";
@@ -132,7 +133,10 @@ export function TableroGeneral() {
 
   return (
     <section className="pantalla pantalla--tablero" aria-labelledby="titulo-tablero">
-      <div className="cabecera-plano" aria-hidden="true" />
+      <div className="cabecera-plano-marco">
+        <div className="cabecera-plano" aria-hidden="true" />
+        <Astronauta className="astronauta-pista--cabecera" />
+      </div>
       <header className="pantalla__cabecera">
         <div>
           <h1 id="titulo-tablero">Tablero general</h1>
@@ -336,6 +340,7 @@ function TableroVacio() {
       <Link className="boton boton--primario" to="/crear">
         Crea la primera
       </Link>
+      <Astronauta modo="asomarse" />
     </div>
   );
 }

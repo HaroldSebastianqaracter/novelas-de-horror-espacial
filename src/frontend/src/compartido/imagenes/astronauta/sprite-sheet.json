@@ -1,0 +1,139 @@
+{
+  "image": "sprite-sheet.png",
+  "frameWidth": 32,
+  "frameHeight": 32,
+  "columns": 6,
+  "rows": 6,
+  "scaling": "nearest-neighbor (image-rendering: pixelated)",
+  "recommendedScales": [
+    0.75,
+    1,
+    3,
+    4
+  ],
+  "facing": "right",
+  "animations": {
+    "idle": {
+      "row": 0,
+      "y": 0,
+      "frames": 4,
+      "frameDuration": 250,
+      "durations": [
+        140,
+        140,
+        520,
+        120
+      ],
+      "loop": true,
+      "sequence": [
+        {
+          "frame": 0,
+          "ms": 140
+        },
+        {
+          "frame": 1,
+          "ms": 140
+        },
+        {
+          "frame": 0,
+          "ms": 140
+        },
+        {
+          "frame": 1,
+          "ms": 140
+        },
+        {
+          "frame": 0,
+          "ms": 140
+        },
+        {
+          "frame": 1,
+          "ms": 400
+        },
+        {
+          "frame": 2,
+          "ms": 560
+        },
+        {
+          "frame": 3,
+          "ms": 120
+        },
+        {
+          "frame": 2,
+          "ms": 420
+        }
+      ],
+      "use": "Reposo por defecto. Respira y flota 1 px; la antena da tres destellos y una pausa (reproducir la secuencia \"sequence\")."
+    },
+    "andar": {
+      "row": 1,
+      "y": 32,
+      "frames": 6,
+      "frameDuration": 160,
+      "durations": [
+        160,
+        160,
+        160,
+        160,
+        160,
+        160
+      ],
+      "loop": true,
+      "use": "Paso lento de baja gravedad hacia la derecha. Para ir a la izquierda: transform: scaleX(-1). Desplazar ~1 px cada 80 ms."
+    },
+    "saludar": {
+      "row": 2,
+      "y": 64,
+      "frames": 4,
+      "frameDuration": 180,
+      "durations": [
+        160,
+        200,
+        180,
+        180
+      ],
+      "loop": true,
+      "use": "Al pasar el ratón por encima. Reproducir 2 ciclos y volver a idle."
+    },
+    "flotar": {
+      "row": 3,
+      "y": 96,
+      "frames": 4,
+      "frameDuration": 320,
+      "durations": [
+        320,
+        320,
+        320,
+        320
+      ],
+      "loop": true,
+      "use": "Sin gravedad: se inclina levemente y la llave inglesa se le escapa y flota a su lado."
+    },
+    "asomarse": {
+      "row": 4,
+      "y": 128,
+      "frames": 3,
+      "frameDuration": 220,
+      "durations": [
+        220,
+        260,
+        900
+      ],
+      "loop": false,
+      "holdLast": true,
+      "use": "Pie de página y pantallas vacías: el casco sube desde el borde inferior. Una sola vez; mantener el último frame."
+    },
+    "dormir": {
+      "row": 5,
+      "y": 160,
+      "frames": 2,
+      "frameDuration": 800,
+      "durations": [
+        800,
+        800
+      ],
+      "loop": true,
+      "use": "Tras ~60 s sin actividad. Sentado, ojos cerrados y una z que sube."
+    }
+  }
+}

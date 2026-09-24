@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link, NavLink, Outlet, useLocation, useOutletContext } from "react-router";
 import { ErrorApi } from "../../compartido/api/cliente";
 import { useEventosNovela } from "../../compartido/api/eventos";
+import { Astronauta } from "../../compartido/ui/Astronauta";
 import { EstadoConsulta } from "../../compartido/ui/EstadoConsulta";
 import { useTitulo } from "../../compartido/ui/titulo";
 import { type CambioGuardado, useCambioGuardado } from "./cambioGuardado";
@@ -86,6 +87,7 @@ export function MarcoLectura() {
                 La lectura enseña versiones publicadas, y una versión nace cuando la novela se completa.{" "}
                 <Link to={`/novelas/${novelaId}`}>Ver cómo va en la consola</Link>.
               </p>
+              <Astronauta modo="asomarse" />
             </div>
           ) : noExiste ? (
             <div className="aviso">

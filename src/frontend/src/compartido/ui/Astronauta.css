@@ -1,0 +1,46 @@
+/* El astronauta pixel art: hoja de 6 × 6 frames de 32 px, pintada a ×3 sin suavizar. */
+.astronauta-pista { --t: 96px; position: relative; height: var(--t); pointer-events: none; }
+.astronauta { position: absolute; left: 0; bottom: 0; width: var(--t); height: var(--t); pointer-events: auto; cursor: pointer; }
+.astronauta__estatico { display: block; width: var(--t); height: var(--t); image-rendering: pixelated; }
+.astronauta__sprite {
+  display: block; width: 100%; height: 100%; image-rendering: pixelated;
+  background: url("../imagenes/astronauta/sprite-sheet.png") 0 0 / calc(var(--t) * 6) auto no-repeat;
+}
+.astronauta__sprite[data-sentido="izquierda"] { transform: scaleX(-1); }
+
+/* Una fila por animación; `steps()` salta de frame en frame. */
+.astronauta__sprite[data-animacion="idle"] { background-position-y: 0; animation: astronauta-idle 2200ms steps(1, end) infinite; }
+.astronauta__sprite[data-animacion="andar"] { background-position-y: calc(var(--t) * -1); animation: astronauta-6 960ms steps(6) infinite; }
+.astronauta__sprite[data-animacion="saludar"] { background-position-y: calc(var(--t) * -2); animation: astronauta-4 720ms steps(4) infinite; }
+.astronauta__sprite[data-animacion="flotar"] { background-position-y: calc(var(--t) * -3); animation: astronauta-4 1280ms steps(4) infinite; }
+.astronauta__sprite[data-animacion="asomarse"] { background-position-y: calc(var(--t) * -4); animation: astronauta-asomarse 720ms steps(2, jump-none) forwards; }
+.astronauta__sprite[data-animacion="dormir"] { background-position-y: calc(var(--t) * -5); animation: astronauta-2 1600ms steps(2) infinite; }
+
+@keyframes astronauta-6 { from { background-position-x: 0; } to { background-position-x: calc(var(--t) * -6); } }
+@keyframes astronauta-4 { from { background-position-x: 0; } to { background-position-x: calc(var(--t) * -4); } }
+@keyframes astronauta-2 { from { background-position-x: 0; } to { background-position-x: calc(var(--t) * -2); } }
+/* Tres frames y se queda en el último: el casco asoma y no vuelve a bajar. */
+@keyframes astronauta-asomarse { from { background-position-x: 0; } to { background-position-x: calc(var(--t) * -2); } }
+/* La secuencia del JSON: respira dos veces, pausa y tres destellos de la antena. */
+@keyframes astronauta-idle {
+  0% { background-position-x: 0; }
+  6.364% { background-position-x: calc(var(--t) * -1); }
+  12.727% { background-position-x: 0; }
+  19.091% { background-position-x: calc(var(--t) * -1); }
+  25.455% { background-position-x: 0; }
+  31.818% { background-position-x: calc(var(--t) * -1); }
+  50% { background-position-x: calc(var(--t) * -2); }
+  75.455% { background-position-x: calc(var(--t) * -3); }
+  80.909%, 100% { background-position-x: calc(var(--t) * -2); }
+}
+
+/* Dónde va. En la consola pasea por el borde inferior del dibujo de la cabecera, sin ocupar sitio. */
+.astronauta-pista--cabecera { position: absolute; left: 0; right: 0; bottom: 0; }
+/* En las pantallas vacías asoma por encima de una línea, a la derecha del texto. */
+.astronauta-pista--asomarse { justify-self: stretch; width: 100%; max-width: 28rem; overflow: hidden; border-bottom: 1px solid var(--color-borde); }
+.astronauta-pista--asomarse .astronauta { left: auto; right: 15%; }
+.astronauta-pista--flotar { display: inline-block; width: var(--t); vertical-align: middle; }
+
+@media print {
+  .astronauta-pista { display: none; }
+}

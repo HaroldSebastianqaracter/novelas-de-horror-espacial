@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { DIBUJOS } from "../compartido/imagenes";
+import { Astronauta } from "../compartido/ui/Astronauta";
 import { Dibujo } from "../compartido/ui/Dibujo";
 
 export function NoEncontrada() {
@@ -10,6 +11,7 @@ export function NoEncontrada() {
       <p>
         Esta dirección no lleva a ninguna pantalla. <Link to="/">Volver al tablero</Link>.
       </p>
+      <Astronauta modo="asomarse" />
     </section>
   );
 }
