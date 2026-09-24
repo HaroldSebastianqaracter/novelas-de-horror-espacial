@@ -254,6 +254,11 @@ function Cabecera({ detalle, ejecucion, capitulos }: PropsContenido) {
         >
           <span aria-hidden="true">↻</span> Relanzar…
         </button>
+        {(estado === "completada" || estado === "completada_con_avisos") && (
+          <Link className="boton boton--primario" to={`/novelas/${novela.id}/lectura`}>
+            Leer la novela
+          </Link>
+        )}
         <p className="acciones__nota" role="status">
           {pendiente ? (
             <>

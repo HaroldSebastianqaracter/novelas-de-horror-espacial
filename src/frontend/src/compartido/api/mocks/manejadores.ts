@@ -6,6 +6,7 @@
 import { http, HttpResponse } from "msw";
 import type { CapituloTexto, Ejecucion, Estructura, Intencion, IntencionEncolada, NovelaDetalle, NovelaResumen, Parada, TipoIntencion } from "../tipos";
 import { capitulosDe, detalleDe, ejecuciones, fechaApi, novelas, paradas, textoDe } from "./datos";
+import { canonDe, escenasDeNovela, versionesDe } from "./lectura";
 
 /** Lo que tarda el «worker» en atender una intención. */
 const ESPERA_MS = 2_500;
@@ -249,7 +250,26 @@ export const manejadores = [
   http.get("*/api/novelas/:id/estructura", ({ params }) => {
     const capitulos = capitulosDe[Number(params.id)];
     if (!capitulos) return noEncontrada("la novela");
-    return HttpResponse.json<Estructura>({ actos: [], capitulos, hilos: [], puntos_de_giro: [], siembras: [] });
+    const escenas = escenasDeNovela[Number(params.id)];
+    const conEscenas = escenas ? capitulos.map((c) => ({ ...c, escenas: escenas(c.numero) })) : capitulos;
+    return HttpResponse.json<Estructura>({ actos: [], capitulos: conEscenas, hilos: [], puntos_de_giro: [], siembras: [] });
+  }),
+
+  // Lectura (RF-FE-LEE): versiones publicadas y canon.
+  http.get("*/api/novelas/:id/versiones", ({ params }) => {
+    if (!detalleDe(Number(params.id))) return noEncontrada("la novela");
+    const versiones = versionesDe[Number(params.id)] ?? [];
+    return HttpResponse.json(versiones.map(({ capitulos: _, ...resumen }) => resumen));
+  }),
+
+  http.get("*/api/novelas/:id/versiones/:n", ({ params }) => {
+    const version = (versionesDe[Number(params.id)] ?? []).find((v) => v.numero === Number(params.n));
+    return version ? HttpResponse.json(version) : noEncontrada(`la version ${String(params.n)}`);
+  }),
+
+  http.get("*/api/novelas/:id/canon/:entidad", ({ params }) => {
+    if (!detalleDe(Number(params.id))) return noEncontrada("la novela");
+    return HttpResponse.json(canonDe[Number(params.id)]?.[String(params.entidad)] ?? []);
   }),
 
   http.get("*/api/novelas/:id/capitulos/:n", ({ params }) => {

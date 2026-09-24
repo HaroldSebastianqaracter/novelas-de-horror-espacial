@@ -2,6 +2,7 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup, configure } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { restaurarDatos } from "../compartido/api/mocks/datos";
+import { restaurarLectura } from "../compartido/api/mocks/lectura";
 import { servidor } from "../compartido/api/mocks/servidor";
 
 // Con toda la suite en paralelo, el primer render puede tardar más del segundo por defecto.
@@ -13,6 +14,7 @@ afterEach(() => {
   cleanup();
   servidor.resetHandlers();
   restaurarDatos();
+  restaurarLectura();
   sessionStorage.clear();
 });
 afterAll(() => servidor.close());

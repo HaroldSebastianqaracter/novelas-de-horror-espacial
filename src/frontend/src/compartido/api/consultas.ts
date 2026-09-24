@@ -14,6 +14,9 @@ export const claves = {
   paradas: (id: number) => ["novelas", id, "paradas"] as const,
   parada: (id: number, pid: number) => ["novelas", id, "paradas", pid] as const,
   capitulo: (id: number, n: number) => ["novelas", id, "capitulos", n] as const,
+  versiones: (id: number) => ["novelas", id, "versiones"] as const,
+  version: (id: number, n: number) => ["novelas", id, "versiones", n] as const,
+  canon: (id: number, entidad: EntidadLectura) => ["novelas", id, "canon", entidad] as const,
   intencion: (id: number) => ["intenciones", id] as const,
 };
 
@@ -68,6 +71,40 @@ export const consultaCapitulo = (novelaId: number, numero: number) =>
       leer(
         api.GET("/novelas/{novela_id}/capitulos/{numero}", {
           params: { path: { novela_id: novelaId, numero } },
+        }),
+      ),
+  });
+
+/** Las entidades del canon que usa la lectura (RF-FE-LEE-04, RF-FE-CAM-02). */
+export type EntidadLectura = "personajes" | "lugares" | "objetos";
+
+export const consultaVersiones = (novelaId: number) =>
+  queryOptions({
+    queryKey: claves.versiones(novelaId),
+    queryFn: () =>
+      leer(api.GET("/novelas/{novela_id}/versiones", { params: { path: { novela_id: novelaId } } })),
+  });
+
+/** Una versión publicada no cambia nunca (RF3-BIB-11): no hace falta reconsultarla. */
+export const consultaVersion = (novelaId: number, numero: number) =>
+  queryOptions({
+    queryKey: claves.version(novelaId, numero),
+    queryFn: () =>
+      leer(
+        api.GET("/novelas/{novela_id}/versiones/{numero}", {
+          params: { path: { novela_id: novelaId, numero } },
+        }),
+      ),
+    staleTime: Infinity,
+  });
+
+export const consultaCanon = (novelaId: number, entidad: EntidadLectura) =>
+  queryOptions({
+    queryKey: claves.canon(novelaId, entidad),
+    queryFn: () =>
+      leer(
+        api.GET("/novelas/{novela_id}/canon/{entidad}", {
+          params: { path: { novela_id: novelaId, entidad } },
         }),
       ),
   });
