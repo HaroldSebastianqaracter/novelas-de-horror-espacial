@@ -203,7 +203,7 @@ def test_una_firma_generica_sale_entera_y_vuelve_tal_cual() -> None:
     datos["quien_regala"] = "tu hermano"
     m = Mascara(Brief.model_validate(datos))
     texto = "Dijo que tu hermano vendria. Tu hermano llamo. Mi hermano no."
-    assert m.ocultar(texto) == "Dijo que [QUIEN_REGALA] vendria. [QUIEN_REGALA] llamo. Mi hermano no."
+    assert m.ocultar(texto) == \n        "Dijo que [QUIEN_REGALA] vendria. [QUIEN_REGALA] llamo. Mi hermano no."
     assert m.restaurar(m.ocultar(texto)) == texto
     datos["quien_regala"] = "Sus compañeros del instituto"
     m = Mascara(Brief.model_validate(datos))
@@ -337,7 +337,8 @@ def test_la_puerta_1_mira_titulo_personajes_y_objetos(sql: str) -> None:
     ("Los García", "De parte de Los García. García vino.",
      "De parte de [QUIEN_REGALA]. [QUIEN_REGALA_2] vino."),
     ("La Tata", "La Tata vino.", "[QUIEN_REGALA] vino."),
-    ("Mis padres", "Mis padres vinieron. Los padres no.", "[QUIEN_REGALA] vinieron. Los padres no."),
+    ("Mis padres", "Mis padres vinieron. Los padres no.",
+     "[QUIEN_REGALA] vinieron. Los padres no."),
 ])
 def test_una_firma_con_determinante_oculta_sus_nombres_y_nada_mas(firma: str, texto: str,
                                                                   oculto: str) -> None:
@@ -354,8 +355,9 @@ def test_una_firma_con_determinante_oculta_sus_nombres_y_nada_mas(firma: str, te
 
 
 @pytest.mark.parametrize("etiqueta", ["[NOMBRE_OCULTO]", "[nombre_eliminado]", "[APELLIDO_OCULTO]",
-                                      "[TELEFONO_OCULTO]", "[CORREO_ELIMINADO]", "[NOMBRE_CENSURADO]",
-                                      "[PERSONA_OCULTA]", "[Nombre_Anonimizado]", "[NOMBRE_OMITIDO]"])
+                                      "[TELEFONO_OCULTO]", "[CORREO_ELIMINADO]",
+                                      "[NOMBRE_CENSURADO]", "[PERSONA_OCULTA]",
+                                      "[Nombre_Anonimizado]", "[NOMBRE_OMITIDO]"])
 def test_toda_etiqueta_de_un_dato_personal_oculto_para(etiqueta: str) -> None:
     from compartido.texto import ETIQUETA_SIN_NOMBRE
 
