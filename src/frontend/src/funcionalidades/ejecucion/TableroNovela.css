@@ -146,18 +146,19 @@
 .cap-cerrado .codigo { color: var(--color-confirmado); padding-top: 2px; }
 
 /* Ficha */
-.ficha { background: var(--color-superficie-elevada); border: var(--borde-fino) solid var(--color-borde); border-radius: var(--radio-md); }
-.ficha summary { cursor: pointer; padding: var(--espacio-3) var(--espacio-4); font-size: var(--texto-sm); font-weight: var(--peso-medio); color: var(--color-texto-secundario); }
-.ficha__lista { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--espacio-3) var(--espacio-5); margin: 0; padding: 0 var(--espacio-4) var(--espacio-4); }
-.ficha__lista dt { font-size: var(--texto-xs); color: var(--color-texto-tenue); }
-.ficha__lista dd { margin: 0; font-size: var(--texto-sm); }
-.ficha__ancho { grid-column: 1 / -1; }
+/* `ficha-novela` y no `ficha`: la lectura tiene su propia ficha, y el CSS es global. */
+.ficha-novela { background: var(--color-superficie-elevada); border: var(--borde-fino) solid var(--color-borde); border-radius: var(--radio-md); }
+.ficha-novela summary { cursor: pointer; padding: var(--espacio-3) var(--espacio-4); font-size: var(--texto-sm); font-weight: var(--peso-medio); color: var(--color-texto-secundario); }
+.ficha-novela__lista { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--espacio-3) var(--espacio-5); margin: 0; padding: 0 var(--espacio-4) var(--espacio-4); }
+.ficha-novela__lista dt { font-size: var(--texto-xs); color: var(--color-texto-tenue); }
+.ficha-novela__lista dd { margin: 0; font-size: var(--texto-sm); }
+.ficha-novela__ancho { grid-column: 1 / -1; }
 
 @media (max-width: 1000px) {
   .telemetria { grid-template-columns: repeat(3, minmax(0, auto)); }
   .tablero-caps { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .tablero-caps [data-col="en_curso"] { grid-column: 1 / -1; order: -1; }
-  .ficha__lista { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ficha-novela__lista { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 767px) {
   .telemetria { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -166,5 +167,5 @@
   .paso::before { display: none; }
   .paso__num { margin: 0; }
   .tablero-caps { grid-template-columns: minmax(0, 1fr); }
-  .ficha__lista { grid-template-columns: minmax(0, 1fr); }
+  .ficha-novela__lista { grid-template-columns: minmax(0, 1fr); }
 }

@@ -327,6 +327,10 @@ En una versión anterior, el canon es el de ahora, y un cambio del lector puede 
 
 > **Decisión de la spec.** Hasta la 0.2, en una versión anterior «aparece en» se buscaba en la prosa, por el nombre. La prueba contra el backend real lo desmintió: los lugares y los personajes secundarios casi nunca se nombran en cada capítulo donde están, y la ficha de la versión 1 decía «no aparece» de quien sí aparecía en la de la versión 2. Se descartó mantener la búsqueda en la prosa solo para los renombrados: la presencia no depende del nombre. La prosa queda solo para los capítulos que un relanzamiento reescribió después, donde la story bible ya describe otro texto y no hay otra fuente de esa versión; el aviso lo dice (validador del paso 13).
 
+**RF-FE-LEE-09 — La cursiva de la prosa.** El redactor marca entre asteriscos lo que va en cursiva (la voz de la IA de la estación, una radio, un pensamiento): `*Tu pulso es de 131.*`. La lectura, la vista de impresión, el lector de la consola y la comparación de versiones lo pintan en cursiva y sin los asteriscos. Un párrafo con un número impar de asteriscos se deja tal cual, porque el asterisco suelto es del texto. En la comparación, la cursiva puede empezar en un trozo y acabar en otro.
+
+> **Decisión de la spec.** Salió al exportar el PDF de la novela de diez capítulos: 91 cursivas se veían como asteriscos. Se descartó quitar los asteriscos en el backend, porque son la marca de cursiva de la prosa aprobada, y usar una librería de Markdown para una sola marca.
+
 **RF-FE-LEE-05 — Capítulo.** `/novelas/:id/lectura/capitulos/:n?version=m` pinta el capítulo de la versión con la tipografía de lectura y las escenas separadas por el ornamento (como RF-FE-LEC-01), con anterior y siguiente, y la vuelta al índice. Si el capítulo cambió en esa versión, un interruptor «ver qué cambió» (RF-FE-LEE-07).
 
 **RF-FE-LEE-06 — Versiones y novedades.** `/novelas/:id/lectura/versiones` lista las versiones publicadas (`GET /versiones`): número, fecha, motivo en lenguaje legible (`primera` → «primera edición», `relanzamiento` → «reescrita desde un capítulo», `cambio_lector` → «cambio pedido por el lector»), el `detalle` (en un cambio del lector, lo que se pidió) y los capítulos cambiados, enlazados. Cualquier versión anterior se puede abrir y leer entera. En la portada de una versión que no es la primera, el bloque **Novedades** resume lo mismo de esa versión.
@@ -405,6 +409,8 @@ Un cambio terminado (aplicado, rechazado, fallido o interrumpido) deja de bloque
 5. La ficha de personajes y lugares como apéndice.
 
 Una hoja de estilos `@media print` quita la navegación y fija el tamaño de página (A5), los márgenes y los saltos. Los enlaces internos son anclas, y el PDF los conserva. La vista marca `data-listo-para-imprimir` cuando tiene todo lo que necesita (la versión, el canon, las apariciones, la novela con su línea del regalo y, en una versión anterior, los cambios para sus nombres), y es lo que espera `npm run pdf`. Si algo de eso falla, marca `data-error-impresion`, lo dice, no abre el diálogo de imprimir, y `npm run pdf` sale con error sin guardar un PDF incompleto.
+
+**RF-FE-PDF-04 — La portada en papel.** La página tiene altura fija: la foto va en el hueco inferior, que encoge hasta 55 mm si la dedicatoria es larga, y el texto de la portada es más compacto que en pantalla, para que nunca la pise. La ficha del apéndice va a una columna.
 
 **RF-FE-PDF-02 — Desde la lectura.** El botón «Exportar a PDF» abre la vista de impresión y lanza el diálogo de imprimir del navegador, donde se elige «Guardar como PDF».
 

@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router";
 import { ErrorApi } from "../../compartido/api/cliente";
 import { consultaCapitulo, consultaEstructura, consultaNovela } from "../../compartido/api/consultas";
 import { EstadoConsulta } from "../../compartido/ui/EstadoConsulta";
+import { ConEnfasis } from "../../compartido/ui/Prosa";
 import "./Lector.css";
 
 /** El separador de escenas con el que `compilar` une el capítulo (RF-FE-LEC-01). */
@@ -99,7 +100,9 @@ export function Lector() {
                     </p>
                   )}
                   {parrafos.map((parrafo, j) => (
-                    <p key={j}>{parrafo}</p>
+                    <p key={j}>
+                      <ConEnfasis texto={parrafo} />
+                    </p>
                   ))}
                 </section>
               ))}

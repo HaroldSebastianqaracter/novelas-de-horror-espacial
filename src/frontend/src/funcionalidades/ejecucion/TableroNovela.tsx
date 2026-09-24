@@ -524,11 +524,11 @@ function Ficha({ detalle }: { detalle: NovelaDetalle }) {
   ];
   if (filas.length === 0) return null;
   return (
-    <details className="ficha">
+    <details className="ficha-novela">
       <summary>Parámetros de la novela</summary>
-      <dl className="ficha__lista">
+      <dl className="ficha-novela__lista">
         {filas.map(([clave, valor]) => (
-          <div key={clave} className={valor.length > 60 ? "ficha__ancho" : undefined}>
+          <div key={clave} className={valor.length > 60 ? "ficha-novela__ancho" : undefined}>
             <dt>{clave}</dt>
             <dd>{valor}</dd>
           </div>

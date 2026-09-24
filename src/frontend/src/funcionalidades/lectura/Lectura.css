@@ -102,6 +102,7 @@
 .ficha__fuente { margin: var(--espacio-2) 0 var(--espacio-5); font-family: var(--fuente-interfaz); font-size: var(--texto-sm); color: var(--color-lectura-tenue); }
 .ficha section + section { margin-top: var(--espacio-6); }
 .ficha__lista, .versiones__lista { display: grid; gap: var(--espacio-4); margin: 0; padding: 0; list-style: none; }
+.ficha__lista { grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); column-gap: var(--espacio-5); }
 .ficha__entrada, .versiones__entrada { padding-bottom: var(--espacio-4); border-bottom: var(--borde-fino) solid var(--color-borde); }
 .ficha__entrada h3 { font-size: var(--texto-md); margin-bottom: var(--espacio-1); }
 .ficha__rol { margin: 0 0 var(--espacio-1); color: var(--color-lectura-tenue); }
@@ -192,7 +193,20 @@
     min-height: 0; max-width: none; height: 176mm; aspect-ratio: auto; print-color-adjust: exact; -webkit-print-color-adjust: exact;
     background: var(--color-superficie-elevada) var(--portada, none) center bottom / 100% auto no-repeat;
   }
+  /* En papel la página no crece: la foto va en el hueco, que encoge si la dedicatoria es larga
+     (hasta 55 mm), y el texto de la portada es más compacto. El fondo se escala para que la foto
+     llene la altura del hueco: su foto es el 50,8 % de la altura de la portada, y empieza en el 46,4 %. */
+  .portada--ilustrada { background: var(--color-superficie-elevada); }
+  .portada--ilustrada .portada__texto { gap: 2mm; padding: 8mm 6mm 3mm; }
+  .portada--ilustrada .portada__titulo { font-size: 22pt !important; }
+  .portada--ilustrada .portada__dedicatoria { margin-top: 1mm; font-size: 10.5pt; }
+  .portada--ilustrada .portada__regalo, .portada--ilustrada .portada__edicion { margin-top: 1mm; font-size: 8.5pt; }
+  .portada--ilustrada .portada__hueco {
+    flex: 0 1 auto; aspect-ratio: auto; height: 91mm; min-height: 55mm;
+    background: var(--portada, none) 50% 94.3% / auto 196.8% no-repeat; print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
   .ficha__plano { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .ficha__lista { grid-template-columns: minmax(0, 1fr); }
   .capitulo__texto { font-size: 11pt; line-height: 1.55; }
   .capitulo__texto p { orphans: 2; widows: 2; }
   .indice__lista li { break-inside: avoid; font-size: 11pt; }

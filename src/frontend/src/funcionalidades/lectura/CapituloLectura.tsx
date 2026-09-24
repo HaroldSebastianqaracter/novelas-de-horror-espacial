@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router";
 import { consultaEjecucion, consultaNovelas, consultaVersion } from "../../compartido/api/consultas";
 import { comoEstadoEjecucion, ESTADOS_ACTIVOS } from "../../compartido/api/reglas";
 import { EstadoConsulta } from "../../compartido/ui/EstadoConsulta";
+import { ConEnfasis, trozosConEnfasis } from "../../compartido/ui/Prosa";
 import { useTitulo } from "../../compartido/ui/titulo";
 import { partirEnEscenas } from "../manuscrito/Lector";
 import { compararCapitulo, type ParrafoComparado } from "./comparar";
@@ -190,7 +191,9 @@ export function CapituloLectura() {
                 </p>
               )}
               {parrafos.map((p, j) => (
-                <p key={j}>{p}</p>
+                <p key={j}>
+                  <ConEnfasis texto={p} />
+                </p>
               ))}
             </section>
           ))}
@@ -220,14 +223,14 @@ export function CapituloLectura() {
 
 /** Lo añadido y lo quitado, con color, subrayado o tachado, y una pista para lectores de pantalla. */
 function Comparacion({ parrafos, versionAnterior }: { parrafos: ParrafoComparado[]; versionAnterior: number }) {
-  const anadido = (t: string, k: number) => (
+  const anadido = (t: ReactNode, k: number) => (
     <ins key={k}>
       <span className="solo-lectores">[añadido: </span>
       {t}
       <span className="solo-lectores">]</span>
     </ins>
   );
-  const quitado = (t: string, k: number) => (
+  const quitado = (t: ReactNode, k: number) => (
     <del key={k}>
       <span className="solo-lectores">[quitado: </span>
       {t}
@@ -259,7 +262,9 @@ function Comparacion({ parrafos, versionAnterior }: { parrafos: ParrafoComparado
         }
         return (
           <p key={i} data-cambio={p.tipo === "igual" ? undefined : p.tipo}>
-            {p.trozos.map((t, j) => (t.tipo === "nuevo" ? anadido(t.texto, j) : t.tipo === "quitado" ? quitado(t.texto, j) : t.texto))}
+            {trozosConEnfasis(p.trozos, (t, contenido, j) =>
+              t.tipo === "nuevo" ? anadido(contenido, j) : t.tipo === "quitado" ? quitado(contenido, j) : <span key={j}>{contenido}</span>,
+            )}
           </p>
         );
       })}

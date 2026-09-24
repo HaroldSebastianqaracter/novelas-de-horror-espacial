@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { consultaNovela } from "../../compartido/api/consultas";
+import { ConEnfasis } from "../../compartido/ui/Prosa";
 import { useTitulo } from "../../compartido/ui/titulo";
 import { partirEnEscenas } from "../manuscrito/Lector";
 import { FichaContenido, useConsultasFicha } from "./Ficha";
@@ -141,7 +142,9 @@ export function Imprimir() {
                   </p>
                 )}
                 {parrafos.map((p, j) => (
-                  <p key={j}>{p}</p>
+                  <p key={j}>
+                    <ConEnfasis texto={p} />
+                  </p>
                 ))}
               </section>
             ))}
