@@ -96,16 +96,8 @@ def entrevistar(
     transcripcion: dict[str, Any] = {"turnos": turnos, "llamadas": llamadas, "alertas": []}
 
     if texto_libre.strip():
-        alertas = servicio.alertas_de_inyeccion(texto_libre)
-        salida = _invocar(puerto, servicio.paquete_texto_libre(brief, texto_libre), llamadas)
-        aplicado = servicio.aplicar(
-            brief, salida, texto_libre, permitidos=servicio.CAMPOS_TEXTO_LIBRE,
-            origen="texto_libre",
-        )
-        brief = aplicado.brief.model_copy(update={"texto_libre": texto_libre})
-        transcripcion["texto_libre"] = {
-            "aplicadas": aplicado.aplicadas, "descartadas": aplicado.descartadas,
-        }
+        brief, alertas, detalle = procesar_texto_libre(puerto, brief, texto_libre, llamadas)
+        transcripcion["texto_libre"] = detalle
         transcripcion["alertas"] = alertas
         if alertas:
             escribir(
@@ -158,6 +150,23 @@ def entrevistar(
     return ResultadoEntrevista(brief, False, False, transcripcion)
 
 
+def procesar_texto_libre(
+    puerto: PuertoAgente, brief: Brief, texto: str, llamadas: list[dict[str, Any]],
+) -> tuple[Brief, list[str], dict[str, Any]]:
+    """El texto libre, como dato no confiable (RF3-ENT-05): alertas, extraccion y aplicacion.
+
+    Devuelve el brief con lo que se pudo sacar del texto, las alertas de inyeccion y lo que se
+    aplico y descarto. Lo usan la entrevista y la tabla de evals (spec3, RF3-EVL-02).
+    """
+    alertas = servicio.alertas_de_inyeccion(texto)
+    salida = _invocar(puerto, servicio.paquete_texto_libre(brief, texto), llamadas)
+    aplicado = servicio.aplicar(
+        brief, salida, texto, permitidos=servicio.CAMPOS_TEXTO_LIBRE, origen="texto_libre",
+    )
+    detalle = {"aplicadas": aplicado.aplicadas, "descartadas": aplicado.descartadas}
+    return aplicado.brief.model_copy(update={"texto_libre": texto}), alertas, detalle
+
+
 def encolar(ruta: Path, brief: Brief, transcripcion: dict[str, Any]) -> int:
     """La unica escritura de la entrevista: la intencion, como haria la API."""
     con = db.conectar(ruta)
@@ -172,7 +181,7 @@ def encolar(ruta: Path, brief: Brief, transcripcion: dict[str, Any]) -> int:
         con.close()
 
 
-def _leer_brief(fichero: Path) -> Brief:
+def leer_brief(fichero: Path) -> Brief:
     datos = como_dict(json.loads(fichero.read_text(encoding="utf-8")))
     if "payload" in datos:
         datos = como_dict(datos["payload"])
@@ -199,7 +208,7 @@ def main() -> int:
 
     if args.brief is not None:
         # RF3-ENT-04: sin agente. Solo validar y, si es valido, encolar.
-        brief = _leer_brief(args.brief).con_codigos()
+        brief = leer_brief(args.brief).con_codigos()
         analisis = analizar(brief)
         if not analisis.completo:
             print(json.dumps(analisis.como_dict(), ensure_ascii=False, indent=2))

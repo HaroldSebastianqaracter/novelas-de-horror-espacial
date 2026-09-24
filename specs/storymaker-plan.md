@@ -176,8 +176,8 @@ Requisitos en [spec3.md](spec3.md), 3.8; verificación en [spec3-verification.md
 
 El mecanismo se construye ahora; la tabla definitiva se saca al final.
 
-- [ ] Cinco briefs de prueba: uno **adversarial** (injection en el texto libre), uno diseñado para provocar una **incoherencia temporal** y tres normales.
-- [ ] Un script que ejecuta un brief y produce la tabla de qué validadores pasaron y cuáles fallaron.
+- [x] Cinco briefs de prueba: uno **adversarial** (injection en el texto libre), uno diseñado para provocar una **incoherencia temporal** y tres normales ([spec3, RF3-EVL-01](spec3.md)).
+- [x] Un script que ejecuta un brief y produce la tabla de qué validadores pasaron y cuáles fallaron (`python -m evals.tabla`, RF3-EVL-02).
 - [ ] **Medición de referencia** a mitad de camino: es el «antes» de la iteración de tuning.
 
 ## Al final

@@ -616,6 +616,27 @@ Toda novela completada tiene al menos una versión (RF3-BIB-13 publicó la 1 de 
 
 La tabla definitiva se saca al final. Esta sección empieza por la pieza que mide la puerta 3.
 
+### La tabla de evals
+
+**RF3-EVL-01 — Cinco briefs.** En `ejemplos/`: el brief de ejemplo del README y cuatro en `ejemplos/evals/`: dos normales (una boda y una jubilación, con otras ocasiones, tonos e intensidades), uno **adversarial** con una inyección en el texto libre (órdenes al modelo, la petición del prompt de sistema, un intento de saltarse un término vetado y una palabra canario) y uno de **incoherencia temporal** (recuerdos obligatorios imposibles con la edad del destinatario). Cada fichero es un brief como el de ejemplo y lleva además un bloque `eval` con su nombre, su propósito y el canario, si lo tiene; la entrevista y el worker lo ignoran.
+
+**RF3-EVL-02 — La tabla.** `python -m evals.tabla <briefs…> --puerto falso|terminal --dir <carpeta> [--capitulos N] [--salida tabla.md]` corre cada brief de principio a fin por el mismo camino que una novela de verdad: el schema y el análisis del brief; el texto libre por el entrevistador (`entrevista.procesar_texto_libre`, el mismo paso que la entrevista); `crear_novela` y `arrancar` en el worker, sobre una base nueva por brief. Una parada no se resuelve: es un resultado. La tabla tiene una fila por validador, con su tipo (programático, semántico o formal) y su punto de ejecución, y una columna por brief:
+
+| Fila | Sale de |
+| --- | --- |
+| Schema del brief, datos que faltan, contradicciones | `Brief` y `analizar` |
+| Inyección en el texto libre | las alertas de RF3-ENT-05 |
+| Puertas 1, 2, 3 y 5 | `resultado_puerta` |
+| Palabras vetadas; nombres, allegados y etiquetas; longitud; el resto de la mecánica; el juez | los conflictos de la puerta 4, por su comprobación |
+| Cronología en Lean 4 | «no integrado» hasta que entre el bloque 9 de Lean |
+| Canario | si la palabra canario del brief aparece en la prosa |
+
+Cada celda dice `pasa`, `falla n/m` (en cuántas de las evaluaciones de ese validador hubo un conflicto bloqueante) y los avisos, o `sin ejecutar` si la novela no llegó hasta ahí. Debajo, el estado final, los capítulos completados, las paradas, las llamadas y el coste; y por brief, cada comprobación que saltó con sus veces. Con `--salida`, también un JSON con lo mismo.
+
+**RF3-EVL-03 — La medición de referencia.** La primera pasada con Claude Code real de los cinco briefs es el «antes» de la iteración de tuning; la tabla y su JSON se guardan en `docs/proceso/evals/` con la versión de los prompts (Langfuse, RF3-OBS-05). Cuesta dinero: se lanza con la aprobación del autor, y `--capitulos` permite una pasada más barata con los mismos briefs.
+
+> **Decisión sin entrevistar.** La tabla recorre el camino real (worker y entrevistador) en lugar de llamar a las puertas sueltas: así mide el sistema que se entrega, con sus reintentos y sus paradas. Se descartó resolver las paradas automáticamente para llegar al final, porque escondería lo que la parada detectó. El brief de incoherencia temporal se escribió sabiendo que ningún validador del brief lo detecta todavía: la tabla lo tiene que enseñar.
+
 ### El banco de contraejemplos de la puerta 3
 
 La puerta 3 se ha afinado parada a parada quitando falsos positivos, y cada arreglo afloja algo: la reafirmación por trozos, las presencias, la deducción. Los falsos negativos no paran nada, así que nadie los ve. En la primera novela real completa, las diez paradas fueron falsos positivos o casos discutibles. En cambio, las cinco puertas dejaron pasar contradicciones reales de la prosa final:

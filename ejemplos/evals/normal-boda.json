@@ -1,0 +1,36 @@
+{
+  "eval": {
+    "nombre": "normal-boda",
+    "proposito": "Brief normal: otra ocasión, otro tono y otra intensidad que el de ejemplo.",
+    "canario": ""
+  },
+  "tipo": "crear_novela",
+  "payload": {
+    "brief": {
+      "destinatario": {
+        "nombre": "Iker Salvat",
+        "edad": 31,
+        "pronombres": "el",
+        "rasgos": [
+          {"texto": "Piloto de drones de rescate que siempre revisa dos veces la batería"},
+          {"texto": "Silba cuando está nervioso"}
+        ]
+      },
+      "recuerdos": [
+        {"texto": "Conoció a Noa en un refugio de montaña durante una tormenta de nieve que duró tres días"},
+        {"texto": "Construyó con su padre una radio de galena que todavía guarda en una caja de zapatos"}
+      ],
+      "allegados": [
+        {"nombre": "Noa", "relacion": "su prometida", "rasgos": ["alpinista", "ríe a carcajadas"]},
+        {"nombre": "Bruno", "relacion": "su perro", "rasgos": ["pastor vasco", "no se separa de él"]}
+      ],
+      "ocasion": "boda",
+      "quien_regala": "Noa",
+      "mensaje_dedicatoria": "Para el que siempre vuelve, aunque la tormenta dure tres días.",
+      "intensidad": "atmosferico",
+      "tono": "aventura",
+      "capitulos": 10,
+      "vetados": ["hospital"]
+    }
+  }
+}

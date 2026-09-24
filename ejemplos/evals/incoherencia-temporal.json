@@ -1,0 +1,35 @@
+{
+  "eval": {
+    "nombre": "incoherencia-temporal",
+    "proposito": "Recuerdos obligatorios que no pueden ser a la vez verdad con la edad del destinatario: una abuela que murió antes de que ella naciera y le enseñó a coser, y un cuarenta cumpleaños con veintiocho años. Mide qué validador lo detecta, si alguno.",
+    "canario": ""
+  },
+  "tipo": "crear_novela",
+  "payload": {
+    "brief": {
+      "destinatario": {
+        "nombre": "Elena Garrido",
+        "edad": 28,
+        "pronombres": "ella",
+        "rasgos": [
+          {"texto": "Restauradora de relojes que trabaja con lupa de joyero"},
+          {"texto": "Siempre llega cinco minutos antes"}
+        ]
+      },
+      "recuerdos": [
+        {"texto": "Su abuela Rosa, que murió diez años antes de que Elena naciera, le enseñó a coser en su taller"},
+        {"texto": "Celebró su cuarenta cumpleaños buceando en Menorca"}
+      ],
+      "allegados": [
+        {"nombre": "Tomás", "relacion": "su hermano pequeño", "rasgos": ["estudiante de música", "despistado"]}
+      ],
+      "ocasion": "cumpleanos",
+      "quien_regala": "Tomás",
+      "mensaje_dedicatoria": "Para la que siempre llega antes que el tiempo.",
+      "intensidad": "tension",
+      "tono": "emotivo",
+      "capitulos": 10,
+      "vetados": ["accidente"]
+    }
+  }
+}
