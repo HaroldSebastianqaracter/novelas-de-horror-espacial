@@ -2,11 +2,12 @@
 
 Antes de cada llamada a un agente del pipeline, los nombres del brief (destinatario, quien
 regala y allegados), enteros y por partes, se cambian por etiquetas reversibles; al volver la
-respuesta, las etiquetas se cambian por los nombres, escritos como en el brief. Asi el modelo
-trabaja con `[DESTINATARIO_NOMBRE]` y el grafo, las puertas y la lectura siguen viendo el nombre
-real. La busqueda es la del seudonimizador de Langfuse (plegado, fronteras, mayusculas), que ya
-paso seis revisiones; lo que cambia es que aqui cada forma tiene su propia etiqueta, para poder
-deshacerla.
+respuesta, las etiquetas se cambian por los nombres. Asi el modelo trabaja con
+`[DESTINATARIO_NOMBRE]` y el grafo, las puertas y la lectura siguen viendo el nombre real. La
+busqueda es la del seudonimizador de Langfuse (plegado y fronteras de palabra), con una
+diferencia: aqui una forma solo casa si empieza en mayuscula, porque lo que se reescribe es lo
+que lee el modelo, y «la luz del pasillo» no puede volverse «la [DESTINATARIO_NOMBRE] del
+pasillo» (validador de cd8ab12).
 """
 
 from __future__ import annotations
@@ -15,43 +16,62 @@ import re
 from typing import Any, cast
 
 from compartido.brief import Brief
+from compartido.grafo.escritura import normalizar
+from compartido.texto import PARTICULAS_DE_NOMBRE
 from compartido.tipos import como_dict, como_lista
 
 from .observabilidad import Seudonimizador, partes_del_nombre, plegar
 
+#: La etiqueta del nombre que tenia una persona del encargo antes de un cambio del lector.
+ANTERIOR = "NOMBRE_ANTERIOR"
+
 
 class Mascara:
-    """El cambio de nombres por etiquetas y su vuelta, para un brief."""
+    """El cambio de nombres por etiquetas y su vuelta, para un brief.
 
-    def __init__(self, brief: Brief | None) -> None:
-        self._originales: dict[str, str] = {}
+    `anterior` es el nombre viejo de una persona del encargo que el lector acaba de renombrar
+    (RF3-CAM-11): el brief ya trae el nuevo, y el viejo sigue en la prosa aprobada.
+    """
+
+    def __init__(self, brief: Brief | None, *, anterior: str | None = None) -> None:
+        self._originales: dict[str, str] = {}   # etiqueta que produce `ocultar` -> nombre
+        self._alias: dict[str, str] = {}        # etiqueta que se acepta al volver -> nombre
         self._roles: list[str] = []
-        formas: dict[str, tuple[str, bool]] = {}
-        if brief is not None:
-            for base, nombre, firma, rol in _grupos(brief):
-                self._anadir(formas, base, nombre, firma=firma, rol=rol)
+        formas: dict[str, str] = {}
+        grupos = _grupos(brief) if brief is not None else []
+        if anterior and grupos:
+            grupos.append((ANTERIOR, anterior, False,
+                           f"[{ANTERIOR}]: el nombre que tenia antes esa persona. No lo "
+                           "escribas: donde estaba, va la etiqueta nueva."))
+        for base, nombre, firma, rol in grupos:
+            self._anadir(formas, base, nombre, firma=firma, rol=rol)
         # Las formas largas antes que sus partes: «Marta Ibanez» entera, no «[X] Ibanez».
         self._busqueda = Seudonimizador.desde_formas(sorted(
-            ((f, e, libre) for f, (e, libre) in formas.items()),
-            key=lambda t: len(t[0]), reverse=True,
+            ((f, e, False) for f, e in formas.items()), key=lambda t: len(t[0]), reverse=True,
         ))
+        aceptadas = {**self._alias, **self._originales}
         self._vuelta = re.compile(
-            r"\[(" + "|".join(re.escape(e[1:-1]) for e in self._originales) + r")\]",
-            re.IGNORECASE,
-        ) if self._originales else None
+            r"\[(" + "|".join(re.escape(e[1:-1]) for e in aceptadas) + r")\]", re.IGNORECASE,
+        ) if aceptadas else None
 
-    def _anadir(self, formas: dict[str, tuple[str, bool]], base: str, nombre: str, *,
-                firma: bool, rol: str) -> None:
+    def _anadir(self, formas: dict[str, str], base: str, nombre: str, *, firma: bool,
+                rol: str) -> None:
         plegado, posiciones, _ = plegar(nombre)
         completo = " ".join(plegado.split())
         palabras = completo.split(" ")
-        partes = partes_del_nombre(nombre, firma=firma)
-        candidatas = dict(partes)
-        if completo and completo not in candidatas:
-            candidatas[completo] = True
-        extra = 2
+        candidatas = list(partes_del_nombre(nombre, firma=firma))
+        # Una firma generica («tu hermano», «sus compañeros») no es un nombre: solo se ocultan
+        # sus palabras con mayuscula en el brief, y la firma entera solo si es un nombre.
+        generica = firma and any(p.islower() and normalizar(p) not in PARTICULAS_DE_NOMBRE
+                                 for p in nombre.split())
+        if completo and completo not in candidatas and not generica:
+            candidatas.append(completo)
         propias = 0
-        for forma, libre in sorted(candidatas.items(), key=lambda kv: plegado.find(kv[0])):
+        extra = 2
+        for forma in sorted(candidatas, key=plegado.find):
+            original = _original(nombre, plegado, posiciones, forma)
+            if original is None or (firma and not original[:1].isupper()):
+                continue
             if forma in formas:
                 continue  # el primero que la reclama se la queda (el destinatario manda)
             if forma == completo:
@@ -63,19 +83,21 @@ class Mascara:
             else:
                 etiqueta = f"[{base}_{extra}]"
                 extra += 1
-            original = _original(nombre, plegado, posiciones, forma)
-            if original is None:
-                continue
-            formas[forma] = (etiqueta, libre)
-            self._originales[etiqueta] = original
+            formas[forma] = etiqueta
+            self._originales[etiqueta] = _grafia(original)
             propias += 1
+        # Lo que un modelo escribiria por analogia tambien vuelve: `_NOMBRE` de un nombre de
+        # una palabra, o la etiqueta de quien regala cuando es un allegado.
+        entero = _grafia(" ".join(nombre.split()))
+        trozos = entero.split()
+        self._alias.setdefault(f"[{base}]", entero)
+        self._alias.setdefault(f"[{base}_NOMBRE]", trozos[0] if trozos else entero)
+        self._alias.setdefault(f"[{base}_APELLIDO]", trozos[-1] if trozos else entero)
         if propias:
             self._roles.append(rol)
         elif completo in formas:
-            # La misma persona que otra del encargo (quien regala suele ser un allegado): la
-            # leyenda lo dice, en vez de dar una etiqueta que no existe.
             self._roles.append(f"{rol.split(':', 1)[1].strip().rstrip('.').capitalize()}: es "
-                               f"{formas[completo][0]}.")
+                               f"{formas[completo]}.")
 
     @property
     def vacia(self) -> bool:
@@ -88,28 +110,37 @@ class Mascara:
     def restaurar(self, valor: Any) -> Any:
         """La respuesta del agente con cada etiqueta del encargo cambiada por el nombre.
 
-        Recorre textos, listas y diccionarios, tambien sus claves. Una etiqueta que no es del
-        encargo se queda como esta: la ve la puerta 4 (`etiqueta_en_la_prosa`).
+        Recorre textos, listas y diccionarios, tambien sus claves (dos que quedan iguales no
+        se pisan). Una etiqueta que no es del encargo se queda: la ve la puerta 4 o la 1.
         """
         if self._vuelta is None:
             return valor
         if isinstance(valor, str):
-            return self._vuelta.sub(
-                lambda m: self._originales.get(f"[{m.group(1).upper()}]", m.group(0)), valor
-            )
+            return self._vuelta.sub(lambda m: self._nombre(m.group(1)), valor)
         if isinstance(valor, dict):
-            return {self.restaurar(str(k)): self.restaurar(v)
-                    for k, v in como_dict(cast(object, valor)).items()}
+            salida: dict[str, Any] = {}
+            for k, v in como_dict(cast(object, valor)).items():
+                clave = base = self.restaurar(str(k))
+                n = 2
+                while clave in salida:
+                    clave = f"{base} #{n}"
+                    n += 1
+                salida[clave] = self.restaurar(v)
+            return salida
         if isinstance(valor, list):
             return [self.restaurar(v) for v in como_lista(cast(object, valor))]
         return valor
+
+    def _nombre(self, dentro: str) -> str:
+        etiqueta = f"[{dentro.upper()}]"
+        return self._originales.get(etiqueta) or self._alias.get(etiqueta) or f"[{dentro}]"
 
     def leyenda(self) -> str:
         """Lo que el agente tiene que saber de las etiquetas, sin ningun nombre."""
         if self.vacia:
             return ""
         etiquetas = ", ".join(self._originales)
-        return (
+        return self.ocultar(
             "## NOMBRES DEL ENCARGO\n\n"
             "Los nombres reales del encargo no se envian: van como etiquetas entre corchetes, y "
             "el sistema pone los nombres al guardar. Escribe la etiqueta tal cual, con sus "
@@ -141,9 +172,18 @@ def _grupos(brief: Brief) -> list[tuple[str, str, bool, str]]:
 
 
 def _original(nombre: str, plegado: str, posiciones: list[int], forma: str) -> str | None:
-    """La forma, escrita como en el brief (con sus tildes y mayusculas)."""
+    """La forma, escrita como en el brief (con sus tildes)."""
     patron = r"\s+".join(re.escape(p) for p in forma.split(" "))
     m = re.search(patron, plegado)
     if m is None or m.end() == 0:
         return None
     return nombre[posiciones[m.start()]:posiciones[m.end() - 1] + 1]
+
+
+def _grafia(texto: str) -> str:
+    """Como se escribe el nombre en la prosa: el del brief, salvo que venga todo en minusculas
+    o todo en mayusculas, que entonces va con mayuscula inicial (validador de cd8ab12)."""
+    if not (texto.islower() or texto.isupper()):
+        return texto
+    return " ".join(p.lower() if normalizar(p) in PARTICULAS_DE_NOMBRE and i else p.capitalize()
+                    for i, p in enumerate(texto.split()))
