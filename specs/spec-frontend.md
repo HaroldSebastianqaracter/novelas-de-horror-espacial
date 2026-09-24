@@ -1,8 +1,8 @@
-# SRS — Frontend v1: tablero de novelas
+# SRS — Frontend: tablero de novelas y lectura de la entrega
 
-Requisitos del frontend web: un tablero al estilo Jira para ver las novelas y su generación, el detalle de una novela con sus capítulos, las paradas, un lector sencillo y la creación de una novela desde un brief.
+Requisitos del frontend web: un tablero al estilo Jira para ver las novelas y su generación, el detalle de una novela con sus capítulos, las paradas y la creación de una novela desde un brief. Desde la versión 0.2 es también **la lectura de la entrega**: portada, índice, ficha de personajes y lugares, versiones con sus novedades, el cambio del lector y la exportación a PDF.
 
-Versión 0.1 · 23 de septiembre de 2026
+Versión 0.2 · 24 de septiembre de 2026 (la 0.1, del 23, era el tablero)
 
 > **Cómo leer este documento.** Se apoya en [spec1](spec1.md) (API y estados), [spec2](spec2.md) (paradas y reanudación) y [spec3](spec3.md) (brief), y no cambia ninguno. Los requisitos llevan el prefijo `RF-FE-`. Los callouts **Decisión entrevistada** y **Decisión de la spec** marcan qué se preguntó al autor y qué se decidió sin él. El plan de verificación está en [spec-frontend-verification.md](spec-frontend-verification.md).
 
@@ -10,25 +10,30 @@ Versión 0.1 · 23 de septiembre de 2026
 
 ## 1. Alcance
 
-> **Decisión entrevistada, 23 de septiembre de 2026.** El frontend es un **extra** del plan de entrega. El bloque 7 de [storymaker-plan.md](storymaker-plan.md) no cambia: la lectura de la entrega sigue siendo HTML estático más PDF, que es lo que inspecciona el browser MCP. Se descartó que el frontend sustituyera al bloque 7 (obligaría a rehacer esa decisión y a conseguir igual el PDF) y quedarse solo en el prototipo HTML.
+> **Decisión entrevistada, 24 de septiembre de 2026.** La web **es la lectura de la entrega**: la variante «web» del enunciado. Sustituye al HTML estático más PDF del bloque 7 de [storymaker-plan.md](storymaker-plan.md), y el cambio del lector (bloque 8) se pide desde la propia página. El encargo llegó del autor a través de la sesión del backend (novelasv2-f4) y el autor lo confirmó. Se descartó mantener la web como extra junto a un HTML estático: serían dos lecturas que mantener, y la demo obligatoria del cambio del lector luce más dentro del documento que desde un formulario aparte. El PDF sigue siendo obligatorio (`/ejemplos/novela-ejemplo.pdf`) y sale de la web (RF-FE-PDF).
+>
+> Esto sustituye a la decisión del 23 de septiembre, que dejaba el frontend como extra y la lectura en HTML estático.
 
-Entra en la v1:
+Entra:
 
 - Tablero general de novelas (RF-FE-TAB).
 - Tablero de una novela: planificación y capítulos (RF-FE-NOV).
 - Alerta de parada con sus acciones (RF-FE-PAR).
-- Lector de un capítulo cerrado (RF-FE-LEC).
+- Lector de consola de un capítulo cerrado (RF-FE-LEC).
 - Crear novela con un formulario del brief (RF-FE-BRF).
+- Lectura de la entrega: portada, índice, ficha, versiones y novedades (RF-FE-LEE).
+- Cambio del lector desde la página (RF-FE-CAM).
+- Exportación a PDF (RF-FE-PDF).
+- Inspección con un browser MCP (RF-FE-MCP).
 
 No entra, y por qué:
 
 | Fuera | Motivo |
 | --- | --- |
 | Entrevista conversacional en la web | La decisión 4 de spec3 la deja en el CLI, y la API no invoca al modelo (RF-COD-05). Llevarla a la web obliga a que corra en el worker por intenciones: es trabajo de backend con su propia spec |
-| Explorador del canon, cronología, usos de un hecho y versiones publicadas | La API ya los sirve (`/canon`, `/cronologia`, `/hechos/{id}/usos` y `/versiones`, estos tres de RF3-BIB-15), pero no son lo que pidió el autor para esta ronda. Sus tipos se generan igual con el resto. `funcionalidades/canon/` queda vacía |
+| Explorador completo del canon y cronología | La lectura usa `/canon` (personajes, lugares y objetos), `/hechos`, `/hechos/{id}/usos` y `/versiones`. El resto del canon (sistemas, facciones, temas, motivos) y `/cronologia` no los pide la lectura |
 | Crear novela sin brief (payload de spec1) | Sigue existiendo en la API para tests y demo. En la web, toda novela nueva es personalizada |
-| Despliegue | La v1 corre en local con el servidor de desarrollo, contra el backend en `127.0.0.1:8000` |
-| Cambio del lector (bloque 8) | Todavía no tiene spec en el backend |
+| Despliegue | Corre en local con el servidor de desarrollo, contra el backend en `127.0.0.1:8000`. La entrega enseña la web en local y adjunta el PDF |
 
 La referencia visual es el prototipo navegable de la **propuesta B, «papel técnico»** (`src/frontend/prototipo-b/`, con sus decisiones en `DECISIONES.md`). La v1 reproduce sus pantallas y sus tokens. El comportamiento que el prototipo simula lo fija esta spec, y donde los dos difieren manda la spec.
 
@@ -216,6 +221,7 @@ La tarjeta en curso muestra la subfase (paquete → redacción → extracción �
 | `conflictos` | Una ficha por conflicto: la comprobación en lenguaje legible, la descripción, el capítulo y la escena, si es aviso o conflicto, y sus `datos` plegados. Si los datos traen `cita_nueva` y `cita_previa`, un **cara a cara**: «lo que dice el texto» frente a «lo que dice el canon», con sus valores y sus capítulos |
 | `prosa_rechazada` | La prosa del capítulo rechazado, escena a escena, plegada y con la tipografía de lectura |
 | `bloques` | Tabla de bloques y tamaños (presupuesto) |
+| `segunda_opinion` | La opinión del revisor de continuidad (spec3, RF3-JUE-01; esquema en `tareas/continuidad/esquemas.py`). El `resumen` y la `sugerencia` como párrafos. Luego una línea por opinión, con el número del conflicto, «parece real», «falso positivo» o «dudoso», y el `motivo`. Cada línea enlaza a la ficha de su conflicto, que lleva el mismo número. Las `explicacion_por_conflicto` van plegadas. Si viene vacía, la opinión falló (evento `segunda_opinion_fallida`) y se dice así, sin ocultar la parada |
 | Cualquier otra | Clave-valor, con los valores anidados como JSON legible |
 
 **RF-FE-PAR-02 — Acciones según el tipo.** Solo se ofrecen las acciones que admite el tipo de la parada (tabla de resoluciones en `reglas.ts`), cada una con una línea que explica su consecuencia:
@@ -284,11 +290,132 @@ La tarjeta en curso muestra la subfase (paquete → redacción → extracción �
 
 **RF-FE-VIS-04 — Tamaños de pantalla.** El escritorio es el caso principal y la tablet (≥ 768 px) tiene que ser usable. En móvil, el lector y la alerta de parada son cómodos, y el tablero se desplaza por columnas dentro de su contenedor, sin scroll horizontal de página.
 
+### 3.10 Lectura de la entrega
+
+La lectura es la otra cara de la web: el tablero es para quien genera, y la lectura para quien recibe el regalo. Tiene su propio marco, sin la barra de la consola: papel, tipografía de lectura y nada de códigos técnicos. Vive en `funcionalidades/lectura/`.
+
+```mermaid
+graph LR
+  P["Portada<br/>/novelas/:id/lectura"] --> I["Índice"]
+  P --> F["Personajes y lugares<br/>.../lectura/ficha"]
+  P --> N["Novedades<br/>(versión > 1)"]
+  I --> C["Capítulo<br/>.../lectura/capitulos/:n"]
+  N --> C
+  F --> C
+  C -- "seleccionar y pedir" --> K["Cambio del lector<br/>(RF-FE-CAM)"]
+  K -- "nueva versión" --> N
+  P --> V["Versiones<br/>.../lectura/versiones"]
+  P --> X["Imprimir / PDF<br/>.../lectura/imprimir"]
+```
+
+**RF-FE-LEE-01 — Se lee una versión publicada.** La lectura muestra el texto de `GET /versiones/{n}` (RF3-BIB-11) y nunca el de los capítulos en curso: solo existe lo que el lector puede haber recibido. Por defecto, la última versión. `?version=n` abre otra. Una novela sin versiones (todavía no se ha completado) no tiene lectura: la página lo dice y enlaza a su tablero.
+
+> **Decisión de la spec.** Leer de las versiones, y no de `/capitulos/{n}`, hace que la lectura, sus novedades y su PDF hablen siempre del mismo texto, y que una versión anterior se lea exactamente igual que la actual. El lector de consola (RF-FE-LEC) sigue sirviendo los capítulos cerrados mientras se genera.
+
+**RF-FE-LEE-02 — Portada.** El título de la versión, su dedicatoria y, debajo, la línea del regalo: para quién es, de parte de quién y por qué ocasión. Mientras la API no dé esos tres datos (sección 5.2), la portada muestra solo el título y la dedicatoria de la versión. En la portada están también el índice, el enlace a la ficha, las novedades si la versión no es la primera, y los botones de versiones y de exportar a PDF.
+
+**RF-FE-LEE-03 — Índice navegable.** Un elemento por capítulo de la versión, «Capítulo N» con su número de palabras, enlazado a su lectura. Los capítulos que cambiaron en esa versión llevan la marca «cambió en la versión N». No se enseñan el objetivo ni el resumen de la escaleta: son notas de autor y destripan la trama.
+
+**RF-FE-LEE-04 — Ficha de personajes y lugares.** Sale de `GET /canon/personajes` y `GET /canon/lugares`. De cada personaje: nombre, rol y edad. De cada lugar: nombre, tipo y descripción. Y de cada uno, «aparece en»: los capítulos donde aparece, cada uno enlazado a su lectura.
+
+- Lo que viene de la API (sección 5.2, `GET /apariciones`) manda: la vista `presencia` para los personajes y el lugar de cada escena para los lugares.
+- Mientras no exista, «aparece en» se calcula desde `/estructura`: el punto de vista y el reparto de cada escena para los personajes, y su lugar para los lugares, casados por nombre. La página avisa de que es la escaleta y no la prosa.
+
+No se enseñan los campos de oficio del personaje (deseo, necesidad, fantasma, herida, mentira, defecto, arco, secreto, idiolecto): son la maquinaria del autor y destripan la historia.
+
+> **Decisión de la spec.** El enunciado pide «enlaces al capítulo donde aparece cada uno». La presencia real está en la vista `presencia` (migración 008), que la API no sirve todavía. La escaleta es una aproximación honesta y disponible hoy: peca de no ver a quien aparece sin estar en el reparto. El aviso deja claro de dónde sale.
+
+**RF-FE-LEE-05 — Capítulo.** `/novelas/:id/lectura/capitulos/:n?version=m` pinta el capítulo de la versión con la tipografía de lectura y las escenas separadas por el ornamento (como RF-FE-LEC-01), con anterior y siguiente, y la vuelta al índice. Si el capítulo cambió en esa versión, un interruptor «ver qué cambió» (RF-FE-LEE-07).
+
+**RF-FE-LEE-06 — Versiones y novedades.** `/novelas/:id/lectura/versiones` lista las versiones publicadas (`GET /versiones`): número, fecha, motivo en lenguaje legible (`primera` → «primera edición», `relanzamiento` → «reescrita desde un capítulo», `cambio_lector` → «cambio pedido por el lector»), el `detalle` (en un cambio del lector, lo que se pidió) y los capítulos cambiados, enlazados. Cualquier versión anterior se puede abrir y leer entera. En la portada de una versión que no es la primera, el bloque **Novedades** resume lo mismo de esa versión.
+
+**RF-FE-LEE-07 — Qué cambió.** En un capítulo que cambió en la versión `m`, el interruptor compara su texto con el del mismo capítulo en la versión `m − 1`. Lo añadido se marca como inserción y lo quitado como borrado (`<ins>` y `<del>`, con color y con subrayado o tachado, no solo con color). Se compara por párrafos, y dentro de cada párrafo cambiado, por palabras. Si el capítulo no existía en la versión anterior, todo el capítulo es nuevo.
+
+> **Decisión de la spec.** La comparación se hace en el cliente con las dos versiones, que la API ya sirve enteras. Pedir un endpoint de diff al backend duplicaría la lógica. Para capítulos muy largos (más de cuatro millones de pares de palabras), se compara solo por párrafos.
+
+**RF-FE-LEE-08 — Navegación y accesibilidad.** Toda la lectura se maneja por teclado. Los enlaces del índice, de la ficha y de las novedades llevan a la ancla del capítulo. El título de la página cambia con cada vista. Anchura de línea de lectura y tamaño de letra de los tokens de lectura, y en móvil tan cómoda como en escritorio.
+
+### 3.11 Cambio del lector
+
+La demo obligatoria de la presentación. El lector está leyendo, selecciona un fragmento o un hecho y pide un cambio («el perro se llama Nala»). El worker regenera solo los capítulos afectados (bloque 8, del backend) y publica una versión nueva con motivo `cambio_lector` (RF3-BIB-12). La web marca qué capítulos cambiaron, y la versión anterior se sigue pudiendo leer.
+
+```mermaid
+sequenceDiagram
+  participant L as Lector (web)
+  participant A as API
+  participant W as Worker
+  L->>L: selecciona un fragmento del capítulo N
+  L->>A: GET /hechos?capitulo=N, /canon (qué menciona)
+  L->>L: elige el objetivo y escribe el cambio
+  L->>A: POST /intenciones cambio_lector
+  A-->>L: 202 (o 422 si el payload no vale)
+  W->>W: localiza capítulos, regenera, puertas
+  W-->>L: SSE: fases y capítulos (el tablero lo ve)
+  W->>A: versión N+1, motivo cambio_lector
+  L->>A: GET /versiones
+  L->>L: «Versión N+1: cambiaron los capítulos …»
+```
+
+**RF-FE-CAM-01 — Pedirlo desde el texto.** Solo en la **última** versión y con la novela `completada` o `completada_con_avisos`. Hay dos formas de abrir el panel de cambio:
+
+- Al seleccionar texto dentro de un capítulo, aparece junto a la selección un botón «Pedir un cambio».
+- En la barra del capítulo, un botón «Pedir un cambio» lo abre con la selección, o sin ella. Es la entrada por teclado.
+
+En una versión anterior, o con la novela en otro estado, el botón está desactivado y dice por qué («solo sobre la última versión», «la novela se está generando»). Con otra novela en curso, igual que RF-FE-TAB-04: el worker genera una a la vez.
+
+**RF-FE-CAM-02 — Sobre qué.** El panel enseña la cita seleccionada y propone el objetivo del cambio:
+
+- **Un personaje, lugar u objeto** cuyo nombre aparece en la cita (`/canon/personajes`, `/lugares` y `/objetos`, con la comparación por palabras completas). Es el caso de «el perro se llama Nala».
+- **Un hecho** del capítulo (`GET /hechos?capitulo=N`, vigentes) cuyo valor o sujeto aparece en la cita.
+- **El fragmento tal cual**, si no se reconoce nada o el lector prefiere no elegir.
+
+Se elige uno. Debajo, «qué quieres cambiar»: texto libre de 3 a 300 caracteres.
+
+> **Decisión de la spec.** Aquí sí hay texto libre, al contrario que en el brief (RF-FE-BRF-03). Un cambio del lector es por naturaleza una frase («que el perro se llame Nala»), y es la demo pedida. El texto va solo al worker, que lo trata como petición y no como instrucción de sistema (su guardrail es cosa del backend).
+
+**RF-FE-CAM-03 — Alcance antes de confirmar.** Antes de enviar, el panel dice qué capítulos se van a reescribir:
+
+- En un hecho, sus capítulos de `GET /hechos/{id}/usos`.
+- En una entidad, sus apariciones (RF-FE-LEE-04).
+- En un fragmento, «el capítulo N y los que dependan de lo que cambie; lo decide el worker».
+
+Mientras la API no dé el alcance calculado por el worker (sección 5.2), se llama «estimación». Se confirma en dos pasos, como RF-FE-PAR-03: reescribir capítulos cuesta tiempo y, con Claude Code real, dinero.
+
+**RF-FE-CAM-04 — Envío y seguimiento.** Se envía `cambio_lector` (contrato en la sección 5.2) y sigue el ciclo de RF-FE-DAT-05. La lectura muestra una franja no bloqueante mientras la novela vuelve a generarse: «Reescribiendo por tu cambio», con la fase y el capítulo de la ejecución. Si el worker para (una parada), la franja lo dice y enlaza a la alerta. Si se rechaza, el motivo en lenguaje legible, y el panel conserva lo escrito.
+
+**RF-FE-CAM-05 — La versión nueva.** Cuando aparece una versión nueva con motivo `cambio_lector` (el SSE invalida `/versiones`), la franja pasa a «Versión N+1: cambiaron los capítulos …», con enlaces a cada uno con «ver qué cambió» activado. La versión anterior queda en la lista de versiones y se puede leer.
+
+### 3.12 Exportar a PDF
+
+**RF-FE-PDF-01 — Vista de impresión.** `/novelas/:id/lectura/imprimir?version=m` pinta el libro entero en una sola página, en este orden:
+
+1. Portada.
+2. Novedades, si la versión no es la primera, con enlaces internos a los capítulos cambiados.
+3. Índice con enlaces internos.
+4. Los capítulos, cada uno en página nueva.
+5. La ficha de personajes y lugares como apéndice.
+
+Una hoja de estilos `@media print` quita la navegación y fija el tamaño de página, los márgenes y los saltos. Los enlaces internos son anclas, y el PDF los conserva.
+
+**RF-FE-PDF-02 — Desde la lectura.** El botón «Exportar a PDF» abre la vista de impresión y lanza el diálogo de imprimir del navegador, donde se elige «Guardar como PDF».
+
+**RF-FE-PDF-03 — Por línea de órdenes.** `npm run pdf -- <url> <salida.pdf>` abre la vista de impresión con Playwright y guarda el PDF (`page.pdf`, con fondo y con las anclas). Así se produce `/ejemplos/novela-ejemplo.pdf` desde una novela real completada.
+
+> **Decisión de la spec.** Un solo camino al PDF, la vista de impresión, con dos disparadores: el del navegador para el lector y el de Playwright para la entrega, que es repetible. Se descartó generar el PDF en el servidor (otra dependencia en el backend) y una librería de PDF en el cliente (maquetaría distinto de lo que se ve).
+
+### 3.13 Inspección con un browser MCP
+
+**RF-FE-MCP-01 — Configuración.** `.mcp.json` en la raíz del repo declara el servidor Playwright MCP (`@playwright/mcp`, con la versión fijada). Claude Code lo carga al abrir el proyecto, previa aprobación del autor.
+
+**RF-FE-MCP-02 — Uso real y evidencia.** Un agente con el MCP abre la lectura de una novela completada, recorre la portada, el índice, la ficha, dos capítulos, las novedades y la vista de impresión, y registra lo que ve mal como fallos para el rol que corresponda: el frontend si es de la web, y el backend si es del dato. Qué inspeccionó, qué detectó y qué se cambió por ello queda en `docs/proceso/inspeccion-browser-mcp.md`, y lo que provocó un cambio, en el registro de iteraciones. El enunciado lo pide como evidencia.
+
 ## 4. Estados que toda pantalla tiene que cubrir
 
-Cargando, vacío, error de red (con reintento), reconexión (RF-FE-DAT-04), intención pendiente, intención rechazada, novela en `error` y novela `completada_con_avisos`.
+Cargando, vacío, error de red (con reintento), reconexión (RF-FE-DAT-04), intención pendiente, intención rechazada, novela en `error` y novela `completada_con_avisos`. En la lectura, además: novela sin versiones, versión que no existe y cambio del lector en curso.
 
 ## 5. Pedidos al backend
+
+### 5.1 Deuda de la v1
 
 Ninguno bloquea la v1. Cada uno retira un fichero de deuda de RF-FE-API-04:
 
@@ -301,11 +428,65 @@ Ninguno bloquea la v1. Cada uno retira un fichero de deuda de RF-FE-API-04:
 | Dar las fechas en ISO 8601 con zona (`2026-09-23T15:44:20Z`) | `instanteDeApi` en `reglas.ts` |
 | Opcional: un endpoint de análisis del brief que no escriba (`POST /briefs/analisis` devolviendo `analizar`) | El viaje de envío para descubrir contradicciones |
 
+### 5.2 Contrato para la lectura y el cambio del lector
+
+Lo que la lectura necesita y la API no da todavía. Se envió a la sesión del backend (novelasv2-f4), que implementa el bloque 8, antes de programarlo contra el backend. Mientras tanto, el frontend trabaja contra MSW con este contrato y con las aproximaciones que cada requisito dice.
+
+**Intención `cambio_lector`.** Por `POST /intenciones`, como las demás:
+
+```json
+{
+  "tipo": "cambio_lector",
+  "novela_id": 7,
+  "payload": {
+    "version_base": 2,
+    "objetivo": { "tipo": "entidad", "entidad": "personajes", "id": 14 },
+    "peticion": "El perro se llama Nala",
+    "cita": { "capitulo": 3, "texto": "el perro ladró dos veces" }
+  }
+}
+```
+
+| Campo | Qué es |
+| --- | --- |
+| `version_base` | La versión que el lector estaba leyendo. Si ya no es la última, el worker rechaza con `version_desfasada` |
+| `objetivo` | Uno de tres: `{ "tipo": "entidad", "entidad": "personajes" \| "lugares" \| "objetos", "id" }`, `{ "tipo": "hecho", "hecho_id" }` o `{ "tipo": "fragmento" }` |
+| `peticion` | Lo que pide el lector, de 3 a 300 caracteres |
+| `cita` | Opcional. El capítulo y el texto seleccionado, de hasta 500 caracteres. Obligatoria con `objetivo.tipo = "fragmento"` |
+
+- **Validación síncrona en la API:** un payload mal formado devuelve `422` con `codigo: "cambio_invalido"` y `detalle` con los campos (como `brief_incompleto`).
+- **Rechazos del worker** (`motivo` de la intención `rechazada`):
+  - `novela_no_terminada`: la novela no está `completada` ni `completada_con_avisos`;
+  - `otra_ejecucion_activa`;
+  - `version_desfasada`;
+  - `objetivo_inexistente`: la entidad o el hecho no existen o no son de esa novela.
+- **`resultado`** de la intención `hecha`: `{ "capitulos": [3, 5, 8] }`, los capítulos que el worker va a reescribir. La versión nueva la anuncia `/versiones`.
+- **Durante el cambio**, la ejecución pasa por los estados de siempre (`generando` con su fase y su capítulo, `parada` si una puerta para) y termina en `completada*` con una versión nueva, motivo `cambio_lector` y la `peticion` en `detalle` (RF3-BIB-12).
+
+**Alcance sin escribir (opcional).** `GET /novelas/{id}/cambios/alcance?entidad=personajes&id=14` o `?hecho_id=31`, que devuelve `{ "capitulos": [3, 5, 8] }` con la misma regla que usará el worker. Retira la «estimación» de RF-FE-CAM-03.
+
+**Portada.** En `NovelaDetalle`: `dedicatoria` (la de `novela`) y `regalo: { para, de, ocasion }`, con el nombre del destinatario, `quien_regala` y la ocasión legible del brief, o `null` en una novela sin brief. Retira la portada reducida de RF-FE-LEE-02.
+
+**Apariciones.** `GET /novelas/{id}/apariciones`:
+
+```json
+{
+  "personajes": [{ "id": 14, "nombre": "…", "capitulos": [1, 3] }],
+  "lugares": [{ "id": 2, "nombre": "…", "capitulos": [1, 2] }]
+}
+```
+
+Los personajes salen de la vista `presencia` y los lugares, del lugar de cada escena. Retira el cálculo desde la escaleta de RF-FE-LEE-04.
+
+**SSE.** Con los eventos que ya existen basta: cada evento invalida las consultas de la novela, `/versiones` incluida. El evento `version_publicada` ya existe (se vio en la demostración del 23-09).
+
 ## 6. Orden de implementación
 
 > Los siete pasos están hechos (23 de septiembre de 2026, un commit por paso). Queda pendiente lo que la verificación marca así: el test que compara los ficheros de deuda con Python (fila 2), la regla de lint de colores literales (fila 10) y la revisión a mano (fila 11).
 >
 > La demostración contra el backend real se hizo el 23-09 y añadió RF-FE-DAT-06. También destapó un fallo del backend que el frontend no puede corregir: la API responde `500` a ratos, porque la dependencia `leer` de `main.py` abre la conexión SQLite en un hilo del pool y la usa o la cierra en otro (`sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread`). Con varias consultas a la vez, como hace cada pantalla, salta en casi todas las cargas. El frontend lo absorbía porque reintenta los `5xx` (RF-FE-DAT-01). El backend lo corrigió en `1c5a319` (RF2-API-06), y repetida la demostración con ese cambio, la API no dio ningún `500`.
+
+> **Ronda de la lectura (24 de septiembre de 2026).** Pasos 8 a 13, un commit por paso. El 10 se programa contra MSW con el contrato de la sección 5.2 hasta que el backend lo implemente.
 
 1. Andamiaje, tokens, rutas, tipos generados y MSW.
 2. Tablero general, sin arrastre: columnas, tarjetas, sondeo.
@@ -314,3 +495,9 @@ Ninguno bloquea la v1. Cada uno retira un fichero de deuda de RF-FE-API-04:
 5. Alerta de parada.
 6. Lector.
 7. Formulario del brief y ambiente Three.js.
+8. Segunda opinión legible en la alerta de parada (RF-FE-PAR-01).
+9. Lectura: portada, índice, capítulo, ficha y versiones con «qué cambió» (RF-FE-LEE).
+10. Cambio del lector (RF-FE-CAM), contra MSW y después contra el backend.
+11. Vista de impresión y `npm run pdf` (RF-FE-PDF).
+12. `.mcp.json` e inspección con el browser MCP, con su documento de evidencia (RF-FE-MCP).
+13. Demostración del cambio del lector contra el backend real y `/ejemplos/novela-ejemplo.pdf`.

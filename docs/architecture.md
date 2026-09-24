@@ -10,7 +10,7 @@ El proyecto es un monorepo con estas carpetas principales:
 - **`specs/`** — especificaciones del programa, una por `.md`.
 - **`docs/`** — definiciones del proyecto (este documento entre ellas).
 
-**`src/backend/` está implementado** en su primera versión, según [specs/spec1.md](../specs/spec1.md): persistencia, puerto a Claude Code, las nueve skills de agente, orquestador, worker, las cinco puertas y la API. `src/frontend/` tiene su v1 según [specs/spec-frontend.md](../specs/spec-frontend.md): tablero, novela, paradas, lector y alta desde un brief, probada con mocks y pendiente de probar contra el backend real. Ver sus respectivos `README.md`.
+**`src/backend/` está implementado** en su primera versión, según [specs/spec1.md](../specs/spec1.md): persistencia, puerto a Claude Code, las nueve skills de agente, orquestador, worker, las cinco puertas y la API. `src/frontend/` tiene su v1 según [specs/spec-frontend.md](../specs/spec-frontend.md): tablero, novela, paradas, lector y alta desde un brief, probada contra el backend real el 23 de septiembre. Desde el 24 se construye encima la lectura de la entrega (portada, índice, ficha, versiones, cambio del lector y PDF). Ver sus respectivos `README.md`.
 
 ## El sistema
 
@@ -412,6 +412,8 @@ FastAPI publica OpenAPI. El cliente TypeScript se genera desde ahí en vez de es
 > **Three.js es una pieza expresiva y está declarada como tal**: la estación dibujada como plano en la pantalla de crear novela, decorativa, cargada de forma perezosa y apagada con `prefers-reduced-motion`. Se descartó un grafo del canon en 3D, por la oclusión que ya advertía esta sección.
 >
 > Arrastrar una tarjeta **encola una intención** y la tarjeta se mueve cuando la ejecución lo confirma, que es aplicar al tablero la regla de arriba. Requisitos en [specs/spec-frontend.md](../specs/spec-frontend.md).
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** El frontend pasa a tener **dos caras**: el panel de control de arriba, para quien genera, y **la lectura de la entrega**, para quien recibe el regalo. La lectura tiene portada con dedicatoria, índice, ficha de personajes y lugares, versiones con sus novedades y el PDF. Desde ella el lector pide un cambio, que se encola como la intención `cambio_lector`. Sustituye a la lectura en HTML estático del bloque 7 del plan. La lectura lee siempre de las **versiones publicadas** (`novela_version`), nunca de los capítulos en curso: lo que el lector ve, su PDF y sus novedades son el mismo texto. Pedir un cambio sigue la regla de esta sección: es una intención, y la lectura se entera de la versión nueva por el `GET`. Se descartó mantener dos lecturas (la web y un HTML estático). Requisitos en spec-frontend, secciones 3.10 a 3.13.
 
 ## Persistencia
 

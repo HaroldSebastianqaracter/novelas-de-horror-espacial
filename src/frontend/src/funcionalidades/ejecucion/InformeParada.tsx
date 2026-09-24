@@ -64,7 +64,7 @@ function FichaConflicto({ conflicto, indice }: { conflicto: Datos; indice: numbe
   const conCaraACara = typeof datos.cita_nueva === "string" && typeof datos.cita_previa === "string";
   const aviso = conflicto.aviso === true;
   return (
-    <li className="conflicto" data-aviso={aviso ? true : undefined}>
+    <li className="conflicto" id={`conflicto-${indice + 1}`} data-aviso={aviso ? true : undefined}>
       <header className="conflicto__cabecera">
         <span className="codigo">#{indice + 1}</span>
         <h3>{legible(comprobacion)}</h3>
@@ -132,7 +132,72 @@ function Bloques({ bloques }: { bloques: Datos }) {
   );
 }
 
-const CONOCIDAS = ["motivo", "conflictos", "prosa_rechazada", "bloques"] as const;
+const PARECE: Record<string, string> = { real: "Parece real", falso_positivo: "Falso positivo", dudoso: "Dudoso" };
+
+/** La opinión del revisor de continuidad (spec3, RF3-JUE-01). No levanta la parada: dice dónde mirar. */
+function SegundaOpinion({ opinion, hayConflictos }: { opinion: unknown; hayConflictos: boolean }) {
+  if (!esObjeto(opinion)) {
+    return (
+      <section className="opinion" aria-labelledby="titulo-opinion">
+        <h2 id="titulo-opinion" className="informe-parada__titulo">
+          Segunda opinión
+        </h2>
+        <p className="aviso">Sin segunda opinión: todavía no ha llegado o la llamada al revisor falló. La parada sigue igual de válida.</p>
+      </section>
+    );
+  }
+  const opiniones = (Array.isArray(opinion.opiniones) ? opinion.opiniones : []).filter(esObjeto);
+  const explicaciones = (Array.isArray(opinion.explicacion_por_conflicto) ? opinion.explicacion_por_conflicto : []).filter(
+    (e): e is string => typeof e === "string",
+  );
+  return (
+    <section className="opinion" aria-labelledby="titulo-opinion">
+      <h2 id="titulo-opinion" className="informe-parada__titulo">
+        Segunda opinión del revisor de continuidad
+      </h2>
+      {typeof opinion.resumen === "string" && <p>{opinion.resumen}</p>}
+      {opiniones.length > 0 && (
+        <ul className="opinion__lista">
+          {opiniones.map((o, i) => {
+            const numero = typeof o.conflicto === "number" ? o.conflicto : null;
+            const parece = typeof o.parece === "string" ? o.parece : "";
+            return (
+              <li key={i} className="opinion__fila" data-parece={parece || undefined}>
+                {numero !== null && hayConflictos ? (
+                  <a className="codigo" href={`#conflicto-${numero}`}>
+                    #{numero}
+                  </a>
+                ) : (
+                  <span className="codigo">#{numero ?? "?"}</span>
+                )}
+                <span className="opinion__veredicto">{PARECE[parece] ?? legible(parece || "sin opinión")}</span>
+                {typeof o.motivo === "string" && <span className="opinion__motivo">{o.motivo}</span>}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {typeof opinion.sugerencia === "string" && opinion.sugerencia && (
+        <p>
+          <strong>Sugerencia:</strong> {opinion.sugerencia}
+        </p>
+      )}
+      {explicaciones.length > 0 && (
+        <details>
+          <summary>Explicación de cada conflicto</summary>
+          <ol className="opinion__explicaciones">
+            {explicaciones.map((e, i) => (
+              <li key={i}>{e}</li>
+            ))}
+          </ol>
+        </details>
+      )}
+      <ClaveValor datos={opinion} excluir={["resumen", "opiniones", "sugerencia", "explicacion_por_conflicto"]} />
+    </section>
+  );
+}
+
+const CONOCIDAS = ["motivo", "conflictos", "prosa_rechazada", "bloques", "segunda_opinion"] as const;
 
 export function InformeParada({ informe }: { informe: Datos | null | undefined }) {
   if (!informe || Object.keys(informe).length === 0) {
@@ -156,6 +221,7 @@ export function InformeParada({ informe }: { informe: Datos | null | undefined }
           </ol>
         </section>
       )}
+      {"segunda_opinion" in informe && <SegundaOpinion opinion={informe.segunda_opinion} hayConflictos={conflictos.length > 0} />}
       {esObjeto(informe.prosa_rechazada) && <ProsaRechazada prosa={informe.prosa_rechazada} />}
       {esObjeto(informe.bloques) && <Bloques bloques={informe.bloques} />}
       <ClaveValor datos={informe} excluir={CONOCIDAS} />

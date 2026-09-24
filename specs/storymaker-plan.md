@@ -138,21 +138,24 @@ Requisitos en [spec3.md](spec3.md), 3.4; verificación en [spec3-verification.md
 - [ ] LLM-as-judge con **puntuación y justificación por criterio** (continuidad, tono, calidad narrativa y **personalización integrada con naturalidad**). Hoy el juez de oficio da pasa/falla y no tiene criterio de personalización.
 - [ ] **Dos hooks**, uno de validación del capítulo y otro de policy. Hay que decidir y justificar dónde viven: los agentes corren sin herramientas, así que los hooks de herramientas de Claude Code no se disparan nunca.
 
-### 7. Lectura: HTML estático más PDF exportado desde él
+### 7. Lectura: la web, con PDF exportado desde ella
 
 - [ ] Índice de capítulos navegable.
 - [ ] Ficha de personajes y lugares generada desde la story bible, con enlaces al capítulo donde aparece cada uno.
 - [ ] Portada con dedicatoria personalizada.
-- [ ] `.claude/mcp.json` con un browser MCP. El agente abre la lectura, navega y registra los errores visuales como fallos para el rol correspondiente. Su uso real se documenta en `/docs`.
+- [ ] PDF exportado desde la web (vista de impresión y `npm run pdf`), del que sale `/ejemplos/novela-ejemplo.pdf`.
+- [ ] `.mcp.json` con un browser MCP (Playwright MCP). El agente abre la lectura, navega y registra los errores visuales como fallos para el rol correspondiente. Su uso real se documenta en `/docs`.
 
-> **Decisión del plan.** HTML estático exportado a PDF, sin frontend React. El frontend no existía al decidirlo, el HTML es lo que el browser MCP puede inspeccionar, y el PDF cubre la entrega y `/ejemplos/novela-ejemplo.pdf`. Los cambios del lector se piden desde fuera del documento (CLI o formulario mínimo), que es la variante PDF del enunciado. El frontend React que se decidió después (23 de septiembre) es un opcional y no cambia esta decisión.
+Requisitos en [spec-frontend.md](spec-frontend.md), secciones 3.10, 3.12 y 3.13.
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** La lectura de la entrega es **la web** (la variante «web» del enunciado), y el PDF sale de ella. Sustituye a la decisión anterior del plan, que era HTML estático exportado a PDF sin React: se tomó cuando el frontend no existía, y el 23 de septiembre el frontend quedó como opcional. Con la web ya hecha y probada contra el backend, tener dos lecturas duplicaba trabajo, y la demo del cambio del lector luce más dentro del documento. El browser MCP inspecciona la web igual que habría inspeccionado el HTML. Se descartó mantener el HTML estático junto a la web.
 
 ### 8. Cambio del lector
 
-- [ ] Pedir un cambio («el perro se llama Nala») por CLI o formulario.
-- [ ] Localizar los capítulos que usan ese hecho, con la tabla del bloque 3.
-- [ ] Regenerar **solo** esos capítulos sin romper la continuidad.
-- [ ] Nueva versión del PDF con una página inicial de **novedades** y enlaces internos a los capítulos modificados. La versión anterior se conserva.
+- [ ] Pedir un cambio («el perro se llama Nala») desde la lectura web: seleccionar un fragmento o un hecho y escribir el cambio (spec-frontend, 3.11). El contrato de la intención `cambio_lector` está en spec-frontend, 5.2.
+- [ ] Localizar los capítulos que usan ese hecho, con la tabla del bloque 3 (backend).
+- [ ] Regenerar **solo** esos capítulos sin romper la continuidad (backend).
+- [ ] La web marca qué capítulos cambiaron y enseña qué cambió; el PDF de la versión nueva lleva una página inicial de **novedades** con enlaces internos a los capítulos modificados. La versión anterior se conserva y se puede leer.
 
 ### 9. Validadores formales
 
@@ -190,7 +193,7 @@ El mecanismo se construye ahora; la tabla definitiva se saca al final.
 
 ## Opcionales (suman nota, después de lo obligatorio)
 
-- [ ] **Frontend web** en React: un tablero de novelas al estilo Jira, la alerta de parada, un lector de capítulos y el alta desde un brief. Requisitos en [spec-frontend.md](spec-frontend.md). No sustituye al bloque 7: la lectura de la entrega sigue siendo HTML con PDF.
+- [x] **Frontend web** en React: un tablero de novelas al estilo Jira, la alerta de parada, un lector de capítulos y el alta desde un brief. Requisitos en [spec-frontend.md](spec-frontend.md). Desde el 24 de septiembre es también la lectura de la entrega (bloque 7).
 - [ ] **Servidor MCP** de solo lectura con FastMCP sobre la API que ya existe: `list_novels`, `get_chapter`, `list_versions`, `query_story_bible` y `download_novel`.
 - [ ] **Linters de prosa:** la parte mecánica de la puerta 4 ya es uno (palabras filtro, adverbios de atribución, verbos de habla); ampliarla con repeticiones, frases largas y fraseo típico de IA.
 - [ ] **Security report** en `/docs/security-report.md`, partiendo de la auditoría, de bandit y del `validador-de-codigo`.

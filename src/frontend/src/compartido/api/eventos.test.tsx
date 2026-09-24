@@ -33,14 +33,21 @@ describe("SSE de una novela (RF-FE-DAT-02, RF-FE-DAT-04)", () => {
   it("un evento invalida la novela, un corte avisa y la reconexión manda Last-Event-ID y reconsulta", async () => {
     const cabeceras: (string | null)[] = [];
     let consultasEstructura = 0;
+    // La reconexión espera a que el test la suelte: si no, con la máquina cargada, el aviso
+    // aparece y desaparece antes de que el test llegue a buscarlo.
+    let soltarReconexion = () => {};
+    const reconexion = new Promise<void>((r) => {
+      soltarReconexion = r;
+    });
     servidor.use(
       http.get("*/api/novelas/3/estructura", () => {
         consultasEstructura += 1;
         return HttpResponse.json({ actos: [], capitulos: [], hilos: [], puntos_de_giro: [], siembras: [] });
       }),
-      http.get("*/api/novelas/3/eventos", ({ request }) => {
+      http.get("*/api/novelas/3/eventos", async ({ request }) => {
         cabeceras.push(request.headers.get("Last-Event-ID"));
         if (cabeceras.length > 1) {
+          await reconexion;
           // Segunda conexión: se queda abierta sin decir nada.
           return new HttpResponse(new ReadableStream({ start() {} }), {
             headers: { "Content-Type": "text/event-stream" },
@@ -58,6 +65,7 @@ describe("SSE de una novela (RF-FE-DAT-02, RF-FE-DAT-04)", () => {
     const antes = consultasEstructura;
 
     expect(await screen.findByText("Enlace perdido.")).toBeInTheDocument();
+    soltarReconexion();
     await waitFor(() => expect(consultasEstructura).toBeGreaterThan(antes));
 
     await waitFor(() => expect(cabeceras).toEqual([null, "41"]), { timeout: 3_000 });

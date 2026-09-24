@@ -162,6 +162,18 @@ export const paradas: Record<number, Parada> = {
         "1": "La bodega olía a óxido y a algo más dulce, algo que no debería estar ahí.\n\nEl naranja del traje era lo único que se veía en la bodega.",
         "2": "De repente, el piloto tecleó el código de la esclusa norte sin mirar el panel.",
       },
+      segunda_opinion: {
+        resumen: "Dos conflictos bloqueantes: uno parece un cambio real del traje y el otro, un conocimiento que el texto sí justifica.",
+        explicacion_por_conflicto: [
+          "El capítulo 1 fija el traje gris y el 3 lo pinta naranja sin cambio de traje.",
+          "El piloto usa el código, pero en el capítulo 2 lo ve teclear a la ingeniera.",
+        ],
+        opiniones: [
+          { conflicto: 1, parece: "real", motivo: "Ninguna escena cuenta un cambio de traje: «el naranja del traje» contradice «el traje gris»." },
+          { conflicto: 2, parece: "falso_positivo", motivo: "En el capítulo 2 «la vio teclear el código sin esconderlo»: lo aprendió mirando." },
+        ],
+        sugerencia: "Relanzar el capítulo 3 o dar por sabido el código.",
+      },
     },
   },
 };

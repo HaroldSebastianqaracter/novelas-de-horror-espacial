@@ -42,6 +42,28 @@ describe("informe de la parada (RF-FE-PAR-01)", () => {
     expect(screen.getByText("Prosa del capítulo rechazado (2 escenas)")).toBeInTheDocument();
   });
 
+  it("enseña la segunda opinión legible: una línea por conflicto, con su veredicto y su motivo (RF3-JUE-01)", async () => {
+    renderizarEn(RUTA);
+    const opinion = (await screen.findByRole("heading", { name: "Segunda opinión del revisor de continuidad" })).closest(
+      "section",
+    ) as HTMLElement;
+    const filas = within(opinion).getAllByRole("listitem").filter((li) => li.classList.contains("opinion__fila"));
+    expect(filas).toHaveLength(2);
+    expect(filas[0]).toHaveTextContent("#1Parece realNinguna escena cuenta un cambio de traje");
+    expect(filas[1]).toHaveTextContent("#2Falso positivo");
+    expect(within(filas[0] as HTMLElement).getByRole("link", { name: "#1" })).toHaveAttribute("href", "#conflicto-1");
+    expect(document.getElementById("conflicto-1")).toHaveTextContent("Continuidad factual");
+    expect(within(opinion).getByText(/Relanzar el capítulo 3 o dar por sabido/)).toBeInTheDocument();
+    expect(within(opinion).queryByText(/"opiniones"/)).not.toBeInTheDocument();
+  });
+
+  it("sin segunda opinión lo dice, y la parada sigue", async () => {
+    conParada({ informe: { ...(paradas[93]?.informe as Record<string, unknown>), segunda_opinion: null } });
+    renderizarEn(RUTA);
+    expect(await screen.findByText(/Sin segunda opinión: todavía no ha llegado o la llamada al revisor falló/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "2 conflictos y 1 aviso" })).toBeInTheDocument();
+  });
+
   it("no pierde claves que no conoce y pinta los bloques de presupuesto como tabla", async () => {
     conParada({
       tipo: "presupuesto",

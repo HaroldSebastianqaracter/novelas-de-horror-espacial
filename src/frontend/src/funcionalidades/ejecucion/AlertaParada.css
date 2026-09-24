@@ -37,6 +37,20 @@
 }
 .conflicto[data-aviso] .conflicto__tipo { background: var(--color-aviso-velo); color: var(--color-aviso); }
 .conflicto__descripcion { margin: 0; max-width: 75ch; }
+
+/* Segunda opinión (RF3-JUE-01): el veredicto va en texto, no solo en color. */
+.opinion { display: grid; gap: var(--espacio-3); padding: var(--espacio-4) var(--espacio-5); background: var(--color-superficie-elevada); border: var(--borde-fino) solid var(--color-borde); border-radius: var(--radio-md); }
+.opinion > p { margin: 0; max-width: 75ch; }
+.opinion__lista { display: grid; gap: var(--espacio-2); margin: 0; padding: 0; list-style: none; }
+.opinion__fila { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: var(--espacio-3); align-items: baseline; }
+.opinion__veredicto { padding: 0 8px; border-radius: var(--radio-pildora); font-size: var(--texto-2xs); font-weight: var(--peso-medio); white-space: nowrap; background: var(--color-superficie-hundida); color: var(--color-texto-secundario); }
+.opinion__fila[data-parece="real"] .opinion__veredicto { background: var(--color-alerta-fondo); color: var(--color-alerta-texto); }
+.opinion__fila[data-parece="falso_positivo"] .opinion__veredicto { background: var(--color-confirmado-velo); color: var(--color-confirmado); }
+.opinion__fila[data-parece="dudoso"] .opinion__veredicto { background: var(--color-aviso-velo); color: var(--color-aviso); }
+.opinion__motivo { max-width: 75ch; }
+.opinion summary { cursor: pointer; font-size: var(--texto-sm); font-weight: var(--peso-medio); color: var(--color-texto-secundario); }
+.opinion__explicaciones { display: grid; gap: var(--espacio-2); margin: var(--espacio-2) 0 0; }
+@media (max-width: 767px) { .opinion__fila { grid-template-columns: auto minmax(0, 1fr); } .opinion__motivo { grid-column: 1 / -1; } }
 .conflicto__datos summary, .prosa-rechazada summary { cursor: pointer; font-size: var(--texto-sm); font-weight: var(--peso-medio); color: var(--color-texto-secundario); }
 
 .cara { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: var(--espacio-3); align-items: stretch; }
