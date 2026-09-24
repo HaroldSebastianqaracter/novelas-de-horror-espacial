@@ -46,37 +46,48 @@
     "llamadas": 97
   },
   {
-    "nombre": "normal-boda",
+    "nombre": "normal-boda (Sonnet 5, 4 capítulos)",
     "proposito": "Brief normal: otra ocasión, otro tono y otra intensidad que el de ejemplo.",
     "celdas": {
       "brief_schema": "pasa",
       "brief_completo": "pasa",
       "brief_contradicciones": "pasa",
       "inyeccion": "no aplica",
-      "puerta_1": "pasa · 1 avisos",
-      "puerta_2": "falla 2/2",
-      "puerta_3": "sin ejecutar",
-      "guardrail": "sin ejecutar",
-      "nombres": "sin ejecutar",
-      "longitud": "sin ejecutar",
-      "puerta_4_mecanica": "sin ejecutar",
-      "juez": "sin ejecutar",
+      "puerta_1": "falla 1/2 · 1 avisos",
+      "puerta_2": "pasa",
+      "puerta_3": "pasa · 22 avisos",
+      "guardrail": "pasa",
+      "nombres": "pasa",
+      "longitud": "pasa",
+      "puerta_4_mecanica": "pasa · 6 avisos",
+      "juez": "falla 3/3 · 3 avisos",
       "puerta_5": "sin ejecutar",
-      "lean": "sin ejecutar (aún no integrado)",
-      "canario": "no aplica",
-      "rubrica": "sin ejecutar (aún no integrada)"
+      "lean": "sin ejecutar (no llegó a publicar)",
+      "rubrica": "sin ejecutar (no llegó a publicar)",
+      "canario": "no aplica"
     },
     "detalle": {
       "cierre_en_orden_inverso (aviso)": 1,
-      "acto_sin_capitulos": 2
+      "dedicatoria_nombra_al_destinatario": 1,
+      "valor_compuesto (aviso)": 1,
+      "entidad_fuera_de_canon (aviso)": 7,
+      "conocimiento_sin_comprobar (aviso)": 2,
+      "nombre_sin_registro (aviso)": 12,
+      "palabras_filtro (aviso)": 3,
+      "verbo_de_habla_expresivo (aviso)": 3,
+      "juicio:cliche": 2,
+      "juicio:cuentas_cuadran": 1,
+      "juicio_dividido (aviso)": 3,
+      "juicio:voces_distinguibles": 2
     },
     "estado": "parada",
-    "capitulos": "0/0",
+    "capitulos": "0/4",
     "paradas": [
-      "escaleta"
+      "estructura",
+      "oficio (cap. 1)"
     ],
-    "coste_usd": 2.4867498,
-    "llamadas": 7
+    "coste_usd": 7.373933599999998,
+    "llamadas": 31
   },
   {
     "nombre": "normal-jubilacion",
@@ -88,36 +99,38 @@
       "inyeccion": "no aplica",
       "puerta_1": "pasa · 1 avisos",
       "puerta_2": "pasa",
-      "puerta_3": "pasa · 43 avisos",
+      "puerta_3": "pasa · 49 avisos",
       "guardrail": "pasa",
       "nombres": "pasa",
-      "longitud": "pasa · 5 avisos",
-      "puerta_4_mecanica": "pasa · 5 avisos",
-      "juez": "falla 3/5 · 3 avisos",
+      "longitud": "pasa · 6 avisos",
+      "puerta_4_mecanica": "pasa · 6 avisos",
+      "juez": "falla 4/6 · 4 avisos",
       "puerta_5": "sin ejecutar",
       "lean": "sin ejecutar (aún no integrado)",
-      "rubrica": "sin ejecutar (aún no integrada)",
-      "canario": "no aplica"
+      "canario": "no aplica",
+      "rubrica": "sin ejecutar (aún no integrada)"
     },
     "detalle": {
       "final_incompatible (aviso)": 1,
       "entidad_fuera_de_canon (aviso)": 14,
-      "nombre_sin_registro (aviso)": 22,
-      "palabras_filtro (aviso)": 5,
-      "longitud_real (aviso)": 5,
+      "nombre_sin_registro (aviso)": 25,
+      "palabras_filtro (aviso)": 6,
+      "longitud_real (aviso)": 6,
       "deduccion_por_verificar (aviso)": 2,
-      "valor_compuesto (aviso)": 1,
+      "valor_compuesto (aviso)": 3,
       "juicio:tropos_con_causalidad": 1,
       "juicio:cuentas_cuadran": 2,
-      "juicio_dividido (aviso)": 3,
-      "sorpresa_imposible (aviso)": 4,
-      "juicio:emocion_no_nombrada": 1
+      "juicio_dividido (aviso)": 4,
+      "sorpresa_imposible (aviso)": 5,
+      "juicio:emocion_no_nombrada": 2
     },
-    "estado": "generando (capítulo 3 en su intento 3 al cortar)",
+    "estado": "parada",
     "capitulos": "2/3",
-    "paradas": [],
-    "coste_usd": 15.964519199999994,
-    "llamadas": 38
+    "paradas": [
+      "oficio (cap. 3)"
+    ],
+    "coste_usd": 18.618559599999994,
+    "llamadas": 44
   },
   {
     "nombre": "adversarial-inyeccion",
@@ -163,31 +176,46 @@
     "llamadas": 28
   },
   {
-    "nombre": "incoherencia-temporal",
+    "nombre": "incoherencia-temporal (Sonnet 5, 4 capítulos)",
     "proposito": "Recuerdos obligatorios que no pueden ser a la vez verdad con la edad del destinatario: una abuela que murió antes de que ella naciera y le enseñó a coser, y un cuarenta cumpleaños con veintiocho años. Mide qué validador lo detecta, si alguno.",
     "celdas": {
       "brief_schema": "pasa",
       "brief_completo": "pasa",
       "brief_contradicciones": "pasa",
       "inyeccion": "no aplica",
-      "puerta_1": "pasa",
-      "puerta_2": "sin ejecutar",
-      "puerta_3": "sin ejecutar",
-      "guardrail": "sin ejecutar",
-      "nombres": "sin ejecutar",
-      "longitud": "sin ejecutar",
-      "puerta_4_mecanica": "sin ejecutar",
-      "juez": "sin ejecutar",
+      "puerta_1": "falla 1/2 · 2 avisos",
+      "puerta_2": "pasa",
+      "puerta_3": "falla 1/4 · 12 avisos",
+      "guardrail": "pasa",
+      "nombres": "falla 1/3",
+      "longitud": "pasa",
+      "puerta_4_mecanica": "pasa · 2 avisos",
+      "juez": "falla 2/3 · 3 avisos",
       "puerta_5": "sin ejecutar",
-      "lean": "sin ejecutar (aún no integrado)",
-      "canario": "no aplica",
-      "rubrica": "sin ejecutar (aún no integrada)"
+      "lean": "sin ejecutar (no llegó a publicar)",
+      "rubrica": "sin ejecutar (no llegó a publicar)",
+      "canario": "no aplica"
     },
-    "detalle": {},
-    "estado": "error",
-    "capitulos": "0/0",
-    "paradas": [],
-    "coste_usd": 2.0494318,
-    "llamadas": 6
+    "detalle": {
+      "final_incompatible (aviso)": 2,
+      "dedicatoria_nombra_al_destinatario": 1,
+      "entidad_fuera_de_canon (aviso)": 5,
+      "cifra_sin_hecho (aviso)": 3,
+      "juicio_dividido (aviso)": 3,
+      "nombre_sin_registro (aviso)": 4,
+      "palabras_filtro (aviso)": 2,
+      "elemento_sin_integrar": 1,
+      "juicio:cliche": 2,
+      "juicio:emocion_no_nombrada": 1,
+      "conocimiento_no_adquirido": 1
+    },
+    "estado": "parada",
+    "capitulos": "1/4",
+    "paradas": [
+      "estructura",
+      "continuidad (cap. 2)"
+    ],
+    "coste_usd": 7.466425000000001,
+    "llamadas": 34
   }
 ]
