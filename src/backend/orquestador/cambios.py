@@ -54,30 +54,34 @@ def _renombrar(con: sqlite3.Connection, novela_id: int, cambio: Cambio) -> None:
     # Los hechos que llevan el nombre en el sujeto, el valor o la cita.
     for h in _filas(con, "SELECT * FROM hecho_vigente WHERE novela_id = ? ORDER BY id",
                     novela_id):
-        nuevos = {c: sustituir_nombres(str(h[c]), mapa)
+        nuevos = {c: sustituir_nombres(str(h[c]), mapa, cambio.protegidos)
                   for c in ("sujeto_nombre", "valor", "cita") if h[c] is not None}
         if any(nuevos[c] != h[c] for c in nuevos):
             _sustituir_hecho(con, novela_id, h, **nuevos)
-    _sustituir_en_textos(con, novela_id, mapa)
+    _sustituir_en_textos(con, novela_id, mapa, cambio.protegidos)
 
 
-def _sustituir_en_textos(con: sqlite3.Connection, novela_id: int, mapa: dict[str, str]) -> None:
+def _sustituir_en_textos(con: sqlite3.Connection, novela_id: int, mapa: dict[str, str],
+                         protegidos: tuple[str, ...]) -> None:
     """El nombre, como palabra completa, en los textos del plan y del canon de la novela.
 
     Fichas, escaleta, resumenes, brief, titulo y dedicatoria: todo lo que tenga texto y sea de
-    esta novela, salvo lo que no se sustituye (`_NO_SE_SUSTITUYEN`).
+    esta novela, salvo lo que no se sustituye (`_NO_SE_SUSTITUYEN`). El nombre de las demas
+    entidades no se toca nunca: renombrar a una no renombra a otra (validador de 2fa0ee6).
     """
-    for tabla, columnas in _textos_de_la_novela(con):
+    for tabla, todas in _textos_de_la_novela(con):
+        columnas = [c for c in todas
+                    if not (tabla in TABLAS_CON_NOMBRE_CLAVE and c == "nombre")]
+        if not columnas:
+            continue
         clave = "id" if tabla == "novela" else "novela_id"
         for fila in _filas(con, f"SELECT id, {', '.join(columnas)} FROM {tabla} "
                                 f"WHERE {clave} = ?", novela_id):
-            nuevos = {c: sustituir_nombres(str(fila[c]), mapa) for c in columnas
+            nuevos = {c: sustituir_nombres(str(fila[c]), mapa, protegidos) for c in columnas
                       if fila[c] is not None}
             cambiados = {c: v for c, v in nuevos.items() if v != fila[c]}
             if not cambiados:
                 continue
-            if tabla in TABLAS_CON_NOMBRE_CLAVE and "nombre" in cambiados:
-                cambiados["nombre_clave"] = normalizar(cambiados["nombre"])
             asignaciones = ", ".join(f"{c} = ?" for c in cambiados)
             con.execute(f"UPDATE {tabla} SET {asignaciones} WHERE id = ?",
                         (*cambiados.values(), fila["id"]))

@@ -44,4 +44,9 @@ def delimitar(texto: str, etiqueta: str) -> str:
     sistema: cualquier aparicion de la etiqueta se quita antes de envolverlo.
     """
     marca = re.compile(rf"<*\s*{re.escape(etiqueta)}\s*>*", re.IGNORECASE)
-    return f"<<<{etiqueta}\n{marca.sub('', texto)}\n{etiqueta}>>>"
+    # Hasta que no quede ninguna: quitar una marca anidada recompone la de fuera
+    # («ETI-ETIQUETA-QUETA»), y una sola pasada la dejaba viva (validador de 2fa0ee6).
+    limpio = texto
+    while (siguiente := marca.sub("", limpio)) != limpio:
+        limpio = siguiente
+    return f"<<<{etiqueta}\n{limpio}\n{etiqueta}>>>"

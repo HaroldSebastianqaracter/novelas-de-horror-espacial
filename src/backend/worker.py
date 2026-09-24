@@ -163,6 +163,28 @@ class Worker:
                 novela_id, completados,
             )
 
+        # Una ejecucion en `parada` no esta activa, pero puede haber quedado con un capitulo a
+        # medias si el worker cayo mientras la abria (TLC, `CodigoActual.cfg`). Se revierte sin
+        # tocar la parada, que sigue esperando al autor: un capitulo no completado nunca debe
+        # tener estado, asi que solo se quita lo que no deberia estar (spec2, RF2-FALLO-06).
+        a_medias = db.novelas_con_capitulo_a_medias(self.con)
+        en_parada = [
+            int(f["novela_id"]) for f in self.con.execute(
+                "SELECT novela_id FROM ejecucion WHERE estado = 'parada'"
+            )
+            if int(f["novela_id"]) in a_medias
+        ]
+        for novela_id in en_parada:
+            completados = lectura.ultimo_capitulo_completado(self.con, novela_id)
+            with transaccion(self.con):
+                fallo.revertir_grafo(self.con, novela_id, completados + 1, motivo="worker_caido")
+                emitir_evento(
+                    self.con, novela_id, "worker_recuperado", capitulos_completados=completados,
+                    en_parada=True, integridad=[v.regla for v in db.verificar_integridad(self.con)],
+                )
+            log.warning("Novela %s: capitulo a medias revertido; la parada sigue abierta.",
+                        novela_id)
+
         if llamadas or intenciones or activas:
             log.info(
                 "Recuperacion: %s llamada(s) y %s intencion(es) interrumpidas, "

@@ -17,6 +17,7 @@ from compartido.cambio import TABLAS_DE_ENTIDAD, Cambio
 from compartido.contexto import Paquete
 from compartido.grafo import TABLAS_CON_NOMBRE_CLAVE, lectura, normalizar
 from compartido.inyeccion import delimitar
+from compartido.texto import partes_de_nombre
 from compartido.tipos import PALABRAS_POR_DATO
 
 from .esquemas import SalidaInterprete
@@ -250,7 +251,26 @@ def _renombrado(con: sqlite3.Connection, novela_id: int, e: dict[str, Any], nuev
     if vetado:
         raise NoAdmisible(f"El nombre «{nuevo}» contiene un termino vetado («{vetado}»).")
     return Cambio(tipo="renombrar", antes=str(e["nombre"]), despues=nuevo,
-                  tabla=str(e["tabla"]), entidad_id=int(e["id"]))
+                  tabla=str(e["tabla"]), entidad_id=int(e["id"]),
+                  protegidos=_protegidos(con, novela_id, str(e["nombre"]),
+                                         (str(e["tabla"]), int(e["id"]))))
+
+
+def _protegidos(con: sqlite3.Connection, novela_id: int, viejo: str,
+                propio: tuple[str, int]) -> tuple[str, ...]:
+    """Los nombres de otras entidades que comparten una palabra con el viejo."""
+    partes = {normalizar(p) for p in partes_de_nombre(viejo)} or {normalizar(viejo)}
+    salida: list[str] = []
+    for tabla in TABLAS_CON_NOMBRE_CLAVE:
+        for i, nombre in con.execute(
+            f"SELECT id, nombre FROM {tabla} WHERE novela_id = ?",  # tabla cerrada
+            (novela_id,),
+        ):
+            if (tabla, int(i)) != propio and partes & {
+                normalizar(p) for p in partes_de_nombre(str(nombre))
+            }:
+                salida.append(str(nombre))
+    return tuple(sorted(set(salida)))
 
 
 def _cambio_de_hecho(con: sqlite3.Connection, novela_id: int, h: dict[str, Any], nuevo: str

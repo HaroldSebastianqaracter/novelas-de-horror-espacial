@@ -251,7 +251,7 @@ def _registrar_puerta_en(ctx: Contexto, resultado: Any, capitulo: int | None = N
 
 def _abrir_parada(ctx: Contexto, tipo: str, informe: dict[str, Any],
                   capitulo: int | None = None, intento: int | None = None,
-                  *, antes: Callable[[], None] | None = None,
+                  *, antes: Callable[[], object] | None = None,
                   despues: Callable[[int], None] | None = None) -> None:
     """Abre la parada y lleva la ejecucion a `parada`, en una transaccion.
 
@@ -512,11 +512,15 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                 with transaccion(ctx.con):
                     estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_4", capitulo=numero,
                                        intento=intento)
-                paquete_oficio = _paquete_o_parada(
-                    ctx, numero, intento, s_oficio.paquete,
-                    ctx.con, ctx.novela_id, numero, texto_completo, mecanica,
-                    presupuesto=ctx.presupuesto,
-                )
+                try:
+                    paquete_oficio = _paquete_o_parada(
+                        ctx, numero, intento, s_oficio.paquete,
+                        ctx.con, ctx.novela_id, numero, texto_completo, mecanica,
+                        presupuesto=ctx.presupuesto, revertir=True,
+                    )
+                except Parado:
+                    a_medias = False  # la parada ya revirtio el capitulo en su transaccion
+                    raise
                 juicio, votos = _juzgar(ctx, paquete_oficio, numero, intento)
 
             # La puerta 4 se registra entera, mecanica y juicio (RF2-PIPE-13).
@@ -632,17 +636,22 @@ def _trazar_descartes(
 
 def _paquete_o_parada(
     ctx: Contexto, numero: int, intento: int, fabricar: Callable[..., Paquete],
-    *args: Any, **kwargs: Any,
+    *args: Any, revertir: bool = False, **kwargs: Any,
 ) -> Paquete:
     """Monta un paquete o, si lo obligatorio no cabe, abre una parada de presupuesto.
 
-    Vale para los tres paquetes del capitulo (RF2-CTX-03). Si ocurre despues del tramo 2, la
-    parada sale por el `finally` de `generar_capitulo`, que revierte el capitulo a medias.
+    Vale para los tres paquetes del capitulo (RF2-CTX-03). Despues del tramo 2 (`revertir`),
+    la parada revierte el capitulo a medias en SU MISMA transaccion. Antes se revertia despues,
+    en otra, desde el `finally` de `generar_capitulo`: si el worker caia entre las dos, quedaba
+    una parada con un capitulo a medias que la recuperacion no tocaba (TLC, `CodigoActual.cfg`).
     """
     try:
         return fabricar(*args, **kwargs)
     except PresupuestoExcedido as exc:
-        _abrir_parada(ctx, "presupuesto", exc.informe(), capitulo=numero, intento=intento)
+        antes = partial(fallo.revertir_grafo, ctx.con, ctx.novela_id, numero,
+                        motivo="presupuesto") if revertir else None
+        _abrir_parada(ctx, "presupuesto", exc.informe(), capitulo=numero, intento=intento,
+                      antes=antes)
         raise  # inalcanzable: _abrir_parada lanza Parado
 
 
@@ -1057,7 +1066,23 @@ def _revisar_capitulo(
 
 def _confirmar_cambio(ctx: Contexto, cambio: Cambio, corregidos: dict[int, SalidaRevision]
                       ) -> None:
-    """El paso final, dentro de la transaccion de `_completar` (RF3-CAM-11)."""
+    """El paso final, dentro de la transaccion de `_completar` (RF3-CAM-11).
+
+    Cualquier error de datos aqui deshace la transaccion y hace fracasar el cambio: la novela
+    vuelve a su estado completado, como pide RF3-CAM-12 (validador de 2fa0ee6).
+    """
+    try:
+        _escribir_cambio(ctx, cambio, corregidos)
+    except CambioImposible:
+        raise
+    except Exception as exc:
+        raise CambioImposible(
+            "Un error de datos impidio aplicar el cambio.", [f"{type(exc).__name__}: {exc}"]
+        ) from exc
+
+
+def _escribir_cambio(ctx: Contexto, cambio: Cambio, corregidos: dict[int, SalidaRevision]
+                     ) -> None:
     o_cambios.aplicar_canon(ctx.con, ctx.novela_id, cambio,
                             citas={n: s.citas for n, s in corregidos.items()})
     for numero, salida in sorted(corregidos.items()):

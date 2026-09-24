@@ -22,10 +22,12 @@ def _que_hacer(cambio: Cambio) -> str:
         partes = [p for p in partes_viejas(cambio.antes, cambio.despues) if p != cambio.antes]
         extra = (" Tambien cuando la prosa lo llama solo "
                  + " o ".join(f"«{p}»" for p in partes) + ".") if partes else ""
+        otros = (" No toques " + ", ".join(f"«{n}»" for n in cambio.protegidos)
+                 + ": es otro nombre.") if cambio.protegidos else ""
         return (
             f"«{cambio.antes}» se llama ahora «{cambio.despues}». Sustituye cada vez que la "
             f"prosa lo nombra.{extra} Ajusta las concordancias si el nombre nuevo las cambia, y "
-            "nada mas."
+            f"nada mas.{otros}"
         )
     return (
         f"El dato «{cambio.sujeto} · {cambio.atributo}» vale ahora «{cambio.despues}» (antes, "

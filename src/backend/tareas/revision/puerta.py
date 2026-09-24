@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from difflib import SequenceMatcher
 
-from compartido.cambio import Cambio, menciones_de, partes_viejas
+from compartido.cambio import Cambio, menciones_de, partes_viejas, tapar
 from compartido.puerta_base import Conflicto, ResultadoPuerta
 from compartido.texto import INICIO_DE_FRASE, PALABRA_DE_NOMBRE, veces_termino
 from config import CAMBIO_SIMILITUD_MINIMA
@@ -27,8 +27,10 @@ def _nombre_que_queda(cambio: Cambio, aprobada: str, texto: str) -> dict[str, in
     """Las palabras del nombre viejo que el texto sigue escribiendo, con sus veces.
 
     Si la palabra tambien sale en minuscula en la prosa aprobada, es una palabra corriente
-    («Luna», «la luna»): al empezar frase no cuenta.
+    («Luna», «la luna»): al empezar frase no cuenta. Dentro del nombre de otra entidad
+    («Pedro Reyes» al renombrar a «Reyes») tampoco.
     """
+    texto = tapar(texto, cambio.protegidos)
     corrientes = {p.casefold() for p in PALABRA_DE_NOMBRE.findall(aprobada) if p[0].islower()}
     quedan: dict[str, int] = {}
     for parte in partes_viejas(cambio.antes, cambio.despues):

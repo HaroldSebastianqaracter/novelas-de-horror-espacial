@@ -512,6 +512,12 @@ TABLAS_QUE_CUELGAN_DE_UN_HECHO: tuple[str, ...] = (
 ESTADOS_ACTIVOS: tuple[str, ...] = ("planificando", "escaletando", "generando")
 
 
+def novelas_con_capitulo_a_medias(con: sqlite3.Connection) -> set[int]:
+    """Las novelas con texto vigente o estado en un capitulo no completado (RF2-FALLO-06)."""
+    return {int(f["novela_id"])
+            for f in con.execute(_sql_estado_en_capitulo_no_completado()).fetchall()}
+
+
 def _sql_estado_en_capitulo_no_completado() -> str:
     partes = [
         f"SELECT '{tabla}' AS tabla, x.id AS fila_id, ea.novela_id, ea.capitulo "

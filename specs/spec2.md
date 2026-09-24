@@ -62,6 +62,9 @@ Entre el tramo 2 y el 3 un capítulo puede tener texto y hechos sin estar comple
 2. Marca `interrumpida` con motivo `worker_caido` toda `intencion` en `en_curso`.
 3. Para cada ejecución en `planificando`, `escaletando` o `generando`, **revierte el grafo desde el capítulo siguiente al último completado** y después la deja en `detenida` con `ultimo_error = interrumpida_por_caida`, `capitulo_actual` e `intento_actual` fijados desde el grafo.
 4. Emite `worker_recuperado` con el resultado de `verificar_integridad()`.
+5. Para cada ejecución en `parada` que tenga texto o estado en un capítulo no completado, **revierte el grafo desde el capítulo siguiente al último completado sin tocar la parada**, que sigue esperando al autor, y emite `worker_recuperado` con `en_parada`.
+
+> **Añadido el 24 de septiembre de 2026** (spec3, bloque 9). TLC encontró sobre el código de `pruebas` una traza de 14 estados: la parada de presupuesto del tramo 3 se abría en una transacción y el capítulo a medias se revertía en otra; si el worker caía entre las dos, la parada quedaba con un capítulo a medias y el punto 3 no lo tocaba, porque la ejecución no estaba activa. Se arregló de dos formas: la parada de presupuesto revierte el capítulo en su misma transacción (RF2-CTX-03), y el punto 5 cubre cualquier otro camino parecido. Un capítulo no completado nunca debe tener estado, así que revertirlo solo quita lo que no debería estar.
 
 El párrafo de spec1 que daba por hecho una transacción por capítulo desaparece: con tres tramos, el grafo **no** está siempre al final de la última unidad completa, y es la reversión la que lo devuelve ahí.
 
@@ -166,7 +169,7 @@ Hallazgos 4 (el bloque de hechos y conocimiento desaparece entero), 10 (`LIMIT 2
 
 El bloque del capítulo anterior, como ya pedía spec1, **se sustituye por su resumen** antes de perder párrafos.
 
-**RF2-CTX-03** *Sustituye a RF-CTX-03.* Si los elementos obligatorios no caben, `PresupuestoExcedido` y parada de presupuesto, con los bloques y sus tamaños en el informe; vale para los paquetes del redactor, del extractor y del juez de oficio. **Todo recorte, aunque el paquete quepa, se registra en la traza** con el evento `paquete_recortado`, por bloque: cuántos elementos se quitaron, cuántos tokens y si el bloque se sustituyó por su alternativa.
+**RF2-CTX-03** *Sustituye a RF-CTX-03.* Si los elementos obligatorios no caben, `PresupuestoExcedido` y parada de presupuesto, con los bloques y sus tamaños en el informe; vale para los paquetes del redactor, del extractor y del juez de oficio. La del juez de oficio llega con el capítulo a medias (tras el tramo 2), y la parada lo revierte **en su misma transacción** (añadido el 24 de septiembre de 2026, ver RF2-FALLO-06). **Todo recorte, aunque el paquete quepa, se registra en la traza** con el evento `paquete_recortado`, por bloque: cuántos elementos se quitaron, cuántos tokens y si el bloque se sustituyó por su alternativa.
 
 **RF2-CTX-11** *Requisito nuevo.* Qué es obligatorio:
 

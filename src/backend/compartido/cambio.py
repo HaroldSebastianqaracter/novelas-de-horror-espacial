@@ -41,6 +41,9 @@ class Cambio:
     sujeto: str | None = None
     atributo: str | None = None
     categoria: str | None = None
+    #: Renombrar: los nombres de OTRAS entidades que comparten una palabra con el viejo («Pedro
+    #: Reyes» al renombrar a «Reyes»). No se tocan ni cuentan como nombre viejo que queda.
+    protegidos: tuple[str, ...] = ()
 
     def como_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -48,6 +51,7 @@ class Cambio:
     @classmethod
     def desde_dict(cls, datos: dict[str, Any]) -> Cambio:
         campos: dict[str, Any] = {k: datos.get(k) for k in cls.__dataclass_fields__}
+        campos["protegidos"] = tuple(campos.get("protegidos") or ())
         return cls(**campos)
 
     @property
@@ -91,19 +95,35 @@ def mapa_de_nombres(viejo: str, nuevo: str) -> dict[str, str]:
     return dict(sorted(mapa.items(), key=lambda kv: -len(kv[0])))
 
 
-def sustituir_nombres(texto: str, mapa: dict[str, str]) -> str:
+def _palabras(claves: tuple[str, ...] | list[str]) -> re.Pattern[str]:
+    ordenadas = sorted(claves, key=len, reverse=True)
+    return re.compile(
+        r"(?<![^\W\d_])(" + "|".join(re.escape(k) for k in ordenadas) + r")(?![^\W\d_])"
+    )
+
+
+def tapar(texto: str, protegidos: tuple[str, ...]) -> str:
+    """El texto con cada nombre protegido tapado por un relleno de su misma longitud.
+
+    Conserva las posiciones, para que el inicio de frase se siga midiendo igual.
+    """
+    if not protegidos:
+        return texto
+    return _palabras(protegidos).sub(lambda m: "_" * len(m.group(1)), texto)
+
+
+def sustituir_nombres(texto: str, mapa: dict[str, str], protegidos: tuple[str, ...] = ()) -> str:
     """Cada clave del mapa, como palabra completa y escrita igual, por su valor.
 
     Palabra completa y con su mayuscula: «Luna» no toca «la luna» ni «Lunares». Todo en una
-    pasada, para que una sustitucion no se sustituya otra vez («Ana Luna» a «Luna Ana»).
+    pasada, para que una sustitucion no se sustituya otra vez («Ana Luna» a «Luna Ana»). Los
+    nombres protegidos, de otras entidades, se saltan enteros: renombrar a «Reyes» no toca a
+    «Pedro Reyes» (validador de 2fa0ee6).
     """
     if not mapa:
         return texto
-    claves = sorted(mapa, key=len, reverse=True)
-    patron = re.compile(
-        r"(?<![^\W\d_])(" + "|".join(re.escape(k) for k in claves) + r")(?![^\W\d_])"
-    )
-    return patron.sub(lambda m: mapa[m.group(1)], texto)
+    claves = [*protegidos, *mapa]
+    return _palabras(claves).sub(lambda m: mapa.get(m.group(1), m.group(1)), texto)
 
 
 def partes_viejas(viejo: str, nuevo: str) -> list[str]:
