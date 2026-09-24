@@ -162,6 +162,18 @@ def paquete(
     if vivos:
         p.anadir("siembras", "\n".join(vivos), "SIEMBRAS E HILOS VIVOS")
 
+    planificados = lectura.elementos_del_capitulo(con, novela_id, capitulo)
+    if planificados:
+        # RF3-ELE-01: lo que la escaleta puso aqui del encargo, para registrar si la prosa lo
+        # integra. Obligatorio: sin el, el extractor no conoce los codigos.
+        p.anadir(
+            "hechos",
+            "\n".join(f"- {x['codigo']} ({x['tipo']}, escena {x['escena']}): {x['texto']}"
+                      for x in planificados),
+            "ELEMENTOS DEL ENCARGO EN ESTE CAPITULO",
+            obligatorio=True,
+        )
+
     cuerpo: list[str] = []
     for e in escenas:
         texto = textos.get(int(e["orden"]), "")
@@ -551,6 +563,23 @@ def aplicar(
             "INSERT OR IGNORE INTO presencia_escena (novela_id, escena_id, personaje_id) "
             "VALUES (?,?,?)",
             (novela_id, eid, pid),
+        )
+
+    # RF3-ELE-01: un elemento del encargo integrado, solo con una cita que este en la escena.
+    codigos = {str(f["codigo"]): int(f["id"]) for f in con.execute(
+        "SELECT id, codigo FROM elemento_personal WHERE novela_id = ?", (novela_id,))}
+    for el in salida.elementos:
+        eid, elemento = escena(el.escena_orden), codigos.get(el.codigo.strip().upper())
+        if eid is None or elemento is None:
+            descartes.anotar("elementos", "codigo_o_escena_desconocidos")
+            continue
+        if normalizar(el.cita) not in prosa.get(el.escena_orden, ""):
+            descartes.anotar("elementos", "cita_que_no_esta_en_la_escena")
+            continue
+        con.execute(
+            "INSERT OR IGNORE INTO elemento_integrado (novela_id, escena_id, elemento_id, cita) "
+            "VALUES (?,?,?,?)",
+            (novela_id, eid, elemento, el.cita),
         )
 
     for eo in salida.estados_objeto:

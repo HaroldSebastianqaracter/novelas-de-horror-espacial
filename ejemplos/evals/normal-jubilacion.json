@@ -1,0 +1,35 @@
+{
+  "eval": {
+    "nombre": "normal-jubilacion",
+    "proposito": "Brief normal: destinataria mayor, tono sobrio y un regalo colectivo.",
+    "canario": ""
+  },
+  "tipo": "crear_novela",
+  "payload": {
+    "brief": {
+      "destinatario": {
+        "nombre": "Carmen Olmedo",
+        "edad": 65,
+        "pronombres": "ella",
+        "rasgos": [
+          {"texto": "Profesora de física durante cuarenta años que explica todo con una pizarra"},
+          {"texto": "Apunta en una libreta verde cada cosa que no entiende"}
+        ]
+      },
+      "recuerdos": [
+        {"texto": "Vio el primer paso en la Luna en blanco y negro en el bar de su pueblo"},
+        {"texto": "Montó con sus alumnos un telescopio con lentes de gafas viejas"}
+      ],
+      "allegados": [
+        {"nombre": "Julián", "relacion": "su marido", "rasgos": ["relojero", "habla poco"]}
+      ],
+      "ocasion": "jubilacion",
+      "quien_regala": "Sus compañeros del instituto",
+      "mensaje_dedicatoria": "Para la que nos enseñó a mirar arriba sin miedo.",
+      "intensidad": "tension",
+      "tono": "sobrio",
+      "capitulos": 10,
+      "vetados": ["cáncer"]
+    }
+  }
+}

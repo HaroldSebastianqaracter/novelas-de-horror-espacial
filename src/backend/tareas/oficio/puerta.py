@@ -266,6 +266,26 @@ def _allegados_ausentes(
     return salida
 
 
+def _elementos_sin_integrar(con: sqlite3.Connection, novela_id: int,
+                            capitulo: int) -> list[Conflicto]:
+    """Un rasgo o un recuerdo obligatorio que la escaleta puso aqui y la prosa no integra
+    (spec3, RF3-ELE-02). Lo dice el extractor, con una cita que el codigo comprueba; el allegado
+    va aparte, por su nombre (`_allegados_ausentes`)."""
+    return [
+        Conflicto(
+            comprobacion="elemento_sin_integrar", capitulo=capitulo,
+            descripcion=(
+                f"La escaleta pone {x['codigo']} ({x['tipo']}: «{x['texto']}») en la escena "
+                f"{x['escena']}, y la prosa del capitulo no lo integra. Es un elemento del "
+                "regalo: que se reconozca en esa escena, contado como parte de ella."
+            ),
+            datos={"codigo": x["codigo"], "escena": x["escena"]},
+        )
+        for x in lectura.elementos_del_capitulo(con, novela_id, capitulo)
+        if x["obligatorio"] and x["tipo"] in ("rasgo", "recuerdo") and not x["integrado"]
+    ]
+
+
 def evaluar(
     con: sqlite3.Connection, novela_id: int, capitulo: int, texto: str
 ) -> ResultadoPuerta:
@@ -344,6 +364,7 @@ def evaluar(
             conflictos.append(extra)
     conflictos.extend(_nombres_mal_escritos(con, novela_id, capitulo, texto))
     conflictos.extend(_allegados_ausentes(con, novela_id, capitulo, texto))
+    conflictos.extend(_elementos_sin_integrar(con, novela_id, capitulo))
 
     return ResultadoPuerta(puerta=4, conflictos=conflictos)
 

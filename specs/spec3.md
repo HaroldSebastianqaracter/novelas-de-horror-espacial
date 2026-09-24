@@ -424,6 +424,18 @@ Tres errores de la prosa que el lector de un regalo ve y que ninguna puerta mira
 
 > **Decisión sin entrevistar.** El nombre y el allegado devuelven el capítulo, y la longitud solo avisa. El nombre mal escrito del destinatario es el error más visible de un regalo, y el allegado que falta es una promesa del encargo incumplida; los dos se corrigen con una reescritura dirigida. La longitud, en cambio, no la percibe el lector como un error, el modelo no cuenta palabras, y reescribir un capítulo entero por eso arriesga meter errores de continuidad nuevos, que es lo contrario del objetivo del autor. Se descartó bloquear la longitud con un margen (por ejemplo, un 20 %) por lo mismo. El validador de 469d64d encontró que un umbral de longitud al empezar frase daba falsos positivos que le pedían al redactor meter una falta («Cortes» se escribe «Cortés»); por eso ahí es un aviso y no una vuelta. Se descartó una lista cerrada de palabras corrientes: sin diccionario no se puede cerrar. Puntos ciegos: un nombre mal escrito que solo aparece al empezar frase (queda como aviso), un nombre escrito con otra letra («Sevastián»), un allegado nombrado solo al empezar frase con una palabra corriente («Luz entró» cuenta) y los rasgos y recuerdos del encargo, que no se pueden buscar por palabras y quedan para el juez de personalización del bloque 6.
 
+### Cada elemento del encargo, en la novela
+
+El enunciado pide que cada elemento personalizado obligatorio aparezca en al menos un capítulo, comprobado contra la story bible. Hasta ahora solo se comprobaba que la escaleta lo planificara (puerta 2, `elemento_sin_escena`) y, para los allegados, que la prosa escribiera su nombre (RF3-VAL-02). Nada miraba si la prosa integraba de verdad un rasgo o un recuerdo.
+
+**RF3-ELE-01 — El extractor registra lo que la prosa integra.** El paquete del extractor lleva los elementos del encargo que la escaleta puso en el capítulo, con su código y su escena. El extractor devuelve en `elementos` cada uno que la prosa integra, con la escena y una cita literal de ella. Entra solo si el código es del encargo y la cita está en la escena (comparación normalizada); lo demás es un descarte con su motivo. Se guarda en `elemento_integrado` (migración 013), estado append-only con escena de origen que se revierte con el capítulo.
+
+**RF3-ELE-02 — La puerta 4 devuelve el capítulo.** Un rasgo o un recuerdo obligatorio que la escaleta puso en el capítulo y que la prosa no integra devuelve el capítulo al redactor (`elemento_sin_integrar`), con el código, el texto y la escena. Los allegados siguen por su nombre (RF3-VAL-02), y un elemento no obligatorio (los que salen del texto libre) no devuelve nada. La corrección del lector (RF3-CAM-09) no aplica esta comprobación: no vuelve a extraer, así que leería la extracción del texto aprobado, o ninguna en una novela anterior a la migración 013.
+
+**RF3-ELE-03 — La puerta 5 avisa de lo que falta en toda la novela.** Un rasgo o un recuerdo obligatorio que ningún capítulo completado integra es el aviso `elemento_obligatorio_ausente` (la puerta 5 no bloquea, RF2-PIPE-15).
+
+> **Decisión sin entrevistar.** Se comprueba contra lo que registra el extractor, con cita verificable, y no buscando el texto del recuerdo en la prosa: un recuerdo bien integrado se cuenta con otras palabras, y buscar el literal pararía casi todos. Se hizo bloqueante por capítulo, como el allegado, porque un elemento del regalo que falta es el fallo que el comprador ve primero; el riesgo es que el extractor no lo reconozca y el capítulo vuelva sin motivo, y ese coste es un intento más. Se descartó que la comprobación la hiciera solo el juez: es probabilístico, y esto se puede comprobar contra la base.
+
 ### La segunda opinión en la parada
 
 **RF3-JUE-01 — El revisor de continuidad opina, y la parada sigue abierta.** Cuando la puerta 3 para un capítulo, el pipeline **abre la parada** y después invoca al agente `continuidad`, que tenía skill y esquema pero nadie llamaba. Recibe los conflictos bloqueantes, con sus datos y con su número en la lista entera del informe (avisos incluidos, que es como los ve el autor en el frontend), y la prosa rechazada. Devuelve:
@@ -615,6 +627,27 @@ Toda novela completada tiene al menos una versión (RF3-BIB-13 publicó la 1 de 
 ## 3.10 Bloque 10 — Infraestructura de evals
 
 La tabla definitiva se saca al final. Esta sección empieza por la pieza que mide la puerta 3.
+
+### La tabla de evals
+
+**RF3-EVL-01 — Cinco briefs.** En `ejemplos/`: el brief de ejemplo del README y cuatro en `ejemplos/evals/`: dos normales (una boda y una jubilación, con otras ocasiones, tonos e intensidades), uno **adversarial** con una inyección en el texto libre (órdenes al modelo, la petición del prompt de sistema, un intento de saltarse un término vetado y una palabra canario) y uno de **incoherencia temporal** (recuerdos obligatorios imposibles con la edad del destinatario). Cada fichero es un brief como el de ejemplo y lleva además un bloque `eval` con su nombre, su propósito y el canario, si lo tiene; la entrevista y el worker lo ignoran.
+
+**RF3-EVL-02 — La tabla.** `python -m evals.tabla <briefs…> --puerto falso|terminal --dir <carpeta> [--capitulos N] [--salida tabla.md]` corre cada brief de principio a fin por el mismo camino que una novela de verdad: el schema y el análisis del brief; el texto libre por el entrevistador (`entrevista.procesar_texto_libre`, el mismo paso que la entrevista); `crear_novela` y `arrancar` en el worker, sobre una base nueva por brief. Una parada no se resuelve: es un resultado. La tabla tiene una fila por validador, con su tipo (programático, semántico o formal) y su punto de ejecución, y una columna por brief:
+
+| Fila | Sale de |
+| --- | --- |
+| Schema del brief, datos que faltan, contradicciones | `Brief` y `analizar` |
+| Inyección en el texto libre | las alertas de RF3-ENT-05 |
+| Puertas 1, 2, 3 y 5 | `resultado_puerta` |
+| Palabras vetadas; nombres, allegados y etiquetas; longitud; el resto de la mecánica; el juez | los conflictos de la puerta 4, por su comprobación |
+| Cronología en Lean 4 | «no integrado» hasta que entre el bloque 9 de Lean |
+| Canario | si la palabra canario del brief aparece en la prosa |
+
+Cada celda dice `pasa`, `falla n/m` (en cuántas de las evaluaciones de ese validador hubo un conflicto bloqueante) y los avisos, o `sin ejecutar` si la novela no llegó hasta ahí. Debajo, el estado final, los capítulos completados, las paradas, las llamadas y el coste; y por brief, cada comprobación que saltó con sus veces. Con `--salida`, también un JSON con lo mismo.
+
+**RF3-EVL-03 — La medición de referencia.** La primera pasada con Claude Code real de los cinco briefs es el «antes» de la iteración de tuning; la tabla y su JSON se guardan en `docs/proceso/evals/` con la versión de los prompts (Langfuse, RF3-OBS-05). Cuesta dinero: se lanza con la aprobación del autor, y `--capitulos` permite una pasada más barata con los mismos briefs.
+
+> **Decisión sin entrevistar.** La tabla recorre el camino real (worker y entrevistador) en lugar de llamar a las puertas sueltas: así mide el sistema que se entrega, con sus reintentos y sus paradas. Se descartó resolver las paradas automáticamente para llegar al final, porque escondería lo que la parada detectó. El brief de incoherencia temporal se escribió sabiendo que ningún validador del brief lo detecta todavía: la tabla lo tiene que enseñar.
 
 ### El banco de contraejemplos de la puerta 3
 

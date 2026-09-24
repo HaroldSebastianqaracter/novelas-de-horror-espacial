@@ -23,6 +23,8 @@ Si la prosa menciona una quemadura en el antebrazo, esa quemadura es canon a par
 
 **Observables.** Si el dato lo percibe cualquiera que esté en ese lugar, con los sentidos o en un indicador a la vista de todos (una luz que late con un patrón, un ruido, una alarma, un temblor, el frío), marca `observable: true`. Lo que se sabe por dentro, se dice en privado, se lee en un documento o solo sale en una pantalla que mira uno, no es observable. Ante la duda, `false`: marcar de más deja pasar errores de conocimiento.
 
+**Elementos del encargo.** Si te llegan los elementos personales que la escaleta puso en el capítulo (rasgos y recuerdos del destinatario, con su código), registra en `elementos` cada uno que la prosa integra: el código, la escena y una cita literal de esa escena que lo muestre. Cuenta aunque la prosa lo diga con otras palabras, siempre que se reconozca; no cuenta si solo lo roza. La cita se comprueba contra la escena.
+
 **La cita es literal y de la escena que declaras.** Copia el fragmento tal cual está en la prosa y pon el número de la escena donde aparece: si no coinciden, manda la cita.
 
 Usa `supersede_a` cuando un hecho nuevo sustituye legítimamente a uno anterior, no lo contradice: una herida que cicatriza, un objeto que se rompe, un personaje que se corta el pelo.

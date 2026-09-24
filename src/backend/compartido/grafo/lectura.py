@@ -253,6 +253,46 @@ _VISTOS_FUERA_DEL_REPARTO = """
 """
 
 
+def elementos_del_capitulo(
+    con: sqlite3.Connection, novela_id: int, numero: int
+) -> list[dict[str, Any]]:
+    """Los elementos personales que la escaleta pone en este capitulo, con la primera escena y
+    si ya consta que la prosa los integra (RF3-ELE-01)."""
+    return _filas(con.execute(
+        """
+        SELECT ep.id, ep.codigo, ep.tipo, ep.texto, ep.obligatorio, MIN(e.orden) AS escena,
+               EXISTS (SELECT 1 FROM elemento_integrado ei
+                       JOIN escena e2   ON e2.id = ei.escena_id
+                       JOIN capitulo c2 ON c2.id = e2.capitulo_id
+                       WHERE ei.elemento_id = ep.id AND c2.numero = :capitulo) AS integrado
+        FROM escena_elemento ee
+        JOIN elemento_personal ep ON ep.id = ee.elemento_id
+        JOIN escena e   ON e.id = ee.escena_id
+        JOIN capitulo c ON c.id = e.capitulo_id
+        WHERE ep.novela_id = :novela AND c.numero = :capitulo
+        GROUP BY ep.id ORDER BY ep.codigo
+        """,
+        {"novela": novela_id, "capitulo": numero},
+    ))
+
+
+def elementos_sin_integrar(con: sqlite3.Connection, novela_id: int) -> list[dict[str, Any]]:
+    """Los elementos obligatorios que ninguna escena de un capitulo completado integra."""
+    return _filas(con.execute(
+        """
+        SELECT ep.codigo, ep.tipo, ep.texto FROM elemento_personal ep
+        WHERE ep.novela_id = ? AND ep.obligatorio = 1 AND ep.tipo IN ('rasgo', 'recuerdo')
+          AND NOT EXISTS (
+                SELECT 1 FROM elemento_integrado ei
+                JOIN escena e   ON e.id = ei.escena_id
+                JOIN capitulo c ON c.id = e.capitulo_id
+                WHERE ei.elemento_id = ep.id AND c.estado = 'completado')
+        ORDER BY ep.codigo
+        """,
+        (novela_id,),
+    ))
+
+
 def censo_de_personajes(
     con: sqlite3.Connection, novela_id: int, numero: int
 ) -> list[dict[str, Any]]:
