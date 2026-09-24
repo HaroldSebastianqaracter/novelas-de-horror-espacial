@@ -1,13 +1,13 @@
 TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
-Running breadth-first search Model-Checking with fp 71 and seed 4304625199412552206 with 1 worker on 12 cores with 3572MB heap and 64MB offheap memory (Windows 11 10.0 amd64, Eclipse Adoptium 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 103 and seed -2457335836324269834 with 1 worker on 12 cores with 3572MB heap and 64MB offheap memory (Windows 11 10.0 amd64, Eclipse Adoptium 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
 Semantic processing of module Naturals
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
 Semantic processing of module StoryMaker
-Starting... (2026-09-24 12:06:27)
+Starting... (2026-09-24 12:31:03)
 Implied-temporal checking--satisfiability problem has 2 branches.
 Computing initial states...
-Finished computing initial states: 1 distinct state generated at 2026-09-24 12:06:27.
+Finished computing initial states: 1 distinct state generated at 2026-09-24 12:31:04.
 Error: Invariant SinCapituloAMedias is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -472,7 +472,7 @@ State 14: <Recuperar line 537, col 5 to line 548, col 51 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 2
 
-568 states generated, 349 distinct states found, 67 states left on queue.
+1067 states generated, 620 distinct states found, 144 states left on queue.
 The depth of the complete state graph search is 14.
 The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 9 and the 95th percentile is 4).
-Finished in 02s at (2026-09-24 12:06:28)
+Finished in 04s at (2026-09-24 12:31:07)

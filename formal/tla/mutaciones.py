@@ -24,7 +24,8 @@ from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
 
-#: Las que TLC informa como "Temporal properties were violated", sin nombre.
+#: Las que TLC informa como "Temporal properties were violated", sin nombre. Para saber cual
+#: salto, una mutacion que espera una de estas se comprueba con esa propiedad sola.
 TEMPORALES = {"EjecucionTermina", "AcabaPublicada"}
 
 #: (nombre, texto original, texto mutado, lo que tiene que saltar)
@@ -133,14 +134,17 @@ PROPERTIES
     VersionesInmutables ReanudarNoPierde CierreUnico EjecucionTermina {extra}
 """
 MODOS = {
-    "A": CONFIG.format(fallos=2, acotados="TRUE", reinicios=2, extra="AcabaPublicada"),
+    "A": CONFIG.format(fallos=3, acotados="TRUE", reinicios=3, extra="AcabaPublicada"),
     "T": CONFIG.format(fallos=1, acotados="FALSE", reinicios=1, extra=""),
 }
 
 
-def tlc(java: str, jar: str, carpeta: Path, modo: str) -> str:
-    """La primera linea de veredicto de TLC para ese modo."""
-    (carpeta / f"{modo}.cfg").write_text(MODOS[modo], encoding="utf-8")
+def tlc(java: str, jar: str, carpeta: Path, modo: str, solo: str | None = None) -> str:
+    """La primera linea de veredicto de TLC para ese modo, o solo con la propiedad `solo`."""
+    config = MODOS[modo]
+    if solo is not None:
+        config = config.split("INVARIANTS")[0] + f"PROPERTIES\n    {solo}\n"
+    (carpeta / f"{modo}.cfg").write_text(config, encoding="utf-8")
     salida = subprocess.run(
         [
             java,
@@ -200,7 +204,8 @@ def main() -> int:
             (carpeta / "StoryMaker.tla").write_text(
                 original.replace(viejo, nuevo), encoding="utf-8"
             )
-            veredictos = {modo: tlc(java, jar, carpeta, modo) for modo in MODOS}
+            solo = esperado if esperado in TEMPORALES else None
+            veredictos = {modo: tlc(java, jar, carpeta, modo, solo) for modo in MODOS}
             muerta = any(salta(v, esperado) for v in veredictos.values())
             fallos += not muerta
             detalle = "; ".join(f"{m}: {v}" for m, v in veredictos.items())

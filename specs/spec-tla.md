@@ -87,7 +87,7 @@ Hay una variable fantasma, `aprobado`, que el código no tiene. Vale verdadero s
 > - **Un autor que siempre relanza.** Esconde las resoluciones que no llevan a ningún sitio.
 
 > **Decisión sin entrevistar: dos modos de fallo.** L2 solo es cierta con fallos finitos: una puerta que falla siempre no deja publicar nunca. Si todo se comprobara con fallos acotados, la terminación de L1 vendría de ese límite y no de los topes de reintentos. Por eso hay dos modos:
-> - **Fallos acotados** (`MaxFallos`) para todas las propiedades.
+> - **Fallos acotados** (`MaxFallos`) para todas las propiedades. `MaxFallos` es 3, igual que `MaxIntentos`: con menos, ningún capítulo agota sus intentos y la parada de oficio y el fracaso del cambio del lector serían inalcanzables.
 > - **Fallos de puerta ilimitados** (`FallosDePuertaAcotados = FALSE`) para L1 y la seguridad. En este modo, lo que acota una ejecución son `MaxIntentos` y las dos escaletas. Es el único modo que detecta la mutación «la escaleta se repite sin límite».
 >
 > `MaxReinicios` acota cuántas veces el autor relanza, para que el espacio de estados sea finito. Con fallos acotados no limita nada, porque cada reinicio necesita antes un fallo.
@@ -98,7 +98,7 @@ Hay una variable fantasma, `aprobado`, que el código no tiene. Vale verdadero s
 
 | Configuración | Qué es | Resultado esperado |
 | --- | --- | --- |
-| `StoryMaker.cfg` | El modelo del enunciado: 5 capítulos, 3 intentos (2 reintentos) y 2 fallos, con el cambio del lector y con los dos arreglos del tercer contraejemplo | Pasan S1 a S11, L1 y L2 |
+| `StoryMaker.cfg` | El modelo del enunciado: 5 capítulos, 3 intentos (2 reintentos) y 3 fallos, con el cambio del lector y con los dos arreglos del tercer contraejemplo | Pasan S1 a S11, L1 y L2 |
 | `CodigoActual.cfg` | Lo mismo, sin el cambio del lector y sin los arreglos: el código de `pruebas` tal cual | S2 falla (tercer contraejemplo) |
 | `ArregloA.cfg`, `ArregloB.cfg` | El código de `pruebas` con uno solo de los dos arreglos | Pasan los invariantes: cada arreglo basta por sí solo |
 | `Terminacion.cfg` | Fallos de puerta ilimitados, una caída o `parar` y un reinicio | Pasan la seguridad y L1 |

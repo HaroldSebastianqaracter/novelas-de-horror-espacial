@@ -49,10 +49,10 @@ Salida completa de cada configuración en `salidas/`. Cifras del 24 de septiembr
 
 | Configuración | Estados distintos | Profundidad | Tiempo | Resultado |
 | --- | --- | --- | --- | --- |
-| `StoryMaker.cfg` | 1.133.998 | 89 | 6 min 43 s | Sin errores: S1 a S11, L1 y L2 |
-| `CodigoActual.cfg` | 349 | 14 | 2 s | Viola `SinCapituloAMedias` en 14 estados |
-| `ArregloA.cfg` | 61.722 | 89 | 3 s | Sin errores en los invariantes |
-| `ArregloB.cfg` | 62.282 | 89 | 3 s | Sin errores en los invariantes |
+| `StoryMaker.cfg` | 15.815.224 | 110 | 1 h 07 min | Sin errores: S1 a S11, L1 y L2 |
+| `CodigoActual.cfg` | 620 | 14 | 4 s | Viola `SinCapituloAMedias` en 14 estados |
+| `ArregloA.cfg` | 648.612 | 110 | 23 s | Sin errores en los invariantes |
+| `ArregloB.cfg` | 656.392 | 110 | 26 s | Sin errores en los invariantes |
 | `Terminacion.cfg` | 3.353.833 | 74 | 9 min 22 s | Sin errores: seguridad y L1 |
 | `CambioSinRevalidar.cfg` | 207 | 29 | 1 s | Viola `CompletadaConNovela` en 29 estados |
 | `Hallazgo1.cfg` | 27 | 11 | 1 s | Viola `CompletadaConNovela` en 11 estados |
@@ -87,20 +87,20 @@ Las propiedades se definen al final de `StoryMaker.tla`, cada una con su comenta
 - **A**: fallos acotados y todas las propiedades;
 - **T**: fallos de puerta ilimitados, con terminación y seguridad.
 
-Cada una tiene que hacer saltar justo la propiedad que se espera, no otra. El modelo de las mutaciones lleva el arreglo (a) y no el (b), para que la mutación del presupuesto tenga algo que romper. El 24 de septiembre saltaron las 13:
+Cada una tiene que hacer saltar justo la propiedad que se espera, no otra. Como TLC no dice qué propiedad temporal falló, las que esperan `EjecucionTermina` o `AcabaPublicada` se comprueban con esa propiedad sola. El modelo de las mutaciones lleva el arreglo (a) y no el (b), para que la mutación del presupuesto tenga algo que romper. El 24 de septiembre saltaron las 13:
 
 | Mutación | Lo que salta | Modo |
 | --- | --- | --- |
 | La recuperación no revierte el capítulo a medias | `SinCapituloAMedias` | A y T |
-| El oficio reintenta sin límite | `ReintentosAcotados` | T: con 3 intentos hacen falta más de 2 fallos |
-| El cambio del lector reintenta sin límite | `ReintentosAcotados` | T |
+| El oficio reintenta sin límite | `ReintentosAcotados` | A y T |
+| El cambio del lector reintenta sin límite | `ReintentosAcotados` | A y T |
 | La escaleta se repite sin límite | `EjecucionTermina` | T |
 | Un capítulo se cierra sin pasar la puerta 3 | `PublicacionConPuertas` | A y T |
-| Un cambio fracasado se aplica igual | `PublicacionConPuertas` | T |
+| Un cambio fracasado se aplica igual | `PublicacionConPuertas` | A y T |
 | El cambio reescribe un capítulo fuera del alcance | `SoloElAlcance` | A y T |
 | El cambio no vuelve a evaluar las puertas 1 y 2 | `CompletadaConNovela` | A y T |
 | La parada de presupuesto del tramo 3 no revierte en su transacción | `SinCapituloAMedias` | A y T |
-| La puerta 5 detiene en vez de completar | `AcabaPublicada` | A |
+| La puerta 5 detiene en vez de completar | `AcabaPublicada` | A (en T, `AcabaPublicada` no se cumple nunca: los fallos no tienen límite) |
 | Publicar sobrescribe la última versión | `VersionesInmutables` | A y T |
 | Relanzar no comprueba las puertas 1 y 2 | `SinTransicionInvalida` | A y T |
 | `avanzar` no mira la vigencia de la puerta 1 (la mitad del hallazgo 1) | `SinTransicionInvalida` | A y T |
