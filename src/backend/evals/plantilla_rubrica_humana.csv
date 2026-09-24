@@ -1,7 +1,7 @@
-criterio,que_mide,nota,justificacion,evidencia
-continuidad,"Hechos, nombres, cifras y tiempos no se contradicen de un capitulo a otro.",,,
-tono,El tono y la intensidad pedidos se sostienen de principio a fin.,,,
-arco,La novela plantea una pregunta dramatica y la cierra; la protagonista cambia.,,,
-coherencia_personajes,"Cada personaje actua segun lo que se ha contado de el, y su voz se distingue de las demas.",,,
-ritmo,La tension crece y alterna con respiros; ninguna parte sobra ni va con prisa.,,,
-personalizacion_natural,"Los datos del destinatario (nombre, allegados, recuerdos) estan integrados en la historia y no pegados.",,,
+﻿criterio;que_mide;nota;justificacion;evidencia
+continuidad;Hechos, nombres, cifras y tiempos no se contradicen de un capitulo a otro.;;;
+tono;El tono y la intensidad pedidos se sostienen de principio a fin.;;;
+arco;"La novela plantea una pregunta dramatica y la cierra; la protagonista cambia.";;;
+coherencia_personajes;Cada personaje actua segun lo que se ha contado de el, y su voz se distingue de las demas.;;;
+ritmo;"La tension crece y alterna con respiros; ninguna parte sobra ni va con prisa.";;;
+personalizacion_natural;Los datos del destinatario (nombre, allegados, recuerdos) estan integrados en la historia y no pegados.;;;

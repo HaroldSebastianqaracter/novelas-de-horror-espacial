@@ -8,6 +8,7 @@ humana (`origen = 'humano'`), para comparar las dos con `evals/rubrica_humana.py
 
 from __future__ import annotations
 
+import re
 import sqlite3
 from typing import Any
 
@@ -21,6 +22,28 @@ AGENTE = "rubrica"
 
 #: Una nota igual o menor deja el evento `rubrica_baja`.
 NOTA_BAJA = 2
+
+#: Una cita de menos palabras no prueba nada: «el» esta en cualquier novela.
+PALABRAS_MINIMAS_DE_CITA = 3
+
+# La tipografia que el modelo no copia igual: la cursiva del redactor (*...*), las comillas y
+# las rayas. Se quitan en los dos lados antes de comparar.
+_TIPOGRAFIA = re.compile(r"[*_«»“”„\"'‘’`]")
+_RAYAS = re.compile(r"[—–‒―-]")
+_NO_PALABRA = re.compile(r"[^\w\s]")
+
+
+def _para_comparar(texto: str) -> str:
+    sin_marcas = _RAYAS.sub(" ", _TIPOGRAFIA.sub("", texto))
+    return " ".join(normalizar(_NO_PALABRA.sub(" ", sin_marcas)).split())
+
+
+def es_cita_literal(evidencia: str, texto_normalizado: str) -> bool:
+    """La evidencia aparece en la novela, sin mirar cursivas, comillas, rayas ni puntuacion,
+    y tiene al menos `PALABRAS_MINIMAS_DE_CITA` palabras."""
+    cita = _para_comparar(evidencia)
+    return len(cita.split()) >= PALABRAS_MINIMAS_DE_CITA and f" {cita} " in texto_normalizado
+
 
 #: Que mide cada criterio. La skill los explica; el paquete los repite, para que la rubrica
 #: que usa el juez y la plantilla del humano sean la misma.
@@ -43,9 +66,9 @@ def texto_de_la_novela(con: sqlite3.Connection, novela_id: int) -> str:
         "SELECT numero FROM capitulo WHERE novela_id = ? AND estado = 'completado' "
         "ORDER BY numero", (novela_id,),
     ):
-        texto = lectura.texto_capitulo(con, novela_id, int(f["numero"]))
+        texto = lectura.texto_capitulo(con, novela_id, int(f[0]))
         if texto:
-            partes.append(f"## Capitulo {f['numero']}\n\n{texto}")
+            partes.append(f"## Capitulo {f[0]}\n\n{texto}")
     return "\n\n".join(partes)
 
 
@@ -105,12 +128,12 @@ def registrar(
     inventada no invalida la nota, pero deja constancia (se compara sin tildes ni mayusculas).
     """
     version = _version_actual(con, novela_id)
-    texto = normalizar(texto_de_la_novela(con, novela_id)) if origen == "llm" else ""
+    texto = (f" {_para_comparar(texto_de_la_novela(con, novela_id))} "
+             if origen == "llm" else "")
     bajas: list[str] = []
     for n in notas:
         evidencia = str(n.get("evidencia") or "")
-        literal = (int(bool(evidencia) and normalizar(evidencia) in texto)
-                   if origen == "llm" else None)
+        literal = int(es_cita_literal(evidencia, texto)) if origen == "llm" else None
         con.execute(
             "INSERT INTO evaluacion_rubrica (novela_id, version, origen, criterio, nota, "
             "justificacion, evidencia, evidencia_literal, llamada_id) "
@@ -129,6 +152,12 @@ def registrar_salida(con: sqlite3.Connection, novela_id: int, salida: SalidaRubr
                      llamada_id=llamada_id)
 
 
+def existe_la_tabla(con: sqlite3.Connection) -> bool:
+    """Si la base ya tiene la migracion 015."""
+    return con.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' "
+                       "AND name = 'evaluacion_rubrica'").fetchone() is not None
+
+
 def ultimas_notas(con: sqlite3.Connection, novela_id: int, origen: str) -> dict[str, int]:
     """La nota mas reciente de cada criterio para un origen."""
     salida: dict[str, int] = {}
@@ -136,7 +165,7 @@ def ultimas_notas(con: sqlite3.Connection, novela_id: int, origen: str) -> dict[
         "SELECT criterio, nota FROM evaluacion_rubrica WHERE novela_id = ? AND origen = ? "
         "ORDER BY id", (novela_id, origen),
     ):
-        salida[str(f["criterio"])] = int(f["nota"])
+        salida[str(f[0])] = int(f[1])  # por posicion: vale con o sin row_factory
     return salida
 
 

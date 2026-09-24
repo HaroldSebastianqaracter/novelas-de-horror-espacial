@@ -156,7 +156,7 @@ def test_la_revision_humana_se_importa_y_se_compara(tmp_path: Path,
                                 "--plantilla", str(plantilla)]) == 0
     lineas = plantilla.read_text(encoding="utf-8").splitlines()
     assert len(lineas) == 7
-    rellenas = [lineas[0]] + [linea.replace(",,,", ",4,Bien,") for linea in lineas[1:]]
+    rellenas = [lineas[0]] + [linea.replace(";;;", ";4;Bien;") for linea in lineas[1:]]
     plantilla.write_text("\n".join(rellenas), encoding="utf-8")
     assert rubrica_humana.main(["--db", str(ruta), "--novela", str(novela_id),
                                 "--importar", str(plantilla)]) == 0
@@ -177,3 +177,52 @@ def test_la_plantilla_del_repositorio_esta_al_dia(tmp_path: Path) -> None:
     rubrica_humana.escribir_plantilla(nueva)
     versionada = Path(rubrica_humana.__file__).parent / "plantilla_rubrica_humana.csv"
     assert versionada.read_text(encoding="utf-8") == nueva.read_text(encoding="utf-8")
+
+
+def test_la_cita_se_compara_sin_tipografia() -> None:
+    texto = " " + s_rubrica._para_comparar(  # pyright: ignore[reportPrivateUsage]
+        "*Algo respira ahi dentro*, penso. «Treinta y dos» —dijo Idoia— y se fue.") + " "
+    assert s_rubrica.es_cita_literal("algo respira ahí dentro, pensó", texto)
+    assert s_rubrica.es_cita_literal('"Treinta y dos" dijo Idoia', texto)
+    assert not s_rubrica.es_cita_literal("el", texto)
+    assert not s_rubrica.es_cita_literal("algo que no esta en la novela", texto)
+
+
+@pytest.mark.parametrize(("codificacion", "separador"), [
+    ("utf-8", ","), ("utf-8-sig", ","), ("utf-8-sig", ";"), ("cp1252", ";")])
+def test_la_plantilla_se_lee_como_la_guarda_excel(tmp_path: Path, codificacion: str,
+                                                   separador: str) -> None:
+    filas = [separador.join(rubrica_humana.COLUMNAS)]
+    filas += [f"{c}{separador}mide{separador}4{separador}Está bien{separador}"
+              for c in CRITERIOS_RUBRICA]
+    plantilla = tmp_path / "notas.csv"
+    plantilla.write_bytes("\r\n".join(filas).encode(codificacion))
+    notas = rubrica_humana.leer_plantilla(plantilla)
+    assert [n["nota"] for n in notas] == [4] * 6
+    assert notas[0]["justificacion"] == "Está bien"
+
+
+def test_la_cli_avisa_si_la_novela_no_existe(tmp_path: Path,
+                                             capsys: pytest.CaptureFixture[str]) -> None:
+    con, ruta, _, _ = _generar(activa=False)
+    con.close()
+    assert rubrica_humana.main(["--db", str(ruta), "--novela", "99", "--comparar"]) == 1
+    assert "No hay ninguna novela 99" in capsys.readouterr().out
+
+
+def test_el_exportador_sirve_con_bases_anteriores_a_la_rubrica() -> None:
+    con, _, novela_id, _ = _generar(activa=False)
+    con.execute("DROP TABLE evaluacion_rubrica")
+    informe = obs.Exportador(ClienteFalso(), marcar=False).exportar(con, novela_id)
+    assert informe.eventos > 0
+
+
+def test_la_tabla_de_evals_usa_la_ultima_rubrica() -> None:
+    from evals import tabla
+
+    con, _, novela_id, _ = _generar()
+    with pipeline.transaccion(con):
+        s_rubrica.registrar(con, novela_id, _notas(1)["notas"], origen="llm")
+    r = tabla.Resultado(nombre="x", proposito="")
+    tabla._recoger(con, novela_id, r, canario="")  # pyright: ignore[reportPrivateUsage]
+    assert r.celdas["rubrica"].startswith("media 1.0")

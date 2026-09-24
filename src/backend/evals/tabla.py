@@ -35,6 +35,7 @@ from compartido.grafo.escritura import normalizar
 from compartido.puerto import construir as construir_puerto
 from compartido.tipos import como_dict, como_lista
 from orquestador import cola
+from tareas.rubrica import servicio as s_rubrica
 
 
 @dataclass(frozen=True)
@@ -219,9 +220,8 @@ def _recoger(con: sqlite3.Connection, novela_id: int, r: Resultado, *, canario: 
     for clave in evaluaciones:
         r.celdas[clave] = _celda(evaluaciones[clave], fallos[clave], avisos[clave])
 
-    notas = [(str(c), int(n)) for c, n in con.execute(
-        "SELECT criterio, nota FROM evaluacion_rubrica WHERE novela_id = ? AND origen = 'llm' "
-        "ORDER BY id", (novela_id,))]
+    # La ultima nota de cada criterio: si la novela se completo dos veces, la segunda rubrica.
+    notas = list(s_rubrica.ultimas_notas(con, novela_id, "llm").items())
     if notas:
         bajas = [c for c, n in notas if n <= 2]
         r.celdas["rubrica"] = (f"media {sum(n for _, n in notas) / len(notas):.1f}"

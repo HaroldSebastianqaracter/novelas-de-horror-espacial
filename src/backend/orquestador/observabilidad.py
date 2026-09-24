@@ -542,8 +542,15 @@ def _inicio_de_unidad(con: sqlite3.Connection, novela_id: int, unidad: str) -> o
     if unidad == "entrevista":
         sql, params = "SELECT MIN(creado_en) FROM entrevista WHERE novela_id = ?", (novela_id,)
     elif unidad == "rubrica":
-        sql = "SELECT MIN(creado_en) FROM evaluacion_rubrica WHERE novela_id = ?"
+        # La llamada del juez primero: si fallo, no hay notas, y la traza no puede fechar
+        # «ahora» ni cambiar de fecha al importar despues la revision humana.
+        sql = ("SELECT MIN(creado_en) FROM llamada_modelo WHERE novela_id = ? "
+               "AND agente = 'rubrica'")
         params = (novela_id,)
+        fila = con.execute(sql, params).fetchone()
+        if fila is not None and fila[0] is not None:
+            return fila[0]
+        sql = "SELECT MIN(creado_en) FROM evaluacion_rubrica WHERE novela_id = ?"
     elif unidad == "cierre":
         sql = "SELECT MIN(creado_en) FROM resultado_puerta WHERE novela_id = ? AND puerta = 5"
         params = (novela_id,)
@@ -632,7 +639,11 @@ class Exportador:
             eventos.extend(self._entrevista(f, clave, traza))
             filas.append(("entrevista", int(f["id"])))
 
-        for f in self._pendientes(con, "evaluacion_rubrica", novela_id):
+        # El comando abre en solo lectura bases que pueden ser anteriores a la migracion 015.
+        tiene_rubrica = con.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'evaluacion_rubrica'"
+        ).fetchone() is not None
+        for f in self._pendientes(con, "evaluacion_rubrica", novela_id) if tiene_rubrica else []:
             eventos.append(self._rubrica(f, clave, seud, traza))
             filas.append(("evaluacion_rubrica", int(f["id"])))
 

@@ -228,3 +228,33 @@ def test_la_migracion_014_admite_la_puerta_6_y_la_parada_formal_sin_perder_nada(
     with pytest.raises(sqlite3.IntegrityError):
         x("INSERT INTO resultado_puerta (novela_id, puerta, veredicto) VALUES (?, 7, 'pasa')",
           (ids["novela"],))
+
+
+def test_la_migracion_015_conserva_langfuse_envio_y_admite_la_rubrica() -> None:
+    con = _base_v1()
+    ids = _poblar(con)
+    for m in db._migraciones_pendientes(1):
+        if m.numero >= 15:
+            break
+        sql = m.sql.read_text(encoding="utf-8") if m.sql else ""
+        db._aplicar_version(con, m.numero, sql, db._paso_python(m.python) if m.python else None)
+    x = con.execute
+    x("INSERT INTO langfuse_envio (tabla, fila_id, novela_id) VALUES ('llamada_modelo', 7, ?)",
+      (ids["novela"],))
+    x("INSERT INTO langfuse_envio (tabla, fila_id, novela_id) VALUES ('entrevista', 3, NULL)")
+    antes = x("SELECT tabla, fila_id, novela_id, enviado_en FROM langfuse_envio "
+              "ORDER BY tabla").fetchall()
+
+    assert db.migrar(con) == [15]
+
+    assert x("SELECT tabla, fila_id, novela_id, enviado_en FROM langfuse_envio "
+             "ORDER BY tabla").fetchall() == antes
+    x("INSERT INTO langfuse_envio (tabla, fila_id) VALUES ('evaluacion_rubrica', 1)")
+    with pytest.raises(sqlite3.IntegrityError):
+        x("INSERT INTO langfuse_envio (tabla, fila_id) VALUES ('inventada', 1)")
+    x("INSERT INTO evaluacion_rubrica (novela_id, origen, criterio, nota) "
+      "VALUES (?, 'humano', 'ritmo', 4)", (ids["novela"],))
+    with pytest.raises(sqlite3.IntegrityError):
+        x("INSERT INTO evaluacion_rubrica (novela_id, origen, criterio, nota) "
+          "VALUES (?, 'humano', 'ritmo', 6)", (ids["novela"],))
+    assert x("PRAGMA foreign_key_check").fetchall() == []
