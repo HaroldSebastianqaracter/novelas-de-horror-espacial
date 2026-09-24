@@ -77,6 +77,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/novelas/{novela_id}/apariciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ver Apariciones */
+        get: operations["ver_apariciones_novelas__novela_id__apariciones_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/novelas/{novela_id}/cambios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Cambios */
+        get: operations["listar_cambios_novelas__novela_id__cambios_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/novelas/{novela_id}/cambios/alcance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ver Alcance
+         * @description La misma regla que usa el worker para decidir que reescribe (RF3-CAM-05).
+         */
+        get: operations["ver_alcance_novelas__novela_id__cambios_alcance_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/novelas/{novela_id}/cambios/{cambio_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ver Cambio */
+        get: operations["ver_cambio_novelas__novela_id__cambios__cambio_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/novelas/{novela_id}/canon/{entidad}": {
         parameters: {
             query?: never;
@@ -364,6 +435,14 @@ export interface components {
             /** Numero */
             numero: number;
         };
+        /**
+         * Alcance
+         * @description Los capitulos que reescribiria un cambio (spec3, RF3-CAM-05).
+         */
+        Alcance: {
+            /** Capitulos */
+            capitulos: number[];
+        };
         /** AmenazaCanon */
         AmenazaCanon: {
             /**
@@ -381,6 +460,61 @@ export interface components {
             reglas?: components["schemas"]["ReglaAmenaza"][];
             /** Tema Id */
             tema_id?: number | null;
+        };
+        /** Aparicion */
+        Aparicion: {
+            /** Capitulos */
+            capitulos: number[];
+            /** Id */
+            id: number;
+            /** Nombre */
+            nombre: string;
+        };
+        /**
+         * Apariciones
+         * @description Donde aparece cada personaje y cada lugar, para la ficha (spec3, RF3-LEC-02).
+         */
+        Apariciones: {
+            /** Lugares */
+            lugares: components["schemas"]["Aparicion"][];
+            /** Personajes */
+            personajes: components["schemas"]["Aparicion"][];
+        };
+        /**
+         * CambioVista
+         * @description Un cambio del lector y lo que se hizo con el (spec3, RF3-CAM-13).
+         */
+        CambioVista: {
+            /** Alertas */
+            alertas?: string[];
+            /** Cambio */
+            cambio?: {
+                [key: string]: unknown;
+            } | null;
+            /** Capitulos */
+            capitulos?: number[];
+            /** Cita */
+            cita?: {
+                [key: string]: unknown;
+            } | null;
+            /** Creado En */
+            creado_en: string;
+            /** Estado */
+            estado: string;
+            /** Id */
+            id: number;
+            /** Informe */
+            informe?: {
+                [key: string]: unknown;
+            } | null;
+            /** Objetivo */
+            objetivo: {
+                [key: string]: unknown;
+            };
+            /** Peticion */
+            peticion: string;
+            /** Version */
+            version?: number | null;
         };
         /** Capitulo */
         Capitulo: {
@@ -783,8 +917,11 @@ export interface components {
         };
         /** NovelaDetalle */
         NovelaDetalle: {
+            /** Dedicatoria */
+            dedicatoria?: string | null;
             estilo?: components["schemas"]["EstiloNarrativo"] | null;
             novela: components["schemas"]["NovelaCanon"];
+            regalo?: components["schemas"]["Regalo"] | null;
             /** Restricciones */
             restricciones: {
                 [key: string]: string;
@@ -822,7 +959,7 @@ export interface components {
              * Tipo
              * @enum {string}
              */
-            tipo: "crear_novela" | "arrancar" | "parar" | "relanzar" | "resolver_parada";
+            tipo: "crear_novela" | "arrancar" | "parar" | "relanzar" | "resolver_parada" | "cambio_lector";
         };
         /** ObjetoCanon */
         ObjetoCanon: {
@@ -918,6 +1055,18 @@ export interface components {
             posicion: number;
             /** Tipo */
             tipo: string;
+        };
+        /**
+         * Regalo
+         * @description Para la portada: para quien, de quien y la ocasion legible (spec3, RF3-LEC-01).
+         */
+        Regalo: {
+            /** De */
+            de?: string | null;
+            /** Ocasion */
+            ocasion?: string | null;
+            /** Para */
+            para: string;
         };
         /** ReglaAmenaza */
         ReglaAmenaza: {
@@ -1185,6 +1334,135 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NovelaDetalle"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ver_apariciones_novelas__novela_id__apariciones_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                novela_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Apariciones"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listar_cambios_novelas__novela_id__cambios_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                novela_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CambioVista"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ver_alcance_novelas__novela_id__cambios_alcance_get: {
+        parameters: {
+            query?: {
+                entidad?: ("personajes" | "lugares" | "objetos") | null;
+                id?: number | null;
+                hecho_id?: number | null;
+            };
+            header?: never;
+            path: {
+                novela_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Alcance"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ver_cambio_novelas__novela_id__cambios__cambio_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                novela_id: number;
+                cambio_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CambioVista"];
                 };
             };
             /** @description Validation Error */

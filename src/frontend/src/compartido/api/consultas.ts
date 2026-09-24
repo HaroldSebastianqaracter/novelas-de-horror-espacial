@@ -3,6 +3,7 @@
  * guarda datos propios, solo la caché de lo que dice el servidor.
  */
 import { queryOptions } from "@tanstack/react-query";
+import { leerCambios, type ObjetivoCambio } from "./cambios";
 import { api, ErrorApi, leer } from "./cliente";
 import { comoEstadoEjecucion, ESTADOS_ACTIVOS } from "./reglas";
 
@@ -17,6 +18,7 @@ export const claves = {
   versiones: (id: number) => ["novelas", id, "versiones"] as const,
   version: (id: number, n: number) => ["novelas", id, "versiones", n] as const,
   canon: (id: number, entidad: EntidadLectura) => ["novelas", id, "canon", entidad] as const,
+  apariciones: (id: number) => ["novelas", id, "apariciones"] as const,
   intencion: (id: number) => ["intenciones", id] as const,
 };
 
@@ -110,17 +112,6 @@ export const consultaHechosDeCapitulo = (novelaId: number, capitulo: number) =>
       ),
   });
 
-export const consultaUsosDeHecho = (novelaId: number, hechoId: number) =>
-  queryOptions({
-    queryKey: [...claves.novela(novelaId), "hechos", "usos", hechoId] as const,
-    queryFn: () =>
-      leer(
-        api.GET("/novelas/{novela_id}/hechos/{hecho_id}/usos", {
-          params: { path: { novela_id: novelaId, hecho_id: hechoId } },
-        }),
-      ),
-  });
-
 /** La misma consulta que usa el seguidor de intenciones: comparten caché. */
 export const consultaIntencion = (intencionId: number) =>
   queryOptions({
@@ -138,6 +129,34 @@ export const consultaCanon = (novelaId: number, entidad: EntidadLectura) =>
           params: { path: { novela_id: novelaId, entidad } },
         }),
       ),
+  });
+
+/** Dónde aparece cada personaje y cada lugar, en los capítulos completados (RF3-LEC-02). */
+export const consultaApariciones = (novelaId: number) =>
+  queryOptions({
+    queryKey: claves.apariciones(novelaId),
+    queryFn: () =>
+      leer(api.GET("/novelas/{novela_id}/apariciones", { params: { path: { novela_id: novelaId } } })),
+  });
+
+/** Los cambios del lector de la novela, con lo que entendió el intérprete y la versión que publicaron. */
+export const consultaCambios = (novelaId: number) =>
+  queryOptions({
+    queryKey: [...claves.novela(novelaId), "cambios", "lista"] as const,
+    queryFn: () => leerCambios(novelaId),
+  });
+
+/** Los capítulos que reescribiría un cambio, con la regla del worker (RF3-CAM-05). Un fragmento no tiene. */
+export const consultaAlcance = (novelaId: number, objetivo: ObjetivoCambio | undefined) =>
+  queryOptions({
+    queryKey: [...claves.novela(novelaId), "cambios", "alcance", objetivo ?? null] as const,
+    queryFn: () => {
+      if (!objetivo || objetivo.tipo === "fragmento") throw new Error("Un fragmento no tiene alcance previo");
+      const query =
+        objetivo.tipo === "hecho" ? { hecho_id: objetivo.hecho_id } : { entidad: objetivo.entidad, id: objetivo.id };
+      return leer(api.GET("/novelas/{novela_id}/cambios/alcance", { params: { path: { novela_id: novelaId }, query } }));
+    },
+    enabled: !!objetivo && objetivo.tipo !== "fragmento",
   });
 
 /** Un 4xx no mejora reintentando: se enseña ya. Los fallos de red y los 5xx, hasta tres veces. */

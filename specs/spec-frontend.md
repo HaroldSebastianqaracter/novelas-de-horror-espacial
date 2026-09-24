@@ -2,7 +2,7 @@
 
 Requisitos del frontend web: un tablero al estilo Jira para ver las novelas y su generación, el detalle de una novela con sus capítulos, las paradas y la creación de una novela desde un brief. Desde la versión 0.2 es también **la lectura de la entrega**: portada, índice, ficha de personajes y lugares, versiones con sus novedades, el cambio del lector y la exportación a PDF.
 
-Versión 0.2 · 24 de septiembre de 2026 (la 0.1, del 23, era el tablero)
+Versión 0.3 · 24 de septiembre de 2026 (la 0.1, del 23, era el tablero; la 0.2, la lectura contra MSW; la 0.3, la lectura contra el backend integrado)
 
 > **Cómo leer este documento.** Se apoya en [spec1](spec1.md) (API y estados), [spec2](spec2.md) (paradas y reanudación) y [spec3](spec3.md) (brief), y no cambia ninguno. Los requisitos llevan el prefijo `RF-FE-`. Los callouts **Decisión entrevistada** y **Decisión de la spec** marcan qué se preguntó al autor y qué se decidió sin él. El plan de verificación está en [spec-frontend-verification.md](spec-frontend-verification.md).
 
@@ -115,6 +115,7 @@ Una funcionalidad no importa del interior de otra. Lo común baja a `compartido/
 | `estado` y `fase` de `Ejecucion` y `NovelaResumen`, el `tipo` y el `estado` de `Parada` y el `estado` de una intención salen como `string`, no como enumerados | El compilador no avisa si el backend añade un estado | `reglas.ts` declara las uniones (`EstadoEjecucion`, `Fase`, `TipoParada`, `EstadoIntencion`) desde `compartido/tipos.py` y convierte cada `string` al leerlo. Un valor desconocido se pinta tal cual con aviso y no rompe la pantalla |
 | `NovelaResumen` no trae `fase` ni `total_capitulos` | La tarjeta no puede pintar fase ni progreso | Una consulta de `/ejecucion` por novela visible. Con pocas novelas es aceptable |
 | El `422` de `brief_incompleto` no está en el OpenAPI | El cuerpo del error no se tipa | Se tipa en `brief.ts` desde RF3-PER-05 |
+| El `payload` de `cambio_lector` y los campos `objetivo`, `cita` y `cambio` de `CambioVista` son objetos libres, y el `422` de `cambio_invalido` no está en el OpenAPI | No se generan sus tipos | `compartido/api/cambios.ts`, escrito a mano desde spec3 (RF3-CAM-01, RF3-CAM-13). El tipo `cambio_lector`, `/cambios`, `/cambios/alcance` y `/apariciones` ya salen de `esquema.gen.ts` |
 
 ### 3.3 Estado y datos
 
@@ -312,20 +313,19 @@ graph LR
 
 > **Decisión de la spec.** Leer de las versiones, y no de `/capitulos/{n}`, hace que la lectura, sus novedades y su PDF hablen siempre del mismo texto, y que una versión anterior se lea exactamente igual que la actual. El lector de consola (RF-FE-LEC) sigue sirviendo los capítulos cerrados mientras se genera.
 
-**RF-FE-LEE-02 — Portada.** El título de la versión, su dedicatoria y, debajo, la línea del regalo: para quién es, de parte de quién y por qué ocasión. Mientras la API no dé esos tres datos (sección 5.2), la portada muestra solo el título y la dedicatoria de la versión. En la portada están también el índice, el enlace a la ficha, las novedades si la versión no es la primera, y los botones de versiones y de exportar a PDF.
+**RF-FE-LEE-02 — Portada.** El título de la versión, su dedicatoria y, debajo, la línea del regalo de `NovelaDetalle.regalo` (RF3-LEC-01): «Para Oda Varga · De Lía y Marcos · Cumpleaños», sin la parte que falte. Una novela que no es un regalo (`regalo` nulo) no lleva la línea. La dedicatoria es la de la versión, porque un cambio del lector puede cambiarla; el regalo sale del brief y es el mismo en todas. En la portada están también el índice, el enlace a la ficha, las novedades si la versión no es la primera, y los botones de versiones y de exportar a PDF.
 
 **RF-FE-LEE-03 — Índice navegable.** Un elemento por capítulo de la versión, «Capítulo N» con su número de palabras, enlazado a su lectura. Los capítulos que cambiaron en esa versión llevan la marca «cambió en la versión N». No se enseñan el objetivo ni el resumen de la escaleta: son notas de autor y destripan la trama.
 
 **RF-FE-LEE-04 — Ficha de personajes y lugares.** Sale de `GET /canon/personajes` y `GET /canon/lugares`. De cada personaje: nombre, rol y edad. De cada lugar: nombre, tipo y descripción. Y de cada uno, «aparece en»: los capítulos donde aparece, cada uno enlazado a su lectura.
 
-- Lo que viene de la API (sección 5.2, `GET /apariciones`) manda: la vista `presencia` para los personajes y el lugar de cada escena para los lugares.
-- Mientras no exista, «aparece en» se calcula desde `/estructura`: el punto de vista y el reparto de cada escena para los personajes, y su lugar para los lugares, casados por nombre. La página avisa de que es la escaleta y no la prosa.
+«Aparece en» sale de `GET /apariciones` (RF3-LEC-02), por id: la vista `presencia` para los personajes (reparto, punto de vista, presencias, usos de conocimiento y estados) y el lugar de cada escena para los lugares. Solo cuentan los capítulos que existen en la versión que se lee.
 
 No se enseñan los campos de oficio del personaje (deseo, necesidad, fantasma, herida, mentira, defecto, arco, secreto, idiolecto): son la maquinaria del autor y destripan la historia.
 
-En una versión anterior, el canon y la escaleta siguen siendo los de ahora, y un cambio del lector puede haber renombrado a alguien desde entonces. Para que la ficha no contradiga el texto que se lee, «aparece en» se busca en la prosa de esa versión (el nombre, por palabras completas), y la página avisa de que la ficha es la de la versión actual.
+En una versión anterior, el canon es el de ahora, y un cambio del lector puede haber renombrado a alguien desde entonces. «Aparece en» sigue saliendo de `/apariciones`: un cambio del lector renombra o cambia un hecho, pero no mueve a nadie de capítulo (RF3-CAM-08). El nombre sí cambia, y sale de `GET /cambios`: cada entidad que un cambio aplicado con una versión posterior renombró lleva el nombre que tenía entonces, «Vaan (ahora Corvo)», salvo que un cambio posterior lo haya devuelto al nombre de ahora. La página avisa de que el resto de la ficha es la de la versión actual. Un relanzamiento sí regenera capítulos (motivo `relanzamiento`, RF3-BIB-12): en los que uno posterior reescribió, la presencia de ahora no vale para el texto que se lee, y «aparece en» se busca en ese texto por el nombre de entonces, por palabras completas. La página dice qué capítulos son.
 
-> **Decisión de la spec.** El enunciado pide «enlaces al capítulo donde aparece cada uno». La presencia real está en la vista `presencia` (migración 008), que la API no sirve todavía. La escaleta es una aproximación honesta y disponible hoy: peca de no ver a quien aparece sin estar en el reparto. El aviso deja claro de dónde sale.
+> **Decisión de la spec.** Hasta la 0.2, en una versión anterior «aparece en» se buscaba en la prosa, por el nombre. La prueba contra el backend real lo desmintió: los lugares y los personajes secundarios casi nunca se nombran en cada capítulo donde están, y la ficha de la versión 1 decía «no aparece» de quien sí aparecía en la de la versión 2. Se descartó mantener la búsqueda en la prosa solo para los renombrados: la presencia no depende del nombre. La prosa queda solo para los capítulos que un relanzamiento reescribió después, donde la story bible ya describe otro texto y no hay otra fuente de esa versión; el aviso lo dice (validador del paso 13).
 
 **RF-FE-LEE-05 — Capítulo.** `/novelas/:id/lectura/capitulos/:n?version=m` pinta el capítulo de la versión con la tipografía de lectura y las escenas separadas por el ornamento (como RF-FE-LEC-01), con anterior y siguiente, y la vuelta al índice. Si el capítulo cambió en esa versión, un interruptor «ver qué cambió» (RF-FE-LEE-07).
 
@@ -377,11 +377,10 @@ Se elige uno. Debajo, «qué quieres cambiar»: texto libre de 3 a 300 caractere
 
 **RF-FE-CAM-03 — Alcance antes de confirmar.** Antes de enviar, el panel dice qué capítulos se van a reescribir:
 
-- En un hecho, sus capítulos de `GET /hechos/{id}/usos`.
-- En una entidad, los capítulos de la versión cuya prosa escribe su nombre, la misma regla que usa el worker para renombrar.
+- En un hecho o una entidad, los capítulos de `GET /cambios/alcance` (RF3-CAM-05), con la misma regla que aplicará el worker.
 - En un fragmento, «el capítulo N y los que dependan de lo que cambie; lo decide el worker».
 
-Mientras la API no dé el alcance calculado por el worker (sección 5.2), se llama «estimación». Se confirma en dos pasos, como RF-FE-PAR-03: reescribir capítulos cuesta tiempo y, con Claude Code real, dinero.
+Si la API no da el alcance, el panel lo dice («el worker lo decidirá al aplicarlo») y no enseña uno inventado: la estimación en el cliente de la 0.2 se retiró al llegar la ruta. Se confirma en dos pasos, como RF-FE-PAR-03: reescribir capítulos cuesta tiempo y, con Claude Code real, dinero.
 
 **RF-FE-CAM-04 — Envío y seguimiento.** Se envía `cambio_lector` (contrato en la sección 5.2). Un `422 cambio_invalido` se enseña en el panel, que conserva lo escrito. Con el `202`, el panel se cierra y lo sigue una franja no bloqueante en la lectura, que sobrevive a recargar porque solo guarda la intención (en `sessionStorage`). Todo lo demás lo consulta:
 
@@ -405,7 +404,7 @@ Un cambio terminado (aplicado, rechazado, fallido o interrumpido) deja de bloque
 4. Los capítulos, cada uno en página nueva.
 5. La ficha de personajes y lugares como apéndice.
 
-Una hoja de estilos `@media print` quita la navegación y fija el tamaño de página (A5), los márgenes y los saltos. Los enlaces internos son anclas, y el PDF los conserva. La vista marca `data-listo-para-imprimir` cuando tiene todo lo que necesita (la versión, el canon y la escaleta), y es lo que espera `npm run pdf`. Si el canon o la escaleta fallan, marca `data-error-impresion`, lo dice, no abre el diálogo de imprimir, y `npm run pdf` sale con error sin guardar un PDF incompleto.
+Una hoja de estilos `@media print` quita la navegación y fija el tamaño de página (A5), los márgenes y los saltos. Los enlaces internos son anclas, y el PDF los conserva. La vista marca `data-listo-para-imprimir` cuando tiene todo lo que necesita (la versión, el canon, las apariciones, la novela con su línea del regalo y, en una versión anterior, los cambios para sus nombres), y es lo que espera `npm run pdf`. Si algo de eso falla, marca `data-error-impresion`, lo dice, no abre el diálogo de imprimir, y `npm run pdf` sale con error sin guardar un PDF incompleto.
 
 **RF-FE-PDF-02 — Desde la lectura.** El botón «Exportar a PDF» abre la vista de impresión y lanza el diálogo de imprimir del navegador, donde se elige «Guardar como PDF».
 
@@ -442,7 +441,7 @@ Ninguno bloquea la v1. Cada uno retira un fichero de deuda de RF-FE-API-04:
 
 ### 5.2 Contrato para la lectura y el cambio del lector
 
-Lo que la lectura necesita y la API no da todavía. Se envió a la sesión del backend (novelasv2-f4), que implementa el bloque 8, antes de programarlo contra el backend. Lo aceptó con los ajustes que ya recoge esta sección, y lo escribió en spec3, secciones 3.7 y 3.8. Mientras tanto, el frontend trabaja contra MSW con este contrato y con las aproximaciones que cada requisito dice. Los tipos van escritos a mano en `compartido/api/cambios.ts`, que es deuda de RF-FE-API-04 hasta que lleguen al OpenAPI.
+Lo que la lectura necesitaba y la API no daba. Se envió a la sesión del backend (novelasv2-f4), que implementa el bloque 8, antes de programarlo contra el backend. Lo aceptó con los ajustes que ya recoge esta sección, lo escribió en spec3, secciones 3.7 y 3.8, y está integrado en `pruebas` (`c43aa9a`). Los tipos salen de `esquema.gen.ts`; en `compartido/api/cambios.ts` queda solo lo que el OpenAPI no tipa (RF-FE-API-04). Lo que el backend dio de más: `cambio` trae también `tabla` y `entidad_id` del renombrado, que la ficha de una versión anterior usa para sus nombres (RF-FE-LEE-04).
 
 **Intención `cambio_lector`.** Por `POST /intenciones`, como las demás:
 
@@ -478,7 +477,7 @@ Lo que la lectura necesita y la API no da todavía. Se envió a la sesión del b
 - **Si fracasa** (tres intentos sin pasar las comprobaciones o la puerta 4), no abre parada: no se aplica nada, la ejecución vuelve a `completada*` sin versión nueva, y queda el evento `cambio_fallido` con el informe. Si el autor lo para, queda en `detenida`.
 - **Seguimiento:** `GET /novelas/{id}/cambios` y `GET /novelas/{id}/cambios/{cambio_id}` → `{ id, estado, peticion, objetivo, cita, cambio, capitulos, informe, version, creado_en }`, con `estado` en `interpretando`, `rechazado`, `reescribiendo`, `aplicado`, `fallido` o `interrumpido`, y `cambio` como lo entendió el intérprete (`tipo` `renombrar` o `cambiar_hecho`, `antes`, `despues`).
 
-**Alcance sin escribir.** `GET /novelas/{id}/cambios/alcance?entidad=personajes&id=14` o `?hecho_id=31`, que devuelve `{ "capitulos": [3, 5, 8] }` con la misma regla que usará el worker. Para renombrar, cuenta solo la prosa que escribe el nombre, no el reparto. Retira la «estimación» de RF-FE-CAM-03. Mientras no exista, el cliente estima: en un hecho, sus usos; en una entidad, los capítulos de la versión cuya prosa escribe el nombre.
+**Alcance sin escribir.** `GET /novelas/{id}/cambios/alcance?entidad=personajes&id=14` o `?hecho_id=31`, que devuelve `{ "capitulos": [3, 5, 8] }` con la misma regla que usará el worker. Para renombrar, cuenta solo la prosa que escribe el nombre, no el reparto. Retiró la «estimación» en el cliente de RF-FE-CAM-03.
 
 **Portada.** En `NovelaDetalle`: `dedicatoria` (la de `novela`) y `regalo: { para, de, ocasion }`, con el nombre del destinatario, `quien_regala` y la ocasión legible del brief, o `null` en una novela sin brief. Retira la portada reducida de RF-FE-LEE-02.
 
@@ -501,7 +500,7 @@ Los personajes salen de la vista `presencia` y los lugares, del lugar de cada es
 >
 > La demostración contra el backend real se hizo el 23-09 y añadió RF-FE-DAT-06. También destapó un fallo del backend que el frontend no puede corregir: la API responde `500` a ratos, porque la dependencia `leer` de `main.py` abre la conexión SQLite en un hilo del pool y la usa o la cierra en otro (`sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread`). Con varias consultas a la vez, como hace cada pantalla, salta en casi todas las cargas. El frontend lo absorbía porque reintenta los `5xx` (RF-FE-DAT-01). El backend lo corrigió en `1c5a319` (RF2-API-06), y repetida la demostración con ese cambio, la API no dio ningún `500`.
 
-> **Ronda de la lectura (24 de septiembre de 2026).** Pasos 8 a 13, un commit por paso. El 10 se programa contra MSW con el contrato de la sección 5.2 hasta que el backend lo implemente. Hechos: 8, 9 (la ficha, de momento desde la escaleta, y la portada sin la línea del regalo hasta que la API la sirva) 10 contra MSW (falta probarlo contra el backend cuando f4 lo integre) 11 (el PDF de ejemplo, cuando haya una novela real completada con versión) y la configuración del paso 12. La inspección del paso 12 necesita reabrir Claude Code para que cargue el servidor MCP.
+> **Ronda de la lectura (24 de septiembre de 2026).** Pasos 8 a 13, un commit por paso. El 10 se programó contra MSW con el contrato de la sección 5.2 y, con el backend integrado, el paso 13 lo engancha: tipos regenerados, `/apariciones` en la ficha, la línea del regalo en la portada, el alcance del worker en el panel, y la prueba del cambio del lector y del PDF contra la API y el worker reales con el puerto falso. Hechos: 8 a 11, 13 y la configuración del paso 12. Quedan el PDF de ejemplo (de la novela de 10 capítulos que se está generando), la inspección del paso 12, que necesita reabrir Claude Code para que cargue el servidor MCP, y la demostración con Claude Code real para el vídeo.
 
 1. Andamiaje, tokens, rutas, tipos generados y MSW.
 2. Tablero general, sin arrastre: columnas, tarjetas, sondeo.

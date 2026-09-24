@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState } from "react";
-import { errorDeCambio, LIMITES_CAMBIO, leerAlcance, type ObjetivoCambio } from "../../compartido/api/cambios";
-import { consultaCanon, consultaHechosDeCapitulo, consultaUsosDeHecho, type EntidadLectura } from "../../compartido/api/consultas";
+import { errorDeCambio, LIMITES_CAMBIO, type ObjetivoCambio } from "../../compartido/api/cambios";
+import { consultaAlcance, consultaCanon, consultaHechosDeCapitulo, type EntidadLectura } from "../../compartido/api/consultas";
 import { useIntenciones } from "../../compartido/api/intenciones";
 import type { components } from "../../compartido/api/esquema.gen";
 import { contieneTermino } from "./texto";
@@ -12,9 +12,6 @@ interface Opcion {
   clave: string;
   etiqueta: string;
   objetivo: ObjetivoCambio;
-  /** Para la estimación del alcance cuando la API no la da. */
-  nombre?: string;
-  hechoId?: number;
 }
 
 const ENTIDADES: readonly [EntidadLectura, string][] = [
@@ -67,7 +64,7 @@ export function PanelCambio({
     for (const e of canon[entidad]) {
       if (!("nombre" in e)) continue;
       if (cita === null || contieneTermino(cita, e.nombre)) {
-        opciones.push({ clave: `${entidad}-${e.id}`, etiqueta: `${e.nombre} (${tipo})`, objetivo: { tipo: "entidad", entidad, id: e.id }, nombre: e.nombre });
+        opciones.push({ clave: `${entidad}-${e.id}`, etiqueta: `${e.nombre} (${tipo})`, objetivo: { tipo: "entidad", entidad, id: e.id } });
       }
     }
   }
@@ -78,7 +75,6 @@ export function PanelCambio({
           clave: `hecho-${h.id}`,
           etiqueta: `Un hecho: ${h.sujeto_nombre ?? ""} · ${h.atributo.replaceAll("_", " ")}: ${h.valor}`,
           objetivo: { tipo: "hecho", hecho_id: h.id },
-          hechoId: h.id,
         });
       }
     }
@@ -86,22 +82,8 @@ export function PanelCambio({
   }
   const opcion = opciones.find((o) => o.clave === elegida) ?? opciones[0];
 
-  // Alcance: el de la API si lo da; si no, una estimación (RF-FE-CAM-03).
-  const alcanceApi = useQuery({
-    queryKey: ["novelas", novelaId, "cambios", "alcance", opcion?.clave],
-    queryFn: () => leerAlcance(novelaId, opcion?.objetivo ?? { tipo: "fragmento" }) ?? Promise.resolve(null),
-    enabled: !!opcion && opcion.objetivo.tipo !== "fragmento",
-    retry: false,
-  });
-  const usos = useQuery({ ...consultaUsosDeHecho(novelaId, opcion?.hechoId ?? 0), enabled: !!opcion?.hechoId && alcanceApi.isError });
-  let alcance: { capitulos: number[]; estimado: boolean } | null = null;
-  if (alcanceApi.data) alcance = { capitulos: alcanceApi.data.capitulos, estimado: false };
-  else if (alcanceApi.isError && opcion?.nombre) {
-    const nombre = opcion.nombre;
-    alcance = { capitulos: version.capitulos.filter((c) => contieneTermino(c.texto, nombre)).map((c) => c.numero), estimado: true };
-  } else if (alcanceApi.isError && usos.data) {
-    alcance = { capitulos: [...new Set(usos.data.map((u) => u.capitulo))].sort((a, b) => a - b), estimado: true };
-  }
+  // Alcance: el de la API, con la misma regla que usará el worker (RF-FE-CAM-03).
+  const alcance = useQuery({ ...consultaAlcance(novelaId, opcion?.objetivo), retry: false });
 
   const texto = peticion.trim();
   const peticionValida = texto.length >= LIMITES_CAMBIO.peticionMin && texto.length <= LIMITES_CAMBIO.peticionMax;
@@ -198,13 +180,15 @@ export function PanelCambio({
         <p className="panel-cambio__alcance" role="status">
           {opcion?.objetivo.tipo === "fragmento"
             ? `Se reescribirá el capítulo ${capitulo} y los que dependan de lo que cambie; lo decide el worker.`
-            : alcance
-              ? alcance.capitulos.length
-                ? `Se reescribirán ${enumerar(alcance.capitulos)}${alcance.estimado ? " (estimación)" : ""}.`
-                : `No se reescribirá ningún capítulo${alcance.estimado ? " (estimación)" : ""}.`
-              : opcion
-                ? "Calculando qué capítulos se reescribirán…"
-                : ""}
+            : alcance.data
+              ? alcance.data.capitulos.length
+                ? `Se reescribirán ${enumerar(alcance.data.capitulos)}.`
+                : "No se reescribirá ningún capítulo."
+              : alcance.isError
+                ? "No se pudo calcular qué capítulos se reescribirán: el worker lo decidirá al aplicarlo."
+                : opcion
+                  ? "Calculando qué capítulos se reescribirán…"
+                  : ""}
         </p>
         {armado && (
           <p className="panel-cambio__aviso">

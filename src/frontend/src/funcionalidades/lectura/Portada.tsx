@@ -1,4 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
+import { consultaNovela } from "../../compartido/api/consultas";
+import type { Regalo } from "../../compartido/api/tipos";
 import { Hace } from "../../compartido/ui/Hace";
 import { useTitulo } from "../../compartido/ui/titulo";
 import { useLecturaActual } from "./MarcoLectura";
@@ -8,7 +11,8 @@ const miles = new Intl.NumberFormat("es-ES");
 
 /** Portada, novedades e índice de una versión (RF-FE-LEE-02, RF-FE-LEE-03, RF-FE-LEE-06). */
 export function Portada() {
-  const { version, numero, enlace } = useLecturaActual();
+  const { novelaId, version, numero, enlace } = useLecturaActual();
+  const novela = useQuery(consultaNovela(novelaId));
   useTitulo(version.titulo || "Lectura");
   const conNovedades = (numero ?? 1) > 1;
   const cambiados = new Set(version.capitulos_cambiados);
@@ -21,6 +25,7 @@ export function Portada() {
           {version.titulo || "Sin título"}
         </h1>
         {version.dedicatoria && <p className="portada__dedicatoria">{version.dedicatoria}</p>}
+        <LineaRegalo regalo={novela.data?.regalo} />
       </article>
 
       {conNovedades && <Novedades />}
@@ -46,6 +51,17 @@ export function Portada() {
         </p>
       </nav>
     </div>
+  );
+}
+
+/** Para quién es, de parte de quién y por qué ocasión (RF-FE-LEE-02). Nada si la novela no es un regalo. */
+export function LineaRegalo({ regalo }: { regalo: Regalo | null | undefined }) {
+  if (!regalo) return null;
+  const ocasion = regalo.ocasion ? regalo.ocasion.charAt(0).toUpperCase() + regalo.ocasion.slice(1) : null;
+  return (
+    <p className="portada__regalo">
+      {[`Para ${regalo.para}`, regalo.de ? `De ${regalo.de}` : null, ocasion].filter(Boolean).join(" · ")}
+    </p>
   );
 }
 

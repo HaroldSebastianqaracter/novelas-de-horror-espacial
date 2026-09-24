@@ -9,6 +9,7 @@ type Esquemas = components["schemas"];
 type VersionNovela = Esquemas["VersionNovela"];
 type Escena = Esquemas["Escena"];
 type EntidadCanon = Esquemas["PersonajeCanon"] | Esquemas["LugarCanon"] | Esquemas["ObjetoCanon"];
+type Apariciones = Esquemas["Apariciones"];
 
 const fecha = (minutosAtras: number) =>
   new Date(Date.now() - minutosAtras * 60_000).toISOString().slice(0, 19).replace("T", " ");
@@ -117,6 +118,30 @@ function nombreDelPerro(): string {
 
 export const escenasDeNovela: Record<number, (numero: number) => Escena[]> = { 6: escenasDe };
 
+/**
+ * Dónde aparece cada uno (RF3-LEC-02), como la vista `presencia`: el punto de vista y el reparto
+ * de cada escena de la última versión, y su lugar. Quien no aparece sale con la lista vacía.
+ */
+export function aparicionesDe(novelaId: number): Apariciones {
+  const canon = canonDe[novelaId];
+  const ultima = versionesDe[novelaId]?.at(-1);
+  const escenas = escenasDeNovela[novelaId];
+  if (!canon || !ultima || !escenas) return { personajes: [], lugares: [] };
+  const personajes = new Map<string, Set<number>>();
+  const lugares = new Map<string, Set<number>>();
+  const anotar = (mapa: Map<string, Set<number>>, nombre: string, capitulo: number) =>
+    (mapa.get(nombre) ?? mapa.set(nombre, new Set()).get(nombre))?.add(capitulo);
+  for (const { numero } of ultima.capitulos) {
+    for (const e of escenas(numero)) {
+      for (const nombre of [e.pov, ...(e.reparto ?? [])]) anotar(personajes, nombre, numero);
+      anotar(lugares, e.lugar, numero);
+    }
+  }
+  const lista = (entidad: string, mapa: Map<string, Set<number>>) =>
+    (canon[entidad] ?? []).map((e) => ({ id: e.id, nombre: e.nombre, capitulos: [...(mapa.get(e.nombre) ?? [])].sort((a, b) => a - b) }));
+  return { personajes: lista("personajes", personajes), lugares: lista("lugares", lugares) };
+}
+
 /** Hechos del canon de la novela 6, con dónde se establecen y se usan (`hecho_escena`). */
 export const hechosDe: Record<number, { id: number; sujeto_tipo: string; sujeto_nombre: string; atributo: string; valor: string; categoria: string; capitulo_origen: number; vigente: boolean }[]> = {
   6: [
@@ -137,14 +162,31 @@ export interface CambioSimulado {
   peticion: string;
   objetivo: Record<string, unknown>;
   cita: { capitulo: number; texto: string } | null;
-  cambio: { tipo: string; antes: string | null; despues: string | null } | null;
+  cambio: { tipo: string; antes: string | null; despues: string | null; tabla?: string | null; entidad_id?: number | null } | null;
   capitulos: number[];
   informe: unknown;
   version: number | null;
   creado_en: string;
 }
-export const cambiosDe: Record<number, CambioSimulado[]> = {};
-let siguienteCambio = 1;
+/** El cambio del lector que publicó la versión 2 de la novela 6. */
+const cambiosIniciales: Record<number, CambioSimulado[]> = {
+  6: [
+    {
+      id: 1,
+      estado: "aplicado",
+      peticion: "El perro se llama Nala",
+      objetivo: { tipo: "entidad", entidad: "personajes", id: 4 },
+      cita: null,
+      cambio: { tipo: "renombrar", antes: "Toby", despues: "Nala", tabla: "personaje", entidad_id: 4 },
+      capitulos: [3, 5],
+      informe: null,
+      version: 2,
+      creado_en: fecha(40),
+    },
+  ],
+};
+export const cambiosDe: Record<number, CambioSimulado[]> = structuredClone(cambiosIniciales);
+let siguienteCambio = 2;
 
 const escapar = (texto: string) => texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const palabrasCompletas = (termino: string) =>
@@ -174,7 +216,8 @@ export function registrarCambio(novelaId: number, payload: Record<string, unknow
   const nuevoNombre = /se llam[ae]\s+([\p{L}]+)/u.exec(String(payload.peticion))?.[1];
   if (objetivo.tipo === "entidad" && nuevoNombre) {
     const entidad = canonDe[novelaId]?.[String(objetivo.entidad)]?.find((e) => e.id === Number(objetivo.id));
-    cambio = { tipo: "renombrar", antes: entidad?.nombre ?? null, despues: nuevoNombre };
+    const tabla = { personajes: "personaje", lugares: "lugar", objetos: "objeto" }[String(objetivo.entidad)] ?? null;
+    cambio = { tipo: "renombrar", antes: entidad?.nombre ?? null, despues: nuevoNombre, tabla, entidad_id: Number(objetivo.id) };
   } else {
     cambio = { tipo: "cambiar_hecho", antes: null, despues: String(payload.peticion) };
   }
@@ -235,5 +278,6 @@ export function restaurarLectura() {
   for (const id of Object.keys(canonDe)) delete canonDe[Number(id)];
   Object.assign(canonDe, structuredClone(canonInicial));
   for (const id of Object.keys(cambiosDe)) delete cambiosDe[Number(id)];
-  siguienteCambio = 1;
+  Object.assign(cambiosDe, structuredClone(cambiosIniciales));
+  siguienteCambio = 2;
 }

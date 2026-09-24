@@ -21,6 +21,7 @@ describe("vista de impresión y PDF (RF-FE-PDF-01, RF-FE-PDF-02)", () => {
       "Personajes y lugares",
     ]);
 
+    expect(screen.getByText("Para Oda Varga · De Lía y Marcos · Cumpleaños")).toBeInTheDocument();
     const indice = screen.getByRole("navigation", { name: "Índice" });
     expect(within(indice).getByRole("link", { name: "Capítulo 3" })).toHaveAttribute("href", "#cap-3");
     expect(within(indice).getByRole("link", { name: "Personajes y lugares" })).toHaveAttribute("href", "#apendice-ficha");
@@ -38,6 +39,16 @@ describe("vista de impresión y PDF (RF-FE-PDF-01, RF-FE-PDF-02)", () => {
     await waitFor(() => expect(container.querySelector("[data-listo-para-imprimir]")).not.toBeNull());
     expect(screen.queryByRole("region", { name: /Novedades/ })).not.toBeInTheDocument();
     expect(container.querySelector("#cap-3")).toHaveTextContent("Toby ladró dos veces");
+    // La ficha del apéndice lleva el nombre de esa versión: no se marca lista sin los cambios.
+    const ficha = screen.getByRole("region", { name: "Personajes y lugares" });
+    expect(within(ficha).getByRole("heading", { name: "Toby (ahora Nala)", level: 4 })).toBeInTheDocument();
+  });
+
+  it("en una versión anterior, si fallan los cambios no se marca lista", async () => {
+    servidor.use(http.get("*/api/novelas/6/cambios", () => HttpResponse.json({ detail: "x" }, { status: 500 })));
+    const { container } = renderizarEn("/novelas/6/lectura/imprimir?version=1");
+    await waitFor(() => expect(container.querySelector("[data-error-impresion]")).not.toBeNull(), { timeout: 10_000 });
+    expect(container.querySelector("[data-listo-para-imprimir]")).toBeNull();
   });
 
   it("con ?imprimir=1 abre el diálogo de imprimir cuando está lista, una sola vez", async () => {
@@ -73,6 +84,13 @@ describe("vista de impresión y PDF (RF-FE-PDF-01, RF-FE-PDF-02)", () => {
     expect(imprimir).not.toHaveBeenCalled();
     expect(screen.getByText(/el libro no está completo para imprimirlo/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Imprimir o guardar como PDF" })).toBeDisabled();
+  });
+
+  it("si fallan las apariciones tampoco se marca lista", async () => {
+    servidor.use(http.get("*/api/novelas/6/apariciones", () => HttpResponse.json({ detail: "x" }, { status: 500 })));
+    const { container } = renderizarEn("/novelas/6/lectura/imprimir");
+    await waitFor(() => expect(container.querySelector("[data-error-impresion]")).not.toBeNull(), { timeout: 10_000 });
+    expect(container.querySelector("[data-listo-para-imprimir]")).toBeNull();
   });
 
   it("la portada de la lectura enlaza a exportar a PDF", async () => {

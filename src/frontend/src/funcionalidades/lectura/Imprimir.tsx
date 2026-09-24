@@ -1,9 +1,12 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router";
+import { consultaNovela } from "../../compartido/api/consultas";
 import { useTitulo } from "../../compartido/ui/titulo";
 import { partirEnEscenas } from "../manuscrito/Lector";
 import { FichaContenido, useConsultasFicha } from "./Ficha";
 import { useLecturaActual } from "./MarcoLectura";
+import { LineaRegalo } from "./Portada";
 import { motivoLegible } from "./usarLectura";
 
 const miles = new Intl.NumberFormat("es-ES");
@@ -18,11 +21,13 @@ export function Imprimir() {
   const { novelaId, version, numero, esUltima, ultima } = useLecturaActual();
   const [busqueda] = useSearchParams();
   useTitulo(version.titulo || "Novela");
-  // Lista solo con todo lo que lleva el libro: si el canon o la escaleta fallan, no se imprime un
-  // apéndice con un error, y `npm run pdf` lo detecta por `data-error-impresion`.
-  const { personajes, lugares, estructura } = useConsultasFicha(novelaId);
-  const listo = personajes.isSuccess && lugares.isSuccess && estructura.isSuccess;
-  const fallo = personajes.isError || lugares.isError || estructura.isError;
+  // Lista solo con todo lo que lleva el libro: si el canon, las apariciones o la novela (la línea
+  // del regalo) fallan, no se imprime un libro a medias, y `npm run pdf` lo detecta por
+  // `data-error-impresion`.
+  const ficha = useConsultasFicha(novelaId, esUltima);
+  const novela = useQuery(consultaNovela(novelaId));
+  const listo = ficha.listo && novela.isSuccess;
+  const fallo = ficha.error !== null || novela.isError;
   const impreso = useRef(false);
 
   useEffect(() => {
@@ -50,7 +55,7 @@ export function Imprimir() {
       <div className="imprimir__barra no-imprimir">
         <p>
           {fallo
-            ? "No se pudo cargar la ficha de personajes y lugares: el libro no está completo para imprimirlo."
+            ? "No se pudo cargar la portada o la ficha de personajes y lugares: el libro no está completo para imprimirlo."
             : "Vista para imprimir: portada, índice, capítulos y personajes, cada capítulo en página nueva."}
         </p>
         <button type="button" className="boton boton--primario" onClick={() => window.print()} disabled={!listo}>
@@ -64,6 +69,7 @@ export function Imprimir() {
           {version.titulo || "Sin título"}
         </h1>
         {version.dedicatoria && <p className="portada__dedicatoria">{version.dedicatoria}</p>}
+        <LineaRegalo regalo={novela.data?.regalo} />
         <p className="portada__edicion">
           Versión {numero} · {motivoLegible(version.motivo).toLowerCase()}
         </p>

@@ -12,6 +12,7 @@ describe("portada, novedades e índice (RF-FE-LEE-01 a RF-FE-LEE-03, RF-FE-LEE-0
     renderizarEn("/novelas/6/lectura");
     expect(await screen.findByRole("heading", { level: 1, name: "Deriva en el anillo Tántalo" })).toBeInTheDocument();
     expect(screen.getByText("Para Oda, que nunca deja un problema a medias.")).toBeInTheDocument();
+    expect(await screen.findByText("Para Oda Varga · De Lía y Marcos · Cumpleaños")).toBeInTheDocument();
     expect(screen.getByText("Versión 2", { selector: ".lectura__version" })).toBeInTheDocument();
 
     const novedades = screen.getByRole("region", { name: "Novedades de la versión 2" });
@@ -99,19 +100,59 @@ describe("personajes y lugares (RF-FE-LEE-04)", () => {
     const lugares = screen.getByRole("region", { name: "Lugares" });
     const puente = within(lugares).getByRole("heading", { name: "Puente de mando" }).closest("li") as HTMLElement;
     expect(within(puente).getAllByRole("link").length).toBeGreaterThan(0);
-    expect(screen.getByText(/sale de la escaleta/)).toBeInTheDocument();
+    expect(screen.getByText(/sale de la story bible/)).toBeInTheDocument();
+  });
+
+  it("«aparece en» es lo que dice /apariciones, por id y solo con capítulos de la versión", async () => {
+    servidor.use(
+      http.get("*/api/novelas/6/apariciones", () =>
+        HttpResponse.json({
+          personajes: [
+            { id: 5, nombre: "Eco", capitulos: [7, 12] },
+            { id: 4, nombre: "Otro nombre", capitulos: [] },
+          ],
+          lugares: [],
+        }),
+      ),
+    );
+    renderizarEn("/novelas/6/lectura/ficha");
+    const personajes = await screen.findByRole("region", { name: "Personajes" });
+    const eco = within(personajes).getByRole("heading", { name: "Eco" }).closest("li") as HTMLElement;
+    await waitFor(() => expect(eco).toHaveTextContent("Aparece en el capítulo 7"));
+    expect(within(eco).getAllByRole("link").map((a) => a.getAttribute("aria-label"))).toEqual(["capítulo 7"]);
+    const nala = within(personajes).getByRole("heading", { name: "Nala" }).closest("li") as HTMLElement;
+    expect(nala).toHaveTextContent("No aparece en esta versión");
   });
 });
 
 describe("la ficha de una versión anterior (RF-FE-LEE-04)", () => {
-  it("busca «aparece en» en el texto de esa versión y avisa de que la ficha es la actual", async () => {
+  it("lleva los nombres de esa versión, con las apariciones de la story bible, y avisa de que la ficha es la actual", async () => {
     renderizarEn("/novelas/6/lectura/ficha?version=1");
     const personajes = await screen.findByRole("region", { name: "Personajes" });
-    const nala = within(personajes).getByRole("heading", { name: "Nala" }).closest("li") as HTMLElement;
-    expect(nala).toHaveTextContent("No aparece en esta versión");
-    expect(screen.getByText(/Esta ficha es la de la versión 2, la actual/)).toBeInTheDocument();
+    const toby = (await within(personajes).findByRole("heading", { name: "Toby (ahora Nala)" })).closest("li") as HTMLElement;
+    expect(toby).toHaveTextContent("Aparece en los capítulos 3 y 5");
+    expect(within(toby).getByRole("link", { name: "capítulo 3" })).toHaveAttribute("href", "/novelas/6/lectura/capitulos/3?version=1");
+    expect(within(personajes).queryByRole("heading", { name: "Nala" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Esta ficha es la de la versión 2, la actual, con los nombres de la versión que lees/)).toBeInTheDocument();
     const oda = within(personajes).getByRole("heading", { name: "Oda Varga" }).closest("li") as HTMLElement;
     expect(within(oda).getByRole("link", { name: "capítulo 1" })).toHaveAttribute("href", "/novelas/6/lectura/capitulos/1?version=1");
+  });
+});
+
+describe("un renombre deshecho después (RF-FE-LEE-04)", () => {
+  it("no pone «(ahora …)» si el nombre de entonces es el de ahora", async () => {
+    servidor.use(
+      http.get("*/api/novelas/6/cambios", () =>
+        HttpResponse.json([
+          { id: 1, estado: "aplicado", peticion: "Nala", objetivo: { tipo: "entidad", entidad: "personajes", id: 4 }, cita: null, cambio: { tipo: "renombrar", antes: "Nala", despues: "Kira", tabla: "personaje", entidad_id: 4 }, capitulos: [3], version: 2, creado_en: "2026-09-24 10:00:00" },
+          { id: 2, estado: "aplicado", peticion: "Nala otra vez", objetivo: { tipo: "entidad", entidad: "personajes", id: 4 }, cita: null, cambio: { tipo: "renombrar", antes: "Kira", despues: "Nala", tabla: "personaje", entidad_id: 4 }, capitulos: [3], version: 3, creado_en: "2026-09-24 11:00:00" },
+        ]),
+      ),
+    );
+    renderizarEn("/novelas/6/lectura/ficha?version=1");
+    const personajes = await screen.findByRole("region", { name: "Personajes" });
+    expect(await within(personajes).findByRole("heading", { name: "Nala" })).toBeInTheDocument();
+    expect(within(personajes).queryByText(/ahora/)).not.toBeInTheDocument();
   });
 });
 

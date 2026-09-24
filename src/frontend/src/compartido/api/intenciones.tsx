@@ -14,22 +14,22 @@ import {
   useRef,
   useState,
 } from "react";
-import { type IntencionPedida, MOTIVOS_CAMBIO, type TipoIntencionAmpliada } from "./cambios";
+import { MOTIVOS_CAMBIO } from "./cambios";
 import { api, leer } from "./cliente";
 import { claves } from "./consultas";
 import { comoEstadoIntencion } from "./reglas";
-import type { Intencion, NuevaIntencion } from "./tipos";
+import type { Intencion, NuevaIntencion, TipoIntencion } from "./tipos";
 
 export interface Seguimiento {
   id: number;
-  tipo: TipoIntencionAmpliada;
+  tipo: TipoIntencion;
   novelaId: number | null;
   /** Cuándo se encoló, en ms. Pasado un minuto se consulta más despacio y se avisa. */
   desde: number;
 }
 
 export interface Rechazo {
-  tipo: TipoIntencionAmpliada;
+  tipo: TipoIntencion;
   motivo: string;
 }
 
@@ -41,7 +41,7 @@ interface Opciones {
 interface ContextoIntenciones {
   pendientes: readonly Seguimiento[];
   rechazos: Readonly<Record<number, Rechazo>>;
-  pedir: (intencion: IntencionPedida, opciones?: Opciones) => Promise<Seguimiento>;
+  pedir: (intencion: NuevaIntencion, opciones?: Opciones) => Promise<Seguimiento>;
   descartarRechazo: (novelaId: number) => void;
 }
 
@@ -93,9 +93,8 @@ export function IntencionesProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const pedir = useCallback(
-    async (intencion: IntencionPedida, opciones?: Opciones) => {
-      // DEUDA (RF-FE-API-04): `cambio_lector` no está aún en el enumerado del OpenAPI.
-      const encolada = await leer(api.POST("/intenciones", { body: intencion as NuevaIntencion }));
+    async (intencion: NuevaIntencion, opciones?: Opciones) => {
+      const encolada = await leer(api.POST("/intenciones", { body: intencion }));
       const seguimiento: Seguimiento = {
         id: encolada.id,
         tipo: intencion.tipo,

@@ -39,6 +39,8 @@
 .portada__genero { margin: 0; font-family: var(--fuente-interfaz); font-size: var(--texto-sm); color: var(--color-lectura-tenue); letter-spacing: 0.2em; }
 .portada__titulo { font-size: clamp(2rem, 5vw, 3rem) !important; line-height: 1.1; }
 .portada__dedicatoria { max-width: 28rem; margin: var(--espacio-4) 0 0; font-style: italic; font-size: var(--texto-lectura); color: var(--color-lectura-tenue); }
+.ficha__ahora { font-family: var(--fuente-interfaz); font-size: var(--texto-sm); font-weight: normal; color: var(--color-lectura-tenue); }
+.portada__regalo { margin: var(--espacio-4) 0 0; font-family: var(--fuente-interfaz); font-size: var(--texto-sm); letter-spacing: 0.02em; color: var(--color-lectura-tenue); }
 
 /* Novedades */
 .novedades { border-left: 4px solid var(--color-acento); }

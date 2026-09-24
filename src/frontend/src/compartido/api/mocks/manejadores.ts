@@ -6,7 +6,7 @@
 import { http, HttpResponse } from "msw";
 import type { CapituloTexto, Ejecucion, Estructura, Intencion, IntencionEncolada, NovelaDetalle, NovelaResumen, Parada, TipoIntencion } from "../tipos";
 import { capitulosDe, detalleDe, ejecuciones, fechaApi, novelas, paradas, textoDe } from "./datos";
-import { alcanceDe, type CambioSimulado, cambiosDe, canonDe, escenasDeNovela, hechosDe, publicarCambio, registrarCambio, usosDe, versionesDe } from "./lectura";
+import { alcanceDe, aparicionesDe, type CambioSimulado, cambiosDe, canonDe, escenasDeNovela, hechosDe, publicarCambio, registrarCambio, usosDe, versionesDe } from "./lectura";
 
 /** Lo que tarda el «worker» en atender una intención. */
 const ESPERA_MS = 2_500;
@@ -391,6 +391,11 @@ export const manejadores = [
   http.get("*/api/novelas/:id/cambios/:cid", ({ params }) => {
     const cambio = cambiosDe[Number(params.id)]?.find((c) => c.id === Number(params.cid));
     return cambio ? HttpResponse.json(cambio) : noEncontrada(`el cambio ${String(params.cid)}`);
+  }),
+
+  http.get("*/api/novelas/:id/apariciones", ({ params }) => {
+    if (!detalleDe(Number(params.id))) return noEncontrada("la novela");
+    return HttpResponse.json(aparicionesDe(Number(params.id)));
   }),
 
   http.get("*/api/novelas/:id/canon/:entidad", ({ params }) => {

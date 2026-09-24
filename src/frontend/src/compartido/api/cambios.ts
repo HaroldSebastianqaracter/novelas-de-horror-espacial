@@ -1,15 +1,13 @@
 /**
- * DEUDA (RF-FE-API-04): el contrato del cambio del lector (spec-frontend 5.2, aceptado por el
- * backend en spec3 3.7 y 3.8) escrito a mano mientras no esté en `tests/openapi.json`. Cuando el
- * backend lo publique, estos tipos salen de `esquema.gen.ts` y las lecturas pasan a `api.GET`.
+ * DEUDA (RF-FE-API-04): lo que el OpenAPI del cambio del lector no tipa. El `payload` de
+ * `POST /intenciones` y los campos `objetivo`, `cita` y `cambio` de `CambioVista` salen como
+ * objetos libres, y el `422` de `cambio_invalido` no está declarado: aquí se escriben desde spec3
+ * (RF3-CAM-01, RF3-CAM-13). El tipo `cambio_lector`, `/cambios` y `/cambios/alcance` ya vienen de
+ * `esquema.gen.ts`.
  */
-import { ErrorApi } from "./cliente";
+import { api, ErrorApi, leer } from "./cliente";
 import type { EntidadLectura } from "./consultas";
-import type { NuevaIntencion, TipoIntencion } from "./tipos";
-
-export type TipoIntencionAmpliada = TipoIntencion | "cambio_lector";
-/** `NuevaIntencion` con `cambio_lector`, que el OpenAPI todavía no declara. */
-export type IntencionPedida = Omit<NuevaIntencion, "tipo"> & { tipo: TipoIntencionAmpliada };
+import type { CambioVista } from "./tipos";
 
 export type ObjetivoCambio =
   | { tipo: "entidad"; entidad: EntidadLectura; id: number }
@@ -29,19 +27,13 @@ export const ESTADOS_CAMBIO = ["interpretando", "rechazado", "reescribiendo", "a
 export type EstadoCambio = (typeof ESTADOS_CAMBIO)[number];
 export const CAMBIO_TERMINADO: ReadonlySet<string> = new Set(["rechazado", "aplicado", "fallido", "interrumpido"]);
 
-export interface Cambio {
-  id: number;
-  estado: string;
-  peticion: string;
+/** `CambioVista` con sus campos libres leídos con la forma de RF3-CAM-13. */
+export type Cambio = Omit<CambioVista, "objetivo" | "cita" | "cambio"> & {
   objetivo: ObjetivoCambio;
   cita: { capitulo: number; texto: string } | null;
-  /** Lo que entendió el intérprete del backend. */
-  cambio: { tipo: string; antes: string | null; despues: string | null } | null;
-  capitulos: number[];
-  informe: unknown;
-  version: number | null;
-  creado_en: string;
-}
+  /** Lo que entendió el intérprete del backend; al renombrar, `tabla` y `entidad_id` dicen a quién. */
+  cambio: { tipo: string; antes: string | null; despues: string | null; tabla?: string | null; entidad_id?: number | null } | null;
+};
 
 /** Los motivos de rechazo del worker para `cambio_lector`, en lenguaje legible. */
 export const MOTIVOS_CAMBIO: Record<string, string> = {
@@ -52,24 +44,18 @@ export const MOTIVOS_CAMBIO: Record<string, string> = {
   cambio_invalido: "El cambio no tiene una forma que el worker pueda aplicar.",
 };
 
-async function leerSinContrato<T>(ruta: string): Promise<T> {
-  const respuesta = await globalThis.fetch(`${window.location.origin}/api${ruta}`);
-  const cuerpo: unknown = await respuesta.json().catch(() => null);
-  if (!respuesta.ok) throw new ErrorApi(respuesta.status, cuerpo);
-  return cuerpo as T;
+export async function leerCambio(novelaId: number, cambioId: number): Promise<Cambio> {
+  const cambio = await leer(
+    api.GET("/novelas/{novela_id}/cambios/{cambio_id}", {
+      params: { path: { novela_id: novelaId, cambio_id: cambioId } },
+    }),
+  );
+  return cambio as Cambio;
 }
 
-export const leerCambio = (novelaId: number, cambioId: number) =>
-  leerSinContrato<Cambio>(`/novelas/${novelaId}/cambios/${cambioId}`);
-
-/** Los capítulos que reescribiría el worker, sin escribir nada. `null` si el objetivo no lo admite. */
-export function leerAlcance(novelaId: number, objetivo: ObjetivoCambio): Promise<{ capitulos: number[] }> | null {
-  if (objetivo.tipo === "fragmento") return null;
-  const q =
-    objetivo.tipo === "hecho"
-      ? `hecho_id=${objetivo.hecho_id}`
-      : `entidad=${encodeURIComponent(objetivo.entidad)}&id=${objetivo.id}`;
-  return leerSinContrato<{ capitulos: number[] }>(`/novelas/${novelaId}/cambios/alcance?${q}`);
+export async function leerCambios(novelaId: number): Promise<Cambio[]> {
+  const cambios = await leer(api.GET("/novelas/{novela_id}/cambios", { params: { path: { novela_id: novelaId } } }));
+  return cambios as Cambio[];
 }
 
 /**

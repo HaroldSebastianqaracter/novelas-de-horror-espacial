@@ -95,13 +95,14 @@ describe("pedir un cambio desde el texto (RF-FE-CAM-01 a RF-FE-CAM-03)", () => {
     servidor.events.removeAllListeners();
   });
 
-  it("sin el alcance de la API, lo estima y lo dice", async () => {
+  it("si la API no da el alcance, lo dice y no se inventa uno", async () => {
     servidor.use(http.get("*/api/novelas/6/cambios/alcance", () => HttpResponse.json({ detail: "Not Found" }, { status: 404 })));
     const usuario = userEvent.setup();
     renderizarEn(CAPITULO);
     const panel = await abrirPanel(usuario);
     await usuario.click(await within(panel).findByRole("radio", { name: "Nala (personaje)" }));
-    expect(await within(panel).findByText("Se reescribirán los capítulos 3 y 5 (estimación).")).toBeInTheDocument();
+    expect(await within(panel).findByText(/No se pudo calcular qué capítulos se reescribirán/)).toBeInTheDocument();
+    expect(within(panel).queryByText(/Se reescribirán/)).not.toBeInTheDocument();
   });
 
   it("un 422 cambio_invalido se enseña en el panel y no se pierde lo escrito", async () => {

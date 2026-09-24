@@ -19,3 +19,7 @@ export type NuevaIntencion = Esquemas["NuevaIntencion"];
 export type IntencionEncolada = Esquemas["IntencionEncolada"];
 export type Intencion = Esquemas["EstadoIntencion"];
 export type TipoIntencion = NuevaIntencion["tipo"];
+export type Apariciones = Esquemas["Apariciones"];
+export type Regalo = Esquemas["Regalo"];
+export type CambioVista = Esquemas["CambioVista"];
+export type Alcance = Esquemas["Alcance"];

@@ -83,6 +83,13 @@ export function detalleDe(id: number): NovelaDetalle | undefined {
     },
     restricciones: RESTRICCIONES,
     estilo: null,
+    // La novela 6 es un regalo, con la portada de RF3-LEC-01. Nombres inventados.
+    ...(id === 6
+      ? {
+          dedicatoria: "Para Oda, que nunca deja un problema a medias.",
+          regalo: { para: "Oda Varga", de: "Lía y Marcos", ocasion: "cumpleaños" },
+        }
+      : { dedicatoria: null, regalo: null }),
   };
 }
 
