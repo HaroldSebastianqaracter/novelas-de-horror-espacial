@@ -22,6 +22,7 @@ from compartido import politica
 from compartido.grafo import lectura
 from compartido.puerta_base import Conflicto, ResultadoPuerta
 from compartido.texto import (
+    ETIQUETA_SIN_NOMBRE,
     INICIO_DE_FRASE,
     MINIMO_NOMBRE,
     PALABRA_DE_NOMBRE,
@@ -271,6 +272,20 @@ def evaluar(
     conflictos: list[Conflicto] = []
     plano = _sin_tildes(texto)
     palabras = max(1, len(texto.split()))
+
+    # Una etiqueta en la prosa es un nombre que no llego (spec3, RF3-SEU-04): el lector veria
+    # «[DESTINATARIO_NOMBRE]» o «[NOMBRE_ANONIMIZADO]» en su regalo.
+    etiquetas = sorted(set(ETIQUETA_SIN_NOMBRE.findall(texto)))
+    if etiquetas:
+        conflictos.append(Conflicto(
+            comprobacion="etiqueta_en_la_prosa", capitulo=capitulo,
+            descripcion=(
+                "La prosa lleva etiquetas donde tendria que ir un nombre: "
+                + ", ".join(f"«{e}»" for e in etiquetas) + ". Usa solo las etiquetas de la "
+                "leyenda de nombres, escritas exactamente igual, o el nombre de un personaje."
+            ),
+            datos={"etiquetas": etiquetas},
+        ))
 
     for tic in lectura.tics_prohibidos(con, novela_id):
         veces = _contar(plano, tic)

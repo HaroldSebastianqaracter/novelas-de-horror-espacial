@@ -325,7 +325,7 @@ def test_el_redactor_ve_la_edad_de_cada_personaje() -> None:
     pipeline.avanzar(ctx)
     entradas = [i["entrada"] for i in ctx.puerto.invocaciones if i["agente"] == "redaccion"]
     assert entradas
-    assert all("**Marta Ibáñez** (protagonista, 34 años)" in e for e in entradas)
+    assert all("**[DESTINATARIO]** (protagonista, 34 años)" in e for e in entradas)
 
 
 # --- RF3-BIB-08 a RF3-BIB-10: cronologia ------------------------------------------------------

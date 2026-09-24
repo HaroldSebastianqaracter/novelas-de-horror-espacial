@@ -92,6 +92,7 @@ from tareas.revision.esquemas import SalidaRevision
 from . import cambios as o_cambios
 from . import cola, estados, fallo, versiones, vigencia
 from .puerta_global import evaluar as evaluar_puerta_global
+from .seudonimo import Mascara
 
 log = logging.getLogger("orquestador")
 
@@ -172,6 +173,12 @@ def _invocar[T: BaseModel](
 
     entrada = paquete.render() if hasattr(paquete, "render") else str(paquete)
     por_bloque = paquete.tokens_por_bloque if hasattr(paquete, "tokens_por_bloque") else None
+    # Los nombres del encargo no salen de la maquina (spec3, RF3-SEU-01): el agente ve
+    # etiquetas, y su respuesta vuelve con los nombres antes de validarla.
+    mascara = Mascara(lectura.brief(ctx.con, ctx.novela_id))
+    entrada = mascara.ocultar(entrada)
+    if not mascara.vacia:
+        entrada = f"{mascara.leyenda()}\n\n{entrada}"
 
     ultimo: ValidationError | None = None
     for vuelta in (1, 2):
@@ -181,14 +188,15 @@ def _invocar[T: BaseModel](
             capitulo=capitulo, intento=intento, tokens_por_bloque=por_bloque,
         )
         try:
-            validado = modelo.model_validate(resultado.salida)
+            validado = modelo.model_validate(mascara.restaurar(resultado.salida))
         except ValidationError as exc:
             ultimo = exc
             if vuelta == 2:
                 break
+            # El error cita la respuesta ya restaurada: vuelve a salir con etiquetas.
             entrada = (
                 f"{entrada}\n\n## ERROR DEL INTENTO ANTERIOR\n\n"
-                f"Tu respuesta no cumplia estas reglas. Corrigelas:\n{exc}"
+                f"Tu respuesta no cumplia estas reglas. Corrigelas:\n{mascara.ocultar(str(exc))}"
             )
             continue
 

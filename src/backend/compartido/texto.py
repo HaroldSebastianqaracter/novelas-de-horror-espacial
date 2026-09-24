@@ -73,6 +73,11 @@ def cuenta_personas(texto: str) -> bool:
     return any(_PALABRA_DE_PERSONAS.fullmatch(p) for p in _PALABRA.findall(normalizar(texto)))
 
 
+#: Una etiqueta que la prosa no deberia llevar nunca (spec3, RF3-SEU-04): una del encargo sin
+#: restaurar, u otra que el modelo invente («[NOMBRE_ANONIMIZADO]», «[DESTINATARIO_APODO]»).
+ETIQUETA_SIN_NOMBRE = re.compile(r"\[[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ0-9_]{2,}\]")
+
+
 def tiene_cifra(texto: str) -> bool:
     """Si el texto da una cantidad (spec3, RF3-PAS-12).
 
