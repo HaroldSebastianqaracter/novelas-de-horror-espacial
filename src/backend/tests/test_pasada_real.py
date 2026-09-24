@@ -1131,10 +1131,13 @@ def test_el_censo_lleva_como_mucho_30_datos_y_los_mas_recientes() -> None:
 REGLA_DEL_CONOCIMIENTO_AJENO = (
     '- **No haces saber a un personaje algo que aún no ha recibido.** Es la fuente número u'
     'no de errores en obra larga. Un personaje sabe lo que presenció, lo que le dicen en un'
-    'a escena y lo que consta en «Quién sabe qué». Si usa algo que solo vio otro, en este c'
-    'apítulo o antes, la escena muestra cómo le llega: basta una línea de diálogo en la que'
-    ' se lo cuentan. «Según sus observaciones» o «me lo dijo ayer», sin una escena que lo m'
-    'uestre, no basta: para la continuidad, esa conversación no ha ocurrido.'
+    'a escena, lo que consta en la sección «Quien sabe que» de tu paquete, lo que su grupo '
+    'ya sabía en un capítulo anterior, lo que deduce de lo que tiene delante y lo que cualq'
+    'uiera percibe en un sitio donde ha estado. Si usa algo que solo vio otro y no le llega'
+    ' por ninguna de esas vías, la escena muestra cómo le llega: basta una réplica en la qu'
+    'e se lo cuentan, sin exposición. «Según sus observaciones» o «me lo dijo ayer», sin un'
+    'a escena que lo muestre, no basta: para la continuidad, esa conversación no ha ocurrid'
+    'o.'
 )
 
 
@@ -1144,6 +1147,12 @@ def test_la_skill_del_redactor_pide_mostrar_como_llega_lo_que_sabe_otro() -> Non
 
     skill = PuertoTerminal(skills_dir=raiz_repo() / ".claude" / "skills").ruta_skill(
         "redaccion").read_text(encoding="utf-8")
-    # La linea entera: un parrafo anadido que la contradiga tambien falla.
+    # La linea entera, y una sola vez: un cambio dentro de ella o una copia vieja al lado fallan.
+    assert skill.count("No haces saber a un personaje") == 1
     linea = next(x for x in skill.splitlines() if "No haces saber a un personaje" in x)
     assert linea == REGLA_DEL_CONOCIMIENTO_AJENO
+    # La seccion que cita es la que el paquete trae (validador de c4990be).
+    from tareas.redaccion.servicio import _SECCION_CONOCIMIENTO
+
+    assert _SECCION_CONOCIMIENTO.startswith("### Quien sabe que")
+    assert "«Quien sabe que»" in linea
