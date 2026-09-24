@@ -35,6 +35,7 @@ from compartido.grafo.escritura import normalizar
 from compartido.puerto import construir as construir_puerto
 from compartido.tipos import como_dict, como_lista
 from orquestador import cola
+from tareas.rubrica import servicio as s_rubrica
 
 
 @dataclass(frozen=True)
@@ -65,6 +66,8 @@ VALIDADORES: tuple[Validador, ...] = (
     Validador("juez", "LLM-as-judge de oficio", "semántico", "capítulo (rol editor)"),
     Validador("puerta_5", "Puerta global (puerta 5)", "programático", "antes de publicar"),
     Validador("lean", "Cronología en Lean 4", "formal", "antes de publicar"),
+    Validador("rubrica", "Rúbrica del LLM-as-judge (novela entera)", "semántico",
+              "al terminar (rol editor)"),
     Validador("canario", "Canario de la inyección en la prosa", "programático", "evals"),
 )
 
@@ -216,6 +219,13 @@ def _recoger(con: sqlite3.Connection, novela_id: int, r: Resultado, *, canario: 
             fallos[f] += 1
     for clave in evaluaciones:
         r.celdas[clave] = _celda(evaluaciones[clave], fallos[clave], avisos[clave])
+
+    # La ultima nota de cada criterio: si la novela se completo dos veces, la segunda rubrica.
+    notas = list(s_rubrica.ultimas_notas(con, novela_id, "llm").items())
+    if notas:
+        bajas = [c for c, n in notas if n <= 2]
+        r.celdas["rubrica"] = (f"media {sum(n for _, n in notas) / len(notas):.1f}"
+                               + (f" · bajas: {', '.join(bajas)}" if bajas else ""))
 
     estado = con.execute("SELECT estado FROM ejecucion WHERE novela_id = ?",
                          (novela_id,)).fetchone()

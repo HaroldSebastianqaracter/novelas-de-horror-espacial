@@ -50,6 +50,8 @@ ROL_DEL_AGENTE: dict[str, str] = {
     # El cambio del lector (spec3, 3.8): el interprete lee la peticion como un editor y el
     # revisor reescribe como un writer.
     "interprete": "editor", "revision": "writer",
+    # La rubrica juzga la novela entera: LLM-as-judge, rol editor.
+    "rubrica": "editor",
 }
 
 
@@ -539,6 +541,16 @@ def _inicio_de_unidad(con: sqlite3.Connection, novela_id: int, unidad: str) -> o
     """El primer momento de la unidad en la base: la fecha de su traza, estable entre envios."""
     if unidad == "entrevista":
         sql, params = "SELECT MIN(creado_en) FROM entrevista WHERE novela_id = ?", (novela_id,)
+    elif unidad == "rubrica":
+        # La llamada del juez primero: si fallo, no hay notas, y la traza no puede fechar
+        # «ahora» ni cambiar de fecha al importar despues la revision humana.
+        sql = ("SELECT MIN(creado_en) FROM llamada_modelo WHERE novela_id = ? "
+               "AND agente = 'rubrica'")
+        params = (novela_id,)
+        fila = con.execute(sql, params).fetchone()
+        if fila is not None and fila[0] is not None:
+            return fila[0]
+        sql = "SELECT MIN(creado_en) FROM evaluacion_rubrica WHERE novela_id = ?"
     elif unidad == "cierre":
         sql = "SELECT MIN(creado_en) FROM resultado_puerta WHERE novela_id = ? AND puerta = 5"
         params = (novela_id,)
@@ -627,6 +639,14 @@ class Exportador:
             eventos.extend(self._entrevista(f, clave, traza))
             filas.append(("entrevista", int(f["id"])))
 
+        # El comando abre en solo lectura bases que pueden ser anteriores a la migracion 015.
+        tiene_rubrica = con.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'evaluacion_rubrica'"
+        ).fetchone() is not None
+        for f in self._pendientes(con, "evaluacion_rubrica", novela_id) if tiene_rubrica else []:
+            eventos.append(self._rubrica(f, clave, seud, traza))
+            filas.append(("evaluacion_rubrica", int(f["id"])))
+
         if not eventos:
             return Informe(0, 0)
         self.cliente.enviar(eventos)
@@ -664,7 +684,8 @@ class Exportador:
         prompt = self._version_de_prompt(agente, str(f["sistema"] or ""))
         return {
             "id": id_estable(clave,"llamada_modelo", f["id"]),
-            "traceId": traza(_unidad_de_llamada(f["capitulo"])),
+            "traceId": traza("rubrica" if agente == "rubrica"
+                             else _unidad_de_llamada(f["capitulo"])),
             "name": agente,
             "startTime": _iso(f["creado_en"]),
             "endTime": _iso(f["terminado_en"] or f["creado_en"]),
@@ -734,6 +755,18 @@ class Exportador:
                 vistas.add(nombre)
                 score(nombre, 0.0, "BOOLEAN", str(c.get("descripcion") or ""))
         return salida
+
+    def _rubrica(self, f: sqlite3.Row, clave: str, seud: Seudonimizador,
+                 traza: Any) -> dict[str, Any]:
+        """Una nota de la rubrica: score NUMERIC `rubrica_<criterio>`; la revision humana,
+        `rubrica_humana_<criterio>`, para compararlas en Langfuse."""
+        prefijo = "rubrica" if f["origen"] == "llm" else "rubrica_humana"
+        return _evento("score-create", {
+            "id": id_estable(clave, "evaluacion_rubrica", f["id"]),
+            "traceId": traza("rubrica"), "name": f"{prefijo}_{f['criterio']}",
+            "value": float(f["nota"]), "dataType": "NUMERIC",
+            "comment": seud.texto(str(f["justificacion"] or "")) or None,
+        })
 
     def _entrevista(self, f: sqlite3.Row, clave: str, traza: Any) -> list[dict[str, Any]]:
         """Las llamadas de la entrevista solo guardan metricas: van sin texto (RF3-OBS-04)."""

@@ -71,7 +71,18 @@ AGENTES: tuple[str, ...] = (
     # El cambio del lector (specs/spec3.md, 3.8): el interprete convierte la peticion en un
     # cambio del canon y el revisor corrige la prosa de los capitulos que lo usan.
     "interprete", "revision",
+    # El juez de la novela entera: la puntua con la rubrica al terminar la generacion.
+    "rubrica",
 )
+
+#: Los criterios de la rubrica del LLM-as-judge, en el orden en que se presentan. La migracion
+#: 015 los repite en el CHECK de `evaluacion_rubrica`.
+CRITERIOS_RUBRICA: tuple[str, ...] = (
+    "continuidad", "tono", "arco", "coherencia_personajes", "ritmo", "personalizacion_natural",
+)
+CriterioRubrica = Literal[
+    "continuidad", "tono", "arco", "coherencia_personajes", "ritmo", "personalizacion_natural",
+]
 
 #: Un hecho es un dato: su valor tiene como mucho estas palabras (spec3, RF3-PAS-01). En la
 #: primera pasada real, 57 de 94 valores pasaban de 8 y cualquier reformulacion parecia una
@@ -85,6 +96,8 @@ TIPOS_EVENTO: tuple[str, ...] = (
     "revertido", "rehecho", "completada", "error", "worker_recuperado", "paquete_recortado",
     "extraccion_descartes", "indice_fallo", "elemento_desconocido", "rehecho_desde",
     "version_publicada", "resumen_recortado", "langfuse_fallo", "segunda_opinion_fallida",
+    # La rubrica del LLM-as-judge al terminar: una nota de 2 o menos, o el juez que fallo.
+    "rubrica_baja", "rubrica_fallida",
     "cambio_rechazado", "cambio_fallido", "cambio_aplicado",
 )
 

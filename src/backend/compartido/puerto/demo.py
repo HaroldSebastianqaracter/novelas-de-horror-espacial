@@ -596,6 +596,21 @@ def interprete(entrada: str, agente: str) -> dict[str, Any]:
             "nombre_nuevo": valor}
 
 
+def rubrica(entrada: str, agente: str) -> dict[str, Any]:
+    """Un 3 en cada criterio, con la primera frase de la novela como evidencia literal."""
+    from compartido.tipos import CRITERIOS_RUBRICA
+
+    prosa = _bloque(entrada, "LA NOVELA")
+    frase = next((linea.strip() for linea in prosa.splitlines()
+                  if linea.strip() and not linea.startswith("#")), "La novela")
+    evidencia = frase.split(".")[0][:200] or "La novela"
+    return {"notas": [
+        {"criterio": c, "nota": 3, "justificacion": "Correcta, sin destacar (demo).",
+         "evidencia": evidencia}
+        for c in CRITERIOS_RUBRICA
+    ]}
+
+
 def revision(entrada: str, agente: str) -> dict[str, Any]:
     from compartido.cambio import Cambio, sustituir_nombres
 
@@ -656,4 +671,5 @@ TODOS = {
     "entrevistador": entrevistador,
     "interprete": interprete,
     "revision": revision,
+    "rubrica": rubrica,
 }

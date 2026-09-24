@@ -24,6 +24,7 @@ _NO_SE_SUSTITUYEN = frozenset({
     "novela_version_capitulo", "llamada_modelo", "traza_evento", "intencion",
     "resultado_puerta", "parada", "decision_politica", "cambio_lector", "termino_vetado",
     "ejecucion", "entrevista", "entidad_no_reconocida", "langfuse_envio", "indice_estado",
+    "evaluacion_rubrica",
 })
 
 class CanonDesfasado(Exception):
