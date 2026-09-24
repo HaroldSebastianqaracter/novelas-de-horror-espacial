@@ -21,7 +21,10 @@ graph TD
   G4 -- "pasa" --> N["Siguiente capítulo"]
   N --> W
   N --> G5{"Puerta 5<br/>hilos y siembras"}
-  G5 --> F["Manuscrito"]
+  G5 --> G6{"Puerta 6<br/>cronología en Lean 4"}
+  G6 --> F["Manuscrito"]
+  F --> L["Web de lectura y PDF"]
+  L -- "cambio del lector" --> W
 ```
 
 El detalle está en [docs/architecture.md](docs/architecture.md), y la documentación de proceso (decisiones, iteraciones, diagramas) en [docs/proceso/](docs/proceso/README.md).
@@ -49,6 +52,8 @@ set NOVELAS_DB_PATH=novela.db
 set NOVELAS_PUERTO=falso
 .venv\Scripts\python.exe demo.py --brief ..\..\ejemplos\brief-ejemplo.json
 ```
+
+**Leer la novela en la web**: con la API en marcha (`.venv\Scripts\python.exe main.py`, en `http://127.0.0.1:8000`), `npm run dev` en `src\frontend`. Desde la web se pide el cambio del lector y se exporta el PDF; el detalle está en [src/frontend/README.md](src/frontend/README.md).
 
 Con `NOVELAS_PUERTO=terminal` los agentes son Claude Code de verdad, y **cuesta dinero**. Las variables de entorno están en [.env.example](.env.example); la guía completa (API, reanudar, relanzar, verificar) en [src/backend/README.md](src/backend/README.md).
 
@@ -80,11 +85,13 @@ Qué falta y qué se contradice lo decide el código, no el agente entrevistador
 | Carpeta | Qué hay |
 | --- | --- |
 | [src/backend/](src/backend/) | Orquestador, worker, API FastAPI, story bible SQLite y el puerto a Claude Code |
-| [src/frontend/](src/frontend/) | Sin implementar; guarda las ideas pendientes |
-| [specs/](specs/) | Especificaciones y sus planes de verificación: [spec1](specs/spec1.md), [spec2](specs/spec2.md) y el [plan de entrega](specs/storymaker-plan.md) |
+| [src/frontend/](src/frontend/) | La web de lectura (React y Vite): portada con dedicatoria, índice, ficha de personajes y lugares con enlaces a sus capítulos, cambio del lector con los capítulos cambiados marcados y exportación a PDF |
+| [specs/](specs/) | Especificaciones y sus planes de verificación: [spec1](specs/spec1.md), [spec2](specs/spec2.md), [spec3](specs/spec3.md), la de la [web](specs/spec-frontend.md), la de [TLA+](specs/spec-tla.md), la de [Lean](specs/spec-lean.md) y el [plan de entrega](specs/storymaker-plan.md) |
+| [formal/](formal/) | Validadores formales: la especificación [TLA+](formal/tla/README.md) del harness, verificada con TLC, y la cronología de la historia en [Lean 4](formal/lean/) |
 | [docs/](docs/) | Arquitectura, ontología narrativa, oficio de escritura, métodos de verificación y [documentación de proceso](docs/proceso/README.md) |
 | [.claude/](.claude/) | Skills de los agentes, comandos del proyecto y la [memoria de Claude Code](.claude/memoria/README.md) |
-| [ejemplos/](ejemplos/) | Brief de ejemplo |
+| [ejemplos/](ejemplos/) | El [brief de ejemplo](ejemplos/brief-ejemplo.json), el [PDF de la novela de ejemplo](ejemplos/novela-ejemplo.pdf) (10 capítulos, generada con ese brief) y los [briefs de las evals](ejemplos/evals/) |
+| [presentacion/](presentacion/) | La presentación de la entrega y sus anexos |
 
 ## Trabajar con Claude Code
 
