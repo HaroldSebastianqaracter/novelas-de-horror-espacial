@@ -484,6 +484,17 @@ Cinco puertas. Las deterministas van primero porque son baratas y su fallo inval
 | **4. Oficio** | Con la puerta 3 limpia | Voz constante, distancia psíquica modulada, subtexto en diálogo, emoción no nombrada, la escena se gana su lugar, cliché, tropos con causalidad y cuentas que cuadran con el canon (spec3, RF3-PAS-12) — principios 10, 19, 25, 29, 31, 33, 38, 48 y 55 de [domain-knowledge.md](domain-knowledge.md). La parte mecánica devuelve además el capítulo por un nombre mal escrito o un allegado ausente (spec3, 3.6) | `I` |
 | **5. Global** | Sobre el manuscrito completo | Siembras sin pagar e hilos sin cerrar (`A`); reglas de la amenaza respetadas de principio a fin (`I`, exige interpretar el texto); curva de tensión en lectura continua (`D`) — principios 6, 14, 16, 18 y 44 | `A` + `I` + `D` |
 
+### Los dos hooks del harness
+
+El enunciado pide dos hooks: uno de validación del capítulo y otro de política. En storyMaker los dos son **puntos fijos del bucle del orquestador** por los que pasa todo capítulo antes de aceptarse, no hooks de configuración de Claude Code.
+
+| Hook | Dónde se engancha | Qué hace | Si salta | Registro |
+| --- | --- | --- | --- | --- |
+| **Validación del capítulo** | `orquestador/pipeline.py::generar_capitulo`, tras la extracción: tramo 2 (puerta 3, dentro de la transacción que inserta texto y hechos) y tramo 3 (puerta 4: mecánica, y juez de oficio con votos) | Continuidad contra el canon en SQL, nombres exactos, allegados, elementos del encargo, etiquetas sin nombre, longitud, tics y los nueve criterios del juez | Puerta 3: `ROLLBACK` y parada. Puerta 4: el capítulo vuelve al redactor con lo que falló; al tercer intento, parada | `resultado_puerta`, y un score por comprobación en Langfuse |
+| **Política** | El mismo punto de la puerta 4: `tareas/oficio/puerta.py` (comprobación `termino_vetado`) y `pipeline.py::_registrar_politica` | Guardrail de términos vetados en tres niveles (global, novela y los del cliente en el brief), con texto normalizado (mayúsculas, tildes, plurales y variantes simples) | El capítulo vuelve al redactor; al agotar los intentos, parada con informe | `decision_politica` (append-only, el audit log del policy engine) y Langfuse |
+
+> **Decisión sin entrevistar, 24 de septiembre de 2026.** Los hooks son del harness y no de Claude Code (`PreToolUse`, `PostToolUse`…) porque los agentes corren **sin herramientas** ([El motor de los agentes](#el-motor-de-los-agentes-claude-code)): un hook de herramienta no se dispararía nunca, y un hook de fin de sesión no puede devolver el capítulo al redactor ni abrir una parada, que es lo que exige el enunciado. Engancharlos en el orquestador los pone dentro de la misma transacción que acepta o revierte el capítulo, así que no hay capítulo aceptado sin validar ni decisión de política registrada que no ocurriera. Se descartó duplicarlos como hooks de Claude Code para el desarrollo: ya los cubre `/verificar`, y un hook que bloquea commits no valida capítulos.
+
 ## Política de fallo
 
 **La puerta 3 para el pipeline.** Un conflicto de continuidad no se marca ni se acumula: se detiene la generación, se emite un informe con el conflicto, el hecho que lo origina y la escena donde quedó establecido, y no se avanza hasta que un humano decida. Nunca se acumula deuda narrativa silenciosa.

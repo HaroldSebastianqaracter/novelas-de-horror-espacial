@@ -10,6 +10,9 @@ El razonamiento que llevó a storyMaker a ser como es: qué se decidió construi
 | Diagramas | [diagramas.md](diagramas.md) | Harness, máquina de estados (la del código y la de TLA+), esquema SQLite y tabla de validadores |
 | Registro de iteraciones | [registro-iteraciones.md](registro-iteraciones.md) | Al día hasta el 24 de septiembre de 2026 |
 | Red-team log | [red-team-log.md](red-team-log.md) | Formato fijado; casos adversariales pendientes |
+| Iteración de tuning (antes y después) | [tuning.md](tuning.md) | Escrita: el prompt del redactor v5 → v6 en la novela de diez capítulos |
+| Coste real por novela (para la slide de presupuesto) | [coste.md](coste.md) | Medido en la novela de diez capítulos; precio y escenarios, propuestos |
+| Los dos hooks (validación del capítulo y política) | [architecture.md](../architecture.md#los-dos-hooks-del-harness) | Escrito |
 | Uso del browser MCP | — | Pendiente (bloque 7 del [plan de entrega](../../specs/storymaker-plan.md)) |
 | Skills, subagentes y comandos | [herramientas.md](herramientas.md) | Escrita |
 | Resumen de la noche del 23 al 24 de septiembre (trabajo sin el autor) | [noche-23-09.md](noche-23-09.md) | Escrito; la rama `noche-23-09` está sin integrar |
