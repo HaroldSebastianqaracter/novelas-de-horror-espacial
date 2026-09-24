@@ -191,6 +191,10 @@ class Config:
     #: activa salvo `NOVELAS_VERIFICACION_FORMAL=0`; un `Config` construido a mano (los tests,
     #: el banco) la deja apagada para no compilar Lean en cada novela de prueba.
     verificacion_formal: bool = False
+    #: La rubrica del LLM-as-judge al terminar (una llamada mas por novela). Como la
+    #: verificacion formal: `cargar()` la activa salvo `NOVELAS_RUBRICA=0`, y un `Config`
+    #: construido a mano la deja apagada.
+    rubrica: bool = False
 
     @property
     def langfuse_activo(self) -> bool:
@@ -250,4 +254,5 @@ def cargar() -> Config:
         langfuse_host=(os.environ.get("LANGFUSE_HOST") or LANGFUSE_HOST_POR_DEFECTO).rstrip("/"),
         modelo=(_env("MODELO", MODELO_POR_DEFECTO) or MODELO_POR_DEFECTO).strip(),
         verificacion_formal=_env_bool("VERIFICACION_FORMAL", True),
+        rubrica=_env_bool("RUBRICA", True),
     )

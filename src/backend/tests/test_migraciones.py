@@ -207,7 +207,11 @@ def test_la_migracion_014_admite_la_puerta_6_y_la_parada_formal_sin_perder_nada(
                  (ids["parada"],)).fetchone()[0]
     assert colgados == 1
 
-    assert 14 in db.migrar(con)
+    m14 = next(m for m in db._migraciones() if m.numero == 14)
+    assert m14.sql is not None and m14.python is not None
+    db._aplicar_version(con, 14, m14.sql.read_text(encoding="utf-8"),
+                        db._paso_python(m14.python))
+    assert db.version_actual(con) == 14
 
     despues = _filas(con)
     assert {k: v for k, v in despues.items() if k != 'esquema_version'} == {

@@ -88,6 +88,8 @@ from tareas.redaccion.esquemas import SalidaRedaccion
 from tareas.revision import puerta as p_revision
 from tareas.revision import servicio as s_revision
 from tareas.revision.esquemas import SalidaRevision
+from tareas.rubrica import servicio as s_rubrica
+from tareas.rubrica.esquemas import SalidaRubrica
 
 from . import cambios as o_cambios
 from . import cola, estados, fallo, lean, versiones, vigencia
@@ -816,6 +818,7 @@ def _avanzar(ctx: Contexto) -> str:
             siguiente = lectura.ultimo_capitulo_completado(ctx.con, ctx.novela_id) + 1
 
         final, _ = _completar(ctx)
+        _evaluar_rubrica(ctx)
         return final
 
     except Detenido:
@@ -942,6 +945,34 @@ def _publicar(ctx: Contexto, global_: ResultadoPuerta, *, motivo: versiones.Moti
     # Lo que leera el lector, en la misma transaccion que la completa (RF3-BIB-12).
     numero = versiones.publicar(ctx.con, ctx.novela_id, motivo=motivo, detalle=detalle)
     return final, numero
+
+
+def _evaluar_rubrica(ctx: Contexto) -> None:
+    """El LLM-as-judge con rubrica sobre la novela entera, ya publicada. No bloquea.
+
+    Seis notas de 1 a 5 en `evaluacion_rubrica`; una de 2 o menos deja el evento
+    `rubrica_baja`. Cualquier fallo (el agente, el paquete) deja `rubrica_fallida` y la novela
+    sigue completada: la rubrica informa, no decide.
+    """
+    if not ctx.cfg.rubrica:
+        return
+    try:
+        paquete = s_rubrica.paquete(ctx.con, ctx.novela_id, presupuesto=ctx.presupuesto)
+        salida, resultado = _invocar(ctx, "rubrica", paquete, SalidaRubrica)
+        with transaccion(ctx.con):
+            bajas = s_rubrica.registrar_salida(
+                ctx.con, ctx.novela_id, salida,
+                llamada_id=getattr(resultado, "llamada_id", None))
+            if bajas:
+                emitir_evento(ctx.con, ctx.novela_id, "rubrica_baja", criterios=bajas)
+    except Exception as exc:  # la novela ya esta publicada: la rubrica no la toca
+        log.warning("La rubrica de la novela %s fallo", ctx.novela_id, exc_info=True)
+        try:
+            with transaccion(ctx.con):
+                emitir_evento(ctx.con, ctx.novela_id, "rubrica_fallida",
+                              motivo=f"{type(exc).__name__}: {exc}"[:300])
+        except Exception:  # ni siquiera la traza: la novela sigue completada
+            log.warning("No se pudo anotar el fallo de la rubrica", exc_info=True)
 
 
 def _fase_pendiente_de_planificacion(ctx: Contexto) -> bool:
