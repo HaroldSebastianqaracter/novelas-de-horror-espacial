@@ -188,6 +188,13 @@ De ahí una regla dura: **el paquete de capítulo se le entrega al agente, y el 
 >
 > Queda un supuesto sin verificar: que Claude Code **no compacte** dentro de una llamada. Sin herramientas y con el paquete bajo presupuesto no debería ocurrir, y el puerto registra en la traza cualquier señal de que haya ocurrido, para poder contradecirlo.
 
+
+### Los nombres del encargo, fuera del modelo
+
+Los agentes no reciben los nombres del brief: `pipeline._invocar` los cambia por etiquetas reversibles (`[DESTINATARIO_NOMBRE]`, `[ALLEGADO_1]`) con una leyenda sin nombres, y restaura los nombres en la respuesta antes de validarla (`orquestador/seudonimo.py`, [spec3, 3.13](../specs/spec3.md)). Lo que se guarda y lo que llega a Langfuse ya va con etiquetas; el grafo y la lectura tienen los nombres.
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** Con Opus 5.5 los agentes aplicaban la política de privacidad de la organización y escribían `[NOMBRE_ANONIMIZADO]`. Se eligió que los datos personales no lleguen al modelo, en un solo punto del pipeline, frente a pedir que se ajustara la política: cumple la minimización del RGPD y no depende de cómo cada modelo aplique la política. El entrevistador queda fuera, porque es quien descubre los nombres.
+
 ## Fases del pipeline
 
 ```mermaid

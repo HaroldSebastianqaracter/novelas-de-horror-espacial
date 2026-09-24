@@ -257,6 +257,15 @@ def _partes_del_nombre(nombre: str, *, firma: bool) -> dict[str, bool]:
     return partes
 
 
+#: Para la mascara reversible del pipeline (orquestador/seudonimo.py, RF3-SEU-01).
+def plegar(texto: str) -> tuple[str, list[int], set[int]]:
+    return _plegar(texto)
+
+
+def partes_del_nombre(nombre: str, *, firma: bool) -> dict[str, bool]:
+    return _partes_del_nombre(nombre, firma=firma)
+
+
 class Seudonimizador:
     """Sustituye los nombres del encargo por etiquetas antes de que salgan de la maquina.
 
@@ -302,6 +311,14 @@ class Seudonimizador:
             ((f, e, f in libres) for f, e in asignadas.items()),
             key=lambda t: len(t[0]), reverse=True,
         )
+
+    @classmethod
+    def desde_formas(cls, formas: list[tuple[str, str, bool]]) -> Seudonimizador:
+        """Con formas ya hechas (plegadas, de la mas larga a la mas corta): (forma, etiqueta,
+        casa en cualquier grafia). Lo usa la mascara reversible (orquestador/seudonimo.py)."""
+        s = cls(None)
+        s._formas = list(formas)
+        return s
 
     def texto(self, texto: str) -> str:
         if not self._formas or not texto:

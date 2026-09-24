@@ -85,7 +85,10 @@ def test_el_paquete_del_redactor_lleva_los_elementos_de_cada_escena() -> None:
     assert isinstance(ctx.puerto, PuertoFalso)
     entradas = [i["entrada"] for i in ctx.puerto.invocaciones if i["agente"] == "redaccion"]
     assert any("Elementos personales que integra" in e and "): REC1" in e for e in entradas)
-    assert all("DESTINATARIO (protagonista, nombre exacto): Marta Ibáñez" in e for e in entradas)
+    # RF3-SEU-01: el nombre sale como etiqueta, y el nombre real no sale nunca.
+    assert all("DESTINATARIO (protagonista, nombre exacto): [DESTINATARIO]" in e
+               for e in entradas)
+    assert not any("Ibáñez" in e or "Marta" in e for e in entradas)
 
 
 # --- Puerta 1 -----------------------------------------------------------------------------------
@@ -187,6 +190,12 @@ def test_un_codigo_de_elemento_desconocido_queda_en_la_traza() -> None:
         con.execute("SELECT salida_cruda FROM llamada_modelo WHERE agente = 'escaleta' "
                     "ORDER BY id DESC LIMIT 1").fetchone()["salida_cruda"]
     )["structured_output"]
+    # Lo guardado es lo que devolvio el modelo, con etiquetas (RF3-SEU-01): se restaura como
+    # hace el pipeline antes de aplicarlo.
+    from compartido.grafo import lectura
+    from orquestador.seudonimo import Mascara
+
+    salida = Mascara(lectura.brief(con, novela_id)).restaurar(salida)
     salida["capitulos"][0]["escenas"][0]["elementos"].append("REC99")
     con.execute("DELETE FROM capitulo WHERE novela_id = ?", (novela_id,))
     con.execute("DELETE FROM secuencia WHERE novela_id = ?", (novela_id,))

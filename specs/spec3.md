@@ -806,3 +806,19 @@ La regla de la skill del redactor «No haces saber a un personaje algo que aún 
 
 > **Decisión entrevistada, 24 de septiembre de 2026.** Se eligió prevenir en el redactor, sin tocar la puerta. Se descartó que la puerta avisara en vez de parar cuando la prosa cita la fuente: un error real con una fuente inventada saldría solo como aviso. También se descartó lanzar sin cambios y decidir en cada parada, que en una novela de diez capítulos serían varias.
 
+## 3.13 Los nombres del encargo no salen de la máquina
+
+La novela de diez capítulos (24 de septiembre, Opus 5.5) paró en la puerta 1 sin haber escrito nada: el arquitecto, el elenco y el estructurador devolvieron `[NOMBRE_ANONIMIZADO]` en lugar del nombre del destinatario y del de quien regala, en dos personajes y en la dedicatoria. Cada agente es una sesión de Claude Code de la organización, y la política de privacidad de la organización (RGPD) le pide no reproducir datos personales; el modelo no puede saber que los nombres del brief son de un encargo, y los anonimiza. Las puertas hicieron su trabajo (`destinatario_protagonista`, `allegado_en_elenco`, `dedicatoria_nombra_al_destinatario`), pero sin nombres no hay producto.
+
+**RF3-SEU-01 — Etiquetas hacia el modelo.** Antes de cada llamada a un agente del pipeline (`pipeline._invocar`, por donde pasan todas), los nombres del brief se cambian por etiquetas: el destinatario (`[DESTINATARIO]`, y por partes `[DESTINATARIO_NOMBRE]` y `[DESTINATARIO_APELLIDO]`), cada allegado (`[ALLEGADO_n]`) y quien regala (`[QUIEN_REGALA]`, o la etiqueta del allegado que lo es). La búsqueda es la del seudonimizador de Langfuse (RF3-OBS-07: texto plegado, fronteras de palabra, partes que solo casan en mayúscula), pero cada forma tiene su propia etiqueta para poder deshacerla. Lo que se guarda en `llamada_modelo` es lo que se envió y lo que volvió, con etiquetas.
+
+**RF3-SEU-02 — La leyenda.** El paquete empieza por una leyenda sin ningún nombre: qué persona es cada etiqueta (el destinatario y sus pronombres, cada allegado con su relación, quién regala) y la orden de escribir la etiqueta tal cual donde iría el nombre, sin inventar otro nombre ni otra etiqueta.
+
+**RF3-SEU-03 — Nombres de vuelta.** La respuesta del agente vuelve con cada etiqueta del encargo cambiada por el nombre escrito como en el brief (con sus tildes), en textos, listas y claves, antes de validarla. El grafo, las puertas, la lectura y el cambio del lector ven los nombres reales, como hasta ahora. Si la validación falla, el error que se reenvía al agente se vuelve a enmascarar.
+
+**RF3-SEU-04 — Ninguna etiqueta en la prosa.** La mecánica de la puerta 4 devuelve el capítulo si la prosa lleva una etiqueta en mayúsculas entre corchetes (`etiqueta_en_la_prosa`): una del encargo que el agente escribió mal, una que inventó o la de la anonimización de la política. El lector no puede encontrar `[NOMBRE_ANONIMIZADO]` en su regalo.
+
+**RF3-SEU-05 — Lo que queda fuera.** El entrevistador (3.2) sigue viendo los nombres: los extrae de lo que dice el comprador, y no se pueden ocultar antes de saber cuáles son. El brief escrito a mano o desde la web no pasa por él. Los términos vetados (3.5) se envían tal cual al redactor; si uno es un nombre (una expareja), sale. Una forma del nombre que la búsqueda no reconoce (un apodo que no está en el brief) sale, como en Langfuse.
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** El autor eligió la seudonimización desde el diseño frente a pedir al administrador de la organización que ajustara la política. Los datos personales del encargo dejan de llegar al modelo, que es lo que pide la minimización del RGPD, y el diseño no depende de cómo cada modelo aplique la política. Se descartó cambiar de modelo para esquivarla. El coste: el agente escribe etiquetas en lugar de nombres, y la prosa depende de que las respete; la puerta 4 lo comprueba.
+
