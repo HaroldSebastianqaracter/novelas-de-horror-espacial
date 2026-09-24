@@ -49,6 +49,26 @@ _UNIDADES = frozenset({
 })
 
 
+#: Raices de las palabras que dicen que una cifra cuenta personas (spec3, RF3-PAS-16).
+_RAICES_DE_PERSONAS = (
+    "persona", "gente", "tripula", "bordo", "dotacion", "cuadrilla", "evacu", "supervivi",
+    "muert", "baja", "herid", "colono", "habitante", "pasajer", "miembro", "hombre", "mujer",
+    "nino", "respira", "vivo", "equipo", "turno", "dormid",
+)
+
+
+def cuenta_personas(texto: str) -> bool:
+    """Si el texto da una cifra de personas: una cantidad y una palabra de gente.
+
+    Sirve para el censo del redactor (RF3-PAS-16): «personas a bordo: siete», «bajas del turno:
+    dos», «once respirando». Mejor de mas que de menos: una linea que sobra en el censo cuesta
+    unos tokens; una que falta deja al redactor sumando de memoria.
+    """
+    if not tiene_cifra(texto):
+        return False
+    return any(p.startswith(_RAICES_DE_PERSONAS) for p in _PALABRA.findall(normalizar(texto)))
+
+
 def tiene_cifra(texto: str) -> bool:
     """Si el texto da una cantidad (spec3, RF3-PAS-12).
 

@@ -784,3 +784,17 @@ La segunda pasada real (24 de septiembre, `novela_3cap.db`, el brief de ejemplo 
 - En la puerta 3, un uso de un hecho observable no para. Si el personaje estuvo, en una escena anterior o en la misma, en el lugar donde se fijó el hecho, lo sabe y no hay nada que decir. Si no estuvo, es el aviso `conocimiento_observable`, para que el autor compruebe que es verosímil.
 
 > **Decisión entrevistada, 24 de septiembre de 2026.** Se eligió frente a pasar todo el conocimiento no adquirido a aviso, que dejaba de proteger los errores reales, y frente a dejarlo como estaba, que con diez capítulos pararía varias veces por el mismo motivo. El riesgo es que el extractor marque de más y se cuele un error real como aviso: la skill pide ante la duda `false`, y la marca queda a la vista en el grafo. «El mismo lugar» es el mismo `lugar_id`, sin contención (RF2-PIPE-26): quien estuvo en un sitio que contiene al otro recibe el aviso, no el silencio.
+
+### El censo, delante
+
+**RF3-PAS-16 — El redactor recibe el censo.** *Amplía RF3-PAS-10 y RF3-PAS-12.* En el intento 2 del capítulo 3 las cuentas cuadraban («siete a bordo: Marta, Idoia, Casilda, Tomás y tres de la cuadrilla»); en el 3, al reescribir el capítulo entero para arreglar otra cosa, daban nueve. Los de la cuadrilla no tienen nombre ni ficha, y el único dato del canon era una línea, «personas a bordo: siete personas», así que el redactor rehacía la suma de memoria en cada versión. En la primera novela, tres de las cuatro contradicciones reales que pasaron las puertas eran cuentas de este tipo. El juez las caza (RF3-PAS-12, y ahora en cada intento por RF3-PAS-14), pero es probabilístico; esto ataca que se cometan.
+
+- Si el canon tiene algún dato que cuenta personas (una cantidad y una palabra de gente: «personas a bordo: siete», «bajas del turno: dos», «once respirando»), el bloque de hechos del redactor empieza por una sección **Censo**, obligatoria:
+  - la regla: toda cifra de personas cuadra con el censo; antes de escribirla, la suma de los que tienen nombre más los anónimos que cuentan los datos; quien se va o muere baja el total desde esa escena; quien está lejos no cuenta entre los presentes;
+  - cada personaje de la novela con su última condición registrada antes del capítulo (vivo, herido, muerto…);
+  - los datos que cuentan personas hasta el capítulo, como mucho 30, con los de mundo delante y después del más reciente al más antiguo.
+- Sin ningún dato de personas no hay sección: los nombres ya están en el canon del capítulo.
+- Va dentro del bloque `hechos` y no en uno propio, porque los bloques del redactor ya suman el paquete entero (RF2-CTX-12); por ser obligatoria, el recorte no la toca.
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** El autor eligió hacerlo antes de la novela de diez capítulos, a propuesta de la sesión que lanzó la de tres. Se dejó para después una comprobación determinista de las cifras de personas (el punto ciego C12 del banco): es un trabajo grande, y con el censo delante y el juez en cada intento ya hay dos defensas. El criterio de «dato de personas» es de palabras y cifras, a propósito ancho: una línea que sobra cuesta unos tokens y una que falta deja al redactor sumando de memoria.
+

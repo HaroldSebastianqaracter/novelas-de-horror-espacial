@@ -15,6 +15,7 @@ from compartido import politica
 from compartido.brief import describir_intensidad, linea_destinatario
 from compartido.contexto import Elemento, Paquete, Presupuesto, ajustar
 from compartido.grafo import insertar, lectura
+from compartido.texto import cuenta_personas
 from compartido.tipos import como_dict, como_lista
 
 from .esquemas import SalidaRedaccion
@@ -180,6 +181,17 @@ def _canon(canon: dict[str, list[dict[str, Any]]]) -> list[Elemento]:
 
 
 _SECCION_HECHOS = "### Hechos ya establecidos (no los contradigas)"
+_SECCION_CENSO = "### Censo: las cuentas de personas"
+#: Cuantos datos de personas entran como mucho, los mas recientes primero (con los de mundo
+#: delante, como los ordena `hechos_hasta`).
+MAX_DATOS_DE_CENSO = 30
+_REGLA_DEL_CENSO = (
+    "Toda cifra de personas que escribas (cuantos hay, llegan, se van, se quedan, mueren) "
+    "cuadra con este censo. Antes de escribirla, haz la suma: los que tienen nombre mas los "
+    "anonimos que cuentan los datos. Si alguien se va o muere en una escena, el total que queda "
+    "baja desde ahi. Quien esta lejos (por radio, en otra nave) no cuenta entre los presentes. "
+    "Si una escena no cuenta personas, no hace falta que lo haga."
+)
 _SECCION_CONOCIMIENTO = "### Quien sabe que (nadie puede actuar sobre lo que no ha recibido)"
 
 
@@ -208,6 +220,35 @@ def _hechos(hechos: list[dict[str, Any]], conocimiento: list[dict[str, Any]]) ->
         Elemento(linea(h), False, _SECCION_HECHOS) for h in hechos if not h["obligatorio"]
     ]
     return elementos
+
+
+def _censo(con: sqlite3.Connection, novela_id: int, capitulo: int) -> list[Elemento]:
+    """Las cuentas de personas del canon, para no sumar de memoria (spec3, RF3-PAS-16).
+
+    Solo si el canon ya cuenta personas: sin ningun dato asi, los nombres ya estan en el canon
+    del capitulo y el bloque no aportaria nada.
+    """
+    datos = [
+        h for h in lectura.hechos_hasta(con, novela_id, capitulo)
+        if cuenta_personas(f"{h['atributo']} {h['valor']}")
+    ][:MAX_DATOS_DE_CENSO]
+    if not datos:
+        return []
+    personajes = lectura.censo_de_personajes(con, novela_id, capitulo)
+
+    def estado(c: dict[str, Any]) -> str:
+        if c["condicion"] is None:
+            return "sin nada registrado"
+        return f"{c['condicion']} (desde el cap. {c['capitulo_condicion']})"
+
+    return [
+        Elemento(_REGLA_DEL_CENSO, True, _SECCION_CENSO),
+        Elemento("Con nombre: " + "; ".join(
+            f"{c['nombre']} ({c['rol_narrativo']}), {estado(c)}" for c in personajes
+        ) + ".", True, _SECCION_CENSO),
+        *(Elemento(f"- {h['sujeto_nombre']} · {h['atributo']}: {h['valor']} "
+                   f"(cap. {h['capitulo_origen']})", True, _SECCION_CENSO) for h in datos),
+    ]
 
 
 def paquete(
@@ -256,7 +297,9 @@ def paquete(
     p.anadir_elementos("canon", elementos_canon, "CANON DE ESTE CAPITULO", separador="\n\n")
     p.anadir_elementos(
         "hechos",
-        _hechos(
+        # El censo va delante y es obligatorio: sin el, el redactor rehace la suma de memoria
+        # en cada intento y a veces se equivoca (novela de tres capitulos, RF3-PAS-16).
+        _censo(con, novela_id, capitulo) + _hechos(
             lectura.hechos_del_reparto(con, novela_id, capitulo),
             lectura.conocimiento_del_reparto(con, novela_id, capitulo),
         ),
