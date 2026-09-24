@@ -470,3 +470,9 @@ def test_sin_lean_el_redactor_no_recibe_la_herramienta_como_criterio(
     ctx = pipeline.Contexto(con=conexion, puerto=None,  # type: ignore[arg-type]
                             cfg=cfg_de(ruta), novela_id=novela_id)
     assert pipeline._criterios_formales(ctx, 3) == []  # pyright: ignore[reportPrivateUsage]
+
+
+def test_la_puerta_6_va_a_la_unidad_de_cierre_en_langfuse() -> None:
+    from orquestador import observabilidad
+
+    assert observabilidad._unidad_de_puerta(6, None) == "cierre"  # pyright: ignore[reportPrivateUsage]
