@@ -636,3 +636,61 @@ def version(con: sqlite3.Connection, novela_id: int, numero: int) -> dict[str, A
         c["cambiado"] = bool(c["cambiado"])
     v["capitulos_cambiados"] = [c["numero"] for c in v["capitulos"] if c["cambiado"]]
     return v
+
+
+# --- Lo que la lectura web pide al backend (specs/spec3.md, 3.7) -----------------------------
+
+#: La ocasion del brief, como la lee el destinatario en la portada (RF3-LEC-01).
+OCASIONES: dict[str, str] = {
+    "cumpleanos": "cumpleaños", "aniversario": "aniversario", "boda": "boda",
+    "jubilacion": "jubilación", "navidad": "Navidad",
+}
+
+
+def regalo(con: sqlite3.Connection, novela_id: int) -> dict[str, str | None] | None:
+    """Para quien es, de quien y por que, o None si la novela no tiene brief (RF3-LEC-01)."""
+    b = brief(con, novela_id)
+    if b is None:
+        return None
+    ocasion = (b.ocasion_detalle or None) if b.ocasion == "otra" else (
+        OCASIONES.get(b.ocasion) if b.ocasion else None
+    )
+    return {"para": b.destinatario.nombre, "de": b.quien_regala, "ocasion": ocasion}
+
+
+def apariciones(con: sqlite3.Connection, novela_id: int) -> dict[str, list[dict[str, Any]]]:
+    """Cada personaje y cada lugar con los capitulos completados donde aparece (RF3-LEC-02).
+
+    Los personajes, por la vista `presencia` (RF2-PIPE-31); los lugares, por el lugar de cada
+    escena. Quien no aparece en ningun capitulo completado sale con la lista vacia.
+    """
+    def agrupar(entidades: str, apariciones_sql: str) -> list[dict[str, Any]]:
+        capitulos: dict[int, set[int]] = {}
+        for f in con.execute(apariciones_sql, (novela_id,)):
+            capitulos.setdefault(int(f["id"]), set()).add(int(f["capitulo"]))
+        return [
+            {"id": int(f["id"]), "nombre": str(f["nombre"]),
+             "capitulos": sorted(capitulos.get(int(f["id"]), set()))}
+            for f in con.execute(entidades, (novela_id,))
+        ]
+
+    return {
+        "personajes": agrupar(
+            "SELECT id, nombre FROM personaje WHERE novela_id = ? ORDER BY id",
+            """
+            SELECT p.personaje_id AS id, c.numero AS capitulo
+            FROM presencia p
+            JOIN escena e ON e.id = p.escena_id
+            JOIN capitulo c ON c.id = e.capitulo_id
+            WHERE e.novela_id = ? AND c.estado = 'completado'
+            """,
+        ),
+        "lugares": agrupar(
+            "SELECT id, nombre FROM lugar WHERE novela_id = ? ORDER BY id",
+            """
+            SELECT e.lugar_id AS id, c.numero AS capitulo
+            FROM escena e JOIN capitulo c ON c.id = e.capitulo_id
+            WHERE e.novela_id = ? AND c.estado = 'completado' AND e.lugar_id IS NOT NULL
+            """,
+        ),
+    }

@@ -15,11 +15,11 @@ Versión 0.1 · 23 de septiembre de 2026
 | 2. Personalización del terror | [3.2](#32-bloque-2--personalización-del-terror) | Escrita |
 | 3. Huecos de la story bible | [3.3](#33-bloque-3--huecos-de-la-story-bible) | Escrita |
 | 4. Observabilidad con Langfuse | [3.4](#34-bloque-4--observabilidad-con-langfuse) | Escrita |
-| 5. Guardrails | 3.5 | Pendiente |
-| 6. Validadores que faltan | 3.6 | Pendiente |
-| 7. Lectura | 3.7 | Pendiente |
-| 8. Cambio del lector | 3.8 | Pendiente |
-| 9. Validadores formales | 3.9 | Pendiente |
+| 5. Guardrails | [3.5](#35-bloque-5--guardrails) | Escrita |
+| 6. Validadores que faltan | [3.6](#36-bloque-6--validadores-que-faltan) | Empezada: nombres, allegados, longitud, segunda opinión y votos del juez |
+| 7. Lectura | [3.7](#37-bloque-7--lo-que-la-lectura-web-pide-al-backend) | Empezada: lo que la web pide al backend. La lectura es el frontend ([spec-frontend.md](spec-frontend.md)) |
+| 8. Cambio del lector | [3.8](#38-bloque-8--cambio-del-lector) | Escrita |
+| 9. Validadores formales | 3.9 | En sus propias specs: `spec-lean.md` y `spec-tla.md` |
 | 10. Infraestructura de evals | [3.10](#310-bloque-10--infraestructura-de-evals) | Empezada: el banco de contraejemplos de la puerta 3 |
 | Mejoras tras la primera pasada real | [3.11](#311-lo-que-enseñó-la-primera-pasada-real) | Escrita: 3 de los 6 frentes (extractor, resumen y nombres menores) |
 
@@ -451,6 +451,148 @@ Todo se añade al informe de la parada ya abierta como `segunda_opinion`. La ski
 > Coste: el juez pasa de una llamada por intento a tres, o cinco si discrepan (unos 0,25 $ cada una). La temperatura no se controla desde el CLI, así que la variación entre muestras es la del modelo. Queda pendiente calibrar con el autor si tres son pocas.
 
 **Medido con el juez real** (capítulos 1 y 4 de la copia de `novela_real.db`, 2,15 $). En el capítulo 1, `cuentas_cuadran` salió en contra en cuatro de cinco muestras: las tres primeras discreparon, se pidieron dos más y ganó `falla`. En el 4, en contra en tres de tres. Los otros ocho criterios salieron unánimes a favor en los dos capítulos. Es el caso que motivó el voto: con una sola muestra, el capítulo 1 pasó una vez y falló otra.
+
+## 3.7 Bloque 7 — Lo que la lectura web pide al backend
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** La lectura de la entrega es la **web** del frontend (la variante web del enunciado), con su exportación a PDF, y no un HTML estático generado por el backend. Cambia la decisión del bloque 7 del [plan](storymaker-plan.md), que se tomó cuando el frontend no existía. La web la construye la sesión del frontend ([spec-frontend.md](spec-frontend.md)); aquí van solo las dos lecturas que le faltaban al backend.
+
+**RF3-LEC-01 — La portada.** `GET /novelas/{id}` añade a `NovelaDetalle`:
+
+- `dedicatoria`: la de la novela (`novela.dedicatoria`), o nula;
+- `regalo`: `{para, de, ocasion}` con el nombre del destinatario, quien regala y la ocasión legible («cumpleaños», «jubilación»; con `otra`, su detalle), o nulo si la novela no tiene brief.
+
+**RF3-LEC-02 — Dónde aparece cada uno.** `GET /novelas/{id}/apariciones` devuelve `{personajes: [{id, nombre, capitulos}], lugares: [{id, nombre, capitulos}]}`, solo con capítulos **completados** y en orden. Los personajes salen de la vista `presencia` (reparto, punto de vista, presencias registradas, usos de conocimiento y estados: RF2-PIPE-31); los lugares, del lugar de cada escena. Un personaje o un lugar que no aparece en ningún capítulo completado sale con la lista vacía: la ficha lo enseña igual.
+
+## 3.8 Bloque 8 — Cambio del lector
+
+El lector selecciona en la web un personaje, un lugar, un objeto, un hecho o un fragmento, y pide un cambio («el perro se llama Nala»). El sistema entiende qué dato del canon cambia, localiza los capítulos que lo usan, **reescribe solo esos** y publica una versión nueva con lo que cambió marcado. La versión anterior se conserva siempre (RF3-BIB-11).
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** Dos decisiones:
+>
+> 1. **Solo cambios de canon**: renombrar un personaje, un lugar o un objeto, o cambiar el valor de un hecho. Un agente convierte la petición libre en un cambio estructurado y rechaza lo demás («hazlo más triste»). Se descartó admitir cambios de estilo: no hay un dato que localizar ni una forma determinista de comprobar el resultado, y el riesgo de meter fallos en una novela ya aprobada es mayor.
+> 2. **Reescritura quirúrgica**: cada capítulo afectado se corrige sobre su prosa aprobada, cambiando solo lo que toca el dato, y los demás capítulos quedan idénticos. Se descartó regenerarlo entero desde la escaleta: los capítulos siguientes, que no se tocan, apuntan a hechos, conocimientos y siembras de ese capítulo, que se borran al revertirlo (RF-FALLO-04); rehacer esa parte del grafo sin regenerar lo que viene después rompía la continuidad que el enunciado pide conservar.
+
+```mermaid
+sequenceDiagram
+  participant W as Web
+  participant A as API
+  participant K as Worker
+  participant I as interprete
+  participant R as revision
+  participant J as Puerta 4
+  W->>A: POST /intenciones cambio_lector
+  A-->>W: 202 (o 422 cambio_invalido)
+  K->>K: estado, versión base y objetivo
+  K->>I: petición (no confiable) y candidatos del canon
+  I-->>K: cambio estructurado o no admisible
+  K->>K: validación en código y alcance
+  K-->>W: intención hecha {capitulos}
+  loop cada capítulo del alcance, hasta 3 intentos
+    K->>R: prosa aprobada + cambio (canon simulado)
+    R-->>K: escenas corregidas, citas, resúmenes
+    K->>J: comprobaciones del cambio, mecánica y juez con votos
+  end
+  K->>K: una transacción: canon, textos, versión nueva
+```
+
+### La petición
+
+**RF3-CAM-01 — La intención.** Tipo nuevo `cambio_lector`, con este payload, que la API valida en forma (422 con `codigo: "cambio_invalido"` y los campos en `detalle`, como `brief_incompleto`):
+
+| Campo | Contenido |
+| --- | --- |
+| `version_base` | La versión que el lector estaba leyendo |
+| `objetivo` | `{"tipo": "entidad", "entidad": "personajes" \| "lugares" \| "objetos", "id": N}`, `{"tipo": "hecho", "hecho_id": N}` o `{"tipo": "fragmento"}` |
+| `peticion` | Lo que pide el lector, de 3 a 300 caracteres |
+| `cita` | Opcional, hasta 500 caracteres: `{"capitulo": N, "texto": "…"}`. Obligatoria con `fragmento` |
+
+**RF3-CAM-02 — Lo que comprueba el worker antes de nada.** Rechaza la intención, sin llamar a ningún agente ni tocar nada, con uno de estos motivos:
+
+| Motivo | Cuándo |
+| --- | --- |
+| `novela_no_terminada` | La ejecución no está en `completada` ni en `completada_con_avisos` |
+| `version_desfasada` | `version_base` no es la última versión publicada |
+| `objetivo_inexistente` | La entidad o el hecho no existen en la novela, el hecho no está vigente, o el capítulo de la cita no está completado |
+
+**RF3-CAM-03 — El intérprete.** Agente nuevo, `interprete` (con su skill, RF-SKILL-01), que convierte la petición en un cambio. Recibe la petición y la cita **delimitadas como datos no confiables**, el objetivo y los candidatos del canon:
+
+- con una entidad: la entidad y sus hechos vigentes;
+- con un hecho: el hecho y su sujeto;
+- con un fragmento: las entidades del reparto del capítulo de la cita y los hechos vigentes que ese capítulo establece o usa (`hecho_escena`).
+
+Devuelve `admisible`, el `motivo` y, si es admisible, uno de dos cambios: `renombrar` (tabla, id y `nombre_nuevo`) o `cambiar_hecho` (id y `valor_nuevo`).
+
+**RF3-CAM-04 — La validación en código.** Lo que el intérprete devuelve no se cree: el código lo comprueba y, si falla algo, rechaza la intención con el motivo `cambio_no_admisible` y la explicación en `resultado`:
+
+- el id está entre los candidatos que recibió, y con un objetivo de entidad o de hecho, es ese objetivo;
+- un nombre nuevo tiene de 1 a 4 palabras y 60 caracteres como mucho, solo letras, espacios, guiones y apóstrofos, empieza por mayúscula, es distinto del actual y no coincide con otra entidad de la novela (su nombre normalizado es único, RF2-PER-11);
+- un valor nuevo tiene como mucho `PALABRAS_POR_DATO` palabras y 120 caracteres, sin saltos de línea, y es distinto del actual;
+- ni el nombre ni el valor contienen un término vetado de la novela (RF3-GRD-02);
+- la petición y la cita no traen ningún patrón de inyección conocido (los de RF3-ENT-05, que pasan a `compartido/`).
+
+> **Decisión sin entrevistar.** Un patrón de inyección rechaza el cambio en lugar de solo avisar, como hace la entrevista con el texto libre (RF3-ENT-05). El texto de un lector llega a dos agentes y acaba en la prosa de un regalo: ante la duda, no se aplica. La defensa de fondo no es la lista de patrones, que es cerrada, sino que el intérprete solo puede devolver un id de una lista y un valor con forma de dato.
+
+**RF3-CAM-05 — El alcance.** Los capítulos que se reescriben, en orden, calculados por código:
+
+- **Renombrar:** los capítulos completados cuya prosa escribe el nombre actual: el nombre entero o una palabra suya de tres letras o más, con mayúscula, sin mirar tildes (así entra también un «Tomas» mal escrito).
+- **Cambiar un hecho:** `lectura.capitulos_de_hecho` (RF3-BIB-02): los que lo establecen, lo reafirman, lo mencionan, lo conocen o lo usan.
+
+La API expone el mismo cálculo en `GET /novelas/{id}/cambios/alcance?entidad=personajes&id=N` o `?hecho_id=N`, que devuelve `{capitulos}`, para que el lector vea el alcance antes de confirmar. Con un fragmento no hay alcance previo: depende de lo que entienda el intérprete.
+
+> **Decisión de la spec.** *Afina la decisión de RF3-BIB-02.* Para renombrar no cuenta el reparto, solo la prosa. Un capítulo que no escribe el nombre no puede contener el nombre viejo, así que reescribirlo no cambia nada y cuesta cinco llamadas. La regla de pecar de incluir de más (RF3-BIB-02) sigue valiendo para los hechos, que se pueden parafrasear; un nombre, no.
+
+Si la validación pasa, la intención se cierra como `hecha` con `resultado: {"cambio_id", "capitulos"}` y empieza la reescritura. Si el alcance sale vacío, el cambio se aplica al canon y se publica versión solo si cambian el título o la dedicatoria.
+
+### La reescritura
+
+**RF3-CAM-06 — Estados.** Dos transiciones nuevas: `(completada, cambio_lector) → generando` y `(completada_con_avisos, cambio_lector) → generando`. Durante la reescritura la ejecución está en `generando`, con la fase `revision` o `puerta_4` y el capítulo que se corrige; los capítulos siguen `completado`, y `capitulos_completados` no se mueve. La reescritura termina por las transiciones de siempre, `terminado_limpio` o `terminado_con_avisos`, según la puerta 5, que se evalúa de nuevo.
+
+**RF3-CAM-07 — El canon simulado.** El cambio **no se aplica** hasta el final. Para construir los paquetes y pasar la mecánica, el pipeline lo aplica dentro de una transacción que **siempre se deshace**: así el redactor, la mecánica (nombres, allegados del brief, términos vetados) y el paquete del juez (hechos con cifras) ven ya el canon cambiado, y ningún fallo, parada ni caída deja un canon a medias. Las llamadas a los agentes corren fuera de esa transacción, con los paquetes ya construidos.
+
+> **Decisión de la spec.** Se descartó aplicar el cambio al principio y deshacerlo si fallaba: exigía guardar lo anterior, compensar en cada salida (fallo, `parar`, señal, caída del worker) y dejaba a la API leyendo un canon que no casaba con los textos publicados. Con la simulación no hay nada que compensar.
+
+**RF3-CAM-08 — El revisor.** El agente `revision`, que la arquitectura reservaba para las pasadas globales (fuera de la v1), existe ya con una sola pasada: la del cambio del lector. Recibe el cambio (lo viejo y lo nuevo), la prosa aprobada del capítulo escena por escena, su resumen y su resumen breve, la línea de palabras vetadas y, en los intentos 2 y 3, lo que falló en el anterior. Devuelve las **mismas escenas** corregidas, los resúmenes corregidos y las `citas` del cambio: fragmentos literales de la prosa nueva donde aplicó el cambio. La skill le pide cambiar solo lo necesario (el dato, sus concordancias y lo que deje de tener sentido por él) y no mejorar nada más.
+
+**RF3-CAM-09 — Las comprobaciones del cambio.** Deterministas, bloqueantes, en la parte mecánica de la puerta 4, antes del juez:
+
+| Comprobación | Falla si |
+| --- | --- |
+| `cambio_sin_aplicar` | Renombrar: la prosa o los resúmenes nuevos escriben todavía el nombre viejo (el entero o una palabra suya que no esté en el nombre nuevo, con mayúscula; si esa palabra también sale en minúscula en la prosa aprobada, es una palabra corriente y solo cuenta en mitad de frase). Cambiar un hecho de valor literal (las categorías y cifras de RF3-BIB-01): el valor viejo no aparece menos veces que antes, o el nuevo no aparece |
+| `cambio_sin_cita` | Una cita no está en la prosa nueva, o ya estaba en la aprobada; o la prosa cambió y no trae ninguna cita |
+| `cambio_desborda` | La prosa nueva se parece a la aprobada menos que `CAMBIO_SIMILITUD_MINIMA` (0,85, provisional), medido con `difflib` por palabras sobre el capítulo entero |
+
+Después, la mecánica de siempre (RF3-VAL-01 a 03, RF3-GRD-03) y el juez con votos (RF3-JUE-02). Si algo falla, el capítulo vuelve al revisor con la descripción; al tercer intento fallido, el cambio **fracasa**.
+
+> **Decisión sin entrevistar.** El capítulo corregido pasa la puerta 4 entera, juez incluido, aunque ya la pasó una vez. El objetivo del autor es la novela con menos fallos, y una corrección puede romper una concordancia o una cuenta que el juez sí ve. Cuesta de 3 a 5 llamadas más por capítulo. La puerta 3 no vuelve a correr: el capítulo no se reextrae, porque el cambio se aplica al canon por código y el resto de su estado sigue siendo cierto.
+
+**RF3-CAM-10 — Un capítulo sin cambios.** Con un hecho que el capítulo solo conoce o usa (sin escribirlo), el revisor puede devolver la prosa igual. Es válido: pasa las comprobaciones sin citas y no se marca como cambiado en la versión.
+
+### Al final
+
+**RF3-CAM-11 — Todo en una transacción.** Cuando todos los capítulos del alcance pasan, en **una sola** transacción:
+
+1. **El canon.** Renombrar: el nombre y su nombre normalizado; los hechos vigentes de esa entidad, y los que llevan el nombre en su valor, se revocan (`hecho_revocacion`, motivo `cambio_lector`) y se insertan de nuevo en su misma escena con el nombre nuevo; y el nombre se sustituye, palabra completa, en los textos del plan y del canon de la novela: fichas, escaleta, resúmenes, título, dedicatoria y brief. Cambiar un hecho: se revoca y se inserta de nuevo con el valor nuevo y la primera cita del revisor en su capítulo, y sus usos, conocimientos y supersesiones pasan a apuntar al nuevo.
+2. **Los textos.** Cada escena corregida guarda una versión nueva de `escena_texto` con origen `revision` (la anterior queda `descartada`, como en RF-PER-05); el capítulo se recompila y recibe los resúmenes del revisor.
+3. **La versión.** La puerta 5 se evalúa de nuevo, la ejecución vuelve a `completada` o `completada_con_avisos`, y se publica la versión con motivo `cambio_lector` y la petición en `detalle` (RF3-BIB-12), con `cambiado` solo en los capítulos cuyo texto difiere.
+
+Después, fuera de la transacción, el índice vectorial reindexa los capítulos corregidos (prescindible, como siempre: RF2-CTX-09).
+
+> **Decisión de la spec.** Un hecho no se modifica nunca (el trigger `hecho_inmutable`, RF2-PER-06), así que cambiarlo es revocarlo e insertarlo de nuevo, con el rastro del motivo. La sustitución del nombre en los textos del plan es literal y por palabra completa: si el nombre viejo es también una palabra corriente con mayúscula («Luna»), puede tocar de más. Se prefirió eso a dejar el nombre viejo en la escaleta, que el juez compara con la prosa (función de escena).
+
+**RF3-CAM-12 — Si fracasa.** Un cambio que agota los intentos, que el autor para o que se interrumpe no aplica nada, porque todo lo anterior al paso final fue simulado. La ejecución vuelve a su estado completado por la misma puerta 5 (sin versión nueva, porque el texto no cambió) o a `detenida` si se paró, y queda el evento `cambio_fallido` con el informe. Tras una caída del worker, la recuperación marca el cambio como `interrumpido`.
+
+**RF3-CAM-13 — El registro.** Tabla nueva `cambio_lector`, canon y fuera de toda reversión: la petición, el objetivo, la cita, lo que devolvió el intérprete, las alertas, el alcance, el estado (`interpretando`, `rechazado`, `reescribiendo`, `aplicado`, `fallido`, `interrumpido`), el informe y la versión que publicó. La API la lee en `GET /novelas/{id}/cambios` y `GET /novelas/{id}/cambios/{cambio_id}`.
+
+**RF3-CAM-14 — Las reescrituras siguientes respetan el cambio.** El paquete del redactor lleva, si los hay, los cambios aplicados del lector («el lector fijó: …»). Sin eso, relanzar un capítulo tras cambiar un hecho podía volver a escribir el valor viejo: el hecho vive en el canon, pero el extractor lo volvería a establecer desde la prosa nueva.
+
+**RF3-CAM-15 — Demo por CLI.** `demo.py --cambio "petición" [--hecho N | --entidad personajes:N | --cita-capitulo N --cita "…"]` encola el cambio sobre la última versión y muestra cómo avanza. Es la variante por línea de comandos que el enunciado admite, y la que usa el vídeo si la web no está.
+
+### Lo que el bloque 8 deja para después
+
+- Una traza de Langfuse propia por cambio. Hoy las llamadas del cambio caen en la traza del capítulo que corrigen, con su rol.
+- Cambios que afecten a varios datos a la vez, y cambios de estilo (descartados arriba).
+- Cambiar un hecho no toca los textos del plan que lo repiten con otras palabras: solo la prosa y los resúmenes, que pasan por el revisor.
+- Calibrar `CAMBIO_SIMILITUD_MINIMA` con cambios reales.
 
 ## 3.10 Bloque 10 — Infraestructura de evals
 

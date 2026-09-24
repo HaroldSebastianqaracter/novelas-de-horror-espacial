@@ -219,10 +219,20 @@ class EstiloNarrativo(BaseModel):
     convenciones_formato: str | None = None
 
 
+class Regalo(BaseModel):
+    """Para la portada: para quien, de quien y la ocasion legible (spec3, RF3-LEC-01)."""
+
+    para: str
+    de: str | None = None
+    ocasion: str | None = None
+
+
 class NovelaDetalle(BaseModel):
     novela: NovelaCanon
     restricciones: dict[str, str]
     estilo: EstiloNarrativo | None = None
+    dedicatoria: str | None = None
+    regalo: Regalo | None = None
 
 
 class MundoCanon(BaseModel):
@@ -443,6 +453,19 @@ class UsoHecho(BaseModel):
     cita: str | None = None
 
 
+class Aparicion(BaseModel):
+    id: int
+    nombre: str
+    capitulos: list[int]
+
+
+class Apariciones(BaseModel):
+    """Donde aparece cada personaje y cada lugar, para la ficha (spec3, RF3-LEC-02)."""
+
+    personajes: list[Aparicion]
+    lugares: list[Aparicion]
+
+
 class VersionResumen(BaseModel):
     """Una version publicada de la novela (spec3, RF3-BIB-11)."""
 
@@ -634,10 +657,13 @@ def listar_novelas(con: Con) -> list[NovelaResumen]:
 def ver_novela(novela_id: int, con: Con) -> NovelaDetalle:
     n = _novela_o_404(con, novela_id)
     estilo = lectura.estilo(con, novela_id)
+    regalo = lectura.regalo(con, novela_id)
     return NovelaDetalle(
         novela=NovelaCanon.model_validate(n),
         restricciones=lectura.restricciones(con, novela_id),
         estilo=EstiloNarrativo.model_validate(estilo) if estilo else None,
+        dedicatoria=n.get("dedicatoria"),
+        regalo=Regalo.model_validate(regalo) if regalo else None,
     )
 
 
@@ -889,6 +915,12 @@ def ver_cronologia(novela_id: int, con: Con) -> list[EventoCronologia]:
 
 
 # --- Versiones ------------------------------------------------------------------------------------
+
+
+@app.get("/novelas/{novela_id}/apariciones", response_model=Apariciones)
+def ver_apariciones(novela_id: int, con: Con) -> Apariciones:
+    _novela_o_404(con, novela_id)
+    return Apariciones.model_validate(lectura.apariciones(con, novela_id))
 
 
 @app.get("/novelas/{novela_id}/versiones", response_model=list[VersionResumen])
