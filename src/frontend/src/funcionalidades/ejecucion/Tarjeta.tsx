@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { type Rechazo, type Seguimiento, UN_MINUTO } from "../../compartido/api/intenciones";
 import { capituloEnCurso, comoFase } from "../../compartido/api/reglas";
 import type { Ejecucion, NovelaResumen } from "../../compartido/api/tipos";
+import { MiniaturaPortada } from "../../compartido/imagenes/MiniaturaPortada";
 import { ChipEstado } from "../../compartido/ui/ChipEstado";
 import { Hace, useAhora } from "../../compartido/ui/Hace";
 import { MenuAcciones, type OpcionMenu } from "../../compartido/ui/Menu";
@@ -17,6 +18,9 @@ export interface NovelaEnTablero {
 export const tituloDe = (novela: NovelaResumen) => novela.titulo || "Sin título";
 
 export const estadoDe = ({ novela, ejecucion }: NovelaEnTablero) => ejecucion?.estado ?? novela.estado;
+
+/** Una novela terminada ya tiene lectura, y con ella portada (RF-FE-IMG-06). */
+export const terminada = (estado: string | null | undefined) => estado === "completada" || estado === "completada_con_avisos";
 
 export const destinoDe = ({ novela, ejecucion }: NovelaEnTablero) =>
   estadoDe({ novela, ejecucion }) === "parada" && ejecucion?.parada_abierta_id
@@ -84,6 +88,7 @@ export function Tarjeta({ opciones = [], pendiente, rechazo, alDescartarRechazo,
           </Link>
         )}
       </h3>
+      {terminada(estado) && <MiniaturaPortada subgenero={novela.subgenero_dominante} className="tarjeta__portada" />}
       <div className="tarjeta__estado">
         <ChipEstado estado={estado} />
         <span className="tarjeta__fase">{lineaFase(ejecucion, estado)}</span>

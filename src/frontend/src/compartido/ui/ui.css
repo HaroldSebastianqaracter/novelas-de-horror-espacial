@@ -80,6 +80,14 @@
 .menu__opcion[aria-disabled="true"] { color: var(--color-texto-tenue); cursor: not-allowed; }
 .menu__motivo { font-size: var(--texto-xs); color: var(--color-texto-tenue); }
 .boton--alerta { color: var(--color-texto-invertido); background: var(--color-alerta); border-color: var(--color-alerta); }
+/* Miniatura de portada (RF-FE-IMG-06): una franja 3:1 con el centro de la foto. La portada mide
+   1748 × 2480 y su foto ocupa del 46 % al 97 % de la altura; a 107 % de ancho se van los márgenes
+   de papel, y el 78 % vertical centra la franja en la foto. */
+.miniatura-portada {
+  display: block; aspect-ratio: 3 / 1; border-radius: var(--radio-sm);
+  background: var(--color-superficie-hundida) var(--portada, none) 50% 78% / 107% auto no-repeat;
+}
+
 /* Dibujos de línea (RF-FE-IMG-03): el SVG es la máscara y el color, el del texto. */
 .dibujo { display: block; background-color: currentColor; -webkit-mask: var(--dibujo) center / contain no-repeat; mask: var(--dibujo) center / contain no-repeat; }
 .dibujo--vacio { width: 9rem; aspect-ratio: 1; color: var(--color-acento); }

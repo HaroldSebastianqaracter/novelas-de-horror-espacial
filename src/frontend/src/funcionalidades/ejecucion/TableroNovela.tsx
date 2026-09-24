@@ -21,7 +21,8 @@ import { Hace } from "../../compartido/ui/Hace";
 import { Progreso } from "../../compartido/ui/Progreso";
 import { ETIQUETA_FASE } from "../../compartido/ui/vocabulario";
 import { MOTIVO_OTRA_ACTIVA } from "./acciones";
-import { ETIQUETA_INTENCION } from "./Tarjeta";
+import { MiniaturaPortada } from "../../compartido/imagenes/MiniaturaPortada";
+import { ETIQUETA_INTENCION, terminada } from "./Tarjeta";
 import "./TableroGeneral.css";
 import "./TableroNovela.css";
 
@@ -187,6 +188,7 @@ function Cabecera({ detalle, ejecucion, capitulos }: PropsContenido) {
 
   return (
     <header className="novela-cabecera" data-estado={ejecucion.estado}>
+      {terminada(ejecucion.estado) && <MiniaturaPortada subgenero={novela.subgenero_dominante} className="novela-cabecera__portada" />}
       <div>
         <p className="etiqueta">
           N-{String(novela.id).padStart(4, "0")} · terror espacial

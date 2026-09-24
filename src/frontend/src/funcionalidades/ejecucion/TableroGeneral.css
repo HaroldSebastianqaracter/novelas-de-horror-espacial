@@ -126,6 +126,7 @@
 
 /* Menú, intención pendiente y rechazo */
 .tarjeta > .tarjeta__fila:first-child { margin-right: var(--espacio-6); }
+.tarjeta__portada { margin: 0 calc(-1 * var(--espacio-1)); }
 .tarjeta__menu { position: absolute; top: var(--espacio-2); right: var(--espacio-2); z-index: 3; }
 .tarjeta__pendiente { margin: 0; font-size: var(--texto-xs); color: var(--color-acento); font-weight: var(--peso-medio); }
 .tarjeta__rechazo {

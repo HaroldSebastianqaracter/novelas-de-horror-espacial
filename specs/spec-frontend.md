@@ -434,6 +434,12 @@ Una hoja de estilos `@media print` quita la navegación y fija el tamaño de pá
 
 **RF-FE-IMG-05 — Procedencia.** `compartido/imagenes/CREDITOS.md` dice de dónde sale cada imagen y cómo se trató: las fotos de la NASA con su identificador, las generadas por el autor, y los SVG que se retocaron. Del material de la NASA se respeta lo que piden sus normas de uso: ni su logotipo ni nada que sugiera que respalda el producto.
 
+**RF-FE-IMG-06 — Miniaturas en la consola.** Una novela terminada (`completada` o `completada_con_avisos`, las que tienen lectura) lleva una franja 3:1 con la foto de su portada: bajo el título de su tarjeta en el tablero y encima de la cabecera de su página. Las demás, ninguna: todavía no tienen lectura que abrir.
+
+**RF-FE-IMG-07 — Vista previa al crear.** En el paso «El terror» del alta, debajo del subgénero, la misma franja con la portada del subgénero elegido y una línea que lo dice. Con «Que lo elija el arquitecto», la genérica, y la línea explica que la definitiva dependerá de lo que elija.
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** Con las imágenes solo en la lectura, casi no se veían: en los datos de prueba solo una novela está terminada. El autor eligió sacarlas a las tarjetas y a la vista previa del alta; se descartó añadir novelas de prueba solo para enseñarlas.
+
 > **Decisión de la spec.** Las imágenes son fijas y no se generan por novela: el pipeline no tiene un agente de imagen, y el enunciado deja las ilustraciones fuera de alcance. Una portada por subgénero da variedad sin tocar el backend. Se descartó una foto de banco de imágenes comercial, por la licencia, y dejar las fotos de la NASA en color, porque rompían el papel de la lectura.
 
 ## 4. Estados que toda pantalla tiene que cubrir
@@ -518,7 +524,7 @@ Los personajes salen de la vista `presencia` y los lugares, del lugar de cada es
 
 > **Ronda de la lectura (24 de septiembre de 2026).** Pasos 8 a 13, un commit por paso. El 10 se programó contra MSW con el contrato de la sección 5.2 y, con el backend integrado, el paso 13 lo engancha: tipos regenerados, `/apariciones` en la ficha, la línea del regalo en la portada, el alcance del worker en el panel, y la prueba del cambio del lector y del PDF contra la API y el worker reales con el puerto falso. Hechos: 8 a 11, 13 y la configuración del paso 12. Quedan el PDF de ejemplo (de la novela de 10 capítulos que se está generando), la inspección del paso 12, que necesita reabrir Claude Code para que cargue el servidor MCP, y la demostración con Claude Code real para el vídeo.
 >
-> **Paso 14, las imágenes (24 de septiembre de 2026).** Sección 3.14: portadas por subgénero, planos y dibujos de línea, con sus créditos.
+> **Paso 14, las imágenes (24 de septiembre de 2026).** Sección 3.14: portadas por subgénero, planos y dibujos de línea, con sus créditos. Después, las miniaturas en la consola y la vista previa del alta (RF-FE-IMG-06 y 07).
 
 1. Andamiaje, tokens, rutas, tipos generados y MSW.
 2. Tablero general, sin arrastre: columnas, tarjetas, sondeo.

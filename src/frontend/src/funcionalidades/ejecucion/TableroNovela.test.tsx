@@ -40,6 +40,23 @@ describe("tablero de una novela (RF-FE-NOV)", () => {
     expect(cerrados[0]).toHaveAttribute("href", "/novelas/3/capitulos/5");
   });
 
+  it("una novela terminada lleva su portada en la cabecera, y una en curso no (RF-FE-IMG-06)", async () => {
+    const { container, unmount } = renderizarEn("/novelas/6");
+    await screen.findByRole("link", { name: "Leer la novela" });
+    const miniatura = container.querySelector(".novela-cabecera .miniatura-portada") as HTMLElement;
+    expect(miniatura.style.getPropertyValue("--portada")).toContain("portada-horror_cosmico-web");
+    unmount();
+    // «completada», sin avisos, también es terminada.
+    servidor.use(http.get("*/api/novelas/6/ejecucion", () => HttpResponse.json({ ...ejecuciones[6], estado: "completada" })));
+    const limpia = renderizarEn("/novelas/6");
+    await screen.findByRole("link", { name: "Leer la novela" });
+    expect(limpia.container.querySelector(".novela-cabecera .miniatura-portada")).not.toBeNull();
+    limpia.unmount();
+    const otra = renderizarEn("/novelas/3");
+    await screen.findByRole("heading", { level: 1, name: "La bodega once" });
+    expect(otra.container.querySelector(".miniatura-portada")).toBeNull();
+  });
+
   it("una novela en parada enseña la franja que lleva a la alerta (RF-FE-NOV-04)", async () => {
     renderizarEn("/novelas/4");
     const franja = await screen.findByRole("link", { name: /Parada P-93 · la ejecución espera tu decisión/ });

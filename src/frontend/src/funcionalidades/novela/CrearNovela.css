@@ -1,4 +1,7 @@
 /* Crear novela (RF-FE-BRF): formulario a la izquierda, pieza ambiental a la derecha. */
+/* La vista previa de la portada en «El terror» (RF-FE-IMG-07). */
+.vista-portada { display: grid; gap: var(--espacio-2); max-width: 26rem; margin: 0; }
+
 .crear { display: grid; grid-template-columns: minmax(0, var(--ancho-formulario)) minmax(0, 1fr); gap: var(--espacio-7); align-items: start; }
 .crear__formulario { gap: var(--espacio-4); }
 .intro { margin: var(--espacio-2) 0 0; color: var(--color-texto-secundario); max-width: 60ch; }

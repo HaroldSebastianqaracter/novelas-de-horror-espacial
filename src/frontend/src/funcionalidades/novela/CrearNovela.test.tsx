@@ -159,6 +159,19 @@ describe("formulario del brief (RF-FE-BRF)", () => {
     expect(screen.getByRole("option", { name: "Que lo elija el arquitecto" })).toBeInTheDocument();
   });
 
+  it("en «El terror», la vista previa enseña la portada del subgénero elegido (RF-FE-IMG-07)", async () => {
+    const usuario = userEvent.setup();
+    const { container } = renderizarEn("/crear");
+    await usuario.click(await screen.findByRole("button", { name: "Paso 4: El terror" }));
+    const fondo = () => (container.querySelector(".vista-portada .miniatura-portada") as HTMLElement).style.getPropertyValue("--portada");
+    expect(await screen.findByText(/La portada será la ilustración del subgénero que elija el arquitecto/)).toBeInTheDocument();
+    expect(fondo()).toContain("portada-generica-web");
+    await usuario.selectOptions(screen.getByLabelText(/^Subgénero/), "Infección");
+    expect(screen.getByText("La portada de la novela: la ilustración de «Infección».")).toBeInTheDocument();
+    expect(fondo()).toContain("portada-infeccion-web");
+    await sinViolaciones(container);
+  });
+
   it("no tiene violaciones de accesibilidad automáticas en ningún paso", async () => {
     const usuario = userEvent.setup();
     const { container } = renderizarEn("/crear");

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { MiniaturaPortada } from "../../compartido/imagenes/MiniaturaPortada";
 import {
   INTENSIDADES,
   type Intensidad,
@@ -466,6 +467,14 @@ export function PasoTerror({ borrador, actualizar, errores }: PropsPaso) {
           </select>
         )}
       </Campo>
+      <figure className="vista-portada">
+        <MiniaturaPortada subgenero={borrador.subgenero || null} />
+        <figcaption className="campo__pista">
+          {borrador.subgenero
+            ? `La portada de la novela: la ilustración de «${ETIQUETA_SUBGENERO[borrador.subgenero]}».`
+            : "La portada será la ilustración del subgénero que elija el arquitecto; mientras no lo elija, esta."}
+        </figcaption>
+      </figure>
       <Campo
         id="f-capitulos"
         etiqueta="Capítulos"
