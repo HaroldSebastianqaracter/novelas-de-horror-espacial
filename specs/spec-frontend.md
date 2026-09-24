@@ -412,7 +412,9 @@ Una hoja de estilos `@media print` quita la navegación y fija el tamaño de pá
 
 ### 3.13 Inspección con un browser MCP
 
-**RF-FE-MCP-01 — Configuración.** `.mcp.json` en la raíz del repo declara el servidor Playwright MCP (`@playwright/mcp`, con la versión fijada). Claude Code lo carga al abrir el proyecto, previa aprobación del autor.
+**RF-FE-MCP-01 — Configuración.** `.mcp.json` en la raíz del repo declara el servidor Playwright MCP (`@playwright/mcp@0.0.82`, versión fijada), con Microsoft Edge, sin ventana (`--headless`), con el perfil en memoria (`--isolated`) y una ventana de 1440 × 1000. En Windows, `npx` va envuelto en `cmd /c`. Claude Code lo carga al abrir el proyecto, previa aprobación del autor.
+
+> **Decisión de la spec.** Edge y no el Chromium de Playwright: el servidor MCP trae su propia versión de Playwright (1.64 alfa), que no reutiliza el Chromium ya descargado para `npm run pdf`, y Edge viene con Windows. Sin ventana, para que la inspección no abra navegadores en el escritorio del autor; quitar `--headless` la hace visible.
 
 **RF-FE-MCP-02 — Uso real y evidencia.** Un agente con el MCP abre la lectura de una novela completada, recorre la portada, el índice, la ficha, dos capítulos, las novedades y la vista de impresión, y registra lo que ve mal como fallos para el rol que corresponda: el frontend si es de la web, y el backend si es del dato. Qué inspeccionó, qué detectó y qué se cambió por ello queda en `docs/proceso/inspeccion-browser-mcp.md`, y lo que provocó un cambio, en el registro de iteraciones. El enunciado lo pide como evidencia.
 
@@ -495,7 +497,7 @@ Los personajes salen de la vista `presencia` y los lugares, del lugar de cada es
 >
 > La demostración contra el backend real se hizo el 23-09 y añadió RF-FE-DAT-06. También destapó un fallo del backend que el frontend no puede corregir: la API responde `500` a ratos, porque la dependencia `leer` de `main.py` abre la conexión SQLite en un hilo del pool y la usa o la cierra en otro (`sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread`). Con varias consultas a la vez, como hace cada pantalla, salta en casi todas las cargas. El frontend lo absorbía porque reintenta los `5xx` (RF-FE-DAT-01). El backend lo corrigió en `1c5a319` (RF2-API-06), y repetida la demostración con ese cambio, la API no dio ningún `500`.
 
-> **Ronda de la lectura (24 de septiembre de 2026).** Pasos 8 a 13, un commit por paso. El 10 se programa contra MSW con el contrato de la sección 5.2 hasta que el backend lo implemente. Hechos: 8, 9 (la ficha, de momento desde la escaleta, y la portada sin la línea del regalo hasta que la API la sirva) 10 contra MSW (falta probarlo contra el backend cuando f4 lo integre) y 11 (el PDF de ejemplo, cuando haya una novela real completada con versión).
+> **Ronda de la lectura (24 de septiembre de 2026).** Pasos 8 a 13, un commit por paso. El 10 se programa contra MSW con el contrato de la sección 5.2 hasta que el backend lo implemente. Hechos: 8, 9 (la ficha, de momento desde la escaleta, y la portada sin la línea del regalo hasta que la API la sirva) 10 contra MSW (falta probarlo contra el backend cuando f4 lo integre) 11 (el PDF de ejemplo, cuando haya una novela real completada con versión) y la configuración del paso 12. La inspección del paso 12 necesita reabrir Claude Code para que cargue el servidor MCP.
 
 1. Andamiaje, tokens, rutas, tipos generados y MSW.
 2. Tablero general, sin arrastre: columnas, tarjetas, sondeo.
