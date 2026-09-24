@@ -1124,3 +1124,26 @@ def test_el_censo_lleva_como_mucho_30_datos_y_los_mas_recientes() -> None:
              if e.seccion.startswith("### Censo") and e.texto.startswith("- ")]
     assert len(datos) == 30
     assert datos[0] == "- Modulo de carga · personas a bordo: siete personas (cap. 1)"
+
+
+# --- RF3-PAS-17: lo que sabe otro, en escena ------------------------------------------------------
+
+REGLA_DEL_CONOCIMIENTO_AJENO = (
+    '- **No haces saber a un personaje algo que aún no ha recibido.** Es la fuente número u'
+    'no de errores en obra larga. Un personaje sabe lo que presenció, lo que le dicen en un'
+    'a escena y lo que consta en «Quién sabe qué». Si usa algo que solo vio otro, en este c'
+    'apítulo o antes, la escena muestra cómo le llega: basta una línea de diálogo en la que'
+    ' se lo cuentan. «Según sus observaciones» o «me lo dijo ayer», sin una escena que lo m'
+    'uestre, no basta: para la continuidad, esa conversación no ha ocurrido.'
+)
+
+
+def test_la_skill_del_redactor_pide_mostrar_como_llega_lo_que_sabe_otro() -> None:
+    from compartido.puerto.terminal import PuertoTerminal
+    from config import raiz_repo
+
+    skill = PuertoTerminal(skills_dir=raiz_repo() / ".claude" / "skills").ruta_skill(
+        "redaccion").read_text(encoding="utf-8")
+    # La linea entera: un parrafo anadido que la contradiga tambien falla.
+    linea = next(x for x in skill.splitlines() if "No haces saber a un personaje" in x)
+    assert linea == REGLA_DEL_CONOCIMIENTO_AJENO

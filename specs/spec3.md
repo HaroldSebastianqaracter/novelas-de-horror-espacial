@@ -798,3 +798,11 @@ La segunda pasada real (24 de septiembre, `novela_3cap.db`, el brief de ejemplo 
 
 > **Decisión entrevistada, 24 de septiembre de 2026.** El autor eligió hacerlo antes de la novela de diez capítulos, a propuesta de la sesión que lanzó la de tres. Se dejó para después una comprobación determinista de las cifras de personas (el punto ciego C12 del banco): es un trabajo grande, y con el censo delante y el juez en cada intento ya hay dos defensas. El criterio de «dato de personas» es una cifra y una palabra entera de gente, casi siempre en plural («personas», «cuadrilla», «desaparecidos», «cadáveres», «quedan»…): con raíces, «persona» casaba con «personalidad» y «herid» con «herida en el casco», y esas líneas podían echar del tope a la cuenta real (validador de la primera versión).
 
+### Lo que sabe otro, en escena
+
+**RF3-PAS-17 — El redactor muestra cómo llega lo que sabía otro.** *Amplía RF2-PIPE-21.* La prueba real del capítulo 3 con RF3-PAS-13 a 16 (24 de septiembre, sobre una copia de `novela_3cap.db`, 4,76 $) confirmó los arreglos: ni allegado ausente ni cuentas descuadradas. Pero el intento 2 paró por conocimiento no adquirido: una personaje citaba una regla de la amenaza «según las observaciones» de la protagonista, sin ninguna escena en la que se la contara. La segunda opinión lo dio por real. Es el caso que más se repite en las tres novelas reales: la prosa supone una conversación fuera de escena que el canon no tiene.
+
+La regla de la skill del redactor «No haces saber a un personaje algo que aún no ha recibido» se amplía: un personaje sabe lo que presenció, lo que le dicen en una escena y lo que consta en «Quién sabe qué»; si usa algo que solo vio otro, la escena muestra cómo le llega (basta una línea de diálogo), y una fuente citada sin escena («según sus observaciones», «me lo dijo ayer») no cuenta. La puerta 3 no cambia: si el redactor no lo cumple, sigue parando.
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** Se eligió prevenir en el redactor, sin tocar la puerta. Se descartó que la puerta avisara en vez de parar cuando la prosa cita la fuente: un error real con una fuente inventada saldría solo como aviso. También se descartó lanzar sin cambios y decidir en cada parada, que en una novela de diez capítulos serían varias.
+
