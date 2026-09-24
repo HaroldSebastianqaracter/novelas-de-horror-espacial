@@ -49,11 +49,15 @@ _UNIDADES = frozenset({
 })
 
 
-#: Raices de las palabras que dicen que una cifra cuenta personas (spec3, RF3-PAS-16).
-_RAICES_DE_PERSONAS = (
-    "persona", "gente", "tripula", "bordo", "dotacion", "cuadrilla", "evacu", "supervivi",
-    "muert", "baja", "herid", "colono", "habitante", "pasajer", "miembro", "hombre", "mujer",
-    "nino", "respira", "vivo", "equipo", "turno", "dormid",
+#: Las palabras que dicen que una cifra cuenta personas (spec3, RF3-PAS-16), enteras y casi
+#: siempre en plural: una raiz como «persona» casaba con «personalidad», «herid» con «herida en
+#: el casco» y «bordo» con «presion a bordo» (validador de f752f39).
+_PALABRA_DE_PERSONAS = re.compile(
+    r"personas?|personal|gente|tripulacion|tripulantes?|dotacion|cuadrillas?|evacuad[oa]s"
+    r"|supervivientes?|muert[oa]s|bajas|herid[oa]s|colonos|habitantes|pasajer[oa]s|miembros"
+    r"|hombres|mujeres|niñ[oa]s|respirando|viv[oa]s|dormid[oa]s|desaparecid[oa]s|cadaveres"
+    r"|cuerpos|infectad[oa]s|tecnicos|mineros|ocupantes|soldados|durmientes|trabajadores"
+    r"|operarios|cientificos|ingenieros|guardias|rehenes|quedan"
 )
 
 
@@ -66,7 +70,7 @@ def cuenta_personas(texto: str) -> bool:
     """
     if not tiene_cifra(texto):
         return False
-    return any(p.startswith(_RAICES_DE_PERSONAS) for p in _PALABRA.findall(normalizar(texto)))
+    return any(_PALABRA_DE_PERSONAS.fullmatch(p) for p in _PALABRA.findall(normalizar(texto)))
 
 
 def tiene_cifra(texto: str) -> bool:

@@ -256,27 +256,39 @@ _VISTOS_FUERA_DEL_REPARTO = """
 def censo_de_personajes(
     con: sqlite3.Connection, novela_id: int, numero: int
 ) -> list[dict[str, Any]]:
-    """Cada personaje de la novela con su ultima condicion antes de este capitulo (RF3-PAS-16).
+    """Cada personaje que ya salio, o que sale en este capitulo, con su ultima condicion antes de
+    el (RF3-PAS-16).
 
     `condicion` es la de `estado_personaje` (vivo, herido, incapacitado, muerto, desaparecido),
-    o None si nunca se registro. `capitulo_condicion` es donde se registro.
+    o None si nunca se registro. `capitulo_condicion` es donde se registro. Una analepsis no
+    cuenta: un muerto vivo en un recuerdo sigue muerto (validador de f752f39). Quien no ha salido
+    todavia no entra: la regla pide sumar los que tienen nombre, y una ficha que la novela aun no
+    ha usado descuadraria la suma. `en_este_capitulo` dice si la escaleta lo pone en este.
     """
     return _filas(con.execute(
         """
-        SELECT p.nombre, p.rol_narrativo, ult.condicion, ult.capitulo_numero AS capitulo_condicion
+        SELECT p.nombre, p.rol_narrativo, ult.condicion, ult.capitulo_numero AS capitulo_condicion,
+               EXISTS (SELECT 1 FROM presencia pa
+                       JOIN escena_ordinal oa ON oa.escena_id = pa.escena_id
+                       WHERE pa.personaje_id = p.id AND oa.capitulo_numero = ?)
+                   AS en_este_capitulo
         FROM personaje p
         LEFT JOIN (
             SELECT ep.personaje_id, ep.condicion, o.capitulo_numero,
                    ROW_NUMBER() OVER (PARTITION BY ep.personaje_id
                                       ORDER BY o.ordinal DESC, ep.id DESC) AS n
             FROM estado_personaje ep
+            JOIN escena e         ON e.id = ep.escena_id AND e.analepsis = 0
             JOIN escena_ordinal o ON o.escena_id = ep.escena_id
             WHERE ep.novela_id = ? AND ep.condicion IS NOT NULL AND o.capitulo_numero < ?
         ) ult ON ult.personaje_id = p.id AND ult.n = 1
         WHERE p.novela_id = ?
+          AND EXISTS (SELECT 1 FROM presencia ps
+                      JOIN escena_ordinal os ON os.escena_id = ps.escena_id
+                      WHERE ps.personaje_id = p.id AND os.capitulo_numero <= ?)
         ORDER BY p.id
         """,
-        (novela_id, numero, novela_id),
+        (numero, novela_id, numero, novela_id, numero),
     ))
 
 

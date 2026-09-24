@@ -182,8 +182,9 @@ def _canon(canon: dict[str, list[dict[str, Any]]]) -> list[Elemento]:
 
 _SECCION_HECHOS = "### Hechos ya establecidos (no los contradigas)"
 _SECCION_CENSO = "### Censo: las cuentas de personas"
-#: Cuantos datos de personas entran como mucho, los mas recientes primero (con los de mundo
-#: delante, como los ordena `hechos_hasta`).
+#: Cuantos datos de personas entran como mucho, los mas recientes primero: la cuenta que vale
+#: es la ultima, y un dato viejo de mundo no puede echar del tope a la del capitulo anterior
+#: (validador de f752f39).
 MAX_DATOS_DE_CENSO = 30
 _REGLA_DEL_CENSO = (
     "Toda cifra de personas que escribas (cuantos hay, llegan, se van, se quedan, mueren) "
@@ -228,22 +229,23 @@ def _censo(con: sqlite3.Connection, novela_id: int, capitulo: int) -> list[Eleme
     Solo si el canon ya cuenta personas: sin ningun dato asi, los nombres ya estan en el canon
     del capitulo y el bloque no aportaria nada.
     """
-    datos = [
-        h for h in lectura.hechos_hasta(con, novela_id, capitulo)
-        if cuenta_personas(f"{h['atributo']} {h['valor']}")
-    ][:MAX_DATOS_DE_CENSO]
+    datos = sorted(
+        (h for h in lectura.hechos_hasta(con, novela_id, capitulo)
+         if cuenta_personas(f"{h['atributo']} {h['valor']}")),
+        key=lambda h: (-int(h["capitulo_origen"]), -int(h["id"])),
+    )[:MAX_DATOS_DE_CENSO]
     if not datos:
         return []
     personajes = lectura.censo_de_personajes(con, novela_id, capitulo)
 
     def estado(c: dict[str, Any]) -> str:
-        if c["condicion"] is None:
-            return "sin nada registrado"
-        return f"{c['condicion']} (desde el cap. {c['capitulo_condicion']})"
+        texto = ("sin nada registrado" if c["condicion"] is None
+                 else f"{c['condicion']} (desde el cap. {c['capitulo_condicion']})")
+        return texto + (", sale en este capitulo" if c["en_este_capitulo"] else "")
 
     return [
         Elemento(_REGLA_DEL_CENSO, True, _SECCION_CENSO),
-        Elemento("Con nombre: " + "; ".join(
+        Elemento("Con nombre, los que ya han salido o salen ahora: " + "; ".join(
             f"{c['nombre']} ({c['rol_narrativo']}), {estado(c)}" for c in personajes
         ) + ".", True, _SECCION_CENSO),
         *(Elemento(f"- {h['sujeto_nombre']} · {h['atributo']}: {h['valor']} "

@@ -693,10 +693,39 @@ def test_renombrar_al_sujeto_conserva_sus_marcas(grafo: tuple[sqlite3.Connection
         "INSERT INTO atributo_conducta (novela_id, escena_id, sujeto_clave, atributo_clave) "
         "VALUES (?, ?, 'ibarra', 'ritual de entrada')", (g.novela_id, g.escenas[(1, 1)]),
     )
+    # La marca de otra novela con la misma clave no es de este sujeto.
+    otra = con.execute(
+        "INSERT INTO novela (titulo, subgenero_dominante, tipo_final, longitud_objetivo) "
+        "VALUES ('Otra', 'horror_cosmico', 'victoria_pirrica', 80000)").lastrowid
+    con.execute(
+        "INSERT INTO atributo_observable (novela_id, escena_id, sujeto_clave, atributo_clave) "
+        "VALUES (?, ?, 'ibarra', 'voz')", (otra, g.escenas[(1, 2)]),
+    )
     aplicar_canon(con, g.novela_id, Cambio(
         tipo="renombrar", antes="Ibarra", despues="Ibarguen", tabla="personaje",
         entidad_id=g.personajes["Ibarra"]))
     for tabla in ("atributo_observable", "atributo_conducta"):
-        assert [f[0] for f in con.execute(f"SELECT sujeto_clave FROM {tabla}")] == ["ibarguen"]
+        assert [f[0] for f in con.execute(
+            f"SELECT sujeto_clave FROM {tabla} WHERE novela_id = ?", (g.novela_id,))] \
+            == ["ibarguen"]
+    assert con.execute("SELECT sujeto_clave FROM atributo_observable WHERE novela_id = ?",
+                       (otra,)).fetchone()[0] == "ibarra"
     assert "conocimiento_no_adquirido" not in comprobaciones(con, g)
     assert "conocimiento_observable" in detectadas(con, g)
+
+
+def test_un_muerto_vivo_en_una_analepsis_que_reaparece_para(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """La condicion de un recuerdo no resucita a nadie (validador de f752f39)."""
+    con, g = grafo
+    con.execute(
+        "INSERT INTO estado_personaje (novela_id, personaje_id, escena_id, condicion) "
+        "VALUES (?,?,?, 'muerto')", (g.novela_id, g.personajes["Ibarra"], g.escenas[(1, 2)]),
+    )
+    con.execute("UPDATE escena SET analepsis = 1 WHERE id = ?", (g.escenas[(2, 1)],))
+    con.execute(
+        "INSERT INTO estado_personaje (novela_id, personaje_id, escena_id, condicion) "
+        "VALUES (?,?,?, 'vivo')", (g.novela_id, g.personajes["Ibarra"], g.escenas[(2, 1)]),
+    )
+    assert "presencia_imposible" in comprobaciones(con, g)
