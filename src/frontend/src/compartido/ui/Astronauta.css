@@ -11,16 +11,27 @@
 /* Una fila por animación; `steps()` salta de frame en frame. */
 .astronauta__sprite[data-animacion="idle"] { background-position-y: 0; animation: astronauta-idle 2200ms steps(1, end) infinite; }
 .astronauta__sprite[data-animacion="andar"] { background-position-y: calc(var(--t) * -1); animation: astronauta-6 960ms steps(6) infinite; }
-.astronauta__sprite[data-animacion="saludar"] { background-position-y: calc(var(--t) * -2); animation: astronauta-4 720ms steps(4) infinite; }
+.astronauta__sprite[data-animacion="saludar"] { background-position-y: calc(var(--t) * -2); animation: astronauta-saludar 720ms steps(1, end) infinite; }
 .astronauta__sprite[data-animacion="flotar"] { background-position-y: calc(var(--t) * -3); animation: astronauta-4 1280ms steps(4) infinite; }
-.astronauta__sprite[data-animacion="asomarse"] { background-position-y: calc(var(--t) * -4); animation: astronauta-asomarse 720ms steps(2, jump-none) forwards; }
+.astronauta__sprite[data-animacion="asomarse"] { background-position-y: calc(var(--t) * -4); animation: astronauta-asomarse 480ms steps(1, end) forwards; }
 .astronauta__sprite[data-animacion="dormir"] { background-position-y: calc(var(--t) * -5); animation: astronauta-2 1600ms steps(2) infinite; }
 
 @keyframes astronauta-6 { from { background-position-x: 0; } to { background-position-x: calc(var(--t) * -6); } }
 @keyframes astronauta-4 { from { background-position-x: 0; } to { background-position-x: calc(var(--t) * -4); } }
 @keyframes astronauta-2 { from { background-position-x: 0; } to { background-position-x: calc(var(--t) * -2); } }
-/* Tres frames y se queda en el último: el casco asoma y no vuelve a bajar. */
-@keyframes astronauta-asomarse { from { background-position-x: 0; } to { background-position-x: calc(var(--t) * -2); } }
+/* Con los tiempos del JSON: 160, 200, 180 y 180 ms. */
+@keyframes astronauta-saludar {
+  0% { background-position-x: 0; }
+  22.222% { background-position-x: calc(var(--t) * -1); }
+  50% { background-position-x: calc(var(--t) * -2); }
+  75%, 100% { background-position-x: calc(var(--t) * -3); }
+}
+/* Tres frames (220 y 260 ms) y se queda en el último: el casco asoma y no vuelve a bajar. */
+@keyframes astronauta-asomarse {
+  0% { background-position-x: 0; }
+  45.833% { background-position-x: calc(var(--t) * -1); }
+  100% { background-position-x: calc(var(--t) * -2); }
+}
 /* La secuencia del JSON: respira dos veces, pausa y tres destellos de la antena. */
 @keyframes astronauta-idle {
   0% { background-position-x: 0; }
