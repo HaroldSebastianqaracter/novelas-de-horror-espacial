@@ -45,6 +45,15 @@ set NOVELAS_PUERTO=falso
 .venv\Scripts\python.exe demo.py
 ```
 
+**La tabla de evals** ([spec3, RF3-EVL-02](../../specs/spec3.md)). Corre los cinco briefs de
+`ejemplos/` de principio a fin, cada uno sobre una base nueva en `--dir`, y escribe la tabla de
+qué validadores pasan y cuáles fallan. Con `--puerto terminal` usa Claude Code de verdad y cuesta
+dinero; `--capitulos 3` hace una pasada más corta con los mismos briefs.
+
+```bat
+.venv\Scripts\python.exe -m evals.tabla ..\..\ejemplos\brief-ejemplo.json ..\..\ejemplos\evals\normal-boda.json ..\..\ejemplos\evals\normal-jubilacion.json ..\..\ejemplos\evals\adversarial-inyeccion.json ..\..\ejemplos\evals\incoherencia-temporal.json --puerto falso --dir evals_out --salida evals_out\tabla.md
+```
+
 Otras cosas que sabe hacer el lanzador:
 
 ```bat
