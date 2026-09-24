@@ -991,9 +991,19 @@ def test_la_skill_pide_marcar_lo_observable() -> None:
     ("bajas del turno: dos", True),
     ("once respirando", True),
     ("tamano de la cuadrilla: seis", True),
+    ("desaparecidos: tres", True),
+    ("cadaveres en la bodega: cuatro", True),
+    ("infectados: cinco", True),
+    ("durmientes en criogenia: cuarenta", True),
+    ("quedan en la nave: seis", True),
     ("periodicidad del pulso: doce coma cuatro segundos", False),
     ("tripulacion: la del carguero", False),
     ("profundidad del pozo: ciento veinte metros", False),
+    ("personalidad: fria; edad 41", False),
+    ("herida en el casco: dos centimetros", False),
+    ("presion a bordo: 0,8 atmosferas", False),
+    ("turno de noche: seis horas", False),
+    ("hora de la muerte: 03:40", False),
 ])
 def test_un_dato_que_cuenta_personas(texto: str, cuenta: bool) -> None:
     from compartido.texto import cuenta_personas
@@ -1027,8 +1037,9 @@ def test_el_redactor_recibe_el_censo_con_los_muertos_y_los_datos_de_personas() -
     assert censo and all(e.obligatorio for e in censo)
     textos = [e.texto for e in censo]
     assert textos[0].startswith("Toda cifra de personas que escribas")
-    assert "Ibarra (oponente), muerto (desde el cap. 1)" in textos[1]
-    assert "Reyes (aliado), sin nada registrado" in textos[1]
+    assert "Ibarra (oponente), muerto (desde el cap. 1), sale en este capitulo" in textos[1]
+    # Reyes no ha salido en ninguna escena: sumarlo descuadraria la cuenta.
+    assert "Reyes" not in textos[1]
     assert "- Puente · personas a bordo: siete personas (cap. 1)" in textos
     # Delante de los demas hechos: es lo primero que lee del estado establecido.
     assert hechos.elementos[:len(censo)] == censo
@@ -1055,3 +1066,61 @@ def test_la_condicion_de_este_capitulo_no_entra_en_su_censo() -> None:
     assert censo["Ibarra"] is None
     censo = {c["nombre"]: c["condicion"] for c in lectura.censo_de_personajes(con, g.novela_id, 3)}
     assert censo["Ibarra"] == "muerto"
+
+
+def _condicion(con: sqlite3.Connection, g: fabrica.Grafo, escena: tuple[int, int],
+               condicion: str | None) -> None:
+    con.execute(
+        "INSERT INTO estado_personaje (novela_id, personaje_id, escena_id, condicion) "
+        "VALUES (?,?,?,?)", (g.novela_id, g.personajes["Ibarra"], g.escenas[escena], condicion),
+    )
+
+
+def _condicion_de_ibarra(con: sqlite3.Connection, g: fabrica.Grafo, capitulo: int) -> Any:
+    from compartido.grafo import lectura
+
+    return {c["nombre"]: c["condicion"]
+            for c in lectura.censo_de_personajes(con, g.novela_id, capitulo)}["Ibarra"]
+
+
+def test_un_muerto_vivo_en_una_analepsis_sigue_muerto_en_el_censo() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    _condicion(con, g, (1, 2), "muerto")
+    con.execute("UPDATE escena SET analepsis = 1 WHERE id = ?", (g.escenas[(2, 1)],))
+    _condicion(con, g, (2, 1), "vivo")
+    assert _condicion_de_ibarra(con, g, 3) == "muerto"
+
+
+def test_el_censo_toma_la_ultima_condicion_en_orden_narrativo() -> None:
+    """Insertadas al reves del orden de la novela, y con una fila sin condicion detras."""
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    _condicion(con, g, (1, 2), "muerto")
+    _condicion(con, g, (1, 1), "herido")
+    _condicion(con, g, (1, 2), None)
+    assert _condicion_de_ibarra(con, g, 2) == "muerto"
+
+
+def test_el_censo_lleva_como_mucho_30_datos_y_los_mas_recientes() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    for n in range(34):
+        insertar_hecho(
+            # De mundo: `hechos_hasta` los pone delante, y no pueden echar a la cuenta real.
+            con, novela_id=g.novela_id, escena_id=g.escenas[(1, 1)], sujeto_tipo="mundo",
+            sujeto_id=None, sujeto_nombre="Estacion Tesalia",
+            atributo=f"personas del turno {n}", valor="dos personas", categoria="otro",
+            cita=None, supersede_a=None,
+        )
+    insertar_hecho(
+        con, novela_id=g.novela_id, escena_id=g.escenas[(1, 2)], sujeto_tipo="lugar",
+        sujeto_id=g.lugares["Modulo de carga"], sujeto_nombre="Modulo de carga",
+        atributo="personas a bordo", valor="siete personas", categoria="otro", cita=None,
+        supersede_a=None,
+    )
+    hechos = next(b for b in _paquete_del_2(con, g).bloques if b.nombre == "hechos")
+    datos = [e.texto for e in hechos.elementos
+             if e.seccion.startswith("### Censo") and e.texto.startswith("- ")]
+    assert len(datos) == 30
+    assert datos[0] == "- Modulo de carga · personas a bordo: siete personas (cap. 1)"

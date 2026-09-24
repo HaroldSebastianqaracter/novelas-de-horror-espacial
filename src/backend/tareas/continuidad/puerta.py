@@ -189,6 +189,7 @@ JOIN capitulo c        ON c.id = e.capitulo_id
 JOIN escena_ordinal oe ON oe.escena_id = e.id
 JOIN estado_personaje ult ON ult.id = (
         SELECT ep.id FROM estado_personaje ep
+        JOIN escena e2         ON e2.id = ep.escena_id AND e2.analepsis = 0
         JOIN escena_ordinal o2 ON o2.escena_id = ep.escena_id
         WHERE ep.personaje_id = sp.personaje_id AND ep.condicion IS NOT NULL
           AND o2.ordinal < oe.ordinal
