@@ -65,6 +65,6 @@ Exposición: 10 minutos · 25 de septiembre de 2026.
 
 ## Estado de esta carpeta (25-09-2026)
 
-- `storymaker-deck.pptx`: pendiente de descargar desde el deck.
-- `storymaker-deck.pdf` y los anexos se generaron fuera del deck con fuentes sustitutas (Lora y Poppins) y todavía no llevan las capturas de Langfuse de la diapositiva 10 y A6, que sí están en el deck y en `docs/proceso/langfuse/`. Se sustituyen por la exportación definitiva del deck.
+- `storymaker-deck.pptx` es la versión definitiva, con las capturas de Langfuse de la diapositiva 10 y A6.
+- `storymaker-deck.pdf` y los anexos se generaron fuera del deck con fuentes sustitutas (Lora y Poppins) y todavía no llevan esas capturas, que están en el `.pptx` y en `docs/proceso/langfuse/`. Se sustituyen por el PDF exportado del deck.
 - A7: la revisión humana se añade al terminarla (`src/backend/evals/plantilla_rubrica_humana.csv`).
