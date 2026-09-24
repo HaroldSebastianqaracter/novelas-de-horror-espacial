@@ -55,4 +55,5 @@ def construir(cfg: Config, con: sqlite3.Connection | None = None) -> PuertoAgent
         skills_dir=cfg.skills_dir,
         timeout_agente_segundos=cfg.timeout_agente_segundos,
         con=con,
+        modelo=cfg.modelo,
     )

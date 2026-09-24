@@ -78,6 +78,11 @@ PRESUPUESTO_BLOQUES: dict[str, int] = {
     "prosa": 10_000,
 }
 
+# El modelo de cada llamada de agente (NOVELAS_MODELO, RF2-PUERTO-11). Fijado en el repo, y no
+# el que tenga por defecto la cuenta de Claude Code, para que la novela no cambie de modelo
+# segun quien la lance.
+MODELO_POR_DEFECTO = "claude-opus-5-5"
+
 # Techo por llamada al modelo (NOVELAS_PRESUPUESTO_TOKENS) y lo que se reserva de el para la
 # salida del agente y la sobrecarga de Claude Code. El paquete dispone del resto.
 TECHO_POR_LLAMADA = 100_000
@@ -180,6 +185,8 @@ class Config:
     langfuse_public_key: str | None = None
     langfuse_secret_key: str | None = field(default=None, repr=False)
     langfuse_host: str = LANGFUSE_HOST_POR_DEFECTO
+    #: El modelo que el puerto terminal pide a Claude Code (RF2-PUERTO-11).
+    modelo: str = MODELO_POR_DEFECTO
 
     @property
     def langfuse_activo(self) -> bool:
@@ -237,4 +244,5 @@ def cargar() -> Config:
         langfuse_public_key=os.environ.get("LANGFUSE_PUBLIC_KEY") or None,
         langfuse_secret_key=os.environ.get("LANGFUSE_SECRET_KEY") or None,
         langfuse_host=(os.environ.get("LANGFUSE_HOST") or LANGFUSE_HOST_POR_DEFECTO).rstrip("/"),
+        modelo=(_env("MODELO", MODELO_POR_DEFECTO) or MODELO_POR_DEFECTO).strip(),
     )

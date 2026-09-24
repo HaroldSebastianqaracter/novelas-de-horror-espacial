@@ -121,8 +121,12 @@ class PuertoTerminal:
         skills_dir: Path,
         timeout_agente_segundos: int = 1800,
         con: sqlite3.Connection | None = None,
+        modelo: str | None = None,
     ) -> None:
         self.claude_bin = claude_bin
+        # Sin modelo, el de la cuenta de Claude Code; el worker siempre pasa el de la
+        # configuracion (RF2-PUERTO-11).
+        self.modelo = modelo
         self.skills_dir = Path(skills_dir)
         self.timeout_por_defecto = timeout_agente_segundos
         self.con = con
@@ -222,6 +226,8 @@ class PuertoTerminal:
             "--output-format", "json",
             "--json-schema", json.dumps(esquema, ensure_ascii=False),
         ]
+        if self.modelo:
+            orden += ["--model", self.modelo]
 
         entorno = dict(os.environ)
         entorno.pop("ANTHROPIC_API_KEY", None)  # RNF-06: ninguna clave pasa por el backend.
