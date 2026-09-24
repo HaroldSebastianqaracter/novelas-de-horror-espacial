@@ -25,6 +25,14 @@ from .observabilidad import Seudonimizador, partes_del_nombre, plegar
 #: La etiqueta del nombre que tenia una persona del encargo antes de un cambio del lector.
 ANTERIOR = "NOMBRE_ANTERIOR"
 
+#: Con que empieza una firma generica de quien regala («tu hermano», «Sus compañeros del
+#: instituto»): no es un nombre, y no se oculta (validador de 7e88879).
+_DETERMINANTES = frozenset({
+    "tu", "tus", "su", "sus", "mi", "mis", "vuestro", "vuestra", "vuestros", "vuestras",
+    "nuestro", "nuestra", "nuestros", "nuestras", "el", "la", "los", "las", "un", "una",
+    "todos", "todas",
+})
+
 
 class Mascara:
     """El cambio de nombres por etiquetas y su vuelta, para un brief.
@@ -37,6 +45,7 @@ class Mascara:
         self._originales: dict[str, str] = {}   # etiqueta que produce `ocultar` -> nombre
         self._alias: dict[str, str] = {}        # etiqueta que se acepta al volver -> nombre
         self._roles: list[str] = []
+        self._minusculas: set[str] = set()
         formas: dict[str, str] = {}
         grupos = _grupos(brief) if brief is not None else []
         if anterior and grupos:
@@ -45,9 +54,12 @@ class Mascara:
                            "escribas: donde estaba, va la etiqueta nueva."))
         for base, nombre, firma, rol in grupos:
             self._anadir(formas, base, nombre, firma=firma, rol=rol)
-        # Las formas largas antes que sus partes: «Marta Ibanez» entera, no «[X] Ibanez».
+        # Las formas largas antes que sus partes: «Marta Ibanez» entera, no «[X] Ibanez». Una
+        # forma casa en cualquier grafia solo si el brief la escribe en minuscula: entonces es
+        # asi como viaja en los paquetes, y ocultarla gana a no tocar «la luz».
         self._busqueda = Seudonimizador.desde_formas(sorted(
-            ((f, e, False) for f, e in formas.items()), key=lambda t: len(t[0]), reverse=True,
+            ((f, e, f in self._minusculas) for f, e in formas.items()),
+            key=lambda t: len(t[0]), reverse=True,
         ))
         aceptadas = {**self._alias, **self._originales}
         self._vuelta = re.compile(
@@ -59,18 +71,20 @@ class Mascara:
         plegado, posiciones, _ = plegar(nombre)
         completo = " ".join(plegado.split())
         palabras = completo.split(" ")
+        # Una firma generica («tu hermano», «Sus compañeros del instituto») no es un nombre y
+        # no se oculta; una firma que es un nombre, aunque venga en minuscula, si.
+        if firma and palabras and palabras[0] in _DETERMINANTES:
+            self._alias.setdefault(f"[{base}]", " ".join(nombre.split()))
+            self._roles.append(f"Quien hace el regalo firma la dedicatoria como «{nombre}».")
+            return
         candidatas = list(partes_del_nombre(nombre, firma=firma))
-        # Una firma generica («tu hermano», «sus compañeros») no es un nombre: solo se ocultan
-        # sus palabras con mayuscula en el brief, y la firma entera solo si es un nombre.
-        generica = firma and any(p.islower() and normalizar(p) not in PARTICULAS_DE_NOMBRE
-                                 for p in nombre.split())
-        if completo and completo not in candidatas and not generica:
+        if completo and completo not in candidatas:
             candidatas.append(completo)
         propias = 0
         extra = 2
         for forma in sorted(candidatas, key=plegado.find):
             original = _original(nombre, plegado, posiciones, forma)
-            if original is None or (firma and not original[:1].isupper()):
+            if original is None:
                 continue
             if forma in formas:
                 continue  # el primero que la reclama se la queda (el destinatario manda)
@@ -85,6 +99,8 @@ class Mascara:
                 extra += 1
             formas[forma] = etiqueta
             self._originales[etiqueta] = _grafia(original)
+            if not original[:1].isupper():
+                self._minusculas.add(forma)
             propias += 1
         # Lo que un modelo escribiria por analogia tambien vuelve: `_NOMBRE` de un nombre de
         # una palabra, o la etiqueta de quien regala cuando es un allegado.
@@ -182,8 +198,14 @@ def _original(nombre: str, plegado: str, posiciones: list[int], forma: str) -> s
 
 def _grafia(texto: str) -> str:
     """Como se escribe el nombre en la prosa: el del brief, salvo que venga todo en minusculas
-    o todo en mayusculas, que entonces va con mayuscula inicial (validador de cd8ab12)."""
+    o todo en mayusculas, que entonces va con mayuscula inicial en cada trozo («Jean-Luc»,
+    «O'Neill»; validadores de cd8ab12 y 7e88879)."""
     if not (texto.islower() or texto.isupper()):
         return texto
-    return " ".join(p.lower() if normalizar(p) in PARTICULAS_DE_NOMBRE and i else p.capitalize()
-                    for i, p in enumerate(texto.split()))
+
+    def palabra(p: str, i: int) -> str:
+        if i and normalizar(p) in PARTICULAS_DE_NOMBRE:
+            return p.lower()
+        return "".join(t.capitalize() for t in re.split(r"([-'’])", p))
+
+    return " ".join(palabra(p, i) for i, p in enumerate(texto.split()))

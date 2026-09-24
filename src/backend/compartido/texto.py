@@ -74,13 +74,12 @@ def cuenta_personas(texto: str) -> bool:
 
 
 #: Una etiqueta que la prosa no deberia llevar nunca (spec3, RF3-SEU-04): una del encargo que
-#: no se restauro («[DESTINATARIO_APODO]») o una de anonimizacion («[NOMBRE_ANONIMIZADO]»,
-#: «[DNI_OCULTO]»). Solo esas: «[ALERTA]» o «[FIN]» son texto legitimo del genero (validador de
-#: cd8ab12).
+#: no se restauro («[DESTINATARIO_APODO]», con uno o mas sufijos) o una de las de anonimizacion
+#: («[NOMBRE_ANONIMIZADO]», «[DNI_OCULTO]»). Solo esas: «[ALERTA]», «[FIN]» o
+#: «[ARCHIVO_ELIMINADO]» son texto legitimo del genero (validadores de cd8ab12 y 7e88879).
 ETIQUETA_SIN_NOMBRE = re.compile(
-    r"\[(?:(?:DESTINATARIO|QUIEN_REGALA|NOMBRE_ANTERIOR|ALLEGADO_\d+)(?:_[A-Z0-9]+)?"
-    r"|[A-Z_]*(?:ANONIMIZAD|OCULT|ELIMINAD)[A-Z_]*)\]",
-    re.IGNORECASE,
+    r"\[(?:(?i:(?:DESTINATARIO|QUIEN_REGALA|NOMBRE_ANTERIOR|ALLEGADO_\d+)(?:_[A-Z0-9]+)*)"
+    r"|[A-Z_]*ANONIMIZAD[OA]S?[A-Z_]*|DNI_OCULTO|EMAIL_ELIMINADO|EMPRESA_OCULTA)\]"
 )
 
 
