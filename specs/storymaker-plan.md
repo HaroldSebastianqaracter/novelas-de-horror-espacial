@@ -166,11 +166,11 @@ Requisitos en [spec3.md](spec3.md), 3.8; verificación en [spec3-verification.md
 - [ ] **Lean 4:** generar un fichero `.lean` desde SQLite con eventos, momento, personajes, lugar y fechas de nacimiento.
 - [ ] Al menos dos invariantes. Candidatos directos, porque la puerta 3 ya los comprueba en SQL: orden temporal, edad coherente, nadie en dos lugares a la vez, nadie aparece tras su muerte.
 - [ ] `lake build` automático como puerta antes de publicar una versión; si falla, el fallo vuelve al editor.
-- [ ] **TLA+:** especificación de la máquina de estados de `orquestador/estados.py` (configuración, planificación, escritura, validación, publicación, retries, reanudación y cambio del lector).
-- [ ] Al menos tres invariantes de seguridad y una propiedad de liveness.
-- [ ] TLC con un modelo pequeño (5 capítulos, 2 reintentos) y su configuración en el repo.
-- [ ] **Contraejemplo documentado:** el hallazgo 1 de la auditoría (resolver una parada de estructura acababa en `completada` sin capítulos). Se modela la máquina anterior a la fase 2 de spec2, se ejecuta TLC, se muestra la traza y el cambio que la cerró.
-- [ ] README con la correspondencia entre cada acción de la spec y el estado o transición del código.
+- [x] **TLA+:** especificación de la máquina de estados de `orquestador/estados.py` (configuración, planificación, escritura, validación, publicación, retries, reanudación y cambio del lector). Requisitos en [spec-tla.md](spec-tla.md); el modelo, en [formal/tla/](../formal/tla/README.md).
+- [x] Al menos tres invariantes de seguridad y una propiedad de liveness: once de seguridad y dos de liveness (RF-TLA-04 y RF-TLA-05).
+- [x] TLC con un modelo pequeño (5 capítulos, 2 reintentos) y su configuración en el repo: `formal/tla/StoryMaker.cfg`, más la terminación con fallos ilimitados y el código sin el cambio del lector.
+- [x] **Contraejemplo documentado:** el hallazgo 1 de la auditoría (resolver una parada de estructura acababa en `completada` sin capítulos). Se modela la máquina anterior a la fase 2 de spec2, se ejecuta TLC, se muestra la traza y el cambio que la cerró. Además, TLC encontró dos fallos nuevos: uno del diseño del cambio del lector antes de implementarlo, y otro del código actual, la parada de presupuesto del tramo 3. Están en el README de `formal/tla/`.
+- [x] README con la correspondencia entre cada acción de la spec y el estado o transición del código. `comprobar_tablas.py` comprueba las tablas.
 
 ### 10. Infraestructura de evals
 

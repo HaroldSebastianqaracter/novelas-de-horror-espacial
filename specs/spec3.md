@@ -19,7 +19,7 @@ Versión 0.1 · 23 de septiembre de 2026
 | 6. Validadores que faltan | [3.6](#36-bloque-6--validadores-que-faltan) | Empezada: nombres, allegados, longitud, segunda opinión y votos del juez |
 | 7. Lectura | [3.7](#37-bloque-7--lo-que-la-lectura-web-pide-al-backend) | Empezada: lo que la web pide al backend. La lectura es el frontend ([spec-frontend.md](spec-frontend.md)) |
 | 8. Cambio del lector | [3.8](#38-bloque-8--cambio-del-lector) | Escrita |
-| 9. Validadores formales | 3.9 | En sus propias specs: `spec-lean.md` y `spec-tla.md` |
+| 9. Validadores formales | 3.9 | En sus propias specs: [spec-tla.md](spec-tla.md) (TLA+, integrada) y `spec-lean.md` (Lean 4, en la rama `formal-lean`, pendiente de integrar) |
 | 10. Infraestructura de evals | [3.10](#310-bloque-10--infraestructura-de-evals) | Empezada: el banco de contraejemplos de la puerta 3 |
 | Mejoras tras la primera pasada real | [3.11](#311-lo-que-enseñó-la-primera-pasada-real) | Escrita: 3 de los 6 frentes (extractor, resumen y nombres menores) |
 

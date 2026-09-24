@@ -54,7 +54,73 @@ El pipeline completo por fases está en [architecture.md](../architecture.md), �
 
 La máquina de estados que implementa el código (`orquestador/estados.py`) está dibujada en [specs/spec2.md](../../specs/spec2.md), requisito RF2-WK-06.
 
-*Pendiente:* la máquina de estados de la especificación TLA+ (bloque 9 del [plan de entrega](../../specs/storymaker-plan.md)), con la correspondencia entre sus acciones y el código.
+La máquina de la especificación TLA+ ([formal/tla/StoryMaker.tla](../../formal/tla/README.md), [spec-tla.md](../../specs/spec-tla.md)) es esa misma máquina con dos añadidos:
+
+- lo que la mueve: las intenciones del autor, las puertas, `parar` y la caída del worker;
+- las dos transiciones del cambio del lector ([spec3](../../specs/spec3.md), RF3-CAM-06).
+
+Las etiquetas son los sucesos de `estados.py` y, entre paréntesis, la acción del modelo que los dispara. La correspondencia de cada acción con su fichero y su función está en el [README de formal/tla](../../formal/tla/README.md), «Correspondencia con el código».
+
+```mermaid
+stateDiagram-v2
+  [*] --> configurada
+  configurada --> planificando: arrancar (Arrancar, Derivar)
+  planificando --> escaletando: puerta_1_ok (PlanP1)
+  escaletando --> generando: puerta_2_ok (EscP2)
+  generando --> completada: terminado_limpio (P5, LectorAplicar)
+  generando --> completada_con_avisos: terminado_con_avisos (P5, LectorAplicar)
+
+  planificando --> parada: conflicto, puerta 1 (PlanP1)
+  escaletando --> parada: conflicto, puerta 2 dos veces (EscP2)
+  generando --> parada: conflicto, puerta 3, oficio o presupuesto (Tramo12, Tramo3)
+
+  parada --> planificando: rehacer, estructura (Rehacer)
+  parada --> escaletando: rehacer, escaleta (Rehacer)
+  parada --> generando: aceptar_retcon, dar_por_sabido o relanzar (ResolverContinuidad, Relanzar)
+
+  planificando --> detenida: parar (DetenerRun, Recuperar)
+  escaletando --> detenida: parar (DetenerRun, Recuperar)
+  generando --> detenida: parar (DetenerRun, Recuperar)
+  detenida --> planificando: arrancar_planificacion (Derivar)
+  detenida --> escaletando: arrancar_escaleta (ChkEsc)
+  detenida --> generando: arrancar_generacion o relanzar (ChkGen, Relanzar)
+
+  planificando --> error: error (FallarRun)
+  escaletando --> error: error (FallarRun)
+  generando --> error: error (FallarRun)
+  parada --> error: error
+  error --> planificando: arrancar_planificacion (Derivar)
+  error --> escaletando: arrancar_escaleta (ChkEsc)
+  error --> generando: arrancar_generacion o relanzar (ChkGen, Relanzar)
+
+  completada --> generando: relanzar (Relanzar) o cambio_lector (CambioDelLector)
+  completada_con_avisos --> generando: relanzar (Relanzar) o cambio_lector (CambioDelLector)
+```
+
+Dentro de `generando` está el bucle de capítulo, que es donde viven los reintentos y la reanudación:
+
+```mermaid
+stateDiagram-v2
+  [*] --> Bucle: ChkGen
+  Bucle --> Tramo12: siguiente capítulo, puertas 1 y 2 vigentes
+  Tramo12 --> Tramo3: texto y hechos entran y la puerta 3 pasa (capítulo a medias)
+  Tramo3 --> Bucle: la puerta 4 pasa (capítulo completado y aprobado)
+  Tramo3 --> Tramo12: la puerta 4 falla y quedan intentos (se revierte)
+  Tramo3 --> [*]: la puerta 4 falla por última vez, parada de oficio
+  Tramo3 --> RevertirTrasParada: el paquete del oficio no cabe, parada de presupuesto
+  RevertirTrasParada --> [*]: el finally revierte el capítulo
+  Tramo12 --> [*]: parada de continuidad o de presupuesto
+  Bucle --> P5: no quedan capítulos
+  P5 --> [*]: completada y versión publicada
+  note right of Tramo3
+    Una caída aquí deja el capítulo a medias.
+    Recuperar lo revierte y deja la ejecución detenida.
+  end note
+  note right of RevertirTrasParada
+    Una caída aquí, con la ejecución ya en parada,
+    dejaba el capítulo a medias (tercer contraejemplo).
+  end note
+```
 
 ## 3. Esquema SQLite (núcleo de la story bible)
 

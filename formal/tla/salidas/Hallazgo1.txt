@@ -1,0 +1,169 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 130 and seed 5002594042933081441 with 1 worker on 12 cores with 3572MB heap and 64MB offheap memory (Windows 11 10.0 amd64, Eclipse Adoptium 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module Hallazgo1
+Starting... (2026-09-24 12:05:56)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-09-24 12:05:57.
+Error: Invariant CompletadaConNovela is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ escIntento = 1
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ tipoParada = "ninguna"
+/\ fallos = 0
+/\ pc = "reposo"
+/\ planificado = FALSE
+/\ estado = "configurada"
+/\ corriendo = FALSE
+/\ escaleta = FALSE
+/\ capParada = 0
+
+State 2: <Arrancar line 177, col 5 to line 180, col 32 of module Hallazgo1>
+/\ escIntento = 1
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ tipoParada = "ninguna"
+/\ fallos = 0
+/\ pc = "inicio"
+/\ planificado = FALSE
+/\ estado = "configurada"
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ capParada = 0
+
+State 3: <Derivar line 99, col 5 to line 103, col 98 of module Hallazgo1>
+/\ escIntento = 1
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ tipoParada = "ninguna"
+/\ fallos = 0
+/\ pc = "plan_agentes"
+/\ planificado = FALSE
+/\ estado = "planificando"
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ capParada = 0
+
+State 4: <PlanAgentes line 106, col 5 to line 109, col 32 of module Hallazgo1>
+/\ escIntento = 1
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ tipoParada = "ninguna"
+/\ fallos = 0
+/\ pc = "plan_p1"
+/\ planificado = TRUE
+/\ estado = "planificando"
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ capParada = 0
+
+State 5: <PlanP1 line 112, col 5 to line 117, col 63 of module Hallazgo1>
+/\ escIntento = 1
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ tipoParada = "estructura"
+/\ fallos = 1
+/\ pc = "reposo"
+/\ planificado = TRUE
+/\ estado = "parada"
+/\ corriendo = FALSE
+/\ escaleta = FALSE
+/\ capParada = 0
+
+State 6: <Resolver line 186, col 5 to line 192, col 70 of module Hallazgo1>
+/\ escIntento = 1
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ tipoParada = "ninguna"
+/\ fallos = 1
+/\ pc = "inicio"
+/\ planificado = TRUE
+/\ estado = "generando"
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ capParada = 0
+
+State 7: <Derivar line 99, col 5 to line 103, col 98 of module Hallazgo1>
+/\ escIntento = 1
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ tipoParada = "ninguna"
+/\ fallos = 1
+/\ pc = "chk_esc"
+/\ planificado = TRUE
+/\ estado = "generando"
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ capParada = 0
+
+State 8: <ChkEsc line 121, col 5 to line 127, col 86 of module Hallazgo1>
+/\ escIntento = 1
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ tipoParada = "ninguna"
+/\ fallos = 1
+/\ pc = "chk_gen"
+/\ planificado = TRUE
+/\ estado = "generando"
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ capParada = 0
+
+State 9: <ChkGen line 150, col 5 to line 154, col 98 of module Hallazgo1>
+/\ escIntento = 1
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ tipoParada = "ninguna"
+/\ fallos = 1
+/\ pc = "caps"
+/\ planificado = TRUE
+/\ estado = "generando"
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ capParada = 0
+
+State 10: <Bucle line 158, col 5 to line 166, col 62 of module Hallazgo1>
+/\ escIntento = 1
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ tipoParada = "ninguna"
+/\ fallos = 1
+/\ pc = "p5"
+/\ planificado = TRUE
+/\ estado = "generando"
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ capParada = 0
+
+State 11: <P5 line 169, col 5 to line 173, col 98 of module Hallazgo1>
+/\ escIntento = 1
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ tipoParada = "ninguna"
+/\ fallos = 1
+/\ pc = "reposo"
+/\ planificado = TRUE
+/\ estado = "completada"
+/\ corriendo = FALSE
+/\ escaleta = FALSE
+/\ capParada = 0
+
+42 states generated, 27 distinct states found, 5 states left on queue.
+The depth of the complete state graph search is 11.
+The average outdegree of the complete state graph is 1 (minimum is 1, the maximum 2 and the 95th percentile is 2).
+Finished in 01s at (2026-09-24 12:05:57)
