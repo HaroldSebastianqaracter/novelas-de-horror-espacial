@@ -7,7 +7,8 @@ respuesta, las etiquetas se cambian por los nombres. Asi el modelo trabaja con
 busqueda es la del seudonimizador de Langfuse (plegado y fronteras de palabra), con una
 diferencia: aqui una forma solo casa si empieza en mayuscula, porque lo que se reescribe es lo
 que lee el modelo, y «la luz del pasillo» no puede volverse «la [DESTINATARIO_NOMBRE] del
-pasillo» (validador de cd8ab12).
+pasillo» (validador de cd8ab12). La excepcion es un nombre que el brief escribe en minuscula,
+que casa en cualquier grafia: asi viaja en los paquetes (validador de 7e88879).
 """
 
 from __future__ import annotations
@@ -25,8 +26,8 @@ from .observabilidad import Seudonimizador, partes_del_nombre, plegar
 #: La etiqueta del nombre que tenia una persona del encargo antes de un cambio del lector.
 ANTERIOR = "NOMBRE_ANTERIOR"
 
-#: Con que empieza una firma generica de quien regala («tu hermano», «Sus compañeros del
-#: instituto»): no es un nombre, y no se oculta (validador de 7e88879).
+#: Palabras de una firma de quien regala que no son nombre («tu tía Carmen», «Los García»,
+#: «Sus compañeros del instituto»): no se ocultan nunca (validadores de 7e88879 y ac7dc1d).
 _DETERMINANTES = frozenset({
     "tu", "tus", "su", "sus", "mi", "mis", "vuestro", "vuestra", "vuestros", "vuestras",
     "nuestro", "nuestra", "nuestros", "nuestras", "el", "la", "los", "las", "un", "una",
@@ -71,14 +72,15 @@ class Mascara:
         plegado, posiciones, _ = plegar(nombre)
         completo = " ".join(plegado.split())
         palabras = completo.split(" ")
-        # Una firma generica («tu hermano», «Sus compañeros del instituto») no es un nombre y
-        # no se oculta; una firma que es un nombre, aunque venga en minuscula, si.
-        if firma and palabras and palabras[0] in _DETERMINANTES:
-            self._alias.setdefault(f"[{base}]", " ".join(nombre.split()))
-            self._roles.append(f"Quien hace el regalo firma la dedicatoria como «{nombre}».")
-            return
+        # Una firma que empieza por un determinante («tu tía Carmen», «Los García») no es un
+        # nombre entero: se ocultan solo sus palabras con mayuscula, y vuelve tal cual. Una
+        # firma que es un nombre, aunque venga en minuscula, se oculta entera y por partes.
+        descriptiva = firma and bool(palabras) and palabras[0] in _DETERMINANTES
         candidatas = list(partes_del_nombre(nombre, firma=firma))
-        if completo and completo not in candidatas:
+        if descriptiva:
+            candidatas = [f for f in candidatas if f not in _DETERMINANTES
+                          and (_original(nombre, plegado, posiciones, f) or " ")[:1].isupper()]
+        elif completo and completo not in candidatas:
             candidatas.append(completo)
         propias = 0
         extra = 2
@@ -102,6 +104,11 @@ class Mascara:
             if not original[:1].isupper():
                 self._minusculas.add(forma)
             propias += 1
+        if descriptiva:
+            self._alias.setdefault(f"[{base}]", " ".join(nombre.split()))
+            # La leyenda pasa por la mascara: los nombres de la firma salen como etiqueta.
+            self._roles.append(f"Quien hace el regalo firma la dedicatoria como «{nombre}».")
+            return
         # Lo que un modelo escribiria por analogia tambien vuelve: `_NOMBRE` de un nombre de
         # una palabra, o la etiqueta de quien regala cuando es un allegado.
         entero = _grafia(" ".join(nombre.split()))

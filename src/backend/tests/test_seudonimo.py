@@ -320,3 +320,45 @@ def test_la_puerta_1_mira_titulo_personajes_y_objetos(sql: str) -> None:
         c.comprobacion for c in p_estructura.evaluar(con, novela_id).bloqueantes}
     # El titulo y la dedicatoria los escribe el arquitecto: se rehace desde el.
     assert fallo.FASE_DE_COMPROBACION["etiqueta_en_el_canon"] == "arquitecto"
+
+
+# --- Lo que encontro el validador de ac7dc1d -----------------------------------------------------
+
+
+@pytest.mark.parametrize(("firma", "texto", "oculto"), [
+    ("tu tía Carmen", "Con carino, tu tía Carmen. Carmen llamo.",
+     "Con carino, tu tía [QUIEN_REGALA_APELLIDO]. [QUIEN_REGALA_APELLIDO] llamo."),
+    ("Los García", "De parte de Los García.", "De parte de Los [QUIEN_REGALA_APELLIDO]."),
+    ("La Tata", "La Tata vino.", "La [QUIEN_REGALA_APELLIDO] vino."),
+    ("Mis padres", "Mis padres vinieron.", "Mis padres vinieron."),
+])
+def test_una_firma_con_determinante_oculta_sus_nombres_y_nada_mas(firma: str, texto: str,
+                                                                  oculto: str) -> None:
+    datos = brief_ejemplo()
+    datos["quien_regala"] = firma
+    m = Mascara(Brief.model_validate(datos))
+    assert m.ocultar(texto) == oculto
+    assert m.restaurar(m.ocultar(texto)) == texto
+    assert m.restaurar("[QUIEN_REGALA]") == firma
+
+
+@pytest.mark.parametrize("etiqueta", ["[NOMBRE_OCULTO]", "[nombre_eliminado]", "[APELLIDO_OCULTO]",
+                                      "[TELEFONO_OCULTO]", "[CORREO_ELIMINADO]", "[DATOS_OCULTOS]",
+                                      "[PERSONA_OCULTA]", "[Nombre_Anonimizado]"])
+def test_toda_etiqueta_de_un_dato_personal_oculto_para(etiqueta: str) -> None:
+    from compartido.texto import ETIQUETA_SIN_NOMBRE
+
+    assert ETIQUETA_SIN_NOMBRE.search(f"y {etiqueta} dijo")
+
+
+def test_la_puerta_1_mira_tambien_los_lugares() -> None:
+    from tareas.estructura import puerta as p_estructura
+    from tests.test_personalizacion import contexto
+
+    con, ruta = nueva_bd()
+    novela_id = crear(con, ruta, capitulos=3)
+    pipeline.planificar(contexto(con, ruta, novela_id))
+    con.execute("UPDATE lugar SET nombre = 'Casa de [DESTINATARIO_NOMBRE]' WHERE id = "
+                "(SELECT MIN(id) FROM lugar WHERE novela_id = ?)", (novela_id,))
+    assert "etiqueta_en_el_canon" in {
+        c.comprobacion for c in p_estructura.evaluar(con, novela_id).bloqueantes}
