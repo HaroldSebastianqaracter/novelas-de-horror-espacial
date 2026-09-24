@@ -378,6 +378,8 @@ def _rehacer(con: sqlite3.Connection, novela_id: int, parada_id: int) -> str:
 #: escrita ni un protagonista equivocado: hay que volver a quien los escribio.
 FASE_DE_COMPROBACION = {
     "dedicatoria_nombra_al_destinatario": "arquitecto",
+    # La etiqueta puede venir del titulo, del elenco o del mundo: se rehace desde el principio.
+    "etiqueta_en_el_canon": "arquitecto",
     "subgenero_del_brief": "arquitecto",
     "subgenero_exige_intensidad": "arquitecto",
     "destinatario_protagonista": "elenco",
