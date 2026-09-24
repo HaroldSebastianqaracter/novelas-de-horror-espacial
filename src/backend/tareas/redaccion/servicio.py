@@ -90,7 +90,10 @@ def _escaleta(escenas: list[dict[str, Any]]) -> str:
         if e.get("objetos"):
             partes.append(f"- Objetos presentes: {', '.join(e['objetos'])}")
         if e.get("elementos"):
-            partes.append("- Elementos personales que integra: " + "; ".join(e["elementos"]))
+            partes.append(
+                "- Elementos personales que integra (a cada allegado, por su nombre al menos una "
+                "vez en la escena; su parentesco solo no basta): " + "; ".join(e["elementos"])
+            )
         if e.get("beats"):
             partes.append("- Beats: " + " | ".join(b["cambio"] for b in e["beats"]))
         if e.get("secuela"):

@@ -500,7 +500,7 @@ _COMPROBACIONES: tuple[tuple[str, str, str], ...] = (
 TABLAS_DE_ESTADO: tuple[str, ...] = (
     "hecho", "estado_conocimiento", "uso_conocimiento", "hecho_uso", "estado_personaje",
     "estado_objeto", "siembra_estado", "hilo_estado", "amenaza_revelacion",
-    "entidad_no_reconocida", "atributo_conducta", "presencia_escena",
+    "entidad_no_reconocida", "atributo_conducta", "presencia_escena", "atributo_observable",
 )
 
 #: Las tablas de estado que cuelgan de un hecho: al revertir, caen tambien las filas de

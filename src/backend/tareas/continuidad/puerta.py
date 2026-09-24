@@ -75,9 +75,23 @@ WHERE n.novela_id = ?
 # POV, lo que constata el extractor o actuar en ella; RF2-PIPE-30, RF2-PIPE-31), o que otro
 # miembro de su faccion la supiera al terminar un capitulo anterior: entre capitulos, lo que
 # sabe la cuadrilla lo sabe cada uno de la cuadrilla.
+#
+# Un hecho observable (RF3-PAS-15: lo percibe cualquiera en el lugar) no para: quien estuvo
+# en el lugar donde se fijo lo sabe, y si no estuvo, es un aviso para que el autor lo mire.
 _SQL_CONOCIMIENTO = f"""
 SELECT u.id AS uso_id, p.nombre AS personaje, h.atributo, h.valor, h.sujeto_nombre,
-       u.escena_id, c.numero AS capitulo, h.id AS hecho_id, p.id AS personaje_id
+       u.escena_id, c.numero AS capitulo, h.id AS hecho_id, p.id AS personaje_id,
+       EXISTS (SELECT 1 FROM atributo_observable ao
+               JOIN escena_ordinal oo ON oo.escena_id = ao.escena_id
+               WHERE ao.novela_id = h.novela_id AND ao.sujeto_clave = h.sujeto_clave
+                 AND ao.atributo_clave = h.atributo_clave
+                 AND oo.ordinal <= ou.ordinal) AS es_observable,
+       EXISTS (SELECT 1 FROM presencia pl
+               JOIN escena el          ON el.id = pl.escena_id
+               JOIN escena_ordinal ol  ON ol.escena_id = pl.escena_id
+               JOIN escena eh          ON eh.id = h.escena_id
+               WHERE pl.personaje_id = u.personaje_id AND el.lugar_id = eh.lugar_id
+                 AND ol.ordinal <= ou.ordinal) AS estuvo_alli
 FROM uso_conocimiento u
 JOIN personaje p       ON p.id = u.personaje_id
 JOIN hecho_vigente h   ON h.id = u.hecho_id
@@ -361,6 +375,20 @@ def evaluar(
         ))
 
     for f in _filas(con, _SQL_CONOCIMIENTO, p):
+        observable, estuvo = bool(f.pop("es_observable")), bool(f.pop("estuvo_alli"))
+        if observable and estuvo:
+            continue
+        if observable:
+            conflictos.append(Conflicto(
+                comprobacion="conocimiento_observable", aviso=True,
+                descripcion=(
+                    f"{f['personaje']} actua sobre '{f['sujeto_nombre']}: {f['atributo']} = "
+                    f"{f['valor']}', que es observable, sin haber estado donde se ve en ninguna "
+                    "escena anterior. Pudo verlo fuera de escena: comprueba que es verosimil."
+                ),
+                escena_id=f["escena_id"], capitulo=capitulo, datos=f,
+            ))
+            continue
         conflictos.append(Conflicto(
             comprobacion="conocimiento_no_adquirido",
             descripcion=(

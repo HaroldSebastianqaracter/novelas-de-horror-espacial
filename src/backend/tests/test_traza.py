@@ -64,7 +64,8 @@ def test_un_juicio_en_contra_queda_registrado_con_su_evidencia() -> None:
     assert juicios and juicios[0]["datos"]["evidencia"] == "Sintio miedo."
 
 
-def test_si_la_mecanica_falla_el_registro_dice_que_no_hubo_juicio() -> None:
+def test_si_la_mecanica_falla_el_juez_corre_igual_y_el_redactor_recibe_todo() -> None:
+    """RF3-PAS-14: la mecanica y el juez a la vez, para no descubrir los fallos de uno en uno."""
     con, ruta = nueva_bd()
     novela_id = crear_novela(con)
     puerto = puerto_falso(con)
@@ -76,13 +77,25 @@ def test_si_la_mecanica_falla_el_registro_dice_que_no_hubo_juicio() -> None:
             e["texto"] = f"{e['texto']} Y {tic}, todo se apago."
         return salida
 
+    def oficio(entrada: str, agente: str) -> dict:
+        salida = agentes_falsos.oficio(entrada, agente)
+        for v in salida["veredictos"]:
+            if v["criterio"] == "cuentas_cuadran":
+                v.update(veredicto="falla", evidencia="Nueve de siete.",
+                         sugerencia="Cuadra el censo.")
+        return salida
+
     puerto.registrar("redaccion", redaccion)
+    puerto.registrar("oficio", oficio)
     assert pipeline.avanzar(contexto(con, puerto, ruta, novela_id)) == "parada"
-    assert not [i for i in puerto.invocaciones if i["agente"] == "oficio"]
+    assert [i for i in puerto.invocaciones if i["agente"] == "oficio"]
     registros = _puerta_4(con, novela_id, 1)
     assert registros and all(r["veredicto"] == "falla" for r in registros)
     comprobaciones = {c["comprobacion"] for c in registros[0]["conflictos"]}
-    assert {"tic_prohibido", "juicio_no_invocado"} <= comprobaciones
+    assert {"tic_prohibido", "juicio:cuentas_cuadran"} <= comprobaciones
+    assert "juicio_no_invocado" not in comprobaciones
+    segundo = [i for i in puerto.invocaciones if i["agente"] == "redaccion"][1]["entrada"]
+    assert "tic_prohibido" in segundo and "Cuadra el censo." in segundo
 
 
 def test_toda_parada_de_oficio_tiene_la_puerta_4_en_falla() -> None:

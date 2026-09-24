@@ -941,3 +941,43 @@ def test_un_fallo_de_las_cuentas_vuelve_al_redactor_con_la_evidencia() -> None:
     assert len(redacciones) == 2
     assert "los siete de fuera" in redacciones[1]
     assert "cuentas_cuadran" in redacciones[1]
+
+
+# --- RF3-PAS-15: lo observable -------------------------------------------------------------------
+
+REGLA_DE_LO_OBSERVABLE = (
+    "**Observables.** Si el dato lo percibe cualquiera que esté en ese lugar, con los sentidos o "
+    "en un indicador a la vista de todos (una luz que late con un patrón, un ruido, una alarma, "
+    "un temblor, el frío), marca `observable: true`. Lo que se sabe por dentro, se dice en "
+    "privado, se lee en un documento o solo sale en una pantalla que mira uno, no es observable. "
+    "Ante la duda, `false`: marcar de más deja pasar errores de conocimiento."
+)
+
+
+def test_el_extractor_marca_lo_observable_y_solo_eso() -> None:
+    con, _ = nueva_bd()
+    g = fabrica.novela_minima(con)
+    salida = SalidaExtraccion.model_validate({
+        "hechos": [
+            {"escena_orden": 1, "sujeto_tipo": "lugar", "sujeto_ref": "Puente",
+             "atributo": "luz de emergencia", "valor": "late en rojo", "observable": True,
+             "cita": "late en rojo"},
+            {"escena_orden": 1, "sujeto_tipo": "lugar", "sujeto_ref": "Puente",
+             "atributo": "codigo de la escotilla", "valor": "cuatro siete", "cita": "cuatro"},
+        ],
+        "resumen": "La cuadrilla entra en el puente y la luz de emergencia late en rojo.",
+        "resumen_breve": "Entran en el puente.",
+    })
+    s_extraccion.aplicar(con, g.novela_id, 1, salida, {1: g.escenas[(1, 1)]})
+    marcas = con.execute("SELECT sujeto_clave, atributo_clave FROM atributo_observable").fetchall()
+    assert [tuple(m) for m in marcas] == [("puente", "luz de emergencia")]
+
+
+def test_la_skill_pide_marcar_lo_observable() -> None:
+    from compartido.puerto.terminal import PuertoTerminal
+    from config import raiz_repo
+
+    skill = PuertoTerminal(skills_dir=raiz_repo() / ".claude" / "skills").ruta_skill(
+        "extraccion").read_text(encoding="utf-8")
+    seccion = "**Observables.**" + skill.split("**Observables.**")[1].split("\n\n")[0]
+    assert seccion.strip() == REGLA_DE_LO_OBSERVABLE

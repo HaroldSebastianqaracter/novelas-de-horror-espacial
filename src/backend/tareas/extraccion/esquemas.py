@@ -58,6 +58,14 @@ class HechoExtraido(BaseModel):
             "(algo que hace siempre), no un rasgo (RF2-PIPE-29)"
         ),
     )
+    observable: bool = Field(
+        default=False,
+        description=(
+            "true si cualquiera que este en ese lugar lo percibe con los sentidos o en un "
+            "indicador a la vista de todos (una luz que late, un ruido, una alarma, un temblor); "
+            "false si se sabe por dentro, se dice en privado o hay que leerlo (RF3-PAS-15)"
+        ),
+    )
     categoria: CategoriaHecho = "otro"
     cita: str = Field(default="", description="Fragmento literal de la prosa que lo fija")
     supersede_a: str = Field(

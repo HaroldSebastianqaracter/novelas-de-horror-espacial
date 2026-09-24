@@ -439,6 +439,14 @@ def aplicar(
                 "atributo_clave) VALUES (?,?,?,?)",
                 (novela_id, eid, normalizar(h.sujeto_ref), normalizar(h.atributo)),
             )
+        if h.observable:
+            # Como la conducta, es del atributo: la luz del pozo late igual con otro patron
+            # (RF3-PAS-15).
+            con.execute(
+                "INSERT OR IGNORE INTO atributo_observable (novela_id, escena_id, sujeto_clave, "
+                "atributo_clave) VALUES (?,?,?,?)",
+                (novela_id, eid, normalizar(h.sujeto_ref), normalizar(h.atributo)),
+            )
         # Reafirmar el valor vigente no es un hecho nuevo (RF2-PIPE-19): el conocimiento y los
         # usos de la escena apuntan al hecho ya establecido. Si cada reafirmacion creara una
         # fila, un uso posterior quedaria enganchado a una fila que nadie sabe, y la puerta 3

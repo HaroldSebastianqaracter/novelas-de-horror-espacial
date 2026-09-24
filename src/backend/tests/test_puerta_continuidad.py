@@ -537,3 +537,79 @@ def test_revertir_un_capitulo_borra_sus_presencias(
     assert borrado["presencia_escena"] == 2
     quedan = [f[0] for f in con.execute("SELECT escena_id FROM presencia_escena")]
     assert quedan == [g.escenas[(1, 1)]]
+
+
+# --- RF3-PAS-15: lo que ve cualquiera no hay que aprenderlo ---------------------------------------
+
+
+def _marcar_observable(con: sqlite3.Connection, g: Grafo, escena: tuple[int, int]) -> None:
+    con.execute(
+        "INSERT INTO atributo_observable (novela_id, escena_id, sujeto_clave, atributo_clave) "
+        "VALUES (?, ?, 'ibarra', 'color de ojos')", (g.novela_id, g.escenas[escena]),
+    )
+
+
+def _reyes_usa_los_ojos(con: sqlite3.Connection, g: Grafo) -> None:
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)",
+        (g.novela_id, g.personajes["Reyes"], g.hechos["ojos"], g.escenas[(2, 2)]),
+    )
+
+
+def test_un_hecho_observable_sin_haber_estado_alli_es_aviso(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    con, g = grafo
+    _reyes_usa_los_ojos(con, g)
+    assert "conocimiento_no_adquirido" in comprobaciones(con, g)
+    _marcar_observable(con, g, (1, 1))
+    assert "conocimiento_no_adquirido" not in comprobaciones(con, g)
+    avisos = {c.comprobacion for c in puerta.evaluar(con, g.novela_id, 2).conflictos if c.aviso}
+    assert "conocimiento_observable" in avisos
+
+
+def test_un_hecho_observable_lo_sabe_quien_estuvo_en_el_lugar(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """El hecho se fijo en el Puente (1.1); Reyes estuvo en el Puente en la 2.1, antes de usarlo
+    en la 2.2, sin estar en la escena donde se fijo."""
+    con, g = grafo
+    _reyes_usa_los_ojos(con, g)
+    _marcar_observable(con, g, (1, 1))
+    con.execute("INSERT INTO escena_personaje (escena_id, personaje_id) VALUES (?, ?)",
+                (g.escenas[(2, 1)], g.personajes["Reyes"]))
+    assert "conocimiento_observable" not in detectadas(con, g)
+    assert "conocimiento_no_adquirido" not in detectadas(con, g)
+
+
+def test_haber_estado_en_otro_lugar_no_basta(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    con, g = grafo
+    _reyes_usa_los_ojos(con, g)
+    _marcar_observable(con, g, (1, 1))
+    con.execute("INSERT INTO escena_personaje (escena_id, personaje_id) VALUES (?, ?)",
+                (g.escenas[(1, 2)], g.personajes["Reyes"]))  # el Modulo de carga
+    assert "conocimiento_observable" in detectadas(con, g)
+
+
+def test_la_marca_de_despues_no_vale_para_antes(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    """Una marca puesta en una escena posterior al uso no lo vuelve observable."""
+    con, g = grafo
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)",
+        (g.novela_id, g.personajes["Reyes"], g.hechos["ojos"], g.escenas[(2, 1)]),
+    )
+    _marcar_observable(con, g, (2, 2))
+    assert "conocimiento_no_adquirido" in comprobaciones(con, g)
+
+
+def test_revertir_el_capitulo_borra_sus_marcas_de_observable(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    from orquestador import fallo
+
+    con, g = grafo
+    _marcar_observable(con, g, (2, 1))
+    fallo.revertir_grafo(con, g.novela_id, 2, motivo="oficio")
+    assert con.execute("SELECT COUNT(*) FROM atributo_observable").fetchone()[0] == 0
