@@ -134,7 +134,7 @@ Requisitos en [spec3.md](spec3.md), 3.4; verificación en [spec3-verification.md
 
 - [x] Nombres escritos **exactamente** como en la story bible (spec3, RF3-VAL-01; en la rama `noche-23-09`).
 - [x] Longitud **real** de cada capítulo dentro del rango, como aviso (spec3, RF3-VAL-02; en la rama `noche-23-09`).
-- [ ] Cada elemento personalizado obligatorio del brief aparece en al menos un capítulo, comprobado contra la tabla de hechos.
+- [x] Cada elemento personalizado obligatorio del brief aparece en al menos un capítulo, comprobado contra la tabla de hechos ([spec3, RF3-ELE-01 a 03](spec3.md)).
 - [ ] LLM-as-judge con **puntuación y justificación por criterio** (continuidad, tono, calidad narrativa y **personalización integrada con naturalidad**). Hoy el juez de oficio da pasa/falla y no tiene criterio de personalización.
 - [ ] **Dos hooks**, uno de validación del capítulo y otro de policy. Hay que decidir y justificar dónde viven: los agentes corren sin herramientas, así que los hooks de herramientas de Claude Code no se disparan nunca.
 

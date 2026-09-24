@@ -13,12 +13,24 @@ from __future__ import annotations
 
 import sqlite3
 
+from compartido.grafo import lectura
 from compartido.puerta_base import Conflicto, ResultadoPuerta
 from config import UMBRAL_HILO_LATENTE
 
 
 def evaluar(con: sqlite3.Connection, novela_id: int) -> ResultadoPuerta:
     conflictos: list[Conflicto] = []
+
+    # RF3-ELE-03: el elemento obligatorio del encargo que ningun capitulo integra.
+    for f in lectura.elementos_sin_integrar(con, novela_id):
+        conflictos.append(Conflicto(
+            comprobacion="elemento_obligatorio_ausente", aviso=True,
+            descripcion=(
+                f"{f['codigo']} ({f['tipo']}: «{f['texto']}») no aparece en ningun capitulo. "
+                "Es un elemento obligatorio del regalo."
+            ),
+            datos={"codigo": f["codigo"]},
+        ))
 
     for f in con.execute(
         """

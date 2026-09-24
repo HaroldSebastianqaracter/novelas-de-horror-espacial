@@ -189,12 +189,24 @@ PALABRAS_RESUMEN_PEDIDAS = 160
 PALABRAS_RESUMEN_BREVE = 40
 
 
+class ElementoIntegrado(BaseModel):
+    """Un elemento personal del encargo que la prosa integra (spec3, RF3-ELE-01)."""
+
+    escena_orden: int = Field(ge=1)
+    codigo: str = Field(min_length=3, max_length=12, description="El codigo del encargo: REC1")
+    cita: str = Field(min_length=3, description="Fragmento literal de la escena que lo muestra")
+
+
 class SalidaExtraccion(BaseModel):
     """Termina cuando todo lo que el texto afirma esta registrado."""
 
     hechos: list[HechoExtraido] = Field(default_factory=list[HechoExtraido])
     conocimiento: list[ConocimientoExtraido] = Field(default_factory=list[ConocimientoExtraido])
     usos_de_conocimiento: list[UsoConocimiento] = Field(default_factory=list[UsoConocimiento])
+    elementos: list[ElementoIntegrado] = Field(
+        default_factory=list[ElementoIntegrado],
+        description="Los elementos del encargo que la prosa integra, con su cita literal",
+    )
     presencias: list[PresenciaExtraida] = Field(
         default_factory=list[PresenciaExtraida],
         description="Quien esta fisicamente en cada escena, aunque la escaleta no lo pusiera. "

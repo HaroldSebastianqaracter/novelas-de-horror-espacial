@@ -345,6 +345,23 @@ ESTADOS_DE_LA_SIEMBRA = ("sembrada", "regada", "pagada")
 REVELACION = ("rastro", "efecto", "vislumbre")
 
 
+def _elementos_integrados(entrada: str) -> list[dict[str, Any]]:
+    """Cada elemento del encargo del capitulo, integrado con las primeras palabras de su escena
+    como cita (RF3-ELE-01): el redactor falso no escribe los recuerdos, y la cita tiene que
+    estar en la escena."""
+    escenas = dict(re.findall(r"### Escena (\d+)[^\n]*\n\n(.*?)(?=\n\n### Escena|\n\n## |\Z)",
+                              entrada, re.S))
+    salida: list[dict[str, Any]] = []
+    for codigo, orden in re.findall(r"^- ([A-Z]+\d+) \([a-z]+, escena (\d+)\)",
+                                    _bloque(entrada, "ELEMENTOS DEL ENCARGO EN ESTE CAPITULO"),
+                                    re.M):
+        palabras = escenas.get(orden, "").split()[:6]
+        if palabras:
+            salida.append({"escena_orden": int(orden), "codigo": codigo,
+                           "cita": " ".join(palabras)})
+    return salida
+
+
 def extraccion(entrada: str, agente: str) -> dict[str, Any]:
     """Una extraccion que ejercita cada comprobacion de la puerta 3 sin disparar ninguna.
 
@@ -424,6 +441,7 @@ def extraccion(entrada: str, agente: str) -> dict[str, Any]:
 
     return {
         "hechos": hechos,
+        "elementos": _elementos_integrados(entrada),
         "conocimiento": conocimiento,
         "usos_de_conocimiento": usos,
         "estados_personaje": estados,

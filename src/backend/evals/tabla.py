@@ -57,8 +57,8 @@ VALIDADORES: tuple[Validador, ...] = (
     Validador("puerta_3", "Continuidad en SQL (puerta 3)", "programático",
               "capítulo (validación)"),
     Validador("guardrail", "Palabras vetadas", "programático", "capítulo (política)"),
-    Validador("nombres", "Nombres exactos, allegados y etiquetas", "programático",
-              "capítulo (puerta 4)"),
+    Validador("nombres", "Personalización: nombres, allegados, elementos y etiquetas",
+              "programático", "capítulo (puerta 4)"),
     Validador("longitud", "Longitud del capítulo", "programático", "capítulo (puerta 4)"),
     Validador("puerta_4_mecanica", "Mecánica de prosa (puerta 4)", "programático",
               "capítulo (puerta 4)"),
@@ -68,7 +68,8 @@ VALIDADORES: tuple[Validador, ...] = (
     Validador("canario", "Canario de la inyección en la prosa", "programático", "evals"),
 )
 
-_NOMBRES = frozenset({"nombre_mal_escrito", "allegado_ausente", "etiqueta_en_la_prosa"})
+_NOMBRES = frozenset({"nombre_mal_escrito", "allegado_ausente", "etiqueta_en_la_prosa",
+                      "elemento_sin_integrar"})
 #: Avisos de la puerta 4 que hablan del juez, no de la prosa.
 _DEL_JUEZ = frozenset({"juicio_no_invocado", "juicio_dividido", "juicio_ausente"})
 

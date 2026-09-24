@@ -80,6 +80,7 @@ def test_cada_eval_empieza_sobre_una_base_nueva(cfg: config.Config) -> None:
     (4, "termino_vetado", "guardrail"),
     (4, "allegado_ausente", "nombres"),
     (4, "etiqueta_en_la_prosa", "nombres"),
+    (4, "elemento_sin_integrar", "nombres"),
     (4, "longitud_real", "longitud"),
     (4, "palabras_filtro", "puerta_4_mecanica"),
     (3, "conocimiento_no_adquirido", "puerta_3"),
