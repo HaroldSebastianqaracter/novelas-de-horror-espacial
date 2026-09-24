@@ -57,6 +57,49 @@ describe("informe de la parada (RF-FE-PAR-01)", () => {
     expect(within(opinion).queryByText(/"opiniones"/)).not.toBeInTheDocument();
   });
 
+  it("el número de la opinión cuenta la lista entera, avisos incluidos", async () => {
+    const informe = paradas[93]?.informe as { conflictos: Record<string, unknown>[] };
+    const [factual, conocimiento, aviso] = informe.conflictos;
+    conParada({
+      informe: {
+        conflictos: [aviso, factual, conocimiento],
+        segunda_opinion: { resumen: "Un aviso va delante.", opiniones: [{ conflicto: 2, parece: "real", motivo: "El traje cambia sin explicación." }] },
+      },
+    });
+    renderizarEn(RUTA);
+    const enlace = await screen.findByRole("link", { name: "#2" });
+    expect(enlace).toHaveAttribute("href", "#conflicto-2");
+    expect(document.getElementById("conflicto-2")).toHaveTextContent("Continuidad factual");
+    expect(document.getElementById("conflicto-1")).toHaveTextContent("Palabras filtro");
+  });
+
+  it("una opinión fuera del esquema no pierde nada, y un número sin ficha no se enlaza", async () => {
+    conParada({
+      informe: {
+        conflictos: [{ comprobacion: "continuidad_factual", descripcion: "Uno.", aviso: false }],
+        segunda_opinion: {
+          resumen: 42,
+          opiniones: [
+            { conflicto: 7, parece: "dudoso", motivo: "Número inventado.", confianza: "media" },
+            "una opinión suelta",
+          ],
+          explicacion_por_conflicto: [{ texto: "no es una cadena" }],
+        },
+      },
+    });
+    renderizarEn(RUTA);
+    const opinion = (await screen.findByRole("heading", { name: "Segunda opinión del revisor de continuidad" })).closest(
+      "section",
+    ) as HTMLElement;
+    expect(within(opinion).queryByRole("link", { name: "#7" })).not.toBeInTheDocument();
+    expect(within(opinion).getByText("#7")).toBeInTheDocument();
+    expect(within(opinion).getByText("confianza")).toBeInTheDocument();
+    expect(within(opinion).getByText("una opinión suelta")).toBeInTheDocument();
+    expect(within(opinion).getByText("resumen")).toBeInTheDocument();
+    expect(within(opinion).getByText("42")).toBeInTheDocument();
+    expect(within(opinion).getByText(/no es una cadena/)).toBeInTheDocument();
+  });
+
   it("sin segunda opinión lo dice, y la parada sigue", async () => {
     conParada({ informe: { ...(paradas[93]?.informe as Record<string, unknown>), segunda_opinion: null } });
     renderizarEn(RUTA);

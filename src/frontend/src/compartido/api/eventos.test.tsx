@@ -3,6 +3,7 @@ import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { renderizarEn } from "../../pruebas/renderizar";
 import { partirEventos } from "./eventos";
+import { novelas } from "./mocks/datos";
 import { servidor } from "./mocks/servidor";
 
 describe("lector de text/event-stream", () => {
@@ -33,6 +34,8 @@ describe("SSE de una novela (RF-FE-DAT-02, RF-FE-DAT-04)", () => {
   it("un evento invalida la novela, un corte avisa y la reconexión manda Last-Event-ID y reconsulta", async () => {
     const cabeceras: (string | null)[] = [];
     let consultasEstructura = 0;
+    // La lista de novelas solo se reconsulta al reconectar: el evento invalida la novela, no la lista.
+    let consultasLista = 0;
     // La reconexión espera a que el test la suelte: si no, con la máquina cargada, el aviso
     // aparece y desaparece antes de que el test llegue a buscarlo.
     let soltarReconexion = () => {};
@@ -40,6 +43,10 @@ describe("SSE de una novela (RF-FE-DAT-02, RF-FE-DAT-04)", () => {
       soltarReconexion = r;
     });
     servidor.use(
+      http.get("*/api/novelas", () => {
+        consultasLista += 1;
+        return HttpResponse.json(novelas);
+      }),
       http.get("*/api/novelas/3/estructura", () => {
         consultasEstructura += 1;
         return HttpResponse.json({ actos: [], capitulos: [], hilos: [], puntos_de_giro: [], siembras: [] });
@@ -62,11 +69,15 @@ describe("SSE de una novela (RF-FE-DAT-02, RF-FE-DAT-04)", () => {
 
     renderizarEn("/novelas/3");
     await screen.findByRole("heading", { level: 1, name: "La bodega once" });
-    const antes = consultasEstructura;
 
     expect(await screen.findByText("Enlace perdido.")).toBeInTheDocument();
+    // El evento 41 invalida la novela: su estructura se pide otra vez. La reconexión sigue retenida,
+    // así que esta segunda consulta solo puede venir del evento.
+    await waitFor(() => expect(consultasEstructura).toBeGreaterThanOrEqual(2));
+
+    const listaAntes = consultasLista;
     soltarReconexion();
-    await waitFor(() => expect(consultasEstructura).toBeGreaterThan(antes));
+    await waitFor(() => expect(consultasLista).toBeGreaterThan(listaAntes));
 
     await waitFor(() => expect(cabeceras).toEqual([null, "41"]), { timeout: 3_000 });
     await waitFor(() => expect(screen.queryByText("Enlace perdido.")).not.toBeInTheDocument());

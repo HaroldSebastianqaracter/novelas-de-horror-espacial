@@ -4,7 +4,7 @@ Stack: React + Three.js.
 
 La v1 está construida con mocks; falta probarla contra el backend real (fila 12 de la verificación). Requisitos en [specs/spec-frontend.md](../../specs/spec-frontend.md) y verificación en [specs/spec-frontend-verification.md](../../specs/spec-frontend-verification.md). La arquitectura está en [docs/architecture.md](../../docs/architecture.md#arquitectura-del-frontend).
 
-La v1 es un tablero al estilo Jira: una tarjeta por novela y, dentro de cada novela, sus capítulos. Tiene además la alerta de parada, un lector de capítulos y el alta de una novela desde un brief. La referencia visual es el prototipo de la propuesta B, «papel técnico», en [prototipo-b/](prototipo-b/): se abre con doble clic en `index.html`, no depende del build y no se toca. Es un **extra** del plan de entrega: la lectura de la entrega sigue siendo el HTML con PDF del bloque 7.
+La v1 es un tablero al estilo Jira: una tarjeta por novela y, dentro de cada novela, sus capítulos. Tiene además la alerta de parada, un lector de capítulos y el alta de una novela desde un brief. La referencia visual es el prototipo de la propuesta B, «papel técnico», en [prototipo-b/](prototipo-b/): se abre con doble clic en `index.html`, no depende del build y no se toca. Desde el 24 de septiembre es también **la lectura de la entrega** (bloque 7 del plan): portada, índice, ficha de personajes y lugares, versiones con sus novedades, el cambio del lector y el PDF, en `/novelas/:id/lectura`.
 
 ## Arrancar
 

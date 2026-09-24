@@ -135,8 +135,8 @@ function Bloques({ bloques }: { bloques: Datos }) {
 const PARECE: Record<string, string> = { real: "Parece real", falso_positivo: "Falso positivo", dudoso: "Dudoso" };
 
 /** La opinión del revisor de continuidad (spec3, RF3-JUE-01). No levanta la parada: dice dónde mirar. */
-function SegundaOpinion({ opinion, hayConflictos }: { opinion: unknown; hayConflictos: boolean }) {
-  if (!esObjeto(opinion)) {
+function SegundaOpinion({ opinion, numeros }: { opinion: unknown; numeros: ReadonlySet<number> }) {
+  if (opinion === null || opinion === undefined) {
     return (
       <section className="opinion" aria-labelledby="titulo-opinion">
         <h2 id="titulo-opinion" className="informe-parada__titulo">
@@ -146,24 +146,52 @@ function SegundaOpinion({ opinion, hayConflictos }: { opinion: unknown; hayConfl
       </section>
     );
   }
-  const opiniones = (Array.isArray(opinion.opiniones) ? opinion.opiniones : []).filter(esObjeto);
-  const explicaciones = (Array.isArray(opinion.explicacion_por_conflicto) ? opinion.explicacion_por_conflicto : []).filter(
-    (e): e is string => typeof e === "string",
-  );
+  if (!esObjeto(opinion)) {
+    // Una forma que no es la del esquema se enseña tal cual: el informe nunca pierde nada.
+    return (
+      <section className="opinion" aria-labelledby="titulo-opinion">
+        <h2 id="titulo-opinion" className="informe-parada__titulo">
+          Segunda opinión
+        </h2>
+        <Valor valor={opinion} />
+      </section>
+    );
+  }
+  const lista = Array.isArray(opinion.opiniones) ? opinion.opiniones : null;
+  const explicaciones = Array.isArray(opinion.explicacion_por_conflicto) ? opinion.explicacion_por_conflicto : null;
+  // Solo se quitan del clave-valor las claves que se han pintado con su forma.
+  const pintadas = [
+    typeof opinion.resumen === "string" && "resumen",
+    typeof opinion.sugerencia === "string" && "sugerencia",
+    lista && "opiniones",
+    explicaciones && "explicacion_por_conflicto",
+  ].filter((c): c is string => typeof c === "string");
+
   return (
     <section className="opinion" aria-labelledby="titulo-opinion">
       <h2 id="titulo-opinion" className="informe-parada__titulo">
         Segunda opinión del revisor de continuidad
       </h2>
       {typeof opinion.resumen === "string" && <p>{opinion.resumen}</p>}
-      {opiniones.length > 0 && (
+      {lista && lista.length > 0 && (
         <ul className="opinion__lista">
-          {opiniones.map((o, i) => {
-            const numero = typeof o.conflicto === "number" ? o.conflicto : null;
+          {lista.map((o, i) => {
+            if (!esObjeto(o)) {
+              return (
+                <li key={i} className="opinion__fila">
+                  <span className="codigo">#?</span>
+                  <span className="opinion__motivo">
+                    <Valor valor={o} />
+                  </span>
+                </li>
+              );
+            }
+            const bruto = typeof o.conflicto === "string" && /^\d+$/.test(o.conflicto) ? Number(o.conflicto) : o.conflicto;
+            const numero = typeof bruto === "number" && Number.isInteger(bruto) ? bruto : null;
             const parece = typeof o.parece === "string" ? o.parece : "";
             return (
               <li key={i} className="opinion__fila" data-parece={parece || undefined}>
-                {numero !== null && hayConflictos ? (
+                {numero !== null && numeros.has(numero) ? (
                   <a className="codigo" href={`#conflicto-${numero}`}>
                     #{numero}
                   </a>
@@ -171,7 +199,10 @@ function SegundaOpinion({ opinion, hayConflictos }: { opinion: unknown; hayConfl
                   <span className="codigo">#{numero ?? "?"}</span>
                 )}
                 <span className="opinion__veredicto">{PARECE[parece] ?? legible(parece || "sin opinión")}</span>
-                {typeof o.motivo === "string" && <span className="opinion__motivo">{o.motivo}</span>}
+                <span className="opinion__motivo">
+                  {typeof o.motivo === "string" ? o.motivo : <Valor valor={o.motivo} />}
+                  <ClaveValor datos={o} excluir={["conflicto", "parece", "motivo"]} />
+                </span>
               </li>
             );
           })}
@@ -182,17 +213,17 @@ function SegundaOpinion({ opinion, hayConflictos }: { opinion: unknown; hayConfl
           <strong>Sugerencia:</strong> {opinion.sugerencia}
         </p>
       )}
-      {explicaciones.length > 0 && (
+      {explicaciones && explicaciones.length > 0 && (
         <details>
           <summary>Explicación de cada conflicto</summary>
           <ol className="opinion__explicaciones">
             {explicaciones.map((e, i) => (
-              <li key={i}>{e}</li>
+              <li key={i}>{typeof e === "string" ? e : <Valor valor={e} />}</li>
             ))}
           </ol>
         </details>
       )}
-      <ClaveValor datos={opinion} excluir={["resumen", "opiniones", "sugerencia", "explicacion_por_conflicto"]} />
+      <ClaveValor datos={opinion} excluir={pintadas} />
     </section>
   );
 }
@@ -203,7 +234,13 @@ export function InformeParada({ informe }: { informe: Datos | null | undefined }
   if (!informe || Object.keys(informe).length === 0) {
     return <p className="aviso">Esta parada no trae informe.</p>;
   }
-  const conflictos = Array.isArray(informe.conflictos) ? informe.conflictos.filter(esObjeto) : [];
+  // El número de cada conflicto es su posición en la lista entera del informe, avisos incluidos,
+  // que es como lo cita la segunda opinión (RF3-JUE-01).
+  const numerados = (Array.isArray(informe.conflictos) ? informe.conflictos : [])
+    .map((c: unknown, i) => ({ c, numero: i + 1 }))
+    .filter((x): x is { c: Datos; numero: number } => esObjeto(x.c));
+  const conflictos = numerados.map((x) => x.c);
+  const numerosConFicha = new Set(numerados.map((x) => x.numero));
   const bloqueantes = conflictos.filter((c) => c.aviso !== true).length;
   return (
     <div className="informe-parada">
@@ -215,13 +252,13 @@ export function InformeParada({ informe }: { informe: Datos | null | undefined }
             {conflictos.length > bloqueantes ? ` y ${conflictos.length - bloqueantes} aviso${conflictos.length - bloqueantes === 1 ? "" : "s"}` : ""}
           </h2>
           <ol className="conflictos">
-            {conflictos.map((c, i) => (
-              <FichaConflicto key={i} conflicto={c} indice={i} />
+            {numerados.map(({ c, numero }) => (
+              <FichaConflicto key={numero} conflicto={c} indice={numero - 1} />
             ))}
           </ol>
         </section>
       )}
-      {"segunda_opinion" in informe && <SegundaOpinion opinion={informe.segunda_opinion} hayConflictos={conflictos.length > 0} />}
+      {"segunda_opinion" in informe && <SegundaOpinion opinion={informe.segunda_opinion} numeros={numerosConFicha} />}
       {esObjeto(informe.prosa_rechazada) && <ProsaRechazada prosa={informe.prosa_rechazada} />}
       {esObjeto(informe.bloques) && <Bloques bloques={informe.bloques} />}
       <ClaveValor datos={informe} excluir={CONOCIDAS} />
