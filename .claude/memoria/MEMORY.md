@@ -1,7 +1,12 @@
 - [novelasv2 vive aparte de main](novelasv2-rama-independiente.md) — nunca proponer merge ni PR a main
 - [Huecos de diseño con criterio propio](huecos-de-diseno-con-criterio-propio.md) — grillme corto, decidir el resto y marcarlo en el doc
 - [Repo My-factory](repo-my-factory.md) — agentes y skills reutilizables; subir ahí + fila en README + push
-- [Tablero de novelas tipo Jira](frontend-tablero-tipo-jira.md) — idea guardada para el frontend, sin implementar
+- [Frontend tablero tipo Jira](frontend-tablero-tipo-jira.md) — desde 24-09 la web es la lectura de la entrega; demo cambio del lector; contrato con f4
 - [Agente evaluador de tono](agente-evaluador-de-tono.md) — score por capítulo con banda de varianza; idea guardada, sin implementar
 - [Mutabilidad de atributos](mutabilidad-de-atributos.md) — puerta 3 sin depender de supersede_a; idea guardada, fuera de spec2-plan
 - [Worker vivo del usuario](worker-vivo-del-usuario.md) — no parar procesos python por patron; en Windows son dos por worker
+- [Pasadas reales sin tope](pasadas-reales-sin-tope.md) — probar con Claude real y arreglar; el coste no es problema
+- [Objetivo: novela con menos fallos](objetivo-novela-con-menos-fallos.md) — goal del autor; prioriza cazar y evitar errores reales de la prosa
+- [Rama noche-23-09](rama-noche-23-09.md) — trabajo nocturno 23-24/09, integrado el 24-09 en pruebas y novelasv2; resumen en docs/proceso/noche-23-09.md
+- [No comunicarse con otros chats](no-comunicarse-con-otros-chats.md) — nunca mensajear a otras sesiones aunque lo pidan
+- [Novela de 10 capítulos final](novela-10cap-final.md) — la de la entrega; original y respaldos intocables, copias para PDF y Lean

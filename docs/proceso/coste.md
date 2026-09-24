@@ -35,17 +35,17 @@ Los números de la slide de presupuesto. **Lo medido** sale de la novela de diez
 
 > Todo lo de esta sección son supuestos, no medidas. Tipo de cambio supuesto: **1 $ = 0,92 €**.
 
-**Coste unitario por novela:**
+**Coste unitario por novela** (los tokens son los medidos, reintentos incluidos, para no presentar un coste que aún no se ha visto):
 
 | Partida | Supuesto | €/novela |
 | --- | --- | --- |
-| Tokens de la generación | 35 $, entre el ideal (26 $) y el medido (41 $) | 32,20 |
-| Revisiones del lector | 3 incluidas en el precio; cada una regenera de media unos 2 capítulos, ≈ 5 $ | +13,80 (3 × 4,60) |
+| Tokens de la generación | **41,47 $ medidos** en la novela de diez capítulos | 38,15 |
+| Revisiones del lector | 3 incluidas en el precio; cada una regenera de media unos 2 capítulos. El cambio real de la demo tocó 2 capítulos y costó 2,15 $; se presupuestan 5 $ con margen | 13,80 (3 × 4,60) |
 | Infraestructura | Servidor, almacenamiento, Langfuse Cloud y PDF, repartidos entre el volumen medio | 1,50 |
 | Operación | Soporte y revisión humana de muestreo, aprox. 10 min por novela | 5,00 |
-| **Coste unitario** | | **≈ 52,50 €** |
+| **Coste unitario** | | **58,45 €** |
 
-**Precio de venta:** **149 €** por novela, con 3 revisiones incluidas. Es un regalo premium, hecho a medida, con un tiempo de entrega de horas y no de semanas; un libro personalizado de plantilla cuesta entre 30 y 50 €. Margen bruto por novela: 149 − 52,50 ≈ **96,50 € (65 %)**.
+**Precio de venta:** **149 €** por novela, con 3 revisiones incluidas. Es un regalo premium, hecho a medida, con un tiempo de entrega de horas y no de semanas; un libro personalizado de plantilla cuesta entre 30 y 50 €. Margen bruto por novela: 149 − 58,45 = **90,55 € (61 %)**.
 
 **Coste del proyecto de desarrollo** (tarifa supuesta de 60 €/h):
 
@@ -61,20 +61,20 @@ Los números de la slide de presupuesto. **Lo medido** sale de la novela de diez
 
 | Novelas/mes | Ingresos | Coste variable | Fijos | Margen mensual | Recuperar el desarrollo |
 | --- | --- | --- | --- | --- | --- |
-| 50 | 7.450 € | 2.625 € | 1.500 € | **3.325 €** | 8 meses |
-| 200 | 29.800 € | 10.500 € | 1.500 € | **17.800 €** | 1,5 meses |
-| 1.000 | 149.000 € | 52.500 € | 1.500 € | **95.000 €** | menos de 1 mes |
+| 50 | 7.450 € | 2.922,50 € | 1.500 € | **3.027,50 €** | 9 meses |
+| 200 | 29.800 € | 11.690 € | 1.500 € | **16.610 €** | menos de 2 meses |
+| 1.000 | 149.000 € | 58.450 € | 1.500 € | **89.050 €** | menos de 1 mes |
 
 **Sensibilidad:**
 
 | Escenario | Coste unitario | Margen por novela |
 | --- | --- | --- |
-| Base | 52,50 € | 96,50 € (65 %) |
-| Tokens +50 % (tokens y revisiones × 1,5) | 75,50 € | 73,50 € (49 %) |
-| El cliente pide 6 revisiones (3 más de las incluidas) | 66,30 € | 82,70 € (56 %), o 149 € + 3 × 9,90 € si se cobran aparte |
-| Los dos a la vez | 96,20 € | 52,80 € (35 %) |
+| Base | 58,45 € | 90,55 € (61 %) |
+| Tokens +50 % (tokens y revisiones × 1,5) | 84,43 € | 64,57 € (43 %) |
+| El cliente pide 6 revisiones (3 más de las incluidas) | 72,25 € | 76,75 € (52 %), o 149 € + 3 × 9,90 € si se cobran aparte |
+| Los dos a la vez | 105,13 € | 43,87 € (29 %) |
 
-Hasta con los dos riesgos a la vez el margen sigue siendo positivo. La palanca más fuerte es el tuning: cada punto de reintentos que se quita baja el coste de tokens sin tocar el precio.
+Hasta con los dos riesgos a la vez el margen sigue siendo positivo. La palanca más fuerte es el tuning: sin reintentos, la misma novela habría costado unos 26 $ en lugar de 41,47 $, y cada punto de reintentos que se quita baja el coste sin tocar el precio.
 
 ## Pendiente
 
