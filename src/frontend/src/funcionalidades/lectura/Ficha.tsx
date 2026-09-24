@@ -6,7 +6,7 @@ import type { components } from "../../compartido/api/esquema.gen";
 import type { VersionNovela } from "../../compartido/api/tipos";
 import { EstadoConsulta } from "../../compartido/ui/EstadoConsulta";
 import { useTitulo } from "../../compartido/ui/titulo";
-import { aparicionesDeApi, capitulosDe, nombresEnVersion, reescritosDespues } from "./apariciones";
+import { aparicionesDeApi, capitulosDe, mencionesEnLaProsa, nombresEnVersion, reescritosDespues } from "./apariciones";
 import { useLecturaActual } from "./MarcoLectura";
 import { normalizar } from "./texto";
 
@@ -114,12 +114,16 @@ export function FichaContenido({
 
   const Seccion = `h${nivel}` as "h2" | "h3";
   const Entrada = `h${nivel + 1}` as "h3" | "h4";
-  const aparece = (capitulos: number[]) =>
-    capitulos.length === 0 ? (
-      <span className="ficha__nunca">No aparece en esta versión</span>
-    ) : (
+  // Sin apariciones en la story bible, se busca el nombre en la prosa y se dice «se nombra»:
+  // nombrar no es estar en la escena.
+  const aparece = (capitulos: number[], nombreEntonces: string) => {
+    if (capitulos.length > 0) return enlaces("Aparece en", capitulos);
+    const menciones = mencionesEnLaProsa(version.capitulos, nombreEntonces);
+    return menciones.length > 0 ? enlaces("Se nombra en", menciones) : <span className="ficha__nunca">No aparece en esta versión</span>;
+  };
+  const enlaces = (verbo: string, capitulos: number[]) => (
       <>
-        Aparece en {capitulos.length === 1 ? "el capítulo" : "los capítulos"}{" "}
+        {verbo} {capitulos.length === 1 ? "el capítulo" : "los capítulos"}{" "}
         {capitulos.map((n, i) => (
           <span key={n}>
             {i > 0 && (i === capitulos.length - 1 ? " y " : ", ")}
@@ -127,7 +131,7 @@ export function FichaContenido({
           </span>
         ))}
       </>
-    );
+  );
 
   return (
     <EstadoConsulta cargando={cargando} error={error} reintentar={reintentar}>
@@ -156,7 +160,7 @@ export function FichaContenido({
                 <p className="ficha__rol">
                   {[p.rol, typeof p.edad === "number" ? `${p.edad} años` : null].filter(Boolean).join(" · ")}
                 </p>
-                <p className="ficha__aparece">{apariciones && aparece(capitulosDe(apariciones.personajes, p.id))}</p>
+                <p className="ficha__aparece">{apariciones && aparece(capitulosDe(apariciones.personajes, p.id), entonces(`personajes-${p.id}`, p.nombre) ?? p.nombre)}</p>
               </li>
             ))}
         </ul>
@@ -170,7 +174,7 @@ export function FichaContenido({
               <li key={l.id} className="ficha__entrada">
                 <Entrada>{nombre(`lugares-${l.id}`, l.nombre)}</Entrada>
                 {(l.tipo || l.descripcion) && <p className="ficha__rol">{[l.tipo, l.descripcion].filter(Boolean).join(" · ")}</p>}
-                <p className="ficha__aparece">{apariciones && aparece(capitulosDe(apariciones.lugares, l.id))}</p>
+                <p className="ficha__aparece">{apariciones && aparece(capitulosDe(apariciones.lugares, l.id), entonces(`lugares-${l.id}`, l.nombre) ?? l.nombre)}</p>
               </li>
             ))}
         </ul>

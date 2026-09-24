@@ -48,6 +48,23 @@ export function reescritosDespues(versiones: readonly VersionResumen[], numero: 
 
 export const capitulosDe = (apariciones: Map<number, number[]>, id: number) => apariciones.get(id) ?? [];
 
+const sinTildes = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+const escapar = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * Los capítulos cuya prosa nombra a la entidad, para cuando la story bible no le da ninguna
+ * aparición (un lugar que contiene a los demás, como la estación entera, no es el lugar de ninguna
+ * escena). La regla es la del worker para renombrar (RF3-CAM-05): el nombre entero o una palabra
+ * suya de tres letras o más, con mayúscula, sin mirar tildes.
+ */
+export function mencionesEnLaProsa(capitulos: readonly { numero: number; texto: string }[], nombre: string): number[] {
+  const palabras = sinTildes(nombre).split(/\s+/).filter((p) => p.length >= 3 && /^\p{Lu}/u.test(p));
+  const terminos = [...new Set([sinTildes(nombre), ...palabras])].filter(Boolean);
+  if (terminos.length === 0) return [];
+  const patron = new RegExp(`(^|[^\\p{L}\\p{N}])(${terminos.map(escapar).join("|")})(?=$|[^\\p{L}\\p{N}])`, "u");
+  return capitulos.filter((c) => patron.test(sinTildes(c.texto))).map((c) => c.numero);
+}
+
 const ENTIDAD_DE_TABLA: Record<string, EntidadLectura> = { personaje: "personajes", lugar: "lugares", objeto: "objetos" };
 
 /**

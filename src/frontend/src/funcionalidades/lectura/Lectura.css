@@ -188,11 +188,7 @@
   .hoja { break-before: page; }
   .portada.hoja { break-before: auto; }
   .portada { min-height: 70vh; }
-  /* Después de `.libro`, que en papel redefine el fondo entero. */
-  .portada--ilustrada {
-    min-height: 0; max-width: none; height: 176mm; aspect-ratio: auto; print-color-adjust: exact; -webkit-print-color-adjust: exact;
-    background: var(--color-superficie-elevada) var(--portada, none) center bottom / 100% auto no-repeat;
-  }
+  .portada--ilustrada { min-height: 0; max-width: none; height: 176mm; aspect-ratio: auto; }
   /* En papel la página no crece: la foto va en el hueco, que encoge si la dedicatoria es larga
      (hasta 55 mm), y el texto de la portada es más compacto. El fondo se escala para que la foto
      llene la altura del hueco: su foto es el 50,8 % de la altura de la portada, y empieza en el 46,4 %. */

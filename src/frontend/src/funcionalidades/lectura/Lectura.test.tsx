@@ -158,8 +158,63 @@ describe("personajes y lugares (RF-FE-LEE-04)", () => {
     const eco = within(personajes).getByRole("heading", { name: "Eco" }).closest("li") as HTMLElement;
     await waitFor(() => expect(eco).toHaveTextContent("Aparece en el capítulo 7"));
     expect(within(eco).getAllByRole("link").map((a) => a.getAttribute("aria-label"))).toEqual(["capítulo 7"]);
+    // Sin apariciones en la story bible, se busca su nombre en la prosa.
     const nala = within(personajes).getByRole("heading", { name: "Nala" }).closest("li") as HTMLElement;
-    expect(nala).toHaveTextContent("No aparece en esta versión");
+    expect(nala).toHaveTextContent("Se nombra en los capítulos 3 y 5");
+  });
+});
+
+describe("la cursiva de la prosa en pantalla (RF-FE-LEE-09)", () => {
+  /** El capítulo 5 con una frase en cursiva: 131 en la versión 1 y 140 en la 2. */
+  const conCursiva = () =>
+    servidor.use(
+      http.get("*/api/novelas/6/versiones/:n", ({ params }) => {
+        const n = Number(params.n);
+        const version = structuredClone(versionesDe[6]?.find((v) => v.numero === n));
+        const capitulo = version?.capitulos.find((c) => c.numero === 5);
+        if (!version || !capitulo) return HttpResponse.json({ detail: "no" }, { status: 404 });
+        capitulo.texto = `La voz dijo: *Tu pulso es de ${n === 1 ? 131 : 140}.* Ella calló.`;
+        return HttpResponse.json(version);
+      }),
+    );
+  const prosa = (raiz: ParentNode) => [...raiz.querySelectorAll("p:not(.capitulo__ornamento)")].map((p) => p.textContent).join(" ");
+
+  it("la lectura y la vista de impresión la pintan sin asteriscos", async () => {
+    conCursiva();
+    const { container, unmount } = renderizarEn("/novelas/6/lectura/capitulos/5");
+    await waitFor(() => expect(container.querySelector(".capitulo__texto em")).toHaveTextContent("Tu pulso es de 140."));
+    expect(prosa(container.querySelector(".capitulo__texto") as HTMLElement)).not.toContain("*");
+    unmount();
+    const impresion = renderizarEn("/novelas/6/lectura/imprimir");
+    await waitFor(() => expect(impresion.container.querySelector("#cap-5 em")).toHaveTextContent("Tu pulso es de 140."));
+    expect(prosa(impresion.container.querySelector("#cap-5") as HTMLElement)).not.toContain("*");
+  });
+
+  it("la comparación marca el cambio dentro de la cursiva, sin asteriscos", async () => {
+    conCursiva();
+    const { container } = renderizarEn("/novelas/6/lectura/capitulos/5?cambios=1");
+    await waitFor(() => expect(container.querySelector(".comparacion ins em")).toHaveTextContent("140."));
+    expect(container.querySelector(".comparacion del em")).toHaveTextContent("131.");
+    const texto = container.querySelector(".comparacion") as HTMLElement;
+    expect(prosa(texto).replace(/\[(añadido|quitado): |\]/g, "")).not.toContain("*");
+  });
+});
+
+describe("una entidad que la story bible no sitúa en ninguna escena (RF-FE-LEE-04)", () => {
+  it("dice en qué capítulos se nombra, y no que no aparece", async () => {
+    servidor.use(
+      http.get("*/api/novelas/6/apariciones", () =>
+        HttpResponse.json({ personajes: [{ id: 1, nombre: "Oda Varga", capitulos: [] }], lugares: [] }),
+      ),
+    );
+    renderizarEn("/novelas/6/lectura/ficha");
+    const personajes = await screen.findByRole("region", { name: "Personajes" });
+    const oda = within(personajes).getByRole("heading", { name: "Oda Varga" }).closest("li") as HTMLElement;
+    await waitFor(() => expect(oda).toHaveTextContent("Se nombra en los capítulos 1, 2, 3"));
+    expect(oda).not.toHaveTextContent("No aparece");
+    // Eco no está en ninguna escena ni se nombra: eso sí es no aparecer.
+    const eco = within(personajes).getByRole("heading", { name: "Eco" }).closest("li") as HTMLElement;
+    expect(eco).toHaveTextContent("No aparece en esta versión");
   });
 });
 

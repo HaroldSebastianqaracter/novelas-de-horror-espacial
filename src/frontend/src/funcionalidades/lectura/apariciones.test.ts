@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Cambio } from "../../compartido/api/cambios";
-import { aparicionesDeApi, nombresEnVersion, reescritosDespues } from "./apariciones";
+import { aparicionesDeApi, mencionesEnLaProsa, nombresEnVersion, reescritosDespues } from "./apariciones";
 
 const renombre = (version: number, antes: string, despues: string, estado = "aplicado"): Cambio => ({
   id: version,
@@ -35,6 +35,19 @@ const capitulos = [
   { numero: 2, texto: "Vaan esperaba en la esclusa." },
   { numero: 3, texto: "Nadie habló." },
 ];
+
+describe("menciones en la prosa, sin apariciones en la story bible (RF-FE-LEE-04)", () => {
+  const prosa = [
+    { numero: 1, texto: "La estación Roldán dormía." },
+    { numero: 2, texto: "Nadie habló del nodo." },
+    { numero: 3, texto: "En el Nodo de Retransmisión Roldán hacía frío." },
+    { numero: 4, texto: "Rolda sin tilde no cuenta; roldán en minúscula tampoco." },
+  ];
+  it("cuenta el nombre entero o una palabra suya con mayúscula de tres letras o más, sin mirar tildes", () => {
+    expect(mencionesEnLaProsa(prosa, "Nodo de Retransmisión Roldán")).toEqual([1, 3]);
+    expect(mencionesEnLaProsa(prosa, "el eje")).toEqual([]);
+  });
+});
 
 describe("apariciones de la API (RF-FE-LEE-04)", () => {
   it("se quedan con los capítulos que existen en la versión", () => {
