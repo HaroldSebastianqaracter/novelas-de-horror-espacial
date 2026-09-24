@@ -891,23 +891,38 @@ def _verificar_cronologia(ctx: Contexto, aplicar: Callable[[], None] | None) -> 
     _abrir_parada(ctx, "formal", formal.informe(), capitulo=desde)
 
 
-def _criterios_formales(ctx: Contexto, numero: int) -> list[dict[str, Any]]:
-    """Lo que Lean encontro en este capitulo, si su ultima verificacion fallo (RF-LEAN-06).
+#: Fallos de la herramienta, no de la prosa: no se le piden al redactor.
+_LEAN_SIN_PROSA = frozenset({"lean_no_disponible", "lean_error"})
 
-    Tras relanzar una parada `formal`, el redactor lo recibe en el primer intento como los
-    criterios incumplidos de la puerta 4. Cuando Lean vuelve a pasar, deja de llegar.
+
+def _criterios_formales(ctx: Contexto, numero: int) -> list[dict[str, Any]]:
+    """Lo que Lean encontro en este capitulo, tras una parada `formal` (RF-LEAN-06).
+
+    Salen del informe de la ultima parada `formal`, no del ultimo resultado de la puerta 6: el
+    de un cambio del lector que fracaso se calculo sobre un canon que se deshizo. Dejan de
+    valer en cuanto la novela vuelve a completarse despues de abrirse esa parada. El redactor
+    los recibe en el primer intento como los criterios incumplidos de la puerta 4.
     """
-    fila = ctx.con.execute(
-        "SELECT veredicto, detalle FROM resultado_puerta WHERE novela_id = ? AND puerta = ? "
-        "ORDER BY id DESC LIMIT 1", (ctx.novela_id, lean.PUERTA),
+    parada = ctx.con.execute(
+        "SELECT p.id, p.informe FROM parada p JOIN ejecucion e ON e.id = p.ejecucion_id "
+        "WHERE e.novela_id = ? AND p.tipo = 'formal' ORDER BY p.id DESC LIMIT 1",
+        (ctx.novela_id,),
     ).fetchone()
-    if fila is None or fila["veredicto"] != "falla":
+    if parada is None:
         return []
-    ultimo = lectura.total_capitulos(ctx.con, ctx.novela_id)
+    completada_despues = ctx.con.execute(
+        "SELECT 1 FROM traza_evento c WHERE c.novela_id = :n AND c.tipo = 'completada' "
+        "AND c.id > (SELECT MIN(a.id) FROM traza_evento a WHERE a.novela_id = :n "
+        "AND a.tipo = 'parada' AND json_extract(a.payload, '$.parada_id') = :p)",
+        {"n": ctx.novela_id, "p": int(parada["id"])},
+    ).fetchone()
+    if completada_despues:
+        return []
     criterios: list[dict[str, Any]] = []
-    for c in como_lista(como_dict(json.loads(fila["detalle"] or "{}")).get("conflictos")):
+    for c in como_lista(como_dict(json.loads(parada["informe"] or "{}")).get("conflictos")):
         c = como_dict(c)
-        if c.get("aviso") or (c.get("capitulo") or ultimo) != numero:
+        if (c.get("aviso") or c.get("comprobacion") in _LEAN_SIN_PROSA
+                or c.get("capitulo") != numero):
             continue
         criterios.append({
             "criterio": str(c.get("comprobacion") or "lean"),

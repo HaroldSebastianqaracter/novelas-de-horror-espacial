@@ -430,3 +430,38 @@ def test_al_relanzar_una_parada_formal_el_redactor_recibe_lo_que_encontro_lean(
     assert "lean_nadie_tras_morir" in entradas[0]
     assert all("lean_nadie_tras_morir" not in e for e in entradas[1:])
     assert _puertas_6(conexion, novela_id) == ["falla", "pasa"]
+
+
+def test_un_cambio_que_fracaso_en_lean_no_da_criterios_al_redactor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """La puerta 6 de un cambio fallido se calculo sobre un canon deshecho: no es feedback."""
+    import worker
+    from orquestador import pipeline
+    from tests.entorno import cfg_de
+    from tests.test_cambio_lector import SOLO_EN_EL_DOS, _completa, _id, _pedir
+
+    conexion, ruta, novela_id = _completa()
+    monkeypatch.setattr(lean, "comprobar", _lean_que_falla(2))
+    w = worker.Worker(cfg_de(ruta, verificacion_formal=True), con=conexion)
+    _pedir(conexion, ruta, novela_id, "Que se llame Oriol",
+           {"tipo": "entidad", "entidad": "personajes",
+            "id": _id(conexion, "personaje", SOLO_EN_EL_DOS)}, w=w)
+    ctx = pipeline.Contexto(con=conexion, puerto=w.puerto, cfg=w.cfg, novela_id=novela_id)
+    assert _puertas_6(conexion, novela_id) == ["falla"]
+    assert pipeline._criterios_formales(ctx, 2) == []  # pyright: ignore[reportPrivateUsage]
+
+
+def test_sin_lean_el_redactor_no_recibe_la_herramienta_como_criterio(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from orquestador import pipeline
+    from tests.entorno import cfg_de
+
+    monkeypatch.setattr(lean, "lake_disponible", lambda: None)
+    conexion, novela_id, final = _generar(monkeypatch, None)
+    assert final == "parada"
+    ruta = Path(conexion.execute("PRAGMA database_list").fetchone()[2])
+    ctx = pipeline.Contexto(con=conexion, puerto=None,  # type: ignore[arg-type]
+                            cfg=cfg_de(ruta), novela_id=novela_id)
+    assert pipeline._criterios_formales(ctx, 3) == []  # pyright: ignore[reportPrivateUsage]
