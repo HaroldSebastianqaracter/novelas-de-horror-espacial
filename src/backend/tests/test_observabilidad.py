@@ -241,7 +241,8 @@ def test_el_coste_es_el_del_puerto_y_nunca_parece_gratis() -> None:
                  metadatos=json.dumps(metadatos), salida_cruda="{}")
 
     llamada({"total_cost_usd": 0.61, "num_turns": 2,
-             "modelUsage": {"claude-opus-5": {"costUSD": 0.61}}})
+             "modelUsage": {"claude-haiku-4-5": {"costUSD": 0.01},
+                            "claude-opus-5": {"costUSD": 0.60}}})
     llamada({"num_turns": 2})
     llamada({"puerto": "falso"})
     cliente = ClienteFalso()

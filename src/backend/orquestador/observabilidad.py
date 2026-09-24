@@ -669,7 +669,12 @@ class Exportador:
         # El puerto falso no gasta: su coste es cero, no desconocido.
         coste = 0.0 if meta.get("puerto") == "falso" else meta.get("total_cost_usd")
         uso = como_dict(meta.get("usage"))
-        modelos = list(como_dict(meta.get("modelUsage")))
+        # Claude Code usa ademas un modelo pequeno para tareas internas: la llamada se
+        # etiqueta con el que mas cuesta, no con el primero de la lista.
+        por_modelo = como_dict(meta.get("modelUsage"))
+        modelos = sorted(
+            por_modelo, key=lambda m: -float(como_dict(por_modelo[m]).get("costUSD") or 0)
+        )
         estado = str(f["estado"])
         coste_desconocido = estado == "ok" and coste is None
         nivel = "DEFAULT" if estado == "ok" else "ERROR"
