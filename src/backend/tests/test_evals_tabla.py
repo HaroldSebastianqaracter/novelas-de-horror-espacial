@@ -25,6 +25,8 @@ BRIEFS = [EJEMPLOS / "brief-ejemplo.json", *sorted((EJEMPLOS / "evals").glob("*.
 def cfg(monkeypatch: pytest.MonkeyPatch) -> config.Config:
     monkeypatch.setenv("NOVELAS_DB_PATH", "sin_uso.db")
     monkeypatch.setenv("NOVELAS_VECTORES", "0")
+    # Lean se prueba en test_formal_lean.py; aqui no se compila en cada brief.
+    monkeypatch.setenv("NOVELAS_VERIFICACION_FORMAL", "0")
     return replace(config.cargar(), puerto="falso")
 
 
@@ -67,7 +69,8 @@ def test_un_brief_normal_pasa_de_principio_a_fin(cfg: config.Config) -> None:
     for clave in ("brief_schema", "brief_completo", "puerta_1", "puerta_5"):
         assert r.celdas[clave] == "pasa", (clave, r.celdas[clave])
     assert r.celdas["inyeccion"] == r.celdas["canario"] == "no aplica"
-    assert r.celdas["lean"] == "no integrado"
+    assert r.celdas["lean"] == "sin ejecutar"
+    assert tabla.validador_de(6, "lean_nadie_tras_morir") == "lean"
 
 
 def test_el_adversarial_detecta_la_inyeccion_y_el_canario_no_llega(cfg: config.Config) -> None:
