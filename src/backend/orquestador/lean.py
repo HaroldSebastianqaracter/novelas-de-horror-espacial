@@ -37,7 +37,6 @@ INVARIANTES = (
     ("el_tiempo_no_retrocede", "ElTiempoNoRetrocede"),
 )
 
-# Una edad en cifras y, como mucho, «años» detras: «6 meses» o «34 y medio» no se leen.
 #: Sin Lean no se publica (spec-lean, RF-LEAN-05): el informe dice como instalarlo.
 INSTALAR = (
     "Lean no esta instalado: la cronologia no se ha comprobado y la version no se publica. "
@@ -45,6 +44,7 @@ INSTALAR = (
     "con `lake build` en formal/lean y relanza."
 )
 
+# Una edad en cifras y, como mucho, «años» detras: «6 meses» o «34 y medio» no se leen.
 _EDAD = re.compile(r"^\s*(\d{1,4})\s*(?:a[ñn]os?)?\s*\.?\s*$", re.IGNORECASE)
 
 
@@ -408,16 +408,29 @@ def verificar(
     tiempo_limite: int = TIEMPO_LIMITE,
 ) -> ResultadoPuerta:
     """Genera el fichero de la novela y lo compila con Lean (RF-LEAN-05)."""
+    return comprobar(extraer(con, novela_id), directorio=directorio, lake=lake,
+                     tiempo_limite=tiempo_limite)
+
+
+def comprobar(
+    crono: Cronologia,
+    *,
+    directorio: Path | None = None,
+    lake: str | None = None,
+    tiempo_limite: int = TIEMPO_LIMITE,
+) -> ResultadoPuerta:
+    """Compila con Lean una cronologia ya extraida. No toca la base: el pipeline la llama
+    fuera de toda transaccion, para no tener el cerrojo de escritura mientras Lean trabaja
+    (RF-LEAN-06)."""
     directorio = directorio or directorio_lean()
     lake = lake or lake_disponible()
     if lake is None:
         return ResultadoPuerta(puerta=PUERTA, conflictos=[Conflicto(
             comprobacion="lean_no_disponible", descripcion=INSTALAR)])
 
-    crono = extraer(con, novela_id)
     carpeta = directorio / "Generado"
     carpeta.mkdir(exist_ok=True)
-    fichero = carpeta / f"Novela{novela_id}_{uuid.uuid4().hex[:8]}.lean"
+    fichero = carpeta / f"Novela{crono.novela_id}_{uuid.uuid4().hex[:8]}.lean"
     fichero.write_text(escribir(crono), encoding="utf-8", newline="\n")
     # Un solo limite para las dos llamadas: compilar la biblioteca (casi nada si ya lo esta)
     # y comprobar el fichero de la novela.

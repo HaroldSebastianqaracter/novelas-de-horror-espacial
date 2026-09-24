@@ -444,7 +444,8 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                 estados.fijar_fase(ctx.con, ctx.novela_id, "paquete", capitulo=numero,
                                    intento=intento)
 
-            criterios = ctx.eventos_criterios if intento > 1 else None
+            criterios = (ctx.eventos_criterios if intento > 1
+                         else _criterios_formales(ctx, numero) or None)
             recuperado = _recuperar(ctx, numero)
 
             paquete_redaccion = _paquete_o_parada(
@@ -846,35 +847,75 @@ def _completar(
     lanza, no queda nada. Devuelve el estado final y el numero de la version publicada, o None
     si el texto no cambio.
 
-    Antes de publicar, la cronologia pasa por Lean (spec-lean, RF-LEAN-06), sobre el canon ya
-    cambiado. Si falla, no se publica: la generacion abre una parada `formal` en el primer
-    capitulo con conflictos, y un cambio del lector fracasa entero con `CambioImposible`.
-    `verificar_cronologia=False` es para volver a completar una novela sin texto nuevo (el
-    cambio que fracaso): no hay nada que publicar.
+    Antes, la cronologia pasa por Lean (spec-lean, RF-LEAN-06), sobre el canon como quedara: en
+    un cambio del lector, `aplicar` corre primero en una simulacion que se deshace. De la base
+    solo se lee la cronologia, que es rapido; Lean compila despues, fuera de toda transaccion,
+    para no tener el cerrojo de escritura mientras trabaja. Su resultado queda como puerta 6.
+    Si falla, no se publica: la generacion abre una parada `formal` y un cambio del lector
+    fracasa entero con `CambioImposible`. `verificar_cronologia=False` es para volver a
+    completar una novela sin texto nuevo (el cambio que fracaso): no hay nada que publicar.
     """
     with transaccion(ctx.con):
         estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_5")
-    formal: ResultadoPuerta | None = None
+    if verificar_cronologia and ctx.cfg.verificacion_formal:
+        _verificar_cronologia(ctx, aplicar)
     with transaccion(ctx.con):
         if aplicar is not None:
             aplicar()
         global_ = evaluar_puerta_global(ctx.con, ctx.novela_id)
         _registrar_puerta_en(ctx, global_)
-        if verificar_cronologia and ctx.cfg.verificacion_formal:
-            formal = lean.verificar(ctx.con, ctx.novela_id)
-            _registrar_puerta_en(ctx, formal)
-            if not formal.pasa and aplicar is not None:
-                raise CambioImposible(
-                    "La cronologia no pasa la verificacion formal (Lean).",
-                    [str(c) for c in formal.bloqueantes])
-        if formal is not None and not formal.pasa:
-            final, numero = "parada", None
-        else:
-            final, numero = _publicar(ctx, global_, motivo=motivo, detalle=detalle)
-    if formal is not None and not formal.pasa:
-        capitulos = [c.capitulo for c in formal.bloqueantes if c.capitulo is not None]
-        _abrir_parada(ctx, "formal", formal.informe(), capitulo=min(capitulos, default=None))
+        final, numero = _publicar(ctx, global_, motivo=motivo, detalle=detalle)
     return final, numero
+
+
+def _verificar_cronologia(ctx: Contexto, aplicar: Callable[[], None] | None) -> None:
+    """La puerta 6 (spec-lean, RF-LEAN-06). Vuelve si pasa; si no, para o lanza."""
+    if aplicar is None:
+        crono = lean.extraer(ctx.con, ctx.novela_id)
+    else:
+        with simulacion(ctx.con):
+            aplicar()
+            crono = lean.extraer(ctx.con, ctx.novela_id)
+    formal = lean.comprobar(crono)
+    with transaccion(ctx.con):
+        _registrar_puerta_en(ctx, formal)
+    if formal.pasa:
+        return
+    if aplicar is not None:
+        raise CambioImposible("La cronologia no pasa la verificacion formal (Lean).",
+                              [str(c) for c in formal.bloqueantes])
+    # Sin capitulo (Lean ausente, un error de la herramienta), la parada apunta al ultimo: al
+    # relanzar se rehace uno solo, no la novela entera.
+    capitulos = [c.capitulo for c in formal.bloqueantes if c.capitulo is not None]
+    desde = min(capitulos) if capitulos else lectura.total_capitulos(ctx.con, ctx.novela_id)
+    _abrir_parada(ctx, "formal", formal.informe(), capitulo=desde)
+
+
+def _criterios_formales(ctx: Contexto, numero: int) -> list[dict[str, Any]]:
+    """Lo que Lean encontro en este capitulo, si su ultima verificacion fallo (RF-LEAN-06).
+
+    Tras relanzar una parada `formal`, el redactor lo recibe en el primer intento como los
+    criterios incumplidos de la puerta 4. Cuando Lean vuelve a pasar, deja de llegar.
+    """
+    fila = ctx.con.execute(
+        "SELECT veredicto, detalle FROM resultado_puerta WHERE novela_id = ? AND puerta = ? "
+        "ORDER BY id DESC LIMIT 1", (ctx.novela_id, lean.PUERTA),
+    ).fetchone()
+    if fila is None or fila["veredicto"] != "falla":
+        return []
+    ultimo = lectura.total_capitulos(ctx.con, ctx.novela_id)
+    criterios: list[dict[str, Any]] = []
+    for c in como_lista(como_dict(json.loads(fila["detalle"] or "{}")).get("conflictos")):
+        c = como_dict(c)
+        if c.get("aviso") or (c.get("capitulo") or ultimo) != numero:
+            continue
+        criterios.append({
+            "criterio": str(c.get("comprobacion") or "lean"),
+            "principio": "cronologia formal (Lean)",
+            "sugerencia": "Reescribe para que la cronologia no lo contradiga.",
+            "evidencia": str(c.get("descripcion") or ""),
+        })
+    return criterios
 
 
 def _publicar(ctx: Contexto, global_: ResultadoPuerta, *, motivo: versiones.Motivo | None,

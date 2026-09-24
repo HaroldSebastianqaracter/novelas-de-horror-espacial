@@ -18,6 +18,7 @@ import pytest
 from compartido import db
 from compartido.grafo import insertar
 from compartido.puerta_base import Conflicto, ResultadoPuerta
+from compartido.puerto import demo as agentes_falsos
 from evals import banco_puerta3 as banco
 from orquestador import lean
 from tareas.continuidad import puerta
@@ -306,7 +307,7 @@ def _generar(
     from tests.entorno import cfg_de, crear_novela, nueva_bd, puerto_falso
 
     if verificar is not None:
-        monkeypatch.setattr(lean, "verificar", verificar)
+        monkeypatch.setattr(lean, "comprobar", verificar)
     conexion, ruta = nueva_bd()
     novela_id = crear_novela(conexion)
     ctx = pipeline.Contexto(con=conexion, puerto=puerto_falso(conexion),
@@ -341,8 +342,10 @@ def test_sin_lean_la_generacion_para(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(lean, "lake_disponible", lambda: None)
     conexion, _, final = _generar(monkeypatch, None)
     assert final == "parada"
-    parada = conexion.execute("SELECT tipo, informe FROM parada").fetchone()
+    parada = conexion.execute("SELECT tipo, capitulo, informe FROM parada").fetchone()
     assert parada["tipo"] == "formal" and "lean_no_disponible" in parada["informe"]
+    # Sin capitulo en el conflicto, apunta al ultimo: relanzar no rehace la novela entera.
+    assert parada["capitulo"] == 3
 
 
 def test_una_parada_formal_se_resuelve_relanzando() -> None:
@@ -361,7 +364,7 @@ def test_un_cambio_del_lector_que_rompe_la_cronologia_fracasa_sin_parada(
     from tests.test_cambio_lector import SOLO_EN_EL_DOS, _completa, _id, _pedir
 
     conexion, ruta, novela_id = _completa()
-    monkeypatch.setattr(lean, "verificar", _lean_que_falla(2))
+    monkeypatch.setattr(lean, "comprobar", _lean_que_falla(2))
     reyes = _id(conexion, "personaje", SOLO_EN_EL_DOS)
     w = worker.Worker(cfg_de(ruta, verificacion_formal=True), con=conexion)
     intencion = _pedir(conexion, ruta, novela_id, "Que se llame Oriol",
@@ -373,6 +376,8 @@ def test_un_cambio_del_lector_que_rompe_la_cronologia_fracasa_sin_parada(
     assert [v["numero"] for v in lectura.versiones(conexion, novela_id)] == [1]
     assert conexion.execute(
         "SELECT COUNT(*) FROM parada WHERE tipo = 'formal'").fetchone()[0] == 0
+    # La puerta 6 queda registrada aunque el cambio se deshaga (sale a Langfuse).
+    assert _puertas_6(conexion, novela_id) == ["falla"]
     estado = conexion.execute("SELECT estado FROM ejecucion WHERE novela_id = ?",
                               (novela_id,)).fetchone()[0]
     assert estado in ("completada", "completada_con_avisos")
@@ -388,3 +393,40 @@ def test_la_configuracion_de_verdad_activa_la_verificacion(
     assert config.cargar().verificacion_formal is True
     monkeypatch.setenv("NOVELAS_VERIFICACION_FORMAL", "0")
     assert config.cargar().verificacion_formal is False
+
+
+def test_al_relanzar_una_parada_formal_el_redactor_recibe_lo_que_encontro_lean(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import worker
+    from compartido.db import transaccion
+    from orquestador import cola
+    from tests.entorno import cfg_de
+
+    llamadas: list[int] = []
+
+    def falla_la_primera(*_a: object, **_k: object) -> ResultadoPuerta:
+        llamadas.append(1)
+        return (_lean_que_falla(2)() if len(llamadas) == 1
+                else ResultadoPuerta(puerta=lean.PUERTA))
+
+    conexion, novela_id, final = _generar(monkeypatch, falla_la_primera)
+    assert final == "parada"
+    ruta = Path(conexion.execute("PRAGMA database_list").fetchone()[2])
+    w = worker.Worker(cfg_de(ruta, verificacion_formal=True), con=conexion)
+    entradas: list[str] = []
+    w.puerto.registrar(  # type: ignore[attr-defined]
+        "redaccion", lambda e, a: entradas.append(e) or agentes_falsos.redaccion(e, a))
+    parada_id = conexion.execute("SELECT id FROM parada").fetchone()[0]
+    with transaccion(conexion):
+        iid = cola.encolar(conexion, "resolver_parada", novela_id, parada_id=parada_id,
+                           accion="relanzar")
+    w._resolver_parada(cola.Intencion(id=iid, tipo="resolver_parada", novela_id=novela_id,
+                                      payload={"parada_id": parada_id, "accion": "relanzar"}))
+    estado = conexion.execute("SELECT estado FROM ejecucion WHERE novela_id = ?",
+                              (novela_id,)).fetchone()[0]
+    assert estado in ("completada", "completada_con_avisos")
+    # El capitulo 2 recibe el conflicto en su primer intento; el 3, que no lo tenia, no.
+    assert "lean_nadie_tras_morir" in entradas[0]
+    assert all("lean_nadie_tras_morir" not in e for e in entradas[1:])
+    assert _puertas_6(conexion, novela_id) == ["falla", "pasa"]
