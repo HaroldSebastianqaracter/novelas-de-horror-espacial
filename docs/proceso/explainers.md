@@ -59,6 +59,12 @@ El segundo salió porque el validador vio que la primera versión del modelo jun
 
 **Observabilidad con Langfuse.** Ver cada llamada, su coste y cada validador de una ejecución larga en un solo sitio. Aquí la fuente es la base y no un registro aparte: el exportador (`orquestador/observabilidad.py`) lee `llamada_modelo` y `resultado_puerta` y los manda como generaciones, spans y scores, con una sesión por novela e identificadores deterministas, para que reenviar no duplique. El coste es el que declara Claude Code en cada llamada, y los nombres del encargo se seudonimizan antes de salir. La lección viene del primer harness, donde Langfuse declaraba menos de la cuarta parte del coste real.
 
+**Hooks de validación y de política.** Un punto fijo del bucle por el que pasa todo capítulo antes de aceptarse. Aquí son del orquestador y no de Claude Code, porque los agentes corren sin herramientas y un hook de herramienta no se dispararía nunca: el de validación es el paso por las puertas 3 y 4 tras la extracción, y el de política es la comprobación de términos vetados en la puerta 4, que deja cada decisión en `decision_politica`. Detalle en [architecture.md](../architecture.md), «Los dos hooks del harness».
+
+**Guardrail de palabras prohibidas.** Una regla en código, no en el prompt, que bloquea lo que el cliente no quiere leer. Aquí son tres niveles (global, novela y los términos del brief) guardados en SQLite y comparados sobre texto normalizado (mayúsculas, tildes, plurales y variantes simples); una coincidencia devuelve el capítulo al redactor y, agotados los intentos, para con informe ([validators.md](../validators.md), «Guardrails»).
+
+**Validación visual con browser MCP.** Que el agente mire la web como la mira el lector. Aquí Claude Code, con Playwright MCP, recorrió la novela real de diez capítulos y un cambio del lector real: once comprobaciones, y el único fallo (el favicon que faltaba) se corrigió ([browser-mcp.md](browser-mcp.md)).
+
 ## Pendientes para la entrega
 
-Se escriben cuando se apliquen, con el mismo formato: **hooks** de validación y de policy, **guardrail de palabras prohibidas**, **validación visual con browser MCP** y **revisión humana** frente a LLM-as-judge.
+**Revisión humana** frente al LLM-as-judge: la misma rúbrica, aplicada por el autor a la novela de diez capítulos con `src/backend/evals/plantilla_rubrica_humana.csv`, y comparada con las notas del juez.
