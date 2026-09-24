@@ -107,12 +107,18 @@ stateDiagram-v2
   Tramo3 --> Bucle: la puerta 4 pasa (capítulo completado y aprobado)
   Tramo3 --> Tramo12: la puerta 4 falla y quedan intentos (se revierte)
   Tramo3 --> [*]: la puerta 4 falla por última vez, parada de oficio
+  Tramo3 --> RevertirTrasParada: el paquete del oficio no cabe, parada de presupuesto
+  RevertirTrasParada --> [*]: el finally revierte el capítulo
   Tramo12 --> [*]: parada de continuidad o de presupuesto
   Bucle --> P5: no quedan capítulos
   P5 --> [*]: completada y versión publicada
   note right of Tramo3
     Una caída aquí deja el capítulo a medias.
     Recuperar lo revierte y deja la ejecución detenida.
+  end note
+  note right of RevertirTrasParada
+    Una caída aquí, con la ejecución ya en parada,
+    dejaba el capítulo a medias (tercer contraejemplo).
   end note
 ```
 

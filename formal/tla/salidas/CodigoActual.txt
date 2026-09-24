@@ -1,25 +1,478 @@
 TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
-Running breadth-first search Model-Checking with fp 69 and seed 1753163845158973099 with 12 workers on 12 cores with 3572MB heap and 64MB offheap memory (Windows 11 10.0 amd64, Eclipse Adoptium 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 71 and seed 4304625199412552206 with 1 worker on 12 cores with 3572MB heap and 64MB offheap memory (Windows 11 10.0 amd64, Eclipse Adoptium 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
 Semantic processing of module Naturals
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
 Semantic processing of module StoryMaker
-Starting... (2026-09-24 11:30:05)
+Starting... (2026-09-24 12:06:27)
 Implied-temporal checking--satisfiability problem has 2 branches.
 Computing initial states...
-Finished computing initial states: 1 distinct state generated at 2026-09-24 11:30:06.
-Checking 2 branches of temporal properties for the current state space with 21995 total distinct states at (2026-09-24 11:30:09)
-Finished checking temporal properties in 00s at 2026-09-24 11:30:09
-Progress(43) at 2026-09-24 11:30:09: 23.633 states generated (23.633 s/min), 11.704 distinct states found (11.704 ds/min), 1.410 states left on queue.
-Progress(89) at 2026-09-24 11:30:16: 106.167 states generated, 61.637 distinct states found, 0 states left on queue.
-Checking 2 branches of temporal properties for the complete state space with 123274 total distinct states at (2026-09-24 11:30:16)
-Finished checking temporal properties in 12s at 2026-09-24 11:30:29
-Model checking completed. No error has been found.
-  Estimates of the probability that TLC did not check all reachable states
-  because two distinct states had the same fingerprint:
-  calculated (optimistic):  val = 1.5E-10
-  based on the actual fingerprints:  val = 2.4E-11
-106167 states generated, 61637 distinct states found, 0 states left on queue.
-The depth of the complete state graph search is 89.
-The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 9 and the 95th percentile is 2).
-Finished in 25s at (2026-09-24 11:30:30)
+Finished computing initial states: 1 distinct state generated at 2026-09-24 12:06:27.
+Error: Invariant SinCapituloAMedias is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ estado = "configurada"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 0
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "reposo"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = FALSE
+/\ escaleta = FALSE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "ninguna"
+/\ capParada = 0
+/\ planificado = FALSE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 0
+
+State 2: <Arrancar line 590, col 5 to line 595, col 69 of module StoryMaker>
+/\ estado = "configurada"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 0
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "inicio"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "ninguna"
+/\ capParada = 0
+/\ planificado = FALSE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 0
+
+State 3: <Derivar line 272, col 5 to line 276, col 95 of module StoryMaker>
+/\ estado = "planificando"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 0
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "plan_agentes"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "ninguna"
+/\ capParada = 0
+/\ planificado = FALSE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 0
+
+State 4: <PlanAgentes line 280, col 5 to line 291, col 30 of module StoryMaker>
+/\ estado = "planificando"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 0
+/\ p1 = FALSE
+/\ p2 = FALSE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "plan_p1"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "ninguna"
+/\ capParada = 0
+/\ planificado = TRUE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 0
+
+State 5: <PlanP1 line 295, col 5 to line 306, col 30 of module StoryMaker>
+/\ estado = "escaletando"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 0
+/\ p1 = TRUE
+/\ p2 = FALSE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "chk_esc"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "ninguna"
+/\ capParada = 0
+/\ planificado = TRUE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 0
+
+State 6: <ChkEsc line 310, col 5 to line 315, col 32 of module StoryMaker>
+/\ estado = "escaletando"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 0
+/\ p1 = TRUE
+/\ p2 = FALSE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "esc_agente"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = TRUE
+/\ escaleta = FALSE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "ninguna"
+/\ capParada = 0
+/\ planificado = TRUE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 0
+
+State 7: <EscAgente line 319, col 5 to line 331, col 30 of module StoryMaker>
+/\ estado = "escaletando"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 0
+/\ p1 = TRUE
+/\ p2 = FALSE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "esc_p2"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = TRUE
+/\ escaleta = TRUE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "ninguna"
+/\ capParada = 0
+/\ planificado = TRUE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 0
+
+State 8: <EscP2 line 336, col 5 to line 352, col 30 of module StoryMaker>
+/\ estado = "generando"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 0
+/\ p1 = TRUE
+/\ p2 = TRUE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "chk_gen"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = TRUE
+/\ escaleta = TRUE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "ninguna"
+/\ capParada = 0
+/\ planificado = TRUE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 0
+
+State 9: <ChkGen line 356, col 5 to line 358, col 95 of module StoryMaker>
+/\ estado = "generando"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 0
+/\ p1 = TRUE
+/\ p2 = TRUE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "caps"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = TRUE
+/\ escaleta = TRUE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "ninguna"
+/\ capParada = 0
+/\ planificado = TRUE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 0
+
+State 10: <Bucle line 363, col 5 to line 371, col 32 of module StoryMaker>
+/\ estado = "generando"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 1
+/\ p1 = TRUE
+/\ p2 = TRUE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "tramo12"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"pendiente", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = TRUE
+/\ escaleta = TRUE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "ninguna"
+/\ capParada = 0
+/\ planificado = TRUE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 0
+
+State 11: <Tramo12 line 376, col 5 to line 386, col 30 of module StoryMaker>
+/\ estado = "generando"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 1
+/\ p1 = TRUE
+/\ p2 = TRUE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "tramo3"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"a_medias", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = TRUE
+/\ escaleta = TRUE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "ninguna"
+/\ capParada = 0
+/\ planificado = TRUE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 0
+
+State 12: <Tramo3 line 391, col 5 to line 418, col 30 of module StoryMaker>
+/\ estado = "parada"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 1
+/\ p1 = TRUE
+/\ p2 = TRUE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "revertir"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"a_medias", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = TRUE
+/\ escaleta = TRUE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "presupuesto"
+/\ capParada = 1
+/\ planificado = TRUE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 1
+
+State 13: <Caida line 568, col 5 to line 571, col 72 of module StoryMaker>
+/\ estado = "parada"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 1
+/\ p1 = TRUE
+/\ p2 = TRUE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "reposo"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"a_medias", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = FALSE
+/\ escaleta = TRUE
+/\ vivo = FALSE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "presupuesto"
+/\ capParada = 1
+/\ planificado = TRUE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 2
+
+State 14: <Recuperar line 537, col 5 to line 548, col 51 of module StoryMaker>
+/\ estado = "parada"
+/\ regeneraciones = 0
+/\ lenBase = 0
+/\ versiones = <<>>
+/\ cur = 1
+/\ p1 = TRUE
+/\ p2 = TRUE
+/\ tipoCambio = "renombrar"
+/\ lectorIntento = 1
+/\ invalida = FALSE
+/\ sabido = FALSE
+/\ pc = "reposo"
+/\ reinicios = 0
+/\ revBase = <<0, 0, 0, 0, 0>>
+/\ escIntento = 1
+/\ intento = 1
+/\ rev = <<0, 0, 0, 0, 0>>
+/\ alcance = {}
+/\ cap = <<"a_medias", "pendiente", "pendiente", "pendiente", "pendiente">>
+/\ retcon = FALSE
+/\ corriendo = FALSE
+/\ escaleta = TRUE
+/\ vivo = TRUE
+/\ aprobado = <<FALSE, FALSE, FALSE, FALSE, FALSE>>
+/\ tipoParada = "presupuesto"
+/\ capParada = 1
+/\ planificado = TRUE
+/\ cambio = "ninguno"
+/\ pararPendiente = FALSE
+/\ pendLector = {}
+/\ fallos = 2
+
+568 states generated, 349 distinct states found, 67 states left on queue.
+The depth of the complete state graph search is 14.
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 9 and the 95th percentile is 4).
+Finished in 02s at (2026-09-24 12:06:28)

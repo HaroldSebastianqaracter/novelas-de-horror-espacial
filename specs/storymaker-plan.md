@@ -165,7 +165,7 @@ Requisitos en [spec-frontend.md](spec-frontend.md), secciones 3.10, 3.12 y 3.13.
 - [x] **TLA+:** especificación de la máquina de estados de `orquestador/estados.py` (configuración, planificación, escritura, validación, publicación, retries, reanudación y cambio del lector). Requisitos en [spec-tla.md](spec-tla.md); el modelo, en [formal/tla/](../formal/tla/README.md).
 - [x] Al menos tres invariantes de seguridad y una propiedad de liveness: once de seguridad y dos de liveness (RF-TLA-04 y RF-TLA-05).
 - [x] TLC con un modelo pequeño (5 capítulos, 2 reintentos) y su configuración en el repo: `formal/tla/StoryMaker.cfg`, más la terminación con fallos ilimitados y el código sin el cambio del lector.
-- [x] **Contraejemplo documentado:** el hallazgo 1 de la auditoría (resolver una parada de estructura acababa en `completada` sin capítulos). Se modela la máquina anterior a la fase 2 de spec2, se ejecuta TLC, se muestra la traza y el cambio que la cerró. Además, TLC encontró un fallo del diseño del cambio del lector antes de implementarlo (entrada 39 del registro de iteraciones).
+- [x] **Contraejemplo documentado:** el hallazgo 1 de la auditoría (resolver una parada de estructura acababa en `completada` sin capítulos). Se modela la máquina anterior a la fase 2 de spec2, se ejecuta TLC, se muestra la traza y el cambio que la cerró. Además, TLC encontró dos fallos nuevos: uno del diseño del cambio del lector antes de implementarlo, y otro del código actual, la parada de presupuesto del tramo 3. Están en el README de `formal/tla/`.
 - [x] README con la correspondencia entre cada acción de la spec y el estado o transición del código. `comprobar_tablas.py` comprueba las tablas.
 
 ### 10. Infraestructura de evals

@@ -1,4 +1,4 @@
-"""Comprueba que las tablas de StoryMaker.tla son las de orquestador/estados.py (RF-TLA-06).
+"""Comprueba que las tablas de StoryMaker.tla son las de orquestador/estados.py (RF-TLA-08).
 
 La especificacion copia a mano las transiciones del codigo. Si alguien cambia una tabla y no
 la otra, TLC seguiria verificando una maquina que ya no existe. Este script lee las dos y

@@ -16,7 +16,7 @@ El modelo es el ciclo de vida de una novela desde `configurada` hasta que se pub
 - las paradas y su resolución;
 - `parar`, la caída del worker y la recuperación;
 - relanzar desde un capítulo;
-- el cambio del lector, que es el diseño de [spec3](spec3.md), sección 3.8.
+- el cambio del lector, que es el diseño de spec3, sección 3.8. Esa sección y sus requisitos `RF3-CAM-*` están en la rama `cambio-lector`, todavía sin integrar en `pruebas`: se modelaron sobre la spec antes que el código.
 
 El diagrama está en [docs/proceso/diagramas.md](../docs/proceso/diagramas.md), sección 2.
 
@@ -25,7 +25,13 @@ El diagrama está en [docs/proceso/diagramas.md](../docs/proceso/diagramas.md), 
 - una transacción de `orquestador/` o de `worker.py`;
 - un tramo entre dos transacciones, porque las llamadas al agente caen fuera de ellas (RF2-PIPE-08).
 
-Así, una caída entre dos acciones es exactamente una caída entre dos `COMMIT`. Hay tres pasos que el código hace en dos transacciones y el modelo junta en uno: registrar una puerta y hacer la transición que la sigue, abrir la parada tras el último fallo de oficio, y evaluar la puerta 5 y completar. Se pueden juntar porque la recuperación no mira el estado de la ejecución, sino el grafo, así que caer entre los dos pasos da el mismo estado recuperado.
+Así, una caída entre dos acciones es exactamente una caída entre dos `COMMIT`. Hay tres pasos que el código hace en dos transacciones y el modelo junta en uno:
+
+- registrar una puerta y hacer la transición que la sigue;
+- revertir el capítulo tras el último fallo de oficio y abrir la parada;
+- evaluar la puerta 5 y completar.
+
+Se pueden juntar porque, si el worker cae entre las dos, el estado sigue activo, y la recuperación deja lo mismo que si hubiera caído antes de la primera. Una unión que no cumple esa condición esconde fallos. Por eso la parada de presupuesto del tramo 3 y el `finally` que revierte el capítulo después son dos acciones, `Tramo3` y `RevertirTrasParada`: la primera versión del modelo las juntaba, y eso escondía el tercer contraejemplo de RF-TLA-09.
 
 **RF-TLA-02 — Lo que el modelo no ve.**
 
@@ -42,7 +48,7 @@ Así, una caída entre dos acciones es exactamente una caída entre dos `COMMIT`
 - `versiones`, que es `novela_version`;
 - el estado del cambio del lector.
 
-Las del proceso son `vivo`, `corriendo`, `pc` (por dónde va `avanzar`) y los contadores de intentos.
+Las del proceso son `vivo`, `corriendo`, `pc` (por dónde va `avanzar`) y los contadores de intentos. `MaxIntentos` cuenta intentos, como `config.MAX_INTENTOS_CAPITULO`: con 3 hay 2 reintentos.
 
 Hay una variable fantasma, `aprobado`, que el código no tiene. Vale verdadero solo para un capítulo cuyo texto vigente pasó las puertas 3 y 4. Sin ella, «completado» y «aprobado» serían lo mismo por construcción, y S1 no podría fallar. La mutación «un capítulo se cierra sin pasar la puerta 3» lo demostró antes de que existiera (RF-TLA-07).
 
@@ -92,8 +98,9 @@ Hay una variable fantasma, `aprobado`, que el código no tiene. Vale verdadero s
 
 | Configuración | Qué es | Resultado esperado |
 | --- | --- | --- |
-| `StoryMaker.cfg` | El modelo del enunciado: 5 capítulos, 2 reintentos, 2 fallos, con el cambio del lector | Pasan S1 a S11, L1 y L2 |
-| `CodigoActual.cfg` | Lo mismo, sin el cambio del lector: el código de `pruebas` tal cual | Pasan todas |
+| `StoryMaker.cfg` | El modelo del enunciado: 5 capítulos, 3 intentos (2 reintentos) y 2 fallos, con el cambio del lector y con los dos arreglos del tercer contraejemplo | Pasan S1 a S11, L1 y L2 |
+| `CodigoActual.cfg` | Lo mismo, sin el cambio del lector y sin los arreglos: el código de `pruebas` tal cual | S2 falla (tercer contraejemplo) |
+| `ArregloA.cfg`, `ArregloB.cfg` | El código de `pruebas` con uno solo de los dos arreglos | Pasan los invariantes: cada arreglo basta por sí solo |
 | `Terminacion.cfg` | Fallos de puerta ilimitados, una caída o `parar` y un reinicio | Pasan la seguridad y L1 |
 | `CambioSinRevalidar.cfg` | El diseño del cambio del lector antes del contraejemplo (RF-TLA-08) | S1b falla |
 | `Hallazgo1.cfg` (sobre `Hallazgo1.tla`) | La máquina anterior a la fase 2 de spec2 | S1b falla |
@@ -104,10 +111,11 @@ Para comprobar deadlocks, TLC corre con `-deadlock`, que los desactiva. El final
 
 **RF-TLA-08 — Correspondencia comprobada.** `formal/tla/comprobar_tablas.py` lee `TRANSICIONES`, `RESOLUCIONES` y los conjuntos de estados de `orquestador/estados.py` y los compara con los del modelo, fila a fila. Si difieren en algo, sale con 1. Las transiciones del cambio del lector (RF3-CAM-06) salen como pendientes hasta que el backend las tenga. El resto de la correspondencia, cada acción del modelo con su fichero y su función, es una tabla del README que se revisa a mano (fila 5 del plan de verificación).
 
-**RF-TLA-09 — Los contraejemplos.** El `README` enseña dos trazas de TLC, con sus pasos y el cambio que cerró cada una:
+**RF-TLA-09 — Los contraejemplos.** El `README` enseña tres trazas de TLC, con sus pasos y el cambio que cierra cada una:
 
 1. **El hallazgo 1 de la auditoría.** Resolver una parada de estructura acababa en `completada` sin capítulos. La máquina anterior es la del padre de `68d9e7e`, y el cambio que la cerró, la fase 2 de spec2 (entrada 4 del [registro de iteraciones](../docs/proceso/registro-iteraciones.md)).
 2. **El renombrado que dejaba las puertas sin vigencia.** Lo encontró TLC al modelar spec3 3.8, antes de implementarlo, y cambió el diseño: RF3-CAM-11 vuelve a evaluar las puertas 1 y 2 en la transacción final.
+3. **La parada de presupuesto del tramo 3 que deja un capítulo a medias.** Es un fallo del código de `pruebas`. La parada se confirma en una transacción y el `finally` revierte el capítulo en otra. Si el worker cae entre las dos, `recuperar` no revierte nada, porque la ejecución está en `parada` y no activa. Lo vio el `validador-de-codigo` al revisar el modelo, y TLC lo reproduce en 14 estados en cuanto el modelo separa las dos transacciones. Hay dos arreglos, y cualquiera de los dos basta: (a) abrir esa parada revirtiendo el capítulo en la misma transacción, y (b) que `recuperar` revierta también en una ejecución en parada. El backend aplica los dos en la rama `cambio-lector` (commit `58e70f0`, spec2 RF2-FALLO-06, punto 5, y entrada 43 del registro de iteraciones).
 
 **RF-TLA-10 — Herramientas.** Hacen falta un JDK 11 o superior (se probó con Temurin 21) y `tla2tools.jar` de las [releases oficiales](https://github.com/tlaplus/tlaplus/releases); se probó con TLC 2.19. El `.jar` no se commitea, y el README dice cómo conseguirlo y cómo lanzar cada configuración.
 

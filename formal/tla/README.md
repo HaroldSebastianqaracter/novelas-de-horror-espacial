@@ -5,8 +5,9 @@
 | Fichero | Qué es |
 | --- | --- |
 | `StoryMaker.tla` | La especificación: el código de hoy más el cambio del lector de spec3 3.8 |
-| `StoryMaker.cfg` | El modelo del enunciado: 5 capítulos y 2 reintentos, con el cambio del lector |
-| `CodigoActual.cfg` | El mismo modelo sin el cambio del lector, que todavía no está en `pruebas` |
+| `StoryMaker.cfg` | El modelo del enunciado: 5 capítulos y 3 intentos (2 reintentos), con el cambio del lector y los dos arreglos del presupuesto |
+| `CodigoActual.cfg` | El código de `pruebas` tal cual: sin el cambio del lector ni los arreglos. Da el tercer contraejemplo |
+| `ArregloA.cfg`, `ArregloB.cfg` | El código de `pruebas` con uno solo de los dos arreglos |
 | `Terminacion.cfg` | Puertas y agentes que fallan sin límite, para comprobar que toda ejecución termina |
 | `CambioSinRevalidar.cfg` | El contraejemplo que cambió el diseño del cambio del lector |
 | `Hallazgo1.tla`, `Hallazgo1.cfg` | La máquina anterior a la fase 2 de spec2 y el contraejemplo del hallazgo 1 |
@@ -48,10 +49,12 @@ Salida completa de cada configuración en `salidas/`. Cifras del 24 de septiembr
 
 | Configuración | Estados distintos | Profundidad | Tiempo | Resultado |
 | --- | --- | --- | --- | --- |
-| `StoryMaker.cfg` | 1.132.973 | 89 | 6 min 26 s | Sin errores: S1 a S11, L1 y L2 |
-| `CodigoActual.cfg` | 61.637 | 89 | 25 s | Sin errores: S1 a S11, L1 y L2 |
-| `Terminacion.cfg` | 1.664.731 | 72 | 7 min 50 s | Sin errores: seguridad y L1 |
-| `CambioSinRevalidar.cfg` | 207 | 29 | 2 s | Viola `CompletadaConNovela` en 29 estados |
+| `StoryMaker.cfg` | 1.133.998 | 89 | 6 min 43 s | Sin errores: S1 a S11, L1 y L2 |
+| `CodigoActual.cfg` | 349 | 14 | 2 s | Viola `SinCapituloAMedias` en 14 estados |
+| `ArregloA.cfg` | 61.722 | 89 | 3 s | Sin errores en los invariantes |
+| `ArregloB.cfg` | 62.282 | 89 | 3 s | Sin errores en los invariantes |
+| `Terminacion.cfg` | 3.353.833 | 74 | 9 min 22 s | Sin errores: seguridad y L1 |
+| `CambioSinRevalidar.cfg` | 207 | 29 | 1 s | Viola `CompletadaConNovela` en 29 estados |
 | `Hallazgo1.cfg` | 27 | 11 | 1 s | Viola `CompletadaConNovela` en 11 estados |
 
 `comprobar_tablas.py` da las 21 transiciones y las 7 resoluciones iguales. Las 2 transiciones del cambio del lector salen como pendientes en el backend.
@@ -84,21 +87,23 @@ Las propiedades se definen al final de `StoryMaker.tla`, cada una con su comenta
 - **A**: fallos acotados y todas las propiedades;
 - **T**: fallos de puerta ilimitados, con terminación y seguridad.
 
-Todas tienen que hacer saltar alguna propiedad. El 24 de septiembre saltaron las 11:
+Cada una tiene que hacer saltar justo la propiedad que se espera, no otra. El modelo de las mutaciones lleva el arreglo (a) y no el (b), para que la mutación del presupuesto tenga algo que romper. El 24 de septiembre saltaron las 13:
 
-| Mutación | Lo que salta |
-| --- | --- |
-| La recuperación no revierte el capítulo a medias | `SinCapituloAMedias` |
-| El oficio reintenta sin límite | `ReintentosAcotados` |
-| El cambio del lector reintenta sin límite | `ReintentosAcotados` |
-| La escaleta se repite sin límite | `EjecucionTermina`, solo en el modo T |
-| Un capítulo se cierra sin pasar la puerta 3 | `PublicacionConPuertas` |
-| Un cambio fracasado se aplica igual | `PublicacionConPuertas` |
-| El cambio reescribe un capítulo fuera del alcance | `SoloElAlcance` |
-| El cambio no vuelve a evaluar las puertas 1 y 2 | `CompletadaConNovela` |
-| Publicar sobrescribe la última versión | `VersionesInmutables` |
-| Relanzar no comprueba las puertas 1 y 2 | `SinTransicionInvalida` |
-| `avanzar` no mira la vigencia de la puerta 1 (la mitad del hallazgo 1) | `SinTransicionInvalida` |
+| Mutación | Lo que salta | Modo |
+| --- | --- | --- |
+| La recuperación no revierte el capítulo a medias | `SinCapituloAMedias` | A y T |
+| El oficio reintenta sin límite | `ReintentosAcotados` | T: con 3 intentos hacen falta más de 2 fallos |
+| El cambio del lector reintenta sin límite | `ReintentosAcotados` | T |
+| La escaleta se repite sin límite | `EjecucionTermina` | T |
+| Un capítulo se cierra sin pasar la puerta 3 | `PublicacionConPuertas` | A y T |
+| Un cambio fracasado se aplica igual | `PublicacionConPuertas` | T |
+| El cambio reescribe un capítulo fuera del alcance | `SoloElAlcance` | A y T |
+| El cambio no vuelve a evaluar las puertas 1 y 2 | `CompletadaConNovela` | A y T |
+| La parada de presupuesto del tramo 3 no revierte en su transacción | `SinCapituloAMedias` | A y T |
+| La puerta 5 detiene en vez de completar | `AcabaPublicada` | A |
+| Publicar sobrescribe la última versión | `VersionesInmutables` | A y T |
+| Relanzar no comprueba las puertas 1 y 2 | `SinTransicionInvalida` | A y T |
+| `avanzar` no mira la vigencia de la puerta 1 (la mitad del hallazgo 1) | `SinTransicionInvalida` | A y T |
 
 Hay dos mutaciones que enseñaron algo del propio modelo:
 
@@ -116,7 +121,7 @@ Todas las rutas son de `src/backend/`. Las filas del cambio del lector apuntan a
 | `Asegurar`, `EntrarFase` | Poner la ejecución en el estado de la fase | `orquestador/pipeline.py::_asegurar_activa` |
 | `MarcaError`, `FallarRun` | Una excepción sale de `avanzar` y la ejecución pasa a `error` | `worker.py::Worker._correr` y `Worker._marcar_error` |
 | `DetenerRun` | `except Detenido` / `except AgenteInterrumpido`: transición `parar` | `orquestador/pipeline.py::_avanzar` |
-| `AbrirParada` | Abrir la parada y hacer la transición `conflicto`, en una transacción | `orquestador/pipeline.py::_abrir_parada`, `orquestador/fallo.py::abrir_parada` |
+| `AbrirParada`, `AbrirParadaY` | Abrir la parada y hacer la transición `conflicto`, en una transacción. `AbrirParadaY` sigue a otro paso cuando el código aún hace algo después | `orquestador/pipeline.py::_abrir_parada`, `orquestador/fallo.py::abrir_parada` |
 | `Derivar` | Qué toca, derivado del grafo (RF2-PIPE-00) | `orquestador/pipeline.py::_avanzar`, primera condición; `orquestador/vigencia.py::puerta_vigente` |
 | `PlanAgentes` | Arquitecto, mundo, elenco y estructura, los que falten | `orquestador/pipeline.py::planificar` (el bucle), `::_fase_ya_hecha` |
 | `PlanP1` | Puerta 1: `puerta_1_ok` o parada de estructura | `orquestador/pipeline.py::planificar` (final) |
@@ -127,11 +132,12 @@ Todas las rutas son de `src/backend/`. Las filas del cambio del lector apuntan a
 | `Bucle` | `siguiente = ultimo_capitulo_completado + 1` y el guardarraíl de puertas | `orquestador/pipeline.py::_avanzar` (el `while`), `::generar_capitulo` (`PuertasNoVigentes`), `compartido/grafo/lectura.py::ultimo_capitulo_completado` |
 | `Tramo12` | Tramos 1 y 2: redacción y extracción fuera de transacción; texto, hechos y puerta 3 en una | `orquestador/pipeline.py::generar_capitulo`, hasta `a_medias = True` |
 | `Tramo3` | Tramo 3: oficio, y cierre, reintento, parada de oficio o reversión en el `finally` | `orquestador/pipeline.py::generar_capitulo` (resto), `::_cerrar_capitulo`, `::_revertir_a_medias`, `orquestador/fallo.py::revertir_grafo` |
+| `Tramo3`, rama de presupuesto, y `RevertirTrasParada` | El paquete del oficio no cabe: `_paquete_o_parada` confirma la parada, y el `finally` revierte el capítulo en otra transacción. Con `PresupuestoRevierteEnLaParada`, las dos en una: el arreglo (a) | `orquestador/pipeline.py::_paquete_o_parada`, `::_abrir_parada`, `::generar_capitulo` (`finally`), `::_revertir_a_medias`. El arreglo (a), en la rama `cambio-lector` (`58e70f0`): `_paquete_o_parada(..., revertir=True)` abre la parada con `antes=partial(fallo.revertir_grafo, ..., numero, motivo="presupuesto")`, y el tramo 3 pone `a_medias = False` antes de dejar subir `Parado` |
 | `P5` | Puerta 5, `terminado_*` y versión, en una transacción | `orquestador/pipeline.py::_avanzar` (final), `orquestador/versiones.py::publicar` |
 | `AtenderParar` | El worker coge la intención `parar` | `worker.py::Worker._parar` |
 | `PedirParar` | La API encola `parar`; el pipeline la ve en cada llamada | `orquestador/cola.py::hay_parada_pendiente`, `orquestador/pipeline.py::_comprobar_parada` |
 | `Caida` | El proceso muere entre dos transacciones | (entorno) |
-| `Recuperar` | Revertir el capítulo a medias y dejar la ejecución `detenida` | `worker.py::Worker.recuperar` |
+| `Recuperar` | Revertir el capítulo a medias y dejar la ejecución `detenida`. Con `RecuperarRevierteEnParada`, también revierte en una ejecución en `parada` sin tocar su estado: el arreglo (b) | `worker.py::Worker.recuperar`. El arreglo (b), en la rama `cambio-lector` (`58e70f0`): para cada ejecución en `parada` que salga en `db.novelas_con_capitulo_a_medias`, `revertir_grafo(completados + 1)` sin cambiar el estado ni cerrar la parada; el evento `worker_recuperado` lleva `en_parada=True` |
 | `Arrancar` | Intención `arrancar` | `worker.py::Worker._arrancar` |
 | `Relanzar(d)` | Intención `relanzar` o `resolver_parada` con `relanzar` | `worker.py::Worker._relanzar`, `::_motivo_para_no_relanzar`, `::_resolver_parada`; `orquestador/fallo.py::relanzar` |
 | `ResolverContinuidad` | `resolver_parada` con `aceptar_retcon` o `dar_por_sabido` | `worker.py::Worker._resolver_parada`; `orquestador/fallo.py::aceptar_retcon`, `::dar_por_sabido`, `::relanzar` |
@@ -185,4 +191,14 @@ TLC encontró este al modelar el cambio del lector de spec3 3.8, antes de implem
 - **Consecuencias en el código.** Relanzar esa novela quedaba bloqueado, porque `_motivo_para_no_relanzar` exige las puertas vigentes. Y si un cambio posterior se interrumpía, `arrancar` volvía a evaluar las puertas 1 y 2 sobre una novela ya publicada. Si la 1 fallaba, la única salida de su parada es `rehacer`, que borra la escaleta.
 - **El cambio.** RF3-CAM-11, paso 3: la transacción final vuelve a evaluar las puertas 1 y 2 sobre el canon cambiado. Si alguna falla, se deshace entera y el cambio fracasa con las puertas intactas. En el modelo, `CambioRevalidaPuertas = TRUE` y la primera rama de `LectorAplicar`. `CambioSinRevalidar.cfg` conserva el diseño anterior para enseñar la traza.
 
-Sobre el código actual de `pruebas`, sin el cambio del lector, TLC no encontró nada nuevo.
+### La parada de presupuesto que deja un capítulo a medias
+
+Es un fallo del código actual de `pruebas`. Lo vio el `validador-de-codigo` al revisar la primera versión del modelo: esa versión juntaba en un solo paso dos transacciones que el código hace por separado. Con el modelo ya fiel, TLC lo reproduce.
+
+- **Por qué pasa.** Si el paquete del oficio no cabe en el tramo 3, `_paquete_o_parada` confirma la parada de presupuesto con el capítulo todavía a medias, con el texto y los hechos del tramo 2 dentro. Después, el `finally` de `generar_capitulo` lo revierte en otra transacción. Si el worker cae entre las dos, `recuperar` no hace nada, porque solo revierte las ejecuciones activas y esta está en `parada`.
+- **Traza** (`salidas/CodigoActual.txt`, 14 estados): la generación llega al tramo 3 del capítulo 1 en 11 pasos. `Tramo3` abre la parada de presupuesto con el capítulo a medias. Luego vienen `Caida` y `Recuperar`: el estado sigue en `parada` y el capítulo, a medias, con el worker vivo y sin nada corriendo. Se viola `SinCapituloAMedias` (RF2-PER-07). El validador también lo reprodujo contra el código real: `verificar_integridad` devuelve `estado_en_capitulo_no_completado`.
+- **El cambio.** Lo decidió y lo hizo la sesión del backend, en la rama `cambio-lector` (commit `58e70f0`; spec2, RF2-FALLO-06 punto 5 y RF2-CTX-03; spec2-verification, fila 45; entrada 43 del registro de iteraciones). Aplica los dos arreglos:
+  - (a) la parada se abre revirtiendo el capítulo en su misma transacción, como ya hace la de escaleta;
+  - (b) `recuperar` revierte también, en una ejecución en `parada`, lo posterior al último completado, sin cambiarle el estado.
+
+  `ArregloA.cfg` y `ArregloB.cfg` comprueban que cada uno basta por sí solo. El (b), además, cubre cualquier otro camino parecido. `StoryMaker.cfg` lleva los dos.

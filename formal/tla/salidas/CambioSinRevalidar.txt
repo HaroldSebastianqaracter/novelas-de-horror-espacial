@@ -1,12 +1,12 @@
 TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
-Running breadth-first search Model-Checking with fp 10 and seed -5959815095445657195 with 1 worker on 12 cores with 3572MB heap and 64MB offheap memory (Windows 11 10.0 amd64, Eclipse Adoptium 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 4 and seed -7837507643947838081 with 1 worker on 12 cores with 3572MB heap and 64MB offheap memory (Windows 11 10.0 amd64, Eclipse Adoptium 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
 Semantic processing of module Naturals
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
 Semantic processing of module StoryMaker
-Starting... (2026-09-24 11:30:02)
+Starting... (2026-09-24 12:05:58)
 Computing initial states...
-Finished computing initial states: 1 distinct state generated at 2026-09-24 11:30:02.
+Finished computing initial states: 1 distinct state generated at 2026-09-24 12:05:58.
 Error: Invariant CompletadaConNovela is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -42,7 +42,7 @@ State 1: <Initial predicate>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 2: <Arrancar line 556, col 5 to line 561, col 69 of module StoryMaker>
+State 2: <Arrancar line 590, col 5 to line 595, col 69 of module StoryMaker>
 /\ estado = "configurada"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -75,7 +75,7 @@ State 2: <Arrancar line 556, col 5 to line 561, col 69 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 3: <Derivar line 257, col 5 to line 261, col 95 of module StoryMaker>
+State 3: <Derivar line 272, col 5 to line 276, col 95 of module StoryMaker>
 /\ estado = "planificando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -108,7 +108,7 @@ State 3: <Derivar line 257, col 5 to line 261, col 95 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 4: <PlanAgentes line 265, col 5 to line 276, col 30 of module StoryMaker>
+State 4: <PlanAgentes line 280, col 5 to line 291, col 30 of module StoryMaker>
 /\ estado = "planificando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -141,7 +141,7 @@ State 4: <PlanAgentes line 265, col 5 to line 276, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 5: <PlanP1 line 280, col 5 to line 291, col 30 of module StoryMaker>
+State 5: <PlanP1 line 295, col 5 to line 306, col 30 of module StoryMaker>
 /\ estado = "escaletando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -174,7 +174,7 @@ State 5: <PlanP1 line 280, col 5 to line 291, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 6: <ChkEsc line 295, col 5 to line 300, col 32 of module StoryMaker>
+State 6: <ChkEsc line 310, col 5 to line 315, col 32 of module StoryMaker>
 /\ estado = "escaletando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -207,7 +207,7 @@ State 6: <ChkEsc line 295, col 5 to line 300, col 32 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 7: <EscAgente line 304, col 5 to line 316, col 30 of module StoryMaker>
+State 7: <EscAgente line 319, col 5 to line 331, col 30 of module StoryMaker>
 /\ estado = "escaletando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -240,7 +240,7 @@ State 7: <EscAgente line 304, col 5 to line 316, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 8: <EscP2 line 321, col 5 to line 337, col 30 of module StoryMaker>
+State 8: <EscP2 line 336, col 5 to line 352, col 30 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -273,7 +273,7 @@ State 8: <EscP2 line 321, col 5 to line 337, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 9: <ChkGen line 341, col 5 to line 343, col 95 of module StoryMaker>
+State 9: <ChkGen line 356, col 5 to line 358, col 95 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -306,7 +306,7 @@ State 9: <ChkGen line 341, col 5 to line 343, col 95 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 10: <Bucle line 348, col 5 to line 356, col 32 of module StoryMaker>
+State 10: <Bucle line 363, col 5 to line 371, col 32 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -339,7 +339,7 @@ State 10: <Bucle line 348, col 5 to line 356, col 32 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 11: <Tramo12 line 361, col 5 to line 371, col 30 of module StoryMaker>
+State 11: <Tramo12 line 376, col 5 to line 386, col 30 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -372,7 +372,7 @@ State 11: <Tramo12 line 361, col 5 to line 371, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 12: <Tramo3 line 376, col 5 to line 396, col 30 of module StoryMaker>
+State 12: <Tramo3 line 391, col 5 to line 418, col 30 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -405,7 +405,7 @@ State 12: <Tramo3 line 376, col 5 to line 396, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 13: <Bucle line 348, col 5 to line 356, col 32 of module StoryMaker>
+State 13: <Bucle line 363, col 5 to line 371, col 32 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -438,7 +438,7 @@ State 13: <Bucle line 348, col 5 to line 356, col 32 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 14: <Tramo12 line 361, col 5 to line 371, col 30 of module StoryMaker>
+State 14: <Tramo12 line 376, col 5 to line 386, col 30 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -471,7 +471,7 @@ State 14: <Tramo12 line 361, col 5 to line 371, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 15: <Tramo3 line 376, col 5 to line 396, col 30 of module StoryMaker>
+State 15: <Tramo3 line 391, col 5 to line 418, col 30 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -504,7 +504,7 @@ State 15: <Tramo3 line 376, col 5 to line 396, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 16: <Bucle line 348, col 5 to line 356, col 32 of module StoryMaker>
+State 16: <Bucle line 363, col 5 to line 371, col 32 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -537,7 +537,7 @@ State 16: <Bucle line 348, col 5 to line 356, col 32 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 17: <Tramo12 line 361, col 5 to line 371, col 30 of module StoryMaker>
+State 17: <Tramo12 line 376, col 5 to line 386, col 30 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -570,7 +570,7 @@ State 17: <Tramo12 line 361, col 5 to line 371, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 18: <Tramo3 line 376, col 5 to line 396, col 30 of module StoryMaker>
+State 18: <Tramo3 line 391, col 5 to line 418, col 30 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -603,7 +603,7 @@ State 18: <Tramo3 line 376, col 5 to line 396, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 19: <Bucle line 348, col 5 to line 356, col 32 of module StoryMaker>
+State 19: <Bucle line 363, col 5 to line 371, col 32 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -636,7 +636,7 @@ State 19: <Bucle line 348, col 5 to line 356, col 32 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 20: <Tramo12 line 361, col 5 to line 371, col 30 of module StoryMaker>
+State 20: <Tramo12 line 376, col 5 to line 386, col 30 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -669,7 +669,7 @@ State 20: <Tramo12 line 361, col 5 to line 371, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 21: <Tramo3 line 376, col 5 to line 396, col 30 of module StoryMaker>
+State 21: <Tramo3 line 391, col 5 to line 418, col 30 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -702,7 +702,7 @@ State 21: <Tramo3 line 376, col 5 to line 396, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 22: <Bucle line 348, col 5 to line 356, col 32 of module StoryMaker>
+State 22: <Bucle line 363, col 5 to line 371, col 32 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -735,7 +735,7 @@ State 22: <Bucle line 348, col 5 to line 356, col 32 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 23: <Tramo12 line 361, col 5 to line 371, col 30 of module StoryMaker>
+State 23: <Tramo12 line 376, col 5 to line 386, col 30 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -768,7 +768,7 @@ State 23: <Tramo12 line 361, col 5 to line 371, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 24: <Tramo3 line 376, col 5 to line 396, col 30 of module StoryMaker>
+State 24: <Tramo3 line 391, col 5 to line 418, col 30 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -801,7 +801,7 @@ State 24: <Tramo3 line 376, col 5 to line 396, col 30 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 25: <Bucle line 348, col 5 to line 356, col 32 of module StoryMaker>
+State 25: <Bucle line 363, col 5 to line 371, col 32 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -834,7 +834,7 @@ State 25: <Bucle line 348, col 5 to line 356, col 32 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 26: <P5 line 402, col 5 to line 408, col 84 of module StoryMaker>
+State 26: <P5 line 424, col 5 to line 430, col 84 of module StoryMaker>
 /\ estado = "completada"
 /\ regeneraciones = 0
 /\ lenBase = 0
@@ -871,7 +871,7 @@ State 26: <P5 line 402, col 5 to line 408, col 84 of module StoryMaker>
 /\ pendLector = {}
 /\ fallos = 0
 
-State 27: <CambioDelLector line 619, col 5 to line 631, col 40 of module StoryMaker>
+State 27: <CambioDelLector line 653, col 5 to line 665, col 40 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 1
 /\ lenBase = 1
@@ -908,7 +908,7 @@ State 27: <CambioDelLector line 619, col 5 to line 631, col 40 of module StoryMa
 /\ pendLector = {}
 /\ fallos = 0
 
-State 28: <LectorRevisar line 419, col 5 to line 438, col 30 of module StoryMaker>
+State 28: <LectorRevisar line 450, col 5 to line 469, col 30 of module StoryMaker>
 /\ estado = "generando"
 /\ regeneraciones = 1
 /\ lenBase = 1
@@ -945,7 +945,7 @@ State 28: <LectorRevisar line 419, col 5 to line 438, col 30 of module StoryMake
 /\ pendLector = {}
 /\ fallos = 0
 
-State 29: <LectorAplicar line 476, col 5 to line 484, col 46 of module StoryMaker>
+State 29: <LectorAplicar line 507, col 5 to line 515, col 46 of module StoryMaker>
 /\ estado = "completada"
 /\ regeneraciones = 1
 /\ lenBase = 1
@@ -985,4 +985,4 @@ State 29: <LectorAplicar line 476, col 5 to line 484, col 46 of module StoryMake
 279 states generated, 207 distinct states found, 70 states left on queue.
 The depth of the complete state graph search is 29.
 The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 31 and the 95th percentile is 1).
-Finished in 02s at (2026-09-24 11:30:03)
+Finished in 01s at (2026-09-24 12:05:59)

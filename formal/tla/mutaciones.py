@@ -2,8 +2,8 @@
 
 Un invariante que nunca falla puede ser un invariante que no mira nada. Cada mutacion
 introduce en una copia del modelo un fallo que el codigo real podria tener, y TLC tiene que
-encontrarlo con el modelo reducido de mutaciones.cfg (2 capitulos) en al menos uno de los dos
-modos:
+hacer saltar la propiedad que se espera, con el modelo reducido de CONFIG (2 capitulos), en al
+menos uno de los dos modos:
 
 - A: fallos acotados, todas las propiedades;
 - T: las puertas y los agentes fallan sin limite, solo terminacion y seguridad.
@@ -23,6 +23,9 @@ import tempfile
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
+
+#: Las que TLC informa como "Temporal properties were violated", sin nombre.
+TEMPORALES = {"EjecucionTermina", "AcabaPublicada"}
 
 #: (nombre, texto original, texto mutado, lo que tiene que saltar)
 MUTACIONES: list[tuple[str, str, str, str]] = [
@@ -77,6 +80,18 @@ MUTACIONES: list[tuple[str, str, str, str]] = [
         "CompletadaConNovela",
     ),
     (
+        "la parada de presupuesto del tramo 3 no revierte en su transaccion",
+        "          /\\ IF PresupuestoRevierteEnLaParada",
+        "          /\\ IF FALSE",
+        "SinCapituloAMedias",
+    ),
+    (
+        "la puerta 5 detiene en vez de completar",
+        "          ELSE estado' = e2 /\\ PublicarCon(rev, aprobado)",
+        '          ELSE estado\' = "detenida" /\\ UNCHANGED versiones',
+        "AcabaPublicada",
+    ),
+    (
         "publicar sobrescribe la ultima version",
         "                 ELSE Append(versiones, Instantanea(r, a))",
         "                 ELSE IF Len(versiones) > 0"
@@ -101,13 +116,15 @@ MUTACIONES: list[tuple[str, str, str, str]] = [
 CONFIG = """SPECIFICATION Spec
 CONSTANTS
     N = 2
-    MaxIntentos = 2
+    MaxIntentos = 3
     MaxFallos = {fallos}
     MaxRegeneraciones = 1
     ConCambioDelLector = TRUE
     CambioRevalidaPuertas = TRUE
     FallosDePuertaAcotados = {acotados}
     MaxReinicios = {reinicios}
+    PresupuestoRevierteEnLaParada = TRUE
+    RecuperarRevierteEnParada = FALSE
 INVARIANTS
     PublicacionConPuertas CompletadaConNovela SinCapituloAMedias AMediasSoloElActual
     ReintentosAcotados CapituloConPuertas SinTransicionInvalida ParadaCoherente
@@ -150,6 +167,13 @@ def tlc(java: str, jar: str, carpeta: Path, modo: str) -> str:
     return "sin veredicto"
 
 
+def salta(veredicto: str, esperado: str) -> bool:
+    """Si el veredicto de TLC es la violacion de la propiedad esperada, y no de otra."""
+    if esperado in TEMPORALES:
+        return "Temporal properties were violated" in veredicto
+    return f" {esperado} is violated" in veredicto
+
+
 def main() -> int:
     if len(sys.argv) != 3:
         print(__doc__)
@@ -177,7 +201,7 @@ def main() -> int:
                 original.replace(viejo, nuevo), encoding="utf-8"
             )
             veredictos = {modo: tlc(java, jar, carpeta, modo) for modo in MODOS}
-            muerta = any("violated" in v for v in veredictos.values())
+            muerta = any(salta(v, esperado) for v in veredictos.values())
             fallos += not muerta
             detalle = "; ".join(f"{m}: {v}" for m, v in veredictos.items())
             print(f"{'ok ' if muerta else 'MAL'} {nombre} (se espera {esperado}). {detalle}")

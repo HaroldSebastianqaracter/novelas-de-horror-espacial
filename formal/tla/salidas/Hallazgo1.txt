@@ -1,12 +1,12 @@
 TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
-Running breadth-first search Model-Checking with fp 110 and seed -7848109481573306969 with 1 worker on 12 cores with 3572MB heap and 64MB offheap memory (Windows 11 10.0 amd64, Eclipse Adoptium 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 130 and seed 5002594042933081441 with 1 worker on 12 cores with 3572MB heap and 64MB offheap memory (Windows 11 10.0 amd64, Eclipse Adoptium 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
 Semantic processing of module Naturals
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
 Semantic processing of module Hallazgo1
-Starting... (2026-09-24 11:29:59)
+Starting... (2026-09-24 12:05:56)
 Computing initial states...
-Finished computing initial states: 1 distinct state generated at 2026-09-24 11:30:00.
+Finished computing initial states: 1 distinct state generated at 2026-09-24 12:05:57.
 Error: Invariant CompletadaConNovela is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -79,7 +79,7 @@ State 5: <PlanP1 line 112, col 5 to line 117, col 63 of module Hallazgo1>
 /\ escaleta = FALSE
 /\ capParada = 0
 
-State 6: <Resolver line 185, col 5 to line 191, col 70 of module Hallazgo1>
+State 6: <Resolver line 186, col 5 to line 192, col 70 of module Hallazgo1>
 /\ escIntento = 1
 /\ p1 = FALSE
 /\ p2 = FALSE
@@ -163,7 +163,7 @@ State 11: <P5 line 169, col 5 to line 173, col 98 of module Hallazgo1>
 /\ escaleta = FALSE
 /\ capParada = 0
 
-27 states generated, 27 distinct states found, 5 states left on queue.
+42 states generated, 27 distinct states found, 5 states left on queue.
 The depth of the complete state graph search is 11.
 The average outdegree of the complete state graph is 1 (minimum is 1, the maximum 2 and the 95th percentile is 2).
-Finished in 01s at (2026-09-24 11:30:00)
+Finished in 01s at (2026-09-24 12:05:57)

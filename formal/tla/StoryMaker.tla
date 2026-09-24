@@ -33,8 +33,16 @@ CONSTANTS
                            \* refuto (CambioSinRevalidar.cfg)
     FallosDePuertaAcotados,\* FALSE: puertas y agentes pueden fallar sin limite (solo la
                            \* caida y el parar siguen contando contra MaxFallos)
-    MaxReinicios           \* veces que el autor relanza una novela que le espera. Con
+    MaxReinicios,          \* veces que el autor relanza una novela que le espera. Con
                            \* fallos acotados no limita nada: cada reinicio necesita un fallo
+    PresupuestoRevierteEnLaParada,
+                           \* FALSE: el codigo de hoy. La parada de presupuesto del tramo 3
+                           \* se confirma y el finally revierte despues, en otra transaccion.
+                           \* TRUE: las dos cosas en la misma, como la parada de escaleta
+    RecuperarRevierteEnParada
+                           \* FALSE: el codigo de hoy. recuperar solo revierte ejecuciones
+                           \* activas. TRUE: tambien revierte lo posterior al ultimo
+                           \* completado en una ejecucion en parada, sin cambiarle el estado
 
 ASSUME /\ N \in Nat \ {0}
        /\ MaxIntentos \in Nat \ {0}
@@ -44,6 +52,8 @@ ASSUME /\ N \in Nat \ {0}
        /\ CambioRevalidaPuertas \in BOOLEAN
        /\ FallosDePuertaAcotados \in BOOLEAN
        /\ MaxReinicios \in Nat
+       /\ PresupuestoRevierteEnLaParada \in BOOLEAN
+       /\ RecuperarRevierteEnParada \in BOOLEAN
 
 Caps == 1..N
 Activos == {"planificando", "escaletando", "generando"}
@@ -229,7 +239,9 @@ DetenerRun ==
     /\ Acabar
 
 \* pipeline._abrir_parada: la parada y la transicion "conflicto" en una transaccion.
-AbrirParada(tipo, c) ==
+\* `sigue` es por donde continua avanzar despues de confirmarla: "reposo" si la ejecucion
+\* acaba ahi (Parado sube hasta _avanzar), o el paso que aun queda en el codigo.
+AbrirParadaY(tipo, c, sigue) ==
     LET e2 == Siguiente(estado, "conflicto", NINGUNA) IN
     IF e2 = INVALIDA
     THEN FallarPorInvalida /\ UNCHANGED paradaVars
@@ -237,7 +249,10 @@ AbrirParada(tipo, c) ==
          /\ IF tipo = "continuidad"
             THEN retcon' \in BOOLEAN /\ sabido' \in BOOLEAN
             ELSE retcon' = FALSE /\ sabido' = FALSE
-         /\ Acabar /\ UNCHANGED invalida
+         /\ IF sigue = "reposo" THEN Acabar ELSE pc' = sigue /\ UNCHANGED corriendo
+         /\ UNCHANGED invalida
+
+AbrirParada(tipo, c) == AbrirParadaY(tipo, c, "reposo")
 
 \* Entrar en una fase: _asegurar_activa y seguir en `destino`.
 EntrarFase(suceso, destino) ==
@@ -385,8 +400,15 @@ Tramo3 ==
                   /\ UNCHANGED <<estado, corriendo, invalida, paradaVars>>
              ELSE AbrirParada("oficio", cur) /\ UNCHANGED intento
           /\ UNCHANGED rev /\ Aprobar
-       \/ /\ FallaPuerta /\ cap' = RevertirDesde(cur)
-          /\ AbrirParada("presupuesto", cur) /\ UNCHANGED <<rev, intento>> /\ Aprobar
+       \/ /\ FallaPuerta
+          \* _paquete_o_parada del oficio: la parada se confirma dentro del try, y el
+          \* finally revierte el capitulo despues (RevertirTrasParada).
+          /\ IF PresupuestoRevierteEnLaParada
+             THEN cap' = RevertirDesde(cur) /\ Aprobar
+                  /\ AbrirParada("presupuesto", cur)
+             ELSE UNCHANGED <<cap, aprobado>>
+                  /\ AbrirParadaY("presupuesto", cur, "revertir")
+          /\ UNCHANGED <<rev, intento>>
        \/ /\ FallaPuerta /\ cap' = RevertirDesde(cur)
           /\ FallarRun /\ UNCHANGED <<rev, intento, paradaVars>> /\ Aprobar
        \/ /\ pararPendiente /\ cap' = RevertirDesde(cur)
@@ -406,6 +428,15 @@ P5 ==
           THEN FallarPorInvalida /\ UNCHANGED versiones
           ELSE estado' = e2 /\ PublicarCon(rev, aprobado) /\ Acabar /\ UNCHANGED invalida
     /\ UNCHANGED <<paradaVars, vivo, grafoVars, bucleVars, lectorVars, entornoVars>>
+
+\* El finally de generar_capitulo tras la parada de presupuesto del tramo 3: revierte el
+\* capitulo a medias en su propia transaccion (pipeline._revertir_a_medias). La parada ya
+\* esta confirmada.
+RevertirTrasParada ==
+    /\ Corre("revertir")
+    /\ cap' = RevertirDesde(cur) /\ Aprobar /\ Acabar
+    /\ UNCHANGED <<estado, paradaVars, vivo, planificado, escaleta, p1, p2, rev, bucleVars,
+                   versiones, lectorVars, entornoVars, invalida>>
 
 (***************************************************************************)
 (* El cambio del lector (spec3, 3.8): los capitulos siguen completados, el  *)
@@ -499,14 +530,17 @@ AtenderParar ==
                    lectorVars, fallos, regeneraciones, reinicios, invalida>>
 
 \* worker.recuperar, al arrancar tras una caida (RF2-FALLO-06): revierte el capitulo a medias
-\* y deja la ejecucion detenida. No reanuda sola. Un cambio del lector en curso queda
-\* interrumpido (RF3-CAM-12).
+\* de una ejecucion activa y la deja detenida. Con RecuperarRevierteEnParada, tambien el de
+\* una ejecucion en parada, que sigue en parada. No reanuda sola. Un cambio del lector en
+\* curso queda interrumpido (RF3-CAM-12).
 Recuperar ==
     /\ ~vivo
     /\ vivo' = TRUE
     /\ IF estado \in Activos
        THEN estado' = "detenida" /\ cap' = RevertirDesde(MaxCompletado + 1)
-       ELSE UNCHANGED <<estado, cap>>
+       ELSE IF RecuperarRevierteEnParada /\ estado = "parada"
+            THEN cap' = RevertirDesde(MaxCompletado + 1) /\ UNCHANGED estado
+            ELSE UNCHANGED <<estado, cap>>
     /\ Aprobar
     /\ cambio' = IF cambio = "reescribiendo" THEN "interrumpido" ELSE cambio
     /\ UNCHANGED <<paradaVars, corriendo, pc, planificado, escaleta, p1, p2, rev, bucleVars,
@@ -515,7 +549,7 @@ Recuperar ==
 
 Sistema ==
     \/ Derivar \/ PlanAgentes \/ PlanP1 \/ ChkEsc \/ EscAgente \/ EscP2 \/ ChkGen
-    \/ Bucle \/ Tramo12 \/ Tramo3 \/ P5 \/ LectorRevisar \/ LectorAplicar
+    \/ Bucle \/ Tramo12 \/ Tramo3 \/ RevertirTrasParada \/ P5 \/ LectorRevisar \/ LectorAplicar
     \/ AtenderParar \/ Recuperar
 
 (***************************************************************************)
@@ -693,9 +727,10 @@ CompletadaConNovela ==
 SinCapituloAMedias ==
     (vivo /\ ~corriendo) => \A i \in Caps : cap[i] # "a_medias"
 
-\* S2b. Solo el capitulo en curso puede estar a medias, y solo entre sus tramos 2 y 3.
+\* S2b. Solo el capitulo en curso puede estar a medias, y solo entre sus tramos 2 y 3 o
+\* hasta que el finally lo revierte.
 AMediasSoloElActual ==
-    \A i \in Caps : cap[i] = "a_medias" => (i = cur /\ (pc = "tramo3" \/ ~vivo))
+    \A i \in Caps : cap[i] = "a_medias" => (i = cur /\ (pc \in {"tramo3", "revertir"} \/ ~vivo))
 
 \* S3. Los reintentos nunca superan el limite.
 ReintentosAcotados ==

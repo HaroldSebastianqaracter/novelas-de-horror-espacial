@@ -44,7 +44,12 @@ Un párrafo por concepto del curso aplicado en el proyecto: qué es, en una fras
 - las puertas son elecciones no deterministas;
 - TLC comprueba, con 5 capítulos y 2 reintentos, que nunca se publica un capítulo sin sus puertas, que reanudar no pierde ni duplica capítulos, que la versión anterior se conserva y que toda ejecución termina.
 
-Encontró el hallazgo 1 en la máquina de spec1. Además, encontró un fallo del diseño del cambio del lector antes de implementarlo: un renombrado dejaba la novela completada con las puertas 1 y 2 sin vigencia. `comprobar_tablas.py` mantiene sus tablas iguales a las del código. `mutaciones.py` rompe el modelo a propósito para comprobar que los invariantes miran algo.
+Encontró el hallazgo 1 en la máquina de spec1 y dos fallos nuevos:
+
+- uno del diseño del cambio del lector, antes de implementarlo: un renombrado dejaba la novela completada con las puertas 1 y 2 sin vigencia;
+- uno del código actual: una caída justo después de una parada de presupuesto dejaba un capítulo a medias.
+
+El segundo salió porque el validador vio que la primera versión del modelo juntaba dos transacciones en un solo paso: un modelo que simplifica de más da verdes falsos. `comprobar_tablas.py` mantiene sus tablas iguales a las del código. `mutaciones.py` rompe el modelo a propósito para comprobar que los invariantes miran algo.
 
 **Prompt injection y contenido no confiable.** Un texto que aporta el usuario puede intentar dar órdenes al modelo. Aquí el texto libre del brief va delimitado y marcado como no confiable, pero la defensa no descansa en que el agente obedezca: de ese texto el código solo acepta rasgos, recuerdos y allegados, y cada uno con una cita literal que se comprueba contra el texto. Una búsqueda de patrones conocidos deja además una alerta (`tareas/entrevistador/servicio.py`).
 

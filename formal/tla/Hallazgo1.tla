@@ -174,16 +174,17 @@ P5 ==
 
 \* worker._arrancar de spec1: solo rechaza una parada abierta.
 Arrancar ==
-    /\ ~corriendo /\ estado # "parada" /\ estado \notin Completadas
+    /\ ~corriendo /\ estado # "parada"
     /\ corriendo' = TRUE /\ pc' = "inicio"
     /\ UNCHANGED <<estado, tipoParada, capParada, planificado, escaleta, p1, p2, escIntento,
                    cap, fallos>>
 
 \* worker._resolver_parada de spec1: relanzar o aceptar_retcon sobre CUALQUIER parada, con
-\* fallo.relanzar, que revierte desde d y deja la ejecucion en generando.
+\* fallo.relanzar, que revierte desde d y deja la ejecucion en generando. `desde_capitulo` no
+\* tenia tope; mas alla de N + 1 revierte lo mismo que N + 1.
 Resolver ==
     /\ ~corriendo /\ estado = "parada"
-    /\ \E d \in 1..(MaxCompletado + 1) :
+    /\ \E d \in 1..(N + 1) :
           cap' = [i \in Caps |-> IF i >= d THEN "pendiente" ELSE cap[i]]
     /\ estado' = Siguiente(estado, "relanzar")
     /\ tipoParada' = NINGUNA /\ capParada' = 0
