@@ -30,7 +30,9 @@ def main(argv: list[str] | None = None) -> int:
     con = db.conectar(ruta, solo_lectura=True)
     try:
         if args.generar:
-            sys.stdout.write(lean.generar(con, args.novela))
+            # En bytes: la consola de Windows no es UTF-8 y el fichero lleva texto de la prosa.
+            sys.stdout.buffer.write(lean.generar(con, args.novela).encode("utf-8"))
+            sys.stdout.flush()
             return 0
         resultado = lean.verificar(con, args.novela)
     finally:
