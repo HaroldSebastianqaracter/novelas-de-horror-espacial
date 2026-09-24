@@ -405,7 +405,7 @@ Un cambio terminado (aplicado, rechazado, fallido o interrumpido) deja de bloque
 4. Los capítulos, cada uno en página nueva.
 5. La ficha de personajes y lugares como apéndice.
 
-Una hoja de estilos `@media print` quita la navegación y fija el tamaño de página (A5), los márgenes y los saltos. Los enlaces internos son anclas, y el PDF los conserva. La vista marca `data-listo-para-imprimir` cuando tiene todo lo que necesita (la versión, el canon y la escaleta), y es lo que espera `npm run pdf`.
+Una hoja de estilos `@media print` quita la navegación y fija el tamaño de página (A5), los márgenes y los saltos. Los enlaces internos son anclas, y el PDF los conserva. La vista marca `data-listo-para-imprimir` cuando tiene todo lo que necesita (la versión, el canon y la escaleta), y es lo que espera `npm run pdf`. Si el canon o la escaleta fallan, marca `data-error-impresion`, lo dice, no abre el diálogo de imprimir, y `npm run pdf` sale con error sin guardar un PDF incompleto.
 
 **RF-FE-PDF-02 — Desde la lectura.** El botón «Exportar a PDF» abre la vista de impresión y lanza el diálogo de imprimir del navegador, donde se elige «Guardar como PDF».
 

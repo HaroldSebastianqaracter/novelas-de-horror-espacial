@@ -18,8 +18,11 @@ export function Imprimir() {
   const { novelaId, version, numero, esUltima, ultima } = useLecturaActual();
   const [busqueda] = useSearchParams();
   useTitulo(version.titulo || "Novela");
-  const { cargando } = useConsultasFicha(novelaId);
-  const listo = !cargando;
+  // Lista solo con todo lo que lleva el libro: si el canon o la escaleta fallan, no se imprime un
+  // apéndice con un error, y `npm run pdf` lo detecta por `data-error-impresion`.
+  const { personajes, lugares, estructura } = useConsultasFicha(novelaId);
+  const listo = personajes.isSuccess && lugares.isSuccess && estructura.isSuccess;
+  const fallo = personajes.isError || lugares.isError || estructura.isError;
   const impreso = useRef(false);
 
   useEffect(() => {
@@ -39,9 +42,17 @@ export function Imprimir() {
     ));
 
   return (
-    <div className="imprimir" data-listo-para-imprimir={listo ? true : undefined}>
+    <div
+      className="imprimir"
+      data-listo-para-imprimir={listo ? true : undefined}
+      data-error-impresion={fallo ? true : undefined}
+    >
       <div className="imprimir__barra no-imprimir">
-        <p>Vista para imprimir: portada, índice, capítulos y personajes, cada capítulo en página nueva.</p>
+        <p>
+          {fallo
+            ? "No se pudo cargar la ficha de personajes y lugares: el libro no está completo para imprimirlo."
+            : "Vista para imprimir: portada, índice, capítulos y personajes, cada capítulo en página nueva."}
+        </p>
         <button type="button" className="boton boton--primario" onClick={() => window.print()} disabled={!listo}>
           Imprimir o guardar como PDF
         </button>
