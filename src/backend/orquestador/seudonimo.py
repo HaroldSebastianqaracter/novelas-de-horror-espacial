@@ -18,21 +18,25 @@ from typing import Any, cast
 
 from compartido.brief import Brief
 from compartido.grafo.escritura import normalizar
-from compartido.texto import PARTICULAS_DE_NOMBRE
+from compartido.texto import INICIO_DE_FRASE, PARTICULAS_DE_NOMBRE
 from compartido.tipos import como_dict, como_lista
 
-from .observabilidad import Seudonimizador, partes_del_nombre, plegar
+from .observabilidad import ACOMPANAN_A_LA_FIRMA, Seudonimizador, partes_del_nombre, plegar
 
 #: La etiqueta del nombre que tenia una persona del encargo antes de un cambio del lector.
 ANTERIOR = "NOMBRE_ANTERIOR"
 
-#: Palabras de una firma de quien regala que no son nombre («tu tía Carmen», «Los García»,
-#: «Sus compañeros del instituto»): no se ocultan nunca (validadores de 7e88879 y ac7dc1d).
+#: Con que empieza una firma descriptiva de quien regala («tu tía Carmen», «Los García»).
 _DETERMINANTES = frozenset({
     "tu", "tus", "su", "sus", "mi", "mis", "vuestro", "vuestra", "vuestros", "vuestras",
     "nuestro", "nuestra", "nuestros", "nuestras", "el", "la", "los", "las", "un", "una",
     "todos", "todas",
 })
+#: Palabras de una firma descriptiva que no son nombre y no se ocultan sueltas (plegadas).
+_NO_SON_NOMBRE = _DETERMINANTES | ACOMPANAN_A_LA_FIRMA | {
+    "companero", "companera", "companeros", "companeras", "colega", "colegas", "equipo",
+    "clase", "instituto", "colegio", "oficina", "trabajo", "compis",
+}
 
 
 class Mascara:
@@ -72,15 +76,15 @@ class Mascara:
         plegado, posiciones, _ = plegar(nombre)
         completo = " ".join(plegado.split())
         palabras = completo.split(" ")
-        # Una firma que empieza por un determinante («tu tía Carmen», «Los García») no es un
-        # nombre entero: se ocultan solo sus palabras con mayuscula, y vuelve tal cual. Una
-        # firma que es un nombre, aunque venga en minuscula, se oculta entera y por partes.
+        # La firma de quien regala se oculta siempre entera, en cualquier grafia, y vuelve tal
+        # como la escribio el comprador. Si es descriptiva («tu tía Carmen», «Los García»), sus
+        # palabras sueltas se ocultan tambien, salvo determinantes y parentescos, esten en
+        # mayuscula o en minuscula (validadores de ac7dc1d y 32b785c).
         descriptiva = firma and bool(palabras) and palabras[0] in _DETERMINANTES
         candidatas = list(partes_del_nombre(nombre, firma=firma))
         if descriptiva:
-            candidatas = [f for f in candidatas if f not in _DETERMINANTES
-                          and (_original(nombre, plegado, posiciones, f) or " ")[:1].isupper()]
-        elif completo and completo not in candidatas:
+            candidatas = [f for f in candidatas if f not in _NO_SON_NOMBRE]
+        if completo and completo not in candidatas:
             candidatas.append(completo)
         propias = 0
         extra = 2
@@ -92,6 +96,9 @@ class Mascara:
                 continue  # el primero que la reclama se la queda (el destinatario manda)
             if forma == completo:
                 etiqueta = f"[{base}]"
+            elif descriptiva:
+                etiqueta = f"[{base}_{extra}]"
+                extra += 1
             elif len(palabras) > 1 and forma == palabras[0]:
                 etiqueta = f"[{base}_NOMBRE]"
             elif len(palabras) > 1 and forma == palabras[-1]:
@@ -100,14 +107,18 @@ class Mascara:
                 etiqueta = f"[{base}_{extra}]"
                 extra += 1
             formas[forma] = etiqueta
-            self._originales[etiqueta] = _grafia(original)
-            if not original[:1].isupper():
+            self._originales[etiqueta] = original if descriptiva else _grafia(original)
+            if not original[:1].isupper() or (firma and forma == completo):
                 self._minusculas.add(forma)
             propias += 1
         if descriptiva:
-            self._alias.setdefault(f"[{base}]", " ".join(nombre.split()))
-            # La leyenda pasa por la mascara: los nombres de la firma salen como etiqueta.
-            self._roles.append(f"Quien hace el regalo firma la dedicatoria como «{nombre}».")
+            sueltas = [self._originales[formas[f]] for f in candidatas
+                       if f != completo and f in formas]
+            entera = " ".join(nombre.split())
+            self._alias.setdefault(f"[{base}]", entera)
+            self._alias.setdefault(f"[{base}_NOMBRE]", sueltas[0] if sueltas else entera)
+            self._alias.setdefault(f"[{base}_APELLIDO]", sueltas[-1] if sueltas else entera)
+            self._roles.append(rol)
             return
         # Lo que un modelo escribiria por analogia tambien vuelve: `_NOMBRE` de un nombre de
         # una palabra, o la etiqueta de quien regala cuando es un allegado.
@@ -139,7 +150,16 @@ class Mascara:
         if self._vuelta is None:
             return valor
         if isinstance(valor, str):
-            return self._vuelta.sub(lambda m: self._nombre(m.group(1)), valor)
+            texto = valor
+
+            def cambio(m: re.Match[str]) -> str:
+                nombre = self._nombre(m.group(1))
+                # Al empezar frase, con mayuscula: «tu hermano» vuelve «Tu hermano».
+                if nombre[:1].islower() and INICIO_DE_FRASE.search(texto, 0, m.start()):
+                    return nombre[:1].upper() + nombre[1:]
+                return nombre
+
+            return self._vuelta.sub(cambio, texto)
         if isinstance(valor, dict):
             salida: dict[str, Any] = {}
             for k, v in como_dict(cast(object, valor)).items():

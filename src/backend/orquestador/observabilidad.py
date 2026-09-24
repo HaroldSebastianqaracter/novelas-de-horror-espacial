@@ -122,6 +122,8 @@ _ACOMPANAN_A_LA_FIRMA = frozenset({
     "amor", "beso", "besos", "abrazo", "abrazos", "feliz", "felicidades", "cumpleanos",
     "parte", "regalo", "siempre", "navidad", "aniversario", "boda",
 })
+#: Para la mascara del pipeline (orquestador/seudonimo.py, RF3-SEU-01).
+ACOMPANAN_A_LA_FIRMA = _ACOMPANAN_A_LA_FIRMA
 #: Lo que abre una firma y se escribe en mayuscula solo por ir delante («Tus padres…»,
 #: «Con todo…»).
 _ENCABEZAN_LA_FIRMA = frozenset({
