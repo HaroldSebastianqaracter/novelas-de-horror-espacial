@@ -97,14 +97,19 @@ def test_las_apariciones_salen_de_la_presencia_y_del_lugar_de_cada_escena(
         esperado_lugares.setdefault(int(f[0]), set()).add(int(f[1]))
     total_personajes = con.execute(
         "SELECT COUNT(*) FROM personaje WHERE novela_id = ?", (novela_id,)).fetchone()[0]
+    total_lugares = con.execute(
+        "SELECT COUNT(*) FROM lugar WHERE novela_id = ?", (novela_id,)).fetchone()[0]
     con.close()
 
     assert len(datos["personajes"]) == total_personajes
     for p in datos["personajes"]:
         assert p["capitulos"] == sorted(esperado_personajes.get(p["id"], set()))
     assert any(p["capitulos"] for p in datos["personajes"])
+    # Validador de 4c18415: sin contar los lugares, una lista vacia pasaba el bucle.
+    assert len(datos["lugares"]) == total_lugares > 0
     for lg in datos["lugares"]:
         assert lg["capitulos"] == sorted(esperado_lugares.get(lg["id"], set()))
+    assert any(lg["capitulos"] for lg in datos["lugares"])
 
 
 def test_solo_cuentan_los_capitulos_completados_y_quien_no_aparece_sale_vacio() -> None:
@@ -119,10 +124,31 @@ def test_solo_cuentan_los_capitulos_completados_y_quien_no_aparece_sale_vacio() 
                               (novela_id,)).fetchone()[0]
         nuevo = insertar(con, "personaje", novela_id=novela_id, faccion_id=faccion,
                          nombre="Oriol Fuster", rol_narrativo="aliado")
+        mundo = con.execute("SELECT id FROM mundo WHERE novela_id = ?",
+                            (novela_id,)).fetchone()[0]
+        sin_escenas = insertar(con, "lugar", novela_id=novela_id, mundo_id=mundo,
+                               nombre="Cantina del muelle cuatro")
     datos = lectura.apariciones(con, novela_id)
     assert all(3 not in p["capitulos"] for p in datos["personajes"] + datos["lugares"])
     [ausente] = [p for p in datos["personajes"] if p["id"] == nuevo]
     assert ausente["capitulos"] == []
+    [vacio] = [lg for lg in datos["lugares"] if lg["id"] == sin_escenas]
+    assert vacio["capitulos"] == []
+
+
+def test_las_apariciones_de_una_novela_no_mezclan_las_de_otra() -> None:
+    """Validador de 4c18415: con una sola novela, un filtro por novela roto no se notaba."""
+    con, ruta = nueva_bd()
+    primera = crear(con, ruta, capitulos=3)
+    assert pipeline.avanzar(contexto(con, ruta, primera)) in (
+        "completada", "completada_con_avisos")
+    segunda = crear(con, ruta, capitulos=3)
+    datos = lectura.apariciones(con, segunda)
+    ids = {int(f[0]) for f in con.execute("SELECT id FROM personaje WHERE novela_id = ?",
+                                          (segunda,))}
+    assert {p["id"] for p in datos["personajes"]} == ids
+    # La segunda no ha escrito nada: nadie aparece en ningun capitulo.
+    assert all(p["capitulos"] == [] for p in datos["personajes"] + datos["lugares"])
 
 
 def test_apariciones_de_una_novela_que_no_existe_es_404(

@@ -87,7 +87,8 @@ Los agentes son el punto donde se encuentran los otros tres documentos de `docs/
 | **Extractor** | `Hecho`, `EstadoDeConocimiento`, `UsoDeConocimiento`, `EstadoObjeto`, `EstadoPersonaje`, `Evento`, `EstadoSiembra`, `EstadoHilo`, `RevelacionAmenaza` | Todo lo que el texto afirma está registrado en el grafo |
 | **Revisor de continuidad** | Informe de conflictos contra el canon | No hay contradicciones, o las hay y el pipeline para |
 | **Revisor de oficio** | Informe de voz, subtexto, función de escena y cliché | Cada criterio tiene veredicto contra su principio de [domain-knowledge.md](domain-knowledge.md) |
-| **Revisor** | El manuscrito revisado: las cuatro [pasadas globales](#pasadas-de-revisión), en orden | Las cuatro pasadas han corrido sin mezclarse y toda escena tocada ha vuelto a pasar la puerta 3 |
+| **Revisor** | El manuscrito revisado: las cuatro [pasadas globales](#pasadas-de-revisión), en orden (fuera de la v1), y la pasada del cambio del lector ([spec3, 3.8](../specs/spec3.md)) | Las cuatro pasadas han corrido sin mezclarse y toda escena tocada ha vuelto a pasar la puerta 3; en el cambio del lector, cada capítulo corregido pasa las comprobaciones del cambio y la puerta 4 |
+| **Intérprete** | El cambio de canon que pide el lector: renombrar una entidad o cambiar el valor de un hecho | El código encuentra el id entre los candidatos que recibió y el valor tiene forma de dato |
 | **Entrevistador** | El `Encargo` de una novela personalizada, con sus `ElementoPersonal` | El código no encuentra nada que falte ni que se contradiga, y el comprador lo confirma |
 
 > **Decisión sin entrevistar, 23 de septiembre de 2026.** La fila del extractor nombraba solo cinco registros, pero ya escribía los usos de conocimiento, las siembras y la revelación de la amenaza. Y nadie escribía `EstadoHilo`: todo hilo acababa la novela abierto y la puerta 5 avisaba siempre. Se le asigna al extractor, que es quien lee la prosa y ya registra las siembras (RF2-PIPE-18 de spec2). Se descartó derivarlo de los puntos de giro de la escaleta, que dicen lo planificado y no lo que la prosa hizo.
@@ -109,7 +110,8 @@ Cada agente se materializa como una **skill de Claude Code**: una carpeta en `.c
 | **Extractor** | `extraccion` | `Hecho`, `EstadoDeConocimiento`, `EstadoObjeto`, `EstadoPersonaje`, `Evento` | 26 |
 | **Revisor de continuidad** | `continuidad` | — (solo lee) | 14, 26 · 44 |
 | **Revisor de oficio** | `oficio` | — (solo informa) | 10, 19, 25, 29, 31, 33, 38 · 48 · 55 |
-| **Revisor** | `revision` | — (reescribe prosa; el estado que altere la pasada estructural vuelve a pasar por el extractor) | 11, 13, 16, 17, 19, 26, 29, 32, 36, 38 |
+| **Revisor** | `revision` | — (reescribe prosa; el estado que altere la pasada estructural vuelve a pasar por el extractor; el del cambio del lector lo aplica el código) | 11, 13, 16, 17, 19, 26, 29, 32, 36, 38 |
+| **Intérprete** | `interprete` | — (propone un cambio; el código lo valida y lo aplica) | — (entiende la petición; no decide si se aplica) |
 | **Entrevistador** | `entrevistador` | `Encargo`, `ElementoPersonal` | — (entiende respuestas y pregunta; no decide qué falta) |
 
 **El redactor y el revisor son los únicos agentes que producen algo que no es ontología.** Escriben prosa; que esa prosa se convierta en canon es trabajo del extractor. Esa asimetría es justo la razón de que el extractor exista y de que un capítulo sin extraer no esté terminado (principio 3).
@@ -499,6 +501,17 @@ Cuando el primer manuscrito completo existe, se aplican las pasadas del oficio e
 | **De estilo** | Mecánica, consistencia léxica, tics prohibidos, ortografía de nombres inventados | 36, 38 | Solo prosa |
 
 Toda escena que una pasada toque vuelve a extraerse y a pasar la puerta 3, junto con las escenas que dependen de sus hechos.
+
+### La pasada del cambio del lector
+
+> **Decisión entrevistada, 24 de septiembre de 2026.** El lector puede pedir, desde la lectura, un cambio de canon: renombrar un personaje, un lugar o un objeto, o cambiar el valor de un hecho. Un agente nuevo, el **intérprete**, convierte la petición en un cambio estructurado, y el **revisor** corrige de forma quirúrgica los capítulos que usan el dato, sobre su prosa ya aprobada. Se descartaron los cambios de estilo (no hay un dato que localizar ni una forma determinista de comprobar el resultado) y regenerar los capítulos enteros desde la escaleta (los siguientes apuntan a hechos y conocimientos del capítulo revertido, y rehacer esa parte del grafo sin regenerar lo que viene después rompía la continuidad). El detalle está en [spec3, 3.8](../specs/spec3.md).
+
+Es la primera pasada del revisor en la v1, y difiere de las cuatro globales en dos cosas, las dos escritas como decisión de la spec en 3.8:
+
+- **No vuelve a extraer ni a pasar la puerta 3.** El cambio lo aplica el código al canon, de forma coherente en todo el grafo, y el resto del estado del capítulo sigue siendo cierto. Lo que se comprueba es que la corrección aplicó el cambio y no tocó nada más (comprobaciones deterministas del cambio) y la puerta 4 entera, juez incluido.
+- **Retira un hecho a conciencia.** La regla de que una pasada de prosa no borra un hecho se mantiene: aquí no lo borra la pasada, lo cambia una persona, el lector, como cuando el autor acepta un retcon. Queda revocado con su motivo (`cambio_lector`) y el nuevo ocupa su escena.
+
+El cambio se simula en una transacción que siempre se deshace mientras los agentes trabajan, y se aplica de una vez al final (canon, textos, puertas de planificación y versión nueva), así que ningún fallo deja una novela a medias.
 
 ## Qué es código y qué es agente
 

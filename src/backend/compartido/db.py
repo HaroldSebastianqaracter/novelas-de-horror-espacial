@@ -154,6 +154,24 @@ def transaccion(
         con.execute("COMMIT")
 
 
+@contextmanager
+def simulacion(con: sqlite3.Connection) -> Generator[sqlite3.Connection]:
+    """Transaccion que SIEMPRE se deshace (spec3, RF3-CAM-07).
+
+    Para leer el grafo como quedaria tras un cambio sin aplicarlo: dentro se escribe el
+    cambio, se construye lo que haga falta y, al salir por donde sea, nada de eso queda. Toma
+    el cerrojo de escritura y pasa la guarda del worker como `transaccion`, porque escribe.
+    """
+    con.execute("BEGIN IMMEDIATE")
+    try:
+        guardia = getattr(con, "guardia", None)
+        if guardia is not None:
+            guardia(con)
+        yield con
+    finally:
+        con.execute("ROLLBACK")
+
+
 def uno(con: sqlite3.Connection, sql: str, params: Sequence[Any] = ()) -> sqlite3.Row | None:
     return con.execute(sql, params).fetchone()
 

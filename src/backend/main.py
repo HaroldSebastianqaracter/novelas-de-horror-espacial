@@ -31,6 +31,7 @@ from pydantic import BaseModel, Field, ValidationError, model_validator
 import config
 from compartido import db
 from compartido.brief import Analisis, Brief, BriefIncompleto, analizar
+from compartido.cambio import TABLAS_DE_ENTIDAD, PeticionCambio
 from compartido.grafo import lectura
 from compartido.tipos import TipoIntencion
 
@@ -87,6 +88,28 @@ PAYLOADS: dict[str, type[BaseModel]] = {
     "relanzar": PayloadRelanzar,
     "resolver_parada": PayloadResolverParada,
 }
+
+
+class CambioVista(BaseModel):
+    """Un cambio del lector y lo que se hizo con el (spec3, RF3-CAM-13)."""
+
+    id: int
+    estado: str
+    peticion: str
+    objetivo: dict[str, Any]
+    cita: dict[str, Any] | None = None
+    cambio: dict[str, Any] | None = None
+    alertas: list[str] = Field(default_factory=list[str])
+    capitulos: list[int] = Field(default_factory=list[int])
+    informe: dict[str, Any] | None = None
+    version: int | None = None
+    creado_en: str
+
+
+class Alcance(BaseModel):
+    """Los capitulos que reescribiria un cambio (spec3, RF3-CAM-05)."""
+
+    capitulos: list[int]
 
 
 class NuevaIntencion(BaseModel):
@@ -599,6 +622,13 @@ def crear_intencion(cuerpo: NuevaIntencion, con: ConEscritura) -> IntencionEncol
         if analisis is not None and not analisis.completo:
             raise BriefNoValido(analisis)
 
+    if cuerpo.tipo == "cambio_lector":
+        # spec3, RF3-CAM-01: como un brief incompleto, 422 con los campos en `detalle`.
+        try:
+            PeticionCambio.model_validate(cuerpo.payload)
+        except ValidationError as exc:
+            raise CambioNoValido(exc) from exc
+
     modelo = PAYLOADS.get(cuerpo.tipo)
     if modelo is not None:
         try:
@@ -923,6 +953,42 @@ def ver_apariciones(novela_id: int, con: Con) -> Apariciones:
     return Apariciones.model_validate(lectura.apariciones(con, novela_id))
 
 
+@app.get("/novelas/{novela_id}/cambios", response_model=list[CambioVista])
+def listar_cambios(novela_id: int, con: Con) -> list[CambioVista]:
+    _novela_o_404(con, novela_id)
+    return [CambioVista.model_validate(c) for c in lectura.cambios(con, novela_id)]
+
+
+@app.get("/novelas/{novela_id}/cambios/alcance", response_model=Alcance)
+def ver_alcance(
+    novela_id: int,
+    con: Con,
+    entidad: Literal["personajes", "lugares", "objetos"] | None = None,
+    id: int | None = Query(default=None, ge=1),
+    hecho_id: int | None = Query(default=None, ge=1),
+) -> Alcance:
+    """La misma regla que usa el worker para decidir que reescribe (RF3-CAM-05)."""
+    _novela_o_404(con, novela_id)
+    if hecho_id is None and (entidad is None or id is None):
+        raise HTTPException(status_code=422, detail="Hace falta hecho_id, o entidad e id")
+    capitulos = lectura.alcance_de_cambio(
+        con, novela_id, tabla=TABLAS_DE_ENTIDAD.get(entidad or ""), entidad_id=id,
+        hecho_id=hecho_id,
+    )
+    if capitulos is None:
+        raise HTTPException(status_code=404, detail="El objetivo no existe en la novela")
+    return Alcance(capitulos=capitulos)
+
+
+@app.get("/novelas/{novela_id}/cambios/{cambio_id}", response_model=CambioVista)
+def ver_cambio(novela_id: int, cambio_id: int, con: Con) -> CambioVista:
+    _novela_o_404(con, novela_id)
+    c = lectura.cambio(con, novela_id, cambio_id)
+    if c is None:
+        raise HTTPException(status_code=404, detail=f"No existe el cambio {cambio_id}")
+    return CambioVista.model_validate(c)
+
+
 @app.get("/novelas/{novela_id}/versiones", response_model=list[VersionResumen])
 def listar_versiones(novela_id: int, con: Con) -> list[VersionResumen]:
     """Lo que ha leido el lector, version a version (spec3, RF3-BIB-11)."""
@@ -1086,6 +1152,28 @@ async def error_brief(_: Request, exc: BriefNoValido) -> JSONResponse:
         content=Error(
             codigo="brief_incompleto", mensaje=str(exc),
             detalle=json.dumps(exc.analisis.como_dict(), ensure_ascii=False),
+        ).model_dump(),
+    )
+
+
+class CambioNoValido(Exception):
+    """Un payload de `cambio_lector` mal formado (spec3, RF3-CAM-01)."""
+
+    def __init__(self, exc: ValidationError) -> None:
+        super().__init__("El cambio pedido no tiene la forma que se espera.")
+        self.campos = [
+            {"campo": ".".join(str(x) for x in e["loc"]) or "payload", "error": e["msg"]}
+            for e in exc.errors()
+        ]
+
+
+@app.exception_handler(CambioNoValido)
+async def error_cambio(_: Request, exc: CambioNoValido) -> JSONResponse:
+    return JSONResponse(
+        status_code=422,
+        content=Error(
+            codigo="cambio_invalido", mensaje=str(exc),
+            detalle=json.dumps(exc.campos, ensure_ascii=False),
         ).model_dump(),
     )
 

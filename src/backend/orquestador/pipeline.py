@@ -32,6 +32,7 @@ worker muere ahi, sin ocasion de revertir, la recuperacion lo hace al arrancar
 
 from __future__ import annotations
 
+import json
 import logging
 import sqlite3
 from collections.abc import Callable
@@ -42,10 +43,14 @@ from typing import Any
 from pydantic import BaseModel, ValidationError
 
 from compartido import politica
+from compartido.cambio import Cambio
 from compartido.contexto import Paquete, Presupuesto, PresupuestoExcedido
-from compartido.db import transaccion
+from compartido.db import simulacion, transaccion
 from compartido.grafo import emitir_evento, lectura
+from compartido.puerta_base import ResultadoPuerta
 from compartido.puerto import AgenteInterrumpido, PuertoAgente
+from compartido.tipos import como_dict, como_lista
+from compartido.vectores import purgar_descartes
 from config import (
     MAX_INTENTOS_CAPITULO,
     OFICIO_MUESTRAS,
@@ -71,6 +76,8 @@ from tareas.extraccion.esquemas import (
     PALABRAS_RESUMEN_BREVE,
     SalidaExtraccion,
 )
+from tareas.interprete import servicio as s_interprete
+from tareas.interprete.esquemas import SalidaInterprete
 from tareas.mundo import servicio as s_mundo
 from tareas.mundo.esquemas import SalidaMundo
 from tareas.oficio import puerta as p_oficio
@@ -78,7 +85,11 @@ from tareas.oficio import servicio as s_oficio
 from tareas.oficio.esquemas import SalidaOficio
 from tareas.redaccion import servicio as s_redaccion
 from tareas.redaccion.esquemas import SalidaRedaccion
+from tareas.revision import puerta as p_revision
+from tareas.revision import servicio as s_revision
+from tareas.revision.esquemas import SalidaRevision
 
+from . import cambios as o_cambios
 from . import cola, estados, fallo, versiones, vigencia
 from .puerta_global import evaluar as evaluar_puerta_global
 
@@ -221,15 +232,21 @@ def _comprobar_parada(ctx: Contexto) -> None:
 def _registrar_puerta(ctx: Contexto, resultado: Any, capitulo: int | None = None,
                       intento: int | None = None) -> None:
     with transaccion(ctx.con):
-        resultado.registrar(
-            ctx.con, ctx.novela_id, capitulo=capitulo, intento=intento,
-            huella=vigencia.huella(ctx.con, ctx.novela_id, resultado.puerta),
-        )
-        emitir_evento(
-            ctx.con, ctx.novela_id, "puerta_evaluada", puerta=resultado.puerta,
-            veredicto=resultado.veredicto, capitulo=capitulo,
-            conflictos=[str(c) for c in resultado.conflictos[:10]],
-        )
+        _registrar_puerta_en(ctx, resultado, capitulo=capitulo, intento=intento)
+
+
+def _registrar_puerta_en(ctx: Contexto, resultado: Any, capitulo: int | None = None,
+                         intento: int | None = None) -> None:
+    """`_registrar_puerta` dentro de la transaccion del llamante."""
+    resultado.registrar(
+        ctx.con, ctx.novela_id, capitulo=capitulo, intento=intento,
+        huella=vigencia.huella(ctx.con, ctx.novela_id, resultado.puerta),
+    )
+    emitir_evento(
+        ctx.con, ctx.novela_id, "puerta_evaluada", puerta=resultado.puerta,
+        veredicto=resultado.veredicto, capitulo=capitulo,
+        conflictos=[str(c) for c in resultado.conflictos[:10]],
+    )
 
 
 def _abrir_parada(ctx: Contexto, tipo: str, informe: dict[str, Any],
@@ -500,20 +517,7 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                     ctx.con, ctx.novela_id, numero, texto_completo, mecanica,
                     presupuesto=ctx.presupuesto,
                 )
-                # El juez vota (spec3, RF3-JUE-02): con una muestra, el veredicto de un
-                # capitulo cambiaba de una llamada a otra.
-                juicios = [
-                    _invocar(ctx, "oficio", paquete_oficio, SalidaOficio, capitulo=numero,
-                             intento=intento)[0]
-                    for _ in range(OFICIO_MUESTRAS)
-                ]
-                if p_oficio.discrepan(juicios):
-                    juicios += [
-                        _invocar(ctx, "oficio", paquete_oficio, SalidaOficio, capitulo=numero,
-                                 intento=intento)[0]
-                        for _ in range(OFICIO_MUESTRAS_SI_DISCREPAN - len(juicios))
-                    ]
-                juicio, votos = p_oficio.votar(juicios)
+                juicio, votos = _juzgar(ctx, paquete_oficio, numero, intento)
 
             # La puerta 4 se registra entera, mecanica y juicio (RF2-PIPE-13).
             oficio = p_oficio.combinar(mecanica, juicio, votos)
@@ -560,6 +564,25 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
     finally:
         if a_medias:
             _revertir_a_medias(ctx, numero)
+
+
+def _juzgar(
+    ctx: Contexto, paquete_oficio: Any, numero: int, intento: int
+) -> tuple[SalidaOficio, dict[str, tuple[int, int]]]:
+    """El juez vota (spec3, RF3-JUE-02): con una muestra, el veredicto de un capitulo cambiaba
+    de una llamada a otra. Tres muestras, y dos mas si discrepan."""
+    juicios = [
+        _invocar(ctx, "oficio", paquete_oficio, SalidaOficio, capitulo=numero,
+                 intento=intento)[0]
+        for _ in range(OFICIO_MUESTRAS)
+    ]
+    if p_oficio.discrepan(juicios):
+        juicios += [
+            _invocar(ctx, "oficio", paquete_oficio, SalidaOficio, capitulo=numero,
+                     intento=intento)[0]
+            for _ in range(OFICIO_MUESTRAS_SI_DISCREPAN - len(juicios))
+        ]
+    return p_oficio.votar(juicios)
 
 
 def _segunda_opinion(
@@ -770,16 +793,7 @@ def _avanzar(ctx: Contexto) -> str:
             exportar_a_langfuse(ctx)
             siguiente = lectura.ultimo_capitulo_completado(ctx.con, ctx.novela_id) + 1
 
-        with transaccion(ctx.con):
-            estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_5")
-        global_ = evaluar_puerta_global(ctx.con, ctx.novela_id)
-        _registrar_puerta(ctx, global_)
-        with transaccion(ctx.con):
-            suceso = "terminado_limpio" if not global_.conflictos else "terminado_con_avisos"
-            final = estados.transicion(ctx.con, ctx.novela_id, suceso, fase=None)
-            emitir_evento(ctx.con, ctx.novela_id, "completada", avisos=len(global_.conflictos))
-            # Lo que leera el lector, en la misma transaccion que la completa (RF3-BIB-12).
-            versiones.publicar(ctx.con, ctx.novela_id)
+        final, _ = _completar(ctx)
         return final
 
     except Detenido:
@@ -794,6 +808,35 @@ def _avanzar(ctx: Contexto) -> str:
             estados.transicion(ctx.con, ctx.novela_id, "parar", fase=None)
             emitir_evento(ctx.con, ctx.novela_id, "detenida")
         return "detenida"
+
+
+def _completar(
+    ctx: Contexto,
+    *,
+    motivo: versiones.Motivo | None = None,
+    detalle: str | None = None,
+    aplicar: Callable[[], None] | None = None,
+) -> tuple[str, int | None]:
+    """Puerta 5, la transicion a completada y la version, en UNA transaccion (RF3-BIB-12).
+
+    Es el final de la generacion y el del cambio del lector. `aplicar` corre al principio de
+    esa misma transaccion: el cambio escribe ahi su canon y sus textos (spec3, RF3-CAM-11), y si
+    lanza, no queda nada. Devuelve el estado final y el numero de la version publicada, o None
+    si el texto no cambio.
+    """
+    with transaccion(ctx.con):
+        estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_5")
+    with transaccion(ctx.con):
+        if aplicar is not None:
+            aplicar()
+        global_ = evaluar_puerta_global(ctx.con, ctx.novela_id)
+        _registrar_puerta_en(ctx, global_)
+        suceso = "terminado_limpio" if not global_.conflictos else "terminado_con_avisos"
+        final = estados.transicion(ctx.con, ctx.novela_id, suceso, fase=None)
+        emitir_evento(ctx.con, ctx.novela_id, "completada", avisos=len(global_.conflictos))
+        # Lo que leera el lector, en la misma transaccion que la completa (RF3-BIB-12).
+        numero = versiones.publicar(ctx.con, ctx.novela_id, motivo=motivo, detalle=detalle)
+    return final, numero
 
 
 def _fase_pendiente_de_planificacion(ctx: Contexto) -> bool:
@@ -817,3 +860,223 @@ def _asegurar_activa(ctx: Contexto, suceso: str) -> None:
                 )
         else:
             estados.transicion(ctx.con, ctx.novela_id, suceso, fase=None)
+
+
+# --- El cambio del lector (specs/spec3.md, 3.8) ------------------------------------------------
+
+
+class CambioImposible(Exception):
+    """El paso final del cambio no se puede confirmar: su transaccion se deshace (RF3-CAM-12)."""
+
+    def __init__(self, motivo: str, problemas: list[str]) -> None:
+        super().__init__(motivo)
+        self.problemas = problemas
+
+
+def interpretar_cambio(
+    ctx: Contexto, objetivo: dict[str, Any], peticion: str, cita: dict[str, Any] | None,
+    candidatos: s_interprete.Candidatos,
+) -> SalidaInterprete:
+    """La llamada al interprete (RF3-CAM-03). Lo que devuelve lo valida `s_interprete.validar`."""
+    paquete = s_interprete.paquete(objetivo, peticion, cita, candidatos)
+    salida, _ = _invocar(ctx, "interprete", paquete, SalidaInterprete)
+    return salida
+
+
+def _planificacion_sin_vigencia(ctx: Contexto) -> list[tuple[int, ResultadoPuerta]]:
+    """Las puertas 1 y 2 que el canon actual deja sin vigencia, evaluadas de nuevo."""
+    salida: list[tuple[int, ResultadoPuerta]] = []
+    for puerta, evaluar in ((1, p_estructura.evaluar), (2, p_escaleta.evaluar)):
+        if not vigencia.puerta_vigente(ctx.con, ctx.novela_id, puerta):
+            salida.append((puerta, evaluar(ctx.con, ctx.novela_id)))
+    return salida
+
+
+def _fallos(evaluadas: list[tuple[int, ResultadoPuerta]]) -> list[str]:
+    return [f"puerta {puerta}: [{c.comprobacion}] {c.descripcion}"
+            for puerta, r in evaluadas for c in r.bloqueantes]
+
+
+def comprobar_planificacion(ctx: Contexto, cambio: Cambio) -> list[str]:
+    """Antes de gastar nada: aplicado en simulacion, ¿el cambio deja pasar las puertas 1 y 2?
+
+    Devuelve lo que fallaria, vacio si nada (spec3, RF3-CAM-04).
+    """
+    with simulacion(ctx.con):
+        o_cambios.aplicar_canon(ctx.con, ctx.novela_id, cambio)
+        return _fallos(_planificacion_sin_vigencia(ctx))
+
+
+def aplicar_cambio(ctx: Contexto, cambio_id: int) -> str:
+    """Reescribe los capitulos del alcance y, si todos pasan, confirma el cambio de una vez.
+
+    La ejecucion ya esta en `generando` (la transicion `cambio_lector` la hace el worker al
+    cerrar la intencion). Devuelve el estado final. Nada se aplica hasta el ultimo paso: un
+    fracaso, un `parar` o una caida no dejan nada a medias (RF3-CAM-07, RF3-CAM-12).
+    """
+    try:
+        return _aplicar_cambio(ctx, cambio_id)
+    finally:
+        exportar_a_langfuse(ctx)
+
+
+def _marcar_cambio(ctx: Contexto, cambio_id: int, estado: str, **campos: Any) -> None:
+    asignaciones = ", ".join(["estado = ?", *(f"{c} = ?" for c in campos),
+                              "actualizado_en = datetime('now')"])
+    valores = [estado, *(json.dumps(v, ensure_ascii=False) if isinstance(v, dict | list)
+                         else v for v in campos.values())]
+    ctx.con.execute(f"UPDATE cambio_lector SET {asignaciones} WHERE id = ?",
+                    (*valores, cambio_id))
+
+
+def _aplicar_cambio(ctx: Contexto, cambio_id: int) -> str:
+    registro = lectura.cambio(ctx.con, ctx.novela_id, cambio_id) or {}
+    cambio = Cambio.desde_dict(como_dict(registro.get("cambio")))
+    capitulos = [int(c) for c in como_lista(registro.get("capitulos"))]
+    corregidos: dict[int, SalidaRevision] = {}
+    try:
+        for numero in capitulos:
+            revisado = _revisar_capitulo(ctx, cambio, numero)
+            if not isinstance(revisado, SalidaRevision):
+                return _fracasar(ctx, cambio_id, revisado)
+            corregidos[numero] = revisado
+        try:
+            final, version = _completar(
+                ctx, motivo="cambio_lector", detalle=str(registro.get("peticion") or ""),
+                aplicar=partial(_confirmar_cambio, ctx, cambio, corregidos),
+            )
+        except CambioImposible as exc:
+            return _fracasar(ctx, cambio_id, {"motivo": str(exc), "problemas": exc.problemas})
+        with transaccion(ctx.con):
+            _marcar_cambio(ctx, cambio_id, "aplicado", version=version)
+            emitir_evento(ctx.con, ctx.novela_id, "cambio_aplicado", cambio_id=cambio_id,
+                          version=version, capitulos=sorted(corregidos))
+        for numero in sorted(corregidos):
+            _indexar(ctx, numero)
+        return final
+    except (Detenido, AgenteInterrumpido):
+        with transaccion(ctx.con):
+            _marcar_cambio(ctx, cambio_id, "interrumpido")
+            estados.transicion(ctx.con, ctx.novela_id, "parar", fase=None)
+            emitir_evento(ctx.con, ctx.novela_id, "detenida")
+        return "detenida"
+    except Exception as exc:
+        try:
+            with transaccion(ctx.con):
+                _marcar_cambio(ctx, cambio_id, "fallido",
+                               informe={"motivo": f"{type(exc).__name__}: {exc}"[:500]})
+        except Exception:  # ya estamos en el camino de error
+            log.exception("No se pudo marcar el cambio %s como fallido", cambio_id)
+        raise
+
+
+def _fracasar(ctx: Contexto, cambio_id: int, informe: dict[str, Any]) -> str:
+    """El cambio no se aplica: la novela vuelve a su estado completado sin version nueva."""
+    with transaccion(ctx.con):
+        _marcar_cambio(ctx, cambio_id, "fallido", informe=informe)
+        emitir_evento(ctx.con, ctx.novela_id, "cambio_fallido", cambio_id=cambio_id,
+                      informe=informe)
+    final, _ = _completar(ctx)
+    return final
+
+
+def _revisar_capitulo(
+    ctx: Contexto, cambio: Cambio, numero: int
+) -> SalidaRevision | dict[str, Any]:
+    """El revisor corrige el capitulo y la puerta 4 lo juzga, hasta tres veces (RF3-CAM-08/09).
+
+    Devuelve la correccion aprobada, o el informe de por que no hubo ninguna.
+    """
+    viejo = o_cambios.textos_del_capitulo(ctx.con, ctx.novela_id, numero)
+    criterios: list[dict[str, Any]] | None = None
+    informe: dict[str, Any] = {}
+    for intento in range(1, ctx.cfg_max_intentos + 1):
+        with transaccion(ctx.con):
+            estados.fijar_fase(ctx.con, ctx.novela_id, "revision", capitulo=numero,
+                               intento=intento)
+        with simulacion(ctx.con):
+            o_cambios.aplicar_canon(ctx.con, ctx.novela_id, cambio)
+            paquete = s_revision.paquete(ctx.con, ctx.novela_id, numero, cambio, viejo,
+                                         criterios_incumplidos=criterios)
+        salida, _ = _invocar(ctx, "revision", paquete, SalidaRevision, capitulo=numero,
+                             intento=intento)
+        nuevo = salida.textos()
+        comprobado = p_revision.comprobar(
+            cambio, numero, viejo, nuevo, (salida.resumen, salida.resumen_breve), salida.citas,
+        )
+        texto = "\n\n".join(nuevo[k] for k in sorted(nuevo))
+        mecanica = comprobado
+        paquete_oficio = None
+        if comprobado.pasa:
+            try:
+                with simulacion(ctx.con):
+                    o_cambios.aplicar_canon(ctx.con, ctx.novela_id, cambio)
+                    propia = p_oficio.evaluar(ctx.con, ctx.novela_id, numero, texto)
+                    if propia.pasa:
+                        paquete_oficio = s_oficio.paquete(
+                            ctx.con, ctx.novela_id, numero, texto, propia,
+                            presupuesto=ctx.presupuesto,
+                        )
+            except PresupuestoExcedido as exc:
+                return {"motivo": f"El paquete del juez del capitulo {numero} no cabe.",
+                        "capitulo": numero, "presupuesto": exc.informe()}
+            mecanica = ResultadoPuerta(puerta=4, conflictos=[*comprobado.conflictos,
+                                                             *propia.conflictos])
+        juicio: SalidaOficio | None = None
+        votos: dict[str, tuple[int, int]] | None = None
+        if paquete_oficio is not None:
+            with transaccion(ctx.con):
+                estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_4", capitulo=numero,
+                                   intento=intento)
+            juicio, votos = _juzgar(ctx, paquete_oficio, numero, intento)
+        oficio = p_oficio.combinar(mecanica, juicio, votos)
+        _registrar_puerta(ctx, oficio, capitulo=numero, intento=intento)
+        ultimo = intento == ctx.cfg_max_intentos
+        if not oficio.pasa:
+            with transaccion(ctx.con):
+                _registrar_politica(ctx, mecanica, numero, intento, texto,
+                                    "parar" if ultimo else "reintentar")
+        if oficio.pasa:
+            return salida
+        criterios = (
+            [v.model_dump() for v in juicio.incumplidos] if juicio is not None
+            else [{"criterio": c.comprobacion, "sugerencia": c.descripcion}
+                  for c in mecanica.bloqueantes]
+        )
+        informe = {
+            "motivo": (
+                f"Tres intentos sin que la correccion del capitulo {numero} pasara las "
+                "comprobaciones del cambio y la puerta de oficio."
+            ),
+            "capitulo": numero,
+            "criterios_incumplidos": criterios,
+            "mecanica": mecanica.informe(),
+        }
+    return informe
+
+
+def _confirmar_cambio(ctx: Contexto, cambio: Cambio, corregidos: dict[int, SalidaRevision]
+                      ) -> None:
+    """El paso final, dentro de la transaccion de `_completar` (RF3-CAM-11)."""
+    o_cambios.aplicar_canon(ctx.con, ctx.novela_id, cambio,
+                            citas={n: s.citas for n, s in corregidos.items()})
+    for numero, salida in sorted(corregidos.items()):
+        if o_cambios.guardar_textos(ctx.con, ctx.novela_id, numero, salida.textos()):
+            s_redaccion.compilar(ctx.con, ctx.novela_id, numero)
+        ctx.con.execute(
+            "UPDATE capitulo SET resumen = ?, resumen_breve = ? WHERE novela_id = ? "
+            "AND numero = ?",
+            (salida.resumen, salida.resumen_breve, ctx.novela_id, numero),
+        )
+    evaluadas = _planificacion_sin_vigencia(ctx)
+    fallos = _fallos(evaluadas)
+    if fallos:
+        raise CambioImposible(
+            "El cambio deja sin pasar la planificacion de la novela.", fallos
+        )
+    for _, resultado in evaluadas:
+        _registrar_puerta_en(ctx, resultado)
+    # Lo que acaba de quedar descartado sale del indice en esta misma transaccion.
+    error = purgar_descartes(ctx.con)
+    if error:
+        emitir_evento(ctx.con, ctx.novela_id, "indice_fallo", operacion="purgar", error=error)

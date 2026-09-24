@@ -7,6 +7,7 @@ va leyendo el estado. Sirve para ver el pipeline correr sin montar nada mas.
     python demo.py --brief ../../ejemplos/brief-ejemplo.json  # una novela personalizada
     python demo.py --arrancar # arrancar la que ya existe, sin crear otra
     python demo.py --ver      # solo mirar
+    python demo.py --cambio "Que se llame «Kira»" --entidad personajes:4  # cambio del lector
 """
 
 from __future__ import annotations
@@ -21,6 +22,7 @@ from pathlib import Path
 import config
 from compartido import db
 from compartido.brief import Brief, analizar
+from compartido.cambio import PeticionCambio
 from compartido.db import transaccion
 from compartido.grafo import lectura
 from compartido.tipos import como_dict
@@ -106,6 +108,44 @@ def arrancar(ruta: Path, novela_id: int) -> None:
         with transaccion(con):
             cola.encolar(con, "arrancar", novela_id)
         print(f"Novela {novela_id}: arrancar encolado.")
+    finally:
+        con.close()
+
+
+def pedir_cambio(
+    ruta: Path, novela_id: int, peticion: str, *, entidad: str | None = None,
+    hecho: int | None = None, cita_capitulo: int | None = None, cita: str | None = None,
+) -> bool:
+    """Encola un cambio del lector sobre la ultima version (spec3, RF3-CAM-15).
+
+    Es la variante por linea de comandos del cambio que la web pide desde la pagina.
+    """
+    if entidad:
+        tipo, _, id_ = entidad.partition(":")
+        objetivo: dict[str, object] = {"tipo": "entidad", "entidad": tipo, "id": int(id_ or 0)}
+    elif hecho is not None:
+        objetivo = {"tipo": "hecho", "hecho_id": hecho}
+    else:
+        objetivo = {"tipo": "fragmento"}
+    con = _abrir(ruta)
+    try:
+        ultima = con.execute(
+            "SELECT MAX(numero) FROM novela_version WHERE novela_id = ?", (novela_id,)
+        ).fetchone()[0]
+        payload: dict[str, object] = {
+            "version_base": int(ultima or 0), "objetivo": objetivo, "peticion": peticion,
+        }
+        if cita_capitulo is not None:
+            payload["cita"] = {"capitulo": cita_capitulo, "texto": cita or ""}
+        try:
+            PeticionCambio.model_validate(payload)
+        except ValueError as exc:
+            print(f"El cambio no tiene la forma que se espera:\n{exc}", file=sys.stderr)
+            return False
+        with transaccion(con):
+            cola.encolar(con, "cambio_lector", novela_id, **payload)
+        print(f"Novela {novela_id}: cambio encolado sobre la version {payload['version_base']}.")
+        return True
     finally:
         con.close()
 
@@ -230,6 +270,16 @@ def main() -> int:
         help="resolver la parada de continuidad dando por sabido lo que el personaje uso",
     )
     parser.add_argument("--leer", type=int, default=None, metavar="N")
+    parser.add_argument("--cambio", default=None, metavar="PETICION",
+                        help="pedir un cambio del lector sobre la ultima version (RF3-CAM-15)")
+    parser.add_argument("--entidad", default=None, metavar="TIPO:ID",
+                        help="con --cambio: personajes:N, lugares:N u objetos:N")
+    parser.add_argument("--hecho", type=int, default=None, metavar="ID",
+                        help="con --cambio: el hecho que cambia")
+    parser.add_argument("--cita-capitulo", type=int, default=None, metavar="N",
+                        help="con --cambio: el capitulo del fragmento seleccionado")
+    parser.add_argument("--cita", default=None, metavar="TEXTO",
+                        help="con --cambio: el fragmento seleccionado")
     parser.add_argument("--segundos", type=int, default=3600, help="cuanto tiempo mirar")
     parser.add_argument(
         "--brief", type=Path, default=None, metavar="FICHERO",
@@ -256,6 +306,15 @@ def main() -> int:
         return 0
     if args.leer is not None:
         leer(ruta, args.novela, args.leer)
+        return 0
+    if args.cambio is not None:
+        novela_id = args.novela or _ultima(ruta)
+        if not novela_id or not pedir_cambio(
+            ruta, novela_id, args.cambio, entidad=args.entidad, hecho=args.hecho,
+            cita_capitulo=args.cita_capitulo, cita=args.cita,
+        ):
+            return 1
+        mirar(ruta, novela_id, args.segundos)
         return 0
     if args.parar:
         parar(ruta, args.novela or _ultima(ruta))

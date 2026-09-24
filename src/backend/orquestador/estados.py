@@ -38,6 +38,11 @@ TRANSICIONES: dict[tuple[str, str], EstadoEjecucion] = {
     ("escaletando", "conflicto"): "parada",
     ("generando", "conflicto"): "parada",
 
+    # El cambio del lector (spec3, RF3-CAM-06): reescribe capitulos de una novela completa y
+    # termina por las mismas dos transiciones que la generacion.
+    ("completada", "cambio_lector"): "generando",
+    ("completada_con_avisos", "cambio_lector"): "generando",
+
     ("generando", "terminado_limpio"): "completada",
     ("generando", "terminado_con_avisos"): "completada_con_avisos",
 
@@ -66,6 +71,9 @@ ACCIONES_DE_PARADA = frozenset(accion for _, accion in RESOLUCIONES)
 ESTADOS_QUE_ADMITEN_RELANZAR = frozenset({
     "detenida", "completada", "completada_con_avisos", "error",
 })
+
+#: Desde donde se admite un cambio del lector (spec3, RF3-CAM-02).
+ESTADOS_QUE_ADMITEN_CAMBIO = frozenset({"completada", "completada_con_avisos"})
 
 #: `arrancar` solo tiene sentido si queda algo por hacer.
 ESTADOS_QUE_ADMITEN_ARRANCAR = frozenset({"configurada", "detenida", "error"})

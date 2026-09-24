@@ -47,6 +47,10 @@ def _instrucciones(con: sqlite3.Connection, novela_id: int, capitulo: int) -> st
     if vetadas:
         lineas += ["", "PALABRAS VETADAS (una sola aparicion devuelve el capitulo entero): "
                    + ", ".join(vetadas) + "."]
+    fijados = lectura.cambios_aplicados(con, novela_id)
+    if fijados:
+        # spec3, RF3-CAM-14: sin esto, relanzar tras un cambio podia volver al valor viejo.
+        lineas += ["", "LO QUE FIJO EL LECTOR (respetalo siempre): " + " ".join(fijados)]
     brief = lectura.brief(con, novela_id)
     if brief is not None:
         # RF3-PER-03: el protagonista es una persona real y la novela es su regalo.

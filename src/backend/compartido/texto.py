@@ -94,6 +94,18 @@ def contiene_termino(texto: str, termino: str) -> bool:
     return aparece_en(palabras(texto), termino)
 
 
+def veces_termino(texto: str, termino: str) -> int:
+    """Cuantas veces aparece el termino como palabras completas (spec3, RF3-CAM-09)."""
+    presentes, buscadas = palabras(texto), palabras(termino)
+    n = len(buscadas)
+    if not n:
+        return 0
+    return sum(
+        all(presentes[i + k] & buscadas[k] for k in range(n))
+        for i in range(len(presentes) - n + 1)
+    )
+
+
 def aparece_en(presentes: list[frozenset[str]], termino: str) -> bool:
     """`contiene_termino` sobre un texto ya partido con `palabras`.
 
@@ -106,4 +118,38 @@ def aparece_en(presentes: list[frozenset[str]], termino: str) -> bool:
     return any(
         all(presentes[i + k] & buscadas[k] for k in range(n))
         for i in range(len(presentes) - n + 1)
+    )
+
+
+# --- Nombres propios en la prosa (spec3, RF3-VAL-01, RF3-VAL-03 y RF3-CAM-05) -----------------
+
+#: Una palabra de un nombre: solo letras.
+PALABRA_DE_NOMBRE = re.compile(r"[^\W\d_]+")
+#: Lo que abre una frase o un dialogo: ahi va mayuscula cualquier palabra, y «Cortes» (heridas)
+#: y el apellido «Cortés» solo se distinguen por la tilde. Tras «:» y «;» va minuscula, asi que
+#: una mayuscula ahi es un nombre propio; salvo tras dos puntos que abren una cita o un dialogo
+#: («Le dijo: —Tomas el primer turno»), que llevan mayuscula (validador de a5d0355).
+INICIO_DE_FRASE = re.compile(
+    r"(?:^|[.!?¿¡…\n]|:\s*[«\"“‘'\-–—])[\s«»\"“”‘’'\-–—*(\[]*$")
+MINIMO_NOMBRE = 3
+#: Partes de un nombre que no lo identifican: «Pedro del Río» no se nombra con «del».
+PARTICULAS_DE_NOMBRE = frozenset({"de", "del", "la", "las", "los", "el", "y", "e", "san", "santa"})
+
+
+def partes_de_nombre(nombre: str) -> list[str]:
+    """Las palabras que identifican un nombre: de tres letras o mas y sin particulas."""
+    return [
+        p for p in PALABRA_DE_NOMBRE.findall(nombre)
+        if len(p) >= MINIMO_NOMBRE and normalizar(p) not in PARTICULAS_DE_NOMBRE
+    ]
+
+
+def nombra(texto: str, nombre: str) -> bool:
+    """Si la prosa nombra a alguien: una palabra de su nombre, sin contar las particulas, escrita
+    con mayuscula. «La luz parpadeo» no nombra a Luz, ni «el tunel del sector» a Pedro del Rio.
+    Las tildes no cuentan: un «Tomas» mal escrito tambien nombra a Tomás."""
+    buscadas = {normalizar(p) for p in partes_de_nombre(nombre)} or {normalizar(nombre)}
+    return any(
+        m.group(0)[0].isupper() and normalizar(m.group(0)) in buscadas
+        for m in PALABRA_DE_NOMBRE.finditer(texto)
     )

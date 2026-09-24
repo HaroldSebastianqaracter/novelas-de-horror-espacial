@@ -57,6 +57,14 @@ Otras cosas que sabe hacer el lanzador:
 Sirven, en orden, para mirar lo que ya hay sin crear nada, imprimir un capítulo, detener la
 generación y rehacerla desde un capítulo concreto.
 
+Y el cambio del lector sobre una novela completada (spec3, 3.8), que la web pide desde la
+propia página:
+
+```bat
+.venv\Scripts\python.exe demo.py --cambio "Que se llame «Kira»" --entidad personajes:4
+.venv\Scripts\python.exe demo.py --cambio "La esclusa queda a «cuarenta metros»" --hecho 11
+```
+
 **Ventana 3, la API**, si quieres verlo por HTTP. Es opcional.
 
 ```bat

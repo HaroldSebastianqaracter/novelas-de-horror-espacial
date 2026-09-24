@@ -547,6 +547,81 @@ def entrevistador(entrada: str, agente: str) -> dict[str, Any]:
     return {"actualizaciones": actualizaciones, "pregunta": pregunta}
 
 
+# --- El cambio del lector (specs/spec3.md, 3.8) ------------------------------------------------
+#
+# El interprete toma como valor nuevo lo que la peticion pone entre comillas latinas, o su
+# ultima palabra, y lo aplica al primer candidato. El revisor sustituye lo viejo por lo nuevo
+# como palabra completa y cita cada sitio. Nada de esto sabe castellano: basta para recorrer el
+# camino entero con el puerto falso.
+
+_PETICION = re.compile(r"<<<PETICION_DEL_LECTOR\n(.*?)\nPETICION_DEL_LECTOR>>>", re.S)
+_CANDIDATO = re.compile(
+    r"^- (?:entidad=(\w+) entidad_id=(\d+): .*|hecho_id=(\d+): .*)$", re.M)
+_NO_ADMISIBLES = ("triste", "alegre", "estilo", "tono")
+
+
+def interprete(entrada: str, agente: str) -> dict[str, Any]:
+    m = _PETICION.search(entrada)
+    peticion = m.group(1).strip() if m else ""
+    comillas = re.search(r"«([^»]+)»", peticion)
+    palabras = re.findall(r"[^\W\d_][\w'-]*", peticion)
+    valor = comillas.group(1) if comillas else (palabras[-1] if palabras else "")
+    candidato = _CANDIDATO.search(_bloque(entrada, "CANDIDATOS"))
+    if candidato is None or not valor or any(p in peticion.lower() for p in _NO_ADMISIBLES):
+        return {"admisible": False, "motivo": "No es un cambio de un dato de la novela."}
+    if candidato.group(3):
+        return {"admisible": True, "motivo": "Cambia el valor del hecho.",
+                "tipo": "cambiar_hecho", "hecho_id": int(candidato.group(3)),
+                "valor_nuevo": valor}
+    return {"admisible": True, "motivo": "Renombra la entidad.", "tipo": "renombrar",
+            "entidad": candidato.group(1), "entidad_id": int(candidato.group(2)),
+            "nombre_nuevo": valor}
+
+
+def revision(entrada: str, agente: str) -> dict[str, Any]:
+    from compartido.cambio import mapa_de_nombres, sustituir_nombres
+
+    cambio = _bloque(entrada, "EL CAMBIO")
+    nombre = re.search(r"«([^»]+)» se llama ahora «([^»]+)»", cambio)
+    dato = re.search(r"vale ahora «([^»]+)» \(antes, «([^»]+)»\)", cambio)
+    if nombre:
+        mapa = mapa_de_nombres(nombre.group(1), nombre.group(2))
+        nuevo_valor = nombre.group(2)
+    elif dato:
+        mapa = {dato.group(2): dato.group(1)}
+        nuevo_valor = dato.group(1)
+    else:
+        mapa, nuevo_valor = {}, ""
+
+    def corregir(texto: str) -> str:
+        return sustituir_nombres(texto, mapa)
+
+    prosa = _bloque(entrada, "PROSA APROBADA")
+    escenas: list[dict[str, Any]] = []
+    citas: list[str] = []
+    for orden, texto in re.findall(r"\[escena (\d+)\]\n(.*?)(?=\n\n\[escena \d+\]|\Z)",
+                                   prosa, re.S):
+        corregido = corregir(texto.strip())
+        escenas.append({"orden": int(orden), "texto": corregido})
+        if corregido != texto.strip() and nuevo_valor:
+            i = corregido.find(nuevo_valor)
+            cita = corregido[max(0, i - 20):i + len(nuevo_valor) + 20]
+            if cita not in texto:
+                citas.append(cita)
+    resumenes = _bloque(entrada, "RESUMENES DEL CAPITULO")
+    resumen = re.search(r"Resumen: (.*?)\n\nResumen breve:", resumenes, re.S)
+    breve = re.search(r"Resumen breve: (.*)", resumenes, re.S)
+    relleno = "El capitulo sigue como estaba."
+    return {
+        "escenas": escenas,
+        "resumen": corregir(resumen.group(1).strip()) if resumen and resumen.group(1).strip()
+        else relleno,
+        "resumen_breve": corregir(breve.group(1).strip()) if breve and breve.group(1).strip()
+        else relleno,
+        "citas": citas,
+    }
+
+
 TODOS = {
     "arquitecto": arquitecto,
     "mundo": mundo,
@@ -558,4 +633,6 @@ TODOS = {
     "oficio": oficio,
     "continuidad": continuidad,
     "entrevistador": entrevistador,
+    "interprete": interprete,
+    "revision": revision,
 }

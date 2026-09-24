@@ -10,7 +10,8 @@ trabaja sobre el brief en memoria. Tres piezas:
   campos de texto, el valor tiene que ser sus propias palabras; en la edad y los capitulos, el
   numero tiene que estar en la cita; en los enumerados, la cita tiene que nombrar el valor o
   una palabra que lo signifique. Una cita real con un valor inventado no pasa.
-* `alertas_de_inyeccion`: busqueda determinista de patrones de inyeccion en el texto libre.
+* `alertas_de_inyeccion`: busqueda determinista de patrones de inyeccion en el texto libre
+  (vive en `compartido.inyeccion`, que comparte con el cambio del lector).
 """
 
 from __future__ import annotations
@@ -24,6 +25,7 @@ from pydantic import ValidationError
 
 from compartido.brief import INTENSIDADES, Analisis, Brief, describir_intensidad
 from compartido.grafo.escritura import normalizar
+from compartido.inyeccion import alertas_de_inyeccion
 from compartido.texto import contiene_termino
 
 from .esquemas import Actualizacion, SalidaEntrevistador
@@ -80,22 +82,6 @@ ANCLAS: dict[str, dict[str, tuple[str, ...]]] = {
         "supervivencia": ("supervivencia", "sobrevivir", "escasez"),
     },
 }
-
-#: Patrones de inyeccion conocidos. Es una lista cerrada: un verde significa «ninguno de los
-#: conocidos», no «texto limpio» (validators.md, puntos ciegos). El filtro de campos de
-#: `aplicar` no depende de esta lista.
-PATRONES_INYECCION: tuple[tuple[str, str], ...] = (
-    ("ignora_instrucciones",
-     r"\b(ignora|olvida|descarta|salta)\w*\s+(\w+\s+){0,3}"
-     r"(instrucciones|reglas|indicaciones|normas|restricciones)"),
-    ("cambio_de_rol", r"\b(a partir de ahora|desde ahora)\s+(eres|seras|actua)"),
-    ("prompt_del_sistema", r"\b(prompt|mensaje|instrucciones)\s+(del|de)\s+sistema\b"),
-    ("marcador_de_rol",
-     r"(<\|?\s*(system|assistant|im_start)|\[/?(inst|system)\]|^\s*(system|assistant)\s*:)"),
-    ("orden_de_salida", r"\b(responde|devuelve|escribe)\s+(solo|unicamente)\b"),
-    ("orden_de_contenido",
-     r"\b(escribe|incluye|anade|pon|mete)\s+(\w+\s+){0,3}(contenido|escenas?|capitulos?)\b"),
-)
 
 INICIO_TEXTO = "<<<TEXTO_DEL_COMPRADOR"
 FIN_TEXTO = "TEXTO_DEL_COMPRADOR>>>"
@@ -328,15 +314,6 @@ def _motivo_de_descarte(
     if origen == "texto_libre" and alertas_de_inyeccion(a.valor):
         return "inyeccion"
     return None
-
-
-def alertas_de_inyeccion(texto: str) -> list[str]:
-    """Los patrones de inyeccion conocidos que aparecen en el texto (RF3-ENT-05)."""
-    plano = normalizar(texto)
-    return [
-        nombre for nombre, patron in PATRONES_INYECCION
-        if re.search(patron, plano, re.IGNORECASE | re.MULTILINE)
-    ]
 
 
 def campo_de(pendiente: str) -> str:

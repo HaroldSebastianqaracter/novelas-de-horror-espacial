@@ -148,6 +148,12 @@ OFICIO_MUESTRAS_SI_DISCREPAN = 5
 MODELO_EMBEDDING_PREFERIDO = "intfloat/multilingual-e5-small"
 
 MAX_INTENTOS_CAPITULO = 3
+
+#: Cuanto se tiene que parecer la prosa corregida por un cambio del lector a la aprobada
+#: (spec3, RF3-CAM-09): proporcion de `difflib` por palabras sobre el capitulo entero.
+#: PROVISIONAL: un nombre cambiado diez veces en 1.300 palabras da 0,98, y rehacer dos
+#: frases, en torno a 0,95; se calibra con cambios reales.
+CAMBIO_SIMILITUD_MINIMA = 0.85
 UMBRAL_HILO_LATENTE = 6
 CAPITULOS_RESUMEN_COMPLETO = 3
 

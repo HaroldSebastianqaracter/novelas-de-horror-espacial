@@ -74,12 +74,13 @@ def test_cada_tarea_solo_tiene_los_ficheros_que_permite_la_spec() -> None:
     assert not fallos, "Ficheros que RF-COD-02 no admite en una tarea:\n" + "\n".join(fallos)
 
 
-# docs/architecture.md nombra DIEZ agentes. El decimo, `revision`, queda fuera de la v1
-# (spec1.md, 1.2): las pasadas globales dependen de la revalidacion en cascada, que a su vez
-# exige dependencias entre hechos que definitions.md todavia no modela. Se declara aqui para
-# que la ausencia sea una divergencia escrita y no un olvido.
-AGENTES_ARQUITECTURA = (*AGENTES, "revision")
-FUERA_DE_LA_V1 = frozenset({"revision"})
+# docs/architecture.md nombra los agentes de AGENTES. El revisor (`revision`) quedo fuera de la
+# v1 (spec1.md, 1.2) hasta el cambio del lector (spec3, 3.8), que le da su primera pasada; las
+# pasadas globales siguen fuera, porque dependen de la revalidacion en cascada. Si un agente de
+# la arquitectura vuelve a quedar sin carpeta, se declara aqui para que la ausencia sea una
+# divergencia escrita y no un olvido.
+AGENTES_ARQUITECTURA = AGENTES
+FUERA_DE_LA_V1: frozenset[str] = frozenset()
 
 
 def test_la_lista_de_carpetas_es_la_lista_de_agentes() -> None:

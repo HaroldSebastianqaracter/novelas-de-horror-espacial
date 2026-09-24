@@ -47,6 +47,9 @@ ROL_DEL_AGENTE: dict[str, str] = {
     "arquitecto": "planner", "mundo": "planner", "elenco": "planner", "estructura": "planner",
     "escaleta": "planner", "redaccion": "writer", "oficio": "editor", "continuidad": "editor",
     "extraccion": "extractor", "entrevistador": "entrevistador",
+    # El cambio del lector (spec3, 3.8): el interprete lee la peticion como un editor y el
+    # revisor reescribe como un writer.
+    "interprete": "editor", "revision": "writer",
 }
 
 

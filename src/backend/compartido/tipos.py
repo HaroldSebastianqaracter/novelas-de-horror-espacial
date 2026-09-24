@@ -56,7 +56,9 @@ EstadoEjecucion = Literal[
     "completada", "completada_con_avisos", "error",
 ]
 TipoParada = Literal["estructura", "escaleta", "continuidad", "oficio", "presupuesto"]
-TipoIntencion = Literal["crear_novela", "arrancar", "parar", "relanzar", "resolver_parada"]
+TipoIntencion = Literal[
+    "crear_novela", "arrancar", "parar", "relanzar", "resolver_parada", "cambio_lector",
+]
 EstadoIntencion = Literal["pendiente", "en_curso", "hecha", "rechazada", "interrumpida"]
 Veredicto = Literal["pasa", "falla", "aviso"]
 
@@ -66,6 +68,9 @@ AGENTES: tuple[str, ...] = (
     # El entrevistador no corre en el pipeline: lo invoca entrevista.py antes de crear la
     # novela (specs/spec3.md, RF3-ENT-01). Es un agente con su skill igual que los demas.
     "entrevistador",
+    # El cambio del lector (specs/spec3.md, 3.8): el interprete convierte la peticion en un
+    # cambio del canon y el revisor corrige la prosa de los capitulos que lo usan.
+    "interprete", "revision",
 )
 
 #: Un hecho es un dato: su valor tiene como mucho estas palabras (spec3, RF3-PAS-01). En la
@@ -80,6 +85,7 @@ TIPOS_EVENTO: tuple[str, ...] = (
     "revertido", "rehecho", "completada", "error", "worker_recuperado", "paquete_recortado",
     "extraccion_descartes", "indice_fallo", "elemento_desconocido", "rehecho_desde",
     "version_publicada", "resumen_recortado", "langfuse_fallo", "segunda_opinion_fallida",
+    "cambio_rechazado", "cambio_fallido", "cambio_aplicado",
 )
 
 
