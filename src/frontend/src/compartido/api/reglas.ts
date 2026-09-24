@@ -22,7 +22,7 @@ export const FASES = [
 ] as const;
 export type Fase = (typeof FASES)[number];
 
-export const TIPOS_PARADA = ["estructura", "escaleta", "continuidad", "oficio", "presupuesto"] as const;
+export const TIPOS_PARADA = ["estructura", "escaleta", "continuidad", "oficio", "presupuesto", "formal"] as const;
 export type TipoParada = (typeof TIPOS_PARADA)[number];
 
 export const ESTADOS_INTENCION = ["pendiente", "en_curso", "hecha", "rechazada", "interrumpida"] as const;
@@ -37,6 +37,8 @@ export const ACCIONES_POR_TIPO_DE_PARADA: Record<TipoParada, readonly AccionPara
   continuidad: ["aceptar_retcon", "dar_por_sabido", "relanzar"],
   oficio: ["relanzar"],
   presupuesto: ["relanzar"],
+  // La cronología no pasa Lean (spec-lean, RF-LEAN-06): se rehace desde el capítulo.
+  formal: ["relanzar"],
 };
 
 export const ESTADOS_QUE_ADMITEN_ARRANCAR: ReadonlySet<EstadoEjecucion> = new Set([

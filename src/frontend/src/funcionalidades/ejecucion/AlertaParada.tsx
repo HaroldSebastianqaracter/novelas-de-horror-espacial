@@ -35,7 +35,9 @@ function consecuencia(accion: AccionParada, tipo: TipoParada, desde: number): st
         ? "Borra actos, hilos, siembras de la estructura y objetos, y el estructurador vuelve a correr con este informe. La puerta 1 se reevalúa."
         : "Borra capítulos, secuencias y escenas planificados, y el escaletador vuelve a correr con este informe. La puerta 2 se reevalúa.";
     case "relanzar":
-      return `Revierte lo escrito desde el capítulo ${desde} y lo vuelve a generar. La prosa rechazada no se reutiliza.`;
+      return tipo === "formal"
+        ? `Revierte lo escrito desde el capítulo ${desde} y lo vuelve a generar; al terminar, Lean verifica otra vez la cronología antes de publicar.`
+        : `Revierte lo escrito desde el capítulo ${desde} y lo vuelve a generar. La prosa rechazada no se reutiliza.`;
     case "aceptar_retcon":
       return "El texto manda: el hecho establecido se retira con rastro de retcon y el capítulo se regenera con el canon corregido.";
     case "dar_por_sabido":
@@ -54,6 +56,9 @@ function avisoDe(accion: AccionParada, parada: Parada): string | null {
       return datos?.hecho_previo_id != null;
     });
     return conPrevio ? null : "Ningún conflicto señala un hecho establecido que revocar: el worker lo rechazará.";
+  }
+  if (accion === "relanzar" && conflictos.some((c) => c.comprobacion === "lean_no_disponible")) {
+    return "Si Lean no está instalado donde corre el worker, relanzar volverá a parar aquí hasta que se instale; si solo no terminó a tiempo, relanzar lo reintenta.";
   }
   if (accion === "dar_por_sabido") {
     const deConocimiento = conflictos.some((c) => c.comprobacion === "conocimiento_no_adquirido");
@@ -107,7 +112,7 @@ function Contenido({ parada, novelaId, titulo }: { parada: Parada; novelaId: num
         <div className="alerta-parada__titulo">
           <Dibujo src={DIBUJOS.parada} className="dibujo--parada" />
           <h1 id="titulo-parada">
-            {titulo}: parada de {parada.tipo}
+            {titulo}: parada de {parada.tipo === "formal" ? "verificación formal" : parada.tipo}
           </h1>
         </div>
         <dl className="telemetria">

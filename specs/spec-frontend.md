@@ -232,6 +232,7 @@ La tarjeta en curso muestra la subfase (paquete → redacción → extracción �
 | `estructura`, `escaleta` | `rehacer` |
 | `continuidad` | `relanzar`, `aceptar_retcon`, `dar_por_sabido` |
 | `oficio`, `presupuesto` | `relanzar` |
+| `formal` (la cronología no pasa Lean, spec-lean) | `relanzar` |
 
 `relanzar` pide `desde_capitulo`, que por defecto es el capítulo de la parada. Cada acción se envía como `resolver_parada` y sigue el ciclo de RF-FE-DAT-05. Si se cierra `hecha`, se vuelve al tablero de la novela. Una parada ya resuelta se muestra en modo lectura, con su `resolucion` (`aceptar_retcon`, `dar_por_sabido`, `relanzado`, `rehecho`).
 
@@ -239,7 +240,9 @@ La tarjeta en curso muestra la subfase (paquete → redacción → extracción �
 
 > **Decisión de la spec.** Todas las acciones de una parada borran o rehacen trabajo del pipeline, y algunas horas de generación. Un diálogo modal interrumpiría la lectura del informe, que es donde está la decisión. Armar la acción en el propio botón la deja a la vista y cuesta un clic más.
 
-**RF-FE-PAR-04 — Avisos de las acciones que el worker puede rechazar.** `aceptar_retcon` avisa, sin impedirlo, si ningún conflicto trae `hecho_previo_id` en sus datos. `dar_por_sabido` avisa si ningún conflicto es `conocimiento_no_adquirido`. En esos casos el worker va a rechazar la acción (RF2-FALLO-03, RF2-FALLO-07).
+**RF-FE-PAR-04 — Avisos de las acciones que el worker puede rechazar.** `aceptar_retcon` avisa, sin impedirlo, si ningún conflicto trae `hecho_previo_id` en sus datos. `dar_por_sabido` avisa si ningún conflicto es `conocimiento_no_adquirido`. En esos casos el worker va a rechazar la acción (RF2-FALLO-03, RF2-FALLO-07). En una parada `formal` con la comprobación `lean_no_disponible`, que el backend emite tanto si Lean no está instalado como si no terminó a tiempo, `relanzar` avisa de las dos cosas: sin Lean volverá a parar, y si solo tardó, lo reintenta. La descripción del conflicto dice cuál fue; el cliente no la interpreta.
+
+**RF-FE-PAR-05 — La parada de verificación formal.** El título dice «parada de verificación formal», la consecuencia de `relanzar` recuerda que Lean vuelve a verificar la cronología antes de publicar, y las comprobaciones de Lean (`lean_nadie_antes_de_nacer`, `lean_nadie_tras_morir`, `lean_edad_coherente`, `lean_el_tiempo_no_retrocede`, `lean_error`, `lean_no_disponible`) llevan un nombre legible. La puerta 6 no cambia nada en el frontend: ninguna pantalla lista las puertas, y durante ella la fase sigue siendo `puerta_5`.
 
 > **Decisión de la spec.** Son avisos y no bloqueos, porque copian una regla del worker que puede cambiar. Si el cliente bloqueara y la regla se relajara, el autor no podría pedir una acción válida. Con un aviso, lo peor que pasa es un rechazo con su motivo.
 

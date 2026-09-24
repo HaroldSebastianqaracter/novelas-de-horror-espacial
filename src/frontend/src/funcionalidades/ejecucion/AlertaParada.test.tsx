@@ -27,6 +27,51 @@ function registrarPedidas() {
   return pedidas;
 }
 
+describe("la parada de verificación formal (RF-FE-PAR-02, spec-lean)", () => {
+  // El informe con la forma de `ResultadoPuerta.informe` del backend (puerta_base.py).
+  const formal = (comprobacion: string, descripcion = "La tripulante aparece en el día 12 y murió el día 9.") =>
+    conParada({
+      tipo: "formal",
+      capitulo: 3,
+      informe: {
+        puerta: 6,
+        veredicto: "falla",
+        conflictos: [{ comprobacion, descripcion, aviso: false, escena_id: null, capitulo: 3, datos: {} }],
+      },
+    });
+
+  it("ofrece relanzar, dice que Lean verificará otra vez y nombra la comprobación", async () => {
+    formal("lean_nadie_tras_morir");
+    const usuario = userEvent.setup();
+    renderizarEn(RUTA);
+    expect(await screen.findByRole("heading", { level: 1, name: /parada de verificación formal/ })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Lean: alguien aparece después de morir" })).toBeInTheDocument();
+    expect(screen.queryByText(/no conoce el tipo de parada/)).not.toBeInTheDocument();
+    const acciones = screen.getByRole("group", { name: "Acciones de resolución" });
+    expect(within(acciones).getAllByRole("button").map((b) => b.textContent)).toEqual(["Relanzar"]);
+    await usuario.click(within(acciones).getByRole("button", { name: "Relanzar" }));
+    expect(acciones).toHaveTextContent("Lean verifica otra vez la cronología");
+    expect(acciones).not.toHaveTextContent("hasta que se instale");
+    // Relanzar desde el capítulo de la parada, que es desde donde el backend la abrió.
+    const pedidas = registrarPedidas();
+    await usuario.click(within(acciones).getByRole("button", { name: "Confirmar: relanzar" }));
+    await waitFor(() =>
+      expect(pedidas).toEqual([
+        { tipo: "resolver_parada", novela_id: 4, payload: { parada_id: 93, accion: "relanzar", desde_capitulo: 3 } },
+      ]),
+    );
+  });
+
+  it("con Lean no disponible, dice las dos causas y no da por hecho que falte instalarlo", async () => {
+    formal("lean_no_disponible", "Lean no termino en 120 s: la cronologia no se ha comprobado y la version no se publica. Relanza para reintentarlo.");
+    renderizarEn(RUTA);
+    expect(await screen.findByRole("heading", { name: "Lean no está disponible" })).toBeInTheDocument();
+    expect(screen.getByText(/Relanza para reintentarlo/)).toBeInTheDocument();
+    const acciones = screen.getByRole("group", { name: "Acciones de resolución" });
+    expect(acciones).toHaveTextContent("si solo no terminó a tiempo, relanzar lo reintenta");
+  });
+});
+
 describe("informe de la parada (RF-FE-PAR-01)", () => {
   it("enseña los conflictos, el cara a cara entre texto y canon, y la prosa rechazada", async () => {
     renderizarEn(RUTA);

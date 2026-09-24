@@ -7,8 +7,21 @@ type Datos = Record<string, unknown>;
 
 const esObjeto = (v: unknown): v is Datos => typeof v === "object" && v !== null && !Array.isArray(v);
 
+/** Las comprobaciones de la verificación formal (spec-lean), que en crudo no se entienden. */
+const COMPROBACIONES: Record<string, string> = {
+  lean_nadie_antes_de_nacer: "Lean: alguien aparece antes de nacer",
+  lean_nadie_tras_morir: "Lean: alguien aparece después de morir",
+  lean_edad_coherente: "Lean: la edad no cuadra con la fecha de nacimiento",
+  lean_el_tiempo_no_retrocede: "Lean: el tiempo retrocede",
+  lean_error: "Lean no pudo verificar la cronología",
+  // El backend la emite si Lean no está instalado y también si no termina a tiempo: la
+  // descripción del conflicto dice cuál de las dos.
+  lean_no_disponible: "Lean no está disponible",
+};
+
 /** `conocimiento_no_adquirido` → «Conocimiento no adquirido». */
 export const legible = (clave: string) => {
+  if (Object.hasOwn(COMPROBACIONES, clave)) return COMPROBACIONES[clave] as string;
   const texto = clave.replaceAll("_", " ");
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 };
