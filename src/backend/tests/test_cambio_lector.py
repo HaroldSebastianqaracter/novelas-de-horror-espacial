@@ -433,6 +433,14 @@ def test_un_cambio_que_no_se_aplica_fracasa_sin_tocar_nada(novela) -> None:
         "SELECT COUNT(*) FROM resultado_puerta WHERE novela_id = ? AND puerta = 4 AND "
         "capitulo = 2 AND veredicto = 'falla'", (novela_id,)).fetchone()[0]
     assert intentos == 3
+    # La correccion conserva el orden anterior (RF3-PAS-14): sin juez si su mecanica falla.
+    detalles = [str(f[0]) for f in con.execute(
+        "SELECT detalle FROM resultado_puerta WHERE novela_id = ? AND puerta = 4 AND "
+        "capitulo = 2 AND veredicto = 'falla'", (novela_id,))]
+    assert all("juicio_no_invocado" in d for d in detalles)
+    oficio = [i for i in w.puerto.invocaciones  # type: ignore[attr-defined]
+              if i["agente"] == "oficio"]
+    assert not oficio
 
 
 def test_parar_durante_el_cambio_lo_deja_interrumpido_y_la_novela_detenida(novela) -> None:

@@ -613,3 +613,90 @@ def test_revertir_el_capitulo_borra_sus_marcas_de_observable(
     _marcar_observable(con, g, (2, 1))
     fallo.revertir_grafo(con, g.novela_id, 2, motivo="oficio")
     assert con.execute("SELECT COUNT(*) FROM atributo_observable").fetchone()[0] == 0
+
+
+def test_haber_estado_alli_antes_de_que_pasara_no_basta(
+    grafo: tuple[sqlite3.Connection, Grafo],
+) -> None:
+    """Una alarma de la 2.1: quien paso por el Puente en la 1.1 no la oyo (validador de 221f1be)."""
+    con, g = grafo
+    alarma = hecho(con, g, (2, 1), "Puente", "alarma", "suena tres veces", sujeto_tipo="lugar")
+    con.execute(
+        "INSERT INTO atributo_observable (novela_id, escena_id, sujeto_clave, atributo_clave) "
+        "VALUES (?, ?, 'puente', 'alarma')", (g.novela_id, g.escenas[(2, 1)]),
+    )
+    con.execute("INSERT INTO escena_personaje (escena_id, personaje_id) VALUES (?, ?)",
+                (g.escenas[(1, 1)], g.personajes["Reyes"]))
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)", (g.novela_id, g.personajes["Reyes"], alarma, g.escenas[(2, 2)]),
+    )
+    assert "conocimiento_observable" in detectadas(con, g)
+
+
+def test_estar_alli_despues_del_uso_no_basta(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    con, g = grafo
+    _marcar_observable(con, g, (1, 1))
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)",
+        (g.novela_id, g.personajes["Reyes"], g.hechos["ojos"], g.escenas[(1, 2)]),
+    )
+    con.execute("INSERT INTO escena_personaje (escena_id, personaje_id) VALUES (?, ?)",
+                (g.escenas[(2, 1)], g.personajes["Reyes"]))
+    assert "conocimiento_observable" in detectadas(con, g, capitulo=1)
+
+
+def test_estar_alli_en_la_escena_del_uso_basta(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    con, g = grafo
+    _marcar_observable(con, g, (1, 1))
+    con.execute(
+        "INSERT INTO uso_conocimiento (novela_id, personaje_id, hecho_id, escena_id) "
+        "VALUES (?,?,?,?)",
+        (g.novela_id, g.personajes["Reyes"], g.hechos["ojos"], g.escenas[(2, 1)]),
+    )
+    con.execute("INSERT INTO escena_personaje (escena_id, personaje_id) VALUES (?, ?)",
+                (g.escenas[(2, 1)], g.personajes["Reyes"]))
+    assert not {"conocimiento_observable", "conocimiento_no_adquirido"} & detectadas(con, g)
+
+
+def test_una_marca_en_la_escena_del_uso_vale(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    con, g = grafo
+    _reyes_usa_los_ojos(con, g)
+    _marcar_observable(con, g, (2, 2))
+    assert "conocimiento_no_adquirido" not in comprobaciones(con, g)
+    assert "conocimiento_observable" in detectadas(con, g)
+
+
+def test_la_marca_de_otra_novela_no_cuenta(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    con, g = grafo
+    otra = con.execute(
+        "INSERT INTO novela (titulo, subgenero_dominante, tipo_final, longitud_objetivo) "
+        "VALUES ('Otra', 'horror_cosmico', 'victoria_pirrica', 80000)").lastrowid
+    _reyes_usa_los_ojos(con, g)
+    con.execute(
+        "INSERT INTO atributo_observable (novela_id, escena_id, sujeto_clave, atributo_clave) "
+        "VALUES (?, ?, 'ibarra', 'color de ojos')", (otra, g.escenas[(1, 1)]),
+    )
+    assert "conocimiento_no_adquirido" in comprobaciones(con, g)
+
+
+def test_renombrar_al_sujeto_conserva_sus_marcas(grafo: tuple[sqlite3.Connection, Grafo]) -> None:
+    """El cambio del lector reinserta el hecho con la clave nueva; la marca va con el."""
+    from compartido.cambio import Cambio
+    from orquestador.cambios import aplicar_canon
+
+    con, g = grafo
+    _reyes_usa_los_ojos(con, g)
+    _marcar_observable(con, g, (1, 1))
+    con.execute(
+        "INSERT INTO atributo_conducta (novela_id, escena_id, sujeto_clave, atributo_clave) "
+        "VALUES (?, ?, 'ibarra', 'ritual de entrada')", (g.novela_id, g.escenas[(1, 1)]),
+    )
+    aplicar_canon(con, g.novela_id, Cambio(
+        tipo="renombrar", antes="Ibarra", despues="Ibarguen", tabla="personaje",
+        entidad_id=g.personajes["Ibarra"]))
+    for tabla in ("atributo_observable", "atributo_conducta"):
+        assert [f[0] for f in con.execute(f"SELECT sujeto_clave FROM {tabla}")] == ["ibarguen"]
+    assert "conocimiento_no_adquirido" not in comprobaciones(con, g)
+    assert "conocimiento_observable" in detectadas(con, g)

@@ -77,7 +77,9 @@ WHERE n.novela_id = ?
 # sabe la cuadrilla lo sabe cada uno de la cuadrilla.
 #
 # Un hecho observable (RF3-PAS-15: lo percibe cualquiera en el lugar) no para: quien estuvo
-# en el lugar donde se fijo lo sabe, y si no estuvo, es un aviso para que el autor lo mire.
+# en el lugar donde se fijo, desde la escena que lo fijo hasta la del uso, lo sabe; si no, es
+# un aviso para que el autor lo mire. Haber pasado por alli ANTES no basta: una alarma que
+# sono ayer no la oyo quien estuvo la semana pasada (validador de 221f1be).
 _SQL_CONOCIMIENTO = f"""
 SELECT u.id AS uso_id, p.nombre AS personaje, h.atributo, h.valor, h.sujeto_nombre,
        u.escena_id, c.numero AS capitulo, h.id AS hecho_id, p.id AS personaje_id,
@@ -90,8 +92,9 @@ SELECT u.id AS uso_id, p.nombre AS personaje, h.atributo, h.valor, h.sujeto_nomb
                JOIN escena el          ON el.id = pl.escena_id
                JOIN escena_ordinal ol  ON ol.escena_id = pl.escena_id
                JOIN escena eh          ON eh.id = h.escena_id
+               JOIN escena_ordinal ohx ON ohx.escena_id = h.escena_id
                WHERE pl.personaje_id = u.personaje_id AND el.lugar_id = eh.lugar_id
-                 AND ol.ordinal <= ou.ordinal) AS estuvo_alli
+                 AND ol.ordinal >= ohx.ordinal AND ol.ordinal <= ou.ordinal) AS estuvo_alli
 FROM uso_conocimiento u
 JOIN personaje p       ON p.id = u.personaje_id
 JOIN hecho_vigente h   ON h.id = u.hecho_id
