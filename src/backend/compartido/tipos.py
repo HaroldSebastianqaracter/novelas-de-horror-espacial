@@ -55,7 +55,7 @@ EstadoEjecucion = Literal[
     "configurada", "planificando", "escaletando", "generando", "parada", "detenida",
     "completada", "completada_con_avisos", "error",
 ]
-TipoParada = Literal["estructura", "escaleta", "continuidad", "oficio", "presupuesto"]
+TipoParada = Literal["estructura", "escaleta", "continuidad", "oficio", "presupuesto", "formal"]
 TipoIntencion = Literal[
     "crear_novela", "arrancar", "parar", "relanzar", "resolver_parada", "cambio_lector",
 ]

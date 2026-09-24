@@ -185,3 +185,42 @@ def test_borrar_un_hecho_sustituido_sigue_pudiendo_revertir(
     )
     con.execute("DELETE FROM hecho WHERE id = ?", (ids["vigente"],))
     assert con.execute("SELECT supersede_a FROM hecho WHERE id = ?", (nuevo,)).fetchone()[0] is None
+
+
+def test_la_migracion_014_admite_la_puerta_6_y_la_parada_formal_sin_perder_nada() -> None:
+    """spec-lean, RF-LEAN-06: se rehacen `parada` y `resultado_puerta` sin tocar a sus hijos."""
+    con = _base_v1()
+    ids = _poblar(con)
+    for m in db._migraciones_pendientes(1):
+        if m.numero >= 14:
+            break
+        sql = m.sql.read_text(encoding="utf-8") if m.sql else ""
+        db._aplicar_version(con, m.numero, sql, db._paso_python(m.python) if m.python else None)
+    assert db.version_actual(con) == 13
+    x = con.execute
+    x("INSERT INTO resultado_puerta (novela_id, puerta, veredicto) VALUES (?, 3, 'pasa')",
+      (ids["novela"],))
+    x("INSERT INTO entidad_no_reconocida (novela_id, escena_id, nombre, parada_id) "
+      "SELECT novela_id, escena_id, 'Vance', ? FROM hecho LIMIT 1", (ids["parada"],))
+    antes = _filas(con)
+    colgados = x("SELECT COUNT(*) FROM hecho_revocacion WHERE parada_id = ?",
+                 (ids["parada"],)).fetchone()[0]
+    assert colgados == 1
+
+    assert 14 in db.migrar(con)
+
+    despues = _filas(con)
+    assert {k: v for k, v in despues.items() if k != 'esquema_version'} == {
+        k: v for k, v in antes.items() if k != 'esquema_version'}
+    # Los hijos siguen apuntando a su parada: el SET NULL no se disparo.
+    assert x("SELECT COUNT(*) FROM hecho_revocacion WHERE parada_id = ?",
+             (ids["parada"],)).fetchone()[0] == colgados
+    assert x("SELECT parada_id FROM entidad_no_reconocida").fetchone()[0] == ids["parada"]
+    assert x("PRAGMA foreign_key_check").fetchall() == []
+    x("INSERT INTO parada (ejecucion_id, tipo, informe) VALUES (?, 'formal', '{}')",
+      (ids["ejecucion"],))
+    x("INSERT INTO resultado_puerta (novela_id, puerta, veredicto) VALUES (?, 6, 'falla')",
+      (ids["novela"],))
+    with pytest.raises(sqlite3.IntegrityError):
+        x("INSERT INTO resultado_puerta (novela_id, puerta, veredicto) VALUES (?, 7, 'pasa')",
+          (ids["novela"],))

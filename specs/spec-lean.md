@@ -69,18 +69,18 @@ El **presente** de un evento es el mayor día de la línea principal en las esce
 1. Genera el fichero en `formal/lean/Generado/` (fuera de git; se borra al terminar), compila la biblioteca con `lake build` si hace falta y ejecuta `lake env lean <fichero>`, las dos llamadas dentro de un solo límite de 300 segundos.
 2. Si compila, pasa.
 3. Si no compila, cada testigo impreso es un conflicto bloqueante con su comprobación (`lean_nadie_antes_de_nacer`, `lean_nadie_tras_morir`, `lean_edad_coherente`, `lean_el_tiempo_no_retrocede`), el capítulo del evento y una descripción legible con el nombre del personaje, que el editor recibe como feedback. Un error de compilación sin testigos (el fichero generado no es Lean válido) es un conflicto `lean_error` con la salida recortada.
-4. Si Lean no está instalado o se agota el tiempo, el resultado es un **aviso** `lean_no_disponible`: la novela no queda sin comprobar en silencio, pero tampoco se bloquea por falta de la herramienta.
+4. Si Lean no está instalado o se agota el tiempo, el resultado es un conflicto **bloqueante** `lean_no_disponible`, con las instrucciones para instalarlo: sin la comprobación formal, la versión no se publica.
 
 `src/backend/verificar_lean.py --novela N [--db ruta] [--generar]` hace lo mismo desde la línea de comandos, con la base en solo lectura: sirve para comprobar una copia de una novela real o para ver el fichero generado.
 
-> **Decisión sin entrevistar, 24 de septiembre de 2026.** Sin Lean instalado, la puerta avisa y deja pasar. Se descartó bloquear: una máquina sin Lean dejaría de publicar novelas por una herramienta, no por la novela. **Pendiente de confirmar con el autor**, porque el enunciado pide que la puerta impida publicar.
+> **Decisión sin entrevistar, 24 de septiembre de 2026, de la sesión del backend.** Sin Lean instalado, la puerta bloquea. El objetivo del autor es la novela con menos fallos, y un aviso dejaría publicar una versión sin la comprobación formal sin que nadie lo notara. Se descartó avisar y dejar publicar, que era la primera versión de esta spec. En la máquina de trabajo Lean está instalado, así que no afecta al uso normal.
 
-**RF-LEAN-06 — Puerta antes de publicar.** *Pendiente: se engancha cuando el cambio del lector (bloque 8) esté integrado.* La verificación corre en `_completar` (`orquestador/pipeline.py`), la función que cierra tanto la generación normal como un cambio del lector, antes de la transacción que publica la versión (RF3-BIB-12). Si falla, la versión no se publica:
+**RF-LEAN-06 — Puerta antes de publicar.** La verificación corre en `_completar` (`orquestador/pipeline.py`), la función que cierra tanto la generación normal como un cambio del lector, antes de la transacción que publica la versión (RF3-BIB-12). Si falla, la versión no se publica:
 
 - en la **generación normal**, se abre una parada de tipo `formal` en el primer capítulo con conflictos, con el informe de Lean, y al relanzarlo los conflictos llegan al redactor como el informe de la puerta 3;
 - en un **cambio del lector**, el cambio fracasa sin aplicar nada y devuelve el informe de Lean, sin parada.
 
-Su resultado queda en `resultado_puerta` como puerta 6, y de ahí sale a Langfuse como score (`puerta_6` y un score por comprobación, RF3-OBS). La migración 012 admite `puerta = 6` en el `CHECK` de `resultado_puerta` y el tipo de parada `formal`.
+Su resultado queda en `resultado_puerta` como puerta 6, y de ahí sale a Langfuse como score (`puerta_6` y un score por comprobación, RF3-OBS). La migración 014 admite `puerta = 6` en el `CHECK` de `resultado_puerta` y el tipo de parada `formal`, que se resuelve relanzando. La verificación la activa `config.cargar()` (se apaga con `NOVELAS_VERIFICACION_FORMAL=0`); un `Config` construido a mano, como el de los tests, la deja apagada para no compilar Lean en cada novela de prueba. Volver a completar una novela tras un cambio que fracasó no la repite: el canon es el ya verificado y no hay versión nueva.
 
 > **Decisión sin entrevistar, 24 de septiembre de 2026, coordinada con la sesión del backend.** El punto de entrada es `_completar` y no el final de `_avanzar`, para que el cambio del lector pase por la misma puerta. Que un cambio del lector no abra parada es de esa sesión: el lector no espera a que alguien resuelva una parada, y un cambio que rompe la cronología se rechaza entero.
 

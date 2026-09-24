@@ -38,6 +38,13 @@ INVARIANTES = (
 )
 
 # Una edad en cifras y, como mucho, «años» detras: «6 meses» o «34 y medio» no se leen.
+#: Sin Lean no se publica (spec-lean, RF-LEAN-05): el informe dice como instalarlo.
+INSTALAR = (
+    "Lean no esta instalado: la cronologia no se ha comprobado y la version no se publica. "
+    "Instala elan a nivel de usuario (https://github.com/leanprover/elan), compila una vez "
+    "con `lake build` en formal/lean y relanza."
+)
+
 _EDAD = re.compile(r"^\s*(\d{1,4})\s*(?:a[ñn]os?)?\s*\.?\s*$", re.IGNORECASE)
 
 
@@ -405,8 +412,7 @@ def verificar(
     lake = lake or lake_disponible()
     if lake is None:
         return ResultadoPuerta(puerta=PUERTA, conflictos=[Conflicto(
-            comprobacion="lean_no_disponible", aviso=True,
-            descripcion="Lean no esta instalado: la cronologia no se ha comprobado.")])
+            comprobacion="lean_no_disponible", descripcion=INSTALAR)])
 
     crono = extraer(con, novela_id)
     carpeta = directorio / "Generado"
@@ -428,9 +434,9 @@ def verificar(
         )
     except subprocess.TimeoutExpired:
         return ResultadoPuerta(puerta=PUERTA, conflictos=[Conflicto(
-            comprobacion="lean_no_disponible", aviso=True,
+            comprobacion="lean_no_disponible",
             descripcion=f"Lean no termino en {tiempo_limite} s: la cronologia no se ha "
-                        "comprobado.")])
+                        "comprobado y la version no se publica. Relanza para reintentarlo.")])
     except subprocess.CalledProcessError as e:
         return ResultadoPuerta(puerta=PUERTA, conflictos=[Conflicto(
             comprobacion="lean_error",

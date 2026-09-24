@@ -17,6 +17,7 @@ import pytest
 
 from compartido import db
 from compartido.grafo import insertar
+from compartido.puerta_base import Conflicto, ResultadoPuerta
 from evals import banco_puerta3 as banco
 from orquestador import lean
 from tareas.continuidad import puerta
@@ -178,11 +179,13 @@ def test_leer_testigos() -> None:
         "evento": 7, "otro": 0, "personaje": 3, "hecho": 0, "dia": 3, "limite": -2})]
 
 
-def test_sin_lean_la_puerta_avisa_y_deja_pasar(con: sqlite3.Connection, base: banco.Base,
-                                               monkeypatch: pytest.MonkeyPatch) -> None:
+def test_sin_lean_la_puerta_bloquea_y_dice_como_instalarlo(
+    con: sqlite3.Connection, base: banco.Base, monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(lean, "lake_disponible", lambda: None)
     r = lean.verificar(con, base.novela_id)
-    assert r.pasa and [c.comprobacion for c in r.avisos] == ["lean_no_disponible"]
+    assert not r.pasa and [c.comprobacion for c in r.bloqueantes] == ["lean_no_disponible"]
+    assert "elan" in r.bloqueantes[0].descripcion
 
 
 
@@ -285,3 +288,103 @@ def test_un_fichero_que_no_compila_es_lean_error(con: sqlite3.Connection, base: 
     monkeypatch.setattr(lean, "escribir", lambda *_a, **_k: "esto no es Lean\n")
     r = lean.verificar(con, base.novela_id)
     assert [c.comprobacion for c in r.bloqueantes] == ["lean_error"]
+
+
+# --- RF-LEAN-06: la puerta antes de publicar -----------------------------------------------------
+
+
+def _lean_que_falla(capitulo: int = 2) -> Callable[..., ResultadoPuerta]:
+    return lambda *_a, **_k: ResultadoPuerta(puerta=lean.PUERTA, conflictos=[Conflicto(
+        comprobacion="lean_nadie_tras_morir", capitulo=capitulo,
+        descripcion="Reyes esta en un suceso el dia 3, pero murio el dia 2.")])
+
+
+def _generar(
+    monkeypatch: pytest.MonkeyPatch, verificar: Callable[..., ResultadoPuerta] | None,
+) -> tuple[sqlite3.Connection, int, str]:
+    from orquestador import pipeline
+    from tests.entorno import cfg_de, crear_novela, nueva_bd, puerto_falso
+
+    if verificar is not None:
+        monkeypatch.setattr(lean, "verificar", verificar)
+    conexion, ruta = nueva_bd()
+    novela_id = crear_novela(conexion)
+    ctx = pipeline.Contexto(con=conexion, puerto=puerto_falso(conexion),
+                            cfg=cfg_de(ruta, verificacion_formal=True), novela_id=novela_id)
+    return conexion, novela_id, pipeline.avanzar(ctx)
+
+
+def _puertas_6(conexion: sqlite3.Connection, novela_id: int) -> list[str]:
+    return [str(f[0]) for f in conexion.execute(
+        "SELECT veredicto FROM resultado_puerta WHERE novela_id = ? AND puerta = 6", (novela_id,))]
+
+
+def test_si_lean_falla_la_generacion_para_y_no_publica(monkeypatch: pytest.MonkeyPatch) -> None:
+    conexion, novela_id, final = _generar(monkeypatch, _lean_que_falla(2))
+    assert final == "parada"
+    parada = conexion.execute("SELECT tipo, capitulo, informe FROM parada").fetchone()
+    assert (parada["tipo"], parada["capitulo"]) == ("formal", 2)
+    assert "lean_nadie_tras_morir" in parada["informe"]
+    assert conexion.execute("SELECT COUNT(*) FROM novela_version").fetchone()[0] == 0
+    assert _puertas_6(conexion, novela_id) == ["falla"]
+
+
+def test_si_lean_pasa_la_novela_se_publica(monkeypatch: pytest.MonkeyPatch) -> None:
+    conexion, novela_id, final = _generar(
+        monkeypatch, lambda *_a, **_k: ResultadoPuerta(puerta=lean.PUERTA))
+    assert final in ("completada", "completada_con_avisos")
+    assert conexion.execute("SELECT COUNT(*) FROM novela_version").fetchone()[0] == 1
+    assert _puertas_6(conexion, novela_id) == ["pasa"]
+
+
+def test_sin_lean_la_generacion_para(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(lean, "lake_disponible", lambda: None)
+    conexion, _, final = _generar(monkeypatch, None)
+    assert final == "parada"
+    parada = conexion.execute("SELECT tipo, informe FROM parada").fetchone()
+    assert parada["tipo"] == "formal" and "lean_no_disponible" in parada["informe"]
+
+
+def test_una_parada_formal_se_resuelve_relanzando() -> None:
+    from orquestador import estados
+
+    assert estados.acciones_validas("formal") == ["relanzar"]
+    assert estados.siguiente("parada", "relanzar", tipo_parada="formal") == "generando"
+
+
+def test_un_cambio_del_lector_que_rompe_la_cronologia_fracasa_sin_parada(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import worker
+    from compartido.grafo import lectura
+    from tests.entorno import cfg_de
+    from tests.test_cambio_lector import SOLO_EN_EL_DOS, _completa, _id, _pedir
+
+    conexion, ruta, novela_id = _completa()
+    monkeypatch.setattr(lean, "verificar", _lean_que_falla(2))
+    reyes = _id(conexion, "personaje", SOLO_EN_EL_DOS)
+    w = worker.Worker(cfg_de(ruta, verificacion_formal=True), con=conexion)
+    intencion = _pedir(conexion, ruta, novela_id, "Que se llame Oriol",
+                       {"tipo": "entidad", "entidad": "personajes", "id": reyes}, w=w)
+    cambio = lectura.cambio(conexion, novela_id, intencion["resultado"]["cambio_id"]) or {}
+    assert cambio["estado"] == "fallido" and "Lean" in str(cambio["informe"])
+    entidad = lectura.entidad(conexion, novela_id, "personaje", reyes) or {}
+    assert entidad["nombre"] == SOLO_EN_EL_DOS
+    assert [v["numero"] for v in lectura.versiones(conexion, novela_id)] == [1]
+    assert conexion.execute(
+        "SELECT COUNT(*) FROM parada WHERE tipo = 'formal'").fetchone()[0] == 0
+    estado = conexion.execute("SELECT estado FROM ejecucion WHERE novela_id = ?",
+                              (novela_id,)).fetchone()[0]
+    assert estado in ("completada", "completada_con_avisos")
+
+
+def test_la_configuracion_de_verdad_activa_la_verificacion(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import config
+
+    monkeypatch.setenv("NOVELAS_DB_PATH", "x.db")
+    monkeypatch.delenv("NOVELAS_VERIFICACION_FORMAL", raising=False)
+    assert config.cargar().verificacion_formal is True
+    monkeypatch.setenv("NOVELAS_VERIFICACION_FORMAL", "0")
+    assert config.cargar().verificacion_formal is False

@@ -90,7 +90,7 @@ from tareas.revision import servicio as s_revision
 from tareas.revision.esquemas import SalidaRevision
 
 from . import cambios as o_cambios
-from . import cola, estados, fallo, versiones, vigencia
+from . import cola, estados, fallo, lean, versiones, vigencia
 from .puerta_global import evaluar as evaluar_puerta_global
 from .seudonimo import Mascara
 
@@ -837,6 +837,7 @@ def _completar(
     motivo: versiones.Motivo | None = None,
     detalle: str | None = None,
     aplicar: Callable[[], None] | None = None,
+    verificar_cronologia: bool = True,
 ) -> tuple[str, int | None]:
     """Puerta 5, la transicion a completada y la version, en UNA transaccion (RF3-BIB-12).
 
@@ -844,19 +845,46 @@ def _completar(
     esa misma transaccion: el cambio escribe ahi su canon y sus textos (spec3, RF3-CAM-11), y si
     lanza, no queda nada. Devuelve el estado final y el numero de la version publicada, o None
     si el texto no cambio.
+
+    Antes de publicar, la cronologia pasa por Lean (spec-lean, RF-LEAN-06), sobre el canon ya
+    cambiado. Si falla, no se publica: la generacion abre una parada `formal` en el primer
+    capitulo con conflictos, y un cambio del lector fracasa entero con `CambioImposible`.
+    `verificar_cronologia=False` es para volver a completar una novela sin texto nuevo (el
+    cambio que fracaso): no hay nada que publicar.
     """
     with transaccion(ctx.con):
         estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_5")
+    formal: ResultadoPuerta | None = None
     with transaccion(ctx.con):
         if aplicar is not None:
             aplicar()
         global_ = evaluar_puerta_global(ctx.con, ctx.novela_id)
         _registrar_puerta_en(ctx, global_)
-        suceso = "terminado_limpio" if not global_.conflictos else "terminado_con_avisos"
-        final = estados.transicion(ctx.con, ctx.novela_id, suceso, fase=None)
-        emitir_evento(ctx.con, ctx.novela_id, "completada", avisos=len(global_.conflictos))
-        # Lo que leera el lector, en la misma transaccion que la completa (RF3-BIB-12).
-        numero = versiones.publicar(ctx.con, ctx.novela_id, motivo=motivo, detalle=detalle)
+        if verificar_cronologia and ctx.cfg.verificacion_formal:
+            formal = lean.verificar(ctx.con, ctx.novela_id)
+            _registrar_puerta_en(ctx, formal)
+            if not formal.pasa and aplicar is not None:
+                raise CambioImposible(
+                    "La cronologia no pasa la verificacion formal (Lean).",
+                    [str(c) for c in formal.bloqueantes])
+        if formal is not None and not formal.pasa:
+            final, numero = "parada", None
+        else:
+            final, numero = _publicar(ctx, global_, motivo=motivo, detalle=detalle)
+    if formal is not None and not formal.pasa:
+        capitulos = [c.capitulo for c in formal.bloqueantes if c.capitulo is not None]
+        _abrir_parada(ctx, "formal", formal.informe(), capitulo=min(capitulos, default=None))
+    return final, numero
+
+
+def _publicar(ctx: Contexto, global_: ResultadoPuerta, *, motivo: versiones.Motivo | None,
+              detalle: str | None) -> tuple[str, int | None]:
+    """La transicion a completada y la version, dentro de la transaccion de `_completar`."""
+    suceso = "terminado_limpio" if not global_.conflictos else "terminado_con_avisos"
+    final = estados.transicion(ctx.con, ctx.novela_id, suceso, fase=None)
+    emitir_evento(ctx.con, ctx.novela_id, "completada", avisos=len(global_.conflictos))
+    # Lo que leera el lector, en la misma transaccion que la completa (RF3-BIB-12).
+    numero = versiones.publicar(ctx.con, ctx.novela_id, motivo=motivo, detalle=detalle)
     return final, numero
 
 
@@ -997,7 +1025,8 @@ def _fracasar(ctx: Contexto, cambio_id: int, informe: dict[str, Any]) -> str:
         _marcar_cambio(ctx, cambio_id, "fallido", informe=informe)
         emitir_evento(ctx.con, ctx.novela_id, "cambio_fallido", cambio_id=cambio_id,
                       informe=informe)
-    final, _ = _completar(ctx)
+    # El canon es el de antes del cambio, ya verificado al publicarse: no hay version nueva.
+    final, _ = _completar(ctx, verificar_cronologia=False)
     return final
 
 
