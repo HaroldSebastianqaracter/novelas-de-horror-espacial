@@ -222,6 +222,35 @@ def test_el_puerto_retira_las_herramientas_y_los_mcp() -> None:
     assert "--tools" in argv and "--allowedTools" in argv and "--strict-mcp-config" in argv
 
 
+def test_el_puerto_pide_el_modelo_configurado(monkeypatch: pytest.MonkeyPatch) -> None:
+    """RF2-PUERTO-11: por defecto Opus 5.5, y NOVELAS_MODELO lo cambia."""
+    from dataclasses import replace
+
+    from compartido.puerto import construir
+
+    monkeypatch.setenv("NOVELAS_DB_PATH", "x.db")
+    monkeypatch.setenv("NOVELAS_PUERTO", "terminal")
+    monkeypatch.delenv("NOVELAS_MODELO", raising=False)
+    assert config.cargar().modelo == "claude-opus-5-5"
+    monkeypatch.setenv("NOVELAS_MODELO", " claude-sonnet-5 ")
+    cfg = config.cargar()
+    assert cfg.modelo == "claude-sonnet-5"
+
+    ejecutable = claude_falso.ejecutable(claude_falso.sobre({"x": 1}))
+    cfg = replace(cfg, claude_bin=str(ejecutable), skills_dir=claude_falso.SKILLS)
+    puerto = construir(cfg)
+    assert isinstance(puerto, PuertoTerminal)
+    puerto.invocar("arquitecto", "entrada", {"type": "object"})
+    argv = claude_falso.argumentos(ejecutable)
+    assert argv[argv.index("--model") + 1] == "claude-sonnet-5"
+
+
+def test_sin_modelo_el_puerto_no_pasa_model() -> None:
+    puerto, ejecutable = _puerto(claude_falso.sobre({"x": 1}))
+    puerto.invocar("arquitecto", "entrada", {"type": "object"})
+    assert "--model" not in claude_falso.argumentos(ejecutable)  # type: ignore[arg-type]
+
+
 @pytest.mark.parametrize("turnos", [2, 3])
 def test_el_numero_de_turnos_no_es_uso_de_herramientas(turnos: int) -> None:
     """Las dos cifras salieron de llamadas reales sin herramientas (CLI 2.1.274)."""

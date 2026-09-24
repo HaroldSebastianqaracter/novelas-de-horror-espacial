@@ -57,6 +57,14 @@ Otras cosas que sabe hacer el lanzador:
 Sirven, en orden, para mirar lo que ya hay sin crear nada, imprimir un capítulo, detener la
 generación y rehacerla desde un capítulo concreto.
 
+Y el cambio del lector sobre una novela completada (spec3, 3.8), que la web pide desde la
+propia página:
+
+```bat
+.venv\Scripts\python.exe demo.py --cambio "Que se llame «Kira»" --entidad personajes:4
+.venv\Scripts\python.exe demo.py --cambio "La esclusa queda a «cuarenta metros»" --hecho 11
+```
+
 **Ventana 3, la API**, si quieres verlo por HTTP. Es opcional.
 
 ```bat
@@ -87,6 +95,7 @@ ninguna credencial ni la pasa al subproceso.
 | `NOVELAS_DB_PATH` | sí | — | Fichero SQLite de la novela |
 | `NOVELAS_PUERTO` | no | `terminal` | `terminal` o `falso` |
 | `NOVELAS_CLAUDE_BIN` | no | `claude` | Ejecutable de Claude Code |
+| `NOVELAS_MODELO` | no | `claude-opus-5-5` | Modelo de todas las llamadas de agente con el puerto terminal, que se pasa a Claude Code con `--model` (spec2, RF2-PUERTO-11) |
 | `NOVELAS_POLL_SEGUNDOS` | no | `2` | Cada cuánto sondea el worker |
 | `NOVELAS_TIMEOUT_AGENTE_SEGUNDOS` | no | `1800` | Máximo por llamada |
 | `NOVELAS_VECTORES` | no | `1` | `0` desactiva el índice |

@@ -32,6 +32,7 @@ from tests.entorno import (
     hechos_del_capitulo,
     nueva_bd,
     puerto_falso,
+    textos_vigentes_del_capitulo,
 )
 from tests.fabrica import hecho, novela_minima
 
@@ -181,6 +182,51 @@ def test_si_lo_obligatorio_del_juez_no_cabe_hay_parada_de_presupuesto_y_se_revie
     assert (parada["tipo"], parada["capitulo"]) == ("presupuesto", 1)
     assert hechos_del_capitulo(con, novela_id, 1) == 0
 
+
+
+def _no_cabe(*_: object, **__: object) -> Paquete:
+    raise PresupuestoExcedido("no cabe", detalle={"prosa": 99_999}, total=99_999, techo=74_000)
+
+
+def test_la_parada_de_presupuesto_revierte_en_su_misma_transaccion(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TLC (CodigoActual.cfg): si el worker caia entre abrir la parada y el `finally`, el
+    capitulo quedaba a medias. Sin el `finally`, la parada tiene que haberlo revertido ya."""
+    con, ruta = nueva_bd()
+    novela_id = crear_novela(con)
+    monkeypatch.setattr(pipeline.s_oficio, "paquete", _no_cabe)
+    monkeypatch.setattr(pipeline, "_revertir_a_medias", lambda *_: None)
+    ctx = pipeline.Contexto(con=con, puerto=puerto_falso(con), cfg=cfg_de(ruta),
+                            novela_id=novela_id)
+    assert pipeline.avanzar(ctx) == "parada"
+    assert hechos_del_capitulo(con, novela_id, 1) == 0
+    assert textos_vigentes_del_capitulo(con, novela_id, 1) == 0
+
+
+def test_la_recuperacion_revierte_un_capitulo_a_medias_de_una_parada(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """spec2, RF2-FALLO-06 punto 5: la parada sigue abierta y el capitulo queda limpio."""
+    import worker
+
+    con, ruta = nueva_bd()
+    novela_id = crear_novela(con)
+    monkeypatch.setattr(pipeline.s_oficio, "paquete", _no_cabe)
+    # Como si el worker cayera antes de revertir: ninguna reversion llega a hacerse.
+    monkeypatch.setattr(pipeline.fallo, "revertir_grafo", lambda *_, **__: {})
+    ctx = pipeline.Contexto(con=con, puerto=puerto_falso(con), cfg=cfg_de(ruta),
+                            novela_id=novela_id)
+    assert pipeline.avanzar(ctx) == "parada"
+    assert hechos_del_capitulo(con, novela_id, 1) > 0
+    monkeypatch.undo()
+
+    worker.Worker(cfg_de(ruta), con=con).recuperar()
+    assert hechos_del_capitulo(con, novela_id, 1) == 0
+    assert textos_vigentes_del_capitulo(con, novela_id, 1) == 0
+    [parada] = fallo.paradas_abiertas(con, novela_id)
+    assert parada["tipo"] == "presupuesto"
+    assert (lectura.ejecucion(con, novela_id) or {})["estado"] == "parada"
 
 # --- Lo que se lee del grafo (RF2-CTX-11) --------------------------------------------------------
 

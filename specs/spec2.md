@@ -62,6 +62,9 @@ Entre el tramo 2 y el 3 un capítulo puede tener texto y hechos sin estar comple
 2. Marca `interrumpida` con motivo `worker_caido` toda `intencion` en `en_curso`.
 3. Para cada ejecución en `planificando`, `escaletando` o `generando`, **revierte el grafo desde el capítulo siguiente al último completado** y después la deja en `detenida` con `ultimo_error = interrumpida_por_caida`, `capitulo_actual` e `intento_actual` fijados desde el grafo.
 4. Emite `worker_recuperado` con el resultado de `verificar_integridad()`.
+5. Para cada ejecución en `parada` que tenga texto o estado en un capítulo no completado, **revierte el grafo desde el capítulo siguiente al último completado sin tocar la parada**, que sigue esperando al autor, y emite `worker_recuperado` con `en_parada`.
+
+> **Añadido el 24 de septiembre de 2026** (spec3, bloque 9). TLC encontró sobre el código de `pruebas` una traza de 14 estados: la parada de presupuesto del tramo 3 se abría en una transacción y el capítulo a medias se revertía en otra; si el worker caía entre las dos, la parada quedaba con un capítulo a medias y el punto 3 no lo tocaba, porque la ejecución no estaba activa. Se arregló de dos formas: la parada de presupuesto revierte el capítulo en su misma transacción (RF2-CTX-03), y el punto 5 cubre cualquier otro camino parecido. Un capítulo no completado nunca debe tener estado, así que revertirlo solo quita lo que no debería estar.
 
 El párrafo de spec1 que daba por hecho una transacción por capítulo desaparece: con tres tramos, el grafo **no** está siempre al final de la última unidad completa, y es la reversión la que lo devuelve ahí.
 
@@ -166,7 +169,7 @@ Hallazgos 4 (el bloque de hechos y conocimiento desaparece entero), 10 (`LIMIT 2
 
 El bloque del capítulo anterior, como ya pedía spec1, **se sustituye por su resumen** antes de perder párrafos.
 
-**RF2-CTX-03** *Sustituye a RF-CTX-03.* Si los elementos obligatorios no caben, `PresupuestoExcedido` y parada de presupuesto, con los bloques y sus tamaños en el informe; vale para los paquetes del redactor, del extractor y del juez de oficio. **Todo recorte, aunque el paquete quepa, se registra en la traza** con el evento `paquete_recortado`, por bloque: cuántos elementos se quitaron, cuántos tokens y si el bloque se sustituyó por su alternativa.
+**RF2-CTX-03** *Sustituye a RF-CTX-03.* Si los elementos obligatorios no caben, `PresupuestoExcedido` y parada de presupuesto, con los bloques y sus tamaños en el informe; vale para los paquetes del redactor, del extractor y del juez de oficio. La del juez de oficio llega con el capítulo a medias (tras el tramo 2), y la parada lo revierte **en su misma transacción** (añadido el 24 de septiembre de 2026, ver RF2-FALLO-06). **Todo recorte, aunque el paquete quepa, se registra en la traza** con el evento `paquete_recortado`, por bloque: cuántos elementos se quitaron, cuántos tokens y si el bloque se sustituyó por su alternativa.
 
 **RF2-CTX-11** *Requisito nuevo.* Qué es obligatorio:
 
@@ -219,6 +222,10 @@ Hallazgos 9 (el juez de la puerta 4 no se registra), 11 (el extractor descarta e
 Los nombres se buscan como palabras enteras sobre el texto normalizado, igual que se comparan las claves. Son avisos y no conflictos: una escena puede nombrar a alguien sin que haya nada que extraer, y lo que miden es la cobertura del extractor, no la continuidad.
 
 **RF2-PUERTO-10** *Requisito nuevo.* El puerto invoca a Claude Code con `--tools ""`, que **retira** las herramientas integradas (no solo sus permisos), junto a `--allowedTools ""`, y con `--strict-mcp-config`, que deja fuera los servidores MCP de la configuración del usuario. Una llamada que devuelve `permission_denials` no vacío es un error de puerto (`AgenteUsoHerramientas`): el agente intentó usar herramientas. No se reintenta. El número de turnos se guarda en la traza, pero no decide nada.
+
+**RF2-PUERTO-11** *Requisito nuevo (24-09-2026, petición del autor).* El puerto terminal pide el modelo con `--model`, y el modelo sale de `NOVELAS_MODELO`, que por defecto es `claude-opus-5-5` (Opus 5.5). Hasta ahora el puerto no fijaba modelo y cada llamada usaba el que tuviera por defecto la cuenta de Claude Code (Opus 5 en las pasadas reales de septiembre): la novela podía cambiar de modelo según quién la lanzara, y el repositorio no lo dejaba escrito. Todos los agentes usan el mismo modelo; el modelo por agente (el extractor con uno más barato) queda pendiente de medirse contra el golden set (plan, bloque 5). El puerto falso no tiene modelo.
+
+> **Decisión sin entrevistar.** El autor pidió Opus 5.5; se hizo configurable, y no fijo en el código, porque medir otro modelo para un agente no debería exigir tocar el puerto. Se descartó `--model opus` (el alias): el alias cambia de modelo cuando sale uno nuevo, y eso es justo lo que se quiere evitar. Si el nombre no existe, el CLI falla en la primera llamada sin gastar, y el error queda en la traza.
 
 > **Decisión de la spec (23-09-2026).** El plan fijaba el umbral en «más de un turno». Una llamada real verificada con el CLI 2.1.274, con `--json-schema` y sin herramientas, devuelve `num_turns = 2`: la salida estructurada consume un turno. Con el umbral del plan, toda llamada legítima habría sido un error. El umbral pasa a dos, y la señal principal es `permission_denials`. Se descartó `--restricted`, que además ignora los ficheros de configuración del usuario y no está probado contra la autenticación de la sesión, como no lo estaba `--bare`, que la rompía.
 

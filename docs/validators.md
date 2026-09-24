@@ -126,6 +126,16 @@ Son consultas sobre las entidades de estado de [definitions.md](definitions.md).
 | **Contract testing** | La forma del paquete de contexto que una etapa del pipeline entrega a la siguiente se mantiene estable con independencia de cómo cambie cada etapa por dentro. |
 | **Evals** | Conjunto de escenas de referencia con su veredicto conocido, para medir si el agente juez acierta. Etiqueta `I` cuando el scorer es un modelo. |
 
+**Las comprobaciones del cambio del lector** ([spec3, RF3-CAM-09](../specs/spec3.md)) son búsquedas dirigidas `T` sobre la corrección del revisor: que el nombre o el valor viejo ya no aparece (`cambio_sin_aplicar`), que el nombre de otra entidad que comparte una palabra con el viejo sigue ahí las mismas veces (`cambio_toca_otro`), que cada cita del revisor está en la prosa nueva y no estaba en la aprobada (`cambio_sin_cita`), que el capítulo apenas se movió (`cambio_desborda`, `difflib` por palabras) y que trae las mismas escenas (`cambio_escenas`). Sus puntos ciegos:
+
+- **Un hecho que no es un literal** («ojos verdes» por «ojos grises») no se puede contar en la prosa. Solo lo sostienen las citas del revisor, que el código comprueba, y el juez de la puerta 4.
+- **Un nombre que también es una palabra corriente** («Luna», «la luna») no cuenta al empezar frase: un nombre viejo que el revisor deje justo ahí pasa.
+- **El nombre viejo llamado solo por una palabra que es, entera, el nombre de otra entidad** («Reyes» para referirse a «Nina Reyes» cuando existe otro «Reyes») es ambiguo y se deja como está: ni se sustituye ni cuenta como nombre viejo. Solo en ese caso: si la otra entidad solo comparte la palabra («Marta Ruiz» al renombrar «Tomás Ruiz»), «Ruiz» a secas sigue contando como nombre viejo. Se prefirió dejar una mención vieja ambigua a reescribir a la otra entidad, que es un fallo de canon seguro. `cambio_toca_otro` sostiene lo segundo aunque el revisor se equivoque (validador de 58e70f0); cuenta fuera del nombre viejo y del nuevo, para que el nuevo no tape un borrado (validador de 5717c7d).
+- **La sustitución por código es literal**: un nombre viejo que la prosa escribe sin su tilde («Tomas» por «Tomás») no se sustituye en las fichas ni en los resúmenes que corrige el código. En la prosa sí lo caza `cambio_sin_aplicar`, que busca sin mirar tildes.
+- **El umbral de parecido** (0,85) es provisional: sin cambios reales medidos, un cambio legítimo que obligue a rehacer un párrafo podría no caber.
+
+> **Decisión de la spec, 24 de septiembre de 2026** (spec3, RF3-CAM-09). Las comprobaciones del cambio van antes que la mecánica de siempre y que el juez, y fallan en bloque: una corrección que no aplicó el cambio no merece tres llamadas al juez. Se descartó comprobar el cambio reextrayendo el capítulo y comparando sus hechos, porque el extractor es otro dato autodeclarado (regla 3) y costaba una llamada más por intento.
+
 ### Requiere juicio — `I`
 
 No hay salida correcta única; se verifica con lectura humana o con un modelo crítico, y conviene puntuarlo contra el principio concreto de [domain-knowledge.md](domain-knowledge.md) en vez de preguntar si está bien.

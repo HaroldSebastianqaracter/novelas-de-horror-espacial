@@ -15,6 +15,7 @@ import pytest
 
 from compartido.grafo import insertar, lectura, normalizar
 from compartido.puerto import demo
+from compartido.texto import nombra
 from orquestador import pipeline
 from tareas.oficio import puerta as p_oficio
 from tests import fabrica
@@ -202,7 +203,7 @@ def test_un_allegado_planificado_que_la_prosa_no_nombra_vuelve_al_redactor() -> 
     ("Abuela Carmen", "La abuela de alguien.", False),
 ])
 def test_nombrar_a_un_allegado(nombre: str, texto: str, nombrado: bool) -> None:
-    assert p_oficio._nombra(texto, nombre) is nombrado
+    assert nombra(texto, nombre) is nombrado
 
 
 def test_sin_brief_no_se_buscan_allegados() -> None:

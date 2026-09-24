@@ -146,16 +146,20 @@ Requisitos en [spec3.md](spec3.md), 3.4; verificación en [spec3-verification.md
 - [ ] PDF exportado desde la web (vista de impresión y `npm run pdf`), del que sale `/ejemplos/novela-ejemplo.pdf`.
 - [ ] `.mcp.json` con un browser MCP (Playwright MCP). El agente abre la lectura, navega y registra los errores visuales como fallos para el rol correspondiente. Su uso real se documenta en `/docs`.
 
-Requisitos en [spec-frontend.md](spec-frontend.md), secciones 3.10, 3.12 y 3.13.
+Requisitos en [spec-frontend.md](spec-frontend.md), secciones 3.10, 3.12 y 3.13, y lo que pide al backend en [spec3, 3.7](spec3.md).
 
 > **Decisión entrevistada, 24 de septiembre de 2026.** La lectura de la entrega es **la web** (la variante «web» del enunciado), y el PDF sale de ella. Sustituye a la decisión anterior del plan, que era HTML estático exportado a PDF sin React: se tomó cuando el frontend no existía, y el 23 de septiembre el frontend quedó como opcional. Con la web ya hecha y probada contra el backend, tener dos lecturas duplicaba trabajo, y la demo del cambio del lector luce más dentro del documento. El browser MCP inspecciona la web igual que habría inspeccionado el HTML. Se descartó mantener el HTML estático junto a la web.
 
 ### 8. Cambio del lector
 
-- [ ] Pedir un cambio («el perro se llama Nala») desde la lectura web: seleccionar un fragmento o un hecho y escribir el cambio (spec-frontend, 3.11). El contrato de la intención `cambio_lector` está en spec-frontend, 5.2.
-- [ ] Localizar los capítulos que usan ese hecho, con la tabla del bloque 3 (backend).
-- [ ] Regenerar **solo** esos capítulos sin romper la continuidad (backend).
-- [ ] La web marca qué capítulos cambiaron y enseña qué cambió; el PDF de la versión nueva lleva una página inicial de **novedades** con enlaces internos a los capítulos modificados. La versión anterior se conserva y se puede leer.
+Requisitos en [spec3.md](spec3.md), 3.8; verificación en [spec3-verification.md](spec3-verification.md), filas 64 a 77.
+
+- [x] Pedir un cambio («el perro se llama Nala»): la intención `cambio_lector` desde la web, y `demo.py --cambio` por CLI.
+- [x] Localizar los capítulos que usan ese hecho o ese nombre, con la tabla del bloque 3 y la prosa.
+- [x] Reescribir **solo** esos capítulos sin romper la continuidad: reescritura quirúrgica del revisor, comprobaciones del cambio y puerta 4 entera, y todo aplicado en una transacción.
+- [x] Nueva versión con los capítulos cambiados marcados; la anterior se conserva.
+- [ ] Enseñar las novedades en la lectura web y en el PDF (spec-frontend, 3.11; contrato de la intención en spec-frontend, 5.2): lo hace la sesión del frontend.
+- [ ] Medir el intérprete y el revisor con Claude Code real (fila 77).
 
 ### 9. Validadores formales
 
@@ -193,7 +197,7 @@ El mecanismo se construye ahora; la tabla definitiva se saca al final.
 
 ## Opcionales (suman nota, después de lo obligatorio)
 
-- [x] **Frontend web** en React: un tablero de novelas al estilo Jira, la alerta de parada, un lector de capítulos y el alta desde un brief. Requisitos en [spec-frontend.md](spec-frontend.md). Desde el 24 de septiembre es también la lectura de la entrega (bloque 7).
+- [x] **Frontend web** en React: un tablero de novelas al estilo Jira, la alerta de parada, un lector de capítulos y el alta desde un brief. Requisitos en [spec-frontend.md](spec-frontend.md). Desde el 24 de septiembre es también la lectura de la entrega (bloque 7, [spec3, 3.7](spec3.md)).
 - [ ] **Servidor MCP** de solo lectura con FastMCP sobre la API que ya existe: `list_novels`, `get_chapter`, `list_versions`, `query_story_bible` y `download_novel`.
 - [ ] **Linters de prosa:** la parte mecánica de la puerta 4 ya es uno (palabras filtro, adverbios de atribución, verbos de habla); ampliarla con repeticiones, frases largas y fraseo típico de IA.
 - [ ] **Security report** en `/docs/security-report.md`, partiendo de la auditoría, de bandit y del `validador-de-codigo`.

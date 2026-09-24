@@ -636,3 +636,163 @@ def version(con: sqlite3.Connection, novela_id: int, numero: int) -> dict[str, A
         c["cambiado"] = bool(c["cambiado"])
     v["capitulos_cambiados"] = [c["numero"] for c in v["capitulos"] if c["cambiado"]]
     return v
+
+
+# --- Lo que la lectura web pide al backend (specs/spec3.md, 3.7) -----------------------------
+
+#: La ocasion del brief, como la lee el destinatario en la portada (RF3-LEC-01).
+OCASIONES: dict[str, str] = {
+    "cumpleanos": "cumpleaños", "aniversario": "aniversario", "boda": "boda",
+    "jubilacion": "jubilación", "navidad": "Navidad",
+}
+
+
+def regalo(con: sqlite3.Connection, novela_id: int) -> dict[str, str | None] | None:
+    """Para quien es, de quien y por que, o None si la novela no tiene brief (RF3-LEC-01)."""
+    b = brief(con, novela_id)
+    if b is None:
+        return None
+    ocasion = (b.ocasion_detalle or None) if b.ocasion == "otra" else (
+        OCASIONES.get(b.ocasion) if b.ocasion else None
+    )
+    return {"para": b.destinatario.nombre, "de": b.quien_regala, "ocasion": ocasion}
+
+
+def apariciones(con: sqlite3.Connection, novela_id: int) -> dict[str, list[dict[str, Any]]]:
+    """Cada personaje y cada lugar con los capitulos completados donde aparece (RF3-LEC-02).
+
+    Los personajes, por la vista `presencia` (RF2-PIPE-31); los lugares, por el lugar de cada
+    escena. Quien no aparece en ningun capitulo completado sale con la lista vacia.
+    """
+    def agrupar(entidades: str, apariciones_sql: str) -> list[dict[str, Any]]:
+        capitulos: dict[int, set[int]] = {}
+        for f in con.execute(apariciones_sql, (novela_id,)):
+            capitulos.setdefault(int(f["id"]), set()).add(int(f["capitulo"]))
+        return [
+            {"id": int(f["id"]), "nombre": str(f["nombre"]),
+             "capitulos": sorted(capitulos.get(int(f["id"]), set()))}
+            for f in con.execute(entidades, (novela_id,))
+        ]
+
+    return {
+        "personajes": agrupar(
+            "SELECT id, nombre FROM personaje WHERE novela_id = ? ORDER BY id",
+            """
+            SELECT p.personaje_id AS id, c.numero AS capitulo
+            FROM presencia p
+            JOIN escena e ON e.id = p.escena_id
+            JOIN capitulo c ON c.id = e.capitulo_id
+            WHERE e.novela_id = ? AND c.estado = 'completado'
+            """,
+        ),
+        "lugares": agrupar(
+            "SELECT id, nombre FROM lugar WHERE novela_id = ? ORDER BY id",
+            """
+            SELECT e.lugar_id AS id, c.numero AS capitulo
+            FROM escena e JOIN capitulo c ON c.id = e.capitulo_id
+            WHERE e.novela_id = ? AND c.estado = 'completado' AND e.lugar_id IS NOT NULL
+            """,
+        ),
+    }
+
+
+# --- El cambio del lector (specs/spec3.md, 3.8) -----------------------------------------------
+
+
+def capitulos_que_nombran(con: sqlite3.Connection, novela_id: int, nombre: str) -> list[int]:
+    """Los capitulos completados cuya prosa escribe el nombre (spec3, RF3-CAM-05).
+
+    El nombre entero o una palabra suya de tres letras o mas, con mayuscula y sin mirar tildes:
+    lo que un renombrado tiene que corregir. El reparto no cuenta: un capitulo que no escribe
+    el nombre no puede contener el viejo.
+    """
+    from compartido.texto import nombra  # compartido.texto importa este paquete
+
+    return [
+        int(f["numero"]) for f in con.execute(
+            """
+            SELECT c.numero, cc.texto FROM capitulo c
+            JOIN capitulo_compilado cc ON cc.capitulo_id = c.id AND cc.estado = 'vigente'
+            WHERE c.novela_id = ? AND c.estado = 'completado'
+            ORDER BY c.numero
+            """,
+            (novela_id,),
+        )
+        if nombra(str(f["texto"]), nombre)
+    ]
+
+
+def entidad(con: sqlite3.Connection, novela_id: int, tabla: str, entidad_id: int
+            ) -> dict[str, Any] | None:
+    """Un personaje, lugar u objeto de la novela, con su nombre, o None."""
+    if tabla not in ("personaje", "lugar", "objeto"):
+        return None
+    return _fila(con.execute(
+        f"SELECT id, nombre FROM {tabla} WHERE novela_id = ? AND id = ?",  # tabla cerrada
+        (novela_id, entidad_id),
+    ).fetchone())
+
+
+def hecho_vigente(con: sqlite3.Connection, novela_id: int, hecho_id: int
+                  ) -> dict[str, Any] | None:
+    """Un hecho vigente de la novela, con su capitulo, o None."""
+    return _fila(con.execute(
+        """
+        SELECT h.id, h.escena_id, h.sujeto_tipo, h.sujeto_id, h.sujeto_nombre, h.atributo,
+               h.valor, h.categoria, h.cita, o.capitulo_numero AS capitulo
+        FROM hecho_vigente h JOIN escena_ordinal o ON o.escena_id = h.escena_id
+        WHERE h.novela_id = ? AND h.id = ?
+        """,
+        (novela_id, hecho_id),
+    ).fetchone())
+
+
+def alcance_de_cambio(
+    con: sqlite3.Connection, novela_id: int, *, tabla: str | None = None,
+    entidad_id: int | None = None, hecho_id: int | None = None,
+) -> list[int] | None:
+    """Los capitulos que reescribe un cambio, o None si el objetivo no existe (RF3-CAM-05)."""
+    if hecho_id is not None:
+        if hecho_vigente(con, novela_id, hecho_id) is None:
+            return None
+        return capitulos_de_hecho(con, novela_id, hecho_id)
+    if tabla is None or entidad_id is None:
+        return None
+    e = entidad(con, novela_id, tabla, entidad_id)
+    return None if e is None else capitulos_que_nombran(con, novela_id, str(e["nombre"]))
+
+
+def cambios(con: sqlite3.Connection, novela_id: int) -> list[dict[str, Any]]:
+    """Los cambios del lector de la novela, del mas reciente al mas antiguo (RF3-CAM-13)."""
+    return [_cambio(f) for f in con.execute(
+        "SELECT * FROM cambio_lector WHERE novela_id = ? ORDER BY id DESC", (novela_id,)
+    ).fetchall()]
+
+
+def cambio(con: sqlite3.Connection, novela_id: int, cambio_id: int) -> dict[str, Any] | None:
+    f = con.execute(
+        "SELECT * FROM cambio_lector WHERE novela_id = ? AND id = ?", (novela_id, cambio_id)
+    ).fetchone()
+    return None if f is None else _cambio(f)
+
+
+def _cambio(f: sqlite3.Row) -> dict[str, Any]:
+    d = dict(f)
+    for campo in ("objetivo", "cita", "interpretacion", "cambio", "alertas", "capitulos",
+                  "informe"):
+        if d.get(campo) is not None:
+            d[campo] = json.loads(str(d[campo]))
+    return d
+
+
+def cambios_aplicados(con: sqlite3.Connection, novela_id: int) -> list[str]:
+    """Lo que el lector fijo, en orden, para quien vuelva a escribir (RF3-CAM-14)."""
+    from compartido.cambio import Cambio  # compartido.cambio importa este paquete
+
+    return [
+        Cambio.desde_dict(json.loads(str(f["cambio"]))).describir()
+        for f in con.execute(
+            "SELECT cambio FROM cambio_lector WHERE novela_id = ? AND estado = 'aplicado' "
+            "AND cambio IS NOT NULL ORDER BY id", (novela_id,)
+        )
+    ]

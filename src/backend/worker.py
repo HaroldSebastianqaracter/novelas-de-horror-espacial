@@ -6,6 +6,7 @@ reiniciar la API sin matar una generacion en curso, que puede durar horas.
 
 from __future__ import annotations
 
+import json
 import logging
 import signal
 import sqlite3
@@ -19,12 +20,16 @@ from pydantic import ValidationError
 import config
 from compartido import db
 from compartido.brief import Brief, BriefIncompleto, elementos, restricciones_derivadas
+from compartido.cambio import PeticionCambio
 from compartido.db import transaccion
 from compartido.grafo import emitir_evento, insertar, lectura
+from compartido.inyeccion import alertas_de_inyeccion
+from compartido.puerto import AgenteInterrumpido
 from compartido.puerto import construir as construir_puerto
 from compartido.tipos import como_dict
 from compartido.vectores import Indice
 from orquestador import cola, estados, fallo, observabilidad, pipeline, vigencia
+from tareas.interprete import servicio as s_interprete
 
 log = logging.getLogger("worker")
 
@@ -112,6 +117,12 @@ class Worker:
                 "UPDATE intencion SET estado = 'interrumpida', motivo = 'worker_caido', "
                 "actualizado_en = datetime('now') WHERE estado = 'en_curso'"
             ).rowcount
+            # Un cambio del lector a medias no dejo nada aplicado (spec3, RF3-CAM-12).
+            self.con.execute(
+                "UPDATE cambio_lector SET estado = 'interrumpido', "
+                "actualizado_en = datetime('now') "
+                "WHERE estado IN ('interpretando', 'reescribiendo')"
+            )
 
         activas = [
             dict(f) for f in self.con.execute(
@@ -152,6 +163,28 @@ class Worker:
                 novela_id, completados,
             )
 
+        # Una ejecucion en `parada` no esta activa, pero puede haber quedado con un capitulo a
+        # medias si el worker cayo mientras la abria (TLC, `CodigoActual.cfg`). Se revierte sin
+        # tocar la parada, que sigue esperando al autor: un capitulo no completado nunca debe
+        # tener estado, asi que solo se quita lo que no deberia estar (spec2, RF2-FALLO-06).
+        a_medias = db.novelas_con_capitulo_a_medias(self.con)
+        en_parada = [
+            int(f["novela_id"]) for f in self.con.execute(
+                "SELECT novela_id FROM ejecucion WHERE estado = 'parada'"
+            )
+            if int(f["novela_id"]) in a_medias
+        ]
+        for novela_id in en_parada:
+            completados = lectura.ultimo_capitulo_completado(self.con, novela_id)
+            with transaccion(self.con):
+                fallo.revertir_grafo(self.con, novela_id, completados + 1, motivo="worker_caido")
+                emitir_evento(
+                    self.con, novela_id, "worker_recuperado", capitulos_completados=completados,
+                    en_parada=True, integridad=[v.regla for v in db.verificar_integridad(self.con)],
+                )
+            log.warning("Novela %s: capitulo a medias revertido; la parada sigue abierta.",
+                        novela_id)
+
         if llamadas or intenciones or activas:
             log.info(
                 "Recuperacion: %s llamada(s) y %s intencion(es) interrumpidas, "
@@ -189,6 +222,7 @@ class Worker:
             "parar": self._parar,
             "relanzar": self._relanzar,
             "resolver_parada": self._resolver_parada,
+            "cambio_lector": self._cambio_lector,
         }.get(intencion.tipo)
 
         if manejador is None:
@@ -417,14 +451,152 @@ class Worker:
 
         self._correr(novela_id)
 
+    # -- el cambio del lector (spec3, 3.8) --------------------------------------------------
+
+    def _cambio_lector(self, intencion: cola.Intencion) -> None:
+        """Comprueba, interpreta, valida y calcula el alcance; luego reescribe (RF3-CAM-02 a 06).
+
+        Todo lo que rechaza lo rechaza antes de tocar la ejecucion. Un fallo del interprete no
+        pone la novela en error: la novela sigue completa y el cambio, rechazado.
+        """
+        novela_id = intencion.novela_id
+        try:
+            peticion = PeticionCambio.model_validate(intencion.payload)
+        except ValidationError as exc:
+            cola.cerrar(self.con, intencion.id, "rechazada", motivo="cambio_invalido",
+                        resultado={"explicacion": str(exc)[:500]})
+            return
+        if novela_id is None:
+            cola.cerrar(self.con, intencion.id, "rechazada", motivo="parametros invalidos")
+            return
+        motivo = self._motivo_para_no_cambiar(novela_id, peticion.version_base)
+        objetivo = peticion.objetivo.model_dump()
+        cita = peticion.cita.model_dump() if peticion.cita else None
+        candidatos = (
+            None if motivo else s_interprete.candidatos(self.con, novela_id, objetivo, cita)
+        )
+        if motivo or candidatos is None:
+            cola.cerrar(self.con, intencion.id, "rechazada",
+                        motivo=motivo or "objetivo_inexistente")
+            return
+
+        with transaccion(self.con):
+            cambio_id = insertar(
+                self.con, "cambio_lector", novela_id=novela_id, intencion_id=intencion.id,
+                version_base=peticion.version_base, peticion=peticion.peticion,
+                objetivo=json.dumps(objetivo, ensure_ascii=False),
+                cita=json.dumps(cita, ensure_ascii=False) if cita else None,
+            )
+        # La primera criba, antes de que el texto llegue a ningun agente (RF3-CAM-04).
+        alertas = alertas_de_inyeccion(f"{peticion.peticion}\n{cita['texto'] if cita else ''}")
+        if alertas:
+            self._rechazar_cambio(
+                intencion.id, cambio_id,
+                "La peticion parece traer instrucciones en lugar de un cambio de la novela.",
+                alertas=alertas,
+            )
+            return
+
+        ctx = self._contexto(novela_id)
+        try:
+            salida = pipeline.interpretar_cambio(ctx, objetivo, peticion.peticion, cita,
+                                                 candidatos)
+            cambio = s_interprete.validar(self.con, novela_id, salida, candidatos, objetivo)
+            problemas = pipeline.comprobar_planificacion(ctx, cambio)
+            if problemas:
+                raise s_interprete.NoAdmisible(
+                    "El cambio dejaria la planificacion de la novela sin pasar sus puertas: "
+                    + "; ".join(problemas[:3])
+                )
+        except s_interprete.NoAdmisible as exc:
+            self._rechazar_cambio(intencion.id, cambio_id, str(exc),
+                                  interpretacion=locals().get("salida"))
+            return
+        except (pipeline.Detenido, AgenteInterrumpido):
+            self._rechazar_cambio(intencion.id, cambio_id, "Se detuvo antes de interpretarlo.",
+                                  estado="interrumpido")
+            return
+        except Exception as exc:  # el interprete fallo: la novela no tiene la culpa
+            log.exception("El interprete fallo en el cambio %s", cambio_id)
+            self._rechazar_cambio(intencion.id, cambio_id,
+                                  f"No se pudo interpretar la peticion ({type(exc).__name__}).")
+            return
+
+        capitulos = lectura.alcance_de_cambio(
+            self.con, novela_id, tabla=cambio.tabla, entidad_id=cambio.entidad_id,
+            hecho_id=cambio.hecho_id,
+        ) or []
+        with transaccion(self.con):
+            self.con.execute(
+                "UPDATE cambio_lector SET interpretacion = ?, cambio = ?, capitulos = ?, "
+                "estado = 'reescribiendo', actualizado_en = datetime('now') WHERE id = ?",
+                (salida.model_dump_json(), json.dumps(cambio.como_dict(), ensure_ascii=False),
+                 json.dumps(capitulos), cambio_id),
+            )
+            estados.transicion(
+                self.con, novela_id, "cambio_lector", fase="revision",
+                capitulo=capitulos[0] if capitulos else None, intento=1,
+            )
+        cola.cerrar(self.con, intencion.id, "hecha",
+                    resultado={"cambio_id": cambio_id, "capitulos": capitulos})
+        self._novela_en_curso = novela_id
+        try:
+            final = pipeline.aplicar_cambio(ctx, cambio_id)
+            log.info("Novela %s tras el cambio %s: %s", novela_id, cambio_id, final)
+        except Exception as exc:
+            log.exception("Fallo no controlado en el cambio %s", cambio_id)
+            self._marcar_error(novela_id, exc)
+        finally:
+            self._novela_en_curso = None
+
+    def _motivo_para_no_cambiar(self, novela_id: int, version_base: int) -> str | None:
+        """Lo que impide un cambio, comprobado antes de llamar a nadie (RF3-CAM-02)."""
+        ejecucion = lectura.ejecucion(self.con, novela_id) or {}
+        if str(ejecucion.get("estado", "")) not in estados.ESTADOS_QUE_ADMITEN_CAMBIO:
+            return "novela_no_terminada"
+        ultima = self.con.execute(
+            "SELECT MAX(numero) FROM novela_version WHERE novela_id = ?", (novela_id,)
+        ).fetchone()[0]
+        if ultima is None or int(ultima) != version_base:
+            return "version_desfasada"
+        return None
+
+    def _rechazar_cambio(
+        self, intencion_id: int, cambio_id: int, explicacion: str, *,
+        estado: str = "rechazado", alertas: list[str] | None = None,
+        interpretacion: Any = None,
+    ) -> None:
+        with transaccion(self.con):
+            self.con.execute(
+                "UPDATE cambio_lector SET estado = ?, informe = ?, alertas = ?, "
+                "interpretacion = COALESCE(?, interpretacion), actualizado_en = datetime('now') "
+                "WHERE id = ?",
+                (
+                    estado, json.dumps({"explicacion": explicacion}, ensure_ascii=False),
+                    json.dumps(alertas or []),
+                    interpretacion.model_dump_json() if interpretacion is not None else None,
+                    cambio_id,
+                ),
+            )
+            nid = self.con.execute(
+                "SELECT novela_id FROM cambio_lector WHERE id = ?", (cambio_id,)
+            ).fetchone()[0]
+            emitir_evento(self.con, int(nid), "cambio_rechazado", cambio_id=cambio_id,
+                          explicacion=explicacion, alertas=alertas or [])
+        cola.cerrar(self.con, intencion_id, "rechazada", motivo="cambio_no_admisible",
+                    resultado={"cambio_id": cambio_id, "explicacion": explicacion})
+
     # -- ejecucion --------------------------------------------------------------------------
 
-    def _correr(self, novela_id: int) -> None:
-        self._novela_en_curso = novela_id
-        ctx = pipeline.Contexto(
+    def _contexto(self, novela_id: int) -> pipeline.Contexto:
+        return pipeline.Contexto(
             con=self.con, puerto=self.puerto, cfg=self.cfg, novela_id=novela_id,
             indice=self.indice, vigilar=self.vigilar, exportador=self.exportador,
         )
+
+    def _correr(self, novela_id: int) -> None:
+        self._novela_en_curso = novela_id
+        ctx = self._contexto(novela_id)
         try:
             final = pipeline.avanzar(ctx)
             log.info("Novela %s: %s", novela_id, final)

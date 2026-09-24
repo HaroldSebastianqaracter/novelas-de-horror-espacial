@@ -25,6 +25,23 @@
         "title": "Acto",
         "type": "object"
       },
+      "Alcance": {
+        "description": "Los capitulos que reescribiria un cambio (spec3, RF3-CAM-05).",
+        "properties": {
+          "capitulos": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Capitulos",
+            "type": "array"
+          }
+        },
+        "required": [
+          "capitulos"
+        ],
+        "title": "Alcance",
+        "type": "object"
+      },
       "AmenazaCanon": {
         "properties": {
           "entidad": {
@@ -76,6 +93,153 @@
           "naturaleza"
         ],
         "title": "AmenazaCanon",
+        "type": "object"
+      },
+      "Aparicion": {
+        "properties": {
+          "capitulos": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Capitulos",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "nombre": {
+            "title": "Nombre",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nombre",
+          "capitulos"
+        ],
+        "title": "Aparicion",
+        "type": "object"
+      },
+      "Apariciones": {
+        "description": "Donde aparece cada personaje y cada lugar, para la ficha (spec3, RF3-LEC-02).",
+        "properties": {
+          "lugares": {
+            "items": {
+              "$ref": "#/components/schemas/Aparicion"
+            },
+            "title": "Lugares",
+            "type": "array"
+          },
+          "personajes": {
+            "items": {
+              "$ref": "#/components/schemas/Aparicion"
+            },
+            "title": "Personajes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "personajes",
+          "lugares"
+        ],
+        "title": "Apariciones",
+        "type": "object"
+      },
+      "CambioVista": {
+        "description": "Un cambio del lector y lo que se hizo con el (spec3, RF3-CAM-13).",
+        "properties": {
+          "alertas": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Alertas",
+            "type": "array"
+          },
+          "cambio": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cambio"
+          },
+          "capitulos": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Capitulos",
+            "type": "array"
+          },
+          "cita": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cita"
+          },
+          "creado_en": {
+            "title": "Creado En",
+            "type": "string"
+          },
+          "estado": {
+            "title": "Estado",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "informe": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Informe"
+          },
+          "objetivo": {
+            "additionalProperties": true,
+            "title": "Objetivo",
+            "type": "object"
+          },
+          "peticion": {
+            "title": "Peticion",
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "id",
+          "estado",
+          "peticion",
+          "objetivo",
+          "creado_en"
+        ],
+        "title": "CambioVista",
         "type": "object"
       },
       "Capitulo": {
@@ -1357,6 +1521,17 @@
       },
       "NovelaDetalle": {
         "properties": {
+          "dedicatoria": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dedicatoria"
+          },
           "estilo": {
             "anyOf": [
               {
@@ -1369,6 +1544,16 @@
           },
           "novela": {
             "$ref": "#/components/schemas/NovelaCanon"
+          },
+          "regalo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Regalo"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "restricciones": {
             "additionalProperties": {
@@ -1464,7 +1649,8 @@
               "arrancar",
               "parar",
               "relanzar",
-              "resolver_parada"
+              "resolver_parada",
+              "cambio_lector"
             ],
             "title": "Tipo",
             "type": "string"
@@ -1814,6 +2000,42 @@
           "posicion"
         ],
         "title": "PuntoDeGiro",
+        "type": "object"
+      },
+      "Regalo": {
+        "description": "Para la portada: para quien, de quien y la ocasion legible (spec3, RF3-LEC-01).",
+        "properties": {
+          "de": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "De"
+          },
+          "ocasion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ocasion"
+          },
+          "para": {
+            "title": "Para",
+            "type": "string"
+          }
+        },
+        "required": [
+          "para"
+        ],
+        "title": "Regalo",
         "type": "object"
       },
       "ReglaAmenaza": {
@@ -2379,6 +2601,231 @@
           }
         },
         "summary": "Ver Novela"
+      }
+    },
+    "/novelas/{novela_id}/apariciones": {
+      "get": {
+        "operationId": "ver_apariciones_novelas__novela_id__apariciones_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Apariciones"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Apariciones"
+      }
+    },
+    "/novelas/{novela_id}/cambios": {
+      "get": {
+        "operationId": "listar_cambios_novelas__novela_id__cambios_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CambioVista"
+                  },
+                  "title": "Response Listar Cambios Novelas  Novela Id  Cambios Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Listar Cambios"
+      }
+    },
+    "/novelas/{novela_id}/cambios/alcance": {
+      "get": {
+        "description": "La misma regla que usa el worker para decidir que reescribe (RF3-CAM-05).",
+        "operationId": "ver_alcance_novelas__novela_id__cambios_alcance_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entidad",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "personajes",
+                    "lugares",
+                    "objetos"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entidad"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hecho_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Hecho Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Alcance"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Alcance"
+      }
+    },
+    "/novelas/{novela_id}/cambios/{cambio_id}": {
+      "get": {
+        "operationId": "ver_cambio_novelas__novela_id__cambios__cambio_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "novela_id",
+            "required": true,
+            "schema": {
+              "title": "Novela Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "cambio_id",
+            "required": true,
+            "schema": {
+              "title": "Cambio Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CambioVista"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ver Cambio"
       }
     },
     "/novelas/{novela_id}/canon/{entidad}": {

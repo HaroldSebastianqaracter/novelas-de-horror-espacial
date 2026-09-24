@@ -20,8 +20,13 @@ import unicodedata
 
 from compartido import politica
 from compartido.grafo import lectura
-from compartido.grafo.escritura import normalizar
 from compartido.puerta_base import Conflicto, ResultadoPuerta
+from compartido.texto import (
+    INICIO_DE_FRASE,
+    MINIMO_NOMBRE,
+    PALABRA_DE_NOMBRE,
+    nombra,
+)
 from config import CRITERIOS_OFICIO, PALABRAS_FILTRO
 
 from .esquemas import SalidaOficio, VeredictoCriterio
@@ -86,16 +91,8 @@ def _terminos_vetados(
 
 # --- spec3 RF3-VAL-01: los nombres del canon, escritos exactamente ------------------------------
 
-_PALABRA_CON_POSICION = re.compile(r"[^\W\d_]+")
-#: Lo que abre una frase o un dialogo: ahi va mayuscula cualquier palabra, y «Cortes» (heridas)
-#: y el apellido «Cortés» solo se distinguen por la tilde. Tras «:» y «;» va minuscula, asi que
-#: una mayuscula ahi es un nombre propio; salvo tras dos puntos que abren una cita o un dialogo
-#: («Le dijo: —Tomas el primer turno»), que llevan mayuscula (validador de a5d0355).
-_INICIO_DE_FRASE = re.compile(
-    r"(?:^|[.!?¿¡…\n]|:\s*[«\"“‘'\-–—])[\s«»\"“”‘’'\-–—*(\[]*$")
-_MINIMO_NOMBRE = 3
-#: Partes de un nombre que no lo identifican: «Pedro del Río» no se nombra con «del».
-_PARTICULAS = frozenset({"de", "del", "la", "las", "los", "el", "y", "e", "san", "santa"})
+# Las piezas para buscar nombres (la palabra, el inicio de frase, las particulas) viven en
+# compartido.texto desde el cambio del lector (spec3, RF3-CAM-05), que busca igual que aqui.
 
 
 def _plano(palabra: str) -> str:
@@ -111,8 +108,8 @@ def _partes_de_los_nombres(con: sqlite3.Connection, novela_id: int) -> dict[str,
     for tabla in ("personaje", "lugar", "objeto", "faccion"):
         for (nombre,) in con.execute(f"SELECT nombre FROM {tabla} WHERE novela_id = ?",
                                      (novela_id,)):
-            for parte in _PALABRA_CON_POSICION.findall(str(nombre)):
-                if len(parte) >= _MINIMO_NOMBRE and parte[0].isupper():
+            for parte in PALABRA_DE_NOMBRE.findall(str(nombre)):
+                if len(parte) >= MINIMO_NOMBRE and parte[0].isupper():
                     salida.setdefault(_plano(parte), set()).add(parte)
     return salida
 
@@ -136,17 +133,17 @@ def _nombres_mal_escritos(
     if not partes:
         return []
     del_regalo = _partes_del_regalo(con, novela_id)
-    en_minuscula = {_plano(p) for p in _PALABRA_CON_POSICION.findall(texto) if p[0].islower()}
+    en_minuscula = {_plano(p) for p in PALABRA_DE_NOMBRE.findall(texto) if p[0].islower()}
     seguros: dict[tuple[str, str], int] = {}
     dudosos: dict[tuple[str, str], int] = {}
-    for m in _PALABRA_CON_POSICION.finditer(texto):
+    for m in PALABRA_DE_NOMBRE.finditer(texto):
         palabra = m.group(0)
-        if not palabra[0].isupper() or len(palabra) < _MINIMO_NOMBRE:
+        if not palabra[0].isupper() or len(palabra) < MINIMO_NOMBRE:
             continue
         buenas = partes.get(_plano(palabra))
         if not buenas or palabra.casefold() in {b.casefold() for b in buenas}:
             continue
-        al_empezar = bool(_INICIO_DE_FRASE.search(texto, 0, m.start()))
+        al_empezar = bool(INICIO_DE_FRASE.search(texto, 0, m.start()))
         corriente = _plano(palabra) not in del_regalo or _plano(palabra) in en_minuscula
         donde = dudosos if al_empezar and corriente else seguros
         clave = (palabra, " o ".join(f"«{b}»" for b in sorted(buenas)))
@@ -179,8 +176,8 @@ def _partes_del_regalo(con: sqlite3.Connection, novela_id: int) -> set[str]:
         return set()
     nombres = [n for n in (brief.destinatario.nombre, *(a.nombre for a in brief.allegados))
                if n]
-    return {_plano(p) for n in nombres for p in _PALABRA_CON_POSICION.findall(n)
-            if len(p) >= _MINIMO_NOMBRE}
+    return {_plano(p) for n in nombres for p in PALABRA_DE_NOMBRE.findall(n)
+            if len(p) >= MINIMO_NOMBRE}
 
 
 def _veces(n: int) -> str:
@@ -224,19 +221,6 @@ def _longitud_real(
 # --- spec3 RF3-VAL-03: los allegados planificados, en la prosa ----------------------------------
 
 
-def _nombra(texto: str, nombre: str) -> bool:
-    """Si la prosa nombra a alguien: una palabra de su nombre, sin contar las particulas, escrita
-    con mayuscula. «La luz parpadeo» no nombra a Luz, ni «el tunel del sector» a Pedro del Rio."""
-    buscadas = {
-        normalizar(p) for p in _PALABRA_CON_POSICION.findall(nombre)
-        if len(p) >= _MINIMO_NOMBRE and normalizar(p) not in _PARTICULAS
-    } or {normalizar(nombre)}
-    return any(
-        m.group(0)[0].isupper() and normalizar(m.group(0)) in buscadas
-        for m in _PALABRA_CON_POSICION.finditer(texto)
-    )
-
-
 def _allegados_ausentes(
     con: sqlite3.Connection, novela_id: int, capitulo: int, texto: str
 ) -> list[Conflicto]:
@@ -265,7 +249,7 @@ def _allegados_ausentes(
     salida: list[Conflicto] = []
     for codigo, orden in planificados:
         nombre = nombres.get(codigo)
-        if nombre is None or _nombra(texto, nombre):
+        if nombre is None or nombra(texto, nombre):
             continue
         salida.append(Conflicto(
             comprobacion="allegado_ausente", capitulo=capitulo,

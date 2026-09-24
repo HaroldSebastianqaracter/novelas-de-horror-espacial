@@ -78,6 +78,11 @@ PRESUPUESTO_BLOQUES: dict[str, int] = {
     "prosa": 10_000,
 }
 
+# El modelo de cada llamada de agente (NOVELAS_MODELO, RF2-PUERTO-11). Fijado en el repo, y no
+# el que tenga por defecto la cuenta de Claude Code, para que la novela no cambie de modelo
+# segun quien la lance.
+MODELO_POR_DEFECTO = "claude-opus-5-5"
+
 # Techo por llamada al modelo (NOVELAS_PRESUPUESTO_TOKENS) y lo que se reserva de el para la
 # salida del agente y la sobrecarga de Claude Code. El paquete dispone del resto.
 TECHO_POR_LLAMADA = 100_000
@@ -148,6 +153,12 @@ OFICIO_MUESTRAS_SI_DISCREPAN = 5
 MODELO_EMBEDDING_PREFERIDO = "intfloat/multilingual-e5-small"
 
 MAX_INTENTOS_CAPITULO = 3
+
+#: Cuanto se tiene que parecer la prosa corregida por un cambio del lector a la aprobada
+#: (spec3, RF3-CAM-09): proporcion de `difflib` por palabras sobre el capitulo entero.
+#: PROVISIONAL: un nombre cambiado diez veces en 1.300 palabras da 0,98, y rehacer dos
+#: frases, en torno a 0,95; se calibra con cambios reales.
+CAMBIO_SIMILITUD_MINIMA = 0.85
 UMBRAL_HILO_LATENTE = 6
 CAPITULOS_RESUMEN_COMPLETO = 3
 
@@ -174,6 +185,8 @@ class Config:
     langfuse_public_key: str | None = None
     langfuse_secret_key: str | None = field(default=None, repr=False)
     langfuse_host: str = LANGFUSE_HOST_POR_DEFECTO
+    #: El modelo que el puerto terminal pide a Claude Code (RF2-PUERTO-11).
+    modelo: str = MODELO_POR_DEFECTO
 
     @property
     def langfuse_activo(self) -> bool:
@@ -231,4 +244,5 @@ def cargar() -> Config:
         langfuse_public_key=os.environ.get("LANGFUSE_PUBLIC_KEY") or None,
         langfuse_secret_key=os.environ.get("LANGFUSE_SECRET_KEY") or None,
         langfuse_host=(os.environ.get("LANGFUSE_HOST") or LANGFUSE_HOST_POR_DEFECTO).rstrip("/"),
+        modelo=(_env("MODELO", MODELO_POR_DEFECTO) or MODELO_POR_DEFECTO).strip(),
     )
