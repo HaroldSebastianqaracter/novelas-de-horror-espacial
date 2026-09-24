@@ -530,7 +530,8 @@ def _unidad_de_llamada(capitulo: object) -> str:
 
 def _unidad_de_puerta(puerta: int, capitulo: object) -> str:
     if puerta in (1, 2) or capitulo is None:
-        return "cierre" if puerta == 5 else "planificacion"
+        # La 5 y la verificacion formal (la 6, spec-lean) cierran la novela.
+        return "cierre" if puerta in (5, 6) else "planificacion"
     return f"capitulo-{capitulo}"
 
 

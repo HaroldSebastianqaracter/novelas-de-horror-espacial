@@ -62,6 +62,8 @@ RESOLUCIONES: dict[tuple[str, str], EstadoEjecucion] = {
     ("continuidad", "relanzar"): "generando",
     ("oficio", "relanzar"): "generando",
     ("presupuesto", "relanzar"): "generando",
+    # La cronologia no pasa Lean (spec-lean, RF-LEAN-06): se rehace desde el capitulo.
+    ("formal", "relanzar"): "generando",
 }
 
 ACCIONES_DE_PARADA = frozenset(accion for _, accion in RESOLUCIONES)

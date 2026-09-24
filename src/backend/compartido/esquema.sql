@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS parada (
     resolucion   TEXT,
     creado_en    TEXT NOT NULL DEFAULT (datetime('now')),
     resuelto_en  TEXT,
+    -- La migracion 014 anade 'formal' (spec-lean, RF-LEAN-06).
     CHECK (tipo IN ('estructura','escaleta','continuidad','oficio','presupuesto')),
     CHECK (estado IN ('abierta','resuelta'))
 );
@@ -563,6 +564,7 @@ CREATE TABLE IF NOT EXISTS resultado_puerta (
     veredicto TEXT NOT NULL,
     detalle   TEXT,
     creado_en TEXT NOT NULL DEFAULT (datetime('now')),
+    -- La migracion 014 lo lleva a 6: la verificacion formal (spec-lean, RF-LEAN-06).
     CHECK (puerta BETWEEN 1 AND 5),
     CHECK (veredicto IN ('pasa','falla','aviso'))
 );

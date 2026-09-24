@@ -86,6 +86,8 @@ def validador_de(puerta: int, comprobacion: str) -> str:
         if comprobacion.startswith("longitud"):
             return "longitud"
         return "puerta_4_mecanica"
+    if puerta == 6:
+        return "lean"  # la verificacion formal (spec-lean, RF-LEAN-06)
     return f"puerta_{puerta}"
 
 
@@ -120,7 +122,6 @@ def evaluar_brief(fichero: Path, directorio: Path, cfg_base: config.Config, *,
                   proposito=str(meta.get("proposito") or ""))
     for v in VALIDADORES:
         r.celdas[v.clave] = "sin ejecutar"
-    r.celdas["lean"] = "no integrado"
 
     try:
         brief = entrevista.leer_brief(fichero)

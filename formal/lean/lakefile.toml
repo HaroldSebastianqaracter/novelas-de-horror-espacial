@@ -1,0 +1,6 @@
+name = "storymaker"
+version = "0.1.0"
+defaultTargets = ["Storymaker"]
+
+[[lean_lib]]
+name = "Storymaker"

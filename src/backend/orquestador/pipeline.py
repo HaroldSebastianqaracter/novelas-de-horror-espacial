@@ -90,7 +90,7 @@ from tareas.revision import servicio as s_revision
 from tareas.revision.esquemas import SalidaRevision
 
 from . import cambios as o_cambios
-from . import cola, estados, fallo, versiones, vigencia
+from . import cola, estados, fallo, lean, versiones, vigencia
 from .puerta_global import evaluar as evaluar_puerta_global
 from .seudonimo import Mascara
 
@@ -444,7 +444,8 @@ def generar_capitulo(ctx: Contexto, numero: int) -> None:
                 estados.fijar_fase(ctx.con, ctx.novela_id, "paquete", capitulo=numero,
                                    intento=intento)
 
-            criterios = ctx.eventos_criterios if intento > 1 else None
+            criterios = (ctx.eventos_criterios if intento > 1
+                         else _criterios_formales(ctx, numero) or None)
             recuperado = _recuperar(ctx, numero)
 
             paquete_redaccion = _paquete_o_parada(
@@ -837,6 +838,7 @@ def _completar(
     motivo: versiones.Motivo | None = None,
     detalle: str | None = None,
     aplicar: Callable[[], None] | None = None,
+    verificar_cronologia: bool = True,
 ) -> tuple[str, int | None]:
     """Puerta 5, la transicion a completada y la version, en UNA transaccion (RF3-BIB-12).
 
@@ -844,19 +846,101 @@ def _completar(
     esa misma transaccion: el cambio escribe ahi su canon y sus textos (spec3, RF3-CAM-11), y si
     lanza, no queda nada. Devuelve el estado final y el numero de la version publicada, o None
     si el texto no cambio.
+
+    Antes, la cronologia pasa por Lean (spec-lean, RF-LEAN-06), sobre el canon como quedara: en
+    un cambio del lector, `aplicar` corre primero en una simulacion que se deshace. De la base
+    solo se lee la cronologia, que es rapido; Lean compila despues, fuera de toda transaccion,
+    para no tener el cerrojo de escritura mientras trabaja. Su resultado queda como puerta 6.
+    Si falla, no se publica: la generacion abre una parada `formal` y un cambio del lector
+    fracasa entero con `CambioImposible`. `verificar_cronologia=False` es para volver a
+    completar una novela sin texto nuevo (el cambio que fracaso): no hay nada que publicar.
     """
     with transaccion(ctx.con):
         estados.fijar_fase(ctx.con, ctx.novela_id, "puerta_5")
+    if verificar_cronologia and ctx.cfg.verificacion_formal:
+        _verificar_cronologia(ctx, aplicar)
     with transaccion(ctx.con):
         if aplicar is not None:
             aplicar()
         global_ = evaluar_puerta_global(ctx.con, ctx.novela_id)
         _registrar_puerta_en(ctx, global_)
-        suceso = "terminado_limpio" if not global_.conflictos else "terminado_con_avisos"
-        final = estados.transicion(ctx.con, ctx.novela_id, suceso, fase=None)
-        emitir_evento(ctx.con, ctx.novela_id, "completada", avisos=len(global_.conflictos))
-        # Lo que leera el lector, en la misma transaccion que la completa (RF3-BIB-12).
-        numero = versiones.publicar(ctx.con, ctx.novela_id, motivo=motivo, detalle=detalle)
+        final, numero = _publicar(ctx, global_, motivo=motivo, detalle=detalle)
+    return final, numero
+
+
+def _verificar_cronologia(ctx: Contexto, aplicar: Callable[[], None] | None) -> None:
+    """La puerta 6 (spec-lean, RF-LEAN-06). Vuelve si pasa; si no, para o lanza."""
+    if aplicar is None:
+        crono = lean.extraer(ctx.con, ctx.novela_id)
+    else:
+        with simulacion(ctx.con):
+            aplicar()
+            crono = lean.extraer(ctx.con, ctx.novela_id)
+    formal = lean.comprobar(crono)
+    with transaccion(ctx.con):
+        _registrar_puerta_en(ctx, formal)
+    if formal.pasa:
+        return
+    if aplicar is not None:
+        raise CambioImposible("La cronologia no pasa la verificacion formal (Lean).",
+                              [str(c) for c in formal.bloqueantes])
+    # Sin capitulo (Lean ausente, un error de la herramienta), la parada apunta al ultimo: al
+    # relanzar se rehace uno solo, no la novela entera.
+    capitulos = [c.capitulo for c in formal.bloqueantes if c.capitulo is not None]
+    desde = min(capitulos) if capitulos else lectura.total_capitulos(ctx.con, ctx.novela_id)
+    _abrir_parada(ctx, "formal", formal.informe(), capitulo=desde)
+
+
+#: Fallos de la herramienta, no de la prosa: no se le piden al redactor.
+_LEAN_SIN_PROSA = frozenset({"lean_no_disponible", "lean_error"})
+
+
+def _criterios_formales(ctx: Contexto, numero: int) -> list[dict[str, Any]]:
+    """Lo que Lean encontro en este capitulo, tras una parada `formal` (RF-LEAN-06).
+
+    Salen del informe de la ultima parada `formal`, no del ultimo resultado de la puerta 6: el
+    de un cambio del lector que fracaso se calculo sobre un canon que se deshizo. Dejan de
+    valer en cuanto la novela vuelve a completarse despues de abrirse esa parada. El redactor
+    los recibe en el primer intento como los criterios incumplidos de la puerta 4.
+    """
+    parada = ctx.con.execute(
+        "SELECT p.id, p.informe FROM parada p JOIN ejecucion e ON e.id = p.ejecucion_id "
+        "WHERE e.novela_id = ? AND p.tipo = 'formal' ORDER BY p.id DESC LIMIT 1",
+        (ctx.novela_id,),
+    ).fetchone()
+    if parada is None:
+        return []
+    completada_despues = ctx.con.execute(
+        "SELECT 1 FROM traza_evento c WHERE c.novela_id = :n AND c.tipo = 'completada' "
+        "AND c.id > (SELECT MIN(a.id) FROM traza_evento a WHERE a.novela_id = :n "
+        "AND a.tipo = 'parada' AND json_extract(a.payload, '$.parada_id') = :p)",
+        {"n": ctx.novela_id, "p": int(parada["id"])},
+    ).fetchone()
+    if completada_despues:
+        return []
+    criterios: list[dict[str, Any]] = []
+    for c in como_lista(como_dict(json.loads(parada["informe"] or "{}")).get("conflictos")):
+        c = como_dict(c)
+        if (c.get("aviso") or c.get("comprobacion") in _LEAN_SIN_PROSA
+                or c.get("capitulo") != numero):
+            continue
+        criterios.append({
+            "criterio": str(c.get("comprobacion") or "lean"),
+            "principio": "cronologia formal (Lean)",
+            "sugerencia": "Reescribe para que la cronologia no lo contradiga.",
+            "evidencia": str(c.get("descripcion") or ""),
+        })
+    return criterios
+
+
+def _publicar(ctx: Contexto, global_: ResultadoPuerta, *, motivo: versiones.Motivo | None,
+              detalle: str | None) -> tuple[str, int | None]:
+    """La transicion a completada y la version, dentro de la transaccion de `_completar`."""
+    suceso = "terminado_limpio" if not global_.conflictos else "terminado_con_avisos"
+    final = estados.transicion(ctx.con, ctx.novela_id, suceso, fase=None)
+    emitir_evento(ctx.con, ctx.novela_id, "completada", avisos=len(global_.conflictos))
+    # Lo que leera el lector, en la misma transaccion que la completa (RF3-BIB-12).
+    numero = versiones.publicar(ctx.con, ctx.novela_id, motivo=motivo, detalle=detalle)
     return final, numero
 
 
@@ -997,7 +1081,8 @@ def _fracasar(ctx: Contexto, cambio_id: int, informe: dict[str, Any]) -> str:
         _marcar_cambio(ctx, cambio_id, "fallido", informe=informe)
         emitir_evento(ctx.con, ctx.novela_id, "cambio_fallido", cambio_id=cambio_id,
                       informe=informe)
-    final, _ = _completar(ctx)
+    # El canon es el de antes del cambio, ya verificado al publicarse: no hay version nueva.
+    final, _ = _completar(ctx, verificar_cronologia=False)
     return final
 
 

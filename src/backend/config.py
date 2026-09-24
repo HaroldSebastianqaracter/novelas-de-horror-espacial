@@ -187,6 +187,10 @@ class Config:
     langfuse_host: str = LANGFUSE_HOST_POR_DEFECTO
     #: El modelo que el puerto terminal pide a Claude Code (RF2-PUERTO-11).
     modelo: str = MODELO_POR_DEFECTO
+    #: La verificacion formal en Lean antes de publicar (spec-lean, RF-LEAN-06). `cargar()` la
+    #: activa salvo `NOVELAS_VERIFICACION_FORMAL=0`; un `Config` construido a mano (los tests,
+    #: el banco) la deja apagada para no compilar Lean en cada novela de prueba.
+    verificacion_formal: bool = False
 
     @property
     def langfuse_activo(self) -> bool:
@@ -245,4 +249,5 @@ def cargar() -> Config:
         langfuse_secret_key=os.environ.get("LANGFUSE_SECRET_KEY") or None,
         langfuse_host=(os.environ.get("LANGFUSE_HOST") or LANGFUSE_HOST_POR_DEFECTO).rstrip("/"),
         modelo=(_env("MODELO", MODELO_POR_DEFECTO) or MODELO_POR_DEFECTO).strip(),
+        verificacion_formal=_env_bool("VERIFICACION_FORMAL", True),
     )

@@ -342,7 +342,8 @@ src/backend/
 │   ├── contexto/        # ensamblado del paquete y presupuesto de tokens
 │   ├── puerto/          # el puerto a Claude Code, real y falso
 │   └── vectores/        # indice derivado: embeddings y recuperacion
-├── orquestador/         # que fase toca, puertas, politica de fallo, reanudacion
+├── orquestador/         # que fase toca, puertas, politica de fallo, reanudacion,
+│                        # y la verificacion formal en Lean (lean.py)
 ├── evals/               # medidas del sistema; nada de aqui corre dentro del pipeline
 └── tareas/              # una carpeta por agente
     ├── arquitecto/
@@ -355,6 +356,8 @@ src/backend/
     ├── continuidad/
     └── oficio/
 ```
+
+> **Decisión sin entrevistar, 24 de septiembre de 2026.** La verificación formal (generador del fichero de Lean y su ejecución) vive en `orquestador/lean.py`, junto a la puerta 5 (`puerta_global.py`), y el proyecto de Lean en `formal/lean/`, fuera de `src/backend/`. Es una puerta global sobre la novela entera, de la misma altura que la puerta 5, y no la fase de ningún agente: no es una tarea. Se descartó `compartido/formal/`, porque `compartido/` es infraestructura y canon, y meter ahí la lógica de una puerta es justo el crecimiento que este documento señala como corte mal hecho. `formal/` es la única carpeta de código fuera de `src/`, que `AGENTS.md` describe como «todo el código»: es un proyecto Lake con su propia versión de Lean, no código de la aplicación, y el backend solo lo invoca como herramienta externa. Se descartó `src/formal/`, que lo mezclaba con las dos aplicaciones. Detalle en [specs/spec-lean.md](../specs/spec-lean.md).
 
 > **Decisión sin entrevistar, 22 de septiembre de 2026.** El **orquestador está fuera de `compartido/`**, junto al worker. `compartido/` es infraestructura que usan todos; el orquestador solo lo usa el worker, y las tareas no lo tocan. Meterlo dentro habría engordado `compartido/` sin razón, que es la señal que este mismo documento identifica como corte mal hecho.
 
