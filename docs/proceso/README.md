@@ -10,6 +10,7 @@ El razonamiento que llevó a storyMaker a ser como es: qué se decidió construi
 | Diagramas | [diagramas.md](diagramas.md) | Harness, máquina de estados (la del código y la de TLA+), esquema SQLite y tabla de validadores |
 | Registro de iteraciones | [registro-iteraciones.md](registro-iteraciones.md) | Al día hasta el 24 de septiembre de 2026 |
 | Red-team log | [red-team-log.md](red-team-log.md) | Formato fijado; casos adversariales pendientes |
+| Tabla de evals (cinco briefs, con Claude real) | [evals-tabla.md](evals-tabla.md) | Medida el 24 de septiembre; dos briefs no llegaron a la prosa por el recorte a tres capítulos (explicado) |
 | Iteración de tuning (antes y después) | [tuning.md](tuning.md) | Escrita: el prompt del redactor v5 → v6 en la novela de diez capítulos |
 | Coste real por novela (para la slide de presupuesto) | [coste.md](coste.md) | Medido en la novela de diez capítulos; precio y escenarios, propuestos |
 | Los dos hooks (validación del capítulo y política) | [architecture.md](../architecture.md#los-dos-hooks-del-harness) | Escrito |
