@@ -109,11 +109,43 @@ def test_la_muerte_cae_el_dia_de_la_primera_escena_de_la_racha(con: sqlite3.Conn
     assert lean.extraer(con, base.novela_id).muertes[base.personajes["Reyes"]] == 2
 
 
+def test_la_muerte_cae_el_mayor_dia_de_su_escena(con: sqlite3.Connection,
+                                                base: banco.Base) -> None:
+    """Reyes muere en la 3.2 (dia 3); si la escena dramatiza tambien el dia 4, muere el 4."""
+    _evento(con, base, (3, 2), 33, 4)
+    assert lean.extraer(con, base.novela_id).muertes[base.personajes["Reyes"]] == 4
+
+
 def test_solo_se_leen_edades_con_cifras(con: sqlite3.Connection, base: banco.Base) -> None:
-    for valor in ("45 años", "treinta y ocho", "unos 40"):
+    for valor in ("45 años", "treinta y ocho", "unos 40", "6 meses", "34 y medio", "52"):
         banco._hecho(con, base, (3, 1), "Idris", "edad", valor)  # pyright: ignore[reportPrivateUsage]
     edades = lean.extraer(con, base.novela_id).edades
-    assert [(p, d, e) for _, p, d, e in edades] == [(base.personajes["Idris"], 3, 45)]
+    idris = base.personajes["Idris"]
+    assert [(p, d, e) for _, p, d, e in edades] == [(idris, 3, 45), (idris, 3, 52)]
+
+
+def test_un_evento_referido_no_pone_a_nadie_en_el(con: sqlite3.Connection,
+                                                   base: banco.Base) -> None:
+    """Un suceso que la 3.1 cuenta sin dramatizar (la fundacion, hace 60 años) no es una
+    presencia de quien esta en la escena, ni fija el dia de la escena."""
+    ev = insertar(con, "evento", novela_id=base.novela_id, linea_de_tiempo_id=base.linea_id,
+                  escena_id=base.escenas[(3, 1)], fecha_interna="hace sesenta años",
+                  dia=-21900, descripcion="La colonia se funda", tipo="referido",
+                  dramatizado=0)
+    crono = lean.extraer(con, base.novela_id)
+    assert all(e != ev for e, _, _ in crono.presencias)
+    assert not any(e.analepsis or e.linea or e.previo for e in crono.eventos if e.id == ev)
+
+
+def test_un_referido_sin_escena_no_es_un_antecedente(con: sqlite3.Connection,
+                                                      base: banco.Base) -> None:
+    ev = insertar(con, "evento", novela_id=base.novela_id, linea_de_tiempo_id=base.linea_id,
+                  fecha_interna="pasado manana", dia=5, descripcion="Llega el relevo",
+                  tipo="referido", dramatizado=0)
+    crono = lean.extraer(con, base.novela_id)
+    assert [e.previo for e in crono.eventos if e.id == ev] == [False]
+    # El antecedente del mundo de la demo si lo es.
+    assert any(e.previo for e in crono.eventos)
 
 
 def test_el_presente_de_una_analepsis(con: sqlite3.Connection, base: banco.Base) -> None:
@@ -152,6 +184,16 @@ def test_sin_lean_la_puerta_avisa_y_deja_pasar(con: sqlite3.Connection, base: ba
     r = lean.verificar(con, base.novela_id)
     assert r.pasa and [c.comprobacion for c in r.avisos] == ["lean_no_disponible"]
 
+
+
+def test_la_linea_de_comandos_imprime_el_fichero(base: banco.Base,
+                                                  capsys: pytest.CaptureFixture[str]) -> None:
+    import verificar_lean
+
+    codigo = verificar_lean.main(
+        ["--novela", str(base.novela_id), "--db", str(base.ruta), "--generar"])
+    assert codigo == 0
+    assert "theorem nadie_tras_morir : NadieTrasMorir datos" in capsys.readouterr().out
 
 # --- RF-LEAN-05 y RF-LEAN-07: la verificacion, con Lean ------------------------------------------
 
@@ -224,7 +266,8 @@ def test_lean_ve_lo_que_la_puerta_3_no_ve(
     r = lean.verificar(con, base.novela_id)
     assert not r.pasa
     assert {c.comprobacion for c in r.bloqueantes} == {esperado}
-    assert all(c.descripcion for c in r.bloqueantes)
+    # El editor recibe el capitulo donde corregir, tambien en una edad (que no tiene evento).
+    assert all(c.descripcion and c.capitulo == banco.CAPITULO for c in r.bloqueantes)
 
 
 @sin_lean

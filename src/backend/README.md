@@ -138,6 +138,13 @@ cd ..\..\formal\lean
 %USERPROFILE%\.elan\bin\lake build
 ```
 
+Para comprobar una novela, o ver el fichero que se le genera, con la base en solo lectura:
+
+```bat
+.venv\Scripts\python.exe verificar_lean.py --novela 1
+.venv\Scripts\python.exe verificar_lean.py --novela 1 --db copia.db --generar
+```
+
 Sin Lean, la verificación avisa (`lean_no_disponible`) y deja pasar, y sus tests se saltan.
 
 ## Cómo está cortado
@@ -147,6 +154,7 @@ main.py          el borde HTTP. Solo lee; actuar es encolar una intencion
 worker.py        el unico proceso que escribe
 demo.py          lanzador de prueba
 exportar_langfuse.py  exporta novelas enteras a Langfuse, en solo lectura
+verificar_lean.py     comprueba la cronologia de una novela con Lean, en solo lectura
 config.py        unico sitio donde se lee el entorno (y el .env)
 compartido/      infraestructura y canon: db, grafo, contexto, puerto, vectores
 orquestador/     que fase toca, puertas, politica de fallo, reversion

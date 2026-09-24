@@ -16,6 +16,7 @@ import re
 import shutil
 import sqlite3
 import subprocess
+import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -36,7 +37,8 @@ INVARIANTES = (
     ("el_tiempo_no_retrocede", "ElTiempoNoRetrocede"),
 )
 
-_EDAD = re.compile(r"^\s*(\d{1,4})(?!\d)")
+# Una edad en cifras y, como mucho, «años» detras: «6 meses» o «34 y medio» no se leen.
+_EDAD = re.compile(r"^\s*(\d{1,4})\s*(?:a[ñn]os?)?\s*\.?\s*$", re.IGNORECASE)
 
 
 def directorio_lean() -> Path:
@@ -80,6 +82,8 @@ class Cronologia:
     eventos_sin_dia: int = 0
     muertes_sin_dia: int = 0
     edades_sin_dia: int = 0
+    #: hecho de edad -> capitulo de su escena, para el feedback del editor
+    capitulo_de_hecho: dict[int, int] = field(default_factory=dict[int, int])
 
 
 # La vista `presencia` (spec2, RF2-PIPE-31) sin el estado `muerto`: registrar que alguien sigue
@@ -119,8 +123,16 @@ def extraer(con: sqlite3.Connection, novela_id: int) -> Cronologia:
     con_dia = [f for f in filas if f[1] is not None]
     crono.eventos_sin_dia = len(filas) - len(con_dia)
 
-    def es_linea(f: sqlite3.Row | tuple[object, ...]) -> bool:
-        return f[4] is not None and bool(f[3]) and not bool(f[7])
+    def dramatizado(f: sqlite3.Row) -> bool:
+        return f[4] is not None and bool(f[3])
+
+    def es_linea(f: sqlite3.Row) -> bool:
+        return dramatizado(f) and not bool(f[7])
+
+    def es_previo(f: sqlite3.Row) -> bool:
+        # Como los inserta el constructor de mundo: sin escena, sin dramatizar y con orden
+        # negativo. Un evento que el extractor refiere sin escena no es un antecedente.
+        return f[4] is None and not bool(f[3]) and f[2] is not None and int(f[2]) < 0
 
     # El presente de cada escena: el mayor dia de la linea principal en las anteriores.
     linea = sorted((int(f[8]), int(f[1])) for f in con_dia if es_linea(f))
@@ -135,23 +147,25 @@ def extraer(con: sqlite3.Connection, novela_id: int) -> Cronologia:
             id=int(f[0]), dia=int(f[1]),
             orden=int(f[2]) if f[2] is not None else None,
             capitulo=int(f[5]) if f[5] is not None else 0,
-            previo=f[4] is None, linea=es_linea(f),
-            analepsis=f[4] is not None and bool(f[7]),
+            previo=es_previo(f), linea=es_linea(f),
+            analepsis=dramatizado(f) and bool(f[7]),
             presente=presente(int(f[8]) if f[8] is not None else None),
             descripcion=str(f[6]),
         ))
     crono.eventos.sort(key=lambda e: (e.dia, e.orden if e.orden is not None else 0, e.id))
 
+    # El dia de una escena, y quien esta en cada suceso, salen de lo que la escena dramatiza:
+    # un evento referido (un recuerdo contado, algo que paso lejos) no pone a nadie en el.
     dia_de_escena: dict[int, int] = {}
     for f in con_dia:
-        if f[4] is not None:
+        if dramatizado(f):
             dia_de_escena[int(f[4])] = max(dia_de_escena.get(int(f[4]), int(f[1])), int(f[1]))
 
     presentes: dict[int, set[int]] = {}
     for escena_id, personaje_id in con.execute(_SQL_PRESENCIA):
         presentes.setdefault(int(escena_id), set()).add(int(personaje_id))
     for f in con_dia:
-        if f[4] is None:
+        if not dramatizado(f):
             continue
         for p in sorted(presentes.get(int(f[4]), set())):
             if p in crono.nombres:
@@ -203,12 +217,14 @@ def _extraer_edades(
     con: sqlite3.Connection, novela_id: int, crono: Cronologia, dia_de_escena: dict[int, int],
 ) -> None:
     """Hechos `edad` de un personaje cuyo valor empieza por cifras (RF-LEAN-02)."""
-    for hecho_id, personaje_id, escena_id, valor in con.execute(
+    for hecho_id, personaje_id, escena_id, valor, capitulo in con.execute(
         """
-        SELECT id, sujeto_id, escena_id, valor FROM hecho_vigente
-        WHERE novela_id = ? AND sujeto_tipo = 'personaje' AND sujeto_id IS NOT NULL
-          AND atributo_clave = 'edad'
-        ORDER BY id
+        SELECT h.id, h.sujeto_id, h.escena_id, h.valor, eo.capitulo_numero
+        FROM hecho_vigente h
+        JOIN escena_ordinal eo ON eo.escena_id = h.escena_id
+        WHERE h.novela_id = ? AND h.sujeto_tipo = 'personaje' AND h.sujeto_id IS NOT NULL
+          AND h.atributo_clave = 'edad'
+        ORDER BY h.id
         """,
         (novela_id,),
     ):
@@ -220,6 +236,7 @@ def _extraer_edades(
             continue
         crono.edades.append(
             (int(hecho_id), int(personaje_id), dia_de_escena[int(escena_id)], int(m.group(1))))
+        crono.capitulo_de_hecho[int(hecho_id)] = int(capitulo)
 
 
 # --- Fichero de Lean ---------------------------------------------------------------------------
@@ -350,7 +367,8 @@ def _conflicto(crono: Cronologia, comprobacion: str, v: dict[str, int]) -> Confl
     nombre = crono.nombres.get(v.get("personaje", 0), "?")
     ev = eventos.get(v.get("evento", 0))
     otro = eventos.get(v.get("otro", 0))
-    capitulo = ev.capitulo if ev and ev.capitulo else None
+    capitulo = (ev.capitulo if ev and ev.capitulo
+                else crono.capitulo_de_hecho.get(v.get("hecho", 0)))
     dia, limite = v.get("dia", 0), v.get("limite", 0)
     que = f"«{ev.descripcion[:80]}» (evento {ev.id})" if ev else ""
     if comprobacion == "lean_nadie_antes_de_nacer":
@@ -395,6 +413,9 @@ def verificar(
     carpeta.mkdir(exist_ok=True)
     fichero = carpeta / f"Novela{novela_id}_{uuid.uuid4().hex[:8]}.lean"
     fichero.write_text(escribir(crono), encoding="utf-8", newline="\n")
+    # Un solo limite para las dos llamadas: compilar la biblioteca (casi nada si ya lo esta)
+    # y comprobar el fichero de la novela.
+    fin = time.monotonic() + tiempo_limite
     try:
         subprocess.run(
             [lake, "build", "Storymaker.Cronologia"], cwd=directorio, capture_output=True,
@@ -403,7 +424,7 @@ def verificar(
         proceso = subprocess.run(
             [lake, "env", "lean", str(fichero.relative_to(directorio))], cwd=directorio,
             capture_output=True, text=True, encoding="utf-8", errors="replace",
-            timeout=tiempo_limite,
+            timeout=max(1.0, fin - time.monotonic()),
         )
     except subprocess.TimeoutExpired:
         return ResultadoPuerta(puerta=PUERTA, conflictos=[Conflicto(
