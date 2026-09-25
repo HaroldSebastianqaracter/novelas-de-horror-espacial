@@ -2,7 +2,7 @@
 
 Lista de lo que falta para la entrega final del examen de *Harness Engineering*, comparada con lo que el repo ya hace. Se va tachando a medida que se cierra. **No es una spec**: cada bloque de «Ahora» empieza escribiendo su spec en `specs/` y entra en el mismo commit que su código, como pide [AGENTS.md](../AGENTS.md).
 
-Versión 0.1 · 23 de septiembre de 2026
+Versión 0.2 · 25 de septiembre de 2026. **Estado:** todo lo obligatorio está hecho salvo cuatro tareas del autor: la revisión humana, el vídeo, el commit final de MyFactory y el email. Quedan abiertos también el nombre del repositorio y los opcionales.
 
 > **Decisión entrevistada, 23 de septiembre de 2026.** Las novelas siguen siendo de **terror espacial**. La personalización que pide el enunciado se resuelve **dentro del género**: el terror se adapta al destinatario (su nombre, sus rasgos, sus recuerdos trasladados a la estación, la intensidad que admite su edad). Se descartó abrir el sistema a otros géneros. **storyMaker es este repositorio**, no uno nuevo.
 
@@ -46,7 +46,7 @@ Requisitos en [spec3.md](spec3.md), 3.2; verificación en [spec3-verification.md
 - [x] **Texto libre no confiable**: solo salen rasgos, recuerdos y allegados, cada uno con cita literal comprobada, y una búsqueda de patrones de inyección deja alertas.
 - [x] El brief llega a arquitecto (dedicatoria), mundo (recuerdos), elenco (destinatario protagonista y allegados), estructura, escaleta (elementos por escena) y redacción. Las puertas 1, 2 y 3 comprueban el encargo.
 - [x] Escala del examen: **10 capítulos de 1.000–1.500 palabras** por defecto, derivada del brief.
-- [ ] Probar la entrevista y una novela personalizada con **Claude Code real**. Cuesta dinero: pendiente de aprobación.
+- [x] Probar la entrevista y una novela personalizada con **Claude Code real**. Cuesta dinero: pendiente de aprobación. Hecho el 24-09: la novela de diez capítulos con el brief de ejemplo y la entrevista de la eval adversarial, con Claude Code real ([evals-tabla](../docs/proceso/evals-tabla.md)).
 
 ### 3. Huecos de la story bible
 
@@ -64,9 +64,9 @@ Requisitos en [spec3.md](spec3.md), 3.11; verificación en [spec3-verification.m
 - [x] **Un hecho, un dato**: valor de 10 palabras como mucho. Pendiente de confirmar con la eval del extractor real (fila 34).
 - [x] Resumen de unas 160 palabras con el límite duro en 250: se recortaba en 7 de 7 extracciones.
 - [x] **Nombres menores**: el mundo en el inventario, variantes resueltas contra el canon, la lista de los ya usados para redactor y extractor, y un aviso por nombre nuevo.
-- [ ] La puerta 4 no rechazó nada en 16 criterios: un capítulo malo conocido como eval y una comprobación mecánica de coletillas. Va con el bloque 6.
-- [ ] Modelo por agente: la extracción es el 48 % del coste y todo corre con Opus. Hace falta medir el extractor con Sonnet contra el golden set (con coste).
-- [ ] Los tres huecos de la parada 6: conocimiento por facción (RF2-PIPE-27), el objeto que viaja con su poseedor (RF2-PIPE-28) y los hábitos como conducta (RF2-PIPE-29). Decididos por el autor; los implementa la sesión que hizo la pasada, en spec2.
+- [x] La puerta 4 no rechazó nada en 16 criterios: un capítulo malo conocido como eval y una comprobación mecánica de coletillas. Va con el bloque 6. Resuelto: en la novela de diez capítulos el juez rechazó 6 de 16 intentos, y la parte mecánica (palabras filtro, verbos de habla) ya avisa ([evals-tabla](../docs/proceso/evals-tabla.md)).
+- [ ] Modelo por agente: la extracción es el 48 % del coste y todo corre con Opus. Hace falta medir el extractor con Sonnet contra el golden set (con coste). Fuera de la entrega: Sonnet 5 se probó en redacción en las evals y no compensa (83 % de rechazos del juez); el extractor con Sonnet queda sin medir.
+- [x] Los tres huecos de la parada 6: conocimiento por facción (RF2-PIPE-27), el objeto que viaja con su poseedor (RF2-PIPE-28) y los hábitos como conducta (RF2-PIPE-29). Decididos por el autor; los implementa la sesión que hizo la pasada, en spec2. Hecho en spec2 (RF2-PIPE-27 a 29, filas 40 y 41 de [spec2-verification](spec2-verification.md)).
 
 ### Mejoras tras la primera novela completa
 
@@ -74,8 +74,8 @@ La novela real se completó el 23 de septiembre (4 capítulos, `completada_con_a
 
 > **Decisión entrevistada, 23 de septiembre de 2026.** Se adoptan el banco de contraejemplos y la ficha para el redactor como trabajo inmediato, y el juez de segunda opinión y la puerta 4 con varianza dentro del bloque 6. Se descartan por ahora la validez temporal de los hechos (ninguna parada fue temporal, y toca el esquema y todas las lecturas de hechos vigentes) y el casado de entidades con LLM (los nombres menores ya dejaron un solo aviso por capítulo).
 
-- [ ] **Banco de contraejemplos para la puerta 3**: contradicciones conocidas metidas a propósito en una novela aprobada, con la cuenta de cuántas detecta cada comprobación. Mide los falsos negativos, que hoy pasan en silencio («siete de fuera» con una cuadrilla de seis). Con el puerto falso, sin coste. Va con el bloque 10.
-- [ ] **Ficha para el redactor** de los personajes fuera del reparto. El redactor mete personajes que la escaleta no puso (paradas 8 y 10, y otra vez en el capítulo 4), y hoy los escribe sin su ficha.
+- [x] **Banco de contraejemplos para la puerta 3**: contradicciones conocidas metidas a propósito en una novela aprobada, con la cuenta de cuántas detecta cada comprobación. Mide los falsos negativos, que hoy pasan en silencio («siete de fuera» con una cuadrilla de seis). Con el puerto falso, sin coste. Va con el bloque 10. Hecho: `banco_contraejemplos.py` (spec3 3.10, filas 48 a 50 de [spec3-verification](spec3-verification.md)).
+- [x] **Ficha para el redactor** de los personajes fuera del reparto. El redactor mete personajes que la escaleta no puso (paradas 8 y 10, y otra vez en el capítulo 4), y hoy los escribe sin su ficha. Hecho: el paquete del redactor trae, opcionales, las fichas de quien ya salió fuera del reparto (fila 38e de [spec3-verification](spec3-verification.md)).
 - [x] **Juez de segunda opinión en la parada** (spec3, RF3-JUE-01; en la rama `noche-23-09`): un agente lee el conflicto de la puerta 3 y le dice al autor si parece un falso positivo y por qué. Nunca levanta una parada, porque la puerta 3 es SQL. Va con el bloque 6.
 - [x] **Puerta 4 con puntuación por criterio y varianza**: varias muestras con la varianza como banda de confianza. Hecho como votos por mayoría (spec3, RF3-JUE-02; en la rama `noche-23-09`).
 
@@ -121,7 +121,7 @@ Requisitos en [spec3.md](spec3.md), 3.4; verificación en [spec3-verification.md
 - [x] Todos los validadores como scores: por puerta, sus recuentos y cada comprobación que falla o avisa.
 - [x] Las `SKILL.md` como **prompts versionados** por la huella de su texto, y cada llamada enlazada a su versión.
 - [x] Claves solo en `.env`, con su entrada en `.env.example`.
-- [ ] **El autor pone las claves** en `src/backend/.env` (nunca en el chat) y se comprueba con `python exportar_langfuse.py --comprobar` y `--novela 1` (fila 47).
+- [x] **El autor pone las claves** en `src/backend/.env` (nunca en el chat) y se comprueba con `python exportar_langfuse.py --comprobar` y `--novela 1` (fila 47). Hecho: las claves están en `.env` y la novela de diez capítulos está en Langfuse (sesión `storymaker-novela-1-e47cf8ad22`, 41,47 $).
 
 ### 5. Guardrails
 
@@ -135,16 +135,16 @@ Requisitos en [spec3.md](spec3.md), 3.4; verificación en [spec3-verification.md
 - [x] Nombres escritos **exactamente** como en la story bible (spec3, RF3-VAL-01; en la rama `noche-23-09`).
 - [x] Longitud **real** de cada capítulo dentro del rango, como aviso (spec3, RF3-VAL-02; en la rama `noche-23-09`).
 - [x] Cada elemento personalizado obligatorio del brief aparece en al menos un capítulo, comprobado contra la tabla de hechos ([spec3, RF3-ELE-01 a 03](spec3.md)).
-- [ ] LLM-as-judge con **puntuación y justificación por criterio** (continuidad, tono, calidad narrativa y **personalización integrada con naturalidad**). Hoy el juez de oficio da pasa/falla y no tiene criterio de personalización.
-- [ ] **Dos hooks**, uno de validación del capítulo y otro de policy. Hay que decidir y justificar dónde viven: los agentes corren sin herramientas, así que los hooks de herramientas de Claude Code no se disparan nunca.
+- [x] LLM-as-judge con **puntuación y justificación por criterio** (continuidad, tono, calidad narrativa y **personalización integrada con naturalidad**). Hoy el juez de oficio da pasa/falla y no tiene criterio de personalización. Hecho: rúbrica de seis criterios con nota y justificación, puerta 5 (migración 015); en la novela de ejemplo, 4·4·5·5·4·5.
+- [x] **Dos hooks**, uno de validación del capítulo y otro de policy. Hay que decidir y justificar dónde viven: los agentes corren sin herramientas, así que los hooks de herramientas de Claude Code no se disparan nunca. Hecho: son puntos del bucle del orquestador, no hooks de Claude Code ([architecture.md](../docs/architecture.md), «Los dos hooks del harness»).
 
 ### 7. Lectura: la web, con PDF exportado desde ella
 
-- [ ] Índice de capítulos navegable.
-- [ ] Ficha de personajes y lugares generada desde la story bible, con enlaces al capítulo donde aparece cada uno.
-- [ ] Portada con dedicatoria personalizada.
-- [ ] PDF exportado desde la web (vista de impresión y `npm run pdf`), del que sale `/ejemplos/novela-ejemplo.pdf`.
-- [ ] `.mcp.json` con un browser MCP (Playwright MCP). El agente abre la lectura, navega y registra los errores visuales como fallos para el rol correspondiente. Su uso real se documenta en `/docs`.
+- [x] Índice de capítulos navegable. Hecho ([spec-frontend](spec-frontend.md); comprobado con browser MCP en [browser-mcp.md](../docs/proceso/browser-mcp.md)).
+- [x] Ficha de personajes y lugares generada desde la story bible, con enlaces al capítulo donde aparece cada uno. Hecho: 5 personajes y 11 lugares con enlaces a sus capítulos ([browser-mcp.md](../docs/proceso/browser-mcp.md), fila 3).
+- [x] Portada con dedicatoria personalizada. Hecho ([browser-mcp.md](../docs/proceso/browser-mcp.md), fila 1).
+- [x] PDF exportado desde la web (vista de impresión y `npm run pdf`), del que sale `/ejemplos/novela-ejemplo.pdf`. Hecho: [`ejemplos/novela-ejemplo.pdf`](../ejemplos/novela-ejemplo.pdf), la novela de diez capítulos.
+- [x] `.mcp.json` con un browser MCP (Playwright MCP). El agente abre la lectura, navega y registra los errores visuales como fallos para el rol correspondiente. Su uso real se documenta en `/docs`. Hecho: [`.mcp.json`](../.mcp.json) con Playwright MCP; once comprobaciones y el favicon que faltaba, corregido ([browser-mcp.md](../docs/proceso/browser-mcp.md)).
 
 Requisitos en [spec-frontend.md](spec-frontend.md), secciones 3.10, 3.12 y 3.13, y lo que pide al backend en [spec3, 3.7](spec3.md).
 
@@ -158,14 +158,14 @@ Requisitos en [spec3.md](spec3.md), 3.8; verificación en [spec3-verification.md
 - [x] Localizar los capítulos que usan ese hecho o ese nombre, con la tabla del bloque 3 y la prosa.
 - [x] Reescribir **solo** esos capítulos sin romper la continuidad: reescritura quirúrgica del revisor, comprobaciones del cambio y puerta 4 entera, y todo aplicado en una transacción.
 - [x] Nueva versión con los capítulos cambiados marcados; la anterior se conserva.
-- [ ] Enseñar las novedades en la lectura web y en el PDF (spec-frontend, 3.11; contrato de la intención en spec-frontend, 5.2): lo hace la sesión del frontend.
-- [ ] Medir el intérprete y el revisor con Claude Code real (fila 77).
+- [x] Enseñar las novedades en la lectura web y en el PDF (spec-frontend, 3.11; contrato de la intención en spec-frontend, 5.2): lo hace la sesión del frontend. Hecho en la web: «cambió en la versión 2» en el índice, novedades, historial y comparación ([browser-mcp.md](../docs/proceso/browser-mcp.md), filas 7 a 10).
+- [x] Medir el intérprete y el revisor con Claude Code real (fila 77). Hecho: un cambio del lector real sobre una copia de la novela de diez capítulos tocó solo los capítulos 1 y 2 (11 min, 2,15 $).
 
 ### 9. Validadores formales
 
-- [ ] **Lean 4:** generar un fichero `.lean` desde SQLite con eventos, momento, personajes, lugar y fechas de nacimiento.
-- [ ] Al menos dos invariantes. Candidatos directos, porque la puerta 3 ya los comprueba en SQL: orden temporal, edad coherente, nadie en dos lugares a la vez, nadie aparece tras su muerte.
-- [ ] `lake build` automático como puerta antes de publicar una versión; si falla, el fallo vuelve al editor.
+- [x] **Lean 4:** generar un fichero `.lean` desde SQLite con eventos, momento, personajes, lugar y fechas de nacimiento. Hecho ([spec-lean](spec-lean.md), `orquestador/lean.py`).
+- [x] Al menos dos invariantes. Candidatos directos, porque la puerta 3 ya los comprueba en SQL: orden temporal, edad coherente, nadie en dos lugares a la vez, nadie aparece tras su muerte. Hecho: cuatro invariantes (nadie antes de nacer, nadie tras morir, edad coherente, el tiempo no retrocede) en `formal/lean/Storymaker/Cronologia.lean`.
+- [x] `lake build` automático como puerta antes de publicar una versión; si falla, el fallo vuelve al editor. Hecho: puerta 6 antes de publicar, con parada `formal` si falla (migración 014, [spec-lean-verification](spec-lean-verification.md) fila 9).
 - [x] **TLA+:** especificación de la máquina de estados de `orquestador/estados.py` (configuración, planificación, escritura, validación, publicación, retries, reanudación y cambio del lector). Requisitos en [spec-tla.md](spec-tla.md); el modelo, en [formal/tla/](../formal/tla/README.md).
 - [x] Al menos tres invariantes de seguridad y una propiedad de liveness: once de seguridad y dos de liveness (RF-TLA-04 y RF-TLA-05).
 - [x] TLC con un modelo pequeño (5 capítulos, 2 reintentos) y su configuración en el repo: `formal/tla/StoryMaker.cfg`, más la terminación con fallos ilimitados y el código sin el cambio del lector.
@@ -178,26 +178,26 @@ El mecanismo se construye ahora; la tabla definitiva se saca al final.
 
 - [x] Cinco briefs de prueba: uno **adversarial** (injection en el texto libre), uno diseñado para provocar una **incoherencia temporal** y tres normales ([spec3, RF3-EVL-01](spec3.md)).
 - [x] Un script que ejecuta un brief y produce la tabla de qué validadores pasaron y cuáles fallaron (`python -m evals.tabla`, RF3-EVL-02).
-- [ ] **Medición de referencia** a mitad de camino: es el «antes» de la iteración de tuning.
+- [x] **Medición de referencia** a mitad de camino: es el «antes» de la iteración de tuning. Hecho: el «antes» son los capítulos 1 a 5 con el redactor v5 ([tuning.md](../docs/proceso/tuning.md)).
 
 ## Al final
 
-- [ ] **Pasada completa con Claude Code real** (fila 41 de spec1-verification, preparada y pendiente de aprobación) → `/ejemplos/novela-ejemplo.pdf` con el brief de ejemplo del README.
-- [ ] Ejecutar los cinco briefs → **tabla de resultados** con números.
-- [ ] Iteración de tuning: el **«después»**, comparado con la referencia y ligado a la versión de prompt en Langfuse.
-- [ ] **Revisión humana** de una novela completa con la misma rúbrica, comparada con el LLM-as-judge.
-- [ ] El caso en que **Lean detecta algo que los otros validadores no detectaron**, o la justificación de por qué no apareció.
-- [ ] **Coste real por novela** desde Langfuse → slide de presupuesto: coste unitario (tokens, infraestructura y margen operativo), precio de venta y margen, coste del desarrollo en horas, tres escenarios de volumen y sensibilidad (+50 % en tokens, más de tres revisiones por novela).
-- [ ] Cerrar `/docs`: diagramas finales (arquitectura del harness, máquina de estados de TLA+, esquema SQLite, tabla de validadores con su punto de ejecución), red-team log y explainers.
-- [ ] Documentar en `/docs` las skills, subagentes y comandos usados (incluido el `validador-de-codigo` de MyFactory).
-- [ ] **Presentación** en `/presentacion/`: marca propia (nombre, logotipo, paleta, tipografía), deck en PDF y editable, anexos como ficheros individuales, README con el contenido y el idioma, y **vídeo** de la demo del cambio del lector.
-- [ ] Escaneo de secretos en el historial (fila 40) antes del commit final.
+- [x] **Pasada completa con Claude Code real** (fila 41 de spec1-verification, preparada y pendiente de aprobación) → `/ejemplos/novela-ejemplo.pdf` con el brief de ejemplo del README. Hecho: la novela de diez capítulos (41,47 $, 97 llamadas) → [`ejemplos/novela-ejemplo.pdf`](../ejemplos/novela-ejemplo.pdf).
+- [x] Ejecutar los cinco briefs → **tabla de resultados** con números. Hecho: [evals-tabla.md](../docs/proceso/evals-tabla.md), cinco briefs con Claude real (86,92 $).
+- [x] Iteración de tuning: el **«después»**, comparado con la referencia y ligado a la versión de prompt en Langfuse. Hecho: redactor v5 → v6, rechazos por cuentas del 44 % al 14 % ([tuning.md](../docs/proceso/tuning.md)).
+- [ ] **Revisión humana** de una novela completa con la misma rúbrica, comparada con el LLM-as-judge. Pendiente del autor: la plantilla está en `src/backend/evals/plantilla_rubrica_humana.csv` y la tabla, en el anexo A7.
+- [x] El caso en que **Lean detecta algo que los otros validadores no detectaron**, o la justificación de por qué no apareció. Hecho: no hay caso real, y la justificación está en [validators.md](../docs/validators.md) y en el explainer de Lean.
+- [x] **Coste real por novela** desde Langfuse → slide de presupuesto: coste unitario (tokens, infraestructura y margen operativo), precio de venta y margen, coste del desarrollo en horas, tres escenarios de volumen y sensibilidad (+50 % en tokens, más de tres revisiones por novela). Hecho: [coste.md](../docs/proceso/coste.md) y las diapositivas 12 y 13 del deck.
+- [x] Cerrar `/docs`: diagramas finales (arquitectura del harness, máquina de estados de TLA+, esquema SQLite, tabla de validadores con su punto de ejecución), red-team log y explainers. Hecho: [diagramas.md](../docs/proceso/diagramas.md) (los cuatro), [red-team-log.md](../docs/proceso/red-team-log.md) y [explainers.md](../docs/proceso/explainers.md).
+- [x] Documentar en `/docs` las skills, subagentes y comandos usados (incluido el `validador-de-codigo` de MyFactory). Hecho: [herramientas.md](../docs/proceso/herramientas.md).
+- [ ] **Presentación** en `/presentacion/`: marca propia (nombre, logotipo, paleta, tipografía), deck en PDF y editable, anexos como ficheros individuales, README con el contenido y el idioma, y **vídeo** de la demo del cambio del lector. Hecho, salvo el vídeo: deck en `.pptx` y PDF, siete anexos sueltos y README en [/presentacion/](../presentacion/README.md). El vídeo lo graba el autor.
+- [x] Escaneo de secretos en el historial (fila 40) antes del commit final. Hecho el 25-09: ninguna clave de Anthropic, Langfuse, GitHub ni AWS en el código ni en el historial.
 - [ ] Commit final de **MyFactory** con el README al día.
 - [ ] **Email** a la dirección del enunciado, con el asunto indicado, los enlaces a los dos commits finales y la frase de diseño (máximo tres líneas).
 
 ## Opcionales (suman nota, después de lo obligatorio)
 
 - [x] **Frontend web** en React: un tablero de novelas al estilo Jira, la alerta de parada, un lector de capítulos y el alta desde un brief. Requisitos en [spec-frontend.md](spec-frontend.md). Desde el 24 de septiembre es también la lectura de la entrega (bloque 7, [spec3, 3.7](spec3.md)).
-- [ ] **Servidor MCP** de solo lectura con FastMCP sobre la API que ya existe: `list_novels`, `get_chapter`, `list_versions`, `query_story_bible` y `download_novel`.
-- [ ] **Linters de prosa:** la parte mecánica de la puerta 4 ya es uno (palabras filtro, adverbios de atribución, verbos de habla); ampliarla con repeticiones, frases largas y fraseo típico de IA.
-- [ ] **Security report** en `/docs/security-report.md`, partiendo de la auditoría, de bandit y del `validador-de-codigo`.
+- [ ] **Servidor MCP** de solo lectura con FastMCP sobre la API que ya existe: `list_novels`, `get_chapter`, `list_versions`, `query_story_bible` y `download_novel`. No se hizo por tiempo.
+- [ ] **Linters de prosa:** la parte mecánica de la puerta 4 ya es uno (palabras filtro, adverbios de atribución, verbos de habla); ampliarla con repeticiones, frases largas y fraseo típico de IA. No se hizo por tiempo: la parte mecánica de la puerta 4 y el criterio de clichés del juez cubren parte.
+- [ ] **Security report** en `/docs/security-report.md`, partiendo de la auditoría, de bandit y del `validador-de-codigo`. No se hizo por tiempo.

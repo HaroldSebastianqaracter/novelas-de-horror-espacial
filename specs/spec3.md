@@ -16,11 +16,11 @@ Versión 0.1 · 23 de septiembre de 2026
 | 3. Huecos de la story bible | [3.3](#33-bloque-3--huecos-de-la-story-bible) | Escrita |
 | 4. Observabilidad con Langfuse | [3.4](#34-bloque-4--observabilidad-con-langfuse) | Escrita |
 | 5. Guardrails | [3.5](#35-bloque-5--guardrails) | Escrita |
-| 6. Validadores que faltan | [3.6](#36-bloque-6--validadores-que-faltan) | Empezada: nombres, allegados, longitud, segunda opinión y votos del juez |
-| 7. Lectura | [3.7](#37-bloque-7--lo-que-la-lectura-web-pide-al-backend) | Empezada: lo que la web pide al backend. La lectura es el frontend ([spec-frontend.md](spec-frontend.md)) |
+| 6. Validadores que faltan | [3.6](#36-bloque-6--validadores-que-faltan) | Escrita: nombres, allegados, longitud, elementos del encargo, segunda opinión, votos del juez y la rúbrica de la novela entera |
+| 7. Lectura | [3.7](#37-bloque-7--lo-que-la-lectura-web-pide-al-backend) | Escrita: lo que la web pide al backend. La lectura es el frontend ([spec-frontend.md](spec-frontend.md)) |
 | 8. Cambio del lector | [3.8](#38-bloque-8--cambio-del-lector) | Escrita |
-| 9. Validadores formales | 3.9 | En sus propias specs: [spec-tla.md](spec-tla.md) (TLA+, integrada) y `spec-lean.md` (Lean 4, en la rama `formal-lean`, pendiente de integrar) |
-| 10. Infraestructura de evals | [3.10](#310-bloque-10--infraestructura-de-evals) | Empezada: el banco de contraejemplos de la puerta 3 |
+| 9. Validadores formales | 3.9 | En sus propias specs: [spec-tla.md](spec-tla.md) (TLA+, integrada) y [spec-lean.md](spec-lean.md) (Lean 4, integrada como puerta 6) |
+| 10. Infraestructura de evals | [3.10](#310-bloque-10--infraestructura-de-evals) | Escrita: el banco de contraejemplos de la puerta 3, los cinco briefs y la tabla de evals |
 | Mejoras tras la primera pasada real | [3.11](#311-lo-que-enseñó-la-primera-pasada-real) | Escrita: 3 de los 6 frentes (extractor, resumen y nombres menores) |
 
 ---
@@ -378,7 +378,7 @@ El mapa de sustitución no sale nunca de la máquina. Una novela sin brief no ti
 
 **RF3-OBS-09 — El comando.** `python exportar_langfuse.py --novela <id>` (o `--todas`) exporta una novela entera desde la base, por ejemplo la de la pasada real. Abre la base en solo lectura y no marca nada: como los identificadores son deterministas, repetirlo no duplica. `--comprobar` hace una petición mínima y dice si las claves y el host funcionan.
 
-**RF3-OBS-10 — El modelo de cada llamada.** El puerto guarda también `modelUsage` en los metadatos de la llamada, que es donde Claude Code dice qué modelo contestó y cuánto costó cada uno. La generación lleva ese modelo.
+**RF3-OBS-10 — El modelo de cada llamada.** El puerto guarda también `modelUsage` en los metadatos de la llamada, que es donde Claude Code dice qué modelo contestó y cuánto costó cada uno. La generación lleva ese modelo. Cuando `modelUsage` trae varios, lleva el de mayor `costUSD`: Claude Code usa además un modelo pequeño (Haiku) para una tarea interna mínima, y etiquetar con el primero de la lista hacía que toda la novela apareciera en Langfuse como Haiku. El coste de la generación sigue siendo el total de la llamada (RF3-OBS-03), no el del modelo elegido.
 
 ### Lo que el bloque 4 deja para después
 
@@ -463,6 +463,18 @@ Todo se añade al informe de la parada ya abierta como `segunda_opinion`. La ski
 > Coste: el juez pasa de una llamada por intento a tres, o cinco si discrepan (unos 0,25 $ cada una). La temperatura no se controla desde el CLI, así que la variación entre muestras es la del modelo. Queda pendiente calibrar con el autor si tres son pocas.
 
 **Medido con el juez real** (capítulos 1 y 4 de la copia de `novela_real.db`, 2,15 $). En el capítulo 1, `cuentas_cuadran` salió en contra en cuatro de cinco muestras: las tres primeras discreparon, se pidieron dos más y ganó `falla`. En el 4, en contra en tres de tres. Los otros ocho criterios salieron unánimes a favor en los dos capítulos. Es el caso que motivó el voto: con una sola muestra, el capítulo 1 pasó una vez y falló otra.
+
+### La rúbrica de la novela entera
+
+> Esta sección se escribe el 25 de septiembre de 2026, después del código (migración 015, `tareas/rubrica/`, `tests/test_rubrica.py`). Describe lo que el código ya hace, para que la rúbrica tenga sus requisitos como el resto del harness.
+
+**RF3-RUB-01 — Seis notas con justificación y cita.** Al terminar la generación, ya publicada la versión, el agente `rubrica` (LLM-as-judge) lee la novela entera y pone una nota de 1 a 5 a seis criterios: continuidad, tono, arco, coherencia de personajes, ritmo y personalización natural (`CRITERIOS_RUBRICA`). Cada nota lleva su justificación y una cita literal. Falta un criterio o sobra uno: la salida no valida. Una cita que no aparece en la novela (comparada sin cursivas, comillas, rayas ni puntuación, y de al menos tres palabras) queda marcada como no literal. Se guarda en `evaluacion_rubrica` con `origen = 'llm'`.
+
+**RF3-RUB-02 — Informa y no decide.** La rúbrica no bloquea la publicación: una nota de 2 o menos deja el evento `rubrica_baja`, y cualquier fallo del agente o del paquete deja `rubrica_fallida` con la novela completada. Se apaga con `NOVELAS_RUBRICA=0`. Cada nota sale a Langfuse como score de la traza `rubrica`.
+
+**RF3-RUB-03 — La revisión humana, por la misma tabla.** La revisión humana usa la misma rúbrica: el autor rellena `src/backend/evals/plantilla_rubrica_humana.csv` y `evals/rubrica_humana.py` la importa con `origen = 'humano'` y la compara criterio a criterio con la del LLM. Una plantilla a medias no se importa.
+
+> **Decisión sin entrevistar.** La rúbrica corre después de publicar y no para nada porque el enunciado la pide como validador semántico con puntuación y justificación, no como puerta: las puertas 4 y 5 ya deciden si la novela se publica, y un juez probabilístico que además bloquease sumaría reintentos sin un umbral calibrado con el autor.
 
 ## 3.7 Bloque 7 — Lo que la lectura web pide al backend
 
